@@ -56,6 +56,10 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     private final Timer timer;
     private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     
+    private Long timeOfEarliestRequestInMillis;
+    private Long timeOfLatestRequestInMillis;
+    private RaceIdentifier selectedRaceIdentifier;
+    
     /**
      * @param raceSelectionProvider
      *            if <code>null</code>, this chart won't update its contents automatically upon race selection change;
@@ -153,6 +157,12 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             Point[] points = new Point[windTrackInfo.windFixes.size()];
             int i=0;
             for (WindDTO wind : windTrackInfo.windFixes) {
+                if (timeOfEarliestRequestInMillis == null || wind.timepoint<timeOfEarliestRequestInMillis) {
+                    timeOfEarliestRequestInMillis = wind.timepoint;
+                }
+                if (timeOfLatestRequestInMillis == null || wind.timepoint>timeOfLatestRequestInMillis) {
+                    timeOfLatestRequestInMillis = wind.timepoint;
+                }
                 points[i++] = new Point(wind.timepoint, wind.dampenedTrueWindFromDeg);
             }
             series.setPoints(points);
@@ -184,10 +194,10 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         }
     }
 
-    private void loadData(final RaceIdentifier raceIdentifier) {
+    private void loadData(final RaceIdentifier raceIdentifier, final Date from, final Date to) {
         sailingService.getWindInfo(raceIdentifier,
         // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
-                null, null, // use race start and time of newest event as default time period
+                from, to, // use race start and time of newest event as default time period
                 null, // retrieve data on all wind sources
                 new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override
@@ -215,21 +225,35 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             // show wind of first selected race
-            RaceIdentifier selectedRaceIdentifier = selectedRaces.iterator().next();
-            loadData(selectedRaceIdentifier);
+            selectedRaceIdentifier = selectedRaces.iterator().next();
+            timeOfEarliestRequestInMillis = null;
+            timeOfLatestRequestInMillis = null;
+            loadData(selectedRaceIdentifier, /* from */ null, /* to */ null);
         } else {
             clearChart();
         }
     }
 
+    /**
+     * If in live mode, fetches what's missing since the last fix and <code>date</code>. If nothing has been loaded yet,
+     * loads from the beginning up to <code>date</code>. If in replay mode, checks if anything has been loaded at all. If not,
+     * everything for the currently selected race is loaded; otherwise, no-op.
+     */
     @Override
     public void timeChanged(Date date) {
         if (timer.getPlayMode() == PlayModes.Live) {
-            // TODO fetch missing pieces from cache
+            // is date before first cache entry or is cache empty?
+            if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > date.getTime()) {
+                loadData(selectedRaceIdentifier, null, date);
+            } else if (timeOfLatestRequestInMillis < date.getTime()) {
+                loadData(selectedRaceIdentifier, new Date(timeOfLatestRequestInMillis), /* to */ null);
+            }
+            // otherwise the cache spans across date and so we don't need to load anything
         } else {
             // assuming play mode is replay / non-live
-            // TODO fetch all if not yet fetched
+            if (timeOfLatestRequestInMillis == null) {
+                loadData(selectedRaceIdentifier, /* from */ null, /* to */ null);
+            }
         }
-        // TODO implement timeChanged by loading missing wind data and adding to series
     }
 }
