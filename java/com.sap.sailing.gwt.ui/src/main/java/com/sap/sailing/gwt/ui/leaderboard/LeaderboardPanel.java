@@ -55,6 +55,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -876,7 +877,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         ClickHandler playPauseHandler = new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (LeaderboardPanel.this.timer.isPlaying()) {
+                if (LeaderboardPanel.this.timer.getPlayState() == PlayStates.Playing) {
                     LeaderboardPanel.this.timer.pause();
                 } else {
                     LeaderboardPanel.this.timer.setDelay(getDelayInMilliseconds());
@@ -897,9 +898,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         headerPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         toolbarPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         toolbarPanel.addStyleName("refreshAndSettings");
-        playPause = new Anchor(getPlayPauseImgHtml(timer.isPlaying()));
+        playPause = new Anchor(getPlayPauseImgHtml(timer.getPlayState()));
         playPause.addClickHandler(playPauseHandler);
-        playStateChanged(timer.isPlaying());
+        playStateChanged(timer.getPlayState(), timer.getPlayMode());
         refreshPanel.add(playPause);
         Anchor chartsAnchor = new Anchor(AbstractImagePrototype.create(chartIcon).getSafeHtml());
         chartsAnchor.setTitle(stringConstants.showCharts());
@@ -924,8 +925,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         setWidget(contentPanel);
     }
 
-    private SafeHtml getPlayPauseImgHtml(boolean playing) {
-        if (playing)
+    private SafeHtml getPlayPauseImgHtml(PlayStates playState) {
+        if (playState == PlayStates.Playing)
             return AbstractImagePrototype.create(pauseIcon).getSafeHtml();
         else
             return AbstractImagePrototype.create(playIcon).getSafeHtml();
@@ -1484,9 +1485,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     @Override
-    public void playStateChanged(boolean isPlaying) {
-        playPause.setHTML(getPlayPauseImgHtml(isPlaying));
-        playPause.setTitle(isPlaying ? stringConstants.pauseAutomaticRefresh() : stringConstants.autoRefresh());
+    public void playStateChanged(PlayStates playState, PlayModes playMode) {
+        playPause.setHTML(getPlayPauseImgHtml(playState));
+        playPause.setTitle(playState == PlayStates.Playing ? stringConstants.pauseAutomaticRefresh() : stringConstants.autoRefresh());
     }
 
     private void compareCompetitors() {
