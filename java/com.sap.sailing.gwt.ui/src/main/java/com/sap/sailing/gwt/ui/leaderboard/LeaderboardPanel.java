@@ -245,9 +245,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
         selectedRaceColumns.clear();
         selectedRaceColumns.addAll(newSettings.getRaceColumnsToShow());
-        setAutoExpandFirstRace(newSettings.isAutoExpandFirstRace());
+        setAutoExpandFirstRace(false); // avoid expansion during updateLeaderboard(...); will expand later if it was expanded before
         // update leaderboard after settings panel column selection change
         updateLeaderboard(leaderboard);
+        setAutoExpandFirstRace(newSettings.isAutoExpandFirstRace());
 
         timer.setDelayBetweenAutoAdvancesInMilliseconds(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
         setDelayInMilliseconds(newSettings.getDelayInMilliseconds());
@@ -1131,13 +1132,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         }
         return columnsToAddImplicitly;
-        /*
-        List<String> namesOfColumnsToAddImplicitly = new ArrayList<String>();
-        for (RaceInLeaderboardDTO column : columnsToAddImplicitly) {
-            namesOfColumnsToAddImplicitly.add(column.getRaceColumnName());
-        }
-        return namesOfColumnsToAddImplicitly;
-        */
     }
 
     private Comparator<LeaderboardRowDTO> getComparatorForSelectedSorting() {
