@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
-public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
+public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventRefresher {
     private Set<EventDisplayer> eventDisplayers;
     
     @Override
@@ -53,16 +53,16 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
         eventDisplayers.add(raceMapPanel);
         raceMapPanel.setSize("90%", "90%");
         tabPanel.add(raceMapPanel, stringMessages.map(), /* asHTML */ false);
-        LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, LeaderboardSettingsFactory.getDefaultSettings(), 
+        final LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, LeaderboardSettingsFactory.getDefaultSettings(), 
                 null, new CompetitorSelectionModel(/* hasMultiSelection */true),
-        DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, null, this, stringMessages);
+        DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, null, this, stringMessages, userAgentType);
         defaultLeaderboardPanel.setSize("90%", "90%");
         tabPanel.add(defaultLeaderboardPanel, stringMessages.defaultLeaderboard(), /* asHTML */ false);
-        LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService, this, this, stringMessages);
+        final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService, this, this, stringMessages);
         leaderboardGroupConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardGroupConfigPanel, stringMessages.leaderboardGroupConfiguration(), /*asHTML*/ false);
         eventDisplayers.add(leaderboardGroupConfigPanel);
-        LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringMessages);
+        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringMessages);
         leaderboardConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         eventDisplayers.add(leaderboardConfigPanel);
@@ -73,7 +73,10 @@ public class AdminConsole extends AbstractEntryPoint implements EventRefresher {
 			public void onSelection(SelectionEvent<Integer> event) {
 				if(raceMapPanel.isVisible()) {
 					raceMapPanel.onResize();
-				}				
+				}
+				if (leaderboardConfigPanel.isVisible()) {
+				    leaderboardConfigPanel.loadAndRefreshAllData();
+				}
 			}
 		});
         fillEvents();
