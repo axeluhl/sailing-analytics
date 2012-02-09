@@ -185,12 +185,11 @@ public class Timer {
      * and registered {@link PlayStateListener}s will be notified.
      */
     public void resume() {
-        if (playState == PlayStates.Paused) {
+        if (playState == PlayStates.Paused || playState == PlayStates.Stopped) {
             playState = PlayStates.Playing;
-            
-            if(playMode == PlayModes.Live)
+            if(playMode == PlayModes.Live) {
                 setTime(System.currentTimeMillis()-livePlayDelayInMs);
-
+            }
             startAutoAdvance();
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
@@ -199,7 +198,7 @@ public class Timer {
     }
 
     private void startAutoAdvance() {
-        RepeatingCommand command = new RepeatingCommand( ) {
+        RepeatingCommand command = new RepeatingCommand() {
             @Override
             public boolean execute() {
                 if (time != null) {
