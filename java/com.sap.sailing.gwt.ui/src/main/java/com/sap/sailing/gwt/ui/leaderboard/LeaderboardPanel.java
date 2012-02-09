@@ -56,6 +56,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -788,22 +789,24 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings,
-            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringConstants) {
-        this(sailingService, settings, /* preSelectedRace */ null, competitorSelectionProvider, leaderboardName, leaderboardGroupName, errorReporter, stringConstants);
+            CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
+            String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringConstants,
+            final UserAgentTypes userAgentType) {
+        this(sailingService, settings, /* preSelectedRace */null, competitorSelectionProvider, leaderboardName,
+                leaderboardGroupName, errorReporter, stringConstants, userAgentType);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringConstants) {
+            ErrorReporter errorReporter, final StringMessages stringConstants, final UserAgentTypes userAgentType) {
         this(sailingService, settings, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
-                leaderboardName, leaderboardGroupName, errorReporter, stringConstants);
+                leaderboardName, leaderboardGroupName, errorReporter, stringConstants, userAgentType);
         timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringConstants) {
+            ErrorReporter errorReporter, final StringMessages stringConstants, final UserAgentTypes userAgentType) {
         this.sailingService = sailingService;
         this.preSelectedRace = preSelectedRace;
         this.competitorSelectionProvider = competitorSelectionProvider;
@@ -836,8 +839,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */100, tableResources);
         getLeaderboardTable().setWidth("100%");
-        leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
-//        leaderboardSelectionModel = new ToggleSelectionModel<LeaderboardRowDTO>();
+        if (userAgentType == UserAgentTypes.MOBILE) {
+            leaderboardSelectionModel = new ToggleSelectionModel<LeaderboardRowDTO>();
+        } else {
+            leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
+        }
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

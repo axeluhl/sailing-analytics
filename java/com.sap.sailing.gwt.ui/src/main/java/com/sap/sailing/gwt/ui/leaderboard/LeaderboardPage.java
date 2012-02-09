@@ -59,7 +59,7 @@ public class LeaderboardPage extends AbstractEntryPoint {
         BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, leaderboardName.toUpperCase());
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, LeaderboardSettingsFactory.getDefaultSettings(),
                 new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName, leaderboardGroupName,
-                LeaderboardPage.this, stringMessages);
+                LeaderboardPage.this, stringMessages, userAgentType);
         
         RootPanel.get().add(logoAndTitlePanel);
         RootPanel.get().add(breadcrumbPanel);
