@@ -169,10 +169,9 @@ public class Timer {
     public void play() {
         if (playState == PlayStates.Stopped) {
             playState = PlayStates.Playing;
-            
-            if(playMode == PlayModes.Live)
+            if(playMode == PlayModes.Live) {
                 setTime(System.currentTimeMillis()-livePlayDelayInMs);
-
+            }
             startAutoAdvance();
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
@@ -222,6 +221,9 @@ public class Timer {
     
     public void setDelay(long delayInMilliseconds) {
         this.livePlayDelayInMs = delayInMilliseconds;
+        if (getPlayState() == PlayStates.Playing) {
+            setTime(new Date().getTime() - delayInMilliseconds);
+        }
     }
 
     public long getDelay() {
