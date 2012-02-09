@@ -226,6 +226,8 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             // show wind of first selected race
             selectedRaceIdentifier = selectedRaces.iterator().next();
+            timeOfEarliestRequestInMillis = null;
+            timeOfLatestRequestInMillis = null;
             loadData(selectedRaceIdentifier, /* from */ null, /* to */ null);
         } else {
             clearChart();
