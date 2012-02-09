@@ -43,6 +43,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.Collator;
@@ -98,7 +99,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final CellTable<LeaderboardRowDTO> leaderboardTable;
 
-    private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
+    private final SelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
     private ListDataProvider<LeaderboardRowDTO> data;
 
@@ -836,11 +837,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         /* pageSize */100, tableResources);
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
+//        leaderboardSelectionModel = new ToggleSelectionModel<LeaderboardRowDTO>();
         leaderboardSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 List<CompetitorDTO> selection = new ArrayList<CompetitorDTO>();
-                for (LeaderboardRowDTO row : leaderboardSelectionModel.getSelectedSet()) {
+                for (LeaderboardRowDTO row : getSelectedRows()) {
                     selection.add(row.competitor);
                 }
                 LeaderboardPanel.this.competitorSelectionProvider.setSelection(selection,
@@ -1091,12 +1093,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 getLeaderboardTable().getColumnSortList().push(getRankColumn());
             }
             //Reselect the selected rows
-            leaderboardSelectionModel.clear();
+            clearSelection();
             for (LeaderboardRowDTO row : data.getList()) {
                 if (competitorSelectionProvider.isSelected(row.competitor)) {
                     leaderboardSelectionModel.setSelected(row, true);
                 }
             }
+        }
+    }
+
+    private void clearSelection() {
+        for (LeaderboardRowDTO row : getData().getList()) {
+            leaderboardSelectionModel.setSelected(row, false);
         }
     }
 
@@ -1563,5 +1571,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     @Override
     public boolean hasBusyIndicator() {
         return true;
+    }
+
+    private Iterable<LeaderboardRowDTO> getSelectedRows() {
+        ArrayList<LeaderboardRowDTO> selectedRows = new ArrayList<LeaderboardRowDTO>();
+        for (LeaderboardRowDTO row : getData().getList()) {
+            if (leaderboardSelectionModel.isSelected(row)) {
+                selectedRows.add(row);
+            }
+        }
+        return selectedRows;
     }
 }
