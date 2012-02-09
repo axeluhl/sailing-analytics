@@ -44,7 +44,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings.ZoomSettings;
+import com.sap.sailing.gwt.ui.adminconsole.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -133,8 +133,8 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
      */
     private boolean mapFirstZoomDone = false;
 
-    // key for domain web4sap.com
-    private final String mapsAPIKey = "ABQIAAAAmvjPh3ZpHbnwuX3a66lDqRRLCigyC_gRDASMpyomD2do5awpNhRCyD_q-27hwxKe_T6ivSZ_0NgbUg";
+    // key for domains web4sap.com, sapsailing.com and sapcoe-app01.pironet-ndh.com
+    private final String mapsAPIKey = "AIzaSyD1Se4tIkt-wglccbco3S7twaHiG20hR9E";
 
     private final Timer timer;
 
@@ -286,14 +286,14 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                             showMarksOnMap(markData);
                             
                             //Rezoom the map
-                            if (getSettings().getZoomSetting() != ZoomSettings.MANUAL) { //Auto zoom if setting is not manual
-                                zoomMapToNewBounds(getNewMapBounds(getCompetitorsToShow(), buoyMarkers.keySet()));
+                            if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { //Auto zoom if setting is not manual
+                                zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
                                 mapFirstZoomDone = true;
                             } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange) { //Zoom once to the boats
-                                zoomMapToNewBounds(getBoundsForBoats(getCompetitorsToShow()));
+                                zoomMapToNewBounds(new BoatsBoundsCalculater().calculateNewBounds(RaceMap.this));
                                 mapFirstZoomDone = true;
                             } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) { //Zoom once to the buoys
-                                zoomMapToNewBounds(getBoundsForMarks(buoyMarkers.keySet()));
+                                zoomMapToNewBounds(new BuoysBoundsCalculater().calculateNewBounds(RaceMap.this));
                                 mapFirstZoomDone = true;
                                 /*
                                  * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was just zoomed
@@ -473,79 +473,79 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     }
     
     /**
-     * Calculates the new map bounds for the given data considering the current {@link ZoomSettings} of the map.
+     * Calculates the new map bounds for the given data considering the current {@link ZoomTypes} of the map.
      * @return The new map bounds
      */
-    private LatLngBounds getNewMapBounds(Iterable<CompetitorDTO> competitorsToZoom, Iterable<MarkDTO> marksToZoom) {
-        LatLngBounds newBounds = null;
-        if (getSettings().getZoomSetting() != ZoomSettings.MANUAL) {
-            //Extend bounds for the boats
-            if (getSettings().getZoomSetting() == ZoomSettings.ZOOM_TO_BOATS
-                    || getSettings().getZoomSetting() == ZoomSettings.ZOOM_TO_BOATS_AND_BUOYS) {
-                LatLngBounds boatBounds = getBoundsForBoats(competitorsToZoom);
-                if (boatBounds != null) {
-                    newBounds = boatBounds;
-                }
-            }
-            //Extend bounds for the marks
-            if (getSettings().getZoomSetting() == ZoomSettings.ZOOM_TO_BUOYS
-                    || getSettings().getZoomSetting() == ZoomSettings.ZOOM_TO_BOATS_AND_BUOYS) {
-                LatLngBounds markBounds = getBoundsForMarks(marksToZoom);
-                if (markBounds != null) {
-                    if (newBounds == null) {
-                        newBounds = markBounds;
-                    } else {
-                        newBounds.extend(markBounds.getNorthEast());
-                        newBounds.extend(markBounds.getSouthWest());
-                    }
-                }
-            }
-        }
-        return newBounds;
-    }
+//    private LatLngBounds getNewMapBounds(Iterable<CompetitorDTO> competitorsToZoom, Iterable<MarkDTO> marksToZoom) {
+//        LatLngBounds newBounds = null;
+//        if (getSettings().getZoomSetting() != ZoomTypes.MANUAL) {
+//            //Extend bounds for the boats
+//            if (getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BOATS
+//                    || getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BOATS_AND_BUOYS) {
+//                LatLngBounds boatBounds = getBoundsForBoats(competitorsToZoom);
+//                if (boatBounds != null) {
+//                    newBounds = boatBounds;
+//                }
+//            }
+//            //Extend bounds for the marks
+//            if (getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BUOYS
+//                    || getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BOATS_AND_BUOYS) {
+//                LatLngBounds markBounds = getBoundsForMarks(marksToZoom);
+//                if (markBounds != null) {
+//                    if (newBounds == null) {
+//                        newBounds = markBounds;
+//                    } else {
+//                        newBounds.extend(markBounds.getNorthEast());
+//                        newBounds.extend(markBounds.getSouthWest());
+//                    }
+//                }
+//            }
+//        }
+//        return newBounds;
+//    }
     
-    private LatLngBounds getBoundsForBoats(Iterable<CompetitorDTO> competitorsToZoom) {
-        LatLngBounds newBounds = null;
-        for (CompetitorDTO competitorDTO : competitorsToZoom) {
-            LatLngBounds bounds = null;
-            if (getSettings().isIncludeTailsToAutoZoom()) {
-                Polyline tail = tails.get(competitorDTO);
-                bounds = tail != null ? tail.getBounds() : null;
-            } else {
-                List<GPSFixDTO> competitorFixes = fixes.get(competitorDTO);
-                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(competitorFixes.size() - 1) : null;
-                PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
-                LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg, competitorPosition.lngDeg) : null;
-                bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng, competitorLatLng) : null;
-            }
-            if (bounds != null) {
-                if (newBounds == null) {
-                    newBounds = bounds;
-                } else {
-                    newBounds.extend(bounds.getNorthEast());
-                    newBounds.extend(bounds.getSouthWest());
-                }
-            }
-        }
-        return newBounds;
-    }
+//    private LatLngBounds getBoundsForBoats(Iterable<CompetitorDTO> competitorsToZoom) {
+//        LatLngBounds newBounds = null;
+//        for (CompetitorDTO competitorDTO : competitorsToZoom) {
+//            LatLngBounds bounds = null;
+//            if (getSettings().isIncludeTailsToAutoZoom()) {
+//                Polyline tail = tails.get(competitorDTO);
+//                bounds = tail != null ? tail.getBounds() : null;
+//            } else {
+//                List<GPSFixDTO> competitorFixes = fixes.get(competitorDTO);
+//                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(competitorFixes.size() - 1) : null;
+//                PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
+//                LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg, competitorPosition.lngDeg) : null;
+//                bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng, competitorLatLng) : null;
+//            }
+//            if (bounds != null) {
+//                if (newBounds == null) {
+//                    newBounds = bounds;
+//                } else {
+//                    newBounds.extend(bounds.getNorthEast());
+//                    newBounds.extend(bounds.getSouthWest());
+//                }
+//            }
+//        }
+//        return newBounds;
+//    }
     
-    private LatLngBounds getBoundsForMarks(Iterable<MarkDTO> marksToZoom) {
-        LatLngBounds newBounds = null;
-        if (marksToZoom != null) {
-            for (MarkDTO markDTO : marksToZoom) {
-                LatLng markLatLng = LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg);
-                LatLngBounds bounds = LatLngBounds.newInstance(markLatLng, markLatLng);
-                if (newBounds == null) {
-                    newBounds = bounds;
-                } else {
-                    newBounds.extend(bounds.getNorthEast());
-                    newBounds.extend(bounds.getSouthWest());
-                }
-            }
-        }
-        return newBounds;
-    }
+//    private LatLngBounds getBoundsForMarks(Iterable<MarkDTO> marksToZoom) {
+//        LatLngBounds newBounds = null;
+//        if (marksToZoom != null) {
+//            for (MarkDTO markDTO : marksToZoom) {
+//                LatLng markLatLng = LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg);
+//                LatLngBounds bounds = LatLngBounds.newInstance(markLatLng, markLatLng);
+//                if (newBounds == null) {
+//                    newBounds = bounds;
+//                } else {
+//                    newBounds.extend(bounds.getNorthEast());
+//                    newBounds.extend(bounds.getSouthWest());
+//                }
+//            }
+//        }
+//        return newBounds;
+//    }
 
     private boolean updateMarkerForCompetitor(CompetitorDTO competitorDTO) {
         boolean usedExistingMarker = false;
@@ -1100,11 +1100,89 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             getSettings().setShowOnlySelectedCompetitors(newSettings.isShowOnlySelectedCompetitors());
             redraw();
         }
-        if (newSettings.getZoomSetting() != getSettings().getZoomSetting()
-                || newSettings.isIncludeTailsToAutoZoom() != getSettings().isIncludeTailsToAutoZoom()) {
-            getSettings().setZoomSetting(newSettings.getZoomSetting());
-            getSettings().setIncludeTailsToAutoZoom(newSettings.isIncludeTailsToAutoZoom());
-            zoomMapToNewBounds(getNewMapBounds(getCompetitorsToShow(), buoyMarkers.keySet()));
+        if (!newSettings.getZoomSettings().equals(getSettings().getZoomSettings())) {
+            getSettings().setZoomSettings(newSettings.getZoomSettings());
+            zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(this));
         }
+    }
+    
+    public static class BoatsBoundsCalculater extends LatLngBoundsCalculaterForSelected {
+
+        @Override
+        public LatLngBounds calculateNewBounds(RaceMap forMap) {
+            LatLngBounds newBounds = null;
+            Iterable<CompetitorDTO> selectedCompetitors = forMap.competitorSelection.getSelectedCompetitors();
+            Iterable<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
+            if (selectedCompetitors == null || !selectedCompetitors.iterator().hasNext()) {
+                competitors = forMap.getCompetitorsToShow();
+            } else {
+                competitors = isZoomOnlyToSelectedCompetitors() ? selectedCompetitors : forMap.getCompetitorsToShow();
+            }
+            for (CompetitorDTO competitor : competitors) {
+                List<GPSFixDTO> competitorFixes = forMap.fixes.get(competitor);
+                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(competitorFixes.size() - 1) : null;
+                PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
+                LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
+                        competitorPosition.lngDeg) : null;
+                LatLngBounds bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng,
+                        competitorLatLng) : null;
+                if (bounds != null) {
+                    if (newBounds == null) {
+                        newBounds = bounds;
+                    } else {
+                        newBounds.extend(bounds.getNorthEast());
+                        newBounds.extend(bounds.getSouthWest());
+                    }
+                }
+            }
+            return newBounds;
+        }
+        
+    }
+    
+    public static class TailsBoundsCalculater extends LatLngBoundsCalculaterForSelected {
+
+        @Override
+        public LatLngBounds calculateNewBounds(RaceMap forMap) {
+            LatLngBounds newBounds = null;
+            Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors() ? forMap.competitorSelection.getSelectedCompetitors() : forMap.getCompetitorsToShow();
+            for (CompetitorDTO competitor : competitors) {
+                Polyline tail = forMap.tails.get(competitor);
+                LatLngBounds bounds = tail != null ? tail.getBounds() : null;
+                if (bounds != null) {
+                    if (newBounds == null) {
+                        newBounds = bounds;
+                    } else {
+                        newBounds.extend(bounds.getNorthEast());
+                        newBounds.extend(bounds.getSouthWest());
+                    }
+                }
+            }
+            return newBounds;
+        }
+        
+    }
+    
+    public static class BuoysBoundsCalculater implements LatLngBoundsCalculator {
+
+        @Override
+        public LatLngBounds calculateNewBounds(RaceMap forMap) {
+            LatLngBounds newBounds = null;
+            Iterable<MarkDTO> marksToZoom = forMap.buoyMarkers.keySet();
+            if (marksToZoom != null) {
+                for (MarkDTO markDTO : marksToZoom) {
+                    LatLng markLatLng = LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg);
+                    LatLngBounds bounds = LatLngBounds.newInstance(markLatLng, markLatLng);
+                    if (newBounds == null) {
+                        newBounds = bounds;
+                    } else {
+                        newBounds.extend(bounds.getNorthEast());
+                        newBounds.extend(bounds.getSouthWest());
+                    }
+                }
+            }
+            return newBounds;
+        }
+        
     }
 }
