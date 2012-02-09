@@ -35,12 +35,14 @@ public class Timer {
      * Listeners interested in changes of {@link #playing}
      */
     private final Set<PlayStateListener> playStateListeners;
-    
+
     /**
-     * If <code>true</code>, an auto-refreshing command is running with {@link #delayBetweenAutoAdvancesInMilliseconds}
+     * If <code>Playing</code>, an auto-refreshing command is running with {@link #delayBetweenAutoAdvancesInMilliseconds}
      * as its refresh interval.
      */
-    private boolean playing;
+    private PlayStates playState;
+    
+//    private boolean playing;
     
     /**
      * The current play mode of the timer
@@ -64,7 +66,9 @@ public class Timer {
     private double playSpeedFactor;
     
     public enum PlayModes { Live, Replay }; 
-    
+
+    public enum PlayStates { Stopped, Playing, Paused }; 
+
     /**
      * The timer is created in resumed mode, using "now" as its current time, 1.0 as its {@link #playSpeedFactor play speed factor} and
      * 1 second (1000ms) as the {@link #delayBetweenAutoAdvancesInMilliseconds delay between automatic updates} should the timer be
@@ -81,14 +85,14 @@ public class Timer {
      * {@link #resume() started}.
      */
     public Timer(PlayModes playMode, long delayBetweenAutoAdvancesInMilliseconds) {
+        this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
+        this.playMode = playMode;
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
-        playing = false;
+        playState = PlayStates.Stopped;
         playSpeedFactor = 1.0;
         livePlayDelayInMs = 0;
-        this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
-        this.playMode = playMode;
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -114,6 +118,8 @@ public class Timer {
             for (TimeListener listener : timeListeners) {
                 listener.timeChanged(time);
             }
+            // change the play mode
+            
         }
     }
     
@@ -123,7 +129,7 @@ public class Timer {
     
     public void setDelayBetweenAutoAdvancesInMilliseconds(long delayBetweenAutoAdvancesInMilliseconds) {
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
-        if (playing) {
+        if (playState == PlayStates.Playing) {
             delayBetweenAutoAdvancesChanged = true;
         }
     }
@@ -141,10 +147,35 @@ public class Timer {
      * paused, and registered {@link PlayStateListener}s will be notified.
      */
     public void pause() {
-        if (playing) {
-            playing = !playing; // this will cause the repeating command to stop executing
+        if (playState == PlayStates.Playing) {
+            playState = PlayStates.Paused; // this will cause the repeating command to stop executing
+            
             for (PlayStateListener playStateListener : playStateListeners) {
-                playStateListener.playStateChanged(playing);
+                playStateListener.playStateChanged(playState, playMode);
+            }
+        }
+    }
+
+    public void stop() {
+        if (playState == PlayStates.Playing) {
+            playState = PlayStates.Stopped;
+
+            for (PlayStateListener playStateListener : playStateListeners) {
+                playStateListener.playStateChanged(playState, playMode);
+            }
+        }
+    }
+
+    public void play() {
+        if (playState == PlayStates.Stopped) {
+            playState = PlayStates.Playing;
+            
+            if(playMode == PlayModes.Live)
+                setTime(System.currentTimeMillis()-livePlayDelayInMs);
+
+            startAutoAdvance();
+            for (PlayStateListener playStateListener : playStateListeners) {
+                playStateListener.playStateChanged(playState, playMode);
             }
         }
     }
@@ -154,15 +185,15 @@ public class Timer {
      * and registered {@link PlayStateListener}s will be notified.
      */
     public void resume() {
-        if (!playing) {
-            playing = !playing;
+        if (playState == PlayStates.Paused) {
+            playState = PlayStates.Playing;
             
             if(playMode == PlayModes.Live)
                 setTime(System.currentTimeMillis()-livePlayDelayInMs);
 
             startAutoAdvance();
             for (PlayStateListener playStateListener : playStateListeners) {
-                playStateListener.playStateChanged(playing);
+                playStateListener.playStateChanged(playState, playMode);
             }
         }
     }
@@ -179,7 +210,7 @@ public class Timer {
                     scheduleAdvancerCommand(this);
                     return false; // stop this command; use the newly-scheduled one instead that uses the new frequency
                 } else {
-                    return playing;
+                    return playState == PlayStates.Playing ? true: false;
                 }
             }
         };
@@ -202,8 +233,8 @@ public class Timer {
         return System.currentTimeMillis() - getTime().getTime();
     }
 
-    public boolean isPlaying() {
-        return playing;
+    public PlayStates getPlayState() {
+        return playState;
     }
 
     public PlayModes getPlayMode() {
@@ -212,6 +243,5 @@ public class Timer {
 
     public void setPlayMode(PlayModes playMode) {
         this.playMode = playMode;
-    }
-    
+    }    
 }

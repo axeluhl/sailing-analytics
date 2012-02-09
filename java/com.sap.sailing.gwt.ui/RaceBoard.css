@@ -299,8 +299,11 @@ input.magnifier {
 
 .timePanel-controls-playSpeed {
 	vertical-align: middle;
-	padding: 3px;
+	padding: 5px;
 	line-height: 25px;
+}
+
+.timePanel-label {
 }
 
 .timePanel-controls-time {
