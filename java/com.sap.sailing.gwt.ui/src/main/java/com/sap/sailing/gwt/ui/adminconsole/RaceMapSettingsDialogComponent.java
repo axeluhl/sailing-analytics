@@ -1,23 +1,20 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings.ZoomSettings;
+import com.sap.sailing.gwt.ui.adminconsole.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
@@ -25,25 +22,23 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
-    private List<Pair<CheckBox, ManeuverType>> checkboxAndType;
-    private ListBox zoomSettingsBox;
-    private CheckBox includeTailsToAutoZoom;
-    private CheckBox checkBoxDouglasPeuckerPoints;
-    private CheckBox showOnlySelectedCompetitors;
-    private LongBox tailLengthBox;
+    //Initializing the lists to prevent a null pointer exception in the first validation call
+    private List<Pair<CheckBox, ManeuverType>> checkboxAndManeuverType = new ArrayList<Pair<CheckBox, ManeuverType>>();
+    private List<Pair<CheckBox, ZoomTypes>> checkboxAndZoomType = new ArrayList<Pair<CheckBox,ZoomTypes>>();
+    private CheckBox zoomOnlyToSelectedCompetitors = new CheckBox();
+    private CheckBox checkBoxDouglasPeuckerPoints = new CheckBox();
+    private CheckBox showOnlySelectedCompetitors = new CheckBox();
+    private LongBox tailLengthBox = new LongBox();
+    
     private final StringMessages stringMessages;
     private final RaceMapSettings initialSettings;
-    
-    private Map<String, ZoomSettings> zoomSettingsMap;
+
+    private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
+    private CheckBox autoZoomOffBox;
     
     public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         initialSettings = settings;
-        zoomSettingsMap = new HashMap<String, RaceMapSettings.ZoomSettings>();
-        zoomSettingsMap.put(stringMessages.autoZoomManual(), ZoomSettings.MANUAL);
-        zoomSettingsMap.put(stringMessages.autoZoomToBoats(), ZoomSettings.ZOOM_TO_BOATS);
-        zoomSettingsMap.put(stringMessages.autoZoomToBuoys(), ZoomSettings.ZOOM_TO_BUOYS);
-        zoomSettingsMap.put(stringMessages.autoZoomToBoatsAndBuoys(), ZoomSettings.ZOOM_TO_BOATS_AND_BUOYS);
     }
 
     @Override
@@ -54,39 +49,48 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         tailLengthBox = dialog.createLongBox((int) (initialSettings.getTailLengthInMilliseconds() / 1000), 4);
         labelAndTailLengthBoxPanel.add(tailLengthBox);
         vp.add(labelAndTailLengthBoxPanel);
-
-        HorizontalPanel labelAndZoomSettingsBoxPanel = new HorizontalPanel();
-        Label zoomSettingsLabel = new Label(stringMessages.autoZoomTo() + ": ");
-        labelAndZoomSettingsBoxPanel.add(zoomSettingsLabel);
-        zoomSettingsBox = new ListBox();
-        for (String zoomSettingLabel : zoomSettingsMap.keySet()) {
-            zoomSettingsBox.addItem(zoomSettingLabel);
-        }
-        zoomSettingsBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                zoomSettingsSelectionChanged();
-            }
-        });
-        labelAndZoomSettingsBoxPanel.add(zoomSettingsBox);
-        vp.add(labelAndZoomSettingsBoxPanel);
         
-        includeTailsToAutoZoom = new CheckBox(stringMessages.includeTailsToAutoZoom());
-        includeTailsToAutoZoom.setValue(initialSettings.isIncludeTailsToAutoZoom());
-        vp.add(includeTailsToAutoZoom);
-        //Set selected zoom setting and set state of the includeTailsToAutoZoomBox
-        zoomSettingsBox.setSelectedIndex(getIndexOfZoomSettingInBox(initialSettings.getZoomSetting()));
-        zoomSettingsSelectionChanged();
+        zoomOnlyToSelectedCompetitors = new CheckBox(stringMessages.autoZoomSelectedCompetitors());
+        zoomOnlyToSelectedCompetitors.setValue(initialSettings.getZoomSettings().isZoomToSelectedCompetitors());
+
+        HorizontalPanel labelAndZoomSettingsPanel = new HorizontalPanel();
+        Label zoomSettingsLabel = new Label(stringMessages.autoZoomTo() + ": ");
+        labelAndZoomSettingsPanel.add(zoomSettingsLabel);
+        VerticalPanel zoomSettingsBoxesPanel = new VerticalPanel();
+        disableOnlySelectedWhenAreFalse = new ArrayList<CheckBox>();
+        for (ZoomTypes zoomType : ZoomTypes.values()) {
+            CheckBox cb = dialog.createCheckbox(ZoomTypeFormatter.format(zoomType, stringMessages));
+            cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), true);
+            checkboxAndZoomType.add(new Pair<CheckBox, ZoomTypes>(cb, zoomType));
+            zoomSettingsBoxesPanel.add(cb);
+            
+            //Save specific checkboxes for easier value change handling
+            if (zoomType == ZoomTypes.BOATS || zoomType == ZoomTypes.TAILS) {
+                disableOnlySelectedWhenAreFalse.add(cb);
+            } else if (zoomType == ZoomTypes.NONE) {
+                autoZoomOffBox = cb;
+            }
+            cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    zoomSettingsChanged();
+                }
+            });
+        }
+        labelAndZoomSettingsPanel.add(zoomSettingsBoxesPanel);
+        vp.add(labelAndZoomSettingsPanel);
+        vp.add(zoomOnlyToSelectedCompetitors);
+        //Run zoomSettingsChanged to set the checkboxes to their correct state
+        zoomSettingsChanged();
         
         showOnlySelectedCompetitors = dialog.createCheckbox(stringMessages.showOnlySelected());
         showOnlySelectedCompetitors.setValue(initialSettings.isShowOnlySelectedCompetitors());
         vp.add(showOnlySelectedCompetitors);
         vp.add(new Label(stringMessages.maneuverTypes()));
-        checkboxAndType = new ArrayList<Pair<CheckBox, ManeuverType>>();
         for (ManeuverType maneuverType : ManeuverType.values()) {
             CheckBox checkbox = dialog.createCheckbox(ManeuverTypeFormatter.format(maneuverType, stringMessages));
             checkbox.setValue(initialSettings.isShowManeuverType(maneuverType));
-            checkboxAndType.add(new Pair<CheckBox, ManeuverType>(checkbox, maneuverType));
+            checkboxAndManeuverType.add(new Pair<CheckBox, ManeuverType>(checkbox, maneuverType));
             vp.add(checkbox);
         }
         checkBoxDouglasPeuckerPoints = dialog.createCheckbox(stringMessages.douglasPeuckerPoints());
@@ -95,43 +99,55 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         return vp;
     }
     
-    private void zoomSettingsSelectionChanged() {
-        ZoomSettings currentZoomSetting = getSelectedZoomSetting();
-        if (currentZoomSetting == ZoomSettings.MANUAL || currentZoomSetting == ZoomSettings.ZOOM_TO_BUOYS) {
-            includeTailsToAutoZoom.setValue(false);
-            includeTailsToAutoZoom.setEnabled(false);
+    private void zoomSettingsChanged() {
+        if (autoZoomOffBox.getValue()) {
+            for (Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
+                if (pair.getB() != ZoomTypes.NONE) {
+                    pair.getA().setEnabled(!autoZoomOffBox.getValue());
+                    pair.getA().setValue(false);
+                }
+            }
+            zoomOnlyToSelectedCompetitors.setEnabled(false);
+            zoomOnlyToSelectedCompetitors.setValue(false);
         } else {
-            includeTailsToAutoZoom.setEnabled(true);
-        }
-    }
-    
-    private ZoomSettings getSelectedZoomSetting() {
-        return zoomSettingsMap.get(zoomSettingsBox.getItemText(zoomSettingsBox.getSelectedIndex()));
-    }
-    
-    private int getIndexOfZoomSettingInBox(ZoomSettings zoomSetting) {
-        int index = -1;
-        for (int i = 0; i < zoomSettingsBox.getItemCount(); i++) {
-            if (zoomSettingsMap.get(zoomSettingsBox.getItemText(i)) == zoomSetting) {
-                index = i;
-                break;
+            boolean disableOnlySelected = true;
+            for (Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
+                pair.getA().setEnabled(true);
+                if (disableOnlySelectedWhenAreFalse.contains(pair.getA())) {
+                    if (pair.getA().getValue()) {
+                        disableOnlySelected = false;
+                    }
+                }
+            }
+
+            zoomOnlyToSelectedCompetitors.setEnabled(!disableOnlySelected);
+            if (disableOnlySelected) {
+                zoomOnlyToSelectedCompetitors.setValue(false);
             }
         }
-        return index;
     }
 
     @Override
     public RaceMapSettings getResult() {
         RaceMapSettings result = new RaceMapSettings();
-        for (Pair<CheckBox, ManeuverType> p : checkboxAndType) {
+        for (Pair<CheckBox, ManeuverType> p : checkboxAndManeuverType) {
             result.showManeuverType(p.getB(), p.getA().getValue());
         }
-        result.setZoomSetting(getSelectedZoomSetting());
-        result.setIncludeTailsToAutoZoom(includeTailsToAutoZoom.getValue());
+        result.setZoomSettings(getZoomSettings());
         result.setShowDouglasPeuckerPoints(checkBoxDouglasPeuckerPoints.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitors.getValue());
         result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);
         return result;
+    }
+    
+    private RaceMapZoomSettings getZoomSettings() {
+        ArrayList<ZoomTypes> zoomTypes = new ArrayList<ZoomTypes>();
+        for (Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
+            if (pair.getA().getValue()) {
+                zoomTypes.add(pair.getB());
+            }
+        }
+        return new RaceMapZoomSettings(zoomTypes, zoomOnlyToSelectedCompetitors.getValue());
     }
 
     @Override
@@ -143,6 +159,12 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 if (valueToValidate.getTailLengthInMilliseconds() < 0) {
                     errorMessage = stringMessages.tailLengthMustBeNonNegative();
                 }
+                
+                List<ZoomTypes> zoomTypesToValidate = valueToValidate.getZoomSettings().getTypesToConsiderOnZoom();
+                if (zoomTypesToValidate == null || zoomTypesToValidate.size() <= 0) {
+                    errorMessage = stringMessages.selectOneZoomType() + ".";
+                }
+                
                 return errorMessage;
             }
         };

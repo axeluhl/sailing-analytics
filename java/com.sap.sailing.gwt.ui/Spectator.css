@@ -215,7 +215,7 @@ input.magnifier {
 	font-size: 24px;
 	text-transform: uppercase;
 	color: #a1a1a1;
-	font-weight: 200;
+	font-weight: 400;
 }
 
 .raceBoardNavigation {
@@ -257,26 +257,30 @@ input.magnifier {
 .leaderboardGroupPanel-LeaderboardsTableLabel {
 	margin: 0 13px 10px;
 		font-size: 17px;
-	font-weight: 200;
+	font-weight: 500;
 }
 
 .leaderboardGroupPanel-ActiveRace, .leaderboardGroupPanel-ActiveLeaderboard {
-	padding: 3px 8px 5px;
+	padding: 5px 8px;
 	display: block;
 	float: left;
 	margin: 5px 5px 5px 0;
 	border-radius: 4px;
-	background: url("images/spectator-table-bg.png") repeat-x 0 0 #e7e7e7;
+	background: url("images/btn-cta-orangeleft.png") repeat-x -10px 0 #e7e7e7;
 	text-decoration: none;
-	color: #3b3b3b;
-  border: 1px solid #a6a6a6;
+	color: #fff;
+  	/*border: 1px solid #a6a6a6;*/
+}
+
+.leaderboardGroupPanel-ActiveRace:visited, .leaderboardGroupPanel-ActiveLeaderboard:visited{
+	color: #fff;
 }
 
 .leaderboardGroupPanel-ActiveRace:hover, .leaderboardGroupPanel-ActiveLeaderboard:hover {
 	text-decoration: none;
 	color: #fff;
-  background: #f1af10;
-  border: 1px solid #f1af10;
+  background: url("images/btn-cta-orangeleft.png") repeat-x -10px -30px #e7e7e7;
+  /*border: 1px solid #f1af10;*/
 }
 
 .leaderboardGroupPanel-ActiveRace {
@@ -311,7 +315,6 @@ input.magnifier {
 .welcomeWidget-WelcomeText {
 	font-weight: 400;
 	line-height: 1.6;
-	text-shadow: 0 0 2px #a4a1a1;
 }
 
 .breadcrumbPanel-NextArrow {

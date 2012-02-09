@@ -157,7 +157,7 @@ input.magnifier {
 	-webkit-border-radius: 6px;
 	-moz-border-radius: 6px;
 	border-radius: 6px;
-	padding: 10px;
+	padding: 10px 10px 0;
 	border: 1px solid #a6a6a6;
 }
 
@@ -261,7 +261,7 @@ input.magnifier {
 
 .collapsablePanel-toolbar a {
 	display: block;
-	padding: 14px;
+	padding: 9px;
 	
 }
 
@@ -291,6 +291,7 @@ input.magnifier {
 }
 
 .timePanel-controls {
+	margin: 7px 0 0 0;
 }
 
 .timePanel-controls-play {

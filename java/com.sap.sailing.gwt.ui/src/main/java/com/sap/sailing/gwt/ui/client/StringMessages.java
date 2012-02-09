@@ -246,7 +246,8 @@ public interface StringMessages extends Messages {
     String autoZoomTo();
     String autoZoomToBoats();
     String autoZoomToBuoys();
-    String autoZoomManual();
-    String autoZoomToBoatsAndBuoys();
-    String includeTailsToAutoZoom();
+    String autoZoomOff();
+    String autoZoomTails();
+    String autoZoomSelectedCompetitors();
+    String selectOneZoomType();
 }
