@@ -231,12 +231,11 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         BreadcrumbPanel breadcrumbPanel = null;
         if (root.equals("overview")) {
             String debugParam = Window.Location.getParameter("gwt.codesvr");
-            String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html"
-                    + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : ""));
+            String link = "/gwt/Spectator.html"
+                    + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
             ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
             breadcrumbLinksData.add(new Pair<String, String>(link, stringConstants.home()));
-            String actualBreadcrumbName = stringConstants.leaderboardGroup() + ": " + group.name;
-            breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, actualBreadcrumbName);
+            breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, group.name);
         }
         return breadcrumbPanel;
     }
