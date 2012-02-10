@@ -820,7 +820,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
         selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
         delayInMilliseconds = settings.getDelayInMilliseconds();
-        autoExpandFirstRace = settings.isAutoExpandFirstRace();
+        setAutoExpandFirstRace(settings.isAutoExpandFirstRace());
 
         this.timer = timer;
         timer.addPlayStateListener(this);
