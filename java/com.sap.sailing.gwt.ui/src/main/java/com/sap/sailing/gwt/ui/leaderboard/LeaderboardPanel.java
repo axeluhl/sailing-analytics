@@ -1274,28 +1274,31 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * 
      * @param raceName
      *            the name of the race to insert
-     * @param the
-     *            position of the race in the {@link selectedRaceColumns selectedRaceColumns}
-     * @return the position to insert the racecolumn
+     * @param listpos
+     *            the position of the race in the {@link selectedRaceColumns selectedRaceColumns}
+     * @return the position of a race column right before which to insert the race column so that it is the
+     *         <code>listpos</code>th race in the table or -1 if no such race column was found, e.g., in case
+     *         the column needs to be inserted as the last race in the table
      */
     private int getColumnPositionToInsert(RaceInLeaderboardDTO race, int listpos) {
         int raceColumnCounter = 0;
         int noRaceColumnCounter = 0;
-        boolean raceColumnfound = false;
-        for (int leaderboardposition = 0; !raceColumnfound
-                & leaderboardposition < getLeaderboardTable().getColumnCount(); leaderboardposition++) {
-            Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
+        boolean raceColumnFound = false;
+        for (int leaderboardPosition = 0; !raceColumnFound
+                && leaderboardPosition < getLeaderboardTable().getColumnCount(); leaderboardPosition++) {
+            Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(leaderboardPosition);
             if (c instanceof RaceColumn) {
                 // RaceColumn<?> raceColumn = (RaceColumn<?>) c;
                 if (raceColumnCounter == listpos) {
-                    raceColumnfound = true;
+                    raceColumnFound = true;
+                } else {
+                    raceColumnCounter++;
                 }
-                raceColumnCounter++;
             } else {
                 noRaceColumnCounter++;
             }
         }
-        if (raceColumnfound) {
+        if (raceColumnFound) {
             return raceColumnCounter + noRaceColumnCounter;
         } else {
             return -1;
@@ -1340,7 +1343,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         for (int selectedRaceCount = 0; selectedRaceCount < selectedRaceColumns.size(); selectedRaceCount++) {
             RaceInLeaderboardDTO selectedRace = selectedRaceColumns.get(selectedRaceCount);
             if (leaderboardTableContainsRace(selectedRace)) {
-                // remove all raceColumns, starting at a specific raceColumnPosition, until the selected raceName.
+                // remove all raceColumns, starting at a specific selectedRaceCount, up to but excluding the selected raceName
+                // with the result that selectedRace is at position selectedRaceCount afterwards
                 removeRaceColumnFromRaceColumnStartIndexBeforeRace(selectedRaceCount, selectedRace);
             } else {
                 // get correct position to insert the column
