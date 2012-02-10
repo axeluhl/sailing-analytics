@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 
@@ -53,9 +54,13 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         eventDisplayers.add(raceMapPanel);
         raceMapPanel.setSize("90%", "90%");
         tabPanel.add(raceMapPanel, stringMessages.map(), /* asHTML */ false);
-        final LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, LeaderboardSettingsFactory.getDefaultSettings(), 
-                null, new CompetitorSelectionModel(/* hasMultiSelection */true),
-        DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, null, this, stringMessages, userAgentType);
+        LeaderboardSettings defaultLeaderboardSettings = LeaderboardSettingsFactory.getInstance()
+                .createNewDefaultSettings(/* autoExpandFirstRace */false);
+        final LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService,
+                defaultLeaderboardSettings,
+                /* preSelectedRace */null, new CompetitorSelectionModel(/* hasMultiSelection */true),
+                DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* leaderboard group name */null, this,
+                stringMessages, userAgentType);
         defaultLeaderboardPanel.setSize("90%", "90%");
         tabPanel.add(defaultLeaderboardPanel, stringMessages.defaultLeaderboard(), /* asHTML */ false);
         final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(sailingService, this, this, stringMessages);
