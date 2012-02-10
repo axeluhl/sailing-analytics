@@ -51,6 +51,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
@@ -157,8 +158,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             @Override
             public SafeHtml getValue(LeaderboardDTO object) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                return ANCHORTEMPLATE.cell("/gwt/Leaderboard.html?name=" + object.name +
-                        (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr="+debugParam : ""), object.name);
+                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + object.name
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                return ANCHORTEMPLATE.cell(link, object.name);
             }
 
         };
