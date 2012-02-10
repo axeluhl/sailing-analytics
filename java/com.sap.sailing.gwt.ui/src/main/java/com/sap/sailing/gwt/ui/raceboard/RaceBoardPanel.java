@@ -41,7 +41,6 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
@@ -70,12 +69,10 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final TimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
-    private final UserDTO user;
     
-    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO currentUser, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
+    public RaceBoardPanel(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType) {
         this.sailingService = sailingService;
-        this.user = currentUser;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
@@ -107,7 +104,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
         // create the default leaderboard and select the right race
-        LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getSettingsForUserRole(user);
+        LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getSettingsForPlayMode(timer.getPlayMode());
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings, selectedRaceIdentifier, competitorSelectionModel,
                 timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
 
@@ -230,6 +227,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                     }
                     break;
             }
+            //timer.setPlayMode(PlayModes.Live);
             sailingService.getRaceTimesInfo(selectedRace.getRaceIdentifier(), 
                     new AsyncCallback<RaceTimesInfoDTO>() {
                         @Override

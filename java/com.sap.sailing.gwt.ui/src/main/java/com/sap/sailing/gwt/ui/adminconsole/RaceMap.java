@@ -55,6 +55,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
@@ -679,7 +680,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                                 if (douglasMarkers != null) {
                                     removeAllMarkDouglasPeuckerpoints();
                                 }
-                                if (!timer.isPlaying()) {
+                                if (!(timer.getPlayState() == PlayStates.Playing)) {
                                     if (settings.isShowDouglasPeuckerPoints()) {
                                         showMarkDouglasPeuckerPoints(result);
                                     }
@@ -699,7 +700,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                                 if (maneuverMarkers != null) {
                                     removeAllManeuverMarkers();
                                 }
-                                if (!timer.isPlaying()) {
+                                if (!(timer.getPlayState() == PlayStates.Playing)) {
                                     showManeuvers(result);
                                 }
                             }
@@ -1077,13 +1078,13 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             }
         }
         if (maneuverTypeSelectionChanged) {
-            if (!timer.isPlaying() && lastManeuverResult != null) {
+            if (!(timer.getPlayState() == PlayStates.Playing) && lastManeuverResult != null) {
                 removeAllManeuverMarkers();
                 showManeuvers(lastManeuverResult);
             }
         }
         if (newSettings.isShowDouglasPeuckerPoints() != getSettings().isShowDouglasPeuckerPoints()) {
-            if (!timer.isPlaying() && lastDouglasPeuckerResult != null && newSettings.isShowDouglasPeuckerPoints()) {
+            if (!(timer.getPlayState() == PlayStates.Playing) && lastDouglasPeuckerResult != null && newSettings.isShowDouglasPeuckerPoints()) {
                 getSettings().setShowDouglasPeuckerPoints(true);
                 removeAllMarkDouglasPeuckerpoints();
                 showMarkDouglasPeuckerPoints(lastDouglasPeuckerResult);
