@@ -209,17 +209,17 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         boolean first = true;
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-            if (!first) {
-                b.appendHtmlConstant(", ");
-            }
             if (race.getRaceIdentifier() != null) {
                 EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
                 String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
-                        + "&raceName=" + "&root=" + root + raceId.getRaceName() + "&eventName=" + raceId.getEventName()
-                        + "&leaderboardGroupName=" + group.name
+                        + "&raceName=" + raceId.getRaceName() + "&root=" + root + raceId.getRaceName() + "&eventName="
+                        + raceId.getEventName() + "&leaderboardGroupName=" + group.name
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 b.append(ANCHORTEMPLATE.anchor(link, race.getRaceColumnName(), STYLE_NAME_PREFIX + "ActiveRace"));
             } else {
+                if (!first) {
+                    b.appendHtmlConstant(", ");
+                }
                 b.append(TEXTTEMPLATE.textWithClass(race.getRaceColumnName(), STYLE_NAME_PREFIX + "InactiveRace"));
             }
             first = false;

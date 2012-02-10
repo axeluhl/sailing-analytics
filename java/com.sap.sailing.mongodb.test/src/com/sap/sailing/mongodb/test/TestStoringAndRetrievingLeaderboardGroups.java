@@ -6,8 +6,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
@@ -61,7 +64,6 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         int c = 0;
         for (Leaderboard board : leaderboardGroup.getLeaderboards()) {
             Assert.assertEquals(leaderboardNames[c], board.getName());
-            mongoObjectFactory.removeLeaderboard(leaderboardNames[c]);
             c++;
         }
     }
@@ -116,6 +118,49 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         }
         
         Assert.assertTrue(c == ungroupedLeaderboards.length);
+    }
+    
+    @Test
+    public void testLeaderboardReferenceBreak() {
+        //Set up
+        final String leaderboardName = "Leaderboard 0";
+        final String columnName = "Column";
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        
+        final String groupName = "Leaderboard Group";
+        final String groupDescription = "A leaderboard group";
+        final ArrayList<Leaderboard> leaderboards = new ArrayList<>();
+        
+        final Leaderboard leaderboard = new LeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
+        final RaceInLeaderboard race = leaderboard.addRaceColumn(columnName, false);
+        leaderboards.add(leaderboard);
+        
+        final LeaderboardGroup group = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
+        mongoObjectFactory.storeLeaderboardGroup(group);
+        
+        //Name change test
+        final String newLeaderboardName = "Leaderboard ChangedName";
+        mongoObjectFactory.renameLeaderboard(leaderboardName, newLeaderboardName);
+        leaderboard.setName(newLeaderboardName);
+        
+        LeaderboardGroup loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName);
+        String loadedLeaderboardName = loadedGroup.getLeaderboards().iterator().next().getName();
+        Assert.assertEquals(newLeaderboardName, loadedLeaderboardName);
+        
+        //RaceIdentifier change test
+        final String eventName = "Event";
+        final String raceName = "Race";
+        leaderboard.getRaceColumnByName(columnName).setRaceIdentifier(new EventNameAndRaceName(eventName, raceName));
+        mongoObjectFactory.storeLeaderboard(leaderboard);
+        
+        //Check if the leaderboard updated correctly
+        final Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboard.getName());
+        Assert.assertEquals(race.getRaceIdentifier(), loadedLeaderboard.getRaceColumnByName(columnName).getRaceIdentifier());
+        
+        //Check if the group received the changes
+        loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName);
+        RaceIdentifier loadedIdentifier = loadedGroup.getLeaderboards().iterator().next().getRaceColumnByName(columnName).getRaceIdentifier();
+        Assert.assertEquals(race.getRaceIdentifier(), loadedIdentifier);
     }
 
 }
