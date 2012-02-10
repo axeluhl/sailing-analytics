@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.client.URLFactory;
 
 public class BreadcrumbPanel extends FlowPanel {
 
@@ -28,7 +29,8 @@ public class BreadcrumbPanel extends FlowPanel {
         super();
         //Adding the active breadcrumbs
         for (Pair<String, String> breadcrumbData : breadcrumbLinksData) {
-            HTML breadcrumb = new HTML(ANCHORTEMPLATE.anchor(breadcrumbData.getA(), breadcrumbData.getB()));
+            HTML breadcrumb = new HTML(ANCHORTEMPLATE.anchor(URLFactory.INSTANCE.encode(breadcrumbData.getA()),
+                    breadcrumbData.getB()));
             breadcrumb.addStyleName(STYLE_NAME_PREFIX + "ActiveBreadcrumb");
             breadcrumb.getElement().getStyle().setFloat(Style.Float.LEFT);
             breadcrumb.getElement().getStyle().setPadding(5, Style.Unit.PX);

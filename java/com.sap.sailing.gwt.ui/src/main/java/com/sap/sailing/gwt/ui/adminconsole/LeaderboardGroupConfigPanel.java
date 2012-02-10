@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -408,8 +409,9 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                return ANCHORTEMPLATE.cell("/gwt/Spectator.html?leaderboardGroupName=" + group.name +
-                        (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr="+debugParam : ""), group.name);
+                String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.name
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                return ANCHORTEMPLATE.cell(link, group.name);
             }
         };
         groupNameColumn.setSortable(true);

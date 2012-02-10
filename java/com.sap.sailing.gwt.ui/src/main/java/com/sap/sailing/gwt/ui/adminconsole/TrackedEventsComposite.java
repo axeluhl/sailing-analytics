@@ -51,6 +51,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -216,10 +217,9 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 if (raceDTO.currentlyTracked == true) {
                     EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) raceDTO.getRaceIdentifier();
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
-                    String link = "/gwt/RaceBoard.html?raceName=" + raceIdentifier.getRaceName() +
-                            "&eventName=" + raceIdentifier.getEventName();
-                    if(debugParam != null && !debugParam.isEmpty())
-                        link += "&gwt.codesvr=" + debugParam; 
+                    String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?raceName="
+                            + raceIdentifier.getRaceName() + "&eventName=" + raceIdentifier.getEventName()
+                            + ((debugParam != null && !debugParam.isEmpty()) ? "&gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.cell(link, raceDTO.name);
                 } else {
                     return SafeHtmlUtils.fromString(raceDTO.name);

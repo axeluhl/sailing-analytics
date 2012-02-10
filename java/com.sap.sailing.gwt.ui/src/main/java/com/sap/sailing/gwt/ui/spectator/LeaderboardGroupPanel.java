@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
@@ -153,10 +154,10 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 @Override
                 public SafeHtml getValue(LeaderboardDTO leaderboard) {
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
-                    return ANCHORTEMPLATE.anchor("/gwt/Leaderboard.html?name=" + leaderboard.name
+                    String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                             + "&leaderboardGroupName=" + group.name + "&root=" + root
-                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""),
-                            leaderboard.name, STYLE_NAME_PREFIX + "ActiveLeaderboard");
+                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                    return ANCHORTEMPLATE.anchor(link, leaderboard.name, STYLE_NAME_PREFIX + "ActiveLeaderboard");
                 }
             };
 
@@ -185,16 +186,16 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         String displayName = race.getRaceColumnName();
         if (race.getRaceColumnName().equals(stringConstants.overview())) {
-            String link = "/gwt/Leaderboard.html?name=" + leaderboard.name + "&leaderboardGroupName=" + group.name
-                    + "&root=" + root
-                    + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
+            String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
+                    + "&leaderboardGroupName=" + group.name + "&root=" + root
+                    + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
             b.append(ANCHORTEMPLATE.anchor(link, displayName, STYLE_NAME_PREFIX + "ActiveLeaderboard"));
         } else {
             if (race.getRaceIdentifier() != null) {
                 EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
-                String link = "/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + raceId.getRaceName()
+                String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + raceId.getRaceName()
                         + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName=" + group.name + "&root=" + root
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 b.append(ANCHORTEMPLATE.anchor(link, displayName, STYLE_NAME_PREFIX + "ActiveRace"));
             } else {
                 b.append(TEXTTEMPLATE.textWithClass(race.getRaceColumnName(), STYLE_NAME_PREFIX + "InactiveRace"));
@@ -213,9 +214,10 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             }
             if (race.getRaceIdentifier() != null) {
                 EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
-                String link = "/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + "&root=" + root
-                        + raceId.getRaceName() + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName="
-                        + group.name + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
+                String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
+                        + "&raceName=" + "&root=" + root + raceId.getRaceName() + "&eventName=" + raceId.getEventName()
+                        + "&leaderboardGroupName=" + group.name
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 b.append(ANCHORTEMPLATE.anchor(link, race.getRaceColumnName(), STYLE_NAME_PREFIX + "ActiveRace"));
             } else {
                 b.append(TEXTTEMPLATE.textWithClass(race.getRaceColumnName(), STYLE_NAME_PREFIX + "InactiveRace"));
@@ -233,8 +235,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
             ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
             breadcrumbLinksData.add(new Pair<String, String>(link, stringConstants.home()));
-            String actualBreadcrumbName = stringConstants.leaderboardGroup() + ": " + group.name;
-            breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, actualBreadcrumbName);
+            breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, group.name);
         }
         return breadcrumbPanel;
     }

@@ -59,7 +59,7 @@ public class LeaderboardPage extends AbstractEntryPoint {
             breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
         }
         BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, leaderboardName.toUpperCase());
-        LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService, LeaderboardSettingsFactory.getDefaultSettings(),
+        LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(true),
                 /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
                 new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                 leaderboardName, leaderboardGroupName,

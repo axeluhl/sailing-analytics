@@ -10,8 +10,16 @@ import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
  * A factory class creating leaderboard settings for different contexts (user role, live or replay mode, etc.
  */
 public class LeaderboardSettingsFactory {
+    private static LeaderboardSettingsFactory instance;
+    
+    public synchronized static LeaderboardSettingsFactory getInstance() {
+        if (instance == null) {
+            instance = new LeaderboardSettingsFactory();
+        }
+        return instance;
+    }
 
-    public static LeaderboardSettings getSettingsForPlayMode(PlayModes playMode) {
+    public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode) {
         LeaderboardSettings settings = null;
         switch (playMode) {
             case Live:  
@@ -19,41 +27,33 @@ public class LeaderboardSettingsFactory {
                 maneuverDetails.add(DetailType.TACK);
                 maneuverDetails.add(DetailType.JIBE);
                 maneuverDetails.add(DetailType.PENALTY_CIRCLE);
-
                 ArrayList<DetailType> legDetails = new ArrayList<DetailType>();
                 legDetails.add(DetailType.DISTANCE_TRAVELED);
                 legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
                 legDetails.add(DetailType.RANK_GAIN);
-                
                 ArrayList<DetailType> raceDetails = new ArrayList<DetailType>();
-
                 ArrayList<RaceInLeaderboardDTO> raceColumns = new ArrayList<RaceInLeaderboardDTO>();
-                
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, true, 0l, 0l);
                 break;
             case Replay:
-                settings = getDefaultSettings();
+                settings = createNewDefaultSettings(true);
                 break;
         }
         return settings;
     }
 
-    public static LeaderboardSettings getDefaultSettings() {
+    public LeaderboardSettings createNewDefaultSettings(boolean autoExpandFirstRace) {
         ArrayList<DetailType> maneuverDetails = new ArrayList<DetailType>();
         maneuverDetails.add(DetailType.TACK);
         maneuverDetails.add(DetailType.JIBE);
         maneuverDetails.add(DetailType.PENALTY_CIRCLE);
-
         ArrayList<DetailType> legDetails = new ArrayList<DetailType>();
         legDetails.add(DetailType.DISTANCE_TRAVELED);
         legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         legDetails.add(DetailType.RANK_GAIN);
-        
         ArrayList<DetailType> raceDetails = new ArrayList<DetailType>();
         raceDetails.add(DetailType.DISPLAY_LEGS);
-
         ArrayList<RaceInLeaderboardDTO> raceColumns = new ArrayList<RaceInLeaderboardDTO>();
-        
-        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, true, 0l, 0l);
+        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, autoExpandFirstRace, 0l, 0l);
     }
 }
