@@ -124,7 +124,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         // create the default leaderboard and select the right race
         if(showLeaderboard) {
-            LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getSettingsForPlayMode(timer.getPlayMode());
+            LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode());
             LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings, selectedRaceIdentifier, competitorSelectionModel,
                     timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
 
