@@ -22,4 +22,16 @@ public interface ClientResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/timeslider-speed.png")
     ImageResource timesliderPlaySpeedIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/timeslider-playstate-live-active.png")
+    ImageResource timesliderPlayStateLiveActiveIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/timeslider-playstate-live-inactive.png")
+    ImageResource timesliderPlayStateLiveInactiveIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/timeslider-playstate-replay-active.png")
+    ImageResource timesliderPlayStateReplayActiveIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/timeslider-playstate-replay-inactive.png")
+    ImageResource timesliderPlayStateReplayInactiveIcon();
 }

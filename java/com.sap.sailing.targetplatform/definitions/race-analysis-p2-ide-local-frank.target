@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.6"?>
+
+<target name="Race Analysis Target (IDE external) for Frank" sequenceNumber="50">
+<locations>
+<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.jetty.bundles.f.feature.group" version="7.5.4"/>
+<repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-7.x/7.5.4.v20111024/"/>
+</location>
+<location path="C:\Projects\sailing\dev\p2-repositories\eclipse\equinox-SDK-3.7" type="Directory"/>
+<location path="${project_loc:com.sap.sailing.targetplatform.base}/gen/p2" type="Directory"/>
+</locations>
+</target>
