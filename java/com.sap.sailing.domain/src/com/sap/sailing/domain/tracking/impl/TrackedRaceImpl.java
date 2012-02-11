@@ -258,6 +258,21 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
+    public Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        if (markPassings.isEmpty()) {
+            return null;
+        } else {
+            TimePoint end = timePoint;
+            if (markPassings.last().getWaypoint() == getRace().getCourse().getLastWaypoint()) {
+                // competitor has finished race; use time point of crossing the finish line
+                end = markPassings.last().getTimePoint();
+            }
+            return getTrack(competitor).getDistanceTraveled(markPassings.first().getTimePoint(), end);
+        }
+    }
+
+    @Override
     public GPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         return tracks.get(competitor);
     }
