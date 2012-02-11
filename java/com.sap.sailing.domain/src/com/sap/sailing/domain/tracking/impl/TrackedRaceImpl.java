@@ -264,7 +264,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             return null;
         } else {
             TimePoint end = timePoint;
-            if (markPassings.last().getWaypoint() == getRace().getCourse().getLastWaypoint()) {
+            if (markPassings.last().getWaypoint() == getRace().getCourse().getLastWaypoint() &&
+                    timePoint.compareTo(markPassings.last().getTimePoint()) > 0) {
                 // competitor has finished race; use time point of crossing the finish line
                 end = markPassings.last().getTimePoint();
             }
