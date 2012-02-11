@@ -1295,6 +1295,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Collections.sort(countryCodes);
         return countryCodes.toArray(new String[0]);
     }
+    
+    /**
+     * Finds a competitor in a sequence of competitors that has an {@link Competitor#getId()} equal to <code>id</code>. 
+     */
+    private Competitor getCompetitorById(Iterable<Competitor> competitors, String id) {
+        for (Competitor c : competitors) {
+            if (c.getId().toString().equals(id)) {
+                return c;
+            }
+        }
+        return null;
+    }
 
     @Override
     public CompetitorInRaceDTO getCompetitorRaceData(RaceIdentifier race,
@@ -1302,24 +1314,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         CompetitorInRaceDTO competitorData = new CompetitorInRaceDTO();
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
-            Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
-            List<Competitor> selectedCompetitor = new ArrayList<Competitor>();
+            List<Competitor> selectedCompetitors = new ArrayList<Competitor>();
             for (CompetitorDTO cDTO : competitorAndTimePointsDTO.getCompetitors()) {
-                for (Competitor c : competitors) {
-                    if (c.getId().toString().equals(cDTO.id)) {
-                        selectedCompetitor.add(c);
-                    }
-                }
+                selectedCompetitors.add(getCompetitorById(trackedRace.getRace().getCompetitors(), cDTO.id));
             }
 
             switch (dataType) {
             case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
-                for (int c = 0; c < selectedCompetitor.size(); c++) {
+                for (int c = 0; c < selectedCompetitors.size(); c++) {
                     Double[] entries = new Double[competitorAndTimePointsDTO.getTimePoints().length];
                     for (int i = 0; i < competitorAndTimePointsDTO.getTimePoints().length; i++) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(
                                 competitorAndTimePointsDTO.getTimePoints()[i]);
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitors.get(c), time);
                         if (trackedLeg != null) {
                             SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(time);
                             entries[i] = (speedOverGround == null) ? null : speedOverGround.getKnots();
@@ -1331,7 +1338,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     for (int i = 0; i < competitorAndTimePointsDTO.getMarkPassings(competitor).length; i++) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(
                                 competitorAndTimePointsDTO.getMarkPassings(competitor)[i].getB());
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitors.get(c), time);
                         if (trackedLeg != null) {
                             SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(time);
                             entries[i] = (speedOverGround == null) ? null : speedOverGround.getKnots();
@@ -1341,12 +1348,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 break;
             case VELOCITY_MADE_GOOD_IN_KNOTS:
-                for (int c = 0; c < selectedCompetitor.size(); c++) {
+                for (int c = 0; c < selectedCompetitors.size(); c++) {
                     Double[] entries = new Double[competitorAndTimePointsDTO.getTimePoints().length];
                     for (int i = 0; i < competitorAndTimePointsDTO.getTimePoints().length; i++) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(
                                 competitorAndTimePointsDTO.getTimePoints()[i]);
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitors.get(c), time);
                         if (trackedLeg != null) {
                             Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(time);
                             entries[i] = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
@@ -1358,7 +1365,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     for (int i = 0; i < competitorAndTimePointsDTO.getMarkPassings(competitor).length; i++) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(
                                 competitorAndTimePointsDTO.getMarkPassings(competitor)[i].getB());
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitors.get(c), time);
                         if (trackedLeg != null) {
                             Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(time);
                             entries[i] = (velocityMadeGood == null) ? null : velocityMadeGood.getKnots();
@@ -1368,14 +1375,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 break;
             case DISTANCE_TRAVELED:
-                for (int c = 0; c < selectedCompetitor.size(); c++) {
+                for (int c = 0; c < selectedCompetitors.size(); c++) {
                     Double[] entries = new Double[competitorAndTimePointsDTO.getTimePoints().length];
                     double distanceOfPreviousLegs = 0;
                     double lastTraveledDistance = 0;
                     for (int i = 0; i < competitorAndTimePointsDTO.getTimePoints().length; i++) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(
                                 competitorAndTimePointsDTO.getTimePoints()[i]);
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitors.get(c), time);
                         if (trackedLeg != null) {
                             Distance distanceTraveled = trackedLeg.getDistanceTraveled(time);
                             if (distanceTraveled != null) {
@@ -1394,7 +1401,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     for (int i = 0; i < competitorAndTimePointsDTO.getMarkPassings(competitor).length; i++) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(
                                 competitorAndTimePointsDTO.getMarkPassings(competitor)[i].getB());
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitors.get(c), time);
                         if (trackedLeg != null) {
                             Distance distanceTraveled = trackedLeg.getDistanceTraveled(time);
                             if (distanceTraveled != null) {
@@ -1411,12 +1418,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 break;
             case GAP_TO_LEADER_IN_SECONDS:
-                for (int c = 0; c < selectedCompetitor.size(); c++) {
+                for (int c = 0; c < selectedCompetitors.size(); c++) {
                     Double[] entries = new Double[competitorAndTimePointsDTO.getTimePoints().length];
                     for (int i = 0; i < competitorAndTimePointsDTO.getTimePoints().length; i++) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(
                                 competitorAndTimePointsDTO.getTimePoints()[i]);
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitors.get(c), time);
                         if (trackedLeg != null) {
                             entries[i] = trackedLeg.getGapToLeaderInSeconds(time);
                         }
@@ -1427,7 +1434,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     for (int i = 0; i < competitorAndTimePointsDTO.getMarkPassings(competitor).length; i++) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(
                                 competitorAndTimePointsDTO.getMarkPassings(competitor)[i].getB());
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitors.get(c), time);
                         if (trackedLeg != null) {
                             entries[i] = trackedLeg.getGapToLeaderInSeconds(time);
                         }
@@ -1436,19 +1443,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 break;
             case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-                for (int c = 0; c < selectedCompetitor.size(); c++) {
+                for (int c = 0; c < selectedCompetitors.size(); c++) {
                     CompetitorDTO competitor = competitorAndTimePointsDTO.getCompetitors()[c];
                     Double[] entries = new Double[competitorAndTimePointsDTO.getTimePoints().length];
                     Double[] markEntries = new Double[competitorAndTimePointsDTO.getMarkPassings(competitor).length];
                     MillisecondsTimePoint markTime = new MillisecondsTimePoint(
                             competitorAndTimePointsDTO.getMarkPassings(competitor)[0].getB());
                     int markEntryCounter = 0;
-                    TrackedLegOfCompetitor trackedLegforMark = trackedRace.getTrackedLeg(selectedCompetitor.get(c),
+                    TrackedLegOfCompetitor trackedLegforMark = trackedRace.getTrackedLeg(selectedCompetitors.get(c),
                             markTime);
                     for (int i = 0; i < competitorAndTimePointsDTO.getTimePoints().length; i++) {
                         MillisecondsTimePoint time = new MillisecondsTimePoint(
                                 competitorAndTimePointsDTO.getTimePoints()[i]);
-                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitor.get(c), time);
+                        TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(selectedCompetitors.get(c), time);
                         if (trackedLeg != null) {
                             Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(time);
                             entries[i] = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
@@ -1462,7 +1469,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             if (markEntryCounter < competitorAndTimePointsDTO.getMarkPassings(competitor).length) {
                                 markTime = new MillisecondsTimePoint(
                                         competitorAndTimePointsDTO.getMarkPassings(competitor)[markEntryCounter].getB());
-                                trackedLegforMark = trackedRace.getTrackedLeg(selectedCompetitor.get(c), markTime);
+                                trackedLegforMark = trackedRace.getTrackedLeg(selectedCompetitors.get(c), markTime);
                             }
                         }
                     }
@@ -1611,7 +1618,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, int steps) {
         CompetitorsAndTimePointsDTO competitorAndTimePointsDTO = new CompetitorsAndTimePointsDTO(steps);
         TrackedRace trackedRace = getExistingTrackedRace(race);
