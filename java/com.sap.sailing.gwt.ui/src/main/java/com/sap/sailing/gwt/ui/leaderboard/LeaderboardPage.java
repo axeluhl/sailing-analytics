@@ -22,7 +22,6 @@ public class LeaderboardPage extends AbstractEntryPoint {
     
     @Override
     public void onModuleLoad() {     
-        
         super.onModuleLoad();
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
@@ -43,15 +42,12 @@ public class LeaderboardPage extends AbstractEntryPoint {
         });
     }
 
-    private void createLeaderboardPanel()
-    {
+    private void createLeaderboardPanel() {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        
         // create the breadcrumb navigation
         ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
         String debugParam = Window.Location.getParameter("gwt.codesvr");
-    
         if(leaderboardGroupName != null) {
             String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName;
             if(debugParam != null && !debugParam.isEmpty())
@@ -59,7 +55,8 @@ public class LeaderboardPage extends AbstractEntryPoint {
             breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
         }
         BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, leaderboardName.toUpperCase());
-        LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(true),
+        LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService,
+                LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(/* autoExpandFirstRace */ false),
                 /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
                 new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                 leaderboardName, leaderboardGroupName,
