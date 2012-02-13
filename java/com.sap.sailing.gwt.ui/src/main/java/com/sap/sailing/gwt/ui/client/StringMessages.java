@@ -249,6 +249,5 @@ public interface StringMessages extends Messages {
     String autoZoomOff();
     String autoZoomTails();
     String autoZoomSelectedCompetitors();
-    String selectOneZoomType();
     String noLeaderboardGroupToLoad();
 }

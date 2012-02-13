@@ -34,7 +34,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private final RaceMapSettings initialSettings;
 
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
-    private CheckBox autoZoomOffBox;
     
     public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -50,7 +49,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         labelAndTailLengthBoxPanel.add(tailLengthBox);
         vp.add(labelAndTailLengthBoxPanel);
         
-        zoomOnlyToSelectedCompetitors = new CheckBox(stringMessages.autoZoomSelectedCompetitors());
+        zoomOnlyToSelectedCompetitors = dialog.createCheckbox(stringMessages.autoZoomSelectedCompetitors());//new CheckBox(stringMessages.autoZoomSelectedCompetitors());
         zoomOnlyToSelectedCompetitors.setValue(initialSettings.getZoomSettings().isZoomToSelectedCompetitors());
 
         HorizontalPanel labelAndZoomSettingsPanel = new HorizontalPanel();
@@ -59,23 +58,23 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         VerticalPanel zoomSettingsBoxesPanel = new VerticalPanel();
         disableOnlySelectedWhenAreFalse = new ArrayList<CheckBox>();
         for (ZoomTypes zoomType : ZoomTypes.values()) {
-            CheckBox cb = dialog.createCheckbox(ZoomTypeFormatter.format(zoomType, stringMessages));
-            cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), true);
-            checkboxAndZoomType.add(new Pair<CheckBox, ZoomTypes>(cb, zoomType));
-            zoomSettingsBoxesPanel.add(cb);
-            
-            //Save specific checkboxes for easier value change handling
-            if (zoomType == ZoomTypes.BOATS || zoomType == ZoomTypes.TAILS) {
-                disableOnlySelectedWhenAreFalse.add(cb);
-            } else if (zoomType == ZoomTypes.NONE) {
-                autoZoomOffBox = cb;
-            }
-            cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-                @Override
-                public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    zoomSettingsChanged();
+            if (zoomType != ZoomTypes.NONE) {
+                CheckBox cb = dialog.createCheckbox(ZoomTypeFormatter.format(zoomType, stringMessages));
+                cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), true);
+                checkboxAndZoomType.add(new Pair<CheckBox, ZoomTypes>(cb, zoomType));
+                zoomSettingsBoxesPanel.add(cb);
+                
+                //Save specific checkboxes for easier value change handling
+                if (zoomType == ZoomTypes.BOATS || zoomType == ZoomTypes.TAILS) {
+                    disableOnlySelectedWhenAreFalse.add(cb);
+                    cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                        @Override
+                        public void onValueChange(ValueChangeEvent<Boolean> event) {
+                            zoomSettingsChanged();
+                        }
+                    });
                 }
-            });
+            }
         }
         labelAndZoomSettingsPanel.add(zoomSettingsBoxesPanel);
         vp.add(labelAndZoomSettingsPanel);
@@ -100,30 +99,19 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     }
     
     private void zoomSettingsChanged() {
-        if (autoZoomOffBox.getValue()) {
-            for (Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
-                if (pair.getB() != ZoomTypes.NONE) {
-                    pair.getA().setEnabled(!autoZoomOffBox.getValue());
-                    pair.getA().setValue(false);
+        boolean disableOnlySelected = true;
+        for (Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
+            pair.getA().setEnabled(true);
+            if (disableOnlySelectedWhenAreFalse.contains(pair.getA())) {
+                if (pair.getA().getValue()) {
+                    disableOnlySelected = false;
                 }
             }
-            zoomOnlyToSelectedCompetitors.setEnabled(false);
-            zoomOnlyToSelectedCompetitors.setValue(false);
-        } else {
-            boolean disableOnlySelected = true;
-            for (Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
-                pair.getA().setEnabled(true);
-                if (disableOnlySelectedWhenAreFalse.contains(pair.getA())) {
-                    if (pair.getA().getValue()) {
-                        disableOnlySelected = false;
-                    }
-                }
-            }
+        }
 
-            zoomOnlyToSelectedCompetitors.setEnabled(!disableOnlySelected);
-            if (disableOnlySelected) {
-                zoomOnlyToSelectedCompetitors.setValue(false);
-            }
+        zoomOnlyToSelectedCompetitors.setEnabled(!disableOnlySelected);
+        if (disableOnlySelected) {
+            zoomOnlyToSelectedCompetitors.setValue(false);
         }
     }
 
@@ -142,10 +130,15 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     
     private RaceMapZoomSettings getZoomSettings() {
         ArrayList<ZoomTypes> zoomTypes = new ArrayList<ZoomTypes>();
+        boolean noAutoZoomSelected = true;
         for (Pair<CheckBox, ZoomTypes> pair : checkboxAndZoomType) {
             if (pair.getA().getValue()) {
                 zoomTypes.add(pair.getB());
+                noAutoZoomSelected = false;
             }
+        }
+        if (noAutoZoomSelected) {
+            zoomTypes.add(ZoomTypes.NONE);
         }
         return new RaceMapZoomSettings(zoomTypes, zoomOnlyToSelectedCompetitors.getValue());
     }
@@ -158,11 +151,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 String errorMessage = null;
                 if (valueToValidate.getTailLengthInMilliseconds() < 0) {
                     errorMessage = stringMessages.tailLengthMustBeNonNegative();
-                }
-                
-                List<ZoomTypes> zoomTypesToValidate = valueToValidate.getZoomSettings().getTypesToConsiderOnZoom();
-                if (zoomTypesToValidate == null || zoomTypesToValidate.size() <= 0) {
-                    errorMessage = stringMessages.selectOneZoomType() + ".";
                 }
                 
                 return errorMessage;
