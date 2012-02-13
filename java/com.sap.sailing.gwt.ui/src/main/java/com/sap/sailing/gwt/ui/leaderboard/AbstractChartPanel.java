@@ -253,13 +253,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     private void doLoadData() {
         final List<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
+        // Assumption: for those competitors shown in chart we already have all data that's needed (TODO: what to do in live mode?)
+        // Therefore, we only need to load race data for those to be shown but not yet in the chart. Find them:
         for (CompetitorDTO competitor : competitorSelectionProvider.getAllCompetitors()) {
             if (isCompetitorVisible(competitor) && !seriesByCompetitor.keySet().contains(competitor)) {
                 competitorsToLoad.add(competitor);
             }
         }
-        final CompetitorsAndTimePointsDTO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDTO(
-                getStepsToLoad());
+        final CompetitorsAndTimePointsDTO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDTO(getStepsToLoad());
         competitorsAndTimePointsToLoad.setStartTime(getCompetitorsAndTimePointsDTO().getStartTime());
         competitorsAndTimePointsToLoad.setTimePointOfNewestEvent(getCompetitorsAndTimePointsDTO()
                 .getTimePointOfNewestEvent());

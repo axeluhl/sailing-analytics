@@ -44,4 +44,11 @@ public class UserManagementServiceImpl  extends RemoteServiceServlet implements 
         
         return null;
     }
+    
+    @Override
+    /**
+     * Override of function to prevent exception "Blocked request without GWT permutation header (XSRF attack?)" when testing the GWT sites
+     */
+    protected void checkPermutationStrongName() throws SecurityException {
+    }
 }
