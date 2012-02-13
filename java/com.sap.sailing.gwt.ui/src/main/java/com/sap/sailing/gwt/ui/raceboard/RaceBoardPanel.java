@@ -116,18 +116,13 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         boolean showLeaderboard = true;
         boolean showMap = true;
-        boolean showWindCharts = false;
-//        boolean showCompetitorChart = true;
-        boolean showCompetitorMultiChart = true;
+        boolean showWindCharts = true;
+        boolean showCompetitorMultiChart = false;
         
         if (user == null) {
            // anonymous user
             showWindCharts = false;
         }
-
-        showMap = true;
-        showWindCharts = false;
-        showCompetitorMultiChart = false;
 
         // create the default leaderboard and select the right race
         if(showLeaderboard) {
