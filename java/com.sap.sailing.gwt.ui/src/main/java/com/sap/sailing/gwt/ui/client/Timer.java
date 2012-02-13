@@ -37,7 +37,7 @@ public class Timer {
     private final Set<PlayStateListener> playStateListeners;
 
     /**
-     * If <code>Playing</code>, an auto-refreshing command is running with {@link #delayBetweenAutoAdvancesInMilliseconds}
+     * If <code>Playing</code>, an auto-refreshing command is running with {@link #refreshInterval}
      * as its refresh interval.
      */
     private PlayStates playState;
@@ -48,15 +48,15 @@ public class Timer {
     private PlayModes playMode;
     
     /**
-     * The refresh interval for auto-updating this timer
+     * The refresh interval in milliseconds for auto-updating this timer
      */
-    private long delayBetweenAutoAdvancesInMilliseconds;
+    private long refreshInterval;
     
     /**
-     * Set to <code>true</code> if the delay changed while {@link #playing}. This forces the auto-refreshing command
-     * to re-schedule itself with the new delay, then terminate.
+     * Set to <code>true</code> if the refreshInterval changed while {@link #playing}. This forces the auto-refreshing command
+     * to re-schedule itself with the new interval, then terminate.
      */
-    private boolean delayBetweenAutoAdvancesChanged;
+    private boolean refreshIntervalChanged;
     
     /**
      * Factor by which the timer runs faster than real time. 1.0 means real-time, 2.0 means twice as fast as real time, and so on.
@@ -69,7 +69,7 @@ public class Timer {
 
     /**
      * The timer is created in stopped state, using "now" as its current time, 1.0 as its {@link #playSpeedFactor play speed factor} and
-     * 1 second (1000ms) as the {@link #delayBetweenAutoAdvancesInMilliseconds delay between automatic updates} should the timer be
+     * 1 second (1000ms) as the {@link #refreshInterval delay between automatic updates} should the timer be
      * {@link #resume() started}.
      */
     public Timer(PlayModes playMode) {
@@ -79,11 +79,11 @@ public class Timer {
     /**
      * The timer is created in stopped state, using "now" as its current time, 1.0 as its {@link #playSpeedFactor
      * acceleration factor} and <code>delayBetweenAutoAdvancesInMilliseconds</code> as the
-     * {@link #delayBetweenAutoAdvancesInMilliseconds delay between automatic updates} should the timer be
+     * {@link #refreshInterval delay between automatic updates} should the timer be
      * {@link #resume() started}.
      */
-    public Timer(PlayModes playMode, long delayBetweenAutoAdvancesInMilliseconds) {
-        this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
+    public Timer(PlayModes playMode, long refreshInterval) {
+        this.refreshInterval = refreshInterval;
         this.playMode = playMode;
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
@@ -125,15 +125,15 @@ public class Timer {
         this.playSpeedFactor = playSpeedFactor;
     }
     
-    public void setDelayBetweenAutoAdvancesInMilliseconds(long delayBetweenAutoAdvancesInMilliseconds) {
-        this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
+    public void setRefreshInterval(long refreshInterval) {
+        this.refreshInterval = refreshInterval;
         if (playState == PlayStates.Playing) {
-            delayBetweenAutoAdvancesChanged = true;
+            refreshIntervalChanged = true;
         }
     }
     
-    public long getDelayBetweenAutoAdvancesInMilliseconds() {
-        return delayBetweenAutoAdvancesInMilliseconds;
+    public long getRefreshInterval() {
+        return refreshInterval;
     }
 
     public Date getTime() {
@@ -207,10 +207,10 @@ public class Timer {
             @Override
             public boolean execute() {
                 if (time != null) {
-                    setTime(time.getTime() + (long) (playSpeedFactor * delayBetweenAutoAdvancesInMilliseconds));
+                    setTime(time.getTime() + (long) (playSpeedFactor * refreshInterval));
                 }
-                if (delayBetweenAutoAdvancesChanged) {
-                    delayBetweenAutoAdvancesChanged = false;
+                if (refreshIntervalChanged) {
+                    refreshIntervalChanged = false;
                     scheduleAdvancerCommand(this);
                     return false; // stop this command; use the newly-scheduled one instead that uses the new frequency
                 } else {
@@ -222,7 +222,7 @@ public class Timer {
     }
 
     private void scheduleAdvancerCommand(RepeatingCommand command) {
-        Scheduler.get().scheduleFixedPeriod(command, (int) delayBetweenAutoAdvancesInMilliseconds);
+        Scheduler.get().scheduleFixedPeriod(command, (int) refreshInterval);
     }
     
     public void setDelay(long delayInMilliseconds) {
@@ -247,4 +247,5 @@ public class Timer {
     public PlayModes getPlayMode() {
         return playMode;
     }
+    
 }

@@ -252,4 +252,6 @@ public interface StringMessages extends Messages {
     String noLeaderboardGroupToLoad();
     String bearing();
     String zoom();
+    String refreshInterval();
+    String refreshIntervalMustBeGreaterThanXSeconds(String seconds);
 }

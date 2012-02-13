@@ -363,6 +363,8 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
             timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
             delayChanged();
         }
+        getSettings().setRefreshInterval(newSettings.getRefreshInterval());
+        timer.setRefreshInterval(getSettings().getRefreshInterval());
     }
 
     @Override
