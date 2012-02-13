@@ -18,7 +18,7 @@ public class WindComparator implements Comparator<Timed> {
 
     @Override
     public int compare(Timed o1, Timed o2) {
-        int result = o1.getTimePoint().compareTo(o2.getTimePoint());
+        int result = o1 == null ? o2 == null ? 0 : -1 : o2 == null ? 1 : o1.getTimePoint().compareTo(o2.getTimePoint());
         if (result == 0) {
             if (o1 instanceof Wind && o2 instanceof Wind) {
                 // try to decide based on position; note that position may be null
