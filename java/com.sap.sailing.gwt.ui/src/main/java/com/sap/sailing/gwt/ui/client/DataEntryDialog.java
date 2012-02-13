@@ -63,9 +63,11 @@ public abstract class DataEntryDialog<T> {
         dialogVPanel.setSpacing(10);
         statusLabel = new Label();
         dialogVPanel.add(statusLabel);
-        Label messageLabel = new Label(message);
-        messageLabel.addStyleName("dialogMessageLabel");
-        dialogVPanel.add(messageLabel);
+        if (message != null) {
+            Label messageLabel = new Label(message);
+            messageLabel.addStyleName("dialogMessageLabel");
+            dialogVPanel.add(messageLabel);
+        }
         
         dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
         panelForAdditionalWidget = new HorizontalPanel();

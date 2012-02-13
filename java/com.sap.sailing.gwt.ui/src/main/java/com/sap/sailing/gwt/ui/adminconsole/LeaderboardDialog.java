@@ -71,7 +71,7 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDTO> 
     
     public LeaderboardDialog(LeaderboardDTO leaderboardDTO,  StringMessages stringConstants,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDTO> callback) {
-        super(stringConstants.leaderboardName(), stringConstants.leaderboardName(), stringConstants.ok(),
+        super(stringConstants.leaderboardName(), null, stringConstants.ok(),
                 stringConstants.cancel(), validator, callback);
         this.stringConstants = stringConstants;
         this.leaderboard = leaderboardDTO;

@@ -10,17 +10,18 @@ public class SettingsDialog<SettingsType> extends DataEntryDialog<SettingsType> 
     private final SettingsDialogComponent<SettingsType> settingsDialogComponent;
     
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringConstants) {
-        super(stringConstants.settingsForComponent(component.getLocalizedShortName()),
-                stringConstants.settingsForComponent(component.getLocalizedShortName()),
-                stringConstants.ok(), stringConstants.cancel(), component.getSettingsDialogComponent().getValidator(),
+        super(stringConstants.settingsForComponent(component.getLocalizedShortName()), null, stringConstants.ok(),
+                stringConstants.cancel(), component.getSettingsDialogComponent().getValidator(),
                 new AsyncCallback<SettingsType>() {
                     @Override
-                    public void onFailure(Throwable t) {}
+                    public void onFailure(Throwable t) {
+                    }
+
                     @Override
                     public void onSuccess(SettingsType newSettings) {
                         component.updateSettings(newSettings);
                     }
-        });
+                });
         this.settingsDialogComponent = component.getSettingsDialogComponent();
     }
 

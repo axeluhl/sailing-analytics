@@ -60,7 +60,7 @@ public class RaceInLeaderboardDialog extends DataEntryDialog<RaceInLeaderboardDT
     public RaceInLeaderboardDialog(Collection<RaceInLeaderboardDTO> existingRaces,
             RaceInLeaderboardDTO raceInLeaderboard, StringMessages stringConstants,
             AsyncCallback<RaceInLeaderboardDTO> callback) {
-        super(stringConstants.name(), stringConstants.name(), stringConstants.ok(), stringConstants.cancel(),
+        super(stringConstants.name(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(stringConstants, existingRaces), callback);
         this.raceInLeaderboard = raceInLeaderboard;
         raceNameBox = createTextBox(raceInLeaderboard.getRaceColumnName());
