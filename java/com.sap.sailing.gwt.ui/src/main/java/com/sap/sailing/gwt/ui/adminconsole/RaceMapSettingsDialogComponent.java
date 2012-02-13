@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -48,10 +50,15 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         tailLengthBox = dialog.createLongBox((int) (initialSettings.getTailLengthInMilliseconds() / 1000), 4);
         labelAndTailLengthBoxPanel.add(tailLengthBox);
         vp.add(labelAndTailLengthBoxPanel);
-        
-        zoomOnlyToSelectedCompetitors = dialog.createCheckbox(stringMessages.autoZoomSelectedCompetitors());//new CheckBox(stringMessages.autoZoomSelectedCompetitors());
-        zoomOnlyToSelectedCompetitors.setValue(initialSettings.getZoomSettings().isZoomToSelectedCompetitors());
+        showOnlySelectedCompetitors = dialog.createCheckbox(stringMessages.showOnlySelected());
+        showOnlySelectedCompetitors.setValue(initialSettings.isShowOnlySelectedCompetitors());
+        vp.add(showOnlySelectedCompetitors);
 
+        Label zoomLabel = new Label(stringMessages.zoom());
+        zoomLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        zoomLabel.getElement().getStyle().setPaddingTop(1, Unit.EM);
+        vp.add(zoomLabel);
+        
         HorizontalPanel labelAndZoomSettingsPanel = new HorizontalPanel();
         Label zoomSettingsLabel = new Label(stringMessages.autoZoomTo() + ": ");
         labelAndZoomSettingsPanel.add(zoomSettingsLabel);
@@ -78,14 +85,17 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         }
         labelAndZoomSettingsPanel.add(zoomSettingsBoxesPanel);
         vp.add(labelAndZoomSettingsPanel);
+        
+        zoomOnlyToSelectedCompetitors = dialog.createCheckbox(stringMessages.autoZoomSelectedCompetitors());
+        zoomOnlyToSelectedCompetitors.setValue(initialSettings.getZoomSettings().isZoomToSelectedCompetitors());
         vp.add(zoomOnlyToSelectedCompetitors);
         //Run zoomSettingsChanged to set the checkboxes to their correct state
         zoomSettingsChanged();
         
-        showOnlySelectedCompetitors = dialog.createCheckbox(stringMessages.showOnlySelected());
-        showOnlySelectedCompetitors.setValue(initialSettings.isShowOnlySelectedCompetitors());
-        vp.add(showOnlySelectedCompetitors);
-        vp.add(new Label(stringMessages.maneuverTypes()));
+        Label maneuversLabel = new Label(stringMessages.maneuverTypes());
+        maneuversLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        maneuversLabel.getElement().getStyle().setPaddingTop(1, Unit.EM);
+        vp.add(maneuversLabel);
         for (ManeuverType maneuverType : ManeuverType.values()) {
             CheckBox checkbox = dialog.createCheckbox(ManeuverTypeFormatter.format(maneuverType, stringMessages));
             checkbox.setValue(initialSettings.isShowManeuverType(maneuverType));

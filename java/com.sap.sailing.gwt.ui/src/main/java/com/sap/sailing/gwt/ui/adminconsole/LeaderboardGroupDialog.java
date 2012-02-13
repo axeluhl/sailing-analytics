@@ -61,7 +61,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
     
     public LeaderboardGroupDialog(LeaderboardGroupDTO group, LeaderboardGroupParameterValidator validator,
             StringMessages stringConstants, AsyncCallback<LeaderboardGroupDTO> callback) {
-        super(stringConstants.leaderboardGroup(), "", stringConstants.ok(), stringConstants.cancel(), validator, callback);
+        super(stringConstants.leaderboardGroup(), null, stringConstants.ok(), stringConstants.cancel(), validator, callback);
         this.stringConstants = stringConstants;
         this.group = group;
     }
