@@ -119,8 +119,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             showWindCharts = false;
         }
 
-        showMap = false;
+        showMap = true;
         showWindCharts = false;
+        showCompetitorMultiChart = false;
 
         // create the default leaderboard and select the right race
         if(showLeaderboard) {
@@ -240,16 +241,10 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             if (selectedRace.startOfTracking != null) {
                 min = selectedRace.startOfTracking;
             }
-//            if (selectedRace.endOfRace != null) {
-//                max = selectedRace.endOfRace;
-//            } else if (selectedRace.timePointOfNewestEvent != null) {
-//                max = selectedRace.timePointOfNewestEvent;
-//                timer.setPlayMode(PlayModes.Live);
-//            }
-//
-            if (selectedRace.timePointOfNewestEvent != null) {
+            if (selectedRace.endOfRace != null) {
+                max = selectedRace.endOfRace;
+            } else if (selectedRace.timePointOfNewestEvent != null) {
                 max = selectedRace.timePointOfNewestEvent;
-                timePanel.setLastReceivedDataTimepoint(selectedRace.timePointOfNewestEvent);
                 timer.setPlayMode(PlayModes.Live);
             }
 
@@ -259,8 +254,14 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             // set initial timer position
             switch(timer.getPlayMode()) {
                 case Live:
+                    if(selectedRace.timePointOfNewestEvent != null) {
+                        timer.setTime(selectedRace.timePointOfNewestEvent.getTime());
+                    }
+                    break;
                 case Replay:
-                    if(selectedRace.startOfRace != null) {
+                    if(selectedRace.endOfRace != null) {
+                        timer.setTime(selectedRace.endOfRace.getTime());
+                    } else {
                         timer.setTime(selectedRace.startOfRace.getTime());
                     }
                     break;
@@ -276,19 +277,22 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                         @Override
                         public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
                             // raceTimesInfo can be null if the race is not tracked anymore
-//                            if (raceTimesInfo != null) {
-//                                timePanel.setLegMarkers(raceTimesInfo.getLegTimes());
-//                                if (raceTimesInfo.getStartOfRace() != null) {
-//                                    // set the new start time 
-//                                    Date startOfRace = raceTimesInfo.getStartOfRace();
-//                                    Date startOfTimeslider = new Date(startOfRace.getTime() - 5 * 60 * 1000);
-//
-//                                    timePanel.changeMin(startOfTimeslider);
-//                                    timer.setTime(raceTimesInfo.getStartOfRace().getTime());
-//                                }
-//                            } else {
-//                                timePanel.reset();
-//                            }
+                            if (raceTimesInfo != null) {
+                                timePanel.setLegMarkers(raceTimesInfo.getLegTimes());
+                                if (raceTimesInfo.getStartOfRace() != null) {
+                                    // set the new start time 
+                                    Date startOfRace = raceTimesInfo.getStartOfRace();
+                                    Date startOfTimeslider = new Date(startOfRace.getTime() - 5 * 60 * 1000);
+
+                                    timePanel.changeMin(startOfTimeslider);
+                                }
+                                // set time to end of race
+                                if(raceTimesInfo.getLastLegTimes() != null) {
+                                    timer.setTime(raceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
+                                }
+                            } else {
+                                timePanel.reset();
+                            }
                         }
                     });
         }
