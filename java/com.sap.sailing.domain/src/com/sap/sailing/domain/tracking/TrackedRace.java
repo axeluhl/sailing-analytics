@@ -278,5 +278,7 @@ public interface TrackedRace {
     boolean raceIsKnownToStartUpwind();
     
     void addListener(RaceChangeListener listener);
+
+    Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
     
 }
