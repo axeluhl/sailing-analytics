@@ -47,7 +47,12 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     private final ImageResource playButtonImg;
     private final ImageResource pauseButtonImg;
     private final ImageResource playSpeedImg;
+    private final ImageResource playModeLiveActiveImg;
+    private final ImageResource playModeReplayActiveImg;
+    private final ImageResource playModeInactiveImg;
     private final Image playPauseImage;
+    private final Image playModeImage;
+    private Date lastReceivedDataTimepoint;
     
     private static ClientResources resources = GWT.create(ClientResources.class);
 
@@ -77,6 +82,11 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         pauseButtonImg = resources.timesliderPauseIcon();
         playSpeedImg = resources.timesliderPlaySpeedIcon();
         playPauseImage = new Image(playButtonImg);
+
+        playModeLiveActiveImg = resources.timesliderPlayStateLiveActiveIcon();
+        playModeReplayActiveImg = resources.timesliderPlayStateReplayActiveIcon();
+        playModeInactiveImg = resources.timesliderPlayStateLiveInactiveIcon();
+        playModeImage = new Image(playModeInactiveImg);
 
         sliderBar = new SliderBar();
         sliderBar.setEnabled(true);
@@ -150,6 +160,9 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
 
         FlowPanel playModeControlPanel = new FlowPanel();
         playModeControlPanel.setStyleName("timePanel-controls-playmode");
+        playModeControlPanel.add(playModeImage);
+        playModeImage.getElement().getStyle().setFloat(Style.Float.LEFT);
+        
         playModeLabel = new Label();
         playModeControlPanel .add(playModeLabel);
         controlsPanel.add(playModeControlPanel );
@@ -201,29 +214,24 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         slowDownButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
 
         // time delay
-        if(timer.getPlayMode() == PlayModes.Live) {
-            FlowPanel timeDelayPanel = new FlowPanel();
-            timeDelayPanel.setStyleName("timePanel-controls-timeDelay");
+        FlowPanel timeDelayPanel = new FlowPanel();
+        timeDelayPanel.setStyleName("timePanel-controls-timeDelay");
 
-            final Label delayTextLabel = new Label(stringMessages.timeDelay() + ":"); 
-            timeDelayPanel.add(delayTextLabel);
-            timeDelayLabel = new Label();
-            timeDelayPanel.add(timeDelayLabel);
-            controlsPanel.add(timeDelayPanel);
-
-            delayTextLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-            delayTextLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
-            timeDelayLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-            timeDelayLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        } else {
-            timeDelayLabel = null;
-        }
+        timeDelayLabel = new Label();
+        timeDelayPanel.add(timeDelayLabel);
+        controlsPanel.add(timeDelayPanel);
+        timeDelayLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        timeDelayLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        
+        // settings
         ImageResource settingsIcon = resources.settingsIcon();
         Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(settingsIcon).getSafeHtml());
         settingsAnchor.setTitle(stringMessages.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
         controlsPanel.add(settingsAnchor);
         setWidget(vp);
+        
+        playStateChanged(timer.getPlayState(), timer.getPlayMode());
     }
 
     @Override
@@ -235,8 +243,11 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         }
         
         sliderBar.setCurrentValue(new Double(t), false);
-        timeLabel.setText(timeFormatter.format(time));
         dateLabel.setText(dateFormatter.format(time));
+        if(lastReceivedDataTimepoint == null)
+            timeLabel.setText(timeFormatter.format(time));
+        else
+            timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
     }
 
     public void setMinMax(Date min, Date max) {
@@ -248,7 +259,11 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         }
         sliderBar.setNumTickLabels(numTicks);
         sliderBar.setNumTicks(numTicks);
-        sliderBar.setStepSize(60000);
+        int numSteps = sliderBar.getElement().getClientWidth();
+        if(numSteps > 0)
+            sliderBar.setStepSize(numSteps);
+        else 
+            sliderBar.setStepSize(1000);
     }
 
     public void changeMax(Date max) {
@@ -293,20 +308,28 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         switch(playState) {
             case Playing:
                 playPauseImage.setResource(pauseButtonImg);
+                if(playMode == PlayModes.Live)
+                    playModeImage.setResource(playModeLiveActiveImg);
+                else
+                    playModeImage.setResource(playModeReplayActiveImg);
                 break;
             case Paused:
             case Stopped:
                 playPauseImage.setResource(playButtonImg);
+                playModeImage.setResource(playModeInactiveImg);
                 break;
         }
         
-        switch(timer.getPlayMode()) {
+        switch(playMode) {
             case Live: 
-                playModeLabel.setText(stringMessages.playModeLive()); 
-                timeDelayLabel.setText(((int) timer.getCurrentDelay() / 1000) + " s");
+                playModeLabel.setText(stringMessages.playModeLive());
+                timeDelayLabel.setText(stringMessages.timeDelay() + ": " + ((int) timer.getCurrentDelay() / 1000) + " s");
+                timeDelayLabel.setVisible(true);
                 sliderBar.setEnabled(false);
                 break;
             case Replay: 
+                timeDelayLabel.setVisible(false);
+                timeDelayLabel.setText("");
                 playModeLabel.setText(stringMessages.playModeReplay()); 
                 sliderBar.setEnabled(true);
                 break;
@@ -356,5 +379,13 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         }
 
         sliderBar.onResize();
+    }
+
+    public Date getLastReceivedDataTimepoint() {
+        return lastReceivedDataTimepoint;
+    }
+
+    public void setLastReceivedDataTimepoint(Date lastReceivedDataTimepoint) {
+        this.lastReceivedDataTimepoint = lastReceivedDataTimepoint;
     }
 }

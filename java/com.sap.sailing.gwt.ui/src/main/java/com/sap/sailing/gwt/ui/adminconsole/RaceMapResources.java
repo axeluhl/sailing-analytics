@@ -193,7 +193,8 @@ public class RaceMapResources {
         double boatLengthInMeter = 5.0;
         // to scale the boats to a realistic size we need the length of the boat in pixel, 
         // but it does not work to just take the image size, because the images for the different boat states can be different
-        int boatLengthInPixel = 40; 
+//        int boatLengthInPixel = 40;
+        int boatLengthInPixel = 50;
         if (zoomLevel > 5) {
             LatLngBounds bounds = map.getBounds();
             if (bounds != null) {

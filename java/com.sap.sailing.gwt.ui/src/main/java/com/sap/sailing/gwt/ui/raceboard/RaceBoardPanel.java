@@ -37,10 +37,13 @@ import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.leaderboard.MultiChartPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiChartSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
@@ -74,11 +77,13 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final TimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
+    private final UserDTO user;
     
-    public RaceBoardPanel(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
+    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType) {
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
+        this.user = theUser;
         this.scrollOffset = 0;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
@@ -109,26 +114,44 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         componentsNavigationPanel = new FlowPanel();
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
-        // create the default leaderboard and select the right race
-        LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode());
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings, selectedRaceIdentifier, competitorSelectionModel,
-                timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
+        boolean showLeaderboard = true;
+        boolean showMap = true;
+        boolean showWindCharts = false;
+//        boolean showCompetitorChart = true;
+        boolean showCompetitorMultiChart = true;
+        
+        if (user == null) {
+           // anonymous user
+            showWindCharts = false;
+        }
 
-        CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
-                leaderboardPanel, "100%", "100%", stringMessages);
-        collapsableViewers.add(leaderboardViewer);
+        showMap = true;
+        showWindCharts = false;
+        showCompetitorMultiChart = false;
+
+        // create the default leaderboard and select the right race
+        if(showLeaderboard) {
+            LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode());
+            LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings, selectedRaceIdentifier, competitorSelectionModel,
+                    timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
+
+            CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
+                    leaderboardPanel, "100%", "100%", stringMessages);
+            collapsableViewers.add(leaderboardViewer);
+        }
 
         // create the race map
-        RaceMap raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionModel, stringMessages);
-        CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
-                raceMap, "auto", "500px", stringMessages);
+        if(showMap) {
+            RaceMap raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionModel, stringMessages);
+            CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
+                    raceMap, "auto", "500px", stringMessages);
 
-        raceMap.loadMapsAPI((Panel) raceMapViewer.getViewerWidget().getContent());
-        raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
-        collapsableViewers.add(raceMapViewer);
+            raceMap.loadMapsAPI((Panel) raceMapViewer.getViewerWidget().getContent());
+            raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
+            collapsableViewers.add(raceMapViewer);
+        }
         
-        boolean showWindChart = true;
-        if(showWindChart) {
+        if(showWindCharts) {
             WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
             WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings, stringMessages, errorReporter); 
             CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
@@ -137,6 +160,16 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             collapsableViewers.add(windChartViewer);
         }
 
+        if(showCompetitorMultiChart) {
+            MultiChartPanel multiChart = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
+                    timer, stringMessages, (int) (Window.getClientWidth() - 350),
+                    (int) (Window.getClientHeight() - 170), errorReporter, /* showRaceSelector */ false);
+            CollapsableComponentViewer<MultiChartSettings> multiChartViewer = new CollapsableComponentViewer<MultiChartSettings>(
+                    multiChart, "600px", "500px", stringMessages);
+            multiChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+            collapsableViewers.add(multiChartViewer);
+        }
+        
         for (CollapsableComponentViewer<?> componentViewer : collapsableViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
             addComponentViewerMenuEntry(componentViewer);
@@ -240,13 +273,19 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             // set initial timer position
             switch(timer.getPlayMode()) {
                 case Live:
+                    if(selectedRace.timePointOfNewestEvent != null) {
+                        timer.setTime(selectedRace.timePointOfNewestEvent.getTime());
+                    }
+                    break;
                 case Replay:
-                    if(selectedRace.startOfRace != null) {
+                    if(selectedRace.endOfRace != null) {
+                        timer.setTime(selectedRace.endOfRace.getTime());
+                    } else {
                         timer.setTime(selectedRace.startOfRace.getTime());
                     }
                     break;
             }
-            //timer.setPlayMode(PlayModes.Live);
+
             sailingService.getRaceTimesInfo(selectedRace.getRaceIdentifier(), 
                     new AsyncCallback<RaceTimesInfoDTO>() {
                         @Override
@@ -265,7 +304,10 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                                     Date startOfTimeslider = new Date(startOfRace.getTime() - 5 * 60 * 1000);
 
                                     timePanel.changeMin(startOfTimeslider);
-                                    timer.setTime(raceTimesInfo.getStartOfRace().getTime());
+                                }
+                                // set time to end of race
+                                if(raceTimesInfo.getLastLegTimes() != null) {
+                                    timer.setTime(raceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
                                 }
                             } else {
                                 timePanel.reset();

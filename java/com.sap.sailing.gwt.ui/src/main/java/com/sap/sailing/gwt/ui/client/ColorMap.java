@@ -2,8 +2,6 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.HashMap;
 
-import com.sap.sailing.gwt.ui.leaderboard.MultiChartPanel;
-
 
 /**
  * Manages color assignments to objects.
@@ -22,7 +20,7 @@ public class ColorMap<T> {
     }
 
     /**
-     * Returns a color that is computed once by using {@link MultiChartPanel#createHexColor(int)} and then cached.
+     * Returns a color that is computed once.
      * 
      * @param object
      *            An ID unique for a competitor.
@@ -38,8 +36,7 @@ public class ColorMap<T> {
     }
     
     /**
-     * Only use this if you don't want the color to be cached. You can use {@link MultiChartPanel#getColorByID(int)}
-     * instead.
+     * Only use this if you don't want the color to be cached.
      * 
      * @param index
      *            The index of e.g. a competitor. Make sure, that each competitor has a unique index.

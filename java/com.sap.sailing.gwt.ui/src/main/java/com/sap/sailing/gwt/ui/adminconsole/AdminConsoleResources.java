@@ -35,40 +35,29 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/reddot.png")
     ImageResource reddotIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/DarkGreyBoats/DarkGrey_Port.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_Port.png")
     ImageResource lowlightedBoatIcon_Port();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/DarkGreyBoats/DarkGrey_Starbord.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_Starbord.png")
     ImageResource lowlightedBoatIcon_Starboard();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/DarkGreyBoats/DarkGreyDW_Port.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_DW_Port.png")
     ImageResource lowlightedBoatIconDW_Port();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/DarkGreyBoats/DarkGreyDW_Starbord.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_DW_Starbord.png")
     ImageResource lowlightedBoatIconDW_Starboard();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/LightGreyBoats/LightGrey_Port.png")
-    ImageResource boatIcon_Port();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/LightGreyBoats/LightGrey_Starbord.png")
-    ImageResource boatIcon_Starboard();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/LightGreyBoats/LightGreyDW_Port.png")
-    ImageResource boatIconDW_Port();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/LightGreyBoats/LightGreyDW_Starbord.png")
-    ImageResource boatIconDW_Starboard();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/YellowBoats/Yellow_Port.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_Port_Selected.png")
     ImageResource highlightedBoatIcon_Port();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/YellowBoats/Yellow_Starbord.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_Starbord_Selected.png")
     ImageResource highlightedBoatIcon_Starboard();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/YellowBoats/YellowDW_Port.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_DW_Port_Selected.png")
     ImageResource highlightedBoatIconDW_Port();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/YellowBoats/YellowDW_Starbord.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_DW_Starbord_Selected.png")
     ImageResource highlightedBoatIconDW_Starboard();
 
     @Source("com/sap/sailing/gwt/ui/client/images/StartFinishBoat/start_finishboat.png")

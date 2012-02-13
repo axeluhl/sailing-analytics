@@ -42,8 +42,6 @@ public class Timer {
      */
     private PlayStates playState;
     
-//    private boolean playing;
-    
     /**
      * The current play mode of the timer
      */
@@ -70,7 +68,7 @@ public class Timer {
     public enum PlayStates { Stopped, Playing, Paused }; 
 
     /**
-     * The timer is created in resumed mode, using "now" as its current time, 1.0 as its {@link #playSpeedFactor play speed factor} and
+     * The timer is created in stopped state, using "now" as its current time, 1.0 as its {@link #playSpeedFactor play speed factor} and
      * 1 second (1000ms) as the {@link #delayBetweenAutoAdvancesInMilliseconds delay between automatic updates} should the timer be
      * {@link #resume() started}.
      */
@@ -79,7 +77,7 @@ public class Timer {
     }
     
     /**
-     * The timer is created in resumed mode, using "now" as its current time, 1.0 as its {@link #playSpeedFactor
+     * The timer is created in stopped state, using "now" as its current time, 1.0 as its {@link #playSpeedFactor
      * acceleration factor} and <code>delayBetweenAutoAdvancesInMilliseconds</code> as the
      * {@link #delayBetweenAutoAdvancesInMilliseconds delay between automatic updates} should the timer be
      * {@link #resume() started}.
@@ -141,6 +139,14 @@ public class Timer {
     public Date getTime() {
         return time;
     }
+
+    public void setPlayMode(PlayModes playMode) {
+        this.playMode = playMode;
+        
+        for (PlayStateListener playStateListener : playStateListeners) {
+            playStateListener.playStateChanged(playState, playMode);
+        }
+    }    
 
     /**
      * Pauses this timer after the next time advance. {@link #playing} is set to <code>false</code> if not already
@@ -241,8 +247,4 @@ public class Timer {
     public PlayModes getPlayMode() {
         return playMode;
     }
-
-    public void setPlayMode(PlayModes playMode) {
-        this.playMode = playMode;
-    }    
 }
