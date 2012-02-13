@@ -62,6 +62,11 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
      * Updated upon each {@link #fillEvents(List)}
      */
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
+    
+    /**
+     * The offset when scrolling with the menu entry anchors (in the top right corner).
+     */
+    private int scrollOffset;
 
     private final List<CollapsableComponentViewer<?>> collapsableViewers;
     private final FlowPanel componentsNavigationPanel;
@@ -74,6 +79,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType) {
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
+        this.scrollOffset = 0;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
         RaceIdentifier selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
@@ -147,7 +153,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         menuEntry.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                c.getViewerWidget().getElement().scrollIntoView();
+                Window.scrollTo(Window.getScrollLeft(), c.getViewerWidget().getAbsoluteTop() - scrollOffset);
             }
         });
         componentsNavigationPanel.add(menuEntry);
@@ -179,6 +185,19 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
     protected ErrorReporter getErrorReporter() {
         return errorReporter;
+    }
+    
+    public int getScrollOffset() {
+        return scrollOffset;
+    }
+    
+    /**
+     * Sets the offset, when scrolling with the menu entry anchors (in the top right corner).<br />
+     * Only the absolute value of <code>scrollOffset</code> will be used.
+     * @param scrollOffset The new scrolling offset. <b>Only</b> the absolute value will be used.
+     */
+    public void setScrollOffset(int scrollOffset) {
+        this.scrollOffset = Math.abs(scrollOffset);
     }
 
     @Override
