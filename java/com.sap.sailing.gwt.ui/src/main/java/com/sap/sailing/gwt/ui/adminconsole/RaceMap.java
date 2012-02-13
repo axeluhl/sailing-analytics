@@ -1103,7 +1103,9 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         }
         if (!newSettings.getZoomSettings().equals(getSettings().getZoomSettings())) {
             getSettings().setZoomSettings(newSettings.getZoomSettings());
-            zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(this));
+            if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) {
+                zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(this));
+            }
         }
     }
     
