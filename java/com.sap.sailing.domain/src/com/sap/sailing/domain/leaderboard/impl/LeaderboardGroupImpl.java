@@ -15,7 +15,6 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     public LeaderboardGroupImpl(String name, String description, List<Leaderboard> leaderboards) {
         this.name = name;
         this.description = description;
-//        this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
         this.leaderboards = leaderboards;
     }
 

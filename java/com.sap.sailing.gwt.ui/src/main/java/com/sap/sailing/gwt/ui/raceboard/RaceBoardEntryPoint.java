@@ -176,5 +176,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RootPanel.get().add(logoAndTitlePanel);                 // position:fixed        
         RootPanel.get().add(timelinePanel);                     // position:fixed
         //RootPanel.get().add(footerShadowPanel);                 // position:fixed
+        raceBoardPanel.setScrollOffset(logoAndTitlePanel.getOffsetHeight());
     }
 }
