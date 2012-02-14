@@ -1350,10 +1350,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
             for (CompetitorDTO competitorDTO : competitorAndTimePointsDTO.getCompetitors()) {
                 Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
-                Double[] entries = new Double[competitorAndTimePointsDTO.getTimePoints().length];
-                for (int i = 0; i < competitorAndTimePointsDTO.getTimePoints().length; i++) {
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(
-                            competitorAndTimePointsDTO.getTimePoints()[i]);
+                List<Long> timePoints = competitorAndTimePointsDTO.getTimePoints();
+                Double[] entries = new Double[timePoints.size()];
+                for (int i = 0; i < timePoints.size(); i++) {
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(timePoints.get(i));
                     entries[i] = getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time);
                 }
                 competitorData.setRaceData(competitorDTO, entries);
@@ -1506,8 +1506,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @SuppressWarnings("unchecked")
     @Override
-    public CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, int steps) {
-        CompetitorsAndTimePointsDTO competitorAndTimePointsDTO = new CompetitorsAndTimePointsDTO(steps);
+    public CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize) {
+        CompetitorsAndTimePointsDTO competitorAndTimePointsDTO = new CompetitorsAndTimePointsDTO(stepSize);
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
             List<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();

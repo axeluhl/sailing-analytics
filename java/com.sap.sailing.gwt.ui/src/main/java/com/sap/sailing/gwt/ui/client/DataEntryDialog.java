@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
@@ -171,6 +172,22 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEnterToButton(getOkButton(), longBox);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), longBox);
         return longBox;
+    }
+
+    public DoubleBox createDoubleBox(double initialValue, int visibleLength) {
+        DoubleBox doubleBox = new DoubleBox();
+        doubleBox.setVisibleLength(visibleLength);
+        doubleBox.setValue(initialValue);
+        AbstractEntryPoint.addFocusUponKeyUpToggler(doubleBox);
+        doubleBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        AbstractEntryPoint.linkEnterToButton(getOkButton(), doubleBox);
+        AbstractEntryPoint.linkEscapeToButton(getCancelButton(), doubleBox);
+        return doubleBox;
     }
 
     /**

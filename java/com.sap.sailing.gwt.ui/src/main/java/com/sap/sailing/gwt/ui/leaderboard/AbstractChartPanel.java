@@ -92,7 +92,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     private final Label title;
     private final DeckPanel chartAndBusyIndicatorPanel;
     private final RaceSelectionProvider raceSelectionProvider;
-    private int stepsToLoad = 100;
+    private long stepSize = 5000;
     private final StringMessages stringMessages;
     private final Set<Series> seriesIsUsed;
     private int width, height;
@@ -341,11 +341,11 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                             + (System.currentTimeMillis() - starttime));
                     starttime = System.currentTimeMillis();
                     Double[] data = chartData.getRaceData(competitor);
-                    long[] timepoints = getCompetitorsAndTimePointsDTO().getTimePoints();
+                    List<Long> timepoints = getCompetitorsAndTimePointsDTO().getTimePoints();
                     List<Point> competitorPoints = new ArrayList<Point>();
-                    for (int j = 0; j < getStepsToLoad(); j++) {
+                    for (int j = 0; j < timepoints.size(); j++) {
                         if (data[j] != null) {
-                            Point competitorPoint = new Point(timepoints[j], data[j]);
+                            Point competitorPoint = new Point(timepoints.get(j), data[j]);
                             competitorPoints.add(competitorPoint);
                         }
                     }
@@ -491,7 +491,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      * updating all settings.
      */
     protected void updateSettingsOnly(ChartSettings newSettings) {
-        setStepsToLoad(newSettings.getStepsToLoad());
+        setStepsToLoad(newSettings.getStepSize());
         setCompetitorsAndTimePointsDTO(null);
     }
 
@@ -499,12 +499,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         return stringMessages;
     }
 
-    protected int getStepsToLoad() {
-        return stepsToLoad;
+    protected long getStepsToLoad() {
+        return stepSize;
     }
 
-    protected void setStepsToLoad(int stepsToLoad) {
-        this.stepsToLoad = stepsToLoad;
+    protected void setStepsToLoad(long stepSize) {
+        this.stepSize = stepSize;
     }
     
     protected DetailType getDataToShow() {

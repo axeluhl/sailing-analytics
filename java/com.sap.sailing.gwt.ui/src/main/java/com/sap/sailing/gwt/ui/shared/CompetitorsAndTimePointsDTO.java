@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -27,21 +29,19 @@ public class CompetitorsAndTimePointsDTO implements IsSerializable {
     private HashMap<String, Pair<String, Long>[]> markPassings;
     private long startTime;
     private long timePointOfNewestEvent;
-    private int steps;
+    private long stepSize;
 
     CompetitorsAndTimePointsDTO() {}
     
-    public CompetitorsAndTimePointsDTO(int steps) {
+    public CompetitorsAndTimePointsDTO(long stepSize) {
         markPassings = new HashMap<String, Pair<String, Long>[]>();
-        this.steps = steps;
+        this.stepSize = stepSize;
     }
 
-    public long[] getTimePoints() {
-        long[] result = new long[steps];
-        int i=0;
-        long stepsize = (timePointOfNewestEvent - startTime - MILLISECONDS_BEFORE_RACE_TO_INCLUDE) / steps;
-        for (long time = startTime - MILLISECONDS_BEFORE_RACE_TO_INCLUDE; i<result.length && time < timePointOfNewestEvent; time += stepsize) {
-            result[i++] = time;
+    public List<Long> getTimePoints() {
+        ArrayList<Long> result = new ArrayList<Long>();
+        for (long time = startTime - MILLISECONDS_BEFORE_RACE_TO_INCLUDE; time < timePointOfNewestEvent; time += stepSize) {
+            result.add(time);
         }
         return result;
     }

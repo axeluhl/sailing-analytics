@@ -208,7 +208,6 @@ public interface StringMessages extends Messages {
     String locationNotAvailable();
     String startDateNotAvailable();
     String startDate();
-    String numberOfStepsToLoadMustAtLeastBeTwo();
     String unknownManeuver();
     String tailLengthMustBeNonNegative();
     String failedToLoadRaceInformation(String message);
@@ -250,4 +249,6 @@ public interface StringMessages extends Messages {
     String autoZoomTails();
     String autoZoomSelectedCompetitors();
     String noLeaderboardGroupToLoad();
+    String stepSizeMustBeGreaterThanNull();
+    String stepSize();
 }

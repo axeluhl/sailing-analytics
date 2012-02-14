@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public abstract class AbstractChartSettingsComponent<SettingsType extends ChartSettings> implements SettingsDialogComponent<SettingsType> {
 
-    private LongBox stepsBox;
+    private DoubleBox stepSizeBox;
     private final ChartSettings settings;
     private final StringMessages stringMessages;
 
@@ -23,15 +23,14 @@ public abstract class AbstractChartSettingsComponent<SettingsType extends ChartS
     @Override
     public VerticalPanel getAdditionalWidget(DataEntryDialog<SettingsType> dialog) {
         VerticalPanel panel = new VerticalPanel();
-        Label lblSteps = new Label(getStringMessages().pointsToLoad());
-        panel.add(lblSteps);
-        stepsBox = dialog.createLongBox(settings.getStepsToLoad(), 4);
-        panel.add(stepsBox);
+        panel.add(new Label(getStringMessages().stepSize()));
+        stepSizeBox = dialog.createDoubleBox(((double) settings.getStepSize()) / 1000, 5);
+        panel.add(stepSizeBox);
         return panel;
     }
 
-    protected LongBox getStepsBox() {
-        return stepsBox;
+    protected DoubleBox getStepSizeBox() {
+        return stepSizeBox;
     }
     
     @Override
@@ -40,8 +39,8 @@ public abstract class AbstractChartSettingsComponent<SettingsType extends ChartS
             @Override
             public String getErrorMessage(SettingsType valueToValidate) {
                 String errorMessage = null;
-                if (valueToValidate.getStepsToLoad() < 2) {
-                    errorMessage = getStringMessages().numberOfStepsToLoadMustAtLeastBeTwo();
+                if (valueToValidate.getStepSize() < 1) {
+                    errorMessage = getStringMessages().stepSizeMustBeGreaterThanNull();
                 }
                 return errorMessage;
             }
@@ -50,7 +49,7 @@ public abstract class AbstractChartSettingsComponent<SettingsType extends ChartS
 
     @Override
     public FocusWidget getFocusWidget() {
-        return stepsBox;
+        return stepSizeBox;
     }
 
     protected StringMessages getStringMessages() {
@@ -58,11 +57,9 @@ public abstract class AbstractChartSettingsComponent<SettingsType extends ChartS
     }
 
     public ChartSettings getAbstractResult() {
-        Long value = getStepsBox().getValue();
-        if (value == null) {
-            value = -1l;
-        }
-        return new ChartSettings(value.intValue());
+        Double valueInSeconds = getStepSizeBox().getValue();
+        Long value = valueInSeconds == null ? 0 : (long) (getStepSizeBox().getValue() * 1000);
+        return new ChartSettings(value);
     }
 
 }
