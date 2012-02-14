@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.gwt.ui.client.UserManagementService;
@@ -21,6 +22,15 @@ public class UserManagementServiceImpl  extends RemoteServiceServlet implements 
     @Override
     public boolean isUserInRole(String userRole) {
         return getThreadLocalRequest().isUserInRole(userRole);
+    }
+
+    @Override
+    public void logoutUser() {
+        HttpSession session = getThreadLocalRequest().getSession();
+        if(session != null) {
+            session.invalidate();
+            session = null;
+        }
     }
 
     @Override

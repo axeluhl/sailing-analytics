@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.panels.UserStatusPanel;
 
 public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventRefresher {
     private Set<EventDisplayer> eventDisplayers;
@@ -26,11 +27,12 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
     public void onModuleLoad() {
         super.onModuleLoad();
         RootPanel rootPanel = RootPanel.get();
-        rootPanel.setSize("95%", "95%");
+        rootPanel.setSize("100%", "100%");
         
+        rootPanel.add(new UserStatusPanel(userManagementService, this));
         TabPanel tabPanel = new TabPanel();
         tabPanel.setAnimationEnabled(true);
-        rootPanel.add(tabPanel, 10, 10);
+        rootPanel.add(tabPanel); //, 10, 10);
         tabPanel.setSize("95%", "95%");
         
         eventDisplayers = new HashSet<EventDisplayer>();
