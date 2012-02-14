@@ -23,7 +23,7 @@ public abstract class AbstractChartSettingsComponent<SettingsType extends ChartS
     @Override
     public VerticalPanel getAdditionalWidget(DataEntryDialog<SettingsType> dialog) {
         VerticalPanel panel = new VerticalPanel();
-        panel.add(new Label(getStringMessages().stepSize()));
+        panel.add(new Label(getStringMessages().stepSizeInSeconds()));
         stepSizeBox = dialog.createDoubleBox(((double) settings.getStepSize()) / 1000, 5);
         panel.add(stepSizeBox);
         return panel;

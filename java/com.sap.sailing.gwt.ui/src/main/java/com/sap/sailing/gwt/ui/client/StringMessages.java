@@ -250,5 +250,5 @@ public interface StringMessages extends Messages {
     String autoZoomSelectedCompetitors();
     String noLeaderboardGroupToLoad();
     String stepSizeMustBeGreaterThanNull();
-    String stepSize();
+    String stepSizeInSeconds();
 }
