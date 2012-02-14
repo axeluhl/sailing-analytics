@@ -434,7 +434,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
      *         when the tracker is stopped or has successfully received the race
      */
     private ScheduledFuture<?> scheduleAbortTrackerAfterInitialTimeout(final RaceTracker tracker, final long timeoutInMilliseconds) {
-        ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
+        ScheduledFuture<?> task = getScheduler().schedule(new Runnable() {
             @Override public void run() {
                 if (tracker.getRaces() == null || tracker.getRaces().isEmpty()) {
                     try {
@@ -745,6 +745,10 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     public void removeExpeditionListener(ExpeditionListener listener) throws SocketException {
         UDPExpeditionReceiver receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
         receiver.removeListener(listener);
+    }
+
+    private ScheduledExecutorService getScheduler() {
+        return scheduler;
     }
 
 }

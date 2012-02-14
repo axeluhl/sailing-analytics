@@ -3,10 +3,12 @@ package com.sap.sailing.server;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Base64Utils;
@@ -20,7 +22,7 @@ import com.sap.sailing.server.impl.AbstractHttpPostServlet;
  * @author Axel Uhl (D043530)
  *
  */
-public class ExpeditionHttpReceiver implements Runnable {
+public class ExpeditionHttpReceiver {
     public interface Receiver {
         /**
          * Called when the receiver has received some bytes from the remote end.
@@ -34,11 +36,16 @@ public class ExpeditionHttpReceiver implements Runnable {
     }
 
     private static final int BUF_SIZE = 1<<16;
-    private static final long HEARTBEAT_TIME_IN_MILLISECONDS = 1000;
     private static final Logger logger = Logger.getLogger(ExpeditionHttpReceiver.class.getName());
     private final Receiver receiver;
     private final URL url;
-    private PrintWriter requestWriter;
+    private long timestampOfLastHeartbeatReceived;
+    
+    /**
+     * The input stream can be used to unblock a read in order to terminate the receiver.
+     */
+    private InputStream inputStream;
+    
     private boolean stop = false;
     
     public ExpeditionHttpReceiver(URL url, Receiver receiver) {
@@ -47,44 +54,48 @@ public class ExpeditionHttpReceiver implements Runnable {
     }
     
     public void connect() throws IOException, InterruptedException {
-        final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setChunkedStreamingMode(/* chunklen */ BUF_SIZE);
-        connection.setDoOutput(true);
-        connection.setRequestMethod("POST");
-        connection.connect();
-        requestWriter = new PrintWriter(connection.getOutputStream());
-        requestWriter.println(AbstractHttpPostServlet.PING); // ensure the stream writes through to the other end
-        requestWriter.flush();
-        final InputStream inputStream = connection.getInputStream();
-        new Thread(this, getClass().getName()+" Heartbeat").start();
+        establishConnection(); // performs the actual HTTP connect request, connecting to the servlet
         Thread reader = new Thread(new Runnable() {
             public void run() {
                 StringBuilder bos = new StringBuilder();
-                try {
-                    Reader reader = new InputStreamReader(inputStream);
-                    char[] buf = new char[BUF_SIZE];
-                    int read = reader.read(buf);
-                    while (!stop && read != -1) {
-                        for (int i = 0; i < read; i++) {
-                            if (buf[i] == 0) {
-                                // message terminator; one message received
-                                stop = receivedMessage(bos.toString());
-                                bos.delete(0, bos.length());
-                            } else {
-                                bos.append(buf[i]);
+                while (!stop) {
+                    try {
+                        Reader reader = new InputStreamReader(inputStream);
+                        char[] buf = new char[BUF_SIZE];
+                        int read = reader.read(buf);
+                        while (!stop && read != -1) {
+                            for (int i = 0; i < read; i++) {
+                                if (buf[i] == 0) {
+                                    // message terminator; one message received
+                                    stop = receivedMessage(bos.toString());
+                                    bos.delete(0, bos.length());
+                                } else {
+                                    bos.append(buf[i]);
+                                }
+                            }
+                            if (!stop) {
+                                read = reader.read(buf);
                             }
                         }
-                        if (!stop) {
-                            read = reader.read(buf);
+                        logger.info("Reached EOF");
+                        reader.close();
+                    } catch (IOException e) {
+                        logger.throwing(ExpeditionHttpReceiver.class.getName(), "connect", e);
+                    }
+                    if (!stop) {
+                        logger.info("Reconnecting because not stopped"); 
+                        try {
+                            establishConnection();
+                        } catch (IOException e) {
+                            logger.info("Can't re-connect. Giving up.");
+                            logger.throwing(ExpeditionHttpReceiver.class.getName(), "connect", e);
+                            stop = true;
                         }
                     }
-                    reader.close();
-                } catch (IOException e) {
-                    logger.throwing(ExpeditionHttpReceiver.class.getName(), "connect", e);
                 }
             }
 
-            protected boolean receivedMessage(String bos) {
+            private boolean receivedMessage(String bos) {
                 boolean stopReceiving = false;
                 if (bos.equals(AbstractHttpPostServlet.PONG)) {
                     receivedHeartbeatResponse();
@@ -96,47 +107,55 @@ public class ExpeditionHttpReceiver implements Runnable {
 
         }, getClass().getName()+" reader");
         reader.start();
-        reader.join();
-        stop = true; // make sure the heartbeat thread stops
-        if (requestWriter != null) {
-            requestWriter.close();
-        }
+        scheduleTimeoutHandler();
+    }
+
+    private void scheduleTimeoutHandler() {
+        final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        Runnable timeoutChecker = new Runnable() {
+            @Override
+            public void run() {
+                if (System.currentTimeMillis() - timestampOfLastHeartbeatReceived > 5*AbstractHttpPostServlet.HEARTBEAT_TIME_IN_MILLISECONDS) {
+                    // TIMEOUT; abort
+                    logger.info("Timeout. Didn't receive a heartbeat through my HTTP connection for "+
+                        (5*AbstractHttpPostServlet.HEARTBEAT_TIME_IN_MILLISECONDS)+"ms");
+                    try {
+                        stop();
+                    } catch (IOException e) {
+                        logger.throwing(ExpeditionHttpReceiver.class.getName(), "scheduleTimeoutHandler", e);
+                    }
+                } else {
+                    scheduler.schedule(this, AbstractHttpPostServlet.HEARTBEAT_TIME_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
+                }
+            }
+        };
+        scheduler.schedule(timeoutChecker, AbstractHttpPostServlet.HEARTBEAT_TIME_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * connects to the remote servlet using {@link #url} and binds the response input stream to {@link #inputStream}
+     */
+    private void establishConnection() throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        inputStream = connection.getInputStream();
     }
     
     private void receivedHeartbeatResponse() {
-        // TODO do we want to keep track of received heartbeat responses?
+        logger.finest("received expedition HTTP heartbeat");
+        timestampOfLastHeartbeatReceived = System.currentTimeMillis();
     }
 
     /**
      * Stops the receiver by closing the writer on the request stream. This will let the server read EOF on the
      * request stream which causes the server to also terminate the sending of data, closing its response stream.
      * This in turn will let the reader return with an EOF.
+     * @throws IOException 
      */
-    public void stop() {
+    public void stop() throws IOException {
+        logger.info("Stopping expedition HTTP receiver");
         stop = true;
-        if (requestWriter != null) {
-            requestWriter.close();
-        }
-    }
-    
-    /**
-     * Implements the heartbeat by sending a "&lt;ping&gt;" message every {@link #HEARTBEAT_TIME_IN_MILLISECONDS} milliseconds.
-     * If that fails with an exception, the {@link #stop} method is called.
-     */
-    @Override
-    public void run() {
-        try {
-            while (!stop && requestWriter != null) {
-                Thread.sleep(HEARTBEAT_TIME_IN_MILLISECONDS);
-                if (requestWriter != null) {
-                    synchronized (requestWriter) {
-                        requestWriter.println(AbstractHttpPostServlet.PING);
-                        requestWriter.flush();
-                    }
-                }
-            }
-        } catch (InterruptedException e) {
-            logger.throwing(ExpeditionHttpReceiver.class.getName(), "run", e);
+        if (inputStream != null) {
+            inputStream.close();
         }
     }
 }

@@ -1,9 +1,7 @@
 package com.sap.sailing.server.impl;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.net.SocketException;
-import java.util.logging.Logger;
 
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
@@ -23,7 +21,6 @@ import com.sap.sailing.server.RacingEventService;
  */
 public class ExpeditionThroughHttpPostServlet extends AbstractHttpPostServlet {
     private static final long serialVersionUID = 4409173886816756920L;
-    private static final Logger logger = Logger.getLogger(ExpeditionThroughHttpPostServlet.class.getName());
     
     /**
      * Used to start sending the response. This may well happen in a separate thread spawned by this method or, e.g., by
@@ -36,12 +33,7 @@ public class ExpeditionThroughHttpPostServlet extends AbstractHttpPostServlet {
             @Override
             public void received(ExpeditionMessage message) {
                 synchronized (writer) {
-                    try {
-                        send(writer, message.getOriginalMessage().getBytes());
-                    } catch (IOException e) {
-                        logger.throwing(ExpeditionThroughHttpPostServlet.class.getName(), "received", e);
-                        runToStop.run();
-                    }
+                    send(writer, message.getOriginalMessage().getBytes());
                 }
             }
         }, /* validMessagesOnly */ false);
