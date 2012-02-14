@@ -36,10 +36,8 @@ import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -186,6 +184,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         this.competitorSelection = competitorSelection;
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
+        lastTimeChangeBeforeInitialization = null;
     }
 
     public double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
@@ -243,6 +242,12 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                         lastMousePosition = event.getLatLng();
                     }
                 });
+                
+                //If there was a time change before the API was loaded, reset the time
+                if (lastTimeChangeBeforeInitialization != null) {
+                    timeChanged(lastTimeChangeBeforeInitialization);
+                    lastTimeChangeBeforeInitialization = null;
+                }
             }
         });
     }
@@ -274,41 +279,43 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                     new ParallelExecutionHolder(getBoatsCallback, getMarksCallback) {
                         @Override
                         protected void handleSuccess() {
-                            //Do boat specific actions
-                            Map<CompetitorDTO, List<GPSFixDTO>> boatData = getBoatsCallback.getData();
-                            // process response only if not received out of order
-                            if (startedProcessingRequestID < requestID) {
-                                startedProcessingRequestID = requestID;
-                                Date from = new Date(date.getTime() - settings.getTailLengthInMilliseconds());
-                                updateFixes(boatData, fromAndToAndOverlap.getC());
-                                showBoatsOnMap(from, date, getCompetitorsToShow());
-                                if (douglasMarkers != null) {
-                                    removeAllMarkDouglasPeuckerpoints();
+                            if (map != null) {
+                                //Do boat specific actions
+                                Map<CompetitorDTO, List<GPSFixDTO>> boatData = getBoatsCallback.getData();
+                                // process response only if not received out of order
+                                if (startedProcessingRequestID < requestID) {
+                                    startedProcessingRequestID = requestID;
+                                    Date from = new Date(date.getTime() - settings.getTailLengthInMilliseconds());
+                                    updateFixes(boatData, fromAndToAndOverlap.getC());
+                                    showBoatsOnMap(from, date, getCompetitorsToShow());
+                                    if (douglasMarkers != null) {
+                                        removeAllMarkDouglasPeuckerpoints();
+                                    }
+                                    if (maneuverMarkers != null) {
+                                        removeAllManeuverMarkers();
+                                    }
                                 }
-                                if (maneuverMarkers != null) {
-                                    removeAllManeuverMarkers();
+                                //Do mark specific actions
+                                List<MarkDTO> markData = getMarksCallback.getData();
+                                showMarksOnMap(markData);
+                                //Rezoom the map
+                                if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { //Auto zoom if setting is not manual
+                                    zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
+                                    mapFirstZoomDone = true;
+                                } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange) { //Zoom once to the boats
+                                    zoomMapToNewBounds(new BoatsBoundsCalculater().calculateNewBounds(RaceMap.this));
+                                    mapFirstZoomDone = true;
+                                } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) { //Zoom once to the buoys
+                                    zoomMapToNewBounds(new BuoysBoundsCalculater().calculateNewBounds(RaceMap.this));
+                                    mapFirstZoomDone = true;
+                                    /* Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was just zoomed
+                                     * to the bounds of the buoys, it was not a zoom or pan triggered by the user. As a consequence the
+                                     * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
+                                     */
+                                    mapZoomedOrPannedSinceLastRaceSelectionChange = false;
                                 }
-                            }
-                            
-                            //Do mark specific actions
-                            List<MarkDTO> markData = getMarksCallback.getData();
-                            showMarksOnMap(markData);
-                            
-                            //Rezoom the map
-                            if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { //Auto zoom if setting is not manual
-                                zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
-                                mapFirstZoomDone = true;
-                            } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange) { //Zoom once to the boats
-                                zoomMapToNewBounds(new BoatsBoundsCalculater().calculateNewBounds(RaceMap.this));
-                                mapFirstZoomDone = true;
-                            } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) { //Zoom once to the buoys
-                                zoomMapToNewBounds(new BuoysBoundsCalculater().calculateNewBounds(RaceMap.this));
-                                mapFirstZoomDone = true;
-                                /* Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was just zoomed
-                                 * to the bounds of the buoys, it was not a zoom or pan triggered by the user. As a consequence the
-                                 * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
-                                 */
-                                mapZoomedOrPannedSinceLastRaceSelectionChange = false;
+                            } else {
+                                lastTimeChangeBeforeInitialization = date;
                             }
                         }
                         
