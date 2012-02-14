@@ -235,7 +235,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if (getCompetitorsAndTimePointsDTO() != null) {
             doLoadData();
         } else {
-            this.sailingService.getCompetitorsAndTimePoints(getSelectedRace(), getStepsToLoad(),
+            this.sailingService.getCompetitorsAndTimePoints(getSelectedRace(), getStepSize(),
                     new AsyncCallback<CompetitorsAndTimePointsDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -260,7 +260,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 competitorsToLoad.add(competitor);
             }
         }
-        final CompetitorsAndTimePointsDTO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDTO(getStepsToLoad());
+        final CompetitorsAndTimePointsDTO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDTO(getStepSize());
         competitorsAndTimePointsToLoad.setStartTime(getCompetitorsAndTimePointsDTO().getStartTime());
         competitorsAndTimePointsToLoad.setTimePointOfNewestEvent(getCompetitorsAndTimePointsDTO()
                 .getTimePointOfNewestEvent());
@@ -316,7 +316,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     }
     
     private synchronized void updateTableData(CompetitorDTO[] competitorDTOs) {
-        // make sure the busy indicator is removed at this point
+        //Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         chartAndBusyIndicatorPanel.showWidget(1);
         if (getCompetitorsAndTimePointsDTO() != null && chartData != null) {
             for (CompetitorDTO competitor : competitorDTOs) {
@@ -482,7 +482,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     }
     
     public ChartSettings getAbstractSettings() {
-        return new ChartSettings(getStepsToLoad());
+        return new ChartSettings(getStepSize());
     }
 
     /**
@@ -491,7 +491,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      * updating all settings.
      */
     protected void updateSettingsOnly(ChartSettings newSettings) {
-        setStepsToLoad(newSettings.getStepSize());
+        setStepSize(newSettings.getStepSize());
         setCompetitorsAndTimePointsDTO(null);
     }
 
@@ -499,11 +499,11 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         return stringMessages;
     }
 
-    protected long getStepsToLoad() {
+    protected long getStepSize() {
         return stepSize;
     }
 
-    protected void setStepsToLoad(long stepSize) {
+    protected void setStepSize(long stepSize) {
         this.stepSize = stepSize;
     }
     
