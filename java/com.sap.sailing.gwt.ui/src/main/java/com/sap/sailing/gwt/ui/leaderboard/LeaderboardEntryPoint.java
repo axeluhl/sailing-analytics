@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
@@ -27,7 +28,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
                 leaderboardName = Window.Location.getParameter("name");
-                leaderboardGroupName = Window.Location.getParameter("group");
+                leaderboardGroupName = Window.Location.getParameter("leaderboardGroupName");
                 if (leaderboardNames.contains(leaderboardName)) {
                     createLeaderboardPanel();
                 } else {
@@ -49,9 +50,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         if(leaderboardGroupName != null) {
-            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName;
-            if(debugParam != null && !debugParam.isEmpty())
-                link += "&gwt.codesvr=" + debugParam;
+            String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName
+                    + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
             breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
         }
         BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, leaderboardName.toUpperCase());
