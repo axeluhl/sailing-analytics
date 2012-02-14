@@ -1,3 +1,4 @@
+@import url(fontface.css);
 
 /** Add css rules here for your application. */
 /*
@@ -27,7 +28,7 @@
 
 body {
 	background: url(images/spectatorview-bg.png) no-repeat left top #ebebeb;
-	font-family: 'Ubuntu', 'Terminal Dosis', sans-serif;
+	font-family: 'UbuntuRegular', Arial, sans-serif;
 	line-height: 1;
 	font-size: 14px;
 	font-weight: 400;
@@ -43,8 +44,7 @@ a {
 
 table td,select,button {
 	line-height: 1;
-	font-family: 'Ubuntu', 'Terminal Dosis', sans-serif;
-	font-weight: 400;
+	font-family: 'UbuntuRegular', Arial, sans-serif;
 	font-size: 14px;
 }
 
@@ -307,12 +307,10 @@ input.magnifier {
 
 .welcomeWidget-Header {
 	font-size: 24px;
-	font-weight: 400;
 	margin: 0 0 20px 0;
 }
 
 .welcomeWidget-WelcomeText {
-	font-weight: 400;
 	line-height: 1.6;
 	overflow: hidden;
 	max-height: 176px;
