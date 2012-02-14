@@ -62,6 +62,7 @@ public abstract class AbstractHttpPostServlet extends Servlet {
             logger.info("Terminating "+getClass().getName()+" doPost after not receiving anything for "+timeoutInMilliseconds+"ms");
             heartbeat.stop();
             heartbeatHandler.join();
+            stop();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -88,7 +89,7 @@ public abstract class AbstractHttpPostServlet extends Servlet {
                 writer.flush();
             }
         } catch (IOException e) {
-            stop = true; // probably the client closed the connection
+            stop();
         }
     }
     
