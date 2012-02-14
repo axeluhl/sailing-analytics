@@ -22,6 +22,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 
 public class ExpeditionMessageImpl implements ExpeditionMessage {
+    private final String originalMessage;
     private final int boatID;
     private final Map<Integer, Double> values;
     private final boolean valid;
@@ -40,11 +41,12 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
      * <code>values</code>, the {@link System#currentTimeMillis() current time} is used as the message's
      * {@link #getTimePoint() time point}.
      */
-    public ExpeditionMessageImpl(int boatID, Map<Integer, Double> values, boolean valid) {
+    public ExpeditionMessageImpl(int boatID, Map<Integer, Double> values, boolean valid, String originalMessage) {
         this.boatID = boatID;
         // ensure that nobody can manipulate the map used by this message object from outside
         this.values = new HashMap<Integer, Double>(values);
         this.valid = valid;
+        this.originalMessage = originalMessage;
         this.createdAtMillis = System.currentTimeMillis();
         if (hasValue(ID_GPS_TIME)) {
             timePoint = new MillisecondsTimePoint((long)
@@ -60,7 +62,7 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
      *            a non-<code>null</code> default time point to use in case the message received does not carry a time
      *            stamp
      */
-    public ExpeditionMessageImpl(int boatID, Map<Integer, Double> values, boolean valid, TimePoint defaultTimePoint) {
+    public ExpeditionMessageImpl(int boatID, Map<Integer, Double> values, boolean valid, TimePoint defaultTimePoint, String originalMessage) {
         if (defaultTimePoint == null) {
             throw new IllegalArgumentException("defaultTimePoint for ExpeditionMessageImpl constructor must not be null");
         }
@@ -68,6 +70,7 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
         // ensure that nobody can manipulate the map used by this message object from outside
         this.values = new HashMap<Integer, Double>(values);
         this.valid = valid;
+        this.originalMessage = originalMessage;
         this.createdAtMillis = System.currentTimeMillis();
         if (hasValue(ID_GPS_TIME)) {
             timePoint = new MillisecondsTimePoint((long)
@@ -76,6 +79,11 @@ public class ExpeditionMessageImpl implements ExpeditionMessage {
         } else {
             timePoint = defaultTimePoint;
         }
+    }
+    
+    @Override
+    public String getOriginalMessage() {
+        return originalMessage;
     }
     
     @Override

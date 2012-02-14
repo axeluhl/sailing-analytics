@@ -60,13 +60,14 @@ import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
-import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.Receiver;
+import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.server.RacingEventService;
 
 public class RacingEventServiceImpl implements RacingEventService, EventFetcher, RaceFetcher {
@@ -82,7 +83,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     
     private final com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory;
     
-    private final WindTrackerFactory windTrackerFactory;
+    private final ExpeditionWindTrackerFactory windTrackerFactory;
     
     protected final Map<String, Event> eventsByName;
     
@@ -732,6 +733,18 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     @Override
     public void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
+    }
+    
+    @Override
+    public void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException {
+        UDPExpeditionReceiver receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
+        receiver.addListener(listener, validMessagesOnly);
+    }
+
+    @Override
+    public void removeExpeditionListener(ExpeditionListener listener) throws SocketException {
+        UDPExpeditionReceiver receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
+        receiver.removeListener(listener);
     }
 
 }

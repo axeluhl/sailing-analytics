@@ -13,7 +13,7 @@ import java.net.InetAddress;
  * @author Axel Uhl (d043530)
  *
  */
-public class UDPMirror {
+public class UDPMirror implements Runnable {
 
     /**
      * @param args 0: the port to listen to; 2*i-1, 2*i for i>0: host/port to which to forward
@@ -52,6 +52,13 @@ public class UDPMirror {
                 }
             }
         }
+    }
+    
+    /**
+     * Listens for an inbound TCP connection
+     */
+    public void run() {
+        
     }
 
     private static void usage() {
