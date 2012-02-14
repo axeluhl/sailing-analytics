@@ -85,7 +85,7 @@ public class UserStatusPanel extends FlowPanel {
         if(user != null) {
             userNameText.setText(user.principalName);
             userRolesText.setText(user.roles.toString());
-            logoutButton.setEnabled(true);
+            logoutButton.setEnabled(false);
         } else {
             userNameText.setText("Unknown");
             userRolesText.setText("Unknown");
