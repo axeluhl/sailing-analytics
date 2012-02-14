@@ -742,9 +742,15 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public void removeExpeditionListener(ExpeditionListener listener) throws SocketException {
-        UDPExpeditionReceiver receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
-        receiver.removeListener(listener);
+    public void removeExpeditionListener(ExpeditionListener listener) {
+        UDPExpeditionReceiver receiver;
+        try {
+            receiver = windTrackerFactory.getOrCreateWindReceiverOnDefaultPort();
+            receiver.removeListener(listener);
+        } catch (SocketException e) {
+            logger.info("Failed to remove expedition listener "+listener+
+                    "; exception while trying to retrieve wind receiver: "+e.getMessage());
+        }
     }
 
     private ScheduledExecutorService getScheduler() {

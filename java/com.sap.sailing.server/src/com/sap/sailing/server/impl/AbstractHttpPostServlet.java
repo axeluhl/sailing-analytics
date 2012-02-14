@@ -39,17 +39,17 @@ public abstract class AbstractHttpPostServlet extends Servlet {
     
     private static final long serialVersionUID = 6034769972654796465L;
 
+    protected void stop() {
+        stop = true;
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final PrintWriter writer = resp.getWriter();
         HeartbeatHandler heartbeat = new HeartbeatHandler(writer);
         Thread heartbeatHandler = new Thread(heartbeat, getClass().getName()
                 + " HeartbeatHandler " + Thread.currentThread().getId());
-        startSendingResponse(writer, new Runnable() {
-            public void run() {
-                stop = true;
-            }
-        });
+        startSendingResponse(writer);
         heartbeatHandler.start();
         try {
             Thread.sleep(timeoutInMilliseconds);
@@ -95,9 +95,9 @@ public abstract class AbstractHttpPostServlet extends Servlet {
     /**
      * Used to start sending the response. This may well happen in a separate thread spawned by this method or, e.g., by
      * registering for receiving data and sending it to the <code>writer</code>. To stop the forwarding process,
-     * call the <code>runToStop</code> object's {@link Runnable#run()} method.
+     * call the {@link #stop} method.
      */
-    abstract protected void startSendingResponse(final Writer writer, final Runnable runToStop) throws SocketException;
+    abstract protected void startSendingResponse(final Writer writer) throws SocketException;
     
     /**
      * Every {@link #HEARTBEAT_TIME_IN_MILLISECONDS} milliseconds, a "<pong>\n" message will be sent to {@link #responseWriter}.

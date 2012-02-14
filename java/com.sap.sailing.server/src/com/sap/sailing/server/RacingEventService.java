@@ -241,6 +241,6 @@ public interface RacingEventService extends TrackedEventRegistry {
 
     void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException;
 
-    void removeExpeditionListener(ExpeditionListener listener) throws SocketException;
+    void removeExpeditionListener(ExpeditionListener listener);
 
 }

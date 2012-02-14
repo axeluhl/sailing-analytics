@@ -21,7 +21,10 @@ public class ExpeditionThroughHttpPostServletTest {
             }
         });
         httpReceiver.connect();
-        Thread.sleep(100000);
-        httpReceiver.stop();
+        synchronized (httpReceiver) {
+            while (!httpReceiver.isStopped()) {
+                httpReceiver.wait();
+            }
+        }
     }
 }

@@ -7,8 +7,11 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType extends UDPMessageListener<MessageType>> implements Runnable {
+    private static final Logger logger = Logger.getLogger(UDPReceiver.class.getName());
+    
     private boolean stopped = false;
 
     private final int listeningOnPort;
@@ -74,7 +77,11 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
                     if (msg != null) {
                         for (ListenerType listener : listeners.keySet()) {
                             if (!listeners.get(listener) || msg.isValid()) {
-                                listener.received(msg);
+                                try {
+                                    listener.received(msg);
+                                } catch (Throwable t) {
+                                    logger.info("Exception while dispatching UDP packet received to "+listener+": "+t.getMessage());
+                                }
                             }
                         }
                     }

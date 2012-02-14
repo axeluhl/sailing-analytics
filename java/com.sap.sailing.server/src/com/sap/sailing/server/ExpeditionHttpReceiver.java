@@ -1,7 +1,6 @@
 package com.sap.sailing.server;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
@@ -17,7 +16,7 @@ import com.sap.sailing.server.impl.AbstractHttpPostServlet;
 /**
  * Receives data from a remote servlet, trying to keep the connection open until {@link #stop stopped}. After constructing
  * an instance, clients need to call {@link #connect()} to actually start the process of receiving data through the HTTP
- * connection.
+ * connection. Waiters on this object will be notified whenever the {@link #isStopped()} result has changed.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -44,7 +43,7 @@ public class ExpeditionHttpReceiver {
     /**
      * The input stream can be used to unblock a read in order to terminate the receiver.
      */
-    private InputStream inputStream;
+    private Reader reader;
     
     private boolean stop = false;
     
@@ -55,25 +54,24 @@ public class ExpeditionHttpReceiver {
     
     public void connect() throws IOException, InterruptedException {
         establishConnection(); // performs the actual HTTP connect request, connecting to the servlet
-        Thread reader = new Thread(new Runnable() {
+        Thread readerThread = new Thread(new Runnable() {
             public void run() {
                 StringBuilder bos = new StringBuilder();
-                while (!stop) {
+                while (!isStopped()) {
                     try {
-                        Reader reader = new InputStreamReader(inputStream);
                         char[] buf = new char[BUF_SIZE];
                         int read = reader.read(buf);
-                        while (!stop && read != -1) {
+                        while (!isStopped() && read != -1) {
                             for (int i = 0; i < read; i++) {
                                 if (buf[i] == 0) {
                                     // message terminator; one message received
-                                    stop = receivedMessage(bos.toString());
+                                    setStop(receivedMessage(bos.toString()));
                                     bos.delete(0, bos.length());
                                 } else {
                                     bos.append(buf[i]);
                                 }
                             }
-                            if (!stop) {
+                            if (!isStopped()) {
                                 read = reader.read(buf);
                             }
                         }
@@ -82,14 +80,14 @@ public class ExpeditionHttpReceiver {
                     } catch (IOException e) {
                         logger.throwing(ExpeditionHttpReceiver.class.getName(), "connect", e);
                     }
-                    if (!stop) {
+                    if (!isStopped()) {
                         logger.info("Reconnecting because not stopped"); 
                         try {
                             establishConnection();
                         } catch (IOException e) {
                             logger.info("Can't re-connect. Giving up.");
                             logger.throwing(ExpeditionHttpReceiver.class.getName(), "connect", e);
-                            stop = true;
+                            setStop(true);
                         }
                     }
                 }
@@ -106,7 +104,7 @@ public class ExpeditionHttpReceiver {
             }
 
         }, getClass().getName()+" reader");
-        reader.start();
+        readerThread.start();
         scheduleTimeoutHandler();
     }
 
@@ -133,11 +131,11 @@ public class ExpeditionHttpReceiver {
     }
 
     /**
-     * connects to the remote servlet using {@link #url} and binds the response input stream to {@link #inputStream}
+     * connects to the remote servlet using {@link #url} and binds the response input stream to {@link #reader}
      */
     private void establishConnection() throws IOException {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        inputStream = connection.getInputStream();
+        reader = new InputStreamReader(connection.getInputStream());
     }
     
     private void receivedHeartbeatResponse() {
@@ -153,9 +151,29 @@ public class ExpeditionHttpReceiver {
      */
     public void stop() throws IOException {
         logger.info("Stopping expedition HTTP receiver");
-        stop = true;
-        if (inputStream != null) {
-            inputStream.close();
+        setStop(true);
+        if (reader != null) {
+            reader.close();
+        }
+    }
+    
+    /**
+     * Tells if this receiver is in <code>stopped</code> state. This means that it won't receive messages anymore.
+     * It may still be that for a hanging socket there is still a thread blocked in a <code>read</code> call, but
+     * when that read call returns or abort, the thread will end, too.<p>
+     * 
+     * When this receiver's stopped state changes, all waiters on this object are notified.
+     */
+    public boolean isStopped() {
+        return stop;
+    }
+
+    private void setStop(boolean stop) {
+        if (stop != this.stop) {
+            synchronized (this) {
+                this.stop = stop;
+                notifyAll();
+            }
         }
     }
 }

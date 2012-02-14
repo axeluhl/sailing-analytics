@@ -5,7 +5,6 @@ import java.net.SocketException;
 
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
-import com.sap.sailing.server.RacingEventService;
 
 /**
  * Clients can use this servlet to retrieve Expedition messages through an HTTP connection. The connection remains
@@ -21,21 +20,28 @@ import com.sap.sailing.server.RacingEventService;
  */
 public class ExpeditionThroughHttpPostServlet extends AbstractHttpPostServlet {
     private static final long serialVersionUID = 4409173886816756920L;
+    private ExpeditionListener listener;
     
     /**
      * Used to start sending the response. This may well happen in a separate thread spawned by this method or, e.g., by
      * registering for receiving data and sending it to the <code>writer</code>. To stop the forwarding process,
      * call the <code>runToStop</code> object's {@link Runnable#run()} method.
      */
-    protected void startSendingResponse(final Writer writer, final Runnable runToStop) throws SocketException {
-        RacingEventService service = getService();
-        service.addExpeditionListener(new ExpeditionListener() {
+    protected void startSendingResponse(final Writer writer) throws SocketException {
+        listener = new ExpeditionListener() {
             @Override
             public void received(ExpeditionMessage message) {
                 synchronized (writer) {
                     send(writer, message.getOriginalMessage().getBytes());
                 }
             }
-        }, /* validMessagesOnly */ false);
+        };
+        getService().addExpeditionListener(listener, /* validMessagesOnly */ false);
+    }
+    
+    @Override
+    protected void stop() {
+        getService().removeExpeditionListener(listener);
+        super.stop();
     }
 }
