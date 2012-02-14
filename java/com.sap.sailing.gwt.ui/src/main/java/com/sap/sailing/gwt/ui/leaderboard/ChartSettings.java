@@ -1,20 +1,20 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 public class ChartSettings {
-    private final int stepsToLoad;
+    private final long stepSize;
     
-    public ChartSettings(int stepsToLoad) {
-        this.stepsToLoad = stepsToLoad;
+    public ChartSettings(long stepSize) {
+        this.stepSize = stepSize;
     }
 
     /**
      * Copy-constructor
      */
     public ChartSettings(ChartSettings superResult) {
-        this(superResult.getStepsToLoad());
+        this(superResult.getStepSize());
     }
 
-    public int getStepsToLoad() {
-        return stepsToLoad;
+    public long getStepSize() {
+        return stepSize;
     }
 }

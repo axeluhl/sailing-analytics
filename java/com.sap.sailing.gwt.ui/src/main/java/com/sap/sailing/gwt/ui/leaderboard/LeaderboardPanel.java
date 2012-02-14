@@ -250,7 +250,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         updateLeaderboard(leaderboard);
         setAutoExpandFirstRace(newSettings.isAutoExpandFirstRace());
 
-        timer.setDelayBetweenAutoAdvancesInMilliseconds(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
+        timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
         setDelayInMilliseconds(newSettings.getDelayInMilliseconds());
         for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
             expandableSortableColumn.toggleExpansion();
@@ -1534,7 +1534,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.unmodifiableList(selectedLegDetails),
                 Collections.unmodifiableList(selectedRaceDetails), /*  All races to select */
                 leaderboard.getRaceList(), selectedRaceColumns,
-                autoExpandFirstRace, timer.getDelayBetweenAutoAdvancesInMilliseconds(), delayInMilliseconds, stringMessages);
+                autoExpandFirstRace, timer.getRefreshInterval(), delayInMilliseconds, stringMessages);
     }
 
     @Override

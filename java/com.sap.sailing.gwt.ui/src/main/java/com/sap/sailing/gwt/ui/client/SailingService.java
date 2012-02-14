@@ -143,7 +143,7 @@ public interface SailingService extends RemoteService {
     CompetitorInRaceDTO getCompetitorRaceData(RaceIdentifier race,
             CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO, DetailType dataType) throws NoWindException;
 
-    CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, int steps);
+    CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize);
     
     Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, double meters) throws NoWindException;

@@ -257,7 +257,7 @@ public interface SailingServiceAsync {
      * few seconds before the race starts, up to the end of the race. The result describes the race's competitors, their
      * mark passing times, the race start time and the list of time points according to the above specification.
      */
-    void getCompetitorsAndTimePoints(RaceIdentifier race, int steps, AsyncCallback<CompetitorsAndTimePointsDTO> callback);
+    void getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize, AsyncCallback<CompetitorsAndTimePointsDTO> callback);
 
     void getLeaderboardGroups(AsyncCallback<List<LeaderboardGroupDTO>> callback);
     
