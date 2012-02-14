@@ -140,7 +140,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
-        raceBoardPanel = new RaceBoardPanel(sailingService, raceSelectionModel, leaderboardName, leaderboardGroupName,
+        raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, raceSelectionModel, leaderboardName, leaderboardGroupName,
                 RaceBoardEntryPoint.this, stringMessages, userAgentType);
         raceBoardPanel.fillEvents(events);
 
@@ -176,5 +176,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RootPanel.get().add(logoAndTitlePanel);                 // position:fixed        
         RootPanel.get().add(timelinePanel);                     // position:fixed
         //RootPanel.get().add(footerShadowPanel);                 // position:fixed
+        raceBoardPanel.setScrollOffset(logoAndTitlePanel.getOffsetHeight());
     }
 }

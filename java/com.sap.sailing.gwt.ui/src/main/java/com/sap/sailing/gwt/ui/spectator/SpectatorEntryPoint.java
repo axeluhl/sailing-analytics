@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.panels.ClosableWelcomeWidget;
+import com.sap.sailing.gwt.ui.shared.panels.SimpleWelcomeWidget;
 
 /**
  * 
@@ -50,14 +50,22 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         
         FormPanel panelToDisplay = null;
         if (groupName == null) {
-            panelToDisplay = new OverviewEventPanel(sailingService, this, this, stringMessages);
+            //TODO Adjust the code after the OverviewEventPanel is ready for the leaderboard groups
+//            panelToDisplay = new OverviewEventPanel(sailingService, this, this, stringMessages);
+            Window.alert(stringMessages.noLeaderboardGroupToLoad() + ".");
         } else {
             panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root);
             LeaderboardGroupPanel groupPanel = (LeaderboardGroupPanel) panelToDisplay;
-            groupPanel.setWelcomeWidget(new ClosableWelcomeWidget(true, stringMessages.welcomeToSailingAnalytics(),
-                    "Ipsum lorum\nHello World!", stringMessages));
+            groupPanel.setWelcomeWidget(new SimpleWelcomeWidget( stringMessages.welcomeToSailingAnalytics(),
+                            "Understanding what happens out on the race course isn't always easy. To help solve this challenge and" +
+                            " bring the excitement of sailing to the fans, we have developed a leader board based on SAP analytics.\n" +
+                            " Through analyzing GPS data together with integrated wind measurements from sensors out on the race course," +
+                            " the leader board displays information such as in-race ranking, average speeds, distance travelled, ETA" +
+                            " (estimated time of arrival at the next mark rounding), gaps to leader, gains and losses per leg.\n\n" +
+                            "Check out the results for yourself to see who triumphed - and how they did it."));
+            rootPanel.add(panelToDisplay);
         }
-        rootPanel.add(panelToDisplay);
+//        rootPanel.add(panelToDisplay);
 
         fillEvents();
     }

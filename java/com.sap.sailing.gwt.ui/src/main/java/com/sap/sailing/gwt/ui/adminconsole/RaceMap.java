@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
@@ -655,11 +656,13 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTO lastFix) {
         final VerticalPanel result = new VerticalPanel();
-        result.add(new Label("Competitor " + competitorDTO.name));
-        result.add(new Label("" + lastFix.position));
-        result.add(new Label(lastFix.speedWithBearing.speedInKnots + "kts " + lastFix.speedWithBearing.bearingInDegrees
-                + "deg"));
-        result.add(new Label("Tack: " + lastFix.tack.name()));
+        result.add(new Label(stringMessages.competitor() + ": " + competitorDTO.name));
+        result.add(new Label(stringMessages.speed() + ": "
+                + NumberFormat.getDecimalFormat().format(lastFix.speedWithBearing.speedInKnots) + " kts"));
+        result.add(new Label(stringMessages.bearing() + ": "+ (int) lastFix.speedWithBearing.bearingInDegrees + " deg"));
+        //TODO Introduce user role dependent view (Spectator, Admin). Comments underneath are necessary for other views
+//      result.add(new Label("" + lastFix.position));
+//      result.add(new Label("Tack: " + lastFix.tack.name()));
         if (!selectedRaces.isEmpty()) {
             RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
             if (race != null) {
@@ -1103,7 +1106,9 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         }
         if (!newSettings.getZoomSettings().equals(getSettings().getZoomSettings())) {
             getSettings().setZoomSettings(newSettings.getZoomSettings());
-            zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(this));
+            if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) {
+                zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(this));
+            }
         }
     }
     

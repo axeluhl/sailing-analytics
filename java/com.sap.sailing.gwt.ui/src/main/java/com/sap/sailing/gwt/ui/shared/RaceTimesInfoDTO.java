@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -24,6 +25,19 @@ public class RaceTimesInfoDTO implements IsSerializable {
 
     public void setRaceIdentifier(RaceIdentifier raceIdentifier) {
         this.raceIdentifier = raceIdentifier;
+    }
+
+    public LegTimesInfoDTO getLastLegTimes() {
+        if(legTimes == null || legTimes.isEmpty())
+            return null;
+        
+        LegTimesInfoDTO lastLegTime = null;
+        
+        Iterator<LegTimesInfoDTO> iterator = legTimes.iterator();
+        while(iterator.hasNext())
+            lastLegTime = iterator.next();
+        
+        return lastLegTime;
     }
 
     public List<LegTimesInfoDTO> getLegTimes() {

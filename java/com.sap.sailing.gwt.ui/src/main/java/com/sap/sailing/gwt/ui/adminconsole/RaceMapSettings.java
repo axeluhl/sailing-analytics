@@ -11,7 +11,7 @@ public class RaceMapSettings {
     
     private final Set<ManeuverType> maneuverTypesToShow;
 
-    private boolean showOnlySelectedCompetitors = true;
+    private boolean showOnlySelectedCompetitors = false;
     
     private RaceMapZoomSettings zoomSettings;
     

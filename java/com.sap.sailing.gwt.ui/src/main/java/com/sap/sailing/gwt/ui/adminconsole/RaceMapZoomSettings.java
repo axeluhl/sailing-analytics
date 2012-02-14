@@ -7,6 +7,12 @@ import com.google.gwt.maps.client.geom.LatLngBounds;
 
 public class RaceMapZoomSettings {
     
+    /**
+     * The auto-zoom types for a {@link RaceMap}.<br />
+     * Each zoom type has a {@link LatLngBoundsCalculator}, which calculates the new bounds for a map.
+     * @author Lennart Hensler (D054527)
+     *
+     */
     public enum ZoomTypes {
         NONE(null), BOATS(new RaceMap.BoatsBoundsCalculater()), TAILS(new RaceMap.TailsBoundsCalculater()), BUOYS(
                 new RaceMap.BuoysBoundsCalculater());
@@ -18,16 +24,21 @@ public class RaceMapZoomSettings {
         }
 
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
-            return calculater != null ? calculater.calculateNewBounds(forMap) : null;
+            return calculater.calculateNewBounds(forMap);
         }
     };
     
     private ArrayList<ZoomTypes> typesToConsiderOnZoom;
     private boolean zoomToSelectedCompetitors;
 
+    /**
+     * Creates new RaceMapZoomSettings with the {@link ZoomTypes} <code>BOATS</code> and <code>TAILS</code>.<br />
+     * The attritbute <code>zoomToSelectedCompetitors</code> will be <code>false</code>.
+     */
     public RaceMapZoomSettings() {
         typesToConsiderOnZoom = new ArrayList<ZoomTypes>();
-        typesToConsiderOnZoom.add(ZoomTypes.NONE);
+        typesToConsiderOnZoom.add(ZoomTypes.BOATS);
+        typesToConsiderOnZoom.add(ZoomTypes.TAILS);
         zoomToSelectedCompetitors = false;
     }
     

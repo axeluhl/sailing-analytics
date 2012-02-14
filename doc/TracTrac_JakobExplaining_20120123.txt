@@ -1,0 +1,136 @@
+Logging in:
+
+http://tracms.germanmaster.traclive.dk
+Username: baur@sailing-team-germany.de
+Password: MarcusBaur
+
+Tracking devices have some kind of an "expiry date" when attached to a
+mark. As a clean-up measure, Jakob had to reset some of these expiry
+dates.
+
+One database for one "event." Start/end is the start/end date of the
+whole regatta. Tracking data received is keyed by time and tracker
+association. Only if it's inside the event window the tracker data is
+accepted. If a tracker is associated with an event, it's data is
+recorded, even if not yet associated with an object. Later, the
+tracker may be associated with an object, associating its track with
+that object. This way it's possible to recover from various types of
+"situations."
+
+Edit an event. As a club event it has a long duration.
+
+Courses - Marks/waypoints:
+
+Show advanced: Tracking device session. Shows tracking device
+association to the mark for a time frame. A tracking device cannot be
+used for other marks if it is still associated for the time frame
+under consideration with another object. Before re-using a tracking
+device for a time frame, it must be disassociated with all other
+objects for that time frame.
+
+Create a new mark:
+
+Mark's short name must not be longer than two characters. It's
+currently not possible to associate trackers to marks if the trackers
+are associated to *any* other object with *any* time frame.  We
+currently have to re-use existing mark definitions because of this
+problem.
+
+A mark can also be created without tracking devices associated. Then
+show the advanced page for the tracking device. There we can set the
+start/end time, and all trackers not associated during this period
+should become available for selection / association.
+
+Create a course:
+
+New course, give it a name. Choose "Mark/Waypoint" as Course Type. Add
+marks (control points) as waypoint. Can be updated while the race is
+on, but marks have to be in the course before the first boat passes
+this mark.
+
+Inserting a mark first always appends it to the end. Then, drag&drop
+is possible to move it to the desired position in the waypoint
+list. Afterwards, "Update" needs to be pressed.
+
+When waypoint data is changed too late, tracking data needs to be
+re-run through the system to update the mark passings. This can only
+be done by TracTrac administrators.
+
+A course needs to be associated to a race. You cannot have the same
+course associated with many races. But a new course's waypoints can be
+copied from any other existing course.
+
+Race:
+
+New race; give it a name. Enter start of tracking, end of tracking,
+start of race. Times are all UTC. Start of race needs to be between
+start and end of tracking. Choose the (default) course. Start of race
+can only be entered later, when known. Don't try to change the
+course-race association. Edit the course instead. It's a 1:1
+association between race and course anyhow since courses cannot
+directly be re-used (only copied) in a different race.
+
+Checkbox "Populate start and endtime to entries" means that race
+timing is applied to the tracking device sessions associated with the
+race.
+
+Editing entries (competitors) information:
+
+It's possible to import from "another race" which typically happens
+for fleet races. Competitor information can also be imported from CSV
+files. Field names: Short name, Last name, Nationality, Class, Team,
+External ID, Tracking device, Picture. Don't use special characters in
+the boat class name.
+
+Boat classes and pictures can be maintained under the "Details" menu.
+
+A tracker can be substituted in the Entries page, clicking the
+"Replace" button next to the tracking device number, entering a UTC
+time for when the replacement shall become effective. If mark passings
+have happened in between, mark passings either need to be entered
+manually or TracTrac administrators can re-run the data by the mark
+passing algorithm.
+
+Manually enter a mark passing:
+
+Go to the races page. Press the SailMarks button (red container). In
+the popup dialog the mark passing times can be manually
+entered. Automatically-detected mark passings will automatically
+update if the algorithm detects a better candidate for the mark
+passing. Manually entered mark passings may be overwritten by the
+algorithm, also during a re-run.
+
+Replacing a tracker on a mark: click the replace button next to a mark
+in the marks list.
+
+Monitoring page:
+
+When the battery indicator shows a dying battery, we can schedule a
+planned replacement.
+
+Send interval configuration: Clicking the checkbox next to the device
+in the monitoring page enables sending an SMS to the device. For this,
+we need to inform TracTrac about which SIM card with which phone
+number went into which tracker. This can be provided in a CSV file
+that has the format "tracker-ID;phone-number" where the phone number
+starts with the country prefix, e.g. "1".
+
+Green button will reboot the devices with checkmarks on. The device
+rebooted will send all buffered information once back up.
+
+A Teltonika command can be sent to all devices wich checkmark
+set. "CF1;" "CF2;" and "CF3;" are the commands to send the device into
+the respective mode. CF1 is most aggressive (quickest possible
+sampling, sending out directly); CF2 sends every 15 seconds; CF3 sends
+every 120 seconds.
+
+Recharging a depleted battery takes about 3h. Batteries can be
+replaced. It's a standard Nokia battery: BL-5C
+
+ - registering boat and mark trackers
+ - setting up the fleet
+ - defining the course with the marks
+ - setting and updating the start time
+ - fixing erroneous mark passing events
+ - updating a course before and during a race
+

@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -11,12 +10,12 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     
     private String name;
     private String description;
-    private ArrayList<Leaderboard> leaderboards;
+    private List<Leaderboard> leaderboards;
 
     public LeaderboardGroupImpl(String name, String description, List<Leaderboard> leaderboards) {
         this.name = name;
         this.description = description;
-        this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
+        this.leaderboards = leaderboards;
     }
 
     @Override

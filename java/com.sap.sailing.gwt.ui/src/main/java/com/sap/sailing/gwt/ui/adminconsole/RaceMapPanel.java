@@ -142,6 +142,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             max = selectedRace.endOfRace;
         } else if (selectedRace.timePointOfNewestEvent != null) {
             max = selectedRace.timePointOfNewestEvent;
+            timer.setPlayMode(PlayModes.Live);
         }
         
         if(min != null && max != null)
@@ -150,8 +151,14 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         // set initial timer position
         switch(timer.getPlayMode()) {
             case Live:
+                if(selectedRace.timePointOfNewestEvent != null) {
+                    timer.setTime(selectedRace.timePointOfNewestEvent.getTime());
+                }
+                break;
             case Replay:
-                if(selectedRace.startOfRace != null) {
+                if(selectedRace.endOfRace != null) {
+                    timer.setTime(selectedRace.endOfRace.getTime());
+                } else {
                     timer.setTime(selectedRace.startOfRace.getTime());
                 }
                 break;
@@ -175,10 +182,13 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                                 Date startOfTimeslider = new Date(startOfRace.getTime() - 5 * 60 * 1000);
 
                                 timePanel.changeMin(startOfTimeslider);
-                                timer.setTime(raceTimesInfo.getStartOfRace().getTime());
-                            } else {
-                                timePanel.reset();
                             }
+                            // set time to end of race
+                            if(raceTimesInfo.getLastLegTimes() != null) {
+                                timer.setTime(raceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
+                            }
+                        } else {
+                            timePanel.reset();
                         }
                     }
                 });
