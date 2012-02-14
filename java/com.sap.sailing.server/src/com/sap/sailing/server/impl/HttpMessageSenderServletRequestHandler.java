@@ -9,16 +9,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import com.sap.sailing.domain.common.Base64Utils;
+import com.sap.sailing.domain.common.HttpMessageSenderServletConstants;
 import com.sap.sailing.server.RacingEventService;
 
-public abstract class HttpPostServletRequestHandler {
+public abstract class HttpMessageSenderServletRequestHandler {
     /**
      * Every so many milliseconds the servlet will send a {@link #PONG} message. This shows clients that the connection
      * is still alive. If after several such intervals the client hasn't received a {@link #PONG} message it seems reasonable
      * to assume the connection has died.
      */
-    public static final long HEARTBEAT_TIME_IN_MILLISECONDS = 5000;
-    public static final String PONG = "<pong>";
     private static final Logger logger = Logger.getLogger(AbstractHttpPostServlet.class.getName());
     private static final long timeoutInMilliseconds = 60000;
     private long timeInMillisOfLastExpeditionMessageReceived;
@@ -27,7 +26,7 @@ public abstract class HttpPostServletRequestHandler {
     private final PrintWriter writer;
     private final AbstractHttpPostServlet owner;
     
-    public HttpPostServletRequestHandler(HttpServletResponse resp, AbstractHttpPostServlet owner) throws IOException {
+    public HttpMessageSenderServletRequestHandler(HttpServletResponse resp, AbstractHttpPostServlet owner) throws IOException {
         this.owner = owner;
         this.writer = resp.getWriter();
     }
@@ -124,15 +123,15 @@ public abstract class HttpPostServletRequestHandler {
         public void run() {
             try {
                 while (!stop) {
-                    sendString(responseWriter, PONG);
-                    Thread.sleep(HEARTBEAT_TIME_IN_MILLISECONDS);
+                    sendString(responseWriter, HttpMessageSenderServletConstants.PONG);
+                    Thread.sleep(HttpMessageSenderServletConstants.HEARTBEAT_TIME_IN_MILLISECONDS);
                 }
             } catch (Exception e) {
-                logger.info("Terminating heartbeat on "+HttpPostServletRequestHandler.this.getClass().getName()+
+                logger.info("Terminating heartbeat on "+HttpMessageSenderServletRequestHandler.this.getClass().getName()+
                         " because of exception "+e);
                 logger.throwing(getClass().getName(), "run", e);
             }
-            HttpPostServletRequestHandler.this.stop();
+            HttpMessageSenderServletRequestHandler.this.stop();
         }
     }
 }

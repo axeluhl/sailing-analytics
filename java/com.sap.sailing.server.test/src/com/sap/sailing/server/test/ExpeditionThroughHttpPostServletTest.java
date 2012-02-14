@@ -6,7 +6,7 @@ import java.net.URL;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sap.sailing.server.ExpeditionHttpReceiver;
+import com.sap.sailing.expeditionconnector.impl.HttpServletMessageReceiver;
 
 public class ExpeditionThroughHttpPostServletTest {
     @Ignore // To run, the OSGi-based Jetty needs to run and listen on port 8888"
@@ -14,7 +14,7 @@ public class ExpeditionThroughHttpPostServletTest {
     public void testConnectDisconnect() throws IOException, InterruptedException {
         int jettyPort = 8888;
         URL url = new URL("http://localhost:"+jettyPort+"/sailingserver/expedition");
-        ExpeditionHttpReceiver httpReceiver = new ExpeditionHttpReceiver(url, new ExpeditionHttpReceiver.Receiver() {
+        HttpServletMessageReceiver httpReceiver = new HttpServletMessageReceiver(url, new HttpServletMessageReceiver.Receiver() {
             @Override
             public boolean received(byte[] bytes) {
                 System.out.println(new String(bytes));

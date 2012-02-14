@@ -33,5 +33,5 @@ public abstract class AbstractHttpPostServlet extends Servlet {
         return super.getService();
     }
 
-    protected abstract HttpPostServletRequestHandler createHandler(HttpServletResponse resp) throws IOException;
+    protected abstract HttpMessageSenderServletRequestHandler createHandler(HttpServletResponse resp) throws IOException;
 }

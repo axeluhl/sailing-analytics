@@ -19,7 +19,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionMessage;
  * @author Axel Uhl (D043530)
  *
  */
-public class ExpeditionThroughHttpPostServletHandler extends HttpPostServletRequestHandler {
+public class ExpeditionThroughHttpPostServletHandler extends HttpMessageSenderServletRequestHandler {
     private final ExpeditionListener listener;
     
     public ExpeditionThroughHttpPostServletHandler(HttpServletResponse resp, AbstractHttpPostServlet owner) throws IOException {

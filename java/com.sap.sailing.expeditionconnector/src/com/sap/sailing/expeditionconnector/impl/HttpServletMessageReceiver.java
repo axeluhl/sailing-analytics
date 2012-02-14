@@ -1,4 +1,4 @@
-package com.sap.sailing.server;
+package com.sap.sailing.expeditionconnector.impl;
 
 import java.io.IOException;
 import java.net.URL;
@@ -7,24 +7,28 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import com.sap.sailing.server.impl.AbstractHttpPostServlet;
-import com.sap.sailing.server.impl.ExpeditionHttpReceiverReader;
-import com.sap.sailing.server.impl.HttpPostServletRequestHandler;
+import com.sap.sailing.domain.common.HttpMessageSenderServletConstants;
+
 
 /**
- * Receives data from a remote servlet, trying to keep the connection open until {@link #stop() stopped}. Will try to
- * re-establish a broken connection until {@link #stop()} is called. After constructing an instance, clients need to
- * call {@link #connect()} to actually start the process of receiving data through the HTTP connection. Waiters on this
- * object will be notified whenever the {@link #isStopped()} result has changed.<p>
+ * Receives data from a remote servlet whose implementation is expected to subclass {@link AbstractHttpPostServlet},
+ * trying to keep the connection open until {@link #stop() stopped}. Will try to re-establish a broken connection until
+ * {@link #stop()} is called. After constructing an instance, clients need to call {@link #connect()} to actually start
+ * the process of receiving data through the HTTP connection. Waiters on this object will be notified whenever the
+ * {@link #isStopped()} result has changed.
+ * <p>
  * 
- * Uses a heart beat protocol with the servlet to detect a broken connection. The server is expected to send a heart beat
- * signal every {@link AbstractHttpPostServlet#HEARTBEAT_TIME_IN_MILLISECONDS} milliseconds. This client accepts a five-fold
- * delay while receiving this heart beat. If the heart beat is not received in time, 
+ * Clients pass a {@link Receiver} object to the constructor. That object's {@link Receiver#received(byte[])} method
+ * will be called upon each message received.<p>
+ * 
+ * Uses a heart beat protocol with the servlet to detect a broken connection. The server is expected to send a heart
+ * beat signal every {@link AbstractHttpPostServlet#HEARTBEAT_TIME_IN_MILLISECONDS} milliseconds. This client accepts a
+ * five-fold delay while receiving this heart beat. If the heart beat is not received in time,
  * 
  * @author Axel Uhl (D043530)
  * 
  */
-public class ExpeditionHttpReceiver {
+public class HttpServletMessageReceiver {
     public interface Receiver {
         /**
          * Called when the receiver has received some bytes from the remote end.
@@ -37,7 +41,7 @@ public class ExpeditionHttpReceiver {
         boolean received(byte[] bytes);
     }
 
-    private static final Logger logger = Logger.getLogger(ExpeditionHttpReceiver.class.getName());
+    private static final Logger logger = Logger.getLogger(HttpServletMessageReceiver.class.getName());
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final Receiver receiver;
     private long timestampOfLastHeartbeatReceived;
@@ -49,26 +53,26 @@ public class ExpeditionHttpReceiver {
      * @param url the URL of a {@link AbstractHttpPostServlet} servlet from which to receive messages
      * @param receiver will have its {@link Receiver#received(byte[])} method called for each message received
      */
-    public ExpeditionHttpReceiver(URL url, Receiver receiver) {
+    public HttpServletMessageReceiver(URL url, Receiver receiver) {
         this.receiver = receiver;
         this.url = url;
     }
     
     public void connect() throws IOException, InterruptedException {
-        ExpeditionHttpReceiverReader readerRunnable = new ExpeditionHttpReceiverReader(url, receiver, this);
+        HttpServletMessageReceiverReader readerRunnable = new HttpServletMessageReceiverReader(url, receiver, this);
         Thread readerThread = new Thread(readerRunnable, getClass().getName()+" reader");
         readerThread.start();
         scheduleTimeoutHandler(readerRunnable);
     }
 
-    private void scheduleTimeoutHandler(final ExpeditionHttpReceiverReader readerRunnable) {
+    private void scheduleTimeoutHandler(final HttpServletMessageReceiverReader readerRunnable) {
         Runnable timeoutChecker = new Runnable() {
             @Override
             public void run() {
-                if (System.currentTimeMillis() - timestampOfLastHeartbeatReceived > 5*HttpPostServletRequestHandler.HEARTBEAT_TIME_IN_MILLISECONDS) {
+                if (System.currentTimeMillis() - timestampOfLastHeartbeatReceived > 5*HttpMessageSenderServletConstants.HEARTBEAT_TIME_IN_MILLISECONDS) {
                     // TIMEOUT; abort
                     logger.info("Timeout. Didn't receive a heartbeat through my HTTP connection for "+
-                        (5*HttpPostServletRequestHandler.HEARTBEAT_TIME_IN_MILLISECONDS)+"ms");
+                        (5*HttpMessageSenderServletConstants.HEARTBEAT_TIME_IN_MILLISECONDS)+"ms");
                     readerRunnable.stop();
                     boolean successfullyConnected = false;
                     while (!isStopped() && !successfullyConnected) {
@@ -78,21 +82,21 @@ public class ExpeditionHttpReceiver {
                             logger.info("Successfully re-connected to "+url);
                             successfullyConnected = true;
                         } catch (IOException | InterruptedException e) {
-                            logger.throwing(ExpeditionHttpReceiver.class.getName(), "run", e);
+                            logger.throwing(HttpServletMessageReceiver.class.getName(), "run", e);
                             logger.info("Error "+e.getMessage()+" trying to re-connect; will keep trying in a few seconds");
                             try {
                                 Thread.sleep(3);
                             } catch (InterruptedException e1) {
-                                logger.throwing(ExpeditionHttpReceiver.class.getName(), "can't even sleep", e1);
+                                logger.throwing(HttpServletMessageReceiver.class.getName(), "can't even sleep", e1);
                             }
                         }
                     }
                 } else {
-                    scheduler.schedule(this, HttpPostServletRequestHandler.HEARTBEAT_TIME_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
+                    scheduler.schedule(this, HttpMessageSenderServletConstants.HEARTBEAT_TIME_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
                 }
             }
         };
-        scheduler.schedule(timeoutChecker, HttpPostServletRequestHandler.HEARTBEAT_TIME_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
+        scheduler.schedule(timeoutChecker, HttpMessageSenderServletConstants.HEARTBEAT_TIME_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
     }
 
     /**

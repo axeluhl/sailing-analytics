@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.expeditionconnector.impl;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,11 +8,11 @@ import java.net.URL;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Base64Utils;
-import com.sap.sailing.server.ExpeditionHttpReceiver;
-import com.sap.sailing.server.ExpeditionHttpReceiver.Receiver;
+import com.sap.sailing.domain.common.HttpMessageSenderServletConstants;
+import com.sap.sailing.expeditionconnector.impl.HttpServletMessageReceiver.Receiver;
 
-public class ExpeditionHttpReceiverReader implements Runnable {
-    private static final Logger logger = Logger.getLogger(ExpeditionHttpReceiverReader.class.getName());
+public class HttpServletMessageReceiverReader implements Runnable {
+    private static final Logger logger = Logger.getLogger(HttpServletMessageReceiverReader.class.getName());
 
     private static final int BUF_SIZE = 1<<16;
     private boolean stopped;
@@ -22,9 +22,9 @@ public class ExpeditionHttpReceiverReader implements Runnable {
 
     private final Receiver receiver;
 
-    private final ExpeditionHttpReceiver owner;
+    private final HttpServletMessageReceiver owner;
     
-    public ExpeditionHttpReceiverReader(URL url, Receiver receiver, ExpeditionHttpReceiver owner) throws IOException {
+    public HttpServletMessageReceiverReader(URL url, Receiver receiver, HttpServletMessageReceiver owner) throws IOException {
         this.url = url;
         this.receiver = receiver;
         this.owner = owner;
@@ -75,7 +75,7 @@ public class ExpeditionHttpReceiverReader implements Runnable {
                 logger.info("Reached EOF");
                 reader.close();
             } catch (IOException e) {
-                logger.throwing(ExpeditionHttpReceiver.class.getName(), "connect", e);
+                logger.throwing(HttpServletMessageReceiver.class.getName(), "connect", e);
             }
             if (!isStopped()) {
                 logger.info("Reconnecting because not stopped");
@@ -83,7 +83,7 @@ public class ExpeditionHttpReceiverReader implements Runnable {
                     establishConnection();
                 } catch (IOException e) {
                     logger.info("Can't re-connect. Giving up.");
-                    logger.throwing(ExpeditionHttpReceiver.class.getName(), "connect", e);
+                    logger.throwing(HttpServletMessageReceiver.class.getName(), "connect", e);
                     stop();
                 }
             }
@@ -92,7 +92,7 @@ public class ExpeditionHttpReceiverReader implements Runnable {
 
     private boolean receivedMessage(String bos) {
         boolean stopReceiving = false;
-        if (bos.equals(HttpPostServletRequestHandler.PONG)) {
+        if (bos.equals(HttpMessageSenderServletConstants.PONG)) {
             owner.receivedHeartbeatResponse();
         } else {
             stopReceiving = receiver.received(Base64Utils.fromBase64(bos));
