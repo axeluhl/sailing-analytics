@@ -36,8 +36,10 @@ import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -52,6 +54,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
@@ -66,7 +69,7 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceMap implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
-        Component<RaceMapSettings> {
+        Component<RaceMapSettings>, RequiresDataInitialization {
     protected MapWidget map;
 
     private final SailingServiceAsync sailingService;
@@ -161,6 +164,10 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
     private final RaceMapSettings settings;
     
     private final StringMessages stringMessages;
+    
+    private boolean dataInitialized;
+    
+    private Date lastTimeChangeBeforeInitialization;
 
     public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer,
             CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
@@ -297,8 +304,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                             } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) { //Zoom once to the buoys
                                 zoomMapToNewBounds(new BuoysBoundsCalculater().calculateNewBounds(RaceMap.this));
                                 mapFirstZoomDone = true;
-                                /*
-                                 * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was just zoomed
+                                /* Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was just zoomed
                                  * to the bounds of the buoys, it was not a zoom or pan triggered by the user. As a consequence the
                                  * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
                                  */
@@ -1190,5 +1196,16 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
             return newBounds;
         }
         
+    }
+
+    @Override
+    public void initializeData() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public boolean isDataInitialized() {
+        return dataInitialized;
     }
 }
