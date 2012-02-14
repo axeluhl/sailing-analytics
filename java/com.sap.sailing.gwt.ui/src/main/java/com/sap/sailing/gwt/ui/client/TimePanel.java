@@ -236,13 +236,29 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
 
     @Override
     public void timeChanged(Date time) {
+        
+        if(!sliderBar.isMinMaxInitialized())
+            return;
+        
         long t = time.getTime();
-        // handle the case where time advances beyond slider's end
-        if(sliderBar.isMinMaxInitialized() &&  t > sliderBar.getMaxValue()) {
-            sliderBar.setMaxValue(new Double(t));
+        // handle also the case where time advances beyond slider's end
+        switch(timer.getPlayMode()) {
+            case Live: 
+                if(t > sliderBar.getMaxValue()) {
+                    sliderBar.setMaxValue(new Double(t));
+                }
+                sliderBar.setCurrentValue(new Double(t), false);
+                break;
+            case Replay:
+                // handle the case where time advances beyond slider's end
+                if(t > sliderBar.getMaxValue()) {
+                    timer.stop();
+                } else {
+                    sliderBar.setCurrentValue(new Double(t), false);
+                }
+                break;
         }
         
-        sliderBar.setCurrentValue(new Double(t), false);
         dateLabel.setText(dateFormatter.format(time));
         if(lastReceivedDataTimepoint == null)
             timeLabel.setText(timeFormatter.format(time));
