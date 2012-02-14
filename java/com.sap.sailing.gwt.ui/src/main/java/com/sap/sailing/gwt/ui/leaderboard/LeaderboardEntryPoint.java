@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
 
-public class LeaderboardPage extends AbstractEntryPoint {
+public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private String leaderboardName;
     private String leaderboardGroupName;
     
@@ -60,7 +60,7 @@ public class LeaderboardPage extends AbstractEntryPoint {
                 /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
                 new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                 leaderboardName, leaderboardGroupName,
-                LeaderboardPage.this, stringMessages, userAgentType);
+                LeaderboardEntryPoint.this, stringMessages, userAgentType);
         RootPanel.get().add(logoAndTitlePanel);
         RootPanel.get().add(breadcrumbPanel);
         RootPanel.get().add(leaderboardPanel);
