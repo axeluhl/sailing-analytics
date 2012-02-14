@@ -141,7 +141,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
                     raceMap, "auto", "500px", stringMessages);
 
-            raceMap.loadMapsAPI((Panel) raceMapViewer.getViewerWidget().getContent());
+            ((Panel) raceMapViewer.getViewerWidget().getContent()).add(raceMap);
             raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
             collapsableViewers.add(raceMapViewer);
         }

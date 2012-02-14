@@ -71,7 +71,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         mapPanel.setSize("100%", "100%");
         grid.setWidget(2, 1, mapPanel);
         raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionProvider, stringMessages);
-        raceMap.loadMapsAPI(mapPanel);
+        mapPanel.add(raceMap);
         raceSelectionModel = new RaceSelectionModel();
         raceListBox = new RacesListBoxPanel(eventRefresher, raceSelectionModel, stringMessages);
         raceSelectionModel.addRaceSelectionChangeListener(this);
