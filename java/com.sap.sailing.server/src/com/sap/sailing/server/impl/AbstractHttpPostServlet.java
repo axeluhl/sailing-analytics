@@ -39,12 +39,18 @@ public abstract class AbstractHttpPostServlet extends Servlet {
     
     private static final long serialVersionUID = 6034769972654796465L;
 
-    protected void stop() {
+    protected synchronized void stop() {
         stop = true;
+        notifyAll();
+    }
+    
+    private boolean isStopped() {
+        return stop;
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        stop = false;
         final PrintWriter writer = resp.getWriter();
         HeartbeatHandler heartbeat = new HeartbeatHandler(writer);
         Thread heartbeatHandler = new Thread(heartbeat, getClass().getName()
@@ -52,17 +58,21 @@ public abstract class AbstractHttpPostServlet extends Servlet {
         startSendingResponse(writer);
         heartbeatHandler.start();
         try {
-            Thread.sleep(timeoutInMilliseconds);
-            while (!stop && System.currentTimeMillis()-timeInMillisOfLastExpeditionMessageReceived < timeoutInMilliseconds) {
-                Thread.sleep(timeInMillisOfLastExpeditionMessageReceived + timeoutInMilliseconds - System.currentTimeMillis());
+            synchronized (this) {
+                timeInMillisOfLastExpeditionMessageReceived = System.currentTimeMillis(); // initialize timeout counter
+                while (!isStopped() && System.currentTimeMillis()-timeInMillisOfLastExpeditionMessageReceived < timeoutInMilliseconds) {
+                    wait(timeInMillisOfLastExpeditionMessageReceived + timeoutInMilliseconds - System.currentTimeMillis());
+                }
             }
-            if (stop) {
+            if (isStopped()) {
                 logger.info(getClass().getName()+" was explicitly stopped, e.g., because client closed connection");
             }
             logger.info("Terminating "+getClass().getName()+" doPost after not receiving anything for "+timeoutInMilliseconds+"ms");
             heartbeat.stop();
             heartbeatHandler.join();
-            stop();
+            if (!isStopped()) {
+                stop();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -132,6 +142,7 @@ public abstract class AbstractHttpPostServlet extends Servlet {
                         " because of exception "+e);
                 logger.throwing(getClass().getName(), "run", e);
             }
+            AbstractHttpPostServlet.this.stop();
         }
     }
 
