@@ -3,7 +3,6 @@ package com.sap.sailing.server.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.net.SocketException;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -31,7 +30,6 @@ public abstract class HttpPostServletRequestHandler {
     public HttpPostServletRequestHandler(HttpServletResponse resp, AbstractHttpPostServlet owner) throws IOException {
         this.owner = owner;
         this.writer = resp.getWriter();
-        startSendingResponse(writer);
     }
     
     protected RacingEventService getService() {
@@ -101,13 +99,6 @@ public abstract class HttpPostServletRequestHandler {
             stop();
         }
     }
-    
-    /**
-     * Used to start sending the response. This may well happen in a separate thread spawned by this method or, e.g., by
-     * registering for receiving data and sending it to the <code>writer</code>. To stop the forwarding process,
-     * call the {@link #stop} method.
-     */
-    abstract protected void startSendingResponse(final Writer writer) throws SocketException;
     
     /**
      * Every {@link #HEARTBEAT_TIME_IN_MILLISECONDS} milliseconds, a "<pong>\n" message will be sent to {@link #responseWriter}.

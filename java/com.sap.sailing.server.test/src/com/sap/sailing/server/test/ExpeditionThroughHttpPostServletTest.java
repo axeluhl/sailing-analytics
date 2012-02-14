@@ -3,12 +3,13 @@ package com.sap.sailing.server.test;
 import java.io.IOException;
 import java.net.URL;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.server.ExpeditionHttpReceiver;
 
 public class ExpeditionThroughHttpPostServletTest {
-//    @Ignore // To run, the OSGi-based Jetty needs to run and listen on port 8888"
+    @Ignore // To run, the OSGi-based Jetty needs to run and listen on port 8888"
     @Test
     public void testConnectDisconnect() throws IOException, InterruptedException {
         int jettyPort = 8888;

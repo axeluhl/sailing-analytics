@@ -1,8 +1,6 @@
 package com.sap.sailing.server.impl;
 
 import java.io.IOException;
-import java.io.Writer;
-import java.net.SocketException;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,7 +24,6 @@ public class ExpeditionThroughHttpPostServletHandler extends HttpPostServletRequ
     
     public ExpeditionThroughHttpPostServletHandler(HttpServletResponse resp, AbstractHttpPostServlet owner) throws IOException {
         super(resp, owner);
-        startSendingResponse(getWriter());
         listener = new ExpeditionListener() {
             @Override
             public void received(ExpeditionMessage message) {
@@ -36,14 +33,6 @@ public class ExpeditionThroughHttpPostServletHandler extends HttpPostServletRequ
             }
         };
         getService().addExpeditionListener(listener, /* validMessagesOnly */ false);
-    }
-    /**
-     * Used to start sending the response. This may well happen in a separate thread spawned by this method or, e.g., by
-     * registering for receiving data and sending it to the <code>writer</code>. To stop the forwarding process,
-     * call the <code>runToStop</code> object's {@link Runnable#run()} method.
-     */
-    protected void startSendingResponse(final Writer writer) throws SocketException {
-        // FIXME can't use a member variable because the same servlet instance may be re-used for subsequent calls
     }
     
     @Override
