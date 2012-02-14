@@ -37,7 +37,7 @@ import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -66,7 +66,7 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class RaceMap implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
+public class RaceMap extends SimplePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         Component<RaceMapSettings>, RequiresDataInitialization {
     protected MapWidget map;
 
@@ -169,6 +169,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer,
             CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
+        this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -185,6 +186,8 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
         lastTimeChangeBeforeInitialization = null;
+        dataInitialized = false;
+        initializeData();
     }
 
     public double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
@@ -201,7 +204,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
         return dist;
     }
     
-    public void loadMapsAPI(final Panel parentPanel) {
+    private void loadMapsAPI() {
         Maps.loadMapsApi(mapsAPIKey, "2", false, new Runnable() {
             public void run() {
                 map = new MapWidget();
@@ -212,7 +215,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                 // Add the map to the HTML host page
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
-                parentPanel.add(map);
+                RaceMap.this.add(map);
                 map.setSize("100%", "100%");
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
@@ -248,6 +251,8 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
                     timeChanged(lastTimeChangeBeforeInitialization);
                     lastTimeChangeBeforeInitialization = null;
                 }
+                //Data has been initialized
+                RaceMap.this.dataInitialized = true;
             }
         });
     }
@@ -1207,8 +1212,7 @@ public class RaceMap implements TimeListener, CompetitorSelectionChangeListener,
 
     @Override
     public void initializeData() {
-        // TODO Auto-generated method stub
-        
+        loadMapsAPI();
     }
 
     @Override
