@@ -181,14 +181,14 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             leaderboardsByName.put(newName, toRename);
             mongoObjectFactory.renameLeaderboard(oldName, newName);
             
-            updateGroupsAfterLeaderboardRenaming(oldName, newName, true);
+            syncGroupsAfterLeaderboardRenaming(oldName, newName, true);
         }
     }
     
     /**
      * Checks all groups, if they contain a leaderboard with the <code>oldName</code> and replace it with the <code>newName</code>.
      */
-    private void updateGroupsAfterLeaderboardRenaming(String oldName, String newName, boolean doDatabaseUpdate) {
+    private void syncGroupsAfterLeaderboardRenaming(String oldName, String newName, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
         synchronized (leaderboardGroupsByName) {
             for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
@@ -212,7 +212,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     @Override
     public void updateStoredLeaderboard(Leaderboard leaderboard) {
         mongoObjectFactory.storeLeaderboard(leaderboard);
-        updateGroupsAfterLeaderboardUpdate(leaderboard, true);
+        syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
     
     /**
@@ -222,7 +222,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
      * 
      * @param updatedLeaderboard
      */
-    private void updateGroupsAfterLeaderboardUpdate(Leaderboard updatedLeaderboard, boolean doDatabaseUpdate) {
+    private void syncGroupsAfterLeaderboardChange(Leaderboard updatedLeaderboard, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
         synchronized (leaderboardGroupsByName) {
             for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
@@ -251,14 +251,14 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         }
         mongoObjectFactory.removeLeaderboard(leaderboardName);
         
-        updateGroupsAfterLeaderboardRemove(leaderboardName, true);
+        syncGroupsAfterLeaderboardRemove(leaderboardName, true);
     }
     
     /**
      * Checks all groups, if they contain a leaderboard with the <code>removedLeaderboardName</code> and removes it from the group.
      * @param removedLeaderboardName
      */
-    private void updateGroupsAfterLeaderboardRemove(String removedLeaderboardName, boolean doDatabaseUpdate) {
+    private void syncGroupsAfterLeaderboardRemove(String removedLeaderboardName, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
         synchronized (leaderboardGroupsByName) {
             for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
@@ -480,7 +480,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             
             if (leaderboardHasChanged) {
                 //Update the corresponding groups, to keep them in sync
-                updateGroupsAfterLeaderboardUpdate(leaderboard, /*doDatabaseUpdate*/ false);
+                syncGroupsAfterLeaderboardChange(leaderboard, /*doDatabaseUpdate*/ false);
             }
         }
     }
