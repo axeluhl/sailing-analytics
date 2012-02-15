@@ -31,6 +31,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sailing.expeditionconnector.ExpeditionListener;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -237,5 +238,9 @@ public interface RacingEventService extends TrackedEventRegistry {
     void renameLeaderboardGroup(String oldName, String newName);
     
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
+
+    void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException;
+
+    void removeExpeditionListener(ExpeditionListener listener);
 
 }

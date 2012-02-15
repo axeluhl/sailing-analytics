@@ -19,7 +19,7 @@ import com.sap.sailing.expeditionconnector.impl.Activator;
 public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleActivator {
     private static Logger logger = Logger.getLogger(ExpeditionWindTrackerFactory.class.getName());
     
-    private static WindTrackerFactory defaultInstance;
+    private static ExpeditionWindTrackerFactory defaultInstance;
     
     private static BundleContext defaultBundleContext;
 
@@ -40,7 +40,7 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
         logger.info("Created "+getClass().getName()+" with default UDP port "+defaultPort);
     }
 
-    public synchronized static WindTrackerFactory getInstance() {
+    public synchronized static ExpeditionWindTrackerFactory getInstance() {
         if (defaultInstance == null) {
             defaultInstance = new ExpeditionWindTrackerFactory();
         }
@@ -57,14 +57,18 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
         WindTracker result = windTrackers.get(race);
         if (result == null) {
             DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(race);
-            UDPExpeditionReceiver receiver = getOrCreateWindReceiverForPort(defaultPort);
+            UDPExpeditionReceiver receiver = getOrCreateWindReceiverOnDefaultPort();
             result = new ExpeditionWindTracker(trackedRace,
                     correctByDeclination ? DeclinationService.INSTANCE : null, receiver, this);
             windTrackers.put(race, result);
         }
         return result;
     }
-
+    
+    public UDPExpeditionReceiver getOrCreateWindReceiverOnDefaultPort() throws SocketException {
+        return getOrCreateWindReceiverForPort(defaultPort);
+    }
+    
     private synchronized UDPExpeditionReceiver getOrCreateWindReceiverForPort(int port) throws SocketException {
         UDPExpeditionReceiver receiver = windReceivers.get(port);
         if (receiver == null) {

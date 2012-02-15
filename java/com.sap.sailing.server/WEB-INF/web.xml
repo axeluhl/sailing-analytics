@@ -4,6 +4,7 @@
 	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+
 	<servlet>
 		<servlet-name>AdminApp</servlet-name>
 		<servlet-class>com.sap.sailing.server.impl.AdminApp</servlet-class>
@@ -12,6 +13,7 @@
 		<servlet-name>AdminApp</servlet-name>
 		<url-pattern>/admin</url-pattern>
 	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>ModeratorApp</servlet-name>
 		<servlet-class>com.sap.sailing.server.impl.ModeratorApp</servlet-class>
@@ -19,5 +21,14 @@
 	<servlet-mapping>
 		<servlet-name>ModeratorApp</servlet-name>
 		<url-pattern>/moderator</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.impl.ExpeditionThroughHttpPostServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
+		<url-pattern>/expedition</url-pattern>
 	</servlet-mapping>
 </web-app>

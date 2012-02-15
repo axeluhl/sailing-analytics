@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
@@ -103,9 +104,8 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         String debugParam = Window.Location.getParameter("gwt.codesvr");
 
         if(leaderboardGroupName != null) {
-            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName;
-            if(debugParam != null && !debugParam.isEmpty())
-                link += "&gwt.codesvr=" + debugParam;
+            String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName +
+                    (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
             breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
         }
         breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, selectedRaceIdentifier.getRaceName());
@@ -141,7 +141,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
                     raceMap, "auto", "500px", stringMessages);
 
-            raceMap.loadMapsAPI((Panel) raceMapViewer.getViewerWidget().getContent());
+            ((Panel) raceMapViewer.getViewerWidget().getContent()).add(raceMap);
             raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
             collapsableViewers.add(raceMapViewer);
         }

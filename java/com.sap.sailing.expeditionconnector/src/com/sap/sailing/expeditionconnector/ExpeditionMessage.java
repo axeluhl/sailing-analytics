@@ -154,4 +154,11 @@ public interface ExpeditionMessage extends UDPMessage {
     TimePoint getTimePoint();
 
     TimePoint getCreatedAt();
+
+    /**
+     * The original text string as received from the Expedition program, including trailing checksum.
+     * 
+     * @return for example <code>"#0,6,349.1,48,53.967217,49,10.888550,94,349.9,95,2.41*37"</code>
+     */
+    String getOriginalMessage();
 }

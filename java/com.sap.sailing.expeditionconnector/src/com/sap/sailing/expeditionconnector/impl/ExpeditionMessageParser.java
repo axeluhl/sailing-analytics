@@ -50,11 +50,11 @@ public class ExpeditionMessageParser implements UDPMessageParser<ExpeditionMessa
                 }
                 int checksum = Integer.valueOf(m.group(m.groupCount()), 16);
                 valid = valid && checksumOk(checksum, packetAsString);
-                ExpeditionMessageImpl result;
+                ExpeditionMessage result;
                 if (defaultForMessageTimePoint == null) {
-                    result = new ExpeditionMessageImpl(boatID, values, valid);
+                    result = new ExpeditionMessageImpl(boatID, values, valid, packetAsString);
                 } else {
-                    result = new ExpeditionMessageImpl(boatID, values, valid, defaultForMessageTimePoint);
+                    result = new ExpeditionMessageImpl(boatID, values, valid, defaultForMessageTimePoint, packetAsString);
                 }
                 if (result.hasValue(ExpeditionMessage.ID_GPS_TIME)) {
                     // an original GPS time stamp; then remember the difference between now and the time stamp

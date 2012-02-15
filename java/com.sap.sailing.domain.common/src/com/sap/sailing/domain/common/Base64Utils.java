@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common;
 
 /*
  * Copyright 2009 Google Inc.

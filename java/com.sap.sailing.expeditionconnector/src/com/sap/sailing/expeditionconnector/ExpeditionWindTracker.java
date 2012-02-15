@@ -43,7 +43,6 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
      * @param receiver
      *            receive wind data from this receiver by adding the new object as a listener to the receiver; when
      *            calling {@link #stop}, this subscription will be removed again.
-     * @param factory TODO
      */
     public ExpeditionWindTracker(DynamicTrackedRace race, DeclinationService declinationService,
             UDPExpeditionReceiver receiver, ExpeditionWindTrackerFactory factory) {
