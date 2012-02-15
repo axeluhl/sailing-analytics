@@ -26,9 +26,8 @@ public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Com
 
     public ChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
             RaceSelectionProvider raceSelectionProvider, Timer timer, DetailType dataToShow, StringMessages stringMessages,
-            int chartWidth, int chartHeight, ErrorReporter errorReporter, boolean showRaceSelector) {
-        super(sailingService, competitorSelectionProvider, raceSelectionProvider, timer, stringMessages, chartWidth,
-                chartHeight, errorReporter, dataToShow, showRaceSelector);
+            ErrorReporter errorReporter) {
+        super(sailingService, competitorSelectionProvider, raceSelectionProvider, timer, stringMessages, errorReporter, dataToShow);
     }
 
     @Override
@@ -48,4 +47,8 @@ public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Com
         loadData();
     }
 
+    @Override
+    public String getLocalizedShortName() {
+        return "Competitor Charts";
+    }
 }

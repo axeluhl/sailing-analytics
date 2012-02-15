@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -35,11 +36,11 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
+import com.sap.sailing.gwt.ui.leaderboard.ChartPanel;
+import com.sap.sailing.gwt.ui.leaderboard.ChartSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.leaderboard.MultiChartPanel;
-import com.sap.sailing.gwt.ui.leaderboard.MultiChartSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -117,7 +118,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         boolean showLeaderboard = true;
         boolean showMap = true;
         boolean showWindCharts = true;
-        boolean showCompetitorMultiChart = false;
+        boolean showCompetitorCharts = true;
         
         if (user == null) {
            // anonymous user
@@ -150,19 +151,17 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
             WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings, stringMessages, errorReporter); 
             CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
-                    windChart, "600px", "500px", stringMessages);
+                    windChart, "auto", "500px", stringMessages);
             windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
             collapsableViewers.add(windChartViewer);
         }
-
-        if(showCompetitorMultiChart) {
-            MultiChartPanel multiChart = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
-                    timer, stringMessages, (int) (Window.getClientWidth() - 350),
-                    (int) (Window.getClientHeight() - 170), errorReporter, /* showRaceSelector */ false);
-            CollapsableComponentViewer<MultiChartSettings> multiChartViewer = new CollapsableComponentViewer<MultiChartSettings>(
-                    multiChart, "600px", "500px", stringMessages);
-            multiChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-            collapsableViewers.add(multiChartViewer);
+        if(showCompetitorCharts) {
+            ChartPanel competitorCharts = new ChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
+                    timer, DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, stringMessages, errorReporter);
+            CollapsableComponentViewer<ChartSettings> chartViewer = new CollapsableComponentViewer<ChartSettings>(
+                    competitorCharts, "auto", "500px", stringMessages);
+            competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+            collapsableViewers.add(chartViewer);
         }
         
         for (CollapsableComponentViewer<?> componentViewer : collapsableViewers) {

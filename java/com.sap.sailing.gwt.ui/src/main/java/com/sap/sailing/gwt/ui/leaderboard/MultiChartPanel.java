@@ -24,10 +24,9 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
  */
 public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> implements Component<MultiChartSettings> {
     public MultiChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
-            RaceSelectionProvider raceSelectionProvider, Timer timer, final StringMessages stringMessages, int chartWidth,
-            int chartHeight, ErrorReporter errorReporter, boolean showRaceSelector) {
-        super(sailingService, competitorSelectionProvider, raceSelectionProvider, timer, stringMessages, chartWidth,
-                chartHeight, errorReporter, /* show initially: */ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, showRaceSelector);
+            RaceSelectionProvider raceSelectionProvider, Timer timer, final StringMessages stringMessages, 
+            ErrorReporter errorReporter) {
+        super(sailingService, competitorSelectionProvider, raceSelectionProvider, timer, stringMessages, errorReporter, /* show initially: */ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER);
     }
 
     @Override
