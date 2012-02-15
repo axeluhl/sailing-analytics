@@ -1,4 +1,0 @@
-#!/bin/sh
-classpath=`find plugins -name 'com.sap.sailing.expeditionconnector-*.jar' | sort | tail -1`
-echo Using JAR file $classpath
-java -cp "$classpath" -Djava.util.logging.config.file=udpmirrorLog.properties com.sap.sailing.expeditionconnector.FromHttpToUdpMirror $*

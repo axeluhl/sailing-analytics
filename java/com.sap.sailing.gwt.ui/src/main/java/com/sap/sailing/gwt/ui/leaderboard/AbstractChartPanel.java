@@ -111,7 +111,13 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 //        chartAndBusyIndicatorPanel.add(chart);
 //        chartAndBusyIndicatorPanel.showWidget(0);
 
-        loadData();
+        List<RaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+        if(!selectedRaces.isEmpty()) {
+            loadData();
+        }
+    }
+
+    protected void selectRace(final RaceIdentifier selectedRace) {
     }
     
     private Chart createChart(DetailType dataToShow) {
@@ -434,10 +440,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if (dataToShow != this.dataToShow) {
             this.dataToShow = dataToShow;
             chart = createChart(dataToShow);
-            if (chartAndBusyIndicatorPanel.getWidgetCount() > 1) {
-                chartAndBusyIndicatorPanel.remove(1);
-            }
-            chartAndBusyIndicatorPanel.add(chart);
+//            if (chartAndBusyIndicatorPanel.getWidgetCount() > 1) {
+//                chartAndBusyIndicatorPanel.remove(1);
+//            }
+            this.setWidget(chart);
         }
     }
 
@@ -451,10 +457,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
-        chart.removeAllSeries();
-        seriesByCompetitor.clear();
-        markPassingSeriesByCompetitor.clear();
-        loadData();
+      setCompetitorsAndTimePointsDTO(null);
+      clearChart(true);
+      loadData();
     }
 
     /**
