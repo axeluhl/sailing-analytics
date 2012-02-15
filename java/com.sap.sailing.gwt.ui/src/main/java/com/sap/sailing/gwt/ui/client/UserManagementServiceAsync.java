@@ -9,4 +9,6 @@ public interface UserManagementServiceAsync {
 
     void getUser(AsyncCallback<UserDTO> callback);
 
+    void logoutUser(AsyncCallback<Void> callback);
+
 }

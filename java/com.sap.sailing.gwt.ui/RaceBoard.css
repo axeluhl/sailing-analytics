@@ -1,3 +1,4 @@
+@import url(fontface.css);
 
 /** Add css rules here for your application. */
 /*
@@ -26,7 +27,7 @@
 
 body {
 	background: #ebebeb;
-	font-family: 'Ubuntu', Arial, sans-serif;
+	font-family: 'UbuntuRegular', Arial, sans-serif;
 	line-height: 1;
 	font-size: 14px;
 	font-weight: 400;
@@ -36,9 +37,8 @@ body {
 }
 
 table td,select,button {
-	font-family: 'Ubuntu', Arial, sans-serif;
+	font-family: 'UbuntuRegular';
 	line-height: 1;
-	font-weight: 400;
 	font-size: 14px;
 }
 
@@ -51,7 +51,7 @@ table td,select,button {
 /** Example rules used by the template application (remove for your app) */
 h1 {
 	font-size: 2em;
-	font-weight: bold;
+	font-family: 'UbuntuBold';
 	color: #777777;
 	margin: 40px 0px 70px;
 	text-align: center;
@@ -104,8 +104,8 @@ table {
 
 .leaderboardLabel {
 	border-bottom: 2px solid #007dc0;
-	font-weight: bold;
 	padding: 0 0 6px 0;
+	font-family: 'UbuntuBold';
 }
 
 .refreshAndSettings {
@@ -224,7 +224,7 @@ input.magnifier {
 }
 
 .collapsablePanel-header-text{
-	font-weight: 600;
+	font-family: 'UbuntuBold';
 	text-transform: uppercase;
 	margin: 15px 0 0 13px;
 	float: left;
@@ -268,6 +268,7 @@ input.magnifier {
 .raceBoardNavigation {
 	float: right;
 	margin: 26px 0 0 0;
+	font-family: 'UbuntuLight';
 }
 
 .raceBoardNavigation-navigationitem {
@@ -320,5 +321,5 @@ input.magnifier {
 	font-size: 20px;
 	text-transform: uppercase;
 	color: #a1a1a1;
-	font-weight: 500;
+	font-family: 'UbuntuMedium';
 }

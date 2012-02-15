@@ -63,6 +63,11 @@ public class Timer {
      */
     private double playSpeedFactor;
     
+    /*
+     * The timer can run in two different modes: Live and Replay
+     * 'Live' means the timer is used for a real time event
+     * 'Replay' means the timer is used for an already finished event in the past 
+     */
     public enum PlayModes { Live, Replay }; 
 
     public enum PlayStates { Stopped, Playing, Paused }; 
@@ -116,8 +121,6 @@ public class Timer {
             for (TimeListener listener : timeListeners) {
                 listener.timeChanged(time);
             }
-            // change the play mode
-            
         }
     }
     
