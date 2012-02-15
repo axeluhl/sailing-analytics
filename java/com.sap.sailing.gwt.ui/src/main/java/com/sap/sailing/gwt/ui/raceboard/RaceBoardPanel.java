@@ -160,6 +160,13 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                     timer, DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, stringMessages, errorReporter);
             CollapsableComponentViewer<ChartSettings> chartViewer = new CollapsableComponentViewer<ChartSettings>(
                     competitorCharts, "auto", "500px", stringMessages);
+
+             // DON'T DELETE -> this is temporary for testing of different chart types
+//            MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
+//                    timer, stringMessages, errorReporter);
+//            CollapsableComponentViewer<MultiChartSettings> chartViewer = new CollapsableComponentViewer<MultiChartSettings>(
+//                    competitorCharts, "auto", "500px", stringMessages);
+
             competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
             collapsableViewers.add(chartViewer);
         }

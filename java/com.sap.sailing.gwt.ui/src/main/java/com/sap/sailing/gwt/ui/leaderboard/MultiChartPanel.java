@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
  * MultiChartPanel is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
  * leader) for different races in a chart. The chart type can be selected from the settings.
  * 
- * When calling the consturcor a chart is created that creates a final amount of series (so the maximum number of
+ * When calling the constructor a chart is created that creates a final amount of series (so the maximum number of
  * competitors cannot be changed in one chart) which are connected to competitors, when the sailing service returns the
  * data. So {@code seriesID, competitorID and markSeriesID} are linked with the index. So if u know for example the
  * seriesID-index, you can get the competitor by calling competitorID.get(index).
@@ -45,5 +45,10 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
     @Override
     protected Component<MultiChartSettings> getComponent() {
         return this;
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return stringMessages.competitorCharts();
     }
 }
