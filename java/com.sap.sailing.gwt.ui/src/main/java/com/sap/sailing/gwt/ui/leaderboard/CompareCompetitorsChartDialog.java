@@ -41,8 +41,8 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         RaceSelectionProvider raceSelectionProvider = new RaceSelectionModel();
         raceSelectionProvider.setAllRaces(races);
         final MultiChartPanel ccp = new MultiChartPanel(sailingService, competitorSelectionProvider, raceSelectionProvider,
-                timer, stringConstants, (int) (Window.getClientWidth() - 350),
-                (int) (Window.getClientHeight() - 170), errorReporter, /* showRaceSelector */ true);
+                timer, stringConstants, errorReporter);
+        ccp.setSize((Window.getClientWidth() - 350) + "px", (Window.getClientHeight() - 170) + "px");
         ccp.addDataLoadedHandler(new DataLoadedHandler() {
             @Override
             public void onDataLoaded(DataLoadedEvent event) {
@@ -86,7 +86,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
-                ccp.resize((int) (Window.getClientWidth() - 250), (int) (Window.getClientHeight() - 90));
+                ccp.setSize((Window.getClientWidth() - 250) + "px", (Window.getClientHeight() - 90) + "px");
             }
         });
     }
