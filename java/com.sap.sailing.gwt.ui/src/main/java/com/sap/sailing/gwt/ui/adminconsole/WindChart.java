@@ -23,7 +23,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
@@ -59,7 +59,9 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
     private RaceIdentifier selectedRaceIdentifier;
-    
+
+    private final SimplePanel mainPanel;
+
     /**
      * @param raceSelectionProvider
      *            if <code>null</code>, this chart won't update its contents automatically upon race selection change;
@@ -78,6 +80,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         chart = new Chart()
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
+                .setWidth100()
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
@@ -98,6 +101,10 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
         chart.getYAxis().setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
+        
+        mainPanel = new SimplePanel();
+        mainPanel.setWidget(chart);
+        
         for (WindSource windSource : WindSource.values()) {
             Series series = createSeries(windSource);
             windSourceSeries.put(windSource, series);
@@ -107,6 +114,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             raceSelectionProvider.addRaceSelectionChangeListener(this);
             onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         }
+        showVisibleSeries();
     }
 
     @Override
@@ -116,10 +124,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
 
     @Override
     public Widget getEntryWidget() {
-        VerticalPanel vp = new VerticalPanel();
-        showVisibleSeries();
-        vp.add(chart);
-        return vp;
+        return mainPanel;
     }
 
     private void showVisibleSeries() {

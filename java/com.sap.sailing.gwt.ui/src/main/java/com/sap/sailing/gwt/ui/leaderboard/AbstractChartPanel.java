@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,28 +23,17 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DeckPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.client.ClientResources;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -61,9 +49,6 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.shared.panels.BusyIndicator;
-import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 
 /**
  * ChartPanel is a GWT panel that can show one sort of competitor data (e.g. current speed over ground, windward distance to
@@ -79,37 +64,29 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
 implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
-    private static final int LINE_WIDTH = 1;
-    private CompetitorInRaceDTO chartData;
-    private CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
-    private final SailingServiceAsync sailingService;
-    private final ErrorReporter errorReporter;
-    private final HorizontalPanel mainPanel;
-    private final VerticalPanel chartPanel;
-    private Chart chart;
-    private final Map<CompetitorDTO, Series> seriesByCompetitor;
-    private final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
-    private final Label title;
-    private final DeckPanel chartAndBusyIndicatorPanel;
-    private final RaceSelectionProvider raceSelectionProvider;
-    private long stepSize = 5000;
-    private final StringMessages stringMessages;
-    private final Set<Series> seriesIsUsed;
-    private int width, height;
-    private final Timer timer;
-    private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
-    private DetailType dataToShow;
-    private AbsolutePanel loadingPanel;
-    private final CompetitorSelectionProvider competitorSelectionProvider;
-    private static final ClientResources resources = GWT.create(ClientResources.class);
+    protected static final int LINE_WIDTH = 1;
+    protected CompetitorInRaceDTO chartData;
+    protected CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
+    protected final SailingServiceAsync sailingService;
+    protected final ErrorReporter errorReporter;
+    protected Chart chart;
+    protected final Map<CompetitorDTO, Series> seriesByCompetitor;
+    protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
+    protected final DeckPanel chartAndBusyIndicatorPanel;
+    protected final RaceSelectionProvider raceSelectionProvider;
+    protected long stepSize = 5000;
+    protected final StringMessages stringMessages;
+    protected final Set<Series> seriesIsUsed;
+    protected final Timer timer;
+    protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
+    protected DetailType dataToShow;
+    protected AbsolutePanel loadingPanel;
+    protected final CompetitorSelectionProvider competitorSelectionProvider;
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, final StringMessages stringMessages, int chartWidth, int chartHeight,
-            ErrorReporter errorReporter, DetailType dataToShow, boolean showRaceSelector) {
+            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow) {
         this.stringMessages = stringMessages;
-        width = chartWidth;
-    	height = chartHeight;
     	seriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
     	this.timer = timer;
@@ -123,47 +100,24 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
-        mainPanel = new HorizontalPanel();
-        mainPanel.setSpacing(5);
-        chartPanel = new VerticalPanel();
-        title = new Label(DetailTypeFormatter.format(dataToShow, stringMessages));
-        title.setStyleName("chartTitle");
-        chartPanel.add(title);
+        
+        setWidget(chart);
         loadingPanel = new AbsolutePanel();
-        loadingPanel.setSize(width + "px", height + "px");
-        BusyIndicator busyIndicator = new SimpleBusyIndicator(true, 1);
-        loadingPanel.add(busyIndicator, width / 2 - 32 / 2, height / 2 - 32 - 2);
-        chartPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-        chartPanel.setSpacing(5);
+        loadingPanel.setSize("100%", "100%");
+//        BusyIndicator busyIndicator = new SimpleBusyIndicator(true, 1);
+//        loadingPanel.add(busyIndicator, width / 2 - 32 / 2, height / 2 - 32 - 2);
         chartAndBusyIndicatorPanel = new DeckPanel();
-        chartAndBusyIndicatorPanel.add(loadingPanel);
-        chartAndBusyIndicatorPanel.add(chart);
-        chartAndBusyIndicatorPanel.showWidget(0);
-        if (showRaceSelector) {
-            addOptionalRaceChooserPanel(chartPanel);
-        }
-        chartPanel.add(chartAndBusyIndicatorPanel);
-        mainPanel.add(chartPanel);
-        ImageResource settingsIcon = resources.settingsIcon();
-        Anchor showConfigAnchor = new Anchor(AbstractImagePrototype.create(settingsIcon).getSafeHtml());
-        showConfigAnchor.setTitle(stringMessages.configuration());
-        showConfigAnchor.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                new SettingsDialog<SettingsType>(getComponent(), stringMessages).show();
-            }
-        });
-        mainPanel.add(showConfigAnchor);
-        this.add(mainPanel);
-        // loadData only necessary if no race chooser displayed; the race chooser will load the data for the selected race
-        if (!showRaceSelector) {
-            loadData();
-        }
+//        chartAndBusyIndicatorPanel.add(loadingPanel);
+//        chartAndBusyIndicatorPanel.add(chart);
+//        chartAndBusyIndicatorPanel.showWidget(0);
+
+        loadData();
     }
     
     private Chart createChart(DetailType dataToShow) {
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
+                .setWidth100()
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
@@ -192,46 +146,13 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         numberFormat.format(toolTipData.getYAsDouble()) + unit;
             }
         }));
-        chart.setWidth(width);
-        chart.setHeight(height);
         return chart;
-    }
-
-    private void addOptionalRaceChooserPanel(VerticalPanel chartPanel) {
-        HorizontalPanel raceChooserPanel = new HorizontalPanel();
-        raceChooserPanel.setSpacing(5);
-        boolean first = true;
-        for (final RaceIdentifier selectedRace : raceSelectionProvider.getAllRaces()) {
-            RadioButton r = new RadioButton("chooseRace");
-            r.setText(selectedRace.toString());
-            raceChooserPanel.add(r);
-            if (first) {
-                r.setValue(true);
-                selectRace(selectedRace);
-                first = false;
-            }
-            r.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    selectRace(selectedRace);
-                    setCompetitorsAndTimePointsDTO(null);
-                    clearChart(true);
-                    loadData();
-                }
-            });
-        }
-        chartPanel.add(raceChooserPanel);
-    }
-
-    private void selectRace(final RaceIdentifier selectedRace) {
-        // also notify this panel when race selection is explicitly changed via radio buttons
-        AbstractChartPanel.this.raceSelectionProvider.setSelection(Collections.singletonList(selectedRace));
     }
 
     protected abstract Component<SettingsType> getComponent();
     
     protected void loadData() {
-    	chartAndBusyIndicatorPanel.showWidget(0);
+//    	chartAndBusyIndicatorPanel.showWidget(0);
         if (getCompetitorsAndTimePointsDTO() != null) {
             doLoadData();
         } else {
@@ -284,7 +205,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                             chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
                         }
                         updateTableData(competitorsAndTimePointsToLoad.getCompetitors());
-                        chartAndBusyIndicatorPanel.showWidget(1);
+//                        chartAndBusyIndicatorPanel.showWidget(1);
                     }
                 });
     }
@@ -317,7 +238,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     
     private synchronized void updateTableData(CompetitorDTO[] competitorDTOs) {
         //Make sure the busy indicator is removed at this point, or plotting the data results in an exception
-        chartAndBusyIndicatorPanel.showWidget(1);
+//        chartAndBusyIndicatorPanel.showWidget(1);
         if (getCompetitorsAndTimePointsDTO() != null && chartData != null) {
             for (CompetitorDTO competitor : competitorDTOs) {
                 Series compSeries = getCompetitorSeries(competitor);
@@ -447,12 +368,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             markPassingSeriesByCompetitor.put(competitor, result);
         }
         return result;
-    }
-    
-    public void resize(int width, int height){
-    	this.width = width;
-    	this.height = height;
-    	this.setSize(width + "px", height + "px");
     }
     
     /**
