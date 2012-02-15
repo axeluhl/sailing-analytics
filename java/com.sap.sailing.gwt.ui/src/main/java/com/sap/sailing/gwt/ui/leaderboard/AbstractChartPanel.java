@@ -64,24 +64,24 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
 implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
-    private static final int LINE_WIDTH = 1;
-    private CompetitorInRaceDTO chartData;
-    private CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
-    private final SailingServiceAsync sailingService;
-    private final ErrorReporter errorReporter;
-    private Chart chart;
-    private final Map<CompetitorDTO, Series> seriesByCompetitor;
-    private final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
-    private final DeckPanel chartAndBusyIndicatorPanel;
-    private final RaceSelectionProvider raceSelectionProvider;
-    private long stepSize = 5000;
-    private final StringMessages stringMessages;
-    private final Set<Series> seriesIsUsed;
-    private final Timer timer;
-    private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
-    private DetailType dataToShow;
-    private AbsolutePanel loadingPanel;
-    private final CompetitorSelectionProvider competitorSelectionProvider;
+    protected static final int LINE_WIDTH = 1;
+    protected CompetitorInRaceDTO chartData;
+    protected CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
+    protected final SailingServiceAsync sailingService;
+    protected final ErrorReporter errorReporter;
+    protected Chart chart;
+    protected final Map<CompetitorDTO, Series> seriesByCompetitor;
+    protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
+    protected final DeckPanel chartAndBusyIndicatorPanel;
+    protected final RaceSelectionProvider raceSelectionProvider;
+    protected long stepSize = 5000;
+    protected final StringMessages stringMessages;
+    protected final Set<Series> seriesIsUsed;
+    protected final Timer timer;
+    protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
+    protected DetailType dataToShow;
+    protected AbsolutePanel loadingPanel;
+    protected final CompetitorSelectionProvider competitorSelectionProvider;
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,

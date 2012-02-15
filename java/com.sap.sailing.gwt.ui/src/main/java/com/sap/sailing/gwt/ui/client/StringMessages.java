@@ -255,4 +255,5 @@ public interface StringMessages extends Messages {
     String stepSizeInSeconds();
     String refreshInterval();
     String refreshIntervalMustBeGreaterThanXSeconds(String seconds);
+    String competitorCharts();
 }
