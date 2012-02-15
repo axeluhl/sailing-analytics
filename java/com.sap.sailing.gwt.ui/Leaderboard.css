@@ -1,3 +1,5 @@
+@import url(fontface.css);
+
 /** Add css rules here for your application. */
 /*
     body #calendar:after
@@ -24,7 +26,7 @@
 
 body {
 	background: #ebebeb;
-	font-family: 'Ubuntu', Arial, sans-serif;
+	font-family: 'UbuntuRegular', Arial, sans-serif;
 	line-height: 1;
 	font-size: 14px;
 	font-weight: 400;
