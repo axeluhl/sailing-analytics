@@ -49,6 +49,6 @@ public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Com
 
     @Override
     public String getLocalizedShortName() {
-        return "Competitor Charts";
+        return stringMessages.competitorCharts();
     }
 }
