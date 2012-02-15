@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.MultiChartPanel;
 import com.sap.sailing.gwt.ui.leaderboard.MultiChartSettings;
+import com.sap.sailing.gwt.ui.raceboard.CollapsableComponentViewer.ViewerPanelTypes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -131,7 +132,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                     timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
 
             CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
-                    leaderboardPanel, "100%", "100%", stringMessages);
+                    leaderboardPanel, "100%", "100%", stringMessages, ViewerPanelTypes.SCROLL_PANEL);
             collapsableViewers.add(leaderboardViewer);
         }
 

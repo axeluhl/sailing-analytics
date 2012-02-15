@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.shared.components.Component;
@@ -19,18 +21,41 @@ import com.sap.sailing.gwt.ui.shared.components.IsEmbeddableComponent;
  * 
  */
 public class CollapsableComponentViewer<SettingsType> implements ComponentViewer {
-    private final CollapsablePanel collapsablePanel;
-
-    private final Component<SettingsType> component;
+    
+    public enum ViewerPanelTypes{ABSOLUTE_PANEL,  SCROLL_PANEL}
 
     private final StringMessages stringMessages;
+    private final ViewerPanelTypes viewerPanelType;
+    
+    private final CollapsablePanel collapsablePanel;
+    private final Component<SettingsType> component;
 
     public CollapsableComponentViewer(Component<SettingsType> component, String defaultWidth, String defaultHeight,
             StringMessages stringMessages) {
+        this(component, defaultWidth, defaultHeight, stringMessages, ViewerPanelTypes.ABSOLUTE_PANEL);
+    }
+
+    public CollapsableComponentViewer(Component<SettingsType> component, String defaultWidth, String defaultHeight,
+            StringMessages stringMessages, ViewerPanelTypes viewerPanelType) {
         this.component = component;
         this.stringMessages = stringMessages;
+        this.viewerPanelType = viewerPanelType;
 
-        AbsolutePanel contentPanel = new AbsolutePanel();
+        Panel contentPanel = null;
+        switch (viewerPanelType) {
+        case ABSOLUTE_PANEL:
+            contentPanel = new AbsolutePanel();
+            break;
+        case SCROLL_PANEL:
+            contentPanel = new ScrollPanel();
+            break;
+
+        default:
+            contentPanel = new AbsolutePanel();
+            GWT.log("Unknown ViewerPanelType during creation of a CollapsableComponentViewer. Created a default panel.");
+            break;
+        }
+        
         collapsablePanel = createCollapsablePanel(contentPanel, component.getLocalizedShortName(), defaultWidth,
                 defaultHeight);
     }
@@ -52,7 +77,6 @@ public class CollapsableComponentViewer<SettingsType> implements ComponentViewer
         CollapsablePanel collapsablePanel = new CollapsablePanel(panelTitle, true);
         collapsablePanel.setSize("100%", "100%");
         collapsablePanel.setOpen(true);
-
         if (component instanceof IsEmbeddableComponent) {
             IsEmbeddableComponent embeddableComponent = (IsEmbeddableComponent) component;
             if (embeddableComponent.hasToolbar()) {
@@ -85,4 +109,9 @@ public class CollapsableComponentViewer<SettingsType> implements ComponentViewer
 
         return collapsablePanel;
     }
+    
+    public ViewerPanelTypes getViewerPanelType() {
+        return viewerPanelType;
+    }
+    
 }
