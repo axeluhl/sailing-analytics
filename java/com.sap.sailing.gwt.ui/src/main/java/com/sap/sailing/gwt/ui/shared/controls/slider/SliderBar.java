@@ -36,6 +36,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
@@ -1101,7 +1102,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the mouse event
      */
     private void slideKnob(Event event) {
-        int x = DOM.eventGetClientX(event);
+        //Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
+        int x = DOM.eventGetClientX(event) + Window.getScrollLeft();
         if (x > 0) {
             int lineWidth = lineElement.getOffsetWidth();
             int lineLeft = lineElement.getAbsoluteLeft();
