@@ -138,9 +138,11 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         chart.setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)));
         final String unit = getUnit();
         chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
+        chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis().setReversed((dataToShow == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || 
+                                      dataToShow == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true : false);
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
-        chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
         String decimalPlaces = "";
         for (int i = 0; i < dataToShow.getPrecision(); i++) {
             if (i == 0) {
