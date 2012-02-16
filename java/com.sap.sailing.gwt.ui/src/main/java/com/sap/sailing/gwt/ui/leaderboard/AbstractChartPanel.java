@@ -105,8 +105,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         raceSelectionProvider.addRaceSelectionChangeListener(this);
 
         noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
-        noCompetitorsSelectedLabel.getElement().setAttribute("margin-left", "auto");
-        noCompetitorsSelectedLabel.getElement().setAttribute("margin-right", "auto");
+        noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         
         chart = createChart(dataToShow);
         
