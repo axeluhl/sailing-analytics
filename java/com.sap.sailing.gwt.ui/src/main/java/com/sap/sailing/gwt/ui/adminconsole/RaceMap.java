@@ -891,9 +891,9 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                                 + ((int) maneuver.directionChangeInDegrees) + " deg ("
                                 + ((int) before.bearingInDegrees) + " deg -> " + ((int) after.bearingInDegrees) + " deg)";
                         String speedChange = stringMessages.speedChange() + ": " 
-                                + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " knt ("
-                                + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " knt -> "
-                                + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " knt)";
+                                + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " kts ("
+                                + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " kts -> "
+                                + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " kts)";
                         
                         options.setTitle(timeAndManeuver + "; " + directionChange + "; " + speedChange);
                         options.setIcon(imageResources.maneuverIconsForTypeAndTargetTack

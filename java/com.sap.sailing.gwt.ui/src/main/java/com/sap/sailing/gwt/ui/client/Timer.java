@@ -24,7 +24,7 @@ public class Timer {
      * The time delay to the current point in time in millisseconds
      * will only be used in live play mode  
      */
-    private long livePlayDelayInMs;
+    private long livePlayDelayInMillis;
     
     /**
      * Listeners interested in changes of {@link #time}
@@ -63,7 +63,7 @@ public class Timer {
      */
     private double playSpeedFactor;
     
-    /*
+    /**
      * The timer can run in two different modes: Live and Replay
      * 'Live' means the timer is used for a real time event
      * 'Replay' means the timer is used for an already finished event in the past 
@@ -95,7 +95,7 @@ public class Timer {
         playStateListeners = new HashSet<PlayStateListener>();
         playState = PlayStates.Stopped;
         playSpeedFactor = 1.0;
-        livePlayDelayInMs = 0;
+        livePlayDelayInMillis = 0;
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -179,7 +179,7 @@ public class Timer {
         if (playState == PlayStates.Stopped) {
             playState = PlayStates.Playing;
             if(playMode == PlayModes.Live) {
-                setTime(System.currentTimeMillis()-livePlayDelayInMs);
+                setTime(System.currentTimeMillis()-livePlayDelayInMillis);
             }
             startAutoAdvance();
             for (PlayStateListener playStateListener : playStateListeners) {
@@ -196,7 +196,7 @@ public class Timer {
         if (playState == PlayStates.Paused || playState == PlayStates.Stopped) {
             playState = PlayStates.Playing;
             if(playMode == PlayModes.Live) {
-                setTime(System.currentTimeMillis()-livePlayDelayInMs);
+                setTime(System.currentTimeMillis()-livePlayDelayInMillis);
             }
             startAutoAdvance();
             for (PlayStateListener playStateListener : playStateListeners) {
@@ -229,14 +229,14 @@ public class Timer {
     }
     
     public void setDelay(long delayInMilliseconds) {
-        this.livePlayDelayInMs = delayInMilliseconds;
+        this.livePlayDelayInMillis = delayInMilliseconds;
         if (getPlayState() == PlayStates.Playing) {
             setTime(new Date().getTime() - delayInMilliseconds);
         }
     }
 
     public long getDelay() {
-        return livePlayDelayInMs;
+        return livePlayDelayInMillis;
     }
     
     public long getCurrentDelay() {
