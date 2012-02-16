@@ -699,8 +699,8 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             result.add(new Label(stringMessages.rank() + ": " + rank));
         }
         result.add(new Label(stringMessages.speed() + ": "
-                + NumberFormat.getDecimalFormat().format(lastFix.speedWithBearing.speedInKnots) + " kts"));
-        result.add(new Label(stringMessages.bearing() + ": "+ (int) lastFix.speedWithBearing.bearingInDegrees + " deg"));
+                + NumberFormat.getDecimalFormat().format(lastFix.speedWithBearing.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()));
+        result.add(new Label(stringMessages.bearing() + ": "+ (int) lastFix.speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
         //TODO Introduce user role dependent view (Spectator, Admin). Comments underneath are necessary for other views
 //      result.add(new Label("" + lastFix.position));
 //      result.add(new Label("Tack: " + lastFix.tack.name()));
@@ -888,12 +888,12 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                         String timeAndManeuver = DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timepoint)
                                 + ": " + maneuver.type.name();
                         String directionChange = stringMessages.directionChange() + ": "
-                                + ((int) maneuver.directionChangeInDegrees) + " deg ("
-                                + ((int) before.bearingInDegrees) + " deg -> " + ((int) after.bearingInDegrees) + " deg)";
+                                + ((int) maneuver.directionChangeInDegrees) + " "+stringMessages.degreesShort()+" ("
+                                + ((int) before.bearingInDegrees) + " deg -> " + ((int) after.bearingInDegrees) + " "+stringMessages.degreesShort()+")";
                         String speedChange = stringMessages.speedChange() + ": " 
-                                + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " kts ("
-                                + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " kts -> "
-                                + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " kts)";
+                                + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+" ("
+                                + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+" -> "
+                                + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit();
                         
                         options.setTitle(timeAndManeuver + "; " + directionChange + "; " + speedChange);
                         options.setIcon(imageResources.maneuverIconsForTypeAndTargetTack
