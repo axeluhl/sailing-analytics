@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.dom.client.EventTarget;
@@ -12,8 +13,13 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -24,6 +30,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedEvent;
 import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedHandler;
+import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
+import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
 
 /**
  * A dialog box that holds a {@link MultiChartPanel} and manages a {@link RaceSelectionProvider} of its own.
@@ -34,16 +42,23 @@ import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedHandler;
 public class CompareCompetitorsChartDialog extends DialogBox {
     private Anchor closeAnchor;
     
+    private final RaceSelectionProvider raceSelectionProvider;
+    
+    private final MultiChartPanel multiChartPanel;
+    
+    private final CollapsablePanel collapsablePanel;
+    
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService,
             List<RaceIdentifier> races, final CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             StringMessages stringConstants, ErrorReporter errorReporter) {
         super(false);
-        RaceSelectionProvider raceSelectionProvider = new RaceSelectionModel();
+        raceSelectionProvider = new RaceSelectionModel();
         raceSelectionProvider.setAllRaces(races);
-        final MultiChartPanel ccp = new MultiChartPanel(sailingService, competitorSelectionProvider, raceSelectionProvider,
-                timer, stringConstants, (int) (Window.getClientWidth() - 350),
-                (int) (Window.getClientHeight() - 170), errorReporter, /* showRaceSelector */ true);
-        ccp.addDataLoadedHandler(new DataLoadedHandler() {
+        
+        multiChartPanel = new MultiChartPanel(sailingService, competitorSelectionProvider, raceSelectionProvider,
+                timer, stringConstants, errorReporter);
+        multiChartPanel.setSize((Window.getClientWidth() - 350) + "px", (Window.getClientHeight() - 170) + "px");
+        multiChartPanel.addDataLoadedHandler(new DataLoadedHandler() {
             @Override
             public void onDataLoaded(DataLoadedEvent event) {
                 CompareCompetitorsChartDialog.this.setPopupPosition(5, 5);
@@ -51,8 +66,25 @@ public class CompareCompetitorsChartDialog extends DialogBox {
                 CompareCompetitorsChartDialog.this.show();
             }
         });
-        this.add(ccp);
-        this.setPopupPosition(5, 5);
+        
+        FlowPanel contentPanel = new FlowPanel();
+
+        collapsablePanel = new CollapsablePanel("", true);
+        collapsablePanel.setSize("100%", "100%");
+        collapsablePanel.setOpen(true);
+
+        ComponentToolbar<MultiChartSettings> toolbar = new ComponentToolbar<MultiChartSettings>(multiChartPanel, stringConstants);
+        toolbar.addSettingsButton();
+        collapsablePanel.setHeaderToolbar(toolbar);
+        collapsablePanel.setContent(contentPanel);
+        Widget componentEntryWidget = multiChartPanel.getEntryWidget();
+
+        createRaceChooserPanel(contentPanel);
+
+        contentPanel.add(componentEntryWidget);
+        
+        this.add(collapsablePanel);
+        this.setPopupPosition(15, 15);
         //this.setSize((int) (Window.getClientWidth()*0.9) + "px", (int) (Window.getClientHeight() * 0.9) + "px");
         closeAnchor = new Anchor("x");
 
@@ -79,15 +111,48 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         closeAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                competitorSelectionProvider.removeCompetitorSelectionChangeListener(ccp);
+                competitorSelectionProvider.removeCompetitorSelectionChangeListener(multiChartPanel);
                 hide();
             }
         });
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
-                ccp.resize((int) (Window.getClientWidth() - 250), (int) (Window.getClientHeight() - 90));
+                multiChartPanel.setSize((Window.getClientWidth() - 250) + "px", (Window.getClientHeight() - 90) + "px");
             }
         });
     }
+    
+    private void createRaceChooserPanel(Panel parentPanel) {
+        HorizontalPanel raceChooserPanel = new HorizontalPanel();
+        raceChooserPanel.setSpacing(5);
+        boolean first = true;
+        for (final RaceIdentifier selectedRace : raceSelectionProvider.getAllRaces()) {
+            RadioButton raceSelectionRadioButton = new RadioButton("chooseRace");
+            raceSelectionRadioButton.setText(selectedRace.toString());
+            raceChooserPanel.add(raceSelectionRadioButton);
+            if (first) {
+                raceSelectionRadioButton.setValue(true);
+                selectRace(selectedRace);
+                first = false;
+            }
+            raceSelectionRadioButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    selectRace(selectedRace);
+                }
+            });
+        }
+        parentPanel.add(raceChooserPanel);
+    }
+
+    private void selectRace(final RaceIdentifier selectedRace) {
+        if(selectedRace != null)
+            collapsablePanel.getHeaderTextAccessor().setText(selectedRace.getRaceName());
+        else
+            collapsablePanel.getHeaderTextAccessor().setText("");
+
+        raceSelectionProvider.setSelection(Collections.singletonList(selectedRace));
+    }
+
 }

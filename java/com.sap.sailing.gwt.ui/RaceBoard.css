@@ -27,7 +27,7 @@
 
 body {
 	background: #ebebeb;
-	font-family: 'UbuntuRegular', Arial, sans-serif;
+	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
 	line-height: 1;
 	font-size: 14px;
 	font-weight: 400;
@@ -37,7 +37,7 @@ body {
 }
 
 table td,select,button {
-	font-family: 'UbuntuRegular';
+	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 	line-height: 1;
 	font-size: 14px;
 }
@@ -51,7 +51,7 @@ table td,select,button {
 /** Example rules used by the template application (remove for your app) */
 h1 {
 	font-size: 2em;
-	font-family: 'UbuntuBold';
+	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
 	color: #777777;
 	margin: 40px 0px 70px;
 	text-align: center;
@@ -70,7 +70,9 @@ table {
 	background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
 	background-position: center top, 0 0;
 	background-repeat: no-repeat, repeat-x;
-	box-shadow: 0 0 20px #b0aeae;
+	box-shadow: 0 0 20px #858585;
+	-moz-box-shadow: 0 0 20px #858585;
+	-webkit-box-shadow: 0 0 20px #858585;
 }
 
 .LogoAndTitlePanel:after {
@@ -105,7 +107,7 @@ table {
 .leaderboardLabel {
 	border-bottom: 2px solid #007dc0;
 	padding: 0 0 6px 0;
-	font-family: 'UbuntuBold';
+	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
 }
 
 .refreshAndSettings {
@@ -141,7 +143,9 @@ input.magnifier {
 	height: 140px;
 	z-index: 9;
 	background: #DDDCDC;
-	box-shadow: 0 0 20px #b0aeae;
+	box-shadow: 0 0 20px #858585;
+	-webkit-box-shadow: 0 0 20px #858585;
+	-moz-box-shadow: 0 0 20px #858585;
 }
 
 .timeLineInnerPanel {
@@ -179,96 +183,10 @@ input.magnifier {
 	width: 100%;
 }
 
-.collapsablePanel {
-	background: #b6b6b6;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-	overflow: hidden;
-	border: 1px solid #aaaaaa;
-	margin: 0 0 15px 0;
-}
-
-.collapsablePanel-content {
-	background: #fff;
-	margin: 12px;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
-	width: auto !important;
-	border: 1px solid #aaaaaa;
-}
-
-.collapsablePanel-header {
-	background: url(images/titlebar-background.png) 0 0 repeat-x;
-	padding: 0;
-	margin: 0;
-	height: 42px;
-	position: relative;
-	-webkit-border-top-left-radius: 4px;
-	-moz-border-top-left-radius: 4px;
-	border-top-left-radius: 4px;
-	-webkit-border-top-right-radius: 4px;
-	-moz-border-top-right-radius: 4px;
-	border-top-right-radius: 4px;
-}
-
-.collapsablePanel:last-child {
-	margin-bottom: 0;
-}
-
-.collapsablePanel-open {
-}	
-
-.collapsablePanel-closed {
-}
-
-.collapsablePanel-header-text{
-	font-family: 'UbuntuBold';
-	text-transform: uppercase;
-	margin: 15px 0 0 13px;
-	float: left;
-}
-
-.collapsablePanel-header-image{
-	float:left;
-	margin: 13px 0 0 0;
-}
-
-.collapsablePanel-header-collapse{
-	height:100%;
-	display: block;
-	padding: 0 0 0 10px;	
-	color: #3b3b3b;
-}
-
-.collapsablePanel-header-collapse:hover {
-	color: #3b3b3b;
-}
-
-.collapsablePanel-toolbar { 
-	position: absolute;
-	top: 0;
-	right: 0;
-	height: 43px;
-	width: 43px;
-	overflow: hidden;
-}
-
-.collapsablePanel-toolbar table {
-	border-collapse: collapse;
-}
-
-.collapsablePanel-toolbar a {
-	display: block;
-	padding: 9px;
-	
-}
-
 .raceBoardNavigation {
 	float: right;
 	margin: 26px 0 0 0;
-	font-family: 'UbuntuLight';
+	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
 .raceBoardNavigation-navigationitem {
@@ -321,5 +239,9 @@ input.magnifier {
 	font-size: 20px;
 	text-transform: uppercase;
 	color: #a1a1a1;
-	font-family: 'UbuntuMedium';
+	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
 }
+
+.breadcrumbPanel-ActiveBreadcrumb a, .breadcrumbPanel-InactiveBreadcrumb a, .breadcrumbPanel-NextArrow a {
+	color:#A1A1A1;
+	}

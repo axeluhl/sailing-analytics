@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.shared.components.Component;
@@ -94,15 +95,19 @@ public class CollapsableComponentViewer<SettingsType> implements ComponentViewer
         
         contentPanel.setSize(defaultContentWidth, defaultContentHeight);
         collapsablePanel.setContent(contentPanel);
-        if (component.getEntryWidget() != null) {
-            component.getEntryWidget().setSize(defaultContentWidth, defaultContentHeight);
-            contentPanel.add(component.getEntryWidget());
+        Widget componentEntryWidget = component.getEntryWidget();
+
+        if (componentEntryWidget != null) {
+            contentPanel.add(componentEntryWidget);
+            componentEntryWidget.setSize(defaultContentWidth, defaultContentHeight);
         } else {
             if (component instanceof ComponentGroup) {
                 Iterable<Component<?>> components = ((ComponentGroup<?>) component).getComponents();
                 for (Component<?> c : components) {
-                    if (c.getEntryWidget() != null)
-                        contentPanel.add(c.getEntryWidget());
+                    Widget entryWidget = c.getEntryWidget();
+                    if (entryWidget != null) {
+                        contentPanel.add(entryWidget);
+                    }
                 }
             }
         }
