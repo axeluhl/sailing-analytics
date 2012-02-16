@@ -24,7 +24,7 @@ public class Timer {
      * The time delay to the current point in time in millisseconds
      * will only be used in live play mode  
      */
-    private long livePlayDelayInMs;
+    private long livePlayDelayInMillis;
     
     /**
      * Listeners interested in changes of {@link #time}
@@ -63,7 +63,7 @@ public class Timer {
      */
     private double playSpeedFactor;
     
-    /*
+    /**
      * The timer can run in two different modes: Live and Replay
      * 'Live' means the timer is used for a real time event
      * 'Replay' means the timer is used for an already finished event in the past 
@@ -85,7 +85,7 @@ public class Timer {
      * The timer is created in stopped state, using "now" as its current time, 1.0 as its {@link #playSpeedFactor
      * acceleration factor} and <code>delayBetweenAutoAdvancesInMilliseconds</code> as the
      * {@link #refreshInterval delay between automatic updates} should the timer be
-     * {@link #resume() started}.
+     * {@link #resume() started}. The {@link #livePlayDelayInMillis} is set to five seconds (5000ms).
      */
     public Timer(PlayModes playMode, long refreshInterval) {
         this.refreshInterval = refreshInterval;
@@ -95,7 +95,7 @@ public class Timer {
         playStateListeners = new HashSet<PlayStateListener>();
         playState = PlayStates.Stopped;
         playSpeedFactor = 1.0;
-        livePlayDelayInMs = 0;
+        livePlayDelayInMillis = 5000l;
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -178,8 +178,8 @@ public class Timer {
     public void play() {
         if (playState == PlayStates.Stopped) {
             playState = PlayStates.Playing;
-            if(playMode == PlayModes.Live) {
-                setTime(System.currentTimeMillis()-livePlayDelayInMs);
+            if (playMode == PlayModes.Live) {
+                setTime(System.currentTimeMillis()-livePlayDelayInMillis);
             }
             startAutoAdvance();
             for (PlayStateListener playStateListener : playStateListeners) {
@@ -195,8 +195,8 @@ public class Timer {
     public void resume() {
         if (playState == PlayStates.Paused || playState == PlayStates.Stopped) {
             playState = PlayStates.Playing;
-            if(playMode == PlayModes.Live) {
-                setTime(System.currentTimeMillis()-livePlayDelayInMs);
+            if (playMode == PlayModes.Live) {
+                setTime(System.currentTimeMillis()-livePlayDelayInMillis);
             }
             startAutoAdvance();
             for (PlayStateListener playStateListener : playStateListeners) {
@@ -210,7 +210,7 @@ public class Timer {
             @Override
             public boolean execute() {
                 if (time != null) {
-                    setTime(time.getTime() + (long) (playSpeedFactor * refreshInterval));
+                    setTime(time.getTime() + (long) ((getPlayMode()==PlayModes.Replay?playSpeedFactor:1.0) * refreshInterval));
                 }
                 if (refreshIntervalChanged) {
                     refreshIntervalChanged = false;
@@ -229,18 +229,27 @@ public class Timer {
     }
     
     public void setDelay(long delayInMilliseconds) {
-        this.livePlayDelayInMs = delayInMilliseconds;
+        this.livePlayDelayInMillis = delayInMilliseconds;
         if (getPlayState() == PlayStates.Playing) {
             setTime(new Date().getTime() - delayInMilliseconds);
         }
     }
 
     public long getDelay() {
-        return livePlayDelayInMs;
+        return livePlayDelayInMillis;
     }
     
-    public long getCurrentDelay() {
+    /**
+     * Tells how much the timer is currently behind "now." Note that this is not the same as asking
+     * {@link #getLivePlayDelayInMillis()} which tells the delay that will be established if the timer is put
+     * into live mode.
+     */
+    public long getCurrentDelayInMillis() {
         return System.currentTimeMillis() - getTime().getTime();
+    }
+    
+    public long getLivePlayDelayInMillis() {
+        return livePlayDelayInMillis;
     }
 
     public PlayStates getPlayState() {
