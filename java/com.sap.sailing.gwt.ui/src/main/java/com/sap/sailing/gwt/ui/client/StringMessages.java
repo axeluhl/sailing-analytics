@@ -259,4 +259,5 @@ public interface StringMessages extends Messages {
     String selectAtLeastOneCompetitor();
     String directionChange();
     String speedChange();
+    String degreesShort();
 }
