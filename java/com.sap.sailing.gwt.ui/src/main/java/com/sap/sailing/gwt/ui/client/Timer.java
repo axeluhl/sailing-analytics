@@ -210,7 +210,7 @@ public class Timer {
             @Override
             public boolean execute() {
                 if (time != null) {
-                    setTime(time.getTime() + (long) (playSpeedFactor * refreshInterval));
+                    setTime(time.getTime() + (long) ((getPlayMode()==PlayModes.Replay?playSpeedFactor:1.0) * refreshInterval));
                 }
                 if (refreshIntervalChanged) {
                     refreshIntervalChanged = false;
