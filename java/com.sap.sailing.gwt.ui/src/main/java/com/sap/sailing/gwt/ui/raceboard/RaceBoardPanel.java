@@ -160,7 +160,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 //            ChartPanel competitorCharts = new ChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
 //                    timer, DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, stringMessages, errorReporter);
 //            CollapsableComponentViewer<ChartSettings> chartViewer = new CollapsableComponentViewer<ChartSettings>(
-//                    competitorCharts, "auto", "500px", stringMessages);
+//                    competitorCharts, "auto", "400px", stringMessages);
 
             MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
                     timer, stringMessages, errorReporter);
