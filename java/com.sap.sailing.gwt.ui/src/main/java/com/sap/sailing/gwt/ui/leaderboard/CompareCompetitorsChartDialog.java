@@ -143,6 +143,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
             });
         }
         parentPanel.add(raceChooserPanel);
+        
     }
 
     private void selectRace(final RaceIdentifier selectedRace) {
