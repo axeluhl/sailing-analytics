@@ -151,7 +151,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
             WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings, stringMessages, errorReporter); 
             CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
-                    windChart, "auto", "500px", stringMessages);
+                    windChart, "auto", "400px", stringMessages);
             windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
             collapsableViewers.add(windChartViewer);
         }
@@ -165,7 +165,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
                     timer, stringMessages, errorReporter);
             CollapsableComponentViewer<MultiChartSettings> chartViewer = new CollapsableComponentViewer<MultiChartSettings>(
-                    competitorCharts, "auto", "500px", stringMessages);
+                    competitorCharts, "auto", "400px", stringMessages);
 
             competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
             collapsableViewers.add(chartViewer);

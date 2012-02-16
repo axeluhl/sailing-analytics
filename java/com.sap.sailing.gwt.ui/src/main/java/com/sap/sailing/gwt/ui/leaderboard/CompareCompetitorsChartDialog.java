@@ -57,7 +57,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         
         multiChartPanel = new MultiChartPanel(sailingService, competitorSelectionProvider, raceSelectionProvider,
                 timer, stringConstants, errorReporter);
-        multiChartPanel.setSize((Window.getClientWidth() - 350) + "px", (Window.getClientHeight() - 170) + "px");
+        multiChartPanel.setSize("100%", "100%");
         multiChartPanel.addDataLoadedHandler(new DataLoadedHandler() {
             @Override
             public void onDataLoaded(DataLoadedEvent event) {
@@ -70,7 +70,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         FlowPanel contentPanel = new FlowPanel();
 
         collapsablePanel = new CollapsablePanel("", true);
-        collapsablePanel.setSize("100%", "100%");
+        collapsablePanel.setSize(Window.getClientWidth() - 250 + "px", "100%");
         collapsablePanel.setOpen(true);
 
         ComponentToolbar<MultiChartSettings> toolbar = new ComponentToolbar<MultiChartSettings>(multiChartPanel, stringConstants);
@@ -118,7 +118,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
-                multiChartPanel.setSize((Window.getClientWidth() - 250) + "px", (Window.getClientHeight() - 90) + "px");
+                multiChartPanel.setSize(Window.getClientWidth() - 250 + "px", "100%");
             }
         });
     }

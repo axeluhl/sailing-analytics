@@ -110,12 +110,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         chart = createChart(dataToShow);
         
         busyIndicatorPanel = new AbsolutePanel();
-        busyIndicatorPanel.setSize("100%", "100%");
         final BusyIndicator busyIndicator = new SimpleBusyIndicator(/*busy*/ true, /*scale*/ 1);
         //Adding the busyIndicator with an scheduler, to be sure that the busyIndicatorPanel has a width and a height
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
+                busyIndicatorPanel.setSize("100%", "400px");
                 busyIndicatorPanel.add(busyIndicator, busyIndicatorPanel.getOffsetWidth() / 2, busyIndicatorPanel.getOffsetHeight() / 2);
             }
         });
