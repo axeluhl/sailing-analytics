@@ -28,6 +28,7 @@ public class CollapsablePanelHeader extends FlowPanel implements HasText, OpenHa
     private final CollapsablePanel collapsablePanel;
     private final boolean hasToolbar;
     private final SimplePanel toolbarPanel;
+    private final ClickableHeader clickableHeaderPanel;
 
     private static final String STYLENAME_TOOLBAR = "collapsablePanel-toolbar";
 
@@ -46,7 +47,7 @@ public class CollapsablePanelHeader extends FlowPanel implements HasText, OpenHa
         textLabel= new Label(text);
         textLabel.addStyleName(STYLENAME_HEADER_TEXT);
 
-        ClickableHeader clickableHeaderPanel = new ClickableHeader(collapsablePanel);
+        clickableHeaderPanel = new ClickableHeader(collapsablePanel);
         clickableHeaderPanel.setStyleName(STYLENAME_HEADER_COLLAPSE_AREA);
         
         add(clickableHeaderPanel);
@@ -93,6 +94,11 @@ public class CollapsablePanelHeader extends FlowPanel implements HasText, OpenHa
         }
     }
 
+    protected void setCollapsingEnabled(boolean enabled)
+    {
+        clickableHeaderPanel.setClickable(enabled);
+    }
+    
     public final String getText() {
         return textLabel.getText();
     }
@@ -120,6 +126,8 @@ public class CollapsablePanelHeader extends FlowPanel implements HasText, OpenHa
     private final class ClickableHeader extends SimplePanel {
         private final CollapsablePanel panel;
         
+        private boolean isClickable = true;
+        
         private ClickableHeader(final CollapsablePanel panel) {
             // Anchor is used to allow keyboard access.
             super(DOM.createAnchor());
@@ -131,6 +139,10 @@ public class CollapsablePanelHeader extends FlowPanel implements HasText, OpenHa
             sinkEvents(Event.ONCLICK);
         }
 
+        protected void setClickable(boolean enabled) {
+            this.isClickable = enabled;
+        }
+        
         @Override
         public void onBrowserEvent(Event event) {
             // no need to call super.
@@ -138,7 +150,9 @@ public class CollapsablePanelHeader extends FlowPanel implements HasText, OpenHa
             case Event.ONCLICK:
                 // Prevent link default action.
                 DOM.eventPreventDefault(event);
-                panel.setOpen(!panel.isOpen());
+                if(isClickable) {
+                    panel.setOpen(!panel.isOpen());
+                }
             }
         }
     }

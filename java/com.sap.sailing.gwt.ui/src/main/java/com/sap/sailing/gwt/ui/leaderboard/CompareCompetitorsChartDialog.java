@@ -62,7 +62,6 @@ public class CompareCompetitorsChartDialog extends DialogBox {
             @Override
             public void onDataLoaded(DataLoadedEvent event) {
                 CompareCompetitorsChartDialog.this.setPopupPosition(5, 5);
-                //CompareCompetitorsChartDialog.this.setSize((int) (Window.getClientWidth()*0.9) + "px", (int) (Window.getClientHeight() * 0.9) + "px");
                 CompareCompetitorsChartDialog.this.show();
             }
         });
@@ -72,6 +71,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         collapsablePanel = new CollapsablePanel("", true);
         collapsablePanel.setSize(Window.getClientWidth() - 250 + "px", "100%");
         collapsablePanel.setOpen(true);
+        collapsablePanel.setCollapsingEnabled(false);
 
         ComponentToolbar<MultiChartSettings> toolbar = new ComponentToolbar<MultiChartSettings>(multiChartPanel, stringConstants);
         toolbar.addSettingsButton();
@@ -85,7 +85,6 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         
         this.add(collapsablePanel);
         this.setPopupPosition(15, 15);
-        //this.setSize((int) (Window.getClientWidth()*0.9) + "px", (int) (Window.getClientHeight() * 0.9) + "px");
         closeAnchor = new Anchor("x");
 
         FlexTable captionLayoutTable = new FlexTable();

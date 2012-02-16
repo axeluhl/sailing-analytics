@@ -166,6 +166,8 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
     private boolean isAnimationEnabled = false;
 
     private boolean isOpen = false;
+    
+    private boolean isCollapsingEnabled = true;
 
     /**
      * Creates an empty ThePanel that is initially closed.
@@ -283,6 +285,16 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
         return isOpen;
     }
 
+    public boolean isCollapsingEnabled() {
+        return isCollapsingEnabled;
+    }
+
+    public void setCollapsingEnabled(boolean enable) {
+        isCollapsingEnabled = enable;
+        
+        this.headerPanel.setCollapsingEnabled(enable);
+    }
+
     public Iterator<Widget> iterator() {
         return null;
     }
@@ -295,11 +307,6 @@ public final class CollapsablePanel extends Composite implements HasWidgets.ForI
         return false;
     }
 
-    /**
-     * Overloaded version for IsWidget.
-     * 
-     * @see #remove(Widget)
-     */
     public boolean remove(IsWidget w) {
         return this.remove(asWidgetOrNull(w));
     }
