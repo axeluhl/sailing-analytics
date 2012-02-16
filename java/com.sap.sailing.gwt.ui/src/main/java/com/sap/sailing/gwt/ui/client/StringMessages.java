@@ -257,4 +257,6 @@ public interface StringMessages extends Messages {
     String refreshIntervalMustBeGreaterThanXSeconds(String seconds);
     String competitorCharts();
     String selectAtLeastOneCompetitor();
+    String directionChange();
+    String speedChange();
 }

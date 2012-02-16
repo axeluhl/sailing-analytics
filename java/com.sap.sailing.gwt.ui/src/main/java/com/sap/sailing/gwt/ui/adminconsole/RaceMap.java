@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
@@ -64,6 +66,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
@@ -878,9 +881,21 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     if (getSettings().isShowManeuverType(maneuver.type)) {
                         LatLng latLng = LatLng.newInstance(maneuver.position.latDeg, maneuver.position.lngDeg);
                         MarkerOptions options = MarkerOptions.newInstance();
-                        options.setTitle("" + maneuver.timepoint + ": " + maneuver.type.name() + " "
-                                + maneuver.directionChangeInDegrees + "deg from " + maneuver.speedWithBearingBefore
-                                + " to " + maneuver.speedWithBearingAfter);
+                        //TODO Introduce user role dependent view (Spectator, Admin)
+                        SpeedWithBearingDTO before = maneuver.speedWithBearingBefore;
+                        SpeedWithBearingDTO after = maneuver.speedWithBearingAfter;
+                        
+                        String timeAndManeuver = DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timepoint)
+                                + ": " + maneuver.type.name();
+                        String directionChange = stringMessages.directionChange() + ": "
+                                + ((int) maneuver.directionChangeInDegrees) + " deg ("
+                                + ((int) before.bearingInDegrees) + " deg -> " + ((int) after.bearingInDegrees) + " deg)";
+                        String speedChange = stringMessages.speedChange() + ": " 
+                                + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " knt ("
+                                + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " knt -> "
+                                + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " knt)";
+                        
+                        options.setTitle(timeAndManeuver + "; " + directionChange + "; " + speedChange);
                         options.setIcon(imageResources.maneuverIconsForTypeAndTargetTack
                                 .get(new Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack)));
                         Marker marker = new Marker(latLng, options);
