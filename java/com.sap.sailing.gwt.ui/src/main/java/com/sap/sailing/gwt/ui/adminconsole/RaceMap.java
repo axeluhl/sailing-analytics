@@ -63,6 +63,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
@@ -166,6 +167,12 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
     private boolean dataInitialized;
     
     private Date lastTimeChangeBeforeInitialization;
+
+    /**
+     * The last quick ranks received from a call to {@link SailingServiceAsync#getQuickRanks(RaceIdentifier, Date, AsyncCallback)} upon
+     * the last {@link #timeChanged(Date)} event. Therefore, the ranks listed here correspond to the {@link #timer}'s time.
+     */
+    private List<QuickRankDTO> quickRanks;
 
     public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer,
             CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
@@ -281,9 +288,11 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     
                     final ParallelExecutionCallback<Map<CompetitorDTO, List<GPSFixDTO>>> getBoatsCallback = new ParallelExecutionCallback<Map<CompetitorDTO, List<GPSFixDTO>>>();
                     final ParallelExecutionCallback<List<MarkDTO>> getMarksCallback = new ParallelExecutionCallback<List<MarkDTO>>();
-                    new ParallelExecutionHolder(getBoatsCallback, getMarksCallback) {
+                    final ParallelExecutionCallback<List<QuickRankDTO>> getQuickRanksCallback = new ParallelExecutionCallback<List<QuickRankDTO>>();
+                    new ParallelExecutionHolder(getBoatsCallback, getMarksCallback, getQuickRanksCallback) {
                         @Override
                         protected void handleSuccess() {
+                            quickRanks = getQuickRanksCallback.getData();
                             if (map != null) {
                                 //Do boat specific actions
                                 Map<CompetitorDTO, List<GPSFixDTO>> boatData = getBoatsCallback.getData();
@@ -332,6 +341,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     
                     sailingService.getBoatPositions(race, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, getBoatsCallback);
                     sailingService.getMarkPositions(race, date, getMarksCallback);
+                    sailingService.getQuickRanks(race, date, getQuickRanksCallback);
                 }
             }
         }
@@ -642,8 +652,6 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             @Override
             public void onMouseOver(MarkerMouseOverEvent event) {
                 map.setTitle(competitorDTO.name);
-                // setSelectedInMap(competitorDTO, true);
-                // quickRanksBox.setItemSelected(quickRanksList.indexOf(competitorDTO), true);
             }
         });
         boatMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
@@ -675,6 +683,18 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
     private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTO lastFix) {
         final VerticalPanel result = new VerticalPanel();
         result.add(new Label(stringMessages.competitor() + ": " + competitorDTO.name));
+        Integer rank = null;
+        if (quickRanks != null) {
+            for (QuickRankDTO quickRank : quickRanks) {
+                if (quickRank.competitor.equals(competitorDTO)) {
+                    rank = quickRank.rank;
+                    break;
+                }
+            }
+        }
+        if (rank != null) {
+            result.add(new Label(stringMessages.rank() + ": " + rank));
+        }
         result.add(new Label(stringMessages.speed() + ": "
                 + NumberFormat.getDecimalFormat().format(lastFix.speedWithBearing.speedInKnots) + " kts"));
         result.add(new Label(stringMessages.bearing() + ": "+ (int) lastFix.speedWithBearing.bearingInDegrees + " deg"));
