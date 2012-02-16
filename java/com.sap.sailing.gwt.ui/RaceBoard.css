@@ -245,3 +245,14 @@ input.magnifier {
 .breadcrumbPanel-ActiveBreadcrumb a, .breadcrumbPanel-InactiveBreadcrumb a, .breadcrumbPanel-NextArrow a {
 	color:#A1A1A1;
 	}
+
+.abstractChartPanel-importantMessageOfChart {
+    font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+    font-size: 20px;
+    height: 70px;
+    margin: 0 auto;
+    padding: 49px 0 0 80px;
+    width: 300px;
+    color: #7c7c7c;
+	background: url(images/important-message.png) left center no-repeat;	
+}
