@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.MultiChartPanel;
 import com.sap.sailing.gwt.ui.leaderboard.MultiChartSettings;
+import com.sap.sailing.gwt.ui.raceboard.CollapsableComponentViewer.ViewerPanelTypes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -131,7 +132,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                     timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
 
             CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
-                    leaderboardPanel, "100%", "100%", stringMessages);
+                    leaderboardPanel, "100%", "100%", stringMessages, ViewerPanelTypes.SCROLL_PANEL);
             collapsableViewers.add(leaderboardViewer);
         }
 
@@ -150,7 +151,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
             WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings, stringMessages, errorReporter); 
             CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
-                    windChart, "auto", "500px", stringMessages);
+                    windChart, "auto", "400px", stringMessages);
             windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
             collapsableViewers.add(windChartViewer);
         }
@@ -164,7 +165,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
                     timer, stringMessages, errorReporter);
             CollapsableComponentViewer<MultiChartSettings> chartViewer = new CollapsableComponentViewer<MultiChartSettings>(
-                    competitorCharts, "auto", "500px", stringMessages);
+                    competitorCharts, "auto", "400px", stringMessages);
 
             competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
             collapsableViewers.add(chartViewer);

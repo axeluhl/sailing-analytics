@@ -23,12 +23,14 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.DeckPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
@@ -49,6 +51,8 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
+import com.sap.sailing.gwt.ui.shared.panels.BusyIndicator;
+import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 
 /**
  * ChartPanel is a GWT panel that can show one sort of competitor data (e.g. current speed over ground, windward distance to
@@ -70,9 +74,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected Chart chart;
+    protected final AbsolutePanel busyIndicatorPanel;
+    protected final Label noCompetitorsSelectedLabel;
     protected final Map<CompetitorDTO, Series> seriesByCompetitor;
     protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
-    protected final DeckPanel chartAndBusyIndicatorPanel;
     protected final RaceSelectionProvider raceSelectionProvider;
     protected long stepSize = 5000;
     protected final StringMessages stringMessages;
@@ -80,7 +85,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final Timer timer;
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     protected DetailType dataToShow;
-    protected AbsolutePanel loadingPanel;
     protected final CompetitorSelectionProvider competitorSelectionProvider;
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
@@ -95,22 +99,28 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	this.errorReporter = errorReporter;
     	chartData = new CompetitorInRaceDTO();
         this.dataToShow = dataToShow;
-    	chart = createChart(dataToShow);
     	seriesIsUsed = new HashSet<Series>();
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
-        
-        setWidget(chart);
-        loadingPanel = new AbsolutePanel();
-        loadingPanel.setSize("100%", "100%");
-//        BusyIndicator busyIndicator = new SimpleBusyIndicator(true, 1);
-//        loadingPanel.add(busyIndicator, width / 2 - 32 / 2, height / 2 - 32 - 2);
-        chartAndBusyIndicatorPanel = new DeckPanel();
-//        chartAndBusyIndicatorPanel.add(loadingPanel);
-//        chartAndBusyIndicatorPanel.add(chart);
-//        chartAndBusyIndicatorPanel.showWidget(0);
 
+        noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
+        noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
+        
+        chart = createChart(dataToShow);
+        
+        busyIndicatorPanel = new AbsolutePanel();
+        final BusyIndicator busyIndicator = new SimpleBusyIndicator(/*busy*/ true, /*scale*/ 1);
+        //Adding the busyIndicator with an scheduler, to be sure that the busyIndicatorPanel has a width and a height
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                busyIndicatorPanel.setSize("100%", "400px");
+                busyIndicatorPanel.add(busyIndicator, busyIndicatorPanel.getOffsetWidth() / 2, busyIndicatorPanel.getOffsetHeight() / 2);
+            }
+        });
+
+        setWidget(busyIndicatorPanel);
         List<RaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
         if(!selectedRaces.isEmpty()) {
             loadData();
@@ -132,9 +142,11 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         chart.setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)));
         final String unit = getUnit();
         chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
+        chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis().setReversed((dataToShow == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || 
+                                      dataToShow == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true : false);
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
-        chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
         String decimalPlaces = "";
         for (int i = 0; i < dataToShow.getPrecision(); i++) {
             if (i == 0) {
@@ -158,7 +170,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected abstract Component<SettingsType> getComponent();
     
     protected void loadData() {
-//    	chartAndBusyIndicatorPanel.showWidget(0);
+        setWidget(busyIndicatorPanel);
         if (getCompetitorsAndTimePointsDTO() != null) {
             doLoadData();
         } else {
@@ -211,7 +223,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                             chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
                         }
                         updateTableData(competitorsAndTimePointsToLoad.getCompetitors());
-//                        chartAndBusyIndicatorPanel.showWidget(1);
+                        if (competitorSelectionProvider.getSelectedCompetitors() != null
+                                && competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
+                            setWidget(chart);
+                        } else {
+                            setWidget(noCompetitorsSelectedLabel);
+                        }
                     }
                 });
     }
@@ -240,11 +257,15 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if (competitorMarkPassingSeries != null) {
             chart.removeSeries(competitorMarkPassingSeries);
         }
+        if (competitorSelectionProvider.getSelectedCompetitors() == null
+                || !competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
+            setWidget(noCompetitorsSelectedLabel);
+        }
     }
     
     private synchronized void updateTableData(CompetitorDTO[] competitorDTOs) {
         //Make sure the busy indicator is removed at this point, or plotting the data results in an exception
-//        chartAndBusyIndicatorPanel.showWidget(1);
+        setWidget(chart);
         if (getCompetitorsAndTimePointsDTO() != null && chartData != null) {
             for (CompetitorDTO competitor : competitorDTOs) {
                 Series compSeries = getCompetitorSeries(competitor);
@@ -440,9 +461,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if (dataToShow != this.dataToShow) {
             this.dataToShow = dataToShow;
             chart = createChart(dataToShow);
-//            if (chartAndBusyIndicatorPanel.getWidgetCount() > 1) {
-//                chartAndBusyIndicatorPanel.remove(1);
-//            }
             this.setWidget(chart);
         }
     }
