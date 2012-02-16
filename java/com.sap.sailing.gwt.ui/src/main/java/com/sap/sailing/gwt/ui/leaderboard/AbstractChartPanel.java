@@ -30,6 +30,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
@@ -74,6 +75,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final ErrorReporter errorReporter;
     protected Chart chart;
     protected final AbsolutePanel busyIndicatorPanel;
+    protected final Label noCompetitorsSelectedLabel;
     protected final Map<CompetitorDTO, Series> seriesByCompetitor;
     protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
     protected final RaceSelectionProvider raceSelectionProvider;
@@ -102,6 +104,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
 
+        noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
+        noCompetitorsSelectedLabel.getElement().setAttribute("margin-left", "auto");
+        noCompetitorsSelectedLabel.getElement().setAttribute("margin-right", "auto");
+        
         chart = createChart(dataToShow);
         
         busyIndicatorPanel = new AbsolutePanel();
@@ -111,8 +117,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                busyIndicatorPanel.add(busyIndicator, busyIndicatorPanel.getOffsetWidth() / 2,
-                        busyIndicatorPanel.getOffsetHeight() / 2 - 40); //Adjusting the indictator to place it more in the middle
+                busyIndicatorPanel.add(busyIndicator, busyIndicatorPanel.getOffsetWidth() / 2, busyIndicatorPanel.getOffsetHeight() / 2);
             }
         });
 
@@ -219,7 +224,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                             chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
                         }
                         updateTableData(competitorsAndTimePointsToLoad.getCompetitors());
-                        setWidget(chart);
+                        if (competitorSelectionProvider.getSelectedCompetitors() != null
+                                && competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
+                            setWidget(chart);
+                        } else {
+                            setWidget(noCompetitorsSelectedLabel);
+                        }
                     }
                 });
     }
@@ -247,6 +257,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Series competitorMarkPassingSeries = getCompetitorMarkPassingSeries(competitor);
         if (competitorMarkPassingSeries != null) {
             chart.removeSeries(competitorMarkPassingSeries);
+        }
+        if (competitorSelectionProvider.getSelectedCompetitors() == null
+                || !competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
+            setWidget(noCompetitorsSelectedLabel);
         }
     }
     
