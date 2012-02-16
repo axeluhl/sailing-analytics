@@ -40,7 +40,6 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     private final Label dateLabel;
     private final Label playModeLabel;
     private final SliderBar sliderBar;
-    private final TimePanelSettings settings;
     private final StringMessages stringMessages;
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
@@ -72,7 +71,6 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     public TimePanel(Timer timer, StringMessages stringMessages) {
         this.timer = timer;
         this.stringMessages = stringMessages;
-        this.settings = new TimePanelSettings();
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
         VerticalPanel vp = new VerticalPanel();
@@ -312,13 +310,6 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         sliderBar.redraw();
     }
     
-    private void delayChanged() {
-        Integer delayToLivePlay = settings.getDelayToLivePlayInSeconds();
-        if (delayToLivePlay != null) {
-            timer.setDelay(1000l * delayToLivePlay.longValue());
-        }
-    }
-
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
         switch(playState) {
@@ -339,7 +330,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         switch(playMode) {
             case Live: 
                 playModeLabel.setText(stringMessages.playModeLive());
-                timeDelayLabel.setText(stringMessages.timeDelay() + ": " + ((int) timer.getCurrentDelay() / 1000) + " s");
+                timeDelayLabel.setText(stringMessages.timeDelay() + ": " + ((int) timer.getCurrentDelayInMillis() / 1000) + " s");
                 timeDelayLabel.setVisible(true);
                 sliderBar.setEnabled(false);
                 break;
@@ -353,7 +344,10 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     }
 
     public TimePanelSettings getSettings() {
-        return settings;
+        TimePanelSettings result = new TimePanelSettings();
+        result.setDelayToLivePlayInSeconds((int) (timer.getLivePlayDelayInMillis()/1000));
+        result.setRefreshInterval(timer.getRefreshInterval());
+        return result;
     }
 
     @Override
@@ -375,11 +369,9 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     public void updateSettings(TimePanelSettings newSettings) {
         boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
         if (delayChanged && timer.getPlayMode() == PlayModes.Live) {
-            getSettings().setDelayToLivePlayInSeconds(newSettings.getDelayToLivePlayInSeconds());
             timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
-            delayChanged();
+            timer.setDelay(1000l * newSettings.getDelayToLivePlayInSeconds());
         }
-        getSettings().setRefreshInterval(newSettings.getRefreshInterval());
         timer.setRefreshInterval(getSettings().getRefreshInterval());
     }
 
