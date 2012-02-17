@@ -299,7 +299,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         blockingQueue.offer(message);
     }
 
-    private void notifyListeners(SailMasterMessage message) throws ParseException {
+    protected void notifyListeners(SailMasterMessage message) throws ParseException {
         switch (message.getType()) {
         case RPD:
             notifyListenersRPD(message);
