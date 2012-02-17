@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.io.IOException;
-
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -35,7 +34,8 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     }
 
     @Override
-    public SailMasterConnector getOrCreateSailMasterConnector(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
+    public SailMasterConnector getOrCreateSailMasterConnector(String host, int port, RaceSpecificMessageLoader messageLoader, 
+            boolean canSendRequests) throws InterruptedException {
         Triple<String, Integer, RaceSpecificMessageLoader> key = new Triple<String, Integer, RaceSpecificMessageLoader>(host, port, messageLoader);
         SailMasterConnector result = connectors.get(key);
         if (result == null) {
@@ -44,6 +44,21 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
             // TODO how do connectors get stopped, terminated and removed from the connectors map again?
         } else if (result.isStopped()) {
             result = new SailMasterConnectorImpl(host, port, messageLoader, canSendRequests);
+            connectors.put(key, result);
+        }
+        return result;
+    }
+
+    @Override
+    public SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
+        Triple<String, Integer, RaceSpecificMessageLoader> key = new Triple<String, Integer, RaceSpecificMessageLoader>(host, port, messageLoader);
+        SailMasterConnector result = connectors.get(key);
+        if (result == null) {
+            result = new SailMasterLiveSimulatorConnectorImpl(host, port, messageLoader, canSendRequests);
+            connectors.put(key, result);
+            // TODO how do connectors get stopped, terminated and removed from the connectors map again?
+        } else if (result.isStopped()) {
+            result = new SailMasterLiveSimulatorConnectorImpl(host, port, messageLoader, canSendRequests);
             connectors.put(key, result);
         }
         return result;
