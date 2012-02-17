@@ -158,7 +158,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
                 if(selectedRace.endOfRace != null) {
                     timer.setTime(selectedRace.endOfRace.getTime());
                 } else {
-                    timer.setTime(selectedRace.startOfRace.getTime());
+                    if (selectedRace.startOfRace != null) {
+                        timer.setTime(selectedRace.startOfRace.getTime());
+                    }
                 }
                 break;
         }

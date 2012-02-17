@@ -103,17 +103,21 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         NavigableSet<GPSFixMoving> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
         NavigableSet<GPSFixMoving> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
         List<GPSFixMoving> relevantFixes = new LinkedList<GPSFixMoving>();
-        for (GPSFixMoving beforeFix : beforeSet.descendingSet()) {
-            if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage()/2) {
-                break;
+        synchronized (this) {
+            for (GPSFixMoving beforeFix : beforeSet.descendingSet()) {
+                if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                    break;
+                }
+                relevantFixes.add(0, beforeFix);
             }
-            relevantFixes.add(0, beforeFix);
         }
-        for (GPSFixMoving afterFix : afterSet) {
-            if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage()/2) {
-                break;
+        synchronized (this) {
+            for (GPSFixMoving afterFix : afterSet) {
+                if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                    break;
+                }
+                relevantFixes.add(afterFix);
             }
-            relevantFixes.add(afterFix);
         }
         if (relevantFixes.isEmpty()) {
             // find the fix closest to "at":
