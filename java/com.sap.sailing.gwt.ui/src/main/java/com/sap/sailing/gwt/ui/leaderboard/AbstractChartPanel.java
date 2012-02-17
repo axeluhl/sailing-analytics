@@ -194,7 +194,11 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 //        }
         if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
             setWidget(busyIndicatorPanel);
-            sailingService.getAllAvailableRaceData(getSelectedRace(), getStepSize(), getDataToShow(),
+            ArrayList<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
+            for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
+                competitors.add(competitor);
+            }
+            sailingService.getAllAvailableRaceData(getSelectedRace(), competitors, getStepSize(), getDataToShow(),
                     new AsyncCallback<MultiCompetitorRaceDataDTO>() {
 
                         @Override
@@ -554,35 +558,17 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     @Override
     public void timeChanged(Date date) {
         //TODO
-//        if (timer.getPlayMode() == PlayModes.Live) {
-//            if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext() &&
-//                    getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent() < date.getTime() &&
-//                    (date.getTime() - getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent()) >= getStepSize()) {
-//                loadCompetitorsAndTimePointsDTO(date.getTime());
-//            }
-//        }
+        //Load the new data only if the timer is in live mode and the data has been initialized by loadData()
+        if (timer.getPlayMode() == PlayModes.Live && getChartData() != null) {
+            long newestEvent = getChartData().getTimePointOfNewestEvent();
+            if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext() &&
+                    newestEvent < date.getTime() && (date.getTime() - newestEvent) >= getStepSize()) {
+                updateData(newestEvent + getStepSize()); //Adding a delta to prevent redundant data
+            }
+        }
     }
-    
-//    private void loadCompetitorsAndTimePointsDTO(final long timePoint) {
-//        sailingService.getCompetitorsAndTimePoints(getSelectedRace(), getStepSize(), new AsyncCallback<CompetitorsAndTimePointsDTO>() {
-//            @Override
-//            public void onFailure(Throwable caught) {
-//                errorReporter.reportError(stringMessages.failedToLoadRaceInformation(caught.toString()));
-//            }
-//            @Override
-//            public void onSuccess(CompetitorsAndTimePointsDTO result) {
-//                //Updating the competitorsAndTimePontsDTO
-//                long cachedUntil = getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent();
-//                setCompetitorsAndTimePointsDTO(result.copy());
-//                //Building the query to fetch the race data
-//                result.setStartTime(cachedUntil + 200); //Adding a small delta to prevent the loading of redundant data
-//                result.setTimePointOfNewestEvent(timePoint);
-//                loadNewRaceData(result);
-//            }
-//        });
-//    }
-//
-//    private void loadNewRaceData(final CompetitorsAndTimePointsDTO competitorsAndTimePoints) {
+
+    private void updateData(long startTime) {
 //        sailingService.getCompetitorRaceData(getSelectedRace(), competitorsAndTimePoints, getDataToShow(), new AsyncCallback<CompetitorInRaceDTO>() {
 //            @Override
 //            public void onFailure(Throwable caught) {
@@ -603,5 +589,23 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 //                updateTableData(competitors);
 //            }
 //        });
-//    }
+        ArrayList<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
+        for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
+            competitors.add(competitor);
+        }
+        sailingService.getNewestRaceData(getSelectedRace(), competitors,
+                startTime, getStepSize(), getDataToShow(), new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": "
+                        + caught.toString());
+            }
+            @Override
+            public void onSuccess(MultiCompetitorRaceDataDTO result) {
+                fireEvent(new DataLoadedEvent());
+                getChartData().addAllRaceData(result);
+                updateTableData(competitorSelectionProvider.getSelectedCompetitors());
+            }
+        });
+    }
 }

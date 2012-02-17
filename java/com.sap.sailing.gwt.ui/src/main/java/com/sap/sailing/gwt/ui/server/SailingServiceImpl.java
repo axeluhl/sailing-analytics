@@ -1296,17 +1296,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return countryCodes.toArray(new String[0]);
     }
     
-//    /**
-//     * Finds a competitor in a sequence of competitors that has an {@link Competitor#getId()} equal to <code>id</code>. 
-//     */
-//    private Competitor getCompetitorById(Iterable<Competitor> competitors, String id) {
-//        for (Competitor c : competitors) {
-//            if (c.getId().toString().equals(id)) {
-//                return c;
-//            }
-//        }
-//        return null;
-//    }
+    /**
+     * Finds a competitor in a sequence of competitors that has an {@link Competitor#getId()} equal to <code>id</code>. 
+     */
+    private Competitor getCompetitorById(Iterable<Competitor> competitors, String id) {
+        for (Competitor c : competitors) {
+            if (c.getId().toString().equals(id)) {
+                return c;
+            }
+        }
+        return null;
+    }
     
     private Double getCompetitorRaceDataEntry(DetailType dataType, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint) throws NoWindException {
@@ -1370,28 +1370,29 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 //    }
     
     @Override
-    public MultiCompetitorRaceDataDTO getAllAvailableRaceData(RaceIdentifier race, long stepSize, DetailType detailType) throws NoWindException {
+    public MultiCompetitorRaceDataDTO getAllAvailableRaceData(RaceIdentifier race, List<CompetitorDTO> competitors,
+            long stepSize, DetailType detailType) throws NoWindException {
         MultiCompetitorRaceDataDTO data = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
-            data = getMultiCompetitorRaceDataDTO(trackedRace, trackedRace.getStart().asMillis(),
+            data = getMultiCompetitorRaceDataDTO(trackedRace, competitors, trackedRace.getStart().asMillis(),
                         trackedRace.getTimePointOfNewestEvent().asMillis(), stepSize, detailType);
         }
         return data;
     }
 
     @Override
-    public MultiCompetitorRaceDataDTO getNewestRaceData(RaceIdentifier race, long startTime, long stepSize, DetailType detailType) throws NoWindException {
+    public MultiCompetitorRaceDataDTO getNewestRaceData(RaceIdentifier race, List<CompetitorDTO> competitors, long startTime, long stepSize, DetailType detailType) throws NoWindException {
         MultiCompetitorRaceDataDTO data = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
-            data = getMultiCompetitorRaceDataDTO(trackedRace, startTime,
-                    trackedRace.getTimePointOfNewestEvent().asMillis(), stepSize, detailType);
+            data = getMultiCompetitorRaceDataDTO(trackedRace, competitors, startTime,
+                    trackedRace.getTimePointOfNewestEvent().asMillis(), stepSize, detailType); 
         }
         return data;
     }
     
-    private MultiCompetitorRaceDataDTO getMultiCompetitorRaceDataDTO(TrackedRace race, long startTime, long endTime,
+    private MultiCompetitorRaceDataDTO getMultiCompetitorRaceDataDTO(TrackedRace race, List<CompetitorDTO> competitors, long startTime, long endTime,
             long stepSize, DetailType detailType) throws NoWindException {
         MultiCompetitorRaceDataDTO data = new MultiCompetitorRaceDataDTO();
         //Calculating the time points
@@ -1400,8 +1401,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             timePoints.add(i);
         }
         //Fetching the data from the TrackedRace
-        for (Competitor competitor : race.getRace().getCompetitors()) {
-            CompetitorDTO competitorDTO = getCompetitorDTO(competitor);
+        for (CompetitorDTO competitorDTO : competitors) {
+            Competitor competitor = getCompetitorById(race.getRace().getCompetitors(), competitorDTO.id);
             ArrayList<Triple<String, Long, Double>> markPassingsData = new ArrayList<Util.Triple<String,Long,Double>>();
             ArrayList<Pair<Long, Double>> raceData = new ArrayList<Util.Pair<Long,Double>>();
             //Filling the mark passings

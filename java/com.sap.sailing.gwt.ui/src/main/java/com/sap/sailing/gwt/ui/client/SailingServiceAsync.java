@@ -10,7 +10,6 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventIdentifier;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -275,8 +274,9 @@ public interface SailingServiceAsync {
     
     void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards, AsyncCallback<Void> callback);
 
-    void getAllAvailableRaceData(RaceIdentifier race, long stepSize, DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
+    void getAllAvailableRaceData(RaceIdentifier race, List<CompetitorDTO> competitors, long stepSize,
+            DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 
-    void getNewestRaceData(RaceIdentifier race, long startTime, long stepSize, DetailType detailType,
+    void getNewestRaceData(RaceIdentifier race, List<CompetitorDTO> competitors, long startTime, long stepSize, DetailType detailType,
             AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 }

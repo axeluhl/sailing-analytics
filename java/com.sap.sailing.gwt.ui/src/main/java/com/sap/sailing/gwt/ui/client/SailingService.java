@@ -166,8 +166,9 @@ public interface SailingService extends RemoteService {
     
     void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards);
 
-    MultiCompetitorRaceDataDTO getAllAvailableRaceData(RaceIdentifier race, long stepSize, DetailType detailType) throws NoWindException;
+    MultiCompetitorRaceDataDTO getAllAvailableRaceData(RaceIdentifier race, List<CompetitorDTO> competitors, long stepSize, DetailType detailType) 
+            throws NoWindException;
 
-    MultiCompetitorRaceDataDTO getNewestRaceData(RaceIdentifier race, long startTime, long stepSize,
+    MultiCompetitorRaceDataDTO getNewestRaceData(RaceIdentifier race, List<CompetitorDTO> competitors, long startTime, long stepSize,
             DetailType detailType) throws NoWindException;
 }

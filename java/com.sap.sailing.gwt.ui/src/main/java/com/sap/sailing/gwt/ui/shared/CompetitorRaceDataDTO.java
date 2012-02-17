@@ -98,9 +98,9 @@ public class CompetitorRaceDataDTO implements IsSerializable {
         getRaceData().addAll(raceData);
     }
 
-    public void addAllData(CompetitorRaceDataDTO competitorRaceDataToAdd) {
-        addMarkPassingsData(competitorRaceDataToAdd.getMarkPassingsData());
-        addRaceData(competitorRaceDataToAdd.getRaceData());
+    public void addAllData(CompetitorRaceDataDTO dataToAdd) {
+        addMarkPassingsData(dataToAdd.getMarkPassingsData());
+        addRaceData(dataToAdd.getRaceData());
     }
     
     public class MarkPassingsDataComparatorByTime implements Comparator<Triple<String, Long, Double>> {

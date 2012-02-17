@@ -35,7 +35,15 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
     public void setAllRaceData(HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
         this.raceData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
     }
-
+    
+    public void addAllRaceData(MultiCompetitorRaceDataDTO dataToAdd) {
+        for (CompetitorRaceDataDTO competitorData : raceData.values()) {
+            CompetitorRaceDataDTO competitorDataToAdd = dataToAdd.getCompetitorRaceData(competitorData.getCompetitor());
+            if (competitorDataToAdd != null) {
+                competitorData.addAllData(competitorDataToAdd);
+            }
+        }
+    }
 
     /**
      * Calculates the time point of the newest event out of the containing data.<br />
@@ -51,7 +59,6 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
         }
         return result;
     }
-
     
     /**
      * Calculates the earliest timepoint out of the containing data.<br />
