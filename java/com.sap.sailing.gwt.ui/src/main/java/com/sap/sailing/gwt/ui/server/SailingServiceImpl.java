@@ -1337,37 +1337,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         return result;
     }
-
-//    @Override
-//    public CompetitorInRaceDTO getCompetitorRaceData(RaceIdentifier race,
-//            CompetitorsAndTimePointsDTO competitorAndTimePointsDTO, DetailType dataType) throws NoWindException {
-//        CompetitorInRaceDTO competitorData = new CompetitorInRaceDTO();
-//        TrackedRace trackedRace = getExistingTrackedRace(race);
-//        if (trackedRace != null) {
-//            List<Competitor> selectedCompetitors = new ArrayList<Competitor>();
-//            for (CompetitorDTO cDTO : competitorAndTimePointsDTO.getCompetitors()) {
-//                selectedCompetitors.add(getCompetitorById(trackedRace.getRace().getCompetitors(), cDTO.id));
-//            }
-//            for (CompetitorDTO competitorDTO : competitorAndTimePointsDTO.getCompetitors()) {
-//                Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
-//                List<Long> timePoints = competitorAndTimePointsDTO.getTimePoints();
-//                List<Double> entries = new ArrayList<Double>();
-//                for (int i = 0; i < timePoints.size(); i++) {
-//                    MillisecondsTimePoint time = new MillisecondsTimePoint(timePoints.get(i));
-//                    entries.add(getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time));
-//                }
-//                competitorData.setRaceData(competitorDTO, entries);
-//                entries = new ArrayList<Double>();
-//                for (int i = 0; i < competitorAndTimePointsDTO.getMarkPassings(competitorDTO).size(); i++) {
-//                    MillisecondsTimePoint time = new MillisecondsTimePoint(
-//                            competitorAndTimePointsDTO.getMarkPassings(competitorDTO).get(i).getB());
-//                    entries.add(getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time));
-//                }
-//                competitorData.setMarkPassingData(competitorDTO, entries);
-//            }
-//        }
-//        return competitorData;
-//    }
     
     @Override
     public MultiCompetitorRaceDataDTO getAllAvailableRaceData(RaceIdentifier race, List<CompetitorDTO> competitors,
@@ -1420,31 +1389,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         return data;
     }
-
-//    @Override
-//    public CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize) {
-//        CompetitorsAndTimePointsDTO competitorAndTimePointsDTO = new CompetitorsAndTimePointsDTO(stepSize);
-//        TrackedRace trackedRace = getExistingTrackedRace(race);
-//        if (trackedRace != null) {
-//            List<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
-//            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-//                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-//                List<Pair<String, Long>> markPassingTimes = new ArrayList<Pair<String, Long>>();
-//                for (MarkPassing markPassing : markPassings) {
-//                    markPassingTimes.add(new Pair<String, Long>(markPassing.getWaypoint().getName(), markPassing
-//                            .getTimePoint().asMillis()));
-//                }
-//                competitors.add(getCompetitorDTO(competitor));
-//                // The following line will create a "Unchecked type safety warning".
-//                // There is no way to solve this, so it is okay to suppress this warning.
-//                competitorAndTimePointsDTO.setMarkPassings(getCompetitorDTO(competitor), markPassingTimes);
-//            }
-//            competitorAndTimePointsDTO.setCompetitors(competitors);
-//            competitorAndTimePointsDTO.setStartTime(trackedRace.getStart().asMillis());
-//            competitorAndTimePointsDTO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent().asMillis());
-//        }
-//        return competitorAndTimePointsDTO;
-//    }
     
     @Override
     public Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RaceIdentifier raceIdentifier,
