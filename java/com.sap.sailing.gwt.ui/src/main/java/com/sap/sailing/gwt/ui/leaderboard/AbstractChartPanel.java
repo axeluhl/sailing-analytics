@@ -69,8 +69,6 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
 implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
     protected static final int LINE_WIDTH = 1;
-//    protected CompetitorInRaceDTO chartData;
-//    protected CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
     protected MultiCompetitorRaceDataDTO chartData;
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
@@ -173,12 +171,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected void loadData() {
         if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
             setWidget(busyIndicatorPanel);
-            ArrayList<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
+            final ArrayList<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
             for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
                 competitors.add(competitor);
             }
-            sailingService.getAllAvailableRaceData(getSelectedRace(), competitors, getStepSize(), getDataToShow(),
-                    new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+            sailingService.getAllAvailableRaceData(getSelectedRace(), competitors, getStepSize(),
+                    getDataToShow(), new AsyncCallback<MultiCompetitorRaceDataDTO>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -189,8 +187,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         @Override
                         public void onSuccess(MultiCompetitorRaceDataDTO result) {
                             fireEvent(new DataLoadedEvent());
-                            setChartData(result);
-                            updateTableData(competitorSelectionProvider.getSelectedCompetitors());
+                            if (result != null && !result.isEmpty()) {
+                                setChartData(result);
+                            }
+                            updateTableData(competitors);
                             setWidget(chart);
                         }
                     });

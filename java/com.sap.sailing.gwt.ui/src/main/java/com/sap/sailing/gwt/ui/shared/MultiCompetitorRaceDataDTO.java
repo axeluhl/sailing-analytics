@@ -74,5 +74,9 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
         }
         return result;
     }
+
+    public boolean isEmpty() {
+        return raceData.isEmpty();
+    }
     
 }

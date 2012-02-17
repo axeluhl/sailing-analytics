@@ -348,7 +348,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
 //        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port, swissTimingAdapterPersistence,
 //                canSendRequests);
-        //TODO remove after testing
+        //TODO remove after testing and enable the upper code instead
         SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterLiveSimulatorConnector(hostname, port, swissTimingAdapterPersistence,
                 canSendRequests);
         //
