@@ -209,7 +209,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 competitorsAndTimePointsToLoad.setMarkPassings(competitor, getCompetitorsAndTimePointsDTO()
                         .getMarkPassings(competitor));
             }
-            competitorsAndTimePointsToLoad.setCompetitors(competitorsToLoad.toArray(new CompetitorDTO[0]));
+            competitorsAndTimePointsToLoad.setCompetitors(competitorsToLoad);
             AbstractChartPanel.this.sailingService.getCompetitorRaceData(getSelectedRace(),
                     competitorsAndTimePointsToLoad, getDataToShow(), new AsyncCallback<CompetitorInRaceDTO>() {
                         @Override
@@ -237,7 +237,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             }
             if (!competitorsToLoad.isEmpty()) {
                 setWidget(chart);
-                updateTableData(competitorsToLoad.toArray(new CompetitorDTO[0]));
+                updateTableData(competitorsToLoad);
             } else {
                 setWidget(noCompetitorsSelectedLabel);
             }
@@ -274,26 +274,26 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         }
     }
     
-    private synchronized void updateTableData(CompetitorDTO[] competitorDTOs) {
+    private synchronized void updateTableData(List<CompetitorDTO> competitors) {
         //Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
         if (getCompetitorsAndTimePointsDTO() != null && chartData != null) {
             //Clearing the series to keep the chart clean
             chart.removeAllSeries();
-            for (CompetitorDTO competitor : competitorDTOs) {
+            for (CompetitorDTO competitor : competitors) {
                 Series compSeries = getCompetitorSeries(competitor);
                 seriesIsUsed.add(compSeries);
                 Series markSeries = getCompetitorMarkPassingSeries(competitor);
                 seriesIsUsed.add(markSeries);
                 if (isCompetitorVisible(competitor) && chartData.getRaceData(competitor) != null) {
                     long starttime = System.currentTimeMillis();
-                    Pair<String, Long>[] markPassingTimes = getCompetitorsAndTimePointsDTO().getMarkPassings(competitor);
+                    List<Pair<String, Long>> markPassingTimes = getCompetitorsAndTimePointsDTO().getMarkPassings(competitor);
                     List<Point> markPassingPoints = new ArrayList<Point>();
                     Double[] markPassingValues = chartData.getMarkPassings(competitor);
-                    for (int j = 0; j < markPassingTimes.length; j++) {
-                        if (markPassingValues[j] != null && markPassingTimes[j].getB() != null) {
-                            Point markPassingPoint = new Point(markPassingTimes[j].getB(), markPassingValues[j]);
-                            markPassingPoint.setName(markPassingTimes[j].getA());
+                    for (int j = 0; j < markPassingTimes.size(); j++) {
+                        if (markPassingValues[j] != null && markPassingTimes.get(j).getB() != null) {
+                            Point markPassingPoint = new Point(markPassingTimes.get(j).getB(), markPassingValues[j]);
+                            markPassingPoint.setName(markPassingTimes.get(j).getA());
                             markPassingPoints.add(markPassingPoint);
                         }
                     }
@@ -316,9 +316,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 if (isCompetitorVisible(competitor)) {
                     chart.addSeries(compSeries);
                     chart.addSeries(markSeries);
-                } else {
-                    chart.removeSeries(compSeries);
-                    chart.removeSeries(markSeries);
                 }
             }
         }

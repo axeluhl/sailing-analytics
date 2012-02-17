@@ -25,8 +25,8 @@ import com.sap.sailing.gwt.ui.client.SailingService;
 public class CompetitorsAndTimePointsDTO implements IsSerializable {
     private static final long MILLISECONDS_BEFORE_RACE_TO_INCLUDE = 20000;
     
-    private CompetitorDTO[] competitors;
-    private HashMap<String, Pair<String, Long>[]> markPassings;
+    private List<CompetitorDTO> competitors;
+    private HashMap<String, List<Pair<String, Long>>> markPassings;
     private long startTime;
     private long timePointOfNewestEvent;
     private long stepSize;
@@ -34,7 +34,7 @@ public class CompetitorsAndTimePointsDTO implements IsSerializable {
     CompetitorsAndTimePointsDTO() {}
     
     public CompetitorsAndTimePointsDTO(long stepSize) {
-        markPassings = new HashMap<String, Pair<String, Long>[]>();
+        markPassings = new HashMap<String, List<Pair<String, Long>>>();
         this.stepSize = stepSize;
     }
 
@@ -46,11 +46,11 @@ public class CompetitorsAndTimePointsDTO implements IsSerializable {
         return result;
     }
 
-    public CompetitorDTO[] getCompetitors() {
+    public List<CompetitorDTO> getCompetitors() {
         return competitors;
     }
 
-    public void setCompetitors(CompetitorDTO[] competitors) {
+    public void setCompetitors(List<CompetitorDTO> competitors) {
         this.competitors = competitors;
     }
 
@@ -62,11 +62,11 @@ public class CompetitorsAndTimePointsDTO implements IsSerializable {
         this.startTime = startTime;
     }
 
-    public Pair<String, Long>[] getMarkPassings(CompetitorDTO competitor) {
+    public List<Pair<String, Long>> getMarkPassings(CompetitorDTO competitor) {
         return markPassings.get(competitor.id);
     }
 
-    public void setMarkPassings(CompetitorDTO competitor, Pair<String, Long>[] markPassings) {
+    public void setMarkPassings(CompetitorDTO competitor, List<Pair<String, Long>> markPassings) {
         this.markPassings.put(competitor.id, markPassings);
     }
 
