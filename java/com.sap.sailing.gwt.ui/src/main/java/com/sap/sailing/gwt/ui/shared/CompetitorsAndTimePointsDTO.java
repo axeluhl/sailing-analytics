@@ -37,6 +37,16 @@ public class CompetitorsAndTimePointsDTO implements IsSerializable {
         markPassings = new HashMap<String, List<Pair<String, Long>>>();
         this.stepSize = stepSize;
     }
+    
+    public CompetitorsAndTimePointsDTO copy() {
+        CompetitorsAndTimePointsDTO clone = new CompetitorsAndTimePointsDTO();
+        clone.startTime = startTime;
+        clone.timePointOfNewestEvent = timePointOfNewestEvent;
+        clone.stepSize = stepSize;
+        clone.competitors = new ArrayList<CompetitorDTO>(competitors);
+        clone.markPassings = new HashMap<String, List<Pair<String, Long>>>(markPassings);
+        return clone;
+    }
 
     public List<Long> getTimePoints() {
         ArrayList<Long> result = new ArrayList<Long>();

@@ -94,6 +94,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	seriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
     	this.timer = timer;
+    	this.timer.addTimeListener(this);
     	this.competitorSelectionProvider = competitorSelectionProvider;
     	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
     	this.errorReporter = errorReporter;
@@ -304,7 +305,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     List<Double> data = chartData.getRaceData(competitor);
                     List<Long> timepoints = getCompetitorsAndTimePointsDTO().getTimePoints();
                     List<Point> competitorPoints = new ArrayList<Point>();
-                    for (int j = 0; j < timepoints.size(); j++) {
+                    for (int j = 0; j < data.size(); j++) {
                         if (data.get(j) != null) {
                             Point competitorPoint = new Point(timepoints.get(j), data.get(j));
                             competitorPoints.add(competitorPoint);
@@ -532,10 +533,55 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     @Override
     public void timeChanged(Date date) {
+        //TODO
         if (timer.getPlayMode() == PlayModes.Live) {
-            // TODO fetch parts missing so far from cache 
-        } else {
-            // TODO check if fetched already; if not, fetch all
+            if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext() &&
+                    getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent() < date.getTime() &&
+                    (date.getTime() - getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent()) >= getStepSize()) {
+                loadCompetitorsAndTimePointsDTO(date.getTime());
+            }
         }
+    }
+    
+    private void loadCompetitorsAndTimePointsDTO(final long timePoint) {
+        sailingService.getCompetitorsAndTimePoints(getSelectedRace(), getStepSize(), new AsyncCallback<CompetitorsAndTimePointsDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.failedToLoadRaceInformation(caught.toString()));
+            }
+            @Override
+            public void onSuccess(CompetitorsAndTimePointsDTO result) {
+                //Updating the competitorsAndTimePontsDTO
+                long cachedUntil = getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent();
+                setCompetitorsAndTimePointsDTO(result.copy());
+                //Building the query to fetch the race data
+                result.setStartTime(cachedUntil + 200); //Adding a small delta to prevent the loading of redundant data
+                result.setTimePointOfNewestEvent(timePoint);
+                loadNewRaceData(result);
+            }
+        });
+    }
+
+    private void loadNewRaceData(final CompetitorsAndTimePointsDTO competitorsAndTimePoints) {
+        sailingService.getCompetitorRaceData(getSelectedRace(), competitorsAndTimePoints, getDataToShow(), new AsyncCallback<CompetitorInRaceDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": " + caught.toString());
+            }
+            @Override
+            public void onSuccess(CompetitorInRaceDTO result) {
+                fireEvent(new DataLoadedEvent());
+                for (CompetitorDTO competitor : competitorsAndTimePoints.getCompetitors()) {
+                    chartData.addRaceData(competitor, result.getRaceData(competitor));
+                    chartData.addMarkPassings(competitor, result.getMarkPassings(competitor));
+                }
+                
+                ArrayList<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
+                for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
+                    competitors.add(competitor);
+                }
+                updateTableData(competitors);
+            }
+        });
     }
 }
