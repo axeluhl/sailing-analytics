@@ -42,6 +42,9 @@ public interface SwissTimingFactory {
     SailMasterConnector getOrCreateSailMasterConnector(String hostname, int port,
             RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException;
 
+    SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, 
+            RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException;
+
     SailMasterTransceiver createSailMasterTransceiver();
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port, boolean canSendRequests);
