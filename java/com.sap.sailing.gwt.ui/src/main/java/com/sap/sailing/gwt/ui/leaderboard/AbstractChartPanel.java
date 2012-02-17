@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -279,6 +278,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         //Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
         if (getCompetitorsAndTimePointsDTO() != null && chartData != null) {
+            //Clearing the series to keep the chart clean
+            chart.removeAllSeries();
             for (CompetitorDTO competitor : competitorDTOs) {
                 Series compSeries = getCompetitorSeries(competitor);
                 seriesIsUsed.add(compSeries);
@@ -312,10 +313,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     compSeries.setPoints(competitorPoints.toArray(new Point[0]));
                     GWT.log("Update data time for " + competitor.name + ": " + (System.currentTimeMillis() - starttime));
                 }
-                if (isCompetitorVisible(competitor) && !Arrays.asList(chart.getSeries()).contains(compSeries)) {
+                if (isCompetitorVisible(competitor)) {
                     chart.addSeries(compSeries);
                     chart.addSeries(markSeries);
-                } else if (!isCompetitorVisible(competitor)) {
+                } else {
                     chart.removeSeries(compSeries);
                     chart.removeSeries(markSeries);
                 }
