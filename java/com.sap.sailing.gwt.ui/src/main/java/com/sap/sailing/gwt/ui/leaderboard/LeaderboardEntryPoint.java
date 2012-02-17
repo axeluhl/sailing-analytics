@@ -58,7 +58,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService,
                 LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(/* autoExpandFirstRace */ false),
                 /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
-                new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
+                new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                 leaderboardName, leaderboardGroupName,
                 LeaderboardEntryPoint.this, stringMessages, userAgentType);
         RootPanel.get().add(logoAndTitlePanel);

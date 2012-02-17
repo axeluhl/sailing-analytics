@@ -1357,10 +1357,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     entries[i] = getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time);
                 }
                 competitorData.setRaceData(competitorDTO, entries);
-                entries = new Double[competitorAndTimePointsDTO.getMarkPassings(competitorDTO).length];
-                for (int i = 0; i < competitorAndTimePointsDTO.getMarkPassings(competitorDTO).length; i++) {
+                entries = new Double[competitorAndTimePointsDTO.getMarkPassings(competitorDTO).size()];
+                for (int i = 0; i < competitorAndTimePointsDTO.getMarkPassings(competitorDTO).size(); i++) {
                     MillisecondsTimePoint time = new MillisecondsTimePoint(
-                            competitorAndTimePointsDTO.getMarkPassings(competitorDTO)[i].getB());
+                            competitorAndTimePointsDTO.getMarkPassings(competitorDTO).get(i).getB());
                     entries[i] = getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time);
                 }
                 competitorData.setMarkPassingData(competitorDTO, entries);
@@ -1504,7 +1504,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return (Event) eventIdentifier.getEvent(this);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize) {
         CompetitorsAndTimePointsDTO competitorAndTimePointsDTO = new CompetitorsAndTimePointsDTO(stepSize);
@@ -1521,10 +1520,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 competitors.add(getCompetitorDTO(competitor));
                 // The following line will create a "Unchecked type safety warning".
                 // There is no way to solve this, so it is okay to suppress this warning.
-                competitorAndTimePointsDTO.setMarkPassings(getCompetitorDTO(competitor),
-                        markPassingTimes.toArray(new Pair[0]));
+                competitorAndTimePointsDTO.setMarkPassings(getCompetitorDTO(competitor), markPassingTimes);
             }
-            competitorAndTimePointsDTO.setCompetitors(competitors.toArray(new CompetitorDTO[0]));
+            competitorAndTimePointsDTO.setCompetitors(competitors);
             competitorAndTimePointsDTO.setStartTime(trackedRace.getStart().asMillis());
             competitorAndTimePointsDTO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent().asMillis());
         }
