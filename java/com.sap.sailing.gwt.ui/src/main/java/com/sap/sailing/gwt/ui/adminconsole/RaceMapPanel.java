@@ -26,18 +26,17 @@ import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SmallWindHistoryPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 
 public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListener, ProvidesResize, RequiresResize,
@@ -47,7 +46,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
     private final ErrorReporter errorReporter;
     private final Grid grid;
     private final RacesListBoxPanel raceListBox;
-    private final TimePanel timePanel;
+    private final RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceMap raceMap;
     private final QuickRanksListBoxComposite quickRanksListBox;
@@ -108,7 +107,11 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         VerticalPanel verticalPanelRadioAndCheckboxes = new VerticalPanel();
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalPanelRadioAndCheckboxes);
         grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
-        timePanel = new TimePanel(timer, stringMessages);
+
+        timePanel = new RaceTimePanel(sailingService, timer, errorReporter, stringMessages);
+        raceSelectionModel.addRaceSelectionChangeListener(timePanel);
+        timePanel.onRaceSelectionChange(raceSelectionModel.getSelectedRaces());
+
         timer.addTimeListener(this);
         timer.addTimeListener(windHistory);
         grid.setWidget(1, 1, timePanel);
@@ -125,74 +128,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
             RaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size() - 1);
             RaceDTO race = raceListBox.getRace(raceIdentifier);
             competitorSelectionProvider.setCompetitors(race.competitors);
-            updateTimePanel(race);
         }
         raceMap.onRaceSelectionChange(selectedRaces);
-    }
-
-    private void updateTimePanel(RaceDTO selectedRace) {
-        Date min = null;
-        Date max = null;
-        
-        if (selectedRace.startOfTracking != null) {
-            min = selectedRace.startOfTracking;
-        }
-        if (selectedRace.endOfRace != null) {
-            max = selectedRace.endOfRace;
-        } else if (selectedRace.timePointOfNewestEvent != null) {
-            max = selectedRace.timePointOfNewestEvent;
-            timer.setPlayMode(PlayModes.Live);
-        }
-        
-        if(min != null && max != null)
-            timePanel.setMinMax(min, max);
-        
-        // set initial timer position
-        switch(timer.getPlayMode()) {
-            case Live:
-                if(selectedRace.timePointOfNewestEvent != null) {
-                    timer.setTime(selectedRace.timePointOfNewestEvent.getTime());
-                }
-                break;
-            case Replay:
-                if(selectedRace.endOfRace != null) {
-                    timer.setTime(selectedRace.endOfRace.getTime());
-                } else {
-                    if (selectedRace.startOfRace != null) {
-                        timer.setTime(selectedRace.startOfRace.getTime());
-                    }
-                }
-                break;
-        }
-        
-        sailingService.getRaceTimesInfo(selectedRace.getRaceIdentifier(), 
-                new AsyncCallback<RaceTimesInfoDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error obtaining leg timepoints: " + caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
-                        // raceTimesInfo can be null if the race is not tracked anymore
-                        if (raceTimesInfo != null) {
-                            timePanel.setLegMarkers(raceTimesInfo.getLegTimes());
-                            if (raceTimesInfo.getStartOfRace() != null) {
-                                // set the new start time 
-                                Date startOfRace = raceTimesInfo.getStartOfRace();
-                                Date startOfTimeslider = new Date(startOfRace.getTime() - 5 * 60 * 1000);
-
-                                timePanel.changeMin(startOfTimeslider);
-                            }
-                            // set time to end of race
-                            if(raceTimesInfo.getLastLegTimes() != null) {
-                                timer.setTime(raceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
-                            }
-                        } else {
-                            timePanel.reset();
-                        }
-                    }
-                });
     }
 
     @Override

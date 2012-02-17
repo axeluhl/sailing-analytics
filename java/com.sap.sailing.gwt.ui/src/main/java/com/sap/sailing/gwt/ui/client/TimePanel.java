@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
-import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -26,20 +25,20 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 
 public class TimePanel extends FormPanel implements Component<TimePanelSettings>, TimeListener, PlayStateListener, RequiresResize {
-    private final Timer timer;
+    protected final Timer timer;
     private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
     private final Label timeLabel;
     private final Label dateLabel;
     private final Label playModeLabel;
-    private final SliderBar sliderBar;
+    protected final SliderBar sliderBar;
+    private final Button backToLivePlayButton;
     private final StringMessages stringMessages;
     private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
     private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
@@ -166,6 +165,15 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         controlsPanel.add(playModeControlPanel );
         playModeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         playModeLabel.getElement().getStyle().setPadding(5, Style.Unit.PX);
+        
+        backToLivePlayButton = new Button("> Live");
+        backToLivePlayButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                TimePanel.this.timer.play();
+            }
+        });
+        controlsPanel.add(backToLivePlayButton);
         
         // play speed controls
         FlowPanel playSpeedControlPanel = new FlowPanel();
@@ -294,17 +302,6 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         }
     }
 
-    public void setLegMarkers(List<LegTimesInfoDTO> legTimepoints) {
-        if(sliderBar.isMinMaxInitialized()) {
-            sliderBar.clearMarkers();
-            
-            for (LegTimesInfoDTO legTimepointDTO : legTimepoints) {
-              sliderBar.addMarker(legTimepointDTO.name, new Double(legTimepointDTO.firstPassingDate.getTime()));
-            }
-            sliderBar.redraw();
-        }
-    }
-    
     public void reset() {
         sliderBar.clearMarkers();
         sliderBar.redraw();
@@ -319,33 +316,37 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
                     playModeImage.setResource(playModeLiveActiveImg);
                 else
                     playModeImage.setResource(playModeReplayActiveImg);
+                backToLivePlayButton.setEnabled(false);
                 break;
             case Paused:
             case Stopped:
                 playPauseImage.setResource(playButtonImg);
                 playModeImage.setResource(playModeInactiveImg);
+                backToLivePlayButton.setEnabled(true);
                 break;
         }
         
         switch(playMode) {
             case Live: 
                 playModeLabel.setText(stringMessages.playModeLive());
-                timeDelayLabel.setText(stringMessages.timeDelay() + ": " + ((int) timer.getCurrentDelayInMillis() / 1000) + " s");
+                timeDelayLabel.setText(stringMessages.timeDelay() + ": " + timer.getCurrentDelayInMillis() / 1000 + " s");
                 timeDelayLabel.setVisible(true);
-                sliderBar.setEnabled(false);
+                sliderBar.setEnabled(true);
+                backToLivePlayButton.setVisible(true);
                 break;
             case Replay: 
                 timeDelayLabel.setVisible(false);
                 timeDelayLabel.setText("");
                 playModeLabel.setText(stringMessages.playModeReplay()); 
                 sliderBar.setEnabled(true);
+                backToLivePlayButton.setVisible(false);
                 break;
         }
     }
 
     public TimePanelSettings getSettings() {
         TimePanelSettings result = new TimePanelSettings();
-        result.setDelayToLivePlayInSeconds((int) (timer.getLivePlayDelayInMillis()/1000));
+        result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
         result.setRefreshInterval(timer.getRefreshInterval());
         return result;
     }
@@ -368,9 +369,12 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     @Override
     public void updateSettings(TimePanelSettings newSettings) {
         boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
-        if (delayChanged && timer.getPlayMode() == PlayModes.Live) {
-            timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
+        if (delayChanged) {
             timer.setDelay(1000l * newSettings.getDelayToLivePlayInSeconds());
+            
+            if(timer.getPlayMode() == PlayModes.Live) {
+                timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
+            }
         }
         timer.setRefreshInterval(getSettings().getRefreshInterval());
     }

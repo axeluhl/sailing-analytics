@@ -1,0 +1,209 @@
+package com.sap.sailing.gwt.ui.client;
+
+import java.util.Date;
+import java.util.List;
+
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+
+public class RaceTimePanel extends TimePanel implements RaceSelectionChangeListener {
+    private final SailingServiceAsync sailingService;
+    private final ErrorReporter errorReporter;
+
+    private RaceIdentifier raceIdentifier;
+    
+    private long refreshIntervalTimeInfos = 3000;
+    
+    private boolean isTimeInfosComplete = false;
+    
+    private boolean isTimerInitialized = false;
+    
+    public RaceTimePanel(final SailingServiceAsync sailingService, Timer timer, ErrorReporter errorReporter, StringMessages stringMessages) {
+        super(timer, stringMessages);
+        
+        this.sailingService = sailingService;
+        this.errorReporter = errorReporter;
+        
+        startAutoTimeInfoUpdate();
+    }
+
+    private void startAutoTimeInfoUpdate() {
+        RepeatingCommand command = new RepeatingCommand() {
+            @Override
+            public boolean execute() {
+                if (!isTimeInfosComplete) {
+                    readRaceTimesInfo();
+                }
+                return timer.getPlayState() == PlayStates.Playing ? true: false;
+            }
+        };
+        scheduleTimeInfoUpdateCommand(command);
+    }
+
+    private void scheduleTimeInfoUpdateCommand(RepeatingCommand command) {
+        Scheduler.get().scheduleFixedPeriod(command, (int) refreshIntervalTimeInfos);
+    }
+
+    @Override
+    public void playStateChanged(PlayStates playState, PlayModes playMode) {
+        super.playStateChanged(playState, playMode);
+        
+        switch(playState) {
+            case Playing:
+                startAutoTimeInfoUpdate();
+                break;
+            case Paused:
+            case Stopped:
+                break;
+        }
+    }    
+    
+    @Override
+    public void updateSettings(TimePanelSettings newSettings) {
+        super.updateSettings(newSettings);
+
+        isTimerInitialized = false;
+        isTimeInfosComplete = false;
+        
+        readRaceTimesInfo();
+    }
+
+    private void updateTimeInfos(RaceTimesInfoDTO raceTimesInfo) {
+        if(raceTimesInfo == null || raceTimesInfo.timePointOfNewestEvent == null) {
+            reset();
+        } else {
+            // we set here the min and max of the time slider, the start and end of the race as well as the knows leg markers
+            if(!isTimerInitialized)
+            {
+                // manipulation of delay to make the event 'live'
+//                long lastEventTimeDelay = System.currentTimeMillis() - raceTimesInfo.timePointOfNewestEvent.getTime() + 1000;
+//                timer.setDelay(lastEventTimeDelay); 
+
+                long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
+
+                if(raceTimesInfo.timePointOfNewestEvent.getTime() > System.currentTimeMillis() - livePlayDelayInMillis)
+                    timer.setPlayMode(PlayModes.Live);
+                else
+                    timer.setPlayMode(PlayModes.Replay);
+
+                initMinMax(raceTimesInfo);
+                initTimerPosition(raceTimesInfo);
+                isTimerInitialized = true;
+            }
+
+            if(!isTimeInfosComplete) {
+                updateLegMarkers(raceTimesInfo);
+            }
+        }
+    } 
+    
+    @Override
+    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
+        if (selectedRaces != null && !selectedRaces.isEmpty()) {
+            raceIdentifier = selectedRaces.iterator().next();
+            isTimerInitialized = false;
+            isTimeInfosComplete = false;
+            
+            readRaceTimesInfo();
+        }
+    }
+
+    private void initMinMax(RaceTimesInfoDTO newRaceTimesInfo)
+    {
+        Date min = null;
+        Date max = null;
+
+        switch(timer.getPlayMode()) {
+            case Live:
+                if (newRaceTimesInfo.startOfTracking != null) {
+                    min = newRaceTimesInfo.startOfTracking;
+                } else if (newRaceTimesInfo.startOfRace != null) {
+                    min = new Date(newRaceTimesInfo.startOfRace.getTime() - 5 * 60 * 1000);
+                }
+                
+                if (newRaceTimesInfo.timePointOfNewestEvent != null) {
+                    max = newRaceTimesInfo.timePointOfNewestEvent;
+                }
+                break;
+            case Replay:
+                if (newRaceTimesInfo.startOfTracking != null) {
+                    min = newRaceTimesInfo.startOfTracking;
+                } else if (newRaceTimesInfo.startOfRace != null) {
+                    min = new Date(newRaceTimesInfo.startOfRace.getTime() - 5 * 60 * 1000);
+                }
+
+                if (newRaceTimesInfo.endOfTracking != null) {
+                    max = newRaceTimesInfo.endOfTracking;
+                } else if (newRaceTimesInfo.endOfRace != null) {
+                    max = newRaceTimesInfo.endOfRace;
+                } else if (newRaceTimesInfo.timePointOfNewestEvent != null) {
+                    max = newRaceTimesInfo.timePointOfNewestEvent;
+                }
+                break;
+        }
+
+        if(min != null && max != null)
+            setMinMax(min, max);
+    }
+    
+    private void initTimerPosition(RaceTimesInfoDTO newRaceTimesInfo) {
+        // initialize timer position
+        switch(timer.getPlayMode()) {
+            case Live:
+                if(newRaceTimesInfo.timePointOfNewestEvent != null)
+                    timer.setTime(newRaceTimesInfo.timePointOfNewestEvent.getTime());
+                timer.play();
+                break;
+            case Replay:
+                if(newRaceTimesInfo.endOfRace != null) {
+                    timer.setTime(newRaceTimesInfo.endOfRace.getTime());
+                } else {
+                    if(newRaceTimesInfo.startOfRace != null)
+                        timer.setTime(newRaceTimesInfo.startOfRace.getTime());
+                }
+                // set time to end of race
+                if(newRaceTimesInfo.getLastLegTimes() != null) {
+                    timer.setTime(newRaceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
+                }
+                break;
+        }
+    }
+
+    private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
+        List<LegTimesInfoDTO> legTimepoints = newRaceTimesInfo.getLegTimes();
+
+        if(sliderBar.isMinMaxInitialized()) {
+            sliderBar.clearMarkers();
+            
+            for (LegTimesInfoDTO legTimepointDTO : legTimepoints) {
+              sliderBar.addMarker(legTimepointDTO.name, new Double(legTimepointDTO.firstPassingDate.getTime()));
+            }
+            sliderBar.redraw();
+        }
+
+        isTimeInfosComplete = false;
+    }
+    
+    private void readRaceTimesInfo() {
+        if(raceIdentifier != null) {
+            sailingService.getRaceTimesInfo(raceIdentifier, new AsyncCallback<RaceTimesInfoDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error reading race timepoints: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
+                    // raceTimesInfo can be null if the race is not tracked anymore
+                    updateTimeInfos(raceTimesInfo);
+                }
+            });
+        }
+    }
+}

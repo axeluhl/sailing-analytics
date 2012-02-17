@@ -3,15 +3,15 @@ package com.sap.sailing.gwt.ui.client;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class TimePanelSettingsDialogComponent implements SettingsDialogComponent<TimePanelSettings> {
-    private IntegerBox timeDelayBox;
+    private LongBox timeDelayBox;
     private DoubleBox refreshIntervalBox;
     private final StringMessages stringMessages;
     private final TimePanelSettings initialSettings;
@@ -27,7 +27,7 @@ public class TimePanelSettingsDialogComponent implements SettingsDialogComponent
         
         HorizontalPanel labelAndTimeDelayBoxPanel = new HorizontalPanel();
         labelAndTimeDelayBoxPanel.add(new Label(stringMessages.timeDelay()));
-        timeDelayBox = dialog.createIntegerBox((int) initialSettings.getDelayToLivePlayInSeconds(), 4);
+        timeDelayBox = dialog.createLongBox(initialSettings.getDelayToLivePlayInSeconds(), 4);
         labelAndTimeDelayBoxPanel.add(timeDelayBox);
         vp.add(labelAndTimeDelayBoxPanel);
         
@@ -55,7 +55,7 @@ public class TimePanelSettingsDialogComponent implements SettingsDialogComponent
             public String getErrorMessage(TimePanelSettings valueToValidate) {
                 String errorMessage = null;
                 if (valueToValidate.getDelayToLivePlayInSeconds() < 0) {
-                    errorMessage = stringMessages.tailLengthMustBeNonNegative();
+                    errorMessage = stringMessages.delayMustBeNonNegative();
                 }
                 if (valueToValidate.getRefreshInterval() < 500) {
                     errorMessage = stringMessages.refreshIntervalMustBeGreaterThanXSeconds("0.5");

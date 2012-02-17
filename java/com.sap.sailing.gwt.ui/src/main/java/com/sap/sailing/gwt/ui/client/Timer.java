@@ -143,11 +143,13 @@ public class Timer {
         return time;
     }
 
-    public void setPlayMode(PlayModes playMode) {
-        this.playMode = playMode;
-        
-        for (PlayStateListener playStateListener : playStateListeners) {
-            playStateListener.playStateChanged(playState, playMode);
+    public void setPlayMode(PlayModes newPlayMode) {
+        if(this.playMode != newPlayMode) {
+            this.playMode = newPlayMode;
+            
+            for (PlayStateListener playStateListener : playStateListeners) {
+                playStateListener.playStateChanged(playState, playMode);
+            }
         }
     }    
 
@@ -209,8 +211,13 @@ public class Timer {
         RepeatingCommand command = new RepeatingCommand() {
             @Override
             public boolean execute() {
-                if (time != null) {
-                    setTime(time.getTime() + (long) ((getPlayMode()==PlayModes.Replay?playSpeedFactor:1.0) * refreshInterval));
+                if (time != null && playState == PlayStates.Playing) {
+                    long newTime = time.getTime();
+                    if (playMode == PlayModes.Replay)
+                        newTime += (long) playSpeedFactor * refreshInterval;
+                    else
+                        newTime += refreshInterval;
+                    setTime(newTime);
                 }
                 if (refreshIntervalChanged) {
                     refreshIntervalChanged = false;
