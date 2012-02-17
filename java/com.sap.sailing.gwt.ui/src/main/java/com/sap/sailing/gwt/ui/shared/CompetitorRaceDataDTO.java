@@ -59,6 +59,20 @@ public class CompetitorRaceDataDTO implements IsSerializable {
         Long newestRaceData = raceData.get(raceData.size() - 1).getA();
         return newestRaceData >= newestMarkPassingsData ? newestRaceData : newestMarkPassingsData;
     }
+    
+    /**
+     * Calculates the earliest timepoint out of the containing data.<br />
+     * Therefore a sorting of the data lists is needed, so use as rare as possible.<br />
+     * After calling this methods, the containing data is sorted by time.
+     * @return The earliest time in the data
+     */
+    public long getStartTime() {
+        Collections.sort(markPassingsData, new MarkPassingsDataComparatorByTime());
+        Collections.sort(raceData, new RaceDataComparatorByTime());
+        Long newestMarkPassingsData = markPassingsData.get(0).getB();
+        Long newestRaceData = raceData.get(0).getA();
+        return newestRaceData <= newestMarkPassingsData ? newestRaceData : newestMarkPassingsData;
+    }
 
     public List<Triple<String, Long, Double>> getMarkPassingsData() {
         return markPassingsData;

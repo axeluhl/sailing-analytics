@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -49,7 +50,9 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
+import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.panels.BusyIndicator;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
@@ -69,8 +72,9 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
 implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
     protected static final int LINE_WIDTH = 1;
-    protected CompetitorInRaceDTO chartData;
-    protected CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
+//    protected CompetitorInRaceDTO chartData;
+//    protected CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
+    protected MultiCompetitorRaceDataDTO chartData;
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected Chart chart;
@@ -98,7 +102,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	this.competitorSelectionProvider = competitorSelectionProvider;
     	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
     	this.errorReporter = errorReporter;
-    	chartData = new CompetitorInRaceDTO();
+    	chartData = null;
         this.dataToShow = dataToShow;
     	seriesIsUsed = new HashSet<Series>();
         this.sailingService = sailingService;
@@ -170,79 +174,101 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected abstract Component<SettingsType> getComponent();
     
     protected void loadData() {
-        setWidget(busyIndicatorPanel);
-        if (getCompetitorsAndTimePointsDTO() != null) {
-            doLoadData();
-        } else {
-            this.sailingService.getCompetitorsAndTimePoints(getSelectedRace(), getStepSize(),
-                    new AsyncCallback<CompetitorsAndTimePointsDTO>() {
+//        setWidget(busyIndicatorPanel);
+//        if (getCompetitorsAndTimePointsDTO() != null) {
+//            doLoadData();
+//        } else {
+//            this.sailingService.getCompetitorsAndTimePoints(getSelectedRace(), getStepSize(),
+//                    new AsyncCallback<CompetitorsAndTimePointsDTO>() {
+//                        @Override
+//                        public void onFailure(Throwable caught) {
+//                            errorReporter.reportError(stringMessages.failedToLoadRaceInformation(caught.toString()));
+//                        }
+//
+//                        @Override
+//                        public void onSuccess(CompetitorsAndTimePointsDTO result) {
+//                            setCompetitorsAndTimePointsDTO(result);
+//                            doLoadData();
+//                        }
+//                    });
+//        }
+        if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
+            setWidget(busyIndicatorPanel);
+            sailingService.getAllAvailableRaceData(getSelectedRace(), getStepSize(), getDataToShow(),
+                    new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError(stringMessages.failedToLoadRaceInformation(caught.toString()));
+                            errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": "
+                                    + caught.toString());
                         }
 
                         @Override
-                        public void onSuccess(CompetitorsAndTimePointsDTO result) {
-                            setCompetitorsAndTimePointsDTO(result);
-                            doLoadData();
+                        public void onSuccess(MultiCompetitorRaceDataDTO result) {
+                            fireEvent(new DataLoadedEvent());
+                            setChartData(result);
+                            updateTableData(competitorSelectionProvider.getSelectedCompetitors());
+                            setWidget(chart);
                         }
                     });
+        } else {
+            setWidget(noCompetitorsSelectedLabel);
         }
     }
 
     private void doLoadData() {
-        if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
-            final List<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
-            List<CompetitorDTO> competitorsWhoseAlreadyLoadedDataNeedsToBeAdded = new ArrayList<CompetitorDTO>();
-            // Assumption: for those competitors shown in chart we already have all data that's needed (TODO: what to do in live mode?)
-            // Therefore, we only need to load race data for those to be shown but not yet in the chart. Find them:
-            for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
-                if (!seriesByCompetitor.keySet().contains(competitor)) {
-                    competitorsToLoad.add(competitor);
-                } else {
-                    competitorsWhoseAlreadyLoadedDataNeedsToBeAdded.add(competitor);
-                }
-            }
-            
-            if (competitorsToLoad != null && !competitorsToLoad.isEmpty()) {
-                final CompetitorsAndTimePointsDTO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDTO(
-                        getStepSize());
-                competitorsAndTimePointsToLoad.setStartTime(getCompetitorsAndTimePointsDTO().getStartTime());
-                competitorsAndTimePointsToLoad.setTimePointOfNewestEvent(getCompetitorsAndTimePointsDTO()
-                        .getTimePointOfNewestEvent());
-                for (CompetitorDTO competitor : competitorsToLoad) {
-                    competitorsAndTimePointsToLoad.setMarkPassings(competitor, getCompetitorsAndTimePointsDTO()
-                            .getMarkPassings(competitor));
-                }
-                competitorsAndTimePointsToLoad.setCompetitors(competitorsToLoad);
-                AbstractChartPanel.this.sailingService.getCompetitorRaceData(getSelectedRace(),
-                        competitorsAndTimePointsToLoad, getDataToShow(), new AsyncCallback<CompetitorInRaceDTO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": "
-                                        + caught.toString());
-                            }
-
-                            @Override
-                            public void onSuccess(CompetitorInRaceDTO result) {
-                                fireEvent(new DataLoadedEvent());
-                                for (CompetitorDTO competitor : competitorsToLoad) {
-                                    chartData.setRaceData(competitor, result.getRaceData(competitor));
-                                    chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
-                                }
-                                updateTableData(competitorsAndTimePointsToLoad.getCompetitors());
-                                setWidget(chart);
-                            }
-                        });
-            }
-            
-            if (competitorsWhoseAlreadyLoadedDataNeedsToBeAdded != null
-                    && !competitorsWhoseAlreadyLoadedDataNeedsToBeAdded.isEmpty()) {
-                updateTableData(competitorsWhoseAlreadyLoadedDataNeedsToBeAdded);
-            }
-        } else {
-            setWidget(noCompetitorsSelectedLabel);
-        }
+//        if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
+//            final List<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
+//            List<CompetitorDTO> competitorsWhoseAlreadyLoadedDataNeedsToBeAdded = new ArrayList<CompetitorDTO>();
+//            // Assumption: for those competitors shown in chart we already have all data that's needed (TODO: what to do in live mode?)
+//            // Therefore, we only need to load race data for those to be shown but not yet in the chart. Find them:
+//            for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
+//                if (!seriesByCompetitor.keySet().contains(competitor)) {
+//                    competitorsToLoad.add(competitor);
+//                } else {
+//                    competitorsWhoseAlreadyLoadedDataNeedsToBeAdded.add(competitor);
+//                }
+//            }
+//            
+//            if (competitorsToLoad != null && !competitorsToLoad.isEmpty()) {
+//                final CompetitorsAndTimePointsDTO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDTO(
+//                        getStepSize());
+//                competitorsAndTimePointsToLoad.setStartTime(getCompetitorsAndTimePointsDTO().getStartTime());
+//                competitorsAndTimePointsToLoad.setTimePointOfNewestEvent(getCompetitorsAndTimePointsDTO()
+//                        .getTimePointOfNewestEvent());
+//                for (CompetitorDTO competitor : competitorsToLoad) {
+//                    competitorsAndTimePointsToLoad.setMarkPassings(competitor, getCompetitorsAndTimePointsDTO()
+//                            .getMarkPassings(competitor));
+//                }
+//                competitorsAndTimePointsToLoad.setCompetitors(competitorsToLoad);
+//                AbstractChartPanel.this.sailingService.getCompetitorRaceData(getSelectedRace(),
+//                        competitorsAndTimePointsToLoad, getDataToShow(), new AsyncCallback<CompetitorInRaceDTO>() {
+//                            @Override
+//                            public void onFailure(Throwable caught) {
+//                                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": "
+//                                        + caught.toString());
+//                            }
+//
+//                            @Override
+//                            public void onSuccess(CompetitorInRaceDTO result) {
+//                                fireEvent(new DataLoadedEvent());
+//                                for (CompetitorDTO competitor : competitorsToLoad) {
+//                                    chartData.setRaceData(competitor, result.getRaceData(competitor));
+//                                    chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
+//                                }
+//                                updateTableData(competitorsAndTimePointsToLoad.getCompetitors());
+//                                setWidget(chart);
+//                            }
+//                        });
+//            }
+//            
+//            if (competitorsWhoseAlreadyLoadedDataNeedsToBeAdded != null
+//                    && !competitorsWhoseAlreadyLoadedDataNeedsToBeAdded.isEmpty()) {
+//                updateTableData(competitorsWhoseAlreadyLoadedDataNeedsToBeAdded);
+//            }
+//        } else {
+//            setWidget(noCompetitorsSelectedLabel);
+//        }
     }
 
     private RaceIdentifier getSelectedRace() {
@@ -274,11 +300,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         }
     }
     
-    private synchronized void updateTableData(List<CompetitorDTO> competitors) {
+    private synchronized void updateTableData(Iterable<CompetitorDTO> competitors) {
         //Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
-        if (getCompetitorsAndTimePointsDTO() != null && chartData != null
-                && competitors != null && !competitors.isEmpty()) {
+        if (chartData != null && competitors != null && competitors.iterator().hasNext()) {
             //Clearing the series to keep the chart clean
             chart.removeAllSeries();
             for (CompetitorDTO competitor : competitors) {
@@ -286,33 +311,28 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 seriesIsUsed.add(compSeries);
                 Series markSeries = getCompetitorMarkPassingSeries(competitor);
                 seriesIsUsed.add(markSeries);
-                if (isCompetitorVisible(competitor) && chartData.getRaceData(competitor) != null) {
-                    long starttime = System.currentTimeMillis();
-                    List<Pair<String, Long>> markPassingTimes = getCompetitorsAndTimePointsDTO().getMarkPassings(competitor);
+                CompetitorRaceDataDTO competitorData = chartData.getCompetitorRaceData(competitor);
+                if (isCompetitorVisible(competitor) && competitorData != null) {
+                    List<Triple<String, Long, Double>> markPassingsData = competitorData.getMarkPassingsData();
                     List<Point> markPassingPoints = new ArrayList<Point>();
-                    List<Double> markPassingValues = chartData.getMarkPassings(competitor);
-                    for (int j = 0; j < markPassingTimes.size(); j++) {
-                        if (markPassingValues.get(j) != null && markPassingTimes.get(j).getB() != null) {
-                            Point markPassingPoint = new Point(markPassingTimes.get(j).getB(), markPassingValues.get(j));
-                            markPassingPoint.setName(markPassingTimes.get(j).getA());
+                    for (Triple<String, Long, Double> markPassingData : markPassingsData) {
+                        if (markPassingData.getB() != null && markPassingData.getC() != null) {
+                            Point markPassingPoint = new Point(markPassingData.getB(), markPassingData.getC());
+                            markPassingPoint.setName(markPassingData.getA());
                             markPassingPoints.add(markPassingPoint);
                         }
                     }
                     markSeries.setPoints(markPassingPoints.toArray(new Point[0]));
-                    GWT.log("Update mark passings time for " + competitor.name + ": "
-                            + (System.currentTimeMillis() - starttime));
-                    starttime = System.currentTimeMillis();
-                    List<Double> data = chartData.getRaceData(competitor);
-                    List<Long> timepoints = getCompetitorsAndTimePointsDTO().getTimePoints();
+                    
+                    List<Pair<Long, Double>> raceData = competitorData.getRaceData();
                     List<Point> competitorPoints = new ArrayList<Point>();
-                    for (int j = 0; j < data.size(); j++) {
-                        if (data.get(j) != null) {
-                            Point competitorPoint = new Point(timepoints.get(j), data.get(j));
+                    for (Pair<Long, Double> data : raceData) {
+                        if (data.getA() != null && data.getB() != null) {
+                            Point competitorPoint = new Point(data.getA(), data.getB());
                             competitorPoints.add(competitorPoint);
                         }
                     }
                     compSeries.setPoints(competitorPoints.toArray(new Point[0]));
-                    GWT.log("Update data time for " + competitor.name + ": " + (System.currentTimeMillis() - starttime));
                 }
                 if (isCompetitorVisible(competitor)) {
                     chart.addSeries(compSeries);
@@ -445,7 +465,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      */
     protected void updateSettingsOnly(ChartSettings newSettings) {
         setStepSize(newSettings.getStepSize());
-        setCompetitorsAndTimePointsDTO(null);
+        setChartData(null);
     }
 
     protected StringMessages getStringMessages() {
@@ -475,18 +495,18 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             this.setWidget(chart);
         }
     }
-
-    protected CompetitorsAndTimePointsDTO getCompetitorsAndTimePointsDTO() {
-        return competitorsAndTimePointsDTO;
+    
+    protected MultiCompetitorRaceDataDTO getChartData() {
+        return chartData;
     }
-
-    protected void setCompetitorsAndTimePointsDTO(CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO) {
-        this.competitorsAndTimePointsDTO = competitorsAndTimePointsDTO;
+    
+    protected void setChartData(MultiCompetitorRaceDataDTO chartData) {
+        this.chartData = chartData;
     }
-
+    
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
-      setCompetitorsAndTimePointsDTO(null);
+      setChartData(null);
       clearChart(true);
       loadData();
     }
@@ -534,54 +554,54 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     @Override
     public void timeChanged(Date date) {
         //TODO
-        if (timer.getPlayMode() == PlayModes.Live) {
-            if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext() &&
-                    getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent() < date.getTime() &&
-                    (date.getTime() - getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent()) >= getStepSize()) {
-                loadCompetitorsAndTimePointsDTO(date.getTime());
-            }
-        }
+//        if (timer.getPlayMode() == PlayModes.Live) {
+//            if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext() &&
+//                    getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent() < date.getTime() &&
+//                    (date.getTime() - getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent()) >= getStepSize()) {
+//                loadCompetitorsAndTimePointsDTO(date.getTime());
+//            }
+//        }
     }
     
-    private void loadCompetitorsAndTimePointsDTO(final long timePoint) {
-        sailingService.getCompetitorsAndTimePoints(getSelectedRace(), getStepSize(), new AsyncCallback<CompetitorsAndTimePointsDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.failedToLoadRaceInformation(caught.toString()));
-            }
-            @Override
-            public void onSuccess(CompetitorsAndTimePointsDTO result) {
-                //Updating the competitorsAndTimePontsDTO
-                long cachedUntil = getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent();
-                setCompetitorsAndTimePointsDTO(result.copy());
-                //Building the query to fetch the race data
-                result.setStartTime(cachedUntil + 200); //Adding a small delta to prevent the loading of redundant data
-                result.setTimePointOfNewestEvent(timePoint);
-                loadNewRaceData(result);
-            }
-        });
-    }
-
-    private void loadNewRaceData(final CompetitorsAndTimePointsDTO competitorsAndTimePoints) {
-        sailingService.getCompetitorRaceData(getSelectedRace(), competitorsAndTimePoints, getDataToShow(), new AsyncCallback<CompetitorInRaceDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": " + caught.toString());
-            }
-            @Override
-            public void onSuccess(CompetitorInRaceDTO result) {
-                fireEvent(new DataLoadedEvent());
-                for (CompetitorDTO competitor : competitorsAndTimePoints.getCompetitors()) {
-                    chartData.addRaceData(competitor, result.getRaceData(competitor));
-                    chartData.addMarkPassings(competitor, result.getMarkPassings(competitor));
-                }
-                
-                ArrayList<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
-                for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
-                    competitors.add(competitor);
-                }
-                updateTableData(competitors);
-            }
-        });
-    }
+//    private void loadCompetitorsAndTimePointsDTO(final long timePoint) {
+//        sailingService.getCompetitorsAndTimePoints(getSelectedRace(), getStepSize(), new AsyncCallback<CompetitorsAndTimePointsDTO>() {
+//            @Override
+//            public void onFailure(Throwable caught) {
+//                errorReporter.reportError(stringMessages.failedToLoadRaceInformation(caught.toString()));
+//            }
+//            @Override
+//            public void onSuccess(CompetitorsAndTimePointsDTO result) {
+//                //Updating the competitorsAndTimePontsDTO
+//                long cachedUntil = getCompetitorsAndTimePointsDTO().getTimePointOfNewestEvent();
+//                setCompetitorsAndTimePointsDTO(result.copy());
+//                //Building the query to fetch the race data
+//                result.setStartTime(cachedUntil + 200); //Adding a small delta to prevent the loading of redundant data
+//                result.setTimePointOfNewestEvent(timePoint);
+//                loadNewRaceData(result);
+//            }
+//        });
+//    }
+//
+//    private void loadNewRaceData(final CompetitorsAndTimePointsDTO competitorsAndTimePoints) {
+//        sailingService.getCompetitorRaceData(getSelectedRace(), competitorsAndTimePoints, getDataToShow(), new AsyncCallback<CompetitorInRaceDTO>() {
+//            @Override
+//            public void onFailure(Throwable caught) {
+//                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": " + caught.toString());
+//            }
+//            @Override
+//            public void onSuccess(CompetitorInRaceDTO result) {
+//                fireEvent(new DataLoadedEvent());
+//                for (CompetitorDTO competitor : competitorsAndTimePoints.getCompetitors()) {
+//                    chartData.addRaceData(competitor, result.getRaceData(competitor));
+//                    chartData.addMarkPassings(competitor, result.getMarkPassings(competitor));
+//                }
+//                
+//                ArrayList<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
+//                for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
+//                    competitors.add(competitor);
+//                }
+//                updateTableData(competitors);
+//            }
+//        });
+//    }
 }

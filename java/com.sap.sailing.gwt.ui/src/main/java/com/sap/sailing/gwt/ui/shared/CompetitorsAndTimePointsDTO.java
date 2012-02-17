@@ -23,69 +23,69 @@ import com.sap.sailing.gwt.ui.client.SailingService;
  * 
  */
 public class CompetitorsAndTimePointsDTO implements IsSerializable {
-    private static final long MILLISECONDS_BEFORE_RACE_TO_INCLUDE = 20000;
-    
-    private List<CompetitorDTO> competitors;
-    private HashMap<String, List<Pair<String, Long>>> markPassings;
-    private long startTime;
-    private long timePointOfNewestEvent;
-    private long stepSize;
-
-    CompetitorsAndTimePointsDTO() {}
-    
-    public CompetitorsAndTimePointsDTO(long stepSize) {
-        markPassings = new HashMap<String, List<Pair<String, Long>>>();
-        this.stepSize = stepSize;
-    }
-    
-    public CompetitorsAndTimePointsDTO copy() {
-        CompetitorsAndTimePointsDTO clone = new CompetitorsAndTimePointsDTO();
-        clone.startTime = startTime;
-        clone.timePointOfNewestEvent = timePointOfNewestEvent;
-        clone.stepSize = stepSize;
-        clone.competitors = new ArrayList<CompetitorDTO>(competitors);
-        clone.markPassings = new HashMap<String, List<Pair<String, Long>>>(markPassings);
-        return clone;
-    }
-
-    public List<Long> getTimePoints() {
-        ArrayList<Long> result = new ArrayList<Long>();
-        for (long time = startTime - MILLISECONDS_BEFORE_RACE_TO_INCLUDE; time < timePointOfNewestEvent; time += stepSize) {
-            result.add(time);
-        }
-        return result;
-    }
-
-    public List<CompetitorDTO> getCompetitors() {
-        return competitors;
-    }
-
-    public void setCompetitors(List<CompetitorDTO> competitors) {
-        this.competitors = competitors;
-    }
-
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
-
-    public List<Pair<String, Long>> getMarkPassings(CompetitorDTO competitor) {
-        return markPassings.get(competitor.id);
-    }
-
-    public void setMarkPassings(CompetitorDTO competitor, List<Pair<String, Long>> markPassings) {
-        this.markPassings.put(competitor.id, markPassings);
-    }
-
-    public long getTimePointOfNewestEvent() {
-        return timePointOfNewestEvent;
-    }
-
-    public void setTimePointOfNewestEvent(long timePointOfNewestEvent) {
-        this.timePointOfNewestEvent = timePointOfNewestEvent;
-    }
+//    private static final long MILLISECONDS_BEFORE_RACE_TO_INCLUDE = 20000;
+//    
+//    private List<CompetitorDTO> competitors;
+//    private HashMap<String, List<Pair<String, Long>>> markPassings;
+//    private long startTime;
+//    private long timePointOfNewestEvent;
+//    private long stepSize;
+//
+//    CompetitorsAndTimePointsDTO() {}
+//    
+//    public CompetitorsAndTimePointsDTO(long stepSize) {
+//        markPassings = new HashMap<String, List<Pair<String, Long>>>();
+//        this.stepSize = stepSize;
+//    }
+//    
+//    public CompetitorsAndTimePointsDTO copy() {
+//        CompetitorsAndTimePointsDTO clone = new CompetitorsAndTimePointsDTO();
+//        clone.startTime = startTime;
+//        clone.timePointOfNewestEvent = timePointOfNewestEvent;
+//        clone.stepSize = stepSize;
+//        clone.competitors = new ArrayList<CompetitorDTO>(competitors);
+//        clone.markPassings = new HashMap<String, List<Pair<String, Long>>>(markPassings);
+//        return clone;
+//    }
+//
+//    public List<Long> getTimePoints() {
+//        ArrayList<Long> result = new ArrayList<Long>();
+//        for (long time = startTime - MILLISECONDS_BEFORE_RACE_TO_INCLUDE; time < timePointOfNewestEvent; time += stepSize) {
+//            result.add(time);
+//        }
+//        return result;
+//    }
+//
+//    public List<CompetitorDTO> getCompetitors() {
+//        return competitors;
+//    }
+//
+//    public void setCompetitors(List<CompetitorDTO> competitors) {
+//        this.competitors = competitors;
+//    }
+//
+//    public long getStartTime() {
+//        return startTime;
+//    }
+//
+//    public void setStartTime(long startTime) {
+//        this.startTime = startTime;
+//    }
+//
+//    public List<Pair<String, Long>> getMarkPassings(CompetitorDTO competitor) {
+//        return markPassings.get(competitor.id);
+//    }
+//
+//    public void setMarkPassings(CompetitorDTO competitor, List<Pair<String, Long>> markPassings) {
+//        this.markPassings.put(competitor.id, markPassings);
+//    }
+//
+//    public long getTimePointOfNewestEvent() {
+//        return timePointOfNewestEvent;
+//    }
+//
+//    public void setTimePointOfNewestEvent(long timePointOfNewestEvent) {
+//        this.timePointOfNewestEvent = timePointOfNewestEvent;
+//    }
 
 }

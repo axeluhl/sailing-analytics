@@ -6,27 +6,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class MultiCompetitorRaceDataDTO implements IsSerializable {
     
-    private long startTime;
     private HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData;
     
-    MultiCompetitorRaceDataDTO() {}
-    
-    public MultiCompetitorRaceDataDTO(long startTime) {
-        this.startTime = startTime;
-        this.raceData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>();
+    public MultiCompetitorRaceDataDTO() {
+        this(new HashMap<CompetitorDTO, CompetitorRaceDataDTO>());
     }
     
-    public MultiCompetitorRaceDataDTO(long startTime, HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
-        this.startTime = startTime;
+    public MultiCompetitorRaceDataDTO(HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
         this.raceData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
-    }
-    
-    public long getStartTime() {
-        return startTime;
-    }
-    
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
     }
     
     public CompetitorRaceDataDTO getCompetitorRaceData(CompetitorDTO competitor) {
@@ -48,12 +35,35 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
     public void setAllRaceData(HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
         this.raceData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
     }
-    
+
+
+    /**
+     * Calculates the time point of the newest event out of the containing data.<br />
+     * Therefore a sorting of the data lists is needed, so use as rare as possible.<br />
+     * After calling this methods, the containing data is sorted by time.
+     * @return The time point of the newest event or -1 if no data is contained
+     */
     public long getTimePointOfNewestEvent() {
-        long result = 0;
+        long result = -1;
         for (CompetitorRaceDataDTO competitorRaceData : raceData.values()) {
             long raceDataNewestEvent = competitorRaceData.getTimePointOfNewestEvent();
             result = result >= raceDataNewestEvent ? result : raceDataNewestEvent;
+        }
+        return result;
+    }
+
+    
+    /**
+     * Calculates the earliest timepoint out of the containing data.<br />
+     * Therefore a sorting of the data lists is needed, so use as rare as possible.<br />
+     * After calling this methods, the containing data is sorted by time.
+     * @return The earliest time in the data or -1 if no data is contained
+     */
+    public long getStartTime() {
+        long result = -1;
+        for (CompetitorRaceDataDTO competitorRaceData : raceData.values()) {
+            long raceDataNewestEvent = competitorRaceData.getStartTime();
+            result = result <= raceDataNewestEvent ? result : raceDataNewestEvent;
         }
         return result;
     }

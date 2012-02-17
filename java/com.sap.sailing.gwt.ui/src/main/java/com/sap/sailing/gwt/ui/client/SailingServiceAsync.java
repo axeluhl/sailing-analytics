@@ -6,15 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
@@ -227,24 +229,24 @@ public interface SailingServiceAsync {
 
     void getCountryCodes(AsyncCallback<String[]> callback);
 
-    /**
-     * This method computes the in {@code dataType} selected data for the in {@code race} specified race
-     * for all competitors returned by {@link CompetitorsAndTimePointsDTO#getCompetitors()} at the timepoints 
-     * returned by {@link CompetitorsAndTimePointsDTO#getTimePoints()}.
-     * The returned {@link CompetitorInRaceDTO} contains the values for the timepoints as well as the values for the markpassings.
-     * 
-     * @see DetailType
-     * 
-     * @throws NullPointerException Thrown if any of the parameters is null.
-     * 
-     * @param race 
-     * @param competitorsAndTimePointsDTO An object that contains the competitors and timepoints.
-     * @param dataType The type of data that should be computed (eg {@link DetailType#WINDWARD_DISTANCE_TO_OVERALL_LEADER}).
-     * @param callback An AsyncCallback that returns the computed data as a parameter in the {@link AsyncCallback#onSuccess(Object)} method.
-     */
-    void getCompetitorRaceData(RaceIdentifier race,
-			CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO,
-			DetailType dataType, AsyncCallback<CompetitorInRaceDTO> callback);
+//    /**
+//     * This method computes the in {@code dataType} selected data for the in {@code race} specified race
+//     * for all competitors returned by {@link CompetitorsAndTimePointsDTO#getCompetitors()} at the timepoints 
+//     * returned by {@link CompetitorsAndTimePointsDTO#getTimePoints()}.
+//     * The returned {@link CompetitorInRaceDTO} contains the values for the timepoints as well as the values for the markpassings.
+//     * 
+//     * @see DetailType
+//     * 
+//     * @throws NullPointerException Thrown if any of the parameters is null.
+//     * 
+//     * @param race 
+//     * @param competitorsAndTimePointsDTO An object that contains the competitors and timepoints.
+//     * @param dataType The type of data that should be computed (eg {@link DetailType#WINDWARD_DISTANCE_TO_OVERALL_LEADER}).
+//     * @param callback An AsyncCallback that returns the computed data as a parameter in the {@link AsyncCallback#onSuccess(Object)} method.
+//     */
+//    void getCompetitorRaceData(RaceIdentifier race,
+//			CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO,
+//			DetailType dataType, AsyncCallback<CompetitorInRaceDTO> callback);
     
     void getDouglasPoints(RaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
             double meters, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
@@ -253,11 +255,11 @@ public interface SailingServiceAsync {
             AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>> callback);
 
     /**
-     * For the race identified by <code>race</code> computes <code>steps</code> equidistant time points starting at a
-     * few seconds before the race starts, up to the end of the race. The result describes the race's competitors, their
-     * mark passing times, the race start time and the list of time points according to the above specification.
-     */
-    void getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize, AsyncCallback<CompetitorsAndTimePointsDTO> callback);
+//     * For the race identified by <code>race</code> computes <code>steps</code> equidistant time points starting at a
+//     * few seconds before the race starts, up to the end of the race. The result describes the race's competitors, their
+//     * mark passing times, the race start time and the list of time points according to the above specification.
+//     */
+//    void getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize, AsyncCallback<CompetitorsAndTimePointsDTO> callback);
 
     void getLeaderboardGroups(AsyncCallback<List<LeaderboardGroupDTO>> callback);
     
@@ -272,4 +274,9 @@ public interface SailingServiceAsync {
     void createLeaderboardGroup(String groupName, String description, AsyncCallback<LeaderboardGroupDTO> callback);
     
     void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards, AsyncCallback<Void> callback);
+
+    void getAllAvailableRaceData(RaceIdentifier race, long stepSize, DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
+
+    void getNewestRaceData(RaceIdentifier race, long startTime, long stepSize, DetailType detailType,
+            AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 }
