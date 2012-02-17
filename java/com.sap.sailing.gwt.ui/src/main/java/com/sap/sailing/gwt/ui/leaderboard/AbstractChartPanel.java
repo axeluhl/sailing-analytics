@@ -289,10 +289,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     long starttime = System.currentTimeMillis();
                     List<Pair<String, Long>> markPassingTimes = getCompetitorsAndTimePointsDTO().getMarkPassings(competitor);
                     List<Point> markPassingPoints = new ArrayList<Point>();
-                    Double[] markPassingValues = chartData.getMarkPassings(competitor);
+                    List<Double> markPassingValues = chartData.getMarkPassings(competitor);
                     for (int j = 0; j < markPassingTimes.size(); j++) {
-                        if (markPassingValues[j] != null && markPassingTimes.get(j).getB() != null) {
-                            Point markPassingPoint = new Point(markPassingTimes.get(j).getB(), markPassingValues[j]);
+                        if (markPassingValues.get(j) != null && markPassingTimes.get(j).getB() != null) {
+                            Point markPassingPoint = new Point(markPassingTimes.get(j).getB(), markPassingValues.get(j));
                             markPassingPoint.setName(markPassingTimes.get(j).getA());
                             markPassingPoints.add(markPassingPoint);
                         }
@@ -301,12 +301,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     GWT.log("Update mark passings time for " + competitor.name + ": "
                             + (System.currentTimeMillis() - starttime));
                     starttime = System.currentTimeMillis();
-                    Double[] data = chartData.getRaceData(competitor);
+                    List<Double> data = chartData.getRaceData(competitor);
                     List<Long> timepoints = getCompetitorsAndTimePointsDTO().getTimePoints();
                     List<Point> competitorPoints = new ArrayList<Point>();
                     for (int j = 0; j < timepoints.size(); j++) {
-                        if (data[j] != null) {
-                            Point competitorPoint = new Point(timepoints.get(j), data[j]);
+                        if (data.get(j) != null) {
+                            Point competitorPoint = new Point(timepoints.get(j), data.get(j));
                             competitorPoints.add(competitorPoint);
                         }
                     }
