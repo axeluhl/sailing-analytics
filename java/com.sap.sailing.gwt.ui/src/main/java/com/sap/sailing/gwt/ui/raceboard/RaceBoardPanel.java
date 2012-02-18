@@ -112,9 +112,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
         boolean showLeaderboard = true;
-        boolean showMap = false;
-        boolean showWindCharts = false;
-        boolean showCompetitorCharts = false;
+        boolean showMap = true;
+        boolean showWindCharts = true;
+        boolean showCompetitorCharts = true;
         
         if (user == null) {
            // anonymous user
