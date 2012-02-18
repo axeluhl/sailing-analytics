@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 public class RaceTimesInfoDTO implements IsSerializable {
     private RaceIdentifier raceIdentifier;
 
-    private List<LegTimesInfoDTO> legTimes;
+    public List<LegTimesInfoDTO> legTimes;
     
     public Date startOfRace;
     public Date startOfTracking;
@@ -19,6 +19,10 @@ public class RaceTimesInfoDTO implements IsSerializable {
 
     public Date timePointOfLastEvent;
     public Date timePointOfNewestEvent;
+
+    public RaceTimesInfoDTO(RaceIdentifier raceIdentifier) {
+        this.raceIdentifier = raceIdentifier;
+    }
 
     public RaceTimesInfoDTO() {}
 

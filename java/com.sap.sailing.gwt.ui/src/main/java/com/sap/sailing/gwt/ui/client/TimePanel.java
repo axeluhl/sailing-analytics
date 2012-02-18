@@ -30,7 +30,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 
-public class TimePanel extends FormPanel implements Component<TimePanelSettings>, TimeListener, PlayStateListener, RequiresResize {
+public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
@@ -39,9 +39,9 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     private final Label playModeLabel;
     protected final SliderBar sliderBar;
     private final Button backToLivePlayButton;
-    private final StringMessages stringMessages;
-    private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
-    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
+    protected final StringMessages stringMessages;
+    protected final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
+    protected final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
     private final ImageResource playButtonImg;
     private final ImageResource pauseButtonImg;
     private final ImageResource playSpeedImg;
@@ -50,7 +50,9 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     private final ImageResource playModeInactiveImg;
     private final Image playPauseImage;
     private final Image playModeImage;
-    private Date lastReceivedDataTimepoint;
+    protected Date lastReceivedDataTimepoint;
+    private final Button slowDownButton;
+    private final Button speedUpButton;
     
     private static ClientResources resources = GWT.create(ClientResources.class);
 
@@ -63,7 +65,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
 
         @Override
         public void onClick(ClickEvent event) {
-            new SettingsDialog<TimePanelSettings>(TimePanel.this, stringConstants).show();
+            new SettingsDialog<T>(TimePanel.this, stringConstants).show();
         }
     }
 
@@ -136,8 +138,21 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
                 }
             }
         });
+        playPauseImage.getElement().getStyle().setFloat(Style.Float.LEFT);
+        playPauseImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
         playControlPanel.add(playPauseImage);
-        
+
+        backToLivePlayButton = new Button("Live");
+        backToLivePlayButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                TimePanel.this.timer.resume();
+            }
+        });
+        backToLivePlayButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+        backToLivePlayButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        playControlPanel.add(backToLivePlayButton);
+
         // current date and time control
         FlowPanel timeControlPanel = new FlowPanel();
         timeControlPanel.setStyleName("timePanel-controls-time");
@@ -166,15 +181,6 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         playModeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         playModeLabel.getElement().getStyle().setPadding(5, Style.Unit.PX);
         
-        backToLivePlayButton = new Button("> Live");
-        backToLivePlayButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                TimePanel.this.timer.play();
-            }
-        });
-        controlsPanel.add(backToLivePlayButton);
-        
         // play speed controls
         FlowPanel playSpeedControlPanel = new FlowPanel();
         playSpeedControlPanel.setStyleName("timePanel-controls-playSpeed");
@@ -189,7 +195,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         playSpeedControlPanel.add(playSpeedImage);
         playSpeedControlPanel.add(playSpeedBox);
 
-        Button slowDownButton = new Button("-1");
+        slowDownButton = new Button("-1");
         slowDownButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -199,7 +205,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         });
         playSpeedControlPanel.add(slowDownButton);
 
-        Button speedUpButton = new Button("+1");
+        speedUpButton = new Button("+1");
         speedUpButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -333,6 +339,9 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
                 timeDelayLabel.setVisible(true);
                 sliderBar.setEnabled(true);
                 backToLivePlayButton.setVisible(true);
+                playSpeedBox.setEnabled(false);
+                slowDownButton.setEnabled(false);
+                speedUpButton.setEnabled(false);
                 break;
             case Replay: 
                 timeDelayLabel.setVisible(false);
@@ -340,15 +349,19 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
                 playModeLabel.setText(stringMessages.playModeReplay()); 
                 sliderBar.setEnabled(true);
                 backToLivePlayButton.setVisible(false);
+                playSpeedBox.setEnabled(true);
+                slowDownButton.setEnabled(true);
+                speedUpButton.setEnabled(true);
                 break;
         }
     }
 
-    public TimePanelSettings getSettings() {
+    @SuppressWarnings("unchecked")
+    public T getSettings() {
         TimePanelSettings result = new TimePanelSettings();
         result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
         result.setRefreshInterval(timer.getRefreshInterval());
-        return result;
+        return (T) result;
     }
 
     @Override
@@ -362,12 +375,12 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     }
 
     @Override
-    public SettingsDialogComponent<TimePanelSettings> getSettingsDialogComponent() {
-        return new TimePanelSettingsDialogComponent(getSettings(), stringMessages);
+    public SettingsDialogComponent<T> getSettingsDialogComponent() {
+        return new TimePanelSettingsDialogComponent<T>(getSettings(), stringMessages);
     }
 
     @Override
-    public void updateSettings(TimePanelSettings newSettings) {
+    public void updateSettings(T newSettings) {
         boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
         if (delayChanged) {
             timer.setDelay(1000l * newSettings.getDelayToLivePlayInSeconds());

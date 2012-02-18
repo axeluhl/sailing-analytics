@@ -10,47 +10,51 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class TimePanelSettingsDialogComponent implements SettingsDialogComponent<TimePanelSettings> {
-    private LongBox timeDelayBox;
-    private DoubleBox refreshIntervalBox;
-    private final StringMessages stringMessages;
-    private final TimePanelSettings initialSettings;
+public class TimePanelSettingsDialogComponent<T extends TimePanelSettings> implements SettingsDialogComponent<T> {
+    protected LongBox timeDelayBox;
+    protected DoubleBox refreshIntervalBox;
+    protected final StringMessages stringMessages;
+    protected final T initialSettings;
+    protected VerticalPanel mainContentPanel;
     
-    public TimePanelSettingsDialogComponent(TimePanelSettings settings, StringMessages stringMessages) {
+    public TimePanelSettingsDialogComponent(T settings, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         initialSettings = settings;
     }
 
     @Override
-    public Widget getAdditionalWidget(DataEntryDialog<TimePanelSettings> dialog) {
-        VerticalPanel vp = new VerticalPanel();
-        
-        HorizontalPanel labelAndTimeDelayBoxPanel = new HorizontalPanel();
-        labelAndTimeDelayBoxPanel.add(new Label(stringMessages.timeDelay()));
-        timeDelayBox = dialog.createLongBox(initialSettings.getDelayToLivePlayInSeconds(), 4);
-        labelAndTimeDelayBoxPanel.add(timeDelayBox);
-        vp.add(labelAndTimeDelayBoxPanel);
-        
+    public Widget getAdditionalWidget(DataEntryDialog<T> dialog) {
+        mainContentPanel = new VerticalPanel();
+
         HorizontalPanel labelAndRefreshIntervalBoxPanel = new HorizontalPanel();
-        labelAndRefreshIntervalBoxPanel.add(new Label(stringMessages.refreshInterval()));
+        labelAndRefreshIntervalBoxPanel.setSpacing(5);
+        labelAndRefreshIntervalBoxPanel.add(new Label(stringMessages.refreshInterval() + ":"));
         refreshIntervalBox = dialog.createDoubleBox(((double) initialSettings.getRefreshInterval()) / 1000, 4);
         labelAndRefreshIntervalBoxPanel.add(refreshIntervalBox);
-        vp.add(labelAndRefreshIntervalBoxPanel);
+        mainContentPanel.add(labelAndRefreshIntervalBoxPanel);
         
-        return vp;
+        HorizontalPanel labelAndTimeDelayBoxPanel = new HorizontalPanel();
+        labelAndTimeDelayBoxPanel.setSpacing(5);
+        labelAndTimeDelayBoxPanel.add(new Label(stringMessages.timeDelay() + ":"));
+        timeDelayBox = dialog.createLongBox(initialSettings.getDelayToLivePlayInSeconds(), 10);
+        labelAndTimeDelayBoxPanel.add(timeDelayBox);
+        mainContentPanel.add(labelAndTimeDelayBoxPanel);
+        
+        return mainContentPanel;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public TimePanelSettings getResult() {
-        TimePanelSettings result = new TimePanelSettings();
+    public T getResult() {
+        T result = (T) new TimePanelSettings();
         result.setDelayToLivePlayInSeconds(timeDelayBox.getValue() == null ? -1 : timeDelayBox.getValue());
         result.setRefreshInterval(refreshIntervalBox.getValue() == null ? -1 : (long) (refreshIntervalBox.getValue() * 1000));
         return result;
     }
 
     @Override
-    public Validator<TimePanelSettings> getValidator() {
-        return new Validator<TimePanelSettings>() {
+    public Validator<T> getValidator() {
+        return new Validator<T>() {
             @Override
             public String getErrorMessage(TimePanelSettings valueToValidate) {
                 String errorMessage = null;

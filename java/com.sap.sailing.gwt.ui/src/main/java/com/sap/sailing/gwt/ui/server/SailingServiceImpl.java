@@ -754,7 +754,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
-            raceTimesInfo = new RaceTimesInfoDTO();
+            raceTimesInfo = new RaceTimesInfoDTO(raceIdentifier);
             
             raceTimesInfo.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
             raceTimesInfo.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();

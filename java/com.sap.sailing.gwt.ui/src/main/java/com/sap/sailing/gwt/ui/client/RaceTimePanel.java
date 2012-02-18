@@ -11,8 +11,9 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class RaceTimePanel extends TimePanel implements RaceSelectionChangeListener {
+public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
 
@@ -23,6 +24,8 @@ public class RaceTimePanel extends TimePanel implements RaceSelectionChangeListe
     private boolean isTimeInfosComplete = false;
     
     private boolean isTimerInitialized = false;
+    
+    private RaceTimesInfoDTO lastRaceTimesInfo;
     
     public RaceTimePanel(final SailingServiceAsync sailingService, Timer timer, ErrorReporter errorReporter, StringMessages stringMessages) {
         super(timer, stringMessages);
@@ -65,7 +68,7 @@ public class RaceTimePanel extends TimePanel implements RaceSelectionChangeListe
     }    
     
     @Override
-    public void updateSettings(TimePanelSettings newSettings) {
+    public void updateSettings(RaceTimePanelSettings newSettings) {
         super.updateSettings(newSettings);
 
         isTimerInitialized = false;
@@ -74,23 +77,38 @@ public class RaceTimePanel extends TimePanel implements RaceSelectionChangeListe
         readRaceTimesInfo();
     }
 
+    @Override
+    public RaceTimePanelSettings getSettings() {
+        RaceTimePanelSettings result = new RaceTimePanelSettings();
+        result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
+        result.setRefreshInterval(timer.getRefreshInterval());
+        result.setRaceTimesInfo(lastRaceTimesInfo);
+        return result;
+    }
+
+    @Override
+    public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent() {
+        return new RaceTimePanelSettingsDialogComponent(getSettings(), stringMessages);
+    }
+
     private void updateTimeInfos(RaceTimesInfoDTO raceTimesInfo) {
-        if(raceTimesInfo == null || raceTimesInfo.timePointOfNewestEvent == null) {
+        lastRaceTimesInfo = raceTimesInfo;
+        
+        if(raceTimesInfo == null || raceTimesInfo.timePointOfNewestEvent == null || raceTimesInfo.startOfTracking == null) {
             reset();
         } else {
             // we set here the min and max of the time slider, the start and end of the race as well as the knows leg markers
             if(!isTimerInitialized)
             {
-                // manipulation of delay to make the event 'live'
-//                long lastEventTimeDelay = System.currentTimeMillis() - raceTimesInfo.timePointOfNewestEvent.getTime() + 1000;
-//                timer.setDelay(lastEventTimeDelay); 
-
                 long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
+                long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
 
-                if(raceTimesInfo.timePointOfNewestEvent.getTime() > System.currentTimeMillis() - livePlayDelayInMillis)
+                if(liveTimePointInMillis < raceTimesInfo.timePointOfNewestEvent.getTime() && 
+                   liveTimePointInMillis > raceTimesInfo.startOfTracking.getTime()) {
                     timer.setPlayMode(PlayModes.Live);
-                else
+                } else {
                     timer.setPlayMode(PlayModes.Replay);
+                }
 
                 initMinMax(raceTimesInfo);
                 initTimerPosition(raceTimesInfo);
