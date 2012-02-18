@@ -274,6 +274,7 @@ input.magnifier {
 	text-decoration: none;
 	color: #fff;
   	/*border: 1px solid #a6a6a6;*/
+  	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
 }
 
 .leaderboardGroupPanel-ActiveRace:visited, .leaderboardGroupPanel-ActiveLeaderboard:visited{
@@ -340,5 +341,5 @@ input.magnifier {
 
 .leaderboardGroupPanel-InactiveRace {
 	background: #c0bebe;
-	
+	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif
 }
