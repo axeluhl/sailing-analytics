@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.Map;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -28,9 +26,9 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
@@ -42,7 +40,6 @@ import com.sap.sailing.gwt.ui.leaderboard.MultiChartSettings;
 import com.sap.sailing.gwt.ui.raceboard.CollapsableComponentViewer.ViewerPanelTypes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
@@ -75,15 +72,15 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final List<CollapsableComponentViewer<?>> collapsableViewers;
     private final FlowPanel componentsNavigationPanel;
     private final BreadcrumbPanel breadcrumbPanel; 
-    private final TimePanel timePanel;
+    private final RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
     private final UserDTO user;
     
-    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser, RaceSelectionProvider raceSelectionProvider, String leaderboardName,
+    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType) {
         this.sailingService = sailingService;
-        this.raceSelectionProvider = raceSelectionProvider;
+        this.raceSelectionProvider = theRaceSelectionProvider;
         this.user = theUser;
         this.scrollOffset = 0;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -175,9 +172,10 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             addComponentViewerMenuEntry(componentViewer);
         }
 
-        timePanel = new TimePanel(timer, stringMessages);
+        timePanel = new RaceTimePanel(sailingService, timer, errorReporter, stringMessages);
+        raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
+        timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
-
     
     private void addComponentViewerMenuEntry(final ComponentViewer c) {
         Anchor menuEntry = new Anchor(c.getViewerName());
@@ -245,76 +243,76 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                 }
             }
         }
-        // trigger selection change because now racesByIdentifier may have the information required, e.g., to update the time slider
-        onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
 
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
-        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            RaceDTO selectedRace = racesByIdentifier.get(selectedRaces.iterator().next());
-            
-            Date min = null;
-            Date max = null;
-            
-            if (selectedRace.startOfTracking != null) {
-                min = selectedRace.startOfTracking;
-            }
-            if (selectedRace.endOfRace != null) {
-                max = selectedRace.endOfRace;
-            } else if (selectedRace.timePointOfNewestEvent != null) {
-                max = selectedRace.timePointOfNewestEvent;
-                timer.setPlayMode(PlayModes.Live);
-            }
-
-            if(min != null && max != null)
-                timePanel.setMinMax(min, max);
-            
-            // set initial timer position
-            switch(timer.getPlayMode()) {
-                case Live:
-                    if(selectedRace.timePointOfNewestEvent != null) {
-                        timer.setTime(selectedRace.timePointOfNewestEvent.getTime());
-                    }
-                    break;
-                case Replay:
-                    if(selectedRace.endOfRace != null) {
-                        timer.setTime(selectedRace.endOfRace.getTime());
-                    } else {
-                        timer.setTime(selectedRace.startOfRace.getTime());
-                    }
-                    break;
-            }
-
-            sailingService.getRaceTimesInfo(selectedRace.getRaceIdentifier(), 
-                    new AsyncCallback<RaceTimesInfoDTO>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error obtaining leg timepoints: " + caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
-                            // raceTimesInfo can be null if the race is not tracked anymore
-                            if (raceTimesInfo != null) {
-                                timePanel.setLegMarkers(raceTimesInfo.getLegTimes());
-                                if (raceTimesInfo.getStartOfRace() != null) {
-                                    // set the new start time 
-                                    Date startOfRace = raceTimesInfo.getStartOfRace();
-                                    Date startOfTimeslider = new Date(startOfRace.getTime() - 5 * 60 * 1000);
-
-                                    timePanel.changeMin(startOfTimeslider);
-                                }
-                                // set time to end of race
-                                if(raceTimesInfo.getLastLegTimes() != null) {
-                                    timer.setTime(raceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
-                                }
-                            } else {
-                                timePanel.reset();
-                            }
-                        }
-                    });
-        }
     }
+//    
+//        if (selectedRaces != null && !selectedRaces.isEmpty()) {
+//            RaceDTO selectedRace = racesByIdentifier.get(selectedRaces.iterator().next());
+//            
+//            Date min = null;
+//            Date max = null;
+//            
+//            if (selectedRace.startOfTracking != null) {
+//                min = selectedRace.startOfTracking;
+//            }
+//            if (selectedRace.endOfRace != null) {
+//                max = selectedRace.endOfRace;
+//            } else if (selectedRace.timePointOfNewestEvent != null) {
+//                max = selectedRace.timePointOfNewestEvent;
+//                timer.setPlayMode(PlayModes.Live);
+//            }
+//
+//            if(min != null && max != null)
+//                timePanel.setMinMax(min, max);
+//            
+//            // set initial timer position
+//            switch(timer.getPlayMode()) {
+//                case Live:
+//                    if(selectedRace.timePointOfNewestEvent != null) {
+//                        timer.setTime(selectedRace.timePointOfNewestEvent.getTime());
+//                    }
+//                    break;
+//                case Replay:
+//                    if(selectedRace.endOfRace != null) {
+//                        timer.setTime(selectedRace.endOfRace.getTime());
+//                    } else {
+//                        timer.setTime(selectedRace.startOfRace.getTime());
+//                    }
+//                    break;
+//            }
+//
+//            sailingService.getRaceTimesInfo(selectedRace.getRaceIdentifier(), 
+//                    new AsyncCallback<RaceTimesInfoDTO>() {
+//                        @Override
+//                        public void onFailure(Throwable caught) {
+//                            errorReporter.reportError("Error obtaining leg timepoints: " + caught.getMessage());
+//                        }
+//
+//                        @Override
+//                        public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
+//                            // raceTimesInfo can be null if the race is not tracked anymore
+//                            if (raceTimesInfo != null) {
+//                                timePanel.setLegMarkers(raceTimesInfo.getLegTimes());
+//                                if (raceTimesInfo.getStartOfRace() != null) {
+//                                    // set the new start time 
+//                                    Date startOfRace = raceTimesInfo.getStartOfRace();
+//                                    Date startOfTimeslider = new Date(startOfRace.getTime() - 5 * 60 * 1000);
+//
+//                                    timePanel.changeMin(startOfTimeslider);
+//                                }
+//                                // set time to end of race
+//                                if(raceTimesInfo.getLastLegTimes() != null) {
+//                                    timer.setTime(raceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
+//                                }
+//                            } else {
+//                                timePanel.reset();
+//                            }
+//                        }
+//                    });
+//        }
+//    }
 }
 

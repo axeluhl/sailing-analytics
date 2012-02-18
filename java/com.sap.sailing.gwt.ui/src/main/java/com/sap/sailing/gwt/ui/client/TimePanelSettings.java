@@ -1,7 +1,8 @@
 package com.sap.sailing.gwt.ui.client;
 
 public class TimePanelSettings {
-    private int delayToLivePlayInSeconds;
+    /* must be of type long to allow manipulation of 'live' events with a very large delay */
+    private long delayToLivePlayInSeconds;
     private long refreshInterval;
 
     public TimePanelSettings() {
@@ -9,11 +10,11 @@ public class TimePanelSettings {
         refreshInterval = 1000;
     }
 
-    public int getDelayToLivePlayInSeconds() {
+    public long getDelayToLivePlayInSeconds() {
         return delayToLivePlayInSeconds;
     }
 
-    public void setDelayToLivePlayInSeconds(int delayToLivePlayInSeconds) {
+    public void setDelayToLivePlayInSeconds(long delayToLivePlayInSeconds) {
         this.delayToLivePlayInSeconds = delayToLivePlayInSeconds;
     }
 

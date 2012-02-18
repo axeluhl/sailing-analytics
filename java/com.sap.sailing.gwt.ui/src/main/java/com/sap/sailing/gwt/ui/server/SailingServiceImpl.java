@@ -750,13 +750,21 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier) {
-        RaceTimesInfoDTO result = null;
+        RaceTimesInfoDTO raceTimesInfo = null;
 
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
-            result = new RaceTimesInfoDTO();
+            raceTimesInfo = new RaceTimesInfoDTO(raceIdentifier);
+            
+            raceTimesInfo.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
+            raceTimesInfo.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
+            raceTimesInfo.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
+            raceTimesInfo.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
+            raceTimesInfo.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
+            raceTimesInfo.endOfTracking = null;
+            
             List<LegTimesInfoDTO> legTimes = new ArrayList<LegTimesInfoDTO>();
-            result.setLegTimes(legTimes);
+            raceTimesInfo.setLegTimes(legTimes);
             
             Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
             Date lastLegPassingTime = null;
@@ -789,7 +797,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                     LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("S");
                                     legTimepointDTO.firstPassingDate = passingDate; 
                                     legTimes.add(legTimepointDTO);
-                                    result.setStartOfRace(passingDate);
+                                    raceTimesInfo.setStartOfRace(passingDate);
                                     lastLegPassingTime = passingDate;
                                     break;
                                 }
@@ -820,7 +828,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }        
-        return result;
+        return raceTimesInfo;
     }
 
     @Override
