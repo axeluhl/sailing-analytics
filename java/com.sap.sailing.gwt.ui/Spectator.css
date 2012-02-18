@@ -262,7 +262,7 @@ input.magnifier {
 	font-weight: 500;
 }
 
-.leaderboardGroupPanel-ActiveRace, .leaderboardGroupPanel-ActiveLeaderboard {
+.leaderboardGroupPanel-ActiveRace, .leaderboardGroupPanel-ActiveLeaderboard, .leaderboardGroupPanel-InactiveRace {
 	padding: 5px 8px;
 	display: block;
 	float: left;
@@ -336,4 +336,9 @@ input.magnifier {
 	margin: 0 13px 20px;
 		font-size: 21px;
 	font-weight: 400;
+}
+
+.leaderboardGroupPanel-InactiveRace {
+	background: #c0bebe;
+	
 }
