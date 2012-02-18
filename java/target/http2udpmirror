@@ -13,4 +13,4 @@ cd "$target/../com.sap.sailing.feature.p2build/bin/products/raceanalysis.product
 echo pwd is now `pwd`
 classpath="`find plugins -name 'com.sap.sailing.expeditionconnector_*.jar' | sort | tail -1`;`find plugins -name 'com.sap.sailing.domain.common_*.jar' | sort | tail -1`"
 echo Using classpath $classpath
-java -cp "$classpath" -Djava.util.logging.config.file=$target/configuration/logging.properties com.sap.sailing.expeditionconnector.FromHttpToUdpMirror $*
+"$JAVA_HOME/bin/java" -cp "$classpath" -Djava.util.logging.config.file=$target/configuration/logging.properties com.sap.sailing.expeditionconnector.FromHttpToUdpMirror $*
