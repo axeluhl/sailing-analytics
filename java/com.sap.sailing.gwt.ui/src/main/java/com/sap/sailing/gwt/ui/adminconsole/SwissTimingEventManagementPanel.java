@@ -221,11 +221,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         Label lblTrackSettings = new Label(stringConstants.trackSettings());
         trackPanel.add(lblTrackSettings);
 
-        final CheckBox simulateLiveEventCheckbox = new CheckBox("Simulate live event");
-        simulateLiveEventCheckbox.setValue(false);
-        simulateLiveEventCheckbox.setWordWrap(false);
-        trackPanel.add(simulateLiveEventCheckbox);
-        
         final CheckBox trackWindCheckbox = new CheckBox(stringConstants.trackWind());
         trackWindCheckbox.setWordWrap(false);
         trackWindCheckbox.setValue(true);
@@ -246,7 +241,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         btnTrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                trackSelectedRaces(simulateLiveEventCheckbox.getValue(), trackWindCheckbox.getValue(), declinationCheckbox.getValue());
+                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue());
             }
         });
 
@@ -342,7 +337,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         });
     }
 
-    private void trackSelectedRaces(boolean simulateLiveEvent, boolean trackWind, boolean correctWindByDeclination) {
+    private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
         String hostname = hostnameTextbox.getValue();
         int port = portIntegerbox.getValue();
         for (final SwissTimingRaceRecordDTO rr : raceList.getList()) {
