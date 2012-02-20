@@ -262,14 +262,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
 
     @Override
     public void timeChanged(Date time) {
-        if (sliderBar.isMinMaxInitialized()) {
-            long t = time.getTime();
+        if (getMin() != null && getMax() != null) {
             // Handle also the case where time advances beyond slider's end.
             // Handle it equally for replay and live mode for robustness reasons. This at least allows a user
             // to watch on even if the time panel was off in its assumptions about race end and end of tracking.
-            if (t > sliderBar.getMaxValue()) {
-                sliderBar.setMaxValue(new Double(t));
+            if (time.after(getMax())) {
+                setMinMax(getMin(), time);
             }
+            long t = time.getTime();
             sliderBar.setCurrentValue(new Double(t), false);
             dateLabel.setText(dateFormatter.format(time));
             if (lastReceivedDataTimepoint == null) {
@@ -280,6 +280,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         }
     }
 
+    private Date getMin() {
+        return min;
+    }
+    
+    private Date getMax() {
+        return max;
+    }
+    
     /**
      * @param min must not be <code>null</code>
      * @param max must not be <code>null</code>
