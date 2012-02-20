@@ -248,9 +248,13 @@ public interface SailingServiceAsync {
     
     void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards, AsyncCallback<Void> callback);
 
-    void getAllAvailableRaceData(RaceIdentifier race, List<CompetitorDTO> competitors, long stepSize,
+    /**
+     * Returns the mark passings and the data for the given {@link DetailType} of all competitors in
+     * <code>competitorsQuery</code> in the <code>race</code>.<br />
+     * The Long part in the <code>competitorsQuery</code> defines the time point, from which on the data should be
+     * returned. If this time point is lesser than the start of race, all available data for this competitor is
+     * returned.
+     */
+    void getCompetitorsRaceData(RaceIdentifier race, List<Pair<Long, CompetitorDTO>> competitorsQuery, long stepSize,
             DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
-
-    void getNewestRaceData(RaceIdentifier race, List<CompetitorDTO> competitors, long startTime, long stepSize, DetailType detailType,
-            AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 }

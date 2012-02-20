@@ -1342,62 +1342,51 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public MultiCompetitorRaceDataDTO getAllAvailableRaceData(RaceIdentifier race, List<CompetitorDTO> competitors,
+    public MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Long, CompetitorDTO>> competitorsQuery,
             long stepSize, DetailType detailType) throws NoWindException {
         MultiCompetitorRaceDataDTO data = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
-            data = getMultiCompetitorRaceDataDTO(trackedRace, competitors, trackedRace.getStart().asMillis(),
+            data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStart().asMillis(),
                         trackedRace.getTimePointOfNewestEvent().asMillis(), stepSize, detailType);
         }
         return data;
     }
-
-    @Override
-    public MultiCompetitorRaceDataDTO getNewestRaceData(RaceIdentifier race, List<CompetitorDTO> competitors, long startTime, long stepSize, DetailType detailType) throws NoWindException {
-        MultiCompetitorRaceDataDTO data = null;
-        TrackedRace trackedRace = getExistingTrackedRace(race);
-        if (trackedRace != null) {
-            data = getMultiCompetitorRaceDataDTO(trackedRace, competitors, startTime,
-                    trackedRace.getTimePointOfNewestEvent().asMillis(), stepSize, detailType); 
-        }
-        return data;
-    }
     
-    private MultiCompetitorRaceDataDTO getMultiCompetitorRaceDataDTO(TrackedRace race, List<CompetitorDTO> competitors, long startTime, long endTime,
-            long stepSize, DetailType detailType) throws NoWindException {
+    private MultiCompetitorRaceDataDTO getMultiCompetitorRaceDataDTO(TrackedRace race,
+            List<Pair<Long, CompetitorDTO>> competitorsQuery, long startTime, long endTime, long stepSize,
+            DetailType detailType) throws NoWindException {
         MultiCompetitorRaceDataDTO data = new MultiCompetitorRaceDataDTO(detailType);
-        //Calculating the time points
-        List<Long> timePoints = new ArrayList<Long>();
-        for (long i = startTime; i <= endTime; i += stepSize) {
-            timePoints.add(i);
-        }
-        //Fetching the data from the TrackedRace
-        for (CompetitorDTO competitorDTO : competitors) {
-            Competitor competitor = getCompetitorById(race.getRace().getCompetitors(), competitorDTO.id);
-            ArrayList<Triple<String, Long, Double>> markPassingsData = new ArrayList<Util.Triple<String,Long,Double>>();
-            ArrayList<Pair<Long, Double>> raceData = new ArrayList<Util.Pair<Long,Double>>();
-            //Filling the mark passings
+        // Fetching the data from the TrackedRace
+        for (Pair<Long, CompetitorDTO> competitorQuery : competitorsQuery) {
+            List<Long> timePoints = new ArrayList<Long>();
+            for (long i = competitorQuery.getA() < startTime ? startTime : competitorQuery.getA(); i <= endTime; i += stepSize) {
+                timePoints.add(i);
+            }
+
+            Competitor competitor = getCompetitorById(race.getRace().getCompetitors(), competitorQuery.getB().id);
+            ArrayList<Triple<String, Long, Double>> markPassingsData = new ArrayList<Util.Triple<String, Long, Double>>();
+            ArrayList<Pair<Long, Double>> raceData = new ArrayList<Util.Pair<Long, Double>>();
+            // Filling the mark passings
             for (MarkPassing markPassing : race.getMarkPassings(competitor)) {
                 MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                markPassingsData.add(new Triple<String, Long, Double>(markPassing.getWaypoint().getName(), time.asMillis(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
+                if (time.asMillis() >= competitorQuery.getA()) {
+                    markPassingsData.add(new Triple<String, Long, Double>(markPassing.getWaypoint().getName(), time
+                            .asMillis(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
+                }
             }
-            //Filling the race data
+            // Filling the race data
             for (Long timePoint : timePoints) {
                 MillisecondsTimePoint time = new MillisecondsTimePoint(timePoint);
-                raceData.add(new Pair<Long, Double>(timePoint, getCompetitorRaceDataEntry(detailType, race, competitor, time)));
+                raceData.add(new Pair<Long, Double>(timePoint, getCompetitorRaceDataEntry(detailType, race, competitor,
+                        time)));
             }
-            //Adding fetched data to the container
-            data.setCompetitorRaceData(competitorDTO, new CompetitorRaceDataDTO(competitorDTO, detailType, startTime, markPassingsData, raceData));
+            // Adding fetched data to the container
+            data.setCompetitorRaceData(competitorQuery.getB(), new CompetitorRaceDataDTO(competitorQuery.getB(),
+                    detailType, startTime, markPassingsData, raceData));
         }
         return data;
     }
-    
-    private CompetitorRaceDataDTO getCompetitorRaceDataDTO(TrackedRace race, CompetitorDTO competitor, long startTime,
-            long endTime, long stepSize, DetailType detailType) {
-        return null; //TODO
-    }
-    
     @Override
     public Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,

@@ -63,18 +63,15 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
     
     /**
      * Adds all data in <code>dataToAdd</code>, if the <code>detailTypes</code> fit.<br />
-     * The data which are not contained, will be ignored.
+     * The data which are not contained, will be
+     * {@link MultiCompetitorRaceDataDTO#setCompetitorRaceData(CompetitorDTO, CompetitorRaceDataDTO) set}.
      * 
      * @param dataToAdd
      */
     public void addAllRaceData(MultiCompetitorRaceDataDTO dataToAdd) {
-        if (detailType == dataToAdd.getDetailType()) {
-            for (CompetitorRaceDataDTO competitorDataToAdd : dataToAdd.getAllRaceData()) {
-                CompetitorRaceDataDTO competitorData = raceData.get(competitorDataToAdd.getCompetitor());
-                if (competitorData != null) {
-                    competitorData.addAllData(competitorDataToAdd);
-                }
-            }
+        //The check if the detailType fits will be done by addCompetitorRaceDataDTO
+        for (CompetitorRaceDataDTO competitorDataToAdd : dataToAdd.getAllRaceData()) {
+            addCompetitorRaceData(competitorDataToAdd.getCompetitor(), competitorDataToAdd);
         }
     }
     
@@ -102,6 +99,10 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
 
     public boolean isEmpty() {
         return raceData.isEmpty();
+    }
+
+    public boolean contains(CompetitorDTO competitor) {
+        return raceData.containsKey(competitor);
     }
     
 }
