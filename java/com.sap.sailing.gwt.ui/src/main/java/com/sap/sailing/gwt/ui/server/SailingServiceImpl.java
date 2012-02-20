@@ -1354,17 +1354,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             for (CompetitorDTO competitorDTO : competitorAndTimePointsDTO.getCompetitors()) {
                 Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
                 List<Long> timePoints = competitorAndTimePointsDTO.getTimePoints();
-                Double[] entries = new Double[timePoints.size()];
+                List<Double> entries = new ArrayList<Double>();
                 for (int i = 0; i < timePoints.size(); i++) {
                     MillisecondsTimePoint time = new MillisecondsTimePoint(timePoints.get(i));
-                    entries[i] = getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time);
+                    entries.add(getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time));
                 }
                 competitorData.setRaceData(competitorDTO, entries);
-                entries = new Double[competitorAndTimePointsDTO.getMarkPassings(competitorDTO).size()];
+                entries = new ArrayList<Double>();
                 for (int i = 0; i < competitorAndTimePointsDTO.getMarkPassings(competitorDTO).size(); i++) {
                     MillisecondsTimePoint time = new MillisecondsTimePoint(
                             competitorAndTimePointsDTO.getMarkPassings(competitorDTO).get(i).getB());
-                    entries[i] = getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time);
+                    entries.add(getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time));
                 }
                 competitorData.setMarkPassingData(competitorDTO, entries);
             }
@@ -1527,8 +1527,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
             competitorAndTimePointsDTO.setCompetitors(competitors);
             competitorAndTimePointsDTO.setStartTime(trackedRace.getStart().asMillis());
-            competitorAndTimePointsDTO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent() == null ? null
-                    : trackedRace.getTimePointOfNewestEvent().asMillis());
+            TimePoint timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent();
+            competitorAndTimePointsDTO.setTimePointOfNewestEvent(timePointOfNewestEvent == null ? -1 : timePointOfNewestEvent.asMillis());
         }
         return competitorAndTimePointsDTO;
     }
