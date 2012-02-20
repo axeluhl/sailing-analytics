@@ -751,32 +751,27 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier) {
         RaceTimesInfoDTO raceTimesInfo = null;
-
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             raceTimesInfo = new RaceTimesInfoDTO(raceIdentifier);
-            
             raceTimesInfo.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
             raceTimesInfo.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
             raceTimesInfo.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
             raceTimesInfo.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
             raceTimesInfo.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
-            raceTimesInfo.endOfTracking = null;
-            
             List<LegTimesInfoDTO> legTimes = new ArrayList<LegTimesInfoDTO>();
             raceTimesInfo.setLegTimes(legTimes);
-            
             Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
             Date lastLegPassingTime = null;
             int i = 1;
             for (TrackedLeg trackedLeg : trackedLegs) {
-                if(i == 1) {
+                if (i == 1) {
                     // try to calculate the point in time where all boats passed the start line in a small time frame
                     Waypoint from = trackedLeg.getLeg().getFrom();
                     Iterable<MarkPassing> markPassings = trackedRace.getMarkPassingsInOrder(from);
                     int markPassingsCount = Util.size(markPassings);
-
-                    if(markPassings != null && markPassingsCount >= 4) {
+                    // require more than half the boats registered for the race to have passed the start mark
+                    if (markPassings != null && markPassingsCount > Util.size(trackedRace.getRace().getCompetitors())/2) {
                         long maxTimeFrameInMs = 60 * 1000; // = 1 minute
                         Iterator<MarkPassing> iterator = markPassings.iterator();
                         long currentTimeToCheck = 0;
@@ -808,15 +803,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 
                 Waypoint to = trackedLeg.getLeg().getTo();
                 Iterable<MarkPassing> markPassings = trackedRace.getMarkPassingsInOrder(to);
-                if(markPassings != null) {
-                    // ensure the passing date is in the right time order
-                    Iterator<MarkPassing> iterator = markPassings.iterator();
-                    while (iterator.hasNext()) {
-                        MarkPassing currentMarkPassing = iterator.next();
+                if (markPassings != null) {
+                    // ensure the passing date is in the right time order; there may perhaps be left-overs for marks to be reached later that
+                    // claim it has been passed in the past which may have been an accidental tracker read-out;
+                    // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point ordering
+                    for (MarkPassing currentMarkPassing : markPassings) {
                         Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
-                        if (lastLegPassingTime == null)
+                        if (lastLegPassingTime == null) {
                             lastLegPassingTime = currentPassingDate;
-                        
+                        }
                         if (currentPassingDate.after(lastLegPassingTime)) {
                             LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("L" + i++);
                             legTimepointDTO.firstPassingDate = currentPassingDate; 
@@ -1359,17 +1354,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             for (CompetitorDTO competitorDTO : competitorAndTimePointsDTO.getCompetitors()) {
                 Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
                 List<Long> timePoints = competitorAndTimePointsDTO.getTimePoints();
-                Double[] entries = new Double[timePoints.size()];
+                List<Double> entries = new ArrayList<Double>();
                 for (int i = 0; i < timePoints.size(); i++) {
                     MillisecondsTimePoint time = new MillisecondsTimePoint(timePoints.get(i));
-                    entries[i] = getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time);
+                    entries.add(getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time));
                 }
                 competitorData.setRaceData(competitorDTO, entries);
-                entries = new Double[competitorAndTimePointsDTO.getMarkPassings(competitorDTO).size()];
+                entries = new ArrayList<Double>();
                 for (int i = 0; i < competitorAndTimePointsDTO.getMarkPassings(competitorDTO).size(); i++) {
                     MillisecondsTimePoint time = new MillisecondsTimePoint(
                             competitorAndTimePointsDTO.getMarkPassings(competitorDTO).get(i).getB());
-                    entries[i] = getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time);
+                    entries.add(getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time));
                 }
                 competitorData.setMarkPassingData(competitorDTO, entries);
             }
@@ -1532,7 +1527,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
             competitorAndTimePointsDTO.setCompetitors(competitors);
             competitorAndTimePointsDTO.setStartTime(trackedRace.getStart().asMillis());
-            competitorAndTimePointsDTO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent().asMillis());
+            TimePoint timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent();
+            competitorAndTimePointsDTO.setTimePointOfNewestEvent(timePointOfNewestEvent == null ? -1 : timePointOfNewestEvent.asMillis());
         }
         return competitorAndTimePointsDTO;
     }

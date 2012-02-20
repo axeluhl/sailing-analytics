@@ -44,8 +44,18 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     }
 
     @Override
+    public int getIndexOf(Leaderboard leaderboard) {
+        return leaderboards.indexOf(leaderboard);
+    }
+
+    @Override
     public void addLeaderboard(Leaderboard leaderboard) {
         leaderboards.add(leaderboard);
+    }
+    
+    @Override
+    public void addLeaderboardAt(Leaderboard leaderboard, int index) {
+        leaderboards.add(index, leaderboard);
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.util.List;
 import junit.framework.Assert;
 
 import org.json.simple.parser.ParseException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Placemark;
@@ -15,6 +16,7 @@ import com.sap.sailing.domain.common.impl.PlacemarkImpl;
 import com.sap.sailing.domain.common.impl.SerializablePositionImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 
+@Ignore // currently, there seems to be something wrong with the Geocoder. Lennart to be on it. See bug 313
 public class ReverseGeocoderTest {
     
     private ReverseGeocoder geocoder = ReverseGeocoder.INSTANCE;
