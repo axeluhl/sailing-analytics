@@ -21,8 +21,8 @@ public class Timer {
     private Date time;
 
     /**
-     * The time delay to the current point in time in millisseconds
-     * will only be used in live play mode  
+     * The time delay to the current point in time in millisseconds which
+     * will only be used in {@link PlayModes#Live} play mode.  
      */
     private long livePlayDelayInMillis;
     

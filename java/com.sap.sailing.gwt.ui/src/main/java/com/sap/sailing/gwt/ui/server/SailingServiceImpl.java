@@ -761,7 +761,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             raceTimesInfo.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
             raceTimesInfo.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
             raceTimesInfo.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
-            raceTimesInfo.endOfTracking = null;
             
             List<LegTimesInfoDTO> legTimes = new ArrayList<LegTimesInfoDTO>();
             raceTimesInfo.setLegTimes(legTimes);
