@@ -95,8 +95,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
                 // leg markers
                 long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
+                long eventTimeoutTolerance = 30 * 1000; // 30s 
                 long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
-                if (liveTimePointInMillis < raceTimesInfo.timePointOfNewestEvent.getTime()
+                if (liveTimePointInMillis < raceTimesInfo.timePointOfNewestEvent.getTime() + eventTimeoutTolerance
                         && liveTimePointInMillis > raceTimesInfo.startOfTracking.getTime()) {
                     // don't worry; this will only fire an event if something actually changed
                     timer.setPlayMode(PlayModes.Live);
