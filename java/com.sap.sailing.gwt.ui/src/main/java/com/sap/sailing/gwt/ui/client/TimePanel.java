@@ -294,20 +294,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             sliderBar.setStepSize(1000);
     }
 
-    public void changeMax(Date max) {
-        sliderBar.setMaxValue(new Double(max.getTime()));
-        if (timer.getTime().after(max)) {
-            timer.setTime((long) max.getTime());
-        }
-    }
-
-    public void changeMin(Date min) {
-        sliderBar.setMinValue(new Double(min.getTime()));
-        if (timer.getTime().before(min)) {
-            timer.setTime((long) min.getTime());
-        }
-    }
-
     public void reset() {
         sliderBar.clearMarkers();
         sliderBar.redraw();

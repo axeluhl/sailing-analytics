@@ -128,71 +128,66 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
     }
 
+    /**
+     * @return whether both, minimum and maximum were initialized using {@link #setMinMax(Date, Date)}
+     */
     private boolean initMinMax(RaceTimesInfoDTO newRaceTimesInfo) {
         Date min = null;
         Date max = null;
-
-        switch(timer.getPlayMode()) {
-            case Live:
-                if (newRaceTimesInfo.startOfTracking != null) {
-                    min = newRaceTimesInfo.startOfTracking;
-                } if (newRaceTimesInfo.startOfRace != null) {
-                    min = new Date(newRaceTimesInfo.startOfRace.getTime() - 5 * 60 * 1000);
-                }
-                
-                if (newRaceTimesInfo.timePointOfNewestEvent != null) {
-                    max = newRaceTimesInfo.timePointOfNewestEvent;
-                }
-                break;
-            case Replay:
-                if (newRaceTimesInfo.startOfTracking != null) {
-                    min = newRaceTimesInfo.startOfTracking;
-                } else if (newRaceTimesInfo.startOfRace != null) {
-                    min = new Date(newRaceTimesInfo.startOfRace.getTime() - 5 * 60 * 1000);
-                }
-
-                if (newRaceTimesInfo.endOfRace != null) {
-                    max = newRaceTimesInfo.endOfRace;
-                } else if (newRaceTimesInfo.timePointOfNewestEvent != null) {
-                    max = newRaceTimesInfo.timePointOfNewestEvent;
-                }
-                break;
+        switch (timer.getPlayMode()) {
+        case Live:
+            if (newRaceTimesInfo.startOfTracking != null) {
+                min = newRaceTimesInfo.startOfTracking;
+            }
+            if (newRaceTimesInfo.startOfRace != null) {
+                min = new Date(newRaceTimesInfo.startOfRace.getTime() - 5 * 60 * 1000);
+            }
+            if (newRaceTimesInfo.timePointOfNewestEvent != null) {
+                max = newRaceTimesInfo.timePointOfNewestEvent;
+            }
+            break;
+        case Replay:
+            if (newRaceTimesInfo.startOfTracking != null) {
+                min = newRaceTimesInfo.startOfTracking;
+            } else if (newRaceTimesInfo.startOfRace != null) {
+                min = new Date(newRaceTimesInfo.startOfRace.getTime() - 5 * 60 * 1000);
+            }
+            if (newRaceTimesInfo.endOfRace != null) {
+                max = newRaceTimesInfo.endOfRace;
+            } else if (newRaceTimesInfo.timePointOfNewestEvent != null) {
+                max = newRaceTimesInfo.timePointOfNewestEvent;
+            }
+            break;
         }
-
-        if(min != null && max != null) {
+        if (min != null && max != null) {
             setMinMax(min, max);
             return true;
         }
-        
         return false;
     }
     
     private boolean initTimerPosition(RaceTimesInfoDTO newRaceTimesInfo) {
         // initialize timer position
-        switch(timer.getPlayMode()) {
-            case Live:
-                if(newRaceTimesInfo.timePointOfNewestEvent != null)
-                    timer.setTime(newRaceTimesInfo.timePointOfNewestEvent.getTime());
-                timer.play();
-                break;
-            case Replay:
-                if(newRaceTimesInfo.endOfRace != null) {
-                    timer.setTime(newRaceTimesInfo.endOfRace.getTime());
-                } else {
-                    if(newRaceTimesInfo.startOfRace != null)
-                        timer.setTime(newRaceTimesInfo.startOfRace.getTime());
-                }
-                // set time to end of race
-                if(newRaceTimesInfo.getLastLegTimes() != null) {
-                    timer.setTime(newRaceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
-                }
-                break;
+        switch (timer.getPlayMode()) {
+        case Live:
+            if (newRaceTimesInfo.timePointOfNewestEvent != null)
+                timer.setTime(newRaceTimesInfo.timePointOfNewestEvent.getTime());
+            timer.play();
+            break;
+        case Replay:
+            if (newRaceTimesInfo.endOfRace != null) {
+                timer.setTime(newRaceTimesInfo.endOfRace.getTime());
+            } else {
+                if (newRaceTimesInfo.startOfRace != null)
+                    timer.setTime(newRaceTimesInfo.startOfRace.getTime());
+            }
+            // set time to end of race
+            if (newRaceTimesInfo.getLastLegTimes() != null) {
+                timer.setTime(newRaceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
+            }
+            break;
         }
-        
-        if(timer.getTime() != null)
-            return true;
-        
-        return false;
+        return timer.getTime() != null;
     }
 
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
