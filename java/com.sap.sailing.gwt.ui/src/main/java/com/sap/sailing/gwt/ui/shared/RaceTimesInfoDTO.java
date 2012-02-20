@@ -10,12 +10,18 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 public class RaceTimesInfoDTO implements IsSerializable {
     private RaceIdentifier raceIdentifier;
 
-    private List<LegTimesInfoDTO> legTimes;
+    public List<LegTimesInfoDTO> legTimes;
     
-    private Date startOfRace;
-    private Date startOfTracking;
-    private Date endOfTracking;
-    private Date endOfRace;
+    public Date startOfRace;
+    public Date startOfTracking;
+    public Date endOfRace;
+
+    public Date timePointOfLastEvent;
+    public Date timePointOfNewestEvent;
+
+    public RaceTimesInfoDTO(RaceIdentifier raceIdentifier) {
+        this.raceIdentifier = raceIdentifier;
+    }
 
     public RaceTimesInfoDTO() {}
 
@@ -28,15 +34,14 @@ public class RaceTimesInfoDTO implements IsSerializable {
     }
 
     public LegTimesInfoDTO getLastLegTimes() {
-        if(legTimes == null || legTimes.isEmpty())
+        if (legTimes == null || legTimes.isEmpty()) {
             return null;
-        
+        }
         LegTimesInfoDTO lastLegTime = null;
-        
         Iterator<LegTimesInfoDTO> iterator = legTimes.iterator();
-        while(iterator.hasNext())
+        while(iterator.hasNext()) {
             lastLegTime = iterator.next();
-        
+        }
         return lastLegTime;
     }
 
@@ -64,21 +69,19 @@ public class RaceTimesInfoDTO implements IsSerializable {
         this.startOfTracking = startOfTracking;
     }
 
-    public Date getEndOfTracking() {
-        return endOfTracking;
+    public Date getTimePointOfLastEvent() {
+        return timePointOfLastEvent;
     }
 
-    public void setEndOfTracking(Date endOfTracking) {
-        this.endOfTracking = endOfTracking;
+    public void setTimePointOfLastEvent(Date timePointOfLastEvent) {
+        this.timePointOfLastEvent = timePointOfLastEvent;
     }
 
-    public Date getEndOfRace() {
-        return endOfRace;
+    public Date getTimePointOfNewestEvent() {
+        return timePointOfNewestEvent;
     }
 
-    public void setEndOfRace(Date endOfRace) {
-        this.endOfRace = endOfRace;
+    public void setTimePointOfNewestEvent(Date timePointOfNewestEvent) {
+        this.timePointOfNewestEvent = timePointOfNewestEvent;
     }
-
-    
 }

@@ -885,7 +885,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     LeaderboardPanel.this.timer.pause();
                 } else {
                     LeaderboardPanel.this.timer.setDelay(getDelayInMilliseconds());
-                    LeaderboardPanel.this.timer.resume();
+                    LeaderboardPanel.this.timer.play();
                 }
             }
         };

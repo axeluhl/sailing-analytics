@@ -146,7 +146,7 @@ public interface TrackedRace {
     /**
      * For the given waypoint lists the {@link MarkPassing} events that describe which competitor passed the waypoint at
      * which point in time. This can, e.g., be used to sort those competitors who already finished a leg within the leg
-     * that ends with <code>waypoint</code>. The remaining competitors needs to be ordered by the advantage line-related
+     * that ends with <code>waypoint</code>. The remaining competitors need to be ordered by the advantage line-related
      * distance to the waypoint.
      */
     Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint);

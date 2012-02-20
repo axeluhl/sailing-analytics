@@ -140,3 +140,7 @@ body, table td, select, button {
 .breadcrumbPanel-ActiveBreadcrumb a, .breadcrumbPanel-InactiveBreadcrumb a, .breadcrumbPanel-NextArrow a {
 	color:#A1A1A1;
 	}
+	
+.busyIndicator-simpleBusyIndicator {
+	margin-top: 7px;
+}
