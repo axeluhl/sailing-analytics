@@ -115,7 +115,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         });
 
         sliderBar.addValueChangeHandler(new ValueChangeHandler<Double>() {
-            
             @Override
             public void onValueChange(ValueChangeEvent<Double> newValue) {
                 if(sliderBar.getCurrentValue() != null) {
