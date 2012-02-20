@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
-import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
@@ -26,23 +25,38 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 
-public class TimePanel extends FormPanel implements Component<TimePanelSettings>, TimeListener, PlayStateListener, RequiresResize {
-    private final Timer timer;
+public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, PlayStateListener, RequiresResize {
+    protected final Timer timer;
+    
+    /**
+     * The start time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
+     * 
+     * @see #setMinMax(Date, Date)
+     */
+    private Date min;
+    
+    /**
+     * The end time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
+     * 
+     * @see #setMinMax(Date, Date)
+     */
+    private Date max;
+    
     private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
     private final Label timeLabel;
     private final Label dateLabel;
     private final Label playModeLabel;
-    private final SliderBar sliderBar;
-    private final StringMessages stringMessages;
-    private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
-    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
+    protected final SliderBar sliderBar;
+    private final Button backToLivePlayButton;
+    protected final StringMessages stringMessages;
+    protected final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
+    protected final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
     private final ImageResource playButtonImg;
     private final ImageResource pauseButtonImg;
     private final ImageResource playSpeedImg;
@@ -51,7 +65,9 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     private final ImageResource playModeInactiveImg;
     private final Image playPauseImage;
     private final Image playModeImage;
-    private Date lastReceivedDataTimepoint;
+    protected Date lastReceivedDataTimepoint;
+    private final Button slowDownButton;
+    private final Button speedUpButton;
     
     private static ClientResources resources = GWT.create(ClientResources.class);
 
@@ -64,7 +80,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
 
         @Override
         public void onClick(ClickEvent event) {
-            new SettingsDialog<TimePanelSettings>(TimePanel.this, stringConstants).show();
+            new SettingsDialog<T>(TimePanel.this, stringConstants).show();
         }
     }
 
@@ -99,7 +115,6 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         });
 
         sliderBar.addValueChangeHandler(new ValueChangeHandler<Double>() {
-            
             @Override
             public void onValueChange(ValueChangeEvent<Double> newValue) {
                 if(sliderBar.getCurrentValue() != null) {
@@ -132,13 +147,26 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
                         TimePanel.this.timer.pause();
                         break;
                     case Paused:
-                        TimePanel.this.timer.resume();
+                    TimePanel.this.timer.play();
                         break;
                 }
             }
         });
+        playPauseImage.getElement().getStyle().setFloat(Style.Float.LEFT);
+        playPauseImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
         playControlPanel.add(playPauseImage);
-        
+
+        backToLivePlayButton = new Button("Live");
+        backToLivePlayButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                TimePanel.this.timer.play();
+            }
+        });
+        backToLivePlayButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+        backToLivePlayButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        playControlPanel.add(backToLivePlayButton);
+
         // current date and time control
         FlowPanel timeControlPanel = new FlowPanel();
         timeControlPanel.setStyleName("timePanel-controls-time");
@@ -181,7 +209,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         playSpeedControlPanel.add(playSpeedImage);
         playSpeedControlPanel.add(playSpeedBox);
 
-        Button slowDownButton = new Button("-1");
+        slowDownButton = new Button("-1");
         slowDownButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -191,7 +219,7 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         });
         playSpeedControlPanel.add(slowDownButton);
 
-        Button speedUpButton = new Button("+1");
+        speedUpButton = new Button("+1");
         speedUpButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -228,83 +256,70 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
         controlsPanel.add(settingsAnchor);
         setWidget(vp);
-        
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
     }
 
     @Override
     public void timeChanged(Date time) {
-        
-        if(!sliderBar.isMinMaxInitialized())
-            return;
-        
-        long t = time.getTime();
-        // handle also the case where time advances beyond slider's end
-        switch(timer.getPlayMode()) {
-            case Live: 
-                if(t > sliderBar.getMaxValue()) {
-                    sliderBar.setMaxValue(new Double(t));
-                }
-                sliderBar.setCurrentValue(new Double(t), false);
-                break;
-            case Replay:
-                // handle the case where time advances beyond slider's end
-                if(t > sliderBar.getMaxValue()) {
-                    timer.stop();
-                } else {
-                    sliderBar.setCurrentValue(new Double(t), false);
-                }
-                break;
-        }
-        
-        dateLabel.setText(dateFormatter.format(time));
-        if(lastReceivedDataTimepoint == null)
-            timeLabel.setText(timeFormatter.format(time));
-        else
-            timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
-    }
-
-    public void setMinMax(Date min, Date max) {
-        int numTicks = 8;
-        sliderBar.setMinValue(new Double(min.getTime()));
-        sliderBar.setMaxValue(new Double(max.getTime()));
-        if(sliderBar.getCurrentValue() == null) {
-            sliderBar.setCurrentValue(new Double(min.getTime()));
-        }
-        sliderBar.setNumTickLabels(numTicks);
-        sliderBar.setNumTicks(numTicks);
-        int numSteps = sliderBar.getElement().getClientWidth();
-        if(numSteps > 0)
-            sliderBar.setStepSize(numSteps);
-        else 
-            sliderBar.setStepSize(1000);
-    }
-
-    public void changeMax(Date max) {
-        sliderBar.setMaxValue(new Double(max.getTime()));
-        if (timer.getTime().after(max)) {
-            timer.setTime((long) max.getTime());
-        }
-    }
-
-    public void changeMin(Date min) {
-        sliderBar.setMinValue(new Double(min.getTime()));
-        if (timer.getTime().before(min)) {
-            timer.setTime((long) min.getTime());
-        }
-    }
-
-    public void setLegMarkers(List<LegTimesInfoDTO> legTimepoints) {
-        if(sliderBar.isMinMaxInitialized()) {
-            sliderBar.clearMarkers();
-            
-            for (LegTimesInfoDTO legTimepointDTO : legTimepoints) {
-              sliderBar.addMarker(legTimepointDTO.name, new Double(legTimepointDTO.firstPassingDate.getTime()));
+        if (getMin() != null && getMax() != null) {
+            // Handle also the case where time advances beyond slider's end.
+            // Handle it equally for replay and live mode for robustness reasons. This at least allows a user
+            // to watch on even if the time panel was off in its assumptions about race end and end of tracking.
+            if (time.after(getMax())) {
+                setMinMax(getMin(), time);
             }
-            sliderBar.redraw();
+            long t = time.getTime();
+            sliderBar.setCurrentValue(new Double(t), false);
+            dateLabel.setText(dateFormatter.format(time));
+            if (lastReceivedDataTimepoint == null) {
+                timeLabel.setText(timeFormatter.format(time));
+            } else {
+                timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
+            }
         }
+    }
+
+    protected Date getMin() {
+        return min;
     }
     
+    protected Date getMax() {
+        return max;
+    }
+    
+    /**
+     * @param min must not be <code>null</code>
+     * @param max must not be <code>null</code>
+     */
+    public void setMinMax(Date min, Date max) {
+        assert min != null && max != null;
+        boolean changed = false;
+        int numTicks = 8;
+        if (!max.equals(this.max)) {
+            changed = true;
+            this.max = max;
+            sliderBar.setMaxValue(new Double(max.getTime()));
+        }
+        if (!min.equals(this.min)) {
+            changed = true;
+            this.min = min;
+            sliderBar.setMinValue(new Double(min.getTime()));
+            if (sliderBar.getCurrentValue() == null) {
+                sliderBar.setCurrentValue(new Double(min.getTime()));
+            }
+        }
+        if (changed) {
+            sliderBar.setNumTickLabels(numTicks);
+            sliderBar.setNumTicks(numTicks);
+            int numSteps = sliderBar.getElement().getClientWidth();
+            if (numSteps > 0) {
+                sliderBar.setStepSize(numSteps);
+            } else {
+                sliderBar.setStepSize(1000);
+            }
+        }
+    }
+
     public void reset() {
         sliderBar.clearMarkers();
         sliderBar.redraw();
@@ -312,42 +327,53 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
-        switch(playState) {
-            case Playing:
-                playPauseImage.setResource(pauseButtonImg);
-                if(playMode == PlayModes.Live)
-                    playModeImage.setResource(playModeLiveActiveImg);
-                else
-                    playModeImage.setResource(playModeReplayActiveImg);
-                break;
-            case Paused:
-            case Stopped:
-                playPauseImage.setResource(playButtonImg);
-                playModeImage.setResource(playModeInactiveImg);
-                break;
+        switch (playState) {
+        case Playing:
+            playPauseImage.setResource(pauseButtonImg);
+            if (playMode == PlayModes.Live)
+                playModeImage.setResource(playModeLiveActiveImg);
+            else
+                playModeImage.setResource(playModeReplayActiveImg);
+            backToLivePlayButton.setEnabled(false);
+            break;
+        case Paused:
+        case Stopped:
+            playPauseImage.setResource(playButtonImg);
+            playModeImage.setResource(playModeInactiveImg);
+            backToLivePlayButton.setEnabled(true);
+            break;
         }
         
-        switch(playMode) {
-            case Live: 
-                playModeLabel.setText(stringMessages.playModeLive());
-                timeDelayLabel.setText(stringMessages.timeDelay() + ": " + ((int) timer.getCurrentDelayInMillis() / 1000) + " s");
-                timeDelayLabel.setVisible(true);
-                sliderBar.setEnabled(false);
-                break;
-            case Replay: 
-                timeDelayLabel.setVisible(false);
-                timeDelayLabel.setText("");
-                playModeLabel.setText(stringMessages.playModeReplay()); 
-                sliderBar.setEnabled(true);
-                break;
+        switch (playMode) {
+        case Live:
+            playModeLabel.setText(stringMessages.playModeLive());
+            timeDelayLabel.setText(stringMessages.timeDelay() + ": " + timer.getCurrentDelayInMillis() / 1000 + " s");
+            timeDelayLabel.setVisible(true);
+            sliderBar.setEnabled(true);
+            backToLivePlayButton.setVisible(true);
+            playSpeedBox.setEnabled(false);
+            slowDownButton.setEnabled(false);
+            speedUpButton.setEnabled(false);
+            break;
+        case Replay:
+            timeDelayLabel.setVisible(false);
+            timeDelayLabel.setText("");
+            playModeLabel.setText(stringMessages.playModeReplay());
+            sliderBar.setEnabled(true);
+            backToLivePlayButton.setVisible(false);
+            playSpeedBox.setEnabled(true);
+            slowDownButton.setEnabled(true);
+            speedUpButton.setEnabled(true);
+            break;
         }
     }
 
-    public TimePanelSettings getSettings() {
+    @SuppressWarnings("unchecked")
+    public T getSettings() {
         TimePanelSettings result = new TimePanelSettings();
-        result.setDelayToLivePlayInSeconds((int) (timer.getLivePlayDelayInMillis()/1000));
+        result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
         result.setRefreshInterval(timer.getRefreshInterval());
-        return result;
+        return (T) result;
     }
 
     @Override
@@ -361,16 +387,19 @@ public class TimePanel extends FormPanel implements Component<TimePanelSettings>
     }
 
     @Override
-    public SettingsDialogComponent<TimePanelSettings> getSettingsDialogComponent() {
-        return new TimePanelSettingsDialogComponent(getSettings(), stringMessages);
+    public SettingsDialogComponent<T> getSettingsDialogComponent() {
+        return new TimePanelSettingsDialogComponent<T>(getSettings(), stringMessages);
     }
 
     @Override
-    public void updateSettings(TimePanelSettings newSettings) {
+    public void updateSettings(T newSettings) {
         boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
-        if (delayChanged && timer.getPlayMode() == PlayModes.Live) {
-            timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
+        if (delayChanged) {
             timer.setDelay(1000l * newSettings.getDelayToLivePlayInSeconds());
+            
+            if(timer.getPlayMode() == PlayModes.Live) {
+                timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
+            }
         }
         timer.setRefreshInterval(getSettings().getRefreshInterval());
     }

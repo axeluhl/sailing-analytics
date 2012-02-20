@@ -21,8 +21,8 @@ public class Timer {
     private Date time;
 
     /**
-     * The time delay to the current point in time in millisseconds
-     * will only be used in live play mode  
+     * The time delay to the current point in time in millisseconds which
+     * will only be used in {@link PlayModes#Live} play mode.  
      */
     private long livePlayDelayInMillis;
     
@@ -143,11 +143,12 @@ public class Timer {
         return time;
     }
 
-    public void setPlayMode(PlayModes playMode) {
-        this.playMode = playMode;
-        
-        for (PlayStateListener playStateListener : playStateListeners) {
-            playStateListener.playStateChanged(playState, playMode);
+    public void setPlayMode(PlayModes newPlayMode) {
+        if (this.playMode != newPlayMode) {
+            this.playMode = newPlayMode;
+            for (PlayStateListener playStateListener : playStateListeners) {
+                playStateListener.playStateChanged(playState, playMode);
+            }
         }
     }    
 
@@ -176,24 +177,7 @@ public class Timer {
     }
 
     public void play() {
-        if (playState == PlayStates.Stopped) {
-            playState = PlayStates.Playing;
-            if (playMode == PlayModes.Live) {
-                setTime(System.currentTimeMillis()-livePlayDelayInMillis);
-            }
-            startAutoAdvance();
-            for (PlayStateListener playStateListener : playStateListeners) {
-                playStateListener.playStateChanged(playState, playMode);
-            }
-        }
-    }
-
-    /**
-     * Resumes this timer if not already {@link #playing}. {@link #playing} is set to <code>true</code>
-     * and registered {@link PlayStateListener}s will be notified.
-     */
-    public void resume() {
-        if (playState == PlayStates.Paused || playState == PlayStates.Stopped) {
+        if (playState != PlayStates.Playing) {
             playState = PlayStates.Playing;
             if (playMode == PlayModes.Live) {
                 setTime(System.currentTimeMillis()-livePlayDelayInMillis);
@@ -209,8 +193,13 @@ public class Timer {
         RepeatingCommand command = new RepeatingCommand() {
             @Override
             public boolean execute() {
-                if (time != null) {
-                    setTime(time.getTime() + (long) ((getPlayMode()==PlayModes.Replay?playSpeedFactor:1.0) * refreshInterval));
+                if (time != null && playState == PlayStates.Playing) {
+                    long newTime = time.getTime();
+                    if (playMode == PlayModes.Replay)
+                        newTime += (long) playSpeedFactor * refreshInterval;
+                    else
+                        newTime += refreshInterval;
+                    setTime(newTime);
                 }
                 if (refreshIntervalChanged) {
                     refreshIntervalChanged = false;

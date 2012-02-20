@@ -122,6 +122,7 @@ public interface StringMessages extends Messages {
     String autoRefresh();
     String delayInSeconds();
     String delayBetweenAutoAdvances();
+    String delayMustBeNonNegative();
     String chooseUpdateIntervalOfAtLeastOneSecond();
     String errorSettingWindForRace();
     String errorFetchingWindInformationForRace();
