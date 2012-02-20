@@ -21,8 +21,8 @@ public class Timer {
     private Date time;
 
     /**
-     * The time delay to the current point in time in millisseconds
-     * will only be used in live play mode  
+     * The time delay to the current point in time in millisseconds which
+     * will only be used in {@link PlayModes#Live} play mode.  
      */
     private long livePlayDelayInMillis;
     
@@ -144,9 +144,8 @@ public class Timer {
     }
 
     public void setPlayMode(PlayModes newPlayMode) {
-        if(this.playMode != newPlayMode) {
+        if (this.playMode != newPlayMode) {
             this.playMode = newPlayMode;
-            
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
             }
@@ -178,24 +177,7 @@ public class Timer {
     }
 
     public void play() {
-        if (playState == PlayStates.Stopped) {
-            playState = PlayStates.Playing;
-            if (playMode == PlayModes.Live) {
-                setTime(System.currentTimeMillis()-livePlayDelayInMillis);
-            }
-            startAutoAdvance();
-            for (PlayStateListener playStateListener : playStateListeners) {
-                playStateListener.playStateChanged(playState, playMode);
-            }
-        }
-    }
-
-    /**
-     * Resumes this timer if not already {@link #playing}. {@link #playing} is set to <code>true</code>
-     * and registered {@link PlayStateListener}s will be notified.
-     */
-    public void resume() {
-        if (playState == PlayStates.Paused || playState == PlayStates.Stopped) {
+        if (playState != PlayStates.Playing) {
             playState = PlayStates.Playing;
             if (playMode == PlayModes.Live) {
                 setTime(System.currentTimeMillis()-livePlayDelayInMillis);

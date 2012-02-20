@@ -14,7 +14,6 @@ public class RaceTimesInfoDTO implements IsSerializable {
     
     public Date startOfRace;
     public Date startOfTracking;
-    public Date endOfTracking;
     public Date endOfRace;
 
     public Date timePointOfLastEvent;
@@ -35,15 +34,14 @@ public class RaceTimesInfoDTO implements IsSerializable {
     }
 
     public LegTimesInfoDTO getLastLegTimes() {
-        if(legTimes == null || legTimes.isEmpty())
+        if (legTimes == null || legTimes.isEmpty()) {
             return null;
-        
+        }
         LegTimesInfoDTO lastLegTime = null;
-        
         Iterator<LegTimesInfoDTO> iterator = legTimes.iterator();
-        while(iterator.hasNext())
+        while(iterator.hasNext()) {
             lastLegTime = iterator.next();
-        
+        }
         return lastLegTime;
     }
 
@@ -69,22 +67,6 @@ public class RaceTimesInfoDTO implements IsSerializable {
 
     public void setStartOfTracking(Date startOfTracking) {
         this.startOfTracking = startOfTracking;
-    }
-
-    public Date getEndOfTracking() {
-        return endOfTracking;
-    }
-
-    public void setEndOfTracking(Date endOfTracking) {
-        this.endOfTracking = endOfTracking;
-    }
-
-    public Date getEndOfRace() {
-        return endOfRace;
-    }
-
-    public void setEndOfRace(Date endOfRace) {
-        this.endOfRace = endOfRace;
     }
 
     public Date getTimePointOfLastEvent() {

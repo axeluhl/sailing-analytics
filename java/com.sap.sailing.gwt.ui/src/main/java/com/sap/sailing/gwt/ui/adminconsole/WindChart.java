@@ -155,6 +155,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     }
 
     public void updateStripChartSeries(WindInfoForRaceDTO result) {
+        final NumberFormat numberFormat = NumberFormat.getFormat("0");
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
             WindSource windSource = e.getKey();
             Series series = windSourceSeries.get(windSource);
@@ -168,7 +169,11 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 if (timeOfLatestRequestInMillis == null || wind.timepoint>timeOfLatestRequestInMillis) {
                     timeOfLatestRequestInMillis = wind.timepoint;
                 }
-                points[i++] = new Point(wind.timepoint, wind.dampenedTrueWindFromDeg);
+                Point newPoint = new Point(wind.timepoint, wind.dampenedTrueWindFromDeg);
+                if (wind.dampenedTrueWindSpeedInKnots != null) {
+                    newPoint.setName(numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+stringMessages.averageSpeedInKnotsUnit());
+                }
+                points[i++] = newPoint;
             }
             series.setPoints(points);
         }
