@@ -156,7 +156,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playPauseImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
         playControlPanel.add(playPauseImage);
 
-        backToLivePlayButton = new Button("Live");
+        backToLivePlayButton = new Button("Live"); // FIXME i18n support
         backToLivePlayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
