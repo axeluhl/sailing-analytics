@@ -32,6 +32,21 @@ import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 
 public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
+    
+    /**
+     * The start time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
+     * 
+     * @see #setMinMax(Date, Date)
+     */
+    private Date min;
+    
+    /**
+     * The end time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
+     * 
+     * @see #setMinMax(Date, Date)
+     */
+    private Date max;
+    
     private final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
     private final Label timeLabel;
@@ -277,20 +292,36 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         }
     }
 
+    /**
+     * @param min must not be <code>null</code>
+     * @param max must not be <code>null</code>
+     */
     public void setMinMax(Date min, Date max) {
+        assert min != null && max != null;
+        boolean changed = false;
         int numTicks = 8;
-        sliderBar.setMinValue(new Double(min.getTime()));
-        sliderBar.setMaxValue(new Double(max.getTime()));
-        if (sliderBar.getCurrentValue() == null) {
-            sliderBar.setCurrentValue(new Double(min.getTime()));
+        if (!max.equals(this.max)) {
+            changed = true;
+            this.max = max;
+            sliderBar.setMaxValue(new Double(max.getTime()));
         }
-        sliderBar.setNumTickLabels(numTicks);
-        sliderBar.setNumTicks(numTicks);
-        int numSteps = sliderBar.getElement().getClientWidth();
-        if (numSteps > 0) {
-            sliderBar.setStepSize(numSteps);
-        } else { 
-            sliderBar.setStepSize(1000);
+        if (!min.equals(this.min)) {
+            changed = true;
+            this.min = min;
+            sliderBar.setMinValue(new Double(min.getTime()));
+            if (sliderBar.getCurrentValue() == null) {
+                sliderBar.setCurrentValue(new Double(min.getTime()));
+            }
+        }
+        if (changed) {
+            sliderBar.setNumTickLabels(numTicks);
+            sliderBar.setNumTicks(numTicks);
+            int numSteps = sliderBar.getElement().getClientWidth();
+            if (numSteps > 0) {
+                sliderBar.setStepSize(numSteps);
+            } else {
+                sliderBar.setStepSize(1000);
+            }
         }
     }
 
