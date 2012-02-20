@@ -279,11 +279,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         }
     }
 
-    private Date getMin() {
+    protected Date getMin() {
         return min;
     }
     
-    private Date getMax() {
+    protected Date getMax() {
         return max;
     }
     

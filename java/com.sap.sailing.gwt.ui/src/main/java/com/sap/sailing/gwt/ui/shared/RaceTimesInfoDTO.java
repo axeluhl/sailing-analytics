@@ -69,14 +69,6 @@ public class RaceTimesInfoDTO implements IsSerializable {
         this.startOfTracking = startOfTracking;
     }
 
-    public Date getEndOfRace() {
-        return endOfRace;
-    }
-
-    public void setEndOfRace(Date endOfRace) {
-        this.endOfRace = endOfRace;
-    }
-
     public Date getTimePointOfLastEvent() {
         return timePointOfLastEvent;
     }
