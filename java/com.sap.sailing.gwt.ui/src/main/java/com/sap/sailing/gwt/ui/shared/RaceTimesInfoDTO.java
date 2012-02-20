@@ -34,15 +34,14 @@ public class RaceTimesInfoDTO implements IsSerializable {
     }
 
     public LegTimesInfoDTO getLastLegTimes() {
-        if(legTimes == null || legTimes.isEmpty())
+        if (legTimes == null || legTimes.isEmpty()) {
             return null;
-        
+        }
         LegTimesInfoDTO lastLegTime = null;
-        
         Iterator<LegTimesInfoDTO> iterator = legTimes.iterator();
-        while(iterator.hasNext())
+        while(iterator.hasNext()) {
             lastLegTime = iterator.next();
-        
+        }
         return lastLegTime;
     }
 

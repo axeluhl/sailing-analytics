@@ -96,11 +96,13 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         } else { 
             if (raceTimesInfo.startOfTracking != null && raceTimesInfo.timePointOfNewestEvent != null) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known leg markers
+                // FIXME bug #311: this "if" should probably be removed and the code should always be executed
                 if (!isTimerInitialized) {
                     long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
                     long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
                     if (liveTimePointInMillis < raceTimesInfo.timePointOfNewestEvent.getTime() && 
                        liveTimePointInMillis > raceTimesInfo.startOfTracking.getTime()) {
+                        // don't worry; this will only fire an event if something actually changed
                         timer.setPlayMode(PlayModes.Live);
                     } else {
                         timer.setPlayMode(PlayModes.Replay);
@@ -166,24 +168,35 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         return false;
     }
     
+    /**
+     * When in {@link PlayModes#Replay} mode, tries to put the {@link #timer} to the time point when the last leg was
+     * finished first. If this time point is not (yet?) known, tries to put the {@link #timer} to the
+     * {@link RaceTimesInfoDTO#endOfRace end of the race}. If that happens to be undefined (<code>null</code>), the
+     * {@link RaceTimesInfoDTO#startOfRace start of the race} is used instead. If that isn't available either, the timer
+     * remains unchanged.
+     * <p>
+     * 
+     * When in {@link PlayModes#Live} mode, tries to advance the timer to the time point of the
+     * {@link RaceTimesInfoDTO#timePointOfNewestEvent timePointOfNewestEvent} received from the tracking infrastructure
+     * so far and puts the timer into {@link PlayStates#Playing play mode}.
+     */
     private boolean initTimerPosition(RaceTimesInfoDTO newRaceTimesInfo) {
         // initialize timer position
         switch (timer.getPlayMode()) {
         case Live:
-            if (newRaceTimesInfo.timePointOfNewestEvent != null)
+            if (newRaceTimesInfo.timePointOfNewestEvent != null) {
                 timer.setTime(newRaceTimesInfo.timePointOfNewestEvent.getTime());
+            }
             timer.play();
             break;
         case Replay:
-            if (newRaceTimesInfo.endOfRace != null) {
-                timer.setTime(newRaceTimesInfo.endOfRace.getTime());
-            } else {
-                if (newRaceTimesInfo.startOfRace != null)
-                    timer.setTime(newRaceTimesInfo.startOfRace.getTime());
-            }
             // set time to end of race
             if (newRaceTimesInfo.getLastLegTimes() != null) {
                 timer.setTime(newRaceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
+            } else  if (newRaceTimesInfo.endOfRace != null) {
+                timer.setTime(newRaceTimesInfo.endOfRace.getTime());
+            } else  if (newRaceTimesInfo.startOfRace != null) {
+                timer.setTime(newRaceTimesInfo.startOfRace.getTime());
             }
             break;
         }

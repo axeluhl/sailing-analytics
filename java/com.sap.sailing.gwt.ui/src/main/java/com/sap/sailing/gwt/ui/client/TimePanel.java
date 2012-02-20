@@ -147,7 +147,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
                         TimePanel.this.timer.pause();
                         break;
                     case Paused:
-                        TimePanel.this.timer.resume();
+                    TimePanel.this.timer.play();
                         break;
                 }
             }
@@ -160,7 +160,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         backToLivePlayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                TimePanel.this.timer.resume();
+                TimePanel.this.timer.play();
             }
         });
         backToLivePlayButton.getElement().getStyle().setFloat(Style.Float.LEFT);
