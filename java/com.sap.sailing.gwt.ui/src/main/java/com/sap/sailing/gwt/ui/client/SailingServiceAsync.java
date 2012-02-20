@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
@@ -259,17 +260,43 @@ public interface SailingServiceAsync {
      */
     void getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize, AsyncCallback<CompetitorsAndTimePointsDTO> callback);
 
+    /**
+     * Creates a {@link LeaderboardGroupDTO} for each {@link LeaderboardGroup} known by the server, which contains the
+     * name, the description and a list with {@link LeaderboardDTO LeaderboardDTOs} contained by the group.
+     */
     void getLeaderboardGroups(AsyncCallback<List<LeaderboardGroupDTO>> callback);
-    
+
+    /**
+     * Creates a {@link LeaderboardGroupDTO} for the {@link LeaderboardGroup} with the name <code>groupName</code>, which contains the
+     * name, the description and a list with {@link LeaderboardDTO LeaderboardDTOs} contained by the group.<br />
+     * If no group with the name <code>groupName</code> is known, an {@link IllegalArgumentException} is thrown.
+     */
     void getLeaderboardGroupByName(String groupName, AsyncCallback<LeaderboardGroupDTO> callback);
     
+    /**
+    * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
+    * If there's no group with the name <code>oldName</code> or there's already a group with the name
+    * <code>newName</code> a {@link IllegalArgumentException} is thrown.
+    */
     void renameLeaderboardGroup(String oldName, String newName, AsyncCallback<Void> callback);
     
+    /**
+     * Removes the leaderboard group with the name <code>groupName</code> from the service and the persistant store.
+     */
     void removeLeaderboardGroup(String groupName, AsyncCallback<Void> callback);
-
-    void createLeaderboardGroup(String groupName, String description, List<String> leaderboardNames, AsyncCallback<LeaderboardGroupDTO> callback);
     
+    /**
+     * Creates a new group with the name <code>groupname</code>, the description <code>description</code> and an empty list of leaderboards.<br/>
+     */
     void createLeaderboardGroup(String groupName, String description, AsyncCallback<LeaderboardGroupDTO> callback);
     
+    /**
+     * Updates the data of the group with the name <code>oldName</code>.
+     * 
+     * @param oldName The old name of the group
+     * @param newName The new name of the group
+     * @param description The new description of the group
+     * @param leaderboards The new leaderboards of the group
+     */
     void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards, AsyncCallback<Void> callback);
 }
