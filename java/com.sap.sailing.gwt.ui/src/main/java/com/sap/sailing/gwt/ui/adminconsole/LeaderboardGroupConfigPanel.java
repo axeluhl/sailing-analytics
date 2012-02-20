@@ -490,7 +490,6 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
             }
             @Override
             public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to obtain list of leaderboard groups: " + t.getMessage());
             }
         });
     }
@@ -634,24 +633,40 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     }
     
     private void groupSelectionChanged() {
-        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
-        if (selectedGroup != null) {
-            //Display details of the group
-            groupDetailsCaptionPanel.setCaptionText(stringConstants.detailsOfLeaderboardGroup() + " '" + selectedGroup.name + "'");
-            descriptionTextArea.setText(selectedGroup.description);
-            setDescriptionEditable(false);
-            
-            groupDetailsSelectionModel.clear();
-            groupDetailsProvider.getList().clear();
-            groupDetailsProvider.getList().addAll(selectedGroup.leaderboards);
-            //Reload available leaderboards and remove leaderboards of the group from the list
-            leaderboardsSelectionModel.clear();
-            leaderboardsFilterTextBox.setText("");
-            leaderboardsProvider.getList().clear();
-            leaderboardsProvider.getList().addAll(availableLeaderboards);
-            leaderboardsProvider.getList().removeAll(selectedGroup.leaderboards);
-        }
+        final LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
         splitPanel.setVisible(selectedGroup != null);
+        if (selectedGroup != null) {
+            sailingService.getLeaderboardGroupByName(selectedGroup.name, new AsyncCallback<LeaderboardGroupDTO>() {
+                @Override
+                public void onFailure(Throwable t) {
+                    errorReporter.reportError("Error trying to obtain the leaderboard group " + selectedGroup.name + ": " + t.getMessage());
+                }
+                @Override
+                public void onSuccess(LeaderboardGroupDTO result) {
+                    //Updating the data lists
+                    availableLeaderboardGroups.set(availableLeaderboardGroups.indexOf(selectedGroup), result);
+                    groupsProvider.getList().clear();
+                    groupsProvider.getList().addAll(availableLeaderboardGroups);
+                    groupsSelectionModel.setSelected(result, true);
+
+                    //Display details of the group
+                    groupDetailsCaptionPanel.setCaptionText(stringConstants.detailsOfLeaderboardGroup() + " '" + result.name + "'");
+                    descriptionTextArea.setText(result.description);
+                    setDescriptionEditable(false);
+                    
+                    groupDetailsSelectionModel.clear();
+                    groupDetailsProvider.getList().clear();
+                    groupDetailsProvider.getList().addAll(result.leaderboards);
+                    
+                    //Reload available leaderboards and remove leaderboards of the group from the list
+                    leaderboardsSelectionModel.clear();
+                    leaderboardsFilterTextBox.setText("");
+                    leaderboardsProvider.getList().clear();
+                    leaderboardsProvider.getList().addAll(availableLeaderboards);
+                    leaderboardsProvider.getList().removeAll(result.leaderboards);
+                }
+            });
+        }
     }
     
     private void leaderboardsFilterChanged() {
