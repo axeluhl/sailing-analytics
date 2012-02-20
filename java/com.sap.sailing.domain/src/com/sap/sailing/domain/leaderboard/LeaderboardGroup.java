@@ -11,7 +11,9 @@ public interface LeaderboardGroup extends Named {
     void setName(String newName);
 
     Iterable<Leaderboard> getLeaderboards();
+    int getIndexOf(Leaderboard leaderboard);
     void addLeaderboard(Leaderboard leaderboard);
+    void addLeaderboardAt(Leaderboard leaderboard, int index);
     void addAllLeaderboards(Collection<Leaderboard> leaderboards);
     void removeLeaderboard(Leaderboard leaderboard);
     void removeAllLeaderboards(Collection<Leaderboard> leaderboards);
