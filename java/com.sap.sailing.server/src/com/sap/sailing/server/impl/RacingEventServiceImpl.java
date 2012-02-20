@@ -181,32 +181,6 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             toRename.setName(newName);
             leaderboardsByName.put(newName, toRename);
             mongoObjectFactory.renameLeaderboard(oldName, newName);
-            
-            syncGroupsAfterLeaderboardRenaming(oldName, newName, true);
-        }
-    }
-    
-    /**
-     * Checks all groups, if they contain a leaderboard with the <code>oldName</code> and replace it with the <code>newName</code>.
-     */
-    private void syncGroupsAfterLeaderboardRenaming(String oldName, String newName, boolean doDatabaseUpdate) {
-        boolean groupNeedsUpdate = false;
-        synchronized (leaderboardGroupsByName) {
-            for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
-                for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                    if (leaderboard.getName().equals(oldName)) {
-                        leaderboard.setName(newName);
-                        groupNeedsUpdate = true;
-                        // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
-                        break;
-                    }
-                }
-                
-                if (doDatabaseUpdate && groupNeedsUpdate) {
-                    mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
-                }
-                groupNeedsUpdate = false;
-            }
         }
     }
     
@@ -229,8 +203,9 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
                 for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                     if (leaderboard.getName().equals(updatedLeaderboard.getName())) {
+                        int index = leaderboardGroup.getIndexOf(leaderboard);
                         leaderboardGroup.removeLeaderboard(leaderboard);
-                        leaderboardGroup.addLeaderboard(updatedLeaderboard);
+                        leaderboardGroup.addLeaderboardAt(updatedLeaderboard, index);
                         groupNeedsUpdate = true;
                         // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
                         break;
