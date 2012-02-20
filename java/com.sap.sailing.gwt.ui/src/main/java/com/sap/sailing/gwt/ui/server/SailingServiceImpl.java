@@ -1366,7 +1366,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private MultiCompetitorRaceDataDTO getMultiCompetitorRaceDataDTO(TrackedRace race, List<CompetitorDTO> competitors, long startTime, long endTime,
             long stepSize, DetailType detailType) throws NoWindException {
-        MultiCompetitorRaceDataDTO data = new MultiCompetitorRaceDataDTO();
+        MultiCompetitorRaceDataDTO data = new MultiCompetitorRaceDataDTO(detailType);
         //Calculating the time points
         List<Long> timePoints = new ArrayList<Long>();
         for (long i = startTime; i <= endTime; i += stepSize) {
@@ -1388,9 +1388,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 raceData.add(new Pair<Long, Double>(timePoint, getCompetitorRaceDataEntry(detailType, race, competitor, time)));
             }
             //Adding fetched data to the container
-            data.setCompetitorRaceData(competitorDTO, new CompetitorRaceDataDTO(competitorDTO, detailType, markPassingsData, raceData));
+            data.setCompetitorRaceData(competitorDTO, new CompetitorRaceDataDTO(competitorDTO, detailType, startTime, markPassingsData, raceData));
         }
         return data;
+    }
+    
+    private CompetitorRaceDataDTO getCompetitorRaceDataDTO(TrackedRace race, CompetitorDTO competitor, long startTime,
+            long endTime, long stepSize, DetailType detailType) {
+        return null; //TODO
     }
     
     @Override

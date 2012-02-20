@@ -2,8 +2,6 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -15,6 +13,8 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     
     private CompetitorDTO competitor;
     private DetailType detailType;
+    private long timePointOfNewestEvent;
+    private long startTime;
     /**
      * A: Bouy-Name; B: Timepoint; C: Data
      */
@@ -26,10 +26,12 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     
     CompetitorRaceDataDTO() {}
     
-    public CompetitorRaceDataDTO(CompetitorDTO competitor, DetailType detailType,
+    public CompetitorRaceDataDTO(CompetitorDTO competitor, DetailType detailType, long startTime,
             Collection<Triple<String, Long, Double>> markPassingsData, Collection<Pair<Long, Double>> raceData) {
         this.competitor = competitor;
         this.detailType = detailType;
+        this.startTime = startTime;
+        this.timePointOfNewestEvent = 0;
         this.markPassingsData = new ArrayList<Triple<String, Long, Double>>(markPassingsData);
         this.raceData = new ArrayList<Pair<Long, Double>>(raceData);
     }
@@ -45,33 +47,17 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     public DetailType getDetailType() {
         return detailType;
     }
-
-    /**
-     * Calculates the time point of the newest event out of the containing data.<br />
-     * Therefore a sorting of the data lists is needed, so use as rare as possible.<br />
-     * After calling this methods, the containing data is sorted by time.
-     * @return The time point of the newest event
-     */
+    
     public long getTimePointOfNewestEvent() {
-        Collections.sort(markPassingsData, new MarkPassingsDataComparatorByTime());
-        Collections.sort(raceData, new RaceDataComparatorByTime());
-        Long newestMarkPassingsData = markPassingsData.get(markPassingsData.size() - 1).getB();
-        Long newestRaceData = raceData.get(raceData.size() - 1).getA();
-        return newestRaceData >= newestMarkPassingsData ? newestRaceData : newestMarkPassingsData;
+        return timePointOfNewestEvent;
     }
     
-    /**
-     * Calculates the earliest timepoint out of the containing data.<br />
-     * Therefore a sorting of the data lists is needed, so use as rare as possible.<br />
-     * After calling this methods, the containing data is sorted by time.
-     * @return The earliest time in the data
-     */
     public long getStartTime() {
-        Collections.sort(markPassingsData, new MarkPassingsDataComparatorByTime());
-        Collections.sort(raceData, new RaceDataComparatorByTime());
-        Long newestMarkPassingsData = markPassingsData.get(0).getB();
-        Long newestRaceData = raceData.get(0).getA();
-        return newestRaceData <= newestMarkPassingsData ? newestRaceData : newestMarkPassingsData;
+        return startTime;
+    }
+    
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 
     public List<Triple<String, Long, Double>> getMarkPassingsData() {
@@ -82,8 +68,18 @@ public class CompetitorRaceDataDTO implements IsSerializable {
         this.markPassingsData = new ArrayList<Triple<String, Long, Double>>(markPassingsData);
     }
     
-    public void addMarkPassingsData(Collection<Triple<String, Long, Double>> markPassingsDataToAdd) {
-        getMarkPassingsData().addAll(markPassingsDataToAdd);
+    public void addAllMarkPassingsData(Collection<Triple<String, Long, Double>> markPassingsDataToAdd) {
+        for (Triple<String, Long, Double> data : markPassingsDataToAdd) {
+            addMarkPassingsData(data);
+        }
+    }
+    
+    public void addMarkPassingsData(Triple<String, Long, Double> markPassingsDataToAdd) {
+        getMarkPassingsData().add(markPassingsDataToAdd);
+        //Updating the timePointOfNewestEvent
+        if (markPassingsDataToAdd.getB() > timePointOfNewestEvent) {
+            timePointOfNewestEvent = markPassingsDataToAdd.getB();
+        }
     }
 
     public List<Pair<Long, Double>> getRaceData() {
@@ -94,26 +90,28 @@ public class CompetitorRaceDataDTO implements IsSerializable {
         this.raceData = new ArrayList<Pair<Long, Double>>(raceData);
     }
     
-    public void addRaceData(Collection<Pair<Long, Double>> raceData) {
-        getRaceData().addAll(raceData);
-    }
-
-    public void addAllData(CompetitorRaceDataDTO dataToAdd) {
-        addMarkPassingsData(dataToAdd.getMarkPassingsData());
-        addRaceData(dataToAdd.getRaceData());
-    }
-    
-    public class MarkPassingsDataComparatorByTime implements Comparator<Triple<String, Long, Double>> {
-        @Override
-        public int compare(Triple<String, Long, Double> t1, Triple<String, Long, Double> t2) {
-            return t1.getB().compareTo(t2.getB());
+    public void addAllRaceData(Collection<Pair<Long, Double>> raceDataToAdd) {
+        for (Pair<Long, Double> data : raceDataToAdd) {
+            addRaceData(data);
         }
     }
     
-    public class RaceDataComparatorByTime implements Comparator<Pair<Long, Double>> {
-        @Override
-        public int compare(Pair<Long, Double> p1, Pair<Long, Double> p2) {
-            return p1.getA().compareTo(p2.getA());
+    public void addRaceData(Pair<Long, Double> raceDataToAdd) {
+        getRaceData().add(raceDataToAdd);
+        //Updating the timePointOfNewestEvent
+        if (raceDataToAdd.getA() > timePointOfNewestEvent) {
+            timePointOfNewestEvent = raceDataToAdd.getA();
+        }
+    }
+
+    /**
+     * Adds all data, if the detailTypes fit.
+     * @param dataToAdd
+     */
+    public void addAllData(CompetitorRaceDataDTO dataToAdd) {
+        if (detailType == dataToAdd.getDetailType()) {
+            addAllMarkPassingsData(dataToAdd.getMarkPassingsData());
+            addAllRaceData(dataToAdd.getRaceData());
         }
     }
 

@@ -1,56 +1,87 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.DetailType;
 
 public class MultiCompetitorRaceDataDTO implements IsSerializable {
     
+    private DetailType detailType;
     private HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData;
     
-    public MultiCompetitorRaceDataDTO() {
-        this(new HashMap<CompetitorDTO, CompetitorRaceDataDTO>());
+    MultiCompetitorRaceDataDTO() {}
+    
+    public MultiCompetitorRaceDataDTO(DetailType detailType) {
+        this.detailType = detailType;
+        this.raceData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>();
     }
     
-    public MultiCompetitorRaceDataDTO(HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
+    public MultiCompetitorRaceDataDTO(DetailType detailType, HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
+        this.detailType = detailType;
         this.raceData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
+    }
+    
+    public Set<CompetitorDTO> getCompetitors() {
+        return raceData.keySet();
     }
     
     public CompetitorRaceDataDTO getCompetitorRaceData(CompetitorDTO competitor) {
         return raceData.get(competitor);
     }
     
+    /**
+     * Sets the data for a competitor, if the <code>detailTypes</code> fit.<br />
+     * If the competitor is already contained, the data will be overwritten.
+     */
     public void setCompetitorRaceData(CompetitorDTO competitor, CompetitorRaceDataDTO raceData) {
-        this.raceData.put(competitor, raceData);
+        if (detailType == raceData.getDetailType()) {
+            this.raceData.put(competitor, raceData);
+        }
     }
     
+    /**
+     * Adds all data in <code>raceDataToAdd</code> to the existing data of the <code>competitor</code>, if the <code>detailTypes</code> fit.<br />
+     * If the <code>competitor</code> is not contained, the data will be
+     * {@link MultiCompetitorRaceDataDTO#setCompetitorRaceData(CompetitorDTO, CompetitorRaceDataDTO) set}.
+     */
     public void addCompetitorRaceData(CompetitorDTO competitor, CompetitorRaceDataDTO raceDataToAdd) {
-        getCompetitorRaceData(competitor).addAllData(raceDataToAdd);
-    }
-    
-    public HashMap<CompetitorDTO, CompetitorRaceDataDTO> getAllRaceData() {
-        return raceData;
-    }
-    
-    public void setAllRaceData(HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
-        this.raceData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
-    }
-    
-    public void addAllRaceData(MultiCompetitorRaceDataDTO dataToAdd) {
-        for (CompetitorRaceDataDTO competitorData : raceData.values()) {
-            CompetitorRaceDataDTO competitorDataToAdd = dataToAdd.getCompetitorRaceData(competitorData.getCompetitor());
-            if (competitorDataToAdd != null) {
-                competitorData.addAllData(competitorDataToAdd);
+        if (detailType == raceDataToAdd.getDetailType()) {
+            if (raceData.containsKey(competitor)) {
+                raceData.get(competitor).addAllData(raceDataToAdd);
+            } else {
+                raceData.put(competitor, raceDataToAdd);
             }
         }
     }
-
+    
+    public Collection<CompetitorRaceDataDTO> getAllRaceData() {
+        return raceData.values();
+    }
+    
     /**
-     * Calculates the time point of the newest event out of the containing data.<br />
-     * Therefore a sorting of the data lists is needed, so use as rare as possible.<br />
-     * After calling this methods, the containing data is sorted by time.
-     * @return The time point of the newest event or -1 if no data is contained
+     * Adds all data in <code>dataToAdd</code>, if the <code>detailTypes</code> fit.<br />
+     * The data which are not contained, will be ignored.
+     * 
+     * @param dataToAdd
      */
+    public void addAllRaceData(MultiCompetitorRaceDataDTO dataToAdd) {
+        if (detailType == dataToAdd.getDetailType()) {
+            for (CompetitorRaceDataDTO competitorDataToAdd : dataToAdd.getAllRaceData()) {
+                CompetitorRaceDataDTO competitorData = raceData.get(competitorDataToAdd.getCompetitor());
+                if (competitorData != null) {
+                    competitorData.addAllData(competitorDataToAdd);
+                }
+            }
+        }
+    }
+    
+    public DetailType getDetailType() {
+        return detailType;
+    }
+
     public long getTimePointOfNewestEvent() {
         long result = -1;
         for (CompetitorRaceDataDTO competitorRaceData : raceData.values()) {
@@ -60,12 +91,6 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
         return result;
     }
     
-    /**
-     * Calculates the earliest timepoint out of the containing data.<br />
-     * Therefore a sorting of the data lists is needed, so use as rare as possible.<br />
-     * After calling this methods, the containing data is sorted by time.
-     * @return The earliest time in the data or -1 if no data is contained
-     */
     public long getStartTime() {
         long result = -1;
         for (CompetitorRaceDataDTO competitorRaceData : raceData.values()) {
