@@ -134,11 +134,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private void initMinMax(RaceTimesInfoDTO newRaceTimesInfo) {
         Date min = null;
         Date max = null;
-        if (newRaceTimesInfo.startOfTracking != null) {
+        long startAndEndRaceExtensionTime = 5 * 60 * 1000; // 5 minutes
+        
+        if (newRaceTimesInfo.startOfRace != null) {
+            min = new Date(newRaceTimesInfo.startOfRace.getTime() - startAndEndRaceExtensionTime);
+        } else if (newRaceTimesInfo.startOfTracking != null) {
             min = newRaceTimesInfo.startOfTracking;
-        } else if (newRaceTimesInfo.startOfRace != null) {
-            min = new Date(newRaceTimesInfo.startOfRace.getTime() - 5 * 60 * 1000);
         }
+
         switch (timer.getPlayMode()) {
         case Live:
             if (newRaceTimesInfo.timePointOfNewestEvent != null) {
@@ -147,7 +150,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             break;
         case Replay:
             if (newRaceTimesInfo.endOfRace != null) {
-                max = newRaceTimesInfo.endOfRace;
+                max = new Date(newRaceTimesInfo.endOfRace.getTime() + startAndEndRaceExtensionTime);
             } else if (newRaceTimesInfo.timePointOfNewestEvent != null) {
                 max = newRaceTimesInfo.timePointOfNewestEvent;
             }
