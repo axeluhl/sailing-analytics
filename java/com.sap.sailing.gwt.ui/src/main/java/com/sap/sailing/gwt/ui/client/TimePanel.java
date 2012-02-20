@@ -264,30 +264,18 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     public void timeChanged(Date time) {
         if (sliderBar.isMinMaxInitialized()) {
             long t = time.getTime();
-            // handle also the case where time advances beyond slider's end
-            switch (timer.getPlayMode()) {
-            case Live:
-                if (t > sliderBar.getMaxValue()) {
-                    sliderBar.setMaxValue(new Double(t));
-                }
-                sliderBar.setCurrentValue(new Double(t), false);
-                break;
-            case Replay:
-                // handle the case where time advances beyond slider's end
-                if (t > sliderBar.getMaxValue()) {
-                    timer.stop();
-                } else {
-                    sliderBar.setCurrentValue(new Double(t), false);
-                }
-                break;
+            // Handle also the case where time advances beyond slider's end.
+            // Handle it equally for replay and live mode for robustness reasons. This at least allows a user
+            // to watch on even if the time panel was off in its assumptions about race end and end of tracking.
+            if (t > sliderBar.getMaxValue()) {
+                sliderBar.setMaxValue(new Double(t));
             }
-
+            sliderBar.setCurrentValue(new Double(t), false);
             dateLabel.setText(dateFormatter.format(time));
             if (lastReceivedDataTimepoint == null) {
                 timeLabel.setText(timeFormatter.format(time));
             } else {
-                timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint)
-                        + ")");
+                timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint) + ")");
             }
         }
     }
