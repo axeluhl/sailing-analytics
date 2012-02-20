@@ -1527,7 +1527,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
             competitorAndTimePointsDTO.setCompetitors(competitors);
             competitorAndTimePointsDTO.setStartTime(trackedRace.getStart().asMillis());
-            competitorAndTimePointsDTO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent().asMillis());
+            competitorAndTimePointsDTO.setTimePointOfNewestEvent(trackedRace.getTimePointOfNewestEvent() == null ? null
+                    : trackedRace.getTimePointOfNewestEvent().asMillis());
         }
         return competitorAndTimePointsDTO;
     }
