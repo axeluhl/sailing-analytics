@@ -20,10 +20,9 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
     @Override
     public void onModuleLoad() {
         super.onModuleLoad();
-
         String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
         final String groupName;
-        if(groupParamValue == null || groupParamValue.isEmpty()) {
+        if (groupParamValue == null || groupParamValue.isEmpty()) {
             groupName = null;
         } else {
             groupName = groupParamValue;
@@ -36,7 +35,6 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
                 public void onSuccess(LeaderboardGroupDTO group) {}
             });
         }
-        
         String root = Window.Location.getParameter("root");
         //Check if the root contains an allowed value
         if (root != null) {
