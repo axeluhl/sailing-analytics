@@ -499,9 +499,11 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
     
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
+            boolean oldMapZoomedOrPannedSinceLastRaceSelectionChange = mapZoomedOrPannedSinceLastRaceSelectionChange;
             map.setZoomLevel(map.getBoundsZoomLevel(newBounds));
             map.setCenter(newBounds.getCenter());
             map.checkResizeAndCenter();
+            mapZoomedOrPannedSinceLastRaceSelectionChange = oldMapZoomedOrPannedSinceLastRaceSelectionChange;
         }
     }
     
