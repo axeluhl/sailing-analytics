@@ -32,12 +32,13 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
      */
     private static final int MAX_PACKET_SIZE = 65536;
     
-    private class ToListenerDispatcher implements Runnable {
+    private class ToListenerDispatcher extends Thread {
         private final LinkedBlockingDeque<MessageType> queue;
         private final ListenerType listener;
         private boolean stopped;
         
         public ToListenerDispatcher(ListenerType listener) {
+            super("UDPReceiver ToListenerDispatcher for listener "+listener);
             queue = new LinkedBlockingDeque<MessageType>(/* capacity */ 10000);
             this.listener = listener;
             stopped = false;
@@ -50,7 +51,7 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
             queue.offer(message);
         }
         
-        public void stop() {
+        public void halt() {
             stopped = true;
         }
         
@@ -59,7 +60,9 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
             try {
                 message = queue.poll(/* timeout */ 10000, TimeUnit.MILLISECONDS);
                 while (!stopped) {
-                    listener.received(message);
+                    if (message != null) {
+                        listener.received(message);
+                    }
                     message = queue.poll(/* timeout */ 10000, TimeUnit.MILLISECONDS);
                 }
             } catch (InterruptedException e) {
@@ -140,13 +143,14 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
 
     public synchronized void addListener(ListenerType listener, boolean validMessagesOnly) {
         ToListenerDispatcher listenerThread = new ToListenerDispatcher(listener);
+        listenerThread.start();
         listenerThreads.put(listener, listenerThread);
         listeners.put(listener, validMessagesOnly);
     }
 
     public synchronized void removeListener(ListenerType listener) {
         listeners.remove(listener);
-        listenerThreads.remove(listener).stop();
+        listenerThreads.remove(listener).halt();
     }
 
     public int getPort() {
