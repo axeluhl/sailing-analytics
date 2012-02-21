@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType extends UDPMessageListener<MessageType>> implements Runnable {
@@ -17,6 +19,8 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
     private final int listeningOnPort;
 
     private final DatagramSocket udpSocket;
+    
+    private final Map<ListenerType, ToListenerDispatcher> listenerThreads;
 
     /**
      * For each listener remembers if the listener is only interested in valid messages.
@@ -28,6 +32,42 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
      */
     private static final int MAX_PACKET_SIZE = 65536;
     
+    private class ToListenerDispatcher implements Runnable {
+        private final LinkedBlockingDeque<MessageType> queue;
+        private final ListenerType listener;
+        private boolean stopped;
+        
+        public ToListenerDispatcher(ListenerType listener) {
+            queue = new LinkedBlockingDeque<MessageType>(/* capacity */ 10000);
+            this.listener = listener;
+            stopped = false;
+        }
+        
+        /**
+         * Offers the message to the queue used by this dispatcher. If the queue is full, the message is dropped without notice.
+         */
+        public void dispatch(MessageType message) {
+            queue.offer(message);
+        }
+        
+        public void stop() {
+            stopped = true;
+        }
+        
+        public void run() {
+            MessageType message;
+            try {
+                message = queue.poll(/* timeout */ 10000, TimeUnit.MILLISECONDS);
+                while (!stopped) {
+                    listener.received(message);
+                    message = queue.poll(/* timeout */ 10000, TimeUnit.MILLISECONDS);
+                }
+            } catch (InterruptedException e) {
+                // when interrupted, this means we'll terminate
+            }
+        }
+    }
+    
     /**
      * You need call {@link #run} to actually start receiving events. To do this asynchronously,
      * start this object in a new thread.
@@ -36,6 +76,7 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
         udpSocket = new DatagramSocket(listeningOnPort);
         listeners = new HashMap<ListenerType, Boolean>();
         this.listeningOnPort = listeningOnPort;
+        listenerThreads = new HashMap<ListenerType, ToListenerDispatcher>();
     }
     
     public void stop() throws SocketException, IOException {
@@ -78,7 +119,8 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
                         for (ListenerType listener : listeners.keySet()) {
                             if (!listeners.get(listener) || msg.isValid()) {
                                 try {
-                                    listener.received(msg);
+                                    ToListenerDispatcher dispatcher = listenerThreads.get(listener);
+                                    dispatcher.dispatch(msg);
                                 } catch (Throwable t) {
                                     logger.info("Exception while dispatching UDP packet received to "+listener+": "+t.getMessage());
                                 }
@@ -97,11 +139,14 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
     }
 
     public synchronized void addListener(ListenerType listener, boolean validMessagesOnly) {
+        ToListenerDispatcher listenerThread = new ToListenerDispatcher(listener);
+        listenerThreads.put(listener, listenerThread);
         listeners.put(listener, validMessagesOnly);
     }
 
     public synchronized void removeListener(ListenerType listener) {
         listeners.remove(listener);
+        listenerThreads.remove(listener).stop();
     }
 
     public int getPort() {
