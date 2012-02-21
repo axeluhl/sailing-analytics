@@ -1179,7 +1179,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             }
             for (CompetitorDTO competitor : competitors) {
                 List<GPSFixDTO> competitorFixes = forMap.fixes.get(competitor);
-                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(competitorFixes.size() - 1) : null;
+                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(forMap.lastShownFix.get(competitor)) : null;
                 PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
                 LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
                         competitorPosition.lngDeg) : null;
