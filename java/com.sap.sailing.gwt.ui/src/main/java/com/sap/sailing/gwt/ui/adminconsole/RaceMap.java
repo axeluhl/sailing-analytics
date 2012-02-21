@@ -507,81 +507,6 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         }
     }
     
-    /**
-     * Calculates the new map bounds for the given data considering the current {@link ZoomTypes} of the map.
-     * @return The new map bounds
-     */
-//    private LatLngBounds getNewMapBounds(Iterable<CompetitorDTO> competitorsToZoom, Iterable<MarkDTO> marksToZoom) {
-//        LatLngBounds newBounds = null;
-//        if (getSettings().getZoomSetting() != ZoomTypes.MANUAL) {
-//            //Extend bounds for the boats
-//            if (getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BOATS
-//                    || getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BOATS_AND_BUOYS) {
-//                LatLngBounds boatBounds = getBoundsForBoats(competitorsToZoom);
-//                if (boatBounds != null) {
-//                    newBounds = boatBounds;
-//                }
-//            }
-//            //Extend bounds for the marks
-//            if (getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BUOYS
-//                    || getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BOATS_AND_BUOYS) {
-//                LatLngBounds markBounds = getBoundsForMarks(marksToZoom);
-//                if (markBounds != null) {
-//                    if (newBounds == null) {
-//                        newBounds = markBounds;
-//                    } else {
-//                        newBounds.extend(markBounds.getNorthEast());
-//                        newBounds.extend(markBounds.getSouthWest());
-//                    }
-//                }
-//            }
-//        }
-//        return newBounds;
-//    }
-    
-//    private LatLngBounds getBoundsForBoats(Iterable<CompetitorDTO> competitorsToZoom) {
-//        LatLngBounds newBounds = null;
-//        for (CompetitorDTO competitorDTO : competitorsToZoom) {
-//            LatLngBounds bounds = null;
-//            if (getSettings().isIncludeTailsToAutoZoom()) {
-//                Polyline tail = tails.get(competitorDTO);
-//                bounds = tail != null ? tail.getBounds() : null;
-//            } else {
-//                List<GPSFixDTO> competitorFixes = fixes.get(competitorDTO);
-//                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(competitorFixes.size() - 1) : null;
-//                PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
-//                LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg, competitorPosition.lngDeg) : null;
-//                bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng, competitorLatLng) : null;
-//            }
-//            if (bounds != null) {
-//                if (newBounds == null) {
-//                    newBounds = bounds;
-//                } else {
-//                    newBounds.extend(bounds.getNorthEast());
-//                    newBounds.extend(bounds.getSouthWest());
-//                }
-//            }
-//        }
-//        return newBounds;
-//    }
-    
-//    private LatLngBounds getBoundsForMarks(Iterable<MarkDTO> marksToZoom) {
-//        LatLngBounds newBounds = null;
-//        if (marksToZoom != null) {
-//            for (MarkDTO markDTO : marksToZoom) {
-//                LatLng markLatLng = LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg);
-//                LatLngBounds bounds = LatLngBounds.newInstance(markLatLng, markLatLng);
-//                if (newBounds == null) {
-//                    newBounds = bounds;
-//                } else {
-//                    newBounds.extend(bounds.getNorthEast());
-//                    newBounds.extend(bounds.getSouthWest());
-//                }
-//            }
-//        }
-//        return newBounds;
-//    }
-
     private boolean updateMarkerForCompetitor(CompetitorDTO competitorDTO) {
         boolean usedExistingMarker = false;
         if (lastShownFix.containsKey(competitorDTO) && lastShownFix.get(competitorDTO) != -1) {
@@ -1181,7 +1106,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             }
             for (CompetitorDTO competitor : competitors) {
                 List<GPSFixDTO> competitorFixes = forMap.fixes.get(competitor);
-                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(competitorFixes.size() - 1) : null;
+                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(forMap.lastShownFix.get(competitor)) : null;
                 PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
                 LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
                         competitorPosition.lngDeg) : null;
