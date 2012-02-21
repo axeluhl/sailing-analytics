@@ -249,7 +249,6 @@ public interface StringMessages extends Messages {
     String autoZoomOff();
     String autoZoomTails();
     String autoZoomSelectedCompetitors();
-    String noLeaderboardGroupToLoad();
     String bearing();
     String zoom();
     String stepSizeMustBeGreaterThanNull();
