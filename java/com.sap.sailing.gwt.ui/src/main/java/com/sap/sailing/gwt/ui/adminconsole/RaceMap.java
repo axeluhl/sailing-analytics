@@ -1235,8 +1235,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     if (newBounds == null) {
                         newBounds = bounds;
                     } else {
-                        newBounds.extend(bounds.getNorthEast());
-                        newBounds.extend(bounds.getSouthWest());
+                        newBounds.extend(markLatLng);
                     }
                 }
             }
