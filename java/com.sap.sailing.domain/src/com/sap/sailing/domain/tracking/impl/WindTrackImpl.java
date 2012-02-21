@@ -63,9 +63,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     @Override
     public void add(Wind wind) {
-        synchronized (this) {
-            getInternalRawFixes().add(wind);
-        }
+        getInternalRawFixes().add(wind);
         notifyListenersAboutReceive(wind);
     }
 
