@@ -39,6 +39,7 @@ public class RaceMapZoomSettings {
         typesToConsiderOnZoom = new ArrayList<ZoomTypes>();
         typesToConsiderOnZoom.add(ZoomTypes.BOATS);
         typesToConsiderOnZoom.add(ZoomTypes.TAILS);
+        typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
         zoomToSelectedCompetitors = false;
     }
     
