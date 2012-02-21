@@ -198,7 +198,7 @@ public class Timer {
                     if (playMode == PlayModes.Replay) {
                         newTime += (long) playSpeedFactor * refreshInterval;
                     } else {
-                        newTime = System.currentTimeMillis() - getLivePlayDelayInMillis();
+                        newTime = System.currentTimeMillis() - getLivePlayDelayInMillis(); 
                     }
                     setTime(newTime);
                 }
