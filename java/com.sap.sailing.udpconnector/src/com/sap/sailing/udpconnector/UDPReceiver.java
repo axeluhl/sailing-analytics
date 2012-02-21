@@ -146,7 +146,7 @@ public abstract class UDPReceiver<MessageType extends UDPMessage, ListenerType e
 
     public synchronized void removeListener(ListenerType listener) {
         listeners.remove(listener);
-        listenerThreads.get(listener).stop();
+        listenerThreads.remove(listener).stop();
     }
 
     public int getPort() {
