@@ -75,13 +75,11 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
-    private final UserDTO user;
     
     public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType) {
         this.sailingService = sailingService;
         this.raceSelectionProvider = theRaceSelectionProvider;
-        this.user = theUser;
         this.scrollOffset = 0;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
@@ -113,14 +111,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         boolean showLeaderboard = true;
         boolean showMap = true;
-        boolean showWindCharts = true;
         boolean showCompetitorCharts = true;
-        
-        if (user == null) {
-           // anonymous user
-            showWindCharts = false;
-        }
-
         // create the default leaderboard and select the right race
         if(showLeaderboard) {
             LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode());
@@ -142,16 +133,15 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
             collapsableViewers.add(raceMapViewer);
         }
-        
-        if(showWindCharts) {
-            WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
-            WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings, stringMessages, errorReporter); 
-            CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
-                    windChart, "auto", "400px", stringMessages);
-            windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-            collapsableViewers.add(windChartViewer);
-        }
-        if(showCompetitorCharts) {
+
+        WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
+        WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
+                stringMessages, errorReporter);
+        CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
+                windChart, "auto", "400px", stringMessages);
+        windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+        collapsableViewers.add(windChartViewer);
+        if (showCompetitorCharts) {
             // DON'T DELETE -> this is temporary for testing of different chart types
 //            ChartPanel competitorCharts = new ChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
 //                    timer, DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, stringMessages, errorReporter);

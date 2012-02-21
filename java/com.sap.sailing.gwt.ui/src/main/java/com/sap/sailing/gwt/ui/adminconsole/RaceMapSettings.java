@@ -15,7 +15,7 @@ public class RaceMapSettings {
     
     private RaceMapZoomSettings zoomSettings;
     
-    private long tailLengthInMilliseconds = 30000l;
+    private long tailLengthInMilliseconds = 300000l;
 
     public RaceMapSettings() {
         maneuverTypesToShow = new HashSet<ManeuverType>();
