@@ -195,10 +195,11 @@ public class Timer {
             public boolean execute() {
                 if (time != null && playState == PlayStates.Playing) {
                     long newTime = time.getTime();
-                    if (playMode == PlayModes.Replay)
+                    if (playMode == PlayModes.Replay) {
                         newTime += (long) playSpeedFactor * refreshInterval;
-                    else
-                        newTime += refreshInterval;
+                    } else {
+                        newTime = System.currentTimeMillis() - getLivePlayDelayInMillis();
+                    }
                     setTime(newTime);
                 }
                 if (refreshIntervalChanged) {
