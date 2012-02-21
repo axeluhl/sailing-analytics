@@ -43,10 +43,20 @@ public interface MongoObjectFactory {
 
     void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject);
     
+    /**
+     * Stores the group, if it doesn't exist or updates it.<br />
+     * Leaderboards in the group, which aren't stored in the database, will be stored.
+     */
     void storeLeaderboardGroup(LeaderboardGroup leaderboardGroup);
     
+    /**
+     * Removes the group with the name <code>groupName</code> from the database.
+     */
     void removeLeaderboardGroup(String groupName);
-    
+
+    /**
+     * Renames the group with the name <code>oldName</code>.
+     */
     void renameLeaderboardGroup(String oldName, String newName);
 
 }

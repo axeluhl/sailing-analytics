@@ -28,10 +28,19 @@ public interface DomainObjectFactory {
 
     RaceIdentifier loadRaceIdentifier(DBObject dbObject);
     
+    /**
+     * @return The group with the name <code>name</code>, or <code>null</code> if no such group exists.
+     */
     LeaderboardGroup loadLeaderboardGroup(String name);
     
+    /**
+     * @return All groups in the database.
+     */
     Iterable<LeaderboardGroup> getAllLeaderboardGroups();
     
+    /**
+     * @return All leaderboards in the database, which aren't contained by a leaderboard group
+     */
     Iterable<Leaderboard> getLeaderboardsNotInGroup();
 
 }
