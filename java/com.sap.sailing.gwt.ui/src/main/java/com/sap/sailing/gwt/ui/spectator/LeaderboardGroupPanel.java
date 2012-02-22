@@ -130,15 +130,15 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 Column<Integer, SafeHtml> leaderboardColumn = new Column<Integer, SafeHtml>(leaderboardCell) {
                     @Override
                     public SafeHtml getValue(Integer raceNum) {
-                        List<RaceInLeaderboardDTO> races = leaderboard.getRaceInLeaderboardList();
+                        List<RaceInLeaderboardDTO> races = leaderboard.getRaceList();
                         return raceNum < races.size() ? raceToRaceBoardLink(leaderboard, races.get(raceNum))
                                 : SafeHtmlUtils.fromString("");
                     }
                 };
                 leaderboardsTable.addColumn(leaderboardColumn, leaderboard.name);
                 leaderboard.addRaceAt(stringConstants.overview(), false, null, 0);
-                maxRacesNum = maxRacesNum < leaderboard.getRaceInLeaderboardList().size() ? leaderboard
-                        .getRaceInLeaderboardList().size() : maxRacesNum;
+                maxRacesNum = maxRacesNum < leaderboard.getRaceList().size() ? leaderboard
+                        .getRaceList().size() : maxRacesNum;
             }
 
             ArrayList<Integer> tableData = new ArrayList<Integer>();

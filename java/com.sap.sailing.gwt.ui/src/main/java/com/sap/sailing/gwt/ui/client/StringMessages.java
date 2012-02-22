@@ -260,4 +260,5 @@ public interface StringMessages extends Messages {
     String directionChange();
     String speedChange();
     String degreesShort();
+    String untracked();
 }
