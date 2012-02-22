@@ -160,6 +160,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         backToLivePlayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                TimePanel.this.timer.setPlayMode(PlayModes.Live);
                 TimePanel.this.timer.play();
             }
         });
@@ -327,6 +328,9 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
+        boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
+        setLiveGenerallyPossible(liveModeToBeMadePossible);
+        setJumpToLiveEnablement(liveModeToBeMadePossible && playMode != PlayModes.Live);
         switch (playState) {
         case Playing:
             playPauseImage.setResource(pauseButtonImg);
@@ -335,13 +339,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             } else {
                 playModeImage.setResource(playModeReplayActiveImg);
             }
-            backToLivePlayButton.setEnabled(false);
             break;
         case Paused:
         case Stopped:
             playPauseImage.setResource(playButtonImg);
             playModeImage.setResource(playModeInactiveImg);
-            backToLivePlayButton.setEnabled(true);
             break;
         }
         
@@ -351,7 +353,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             timeDelayLabel.setText(stringMessages.timeDelay() + ": " + timer.getCurrentDelayInMillis() / 1000 + " s");
             timeDelayLabel.setVisible(true);
             sliderBar.setEnabled(true);
-            backToLivePlayButton.setVisible(true);
             playSpeedBox.setEnabled(false);
             slowDownButton.setEnabled(false);
             speedUpButton.setEnabled(false);
@@ -361,12 +362,29 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             timeDelayLabel.setText("");
             playModeLabel.setText(stringMessages.playModeReplay());
             sliderBar.setEnabled(true);
-            backToLivePlayButton.setVisible(false);
             playSpeedBox.setEnabled(true);
             slowDownButton.setEnabled(true);
             speedUpButton.setEnabled(true);
             break;
         }
+    }
+    
+    protected boolean isLiveModeToBeMadePossible() {
+        return false;
+    }
+    
+    /**
+     * Enables the {@link #backToLivePlayButton} if and only if <code>enabled</code> is <code>true</code>.
+     */
+    protected void setJumpToLiveEnablement(boolean enabled) {
+        backToLivePlayButton.setEnabled(enabled);
+    }
+    
+    /**
+     * Iff <code>possible</code>, makes the {@link #backToLivePlayButton} button visible. 
+     */
+    protected void setLiveGenerallyPossible(boolean possible) {
+        backToLivePlayButton.setVisible(possible);
     }
 
     @SuppressWarnings("unchecked")
