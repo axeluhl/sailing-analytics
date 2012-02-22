@@ -419,7 +419,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
                 timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
             }
         }
-        timer.setRefreshInterval(getSettings().getRefreshInterval());
+        timer.setRefreshInterval(newSettings.getRefreshInterval());
     }
 
     @Override
