@@ -9,7 +9,11 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 
 /**
  * Manages a timer and can auto-advance it at a given acceleration/deceleration rate, with a given delay compared to
- * real time. It can be {@link #pause() paused} and {@link #resume() resumed}.
+ * real time. It can be {@link #pause() paused} and {@link #resume() resumed}. It can be in one of two play modes:
+ * {@link PlayModes#Live} and {@link PlayModes#Replay}. In live play mode the timer is always in state {@link PlayStates#Playing}
+ * and adjusts the time to now-{@link #livePlayDelayInMillis}. As soon as it's paused or stopped it enters
+ * {@link PlayModes#Replay}. By entering {@link PlayModes#Live} with {@link #setPlayMode(PlayModes)}, the timer starts
+ * playing right away.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -43,7 +47,8 @@ public class Timer {
     private PlayStates playState;
     
     /**
-     * The current play mode of the timer
+     * The current play mode of the timer: live or replay. In live mode the timer will adjust to now-delay each time it
+     * refreshes. In replay mode it will advance time by the refresh interval times the play speed factor.
      */
     private PlayModes playMode;
     
@@ -60,6 +65,7 @@ public class Timer {
     
     /**
      * Factor by which the timer runs faster than real time. 1.0 means real-time, 2.0 means twice as fast as real time, and so on.
+     * Applies only if the timer is in replay mode.
      */
     private double playSpeedFactor;
     
@@ -143,36 +149,46 @@ public class Timer {
         return time;
     }
 
+    /**
+     * When setting the play mode to live, the timer will automatically be put into play state playing.
+     */
     public void setPlayMode(PlayModes newPlayMode) {
         if (this.playMode != newPlayMode) {
             this.playMode = newPlayMode;
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
             }
+            if (newPlayMode == PlayModes.Live) {
+                play();
+            }
         }
     }    
 
     /**
      * Pauses this timer after the next time advance. {@link #playing} is set to <code>false</code> if not already
-     * paused, and registered {@link PlayStateListener}s will be notified.
+     * paused, and registered {@link PlayStateListener}s will be notified. If the play mode was live, it'll be set to
+     * replay.
      */
     public void pause() {
         if (playState == PlayStates.Playing) {
             playState = PlayStates.Paused; // this will cause the repeating command to stop executing
-            
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
             }
+            setPlayMode(PlayModes.Replay);
         }
     }
 
+    /**
+     * Puts the timer into the stopped state. If it was in live mode, puts it into replay mode.
+     */
     public void stop() {
         if (playState == PlayStates.Playing) {
             playState = PlayStates.Stopped;
-
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
             }
+            setPlayMode(PlayModes.Replay);
         }
     }
 
