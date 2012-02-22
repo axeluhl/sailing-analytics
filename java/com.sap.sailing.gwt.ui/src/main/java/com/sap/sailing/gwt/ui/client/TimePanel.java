@@ -330,10 +330,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         switch (playState) {
         case Playing:
             playPauseImage.setResource(pauseButtonImg);
-            if (playMode == PlayModes.Live)
+            if (playMode == PlayModes.Live) {
                 playModeImage.setResource(playModeLiveActiveImg);
-            else
+            } else {
                 playModeImage.setResource(playModeReplayActiveImg);
+            }
             backToLivePlayButton.setEnabled(false);
             break;
         case Paused:
@@ -396,7 +397,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
         if (delayChanged) {
             timer.setDelay(1000l * newSettings.getDelayToLivePlayInSeconds());
-            
             if(timer.getPlayMode() == PlayModes.Live) {
                 timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
             }
@@ -416,7 +416,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         if (child instanceof RequiresResize) {
             ((RequiresResize) child).onResize();
         }
-
         sliderBar.onResize();
     }
 
