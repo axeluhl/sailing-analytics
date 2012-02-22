@@ -118,6 +118,10 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             @Override
             public void onValueChange(ValueChangeEvent<Double> newValue) {
                 if(sliderBar.getCurrentValue() != null) {
+                    if (TimePanel.this.timer.getPlayMode() == PlayModes.Live) {
+                        // put timer into replay mode when user explicitly adjusts time; avoids having to press pause first
+                        TimePanel.this.timer.setPlayMode(PlayModes.Replay);
+                    }
                     TimePanel.this.timer.setTime(sliderBar.getCurrentValue().longValue());
                 }
             }
