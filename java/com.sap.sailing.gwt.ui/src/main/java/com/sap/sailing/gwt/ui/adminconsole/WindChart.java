@@ -115,6 +115,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         }
         showVisibleSeries();
+        timer.addTimeListener(this);
     }
 
     @Override
@@ -154,7 +155,11 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         return newSeries;
     }
 
-    public void updateStripChartSeries(WindInfoForRaceDTO result) {
+    /**
+     * Updates the wind charts with the wind data from <code>result</code>. If <code>append</code> is <code>true</code>, previously
+     * existing points in the chart are left unchanged. Otherwise, the existing wind series are replaced.
+     */
+    public void updateStripChartSeries(WindInfoForRaceDTO result, boolean append) {
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
             WindSource windSource = e.getKey();
@@ -175,7 +180,16 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 }
                 points[i++] = newPoint;
             }
-            series.setPoints(points);
+            Point[] newPoints;
+            if (append) {
+                Point[] oldPoints = series.getPoints();
+                newPoints = new Point[oldPoints.length + points.length];
+                System.arraycopy(oldPoints, 0, newPoints, 0, oldPoints.length);
+                System.arraycopy(points, 0, newPoints, oldPoints.length, points.length);
+            } else {
+                newPoints = points;
+            }
+            series.setPoints(newPoints);
         }
     }
 
@@ -191,7 +205,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
 
     /**
      * Sets the visibilities of the wind source series based on the new settings. Note that this does not
-     * re-load any wind data. This has to happen by calling {@link #updateStripChartSeries(WindInfoForRaceDTO)}.
+     * re-load any wind data. This has to happen by calling {@link #updateStripChartSeries(WindInfoForRaceDTO, boolean)}.
      */
     @Override
     public void updateSettings(WindChartSettings newSettings) {
@@ -204,7 +218,12 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         }
     }
 
-    private void loadData(final RaceIdentifier raceIdentifier, final Date from, final Date to) {
+    /**
+     * @param append
+     *            if <code>true</code>, the results retrieved from the server will be appended to the wind chart instead
+     *            of overwriting the existing series.
+     */
+    private void loadData(final RaceIdentifier raceIdentifier, final Date from, final Date to, final boolean append) {
         sailingService.getWindInfo(raceIdentifier,
         // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
                 from, to, // use race start and time of newest event as default time period
@@ -213,9 +232,11 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                     @Override
                     public void onSuccess(WindInfoForRaceDTO result) {
                         if (result != null) {
-                            updateStripChartSeries(result);
+                            updateStripChartSeries(result, append);
                         } else {
-                            clearChart(); // no wind known for untracked race
+                            if (!append) {
+                                clearChart(); // no wind known for untracked race
+                            }
                         }
                     }
 
@@ -238,7 +259,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             selectedRaceIdentifier = selectedRaces.iterator().next();
             timeOfEarliestRequestInMillis = null;
             timeOfLatestRequestInMillis = null;
-            loadData(selectedRaceIdentifier, /* from */ null, /* to */ null);
+            loadData(selectedRaceIdentifier, /* from */ null, /* to */ null, /* append */ false);
         } else {
             clearChart();
         }
@@ -254,15 +275,15 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         if (timer.getPlayMode() == PlayModes.Live) {
             // is date before first cache entry or is cache empty?
             if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > date.getTime()) {
-                loadData(selectedRaceIdentifier, null, date);
+                loadData(selectedRaceIdentifier, null, date, /* append */ true);
             } else if (timeOfLatestRequestInMillis < date.getTime()) {
-                loadData(selectedRaceIdentifier, new Date(timeOfLatestRequestInMillis), /* to */ null);
+                loadData(selectedRaceIdentifier, new Date(timeOfLatestRequestInMillis), /* to */ null, /* append */ true);
             }
             // otherwise the cache spans across date and so we don't need to load anything
         } else {
             // assuming play mode is replay / non-live
             if (timeOfLatestRequestInMillis == null) {
-                loadData(selectedRaceIdentifier, /* from */ null, /* to */ null);
+                loadData(selectedRaceIdentifier, /* from */ null, /* to */ null, /* append */ false); // replace old series
             }
         }
     }
