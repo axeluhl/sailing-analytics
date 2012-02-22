@@ -100,6 +100,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 if (liveTimePointInMillis < raceTimesInfo.timePointOfNewestEvent.getTime() + eventTimeoutTolerance
                         && liveTimePointInMillis > raceTimesInfo.startOfTracking.getTime()) {
                     // don't worry; this will only fire an event if something actually changed
+                    // FIXME bug 323: dont' set the play mode but only make sure the time panel's "Live" button is enabled
                     timer.setPlayMode(PlayModes.Live);
                 } else {
                     timer.setPlayMode(PlayModes.Replay);

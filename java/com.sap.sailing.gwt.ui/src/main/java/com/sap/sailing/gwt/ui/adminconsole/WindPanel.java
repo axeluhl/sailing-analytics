@@ -253,7 +253,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         grid.setWidget(3, 0, null);
         VerticalPanel windDisplay = new VerticalPanel();
         grid.setWidget(3, 0, windDisplay);
-        windChart.updateStripChartSeries(result);
+        windChart.updateStripChartSeries(result, /* append */ false);
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
             Label windSourceLabel = new Label(stringMessages.windSource()+": "+e.getKey()+
                     ", "+stringMessages.dampeningInterval()+" "+e.getValue().dampeningIntervalInMilliseconds+"ms");

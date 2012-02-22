@@ -781,7 +781,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         while (iterator.hasNext()) { 
                             MarkPassing currentMarkPassing = iterator.next();
                             long diff = currentMarkPassing.getTimePoint().asMillis() - currentTimeToCheck;
-                            if(diff > maxTimeFrameInMs) {
+                            if (diff > maxTimeFrameInMs) {
                                 // reset the check
                                 currentCompetitorsInTime = 0;
                                 currentTimeToCheck = currentMarkPassing.getTimePoint().asMillis();
