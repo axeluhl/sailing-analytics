@@ -94,7 +94,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             if (raceTimesInfo.startOfTracking != null && raceTimesInfo.timePointOfNewestEvent != null) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
                 // leg markers
-                setLiveGenerallyPossible(isLiveModeToBeMadePossible());
+                boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
+                setLiveGenerallyPossible(liveModeToBeMadePossible);
+                setJumpToLiveEnablement(liveModeToBeMadePossible && timer.getPlayMode() != PlayModes.Live);
                 boolean timerAlreadyInitialized = getMin() != null && getMax() != null && sliderBar.getCurrentValue() != null;
                 initMinMax(raceTimesInfo);
                 if (!timerAlreadyInitialized) {
@@ -113,8 +115,11 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
         long eventTimeoutTolerance = 30 * 1000; // 30s 
         long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
-        return (liveTimePointInMillis < lastRaceTimesInfo.timePointOfNewestEvent.getTime() + eventTimeoutTolerance
-                && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime());
+        return lastRaceTimesInfo != null &&
+                lastRaceTimesInfo.timePointOfNewestEvent != null &&
+                liveTimePointInMillis < lastRaceTimesInfo.timePointOfNewestEvent.getTime() + eventTimeoutTolerance &&
+                lastRaceTimesInfo.startOfTracking != null &&
+                liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime();
     }
     
     @Override
