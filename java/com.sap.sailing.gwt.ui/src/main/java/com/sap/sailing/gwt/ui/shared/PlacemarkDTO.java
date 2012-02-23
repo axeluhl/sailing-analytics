@@ -45,7 +45,7 @@ public class PlacemarkDTO extends NamedDTO implements IsSerializable {
     }
     
     /**
-     * @return The placemark as string with the format "<code>countryCode</code> , <code>name</code>"
+     * @return The placemark as string with the format '<code>countryCode</code> , <code>name</code>'
      */
     public String asString() {
         return countryCode + ", " + name;

@@ -26,6 +26,10 @@ public class PlacemarkOrderDTO extends NamedDTO implements IsSerializable {
         this.placemarks = new ArrayList<PlacemarkDTO>(placemarks);;
     }
     
+    /**
+     * Builds a string with all {@link PlacemarkDTO placemarks} of this order. Each string representation of a placemark has the format given by {@link PlacemarkDTO#asString()}.<br />
+     * If consecutive placemarks are equal, only one string representation is added ('... -> DE, Kiel -> DE, Kiel -> ...' will be represented by '... -> DE, Kiel -> ...').
+     */
     public String placemarksAsString() {
         StringBuilder sb = new StringBuilder();
         if (!placemarks.isEmpty()) {
@@ -41,6 +45,28 @@ public class PlacemarkOrderDTO extends NamedDTO implements IsSerializable {
             }
         }
         return sb.toString();
+    }
+    
+    @Override
+    public String toString() {
+        return placemarks.toString();
+    }
+    
+    /**
+     * Like {@link PlacemarkOrderDTO#placemarksAsString()}, but builds a representation of all placemarks in the
+     * PlacemarkOrderDTOs of <code>orders</code>.<br />
+     * The order of the PlacemarkOrderDTOs in <code>orders</code> has a direct impact of the returning representation.
+     * 
+     * @param orders
+     *            The PlacemarkOrderDTOs which should be represented as string.
+     * @return A representation of <code>orders</code>
+     */
+    public static String placemarksOfAllOrdersAsString(Iterable<PlacemarkOrderDTO> orders) {
+        PlacemarkOrderDTO superOrder = new PlacemarkOrderDTO();
+        for (PlacemarkOrderDTO order : orders) {
+            superOrder.placemarks.addAll(order.placemarks);
+        }
+        return superOrder.placemarksAsString();
     }
     
 }

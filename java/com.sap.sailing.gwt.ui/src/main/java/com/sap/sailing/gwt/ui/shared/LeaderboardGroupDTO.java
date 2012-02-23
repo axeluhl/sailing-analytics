@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -11,23 +13,29 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     public String description;
     public List<LeaderboardDTO> leaderboards;
     
+    //Additional data
+    private HashMap<RaceIdentifier, Date> racesStartDates;
+    private HashMap<RaceIdentifier, PlacemarkOrderDTO> racesPlaces;
+    
     /**
-     * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.
+     * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.<br />
+     * The additional data (start dates and places for the races) will be initialized but empty.
      */
     public LeaderboardGroupDTO() {
-        this.name = "";
-        this.description = "";
-        this.leaderboards = new ArrayList<LeaderboardDTO>();
+        this("", "", new ArrayList<LeaderboardDTO>());
     }
 
     /**
      * Creates a new LeaderboardGroupDTO with the given parameters as attributes.<br />
-     * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.
+     * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.<br />
+     * The additional data (start dates and places for the races) will be initialized but empty.
      */
     public LeaderboardGroupDTO(String name, String description, List<LeaderboardDTO> leaderboards) {
         super(name);
         this.description = description;
         this.leaderboards = leaderboards;
+        this.racesStartDates = new HashMap<RaceIdentifier, Date>();
+        this.racesPlaces = new HashMap<RaceIdentifier, PlacemarkOrderDTO>();
     }
     
     public boolean containsRace(RaceIdentifier race) {
@@ -42,6 +50,49 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
             }
         }
         return containsRace;
+    }
+    
+    /**
+     * @return The start date of the given <code>race</code>, or <code>null</code> if no date for <code>race</code> is contained.
+     */
+    public Date getRaceStartDate(RaceIdentifier race) {
+        return racesStartDates.get(race);
+    }
+    
+    /**
+     * Sets the <code>startDate</code> for the <code>race</code>. If a date for the race is already contained, the old date will be replaced.
+     */
+    public void setRaceStartDate(RaceIdentifier race, Date startDate) {
+        racesStartDates.put(race, startDate);
+    }
+    
+    /**
+     * @return The {@link PlacemarkOrderDTO places} of the given <code>race</code>, or <code>null</code> if no places for <code>race</code> are contained.
+     */
+    public PlacemarkOrderDTO getRacePlaces(RaceIdentifier race) {
+        return racesPlaces.get(race);
+    }
+    
+    /**
+     * Sets the <code>places</code> for the given <code>race</code>. If places for the race are already contained, the old places will be replaced.
+     */
+    public void setRacePlaces(RaceIdentifier race, PlacemarkOrderDTO places) {
+        racesPlaces.put(race, places);
+    }
+    
+    /**
+     * 
+     * @return The earliest date in the start dates of the races, or <code>null</code> if no start dates are contained
+     */
+    public Date getOverallStartDate() {
+        Date start = null;
+        if (!racesStartDates.isEmpty()) {
+            start = new Date();
+            for (Date date : racesStartDates.values()) {
+                start = start.before(date) ? start : date;
+            }
+        }
+        return start;
     }
 
     @Override
