@@ -230,10 +230,11 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
+                        map.checkResizeAndCenter();
                         mapZoomedOrPannedSinceLastRaceSelectionChange = true;
                         Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatMarkers.keySet());
                         for (CompetitorDTO competitorDTO : getCompetitorsToShow()) {
-                                boolean usedExistingMarker = updateMarkerForCompetitor(competitorDTO);
+                                boolean usedExistingMarker = updateBoatMarkerForCompetitor(competitorDTO);
                                 if (usedExistingMarker) {
                                     competitorDTOsOfUnusedMarkers.remove(competitorDTO);
                                 }
@@ -481,7 +482,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                         updateTail(tail, competitorDTO, from, to);
                         competitorDTOsOfUnusedTails.remove(competitorDTO);
                     }
-                    boolean usedExistingMarker = updateMarkerForCompetitor(competitorDTO);
+                    boolean usedExistingMarker = updateBoatMarkerForCompetitor(competitorDTO);
                     if (usedExistingMarker) {
                         competitorDTOsOfUnusedMarkers.remove(competitorDTO);
                     }
@@ -500,14 +501,13 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
             boolean oldMapZoomedOrPannedSinceLastRaceSelectionChange = mapZoomedOrPannedSinceLastRaceSelectionChange;
-            map.setZoomLevel(map.getBoundsZoomLevel(newBounds));
             map.setCenter(newBounds.getCenter());
-            map.checkResizeAndCenter();
+            map.setZoomLevel(map.getBoundsZoomLevel(newBounds));
             mapZoomedOrPannedSinceLastRaceSelectionChange = oldMapZoomedOrPannedSinceLastRaceSelectionChange;
         }
     }
     
-    private boolean updateMarkerForCompetitor(CompetitorDTO competitorDTO) {
+    private boolean updateBoatMarkerForCompetitor(CompetitorDTO competitorDTO) {
         boolean usedExistingMarker = false;
         if (lastShownFix.containsKey(competitorDTO) && lastShownFix.get(competitorDTO) != -1) {
             GPSFixDTO lastPos = getBoatFix(competitorDTO);

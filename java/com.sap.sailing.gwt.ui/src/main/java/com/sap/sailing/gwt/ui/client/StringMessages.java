@@ -261,4 +261,5 @@ public interface StringMessages extends Messages {
     String speedChange();
     String degreesShort();
     String untracked();
+    String delayForLiveMode();
 }

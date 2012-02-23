@@ -21,6 +21,10 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings> imple
         this.stringMessages = stringMessages;
         initialSettings = settings;
     }
+    
+    protected StringMessages getStringMessages() {
+        return stringMessages;
+    }
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<T> dialog) {
