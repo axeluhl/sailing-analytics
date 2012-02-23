@@ -337,11 +337,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    public List<EventDTO> listEvents(boolean withRacePlaces) throws IllegalArgumentException {
+    @Override
+    public List<EventDTO> listEvents() throws IllegalArgumentException {
         List<EventDTO> result = new ArrayList<EventDTO>();
         for (Event event : getService().getAllEvents()) {
             List<CompetitorDTO> competitorList = getCompetitorDTOs(event.getCompetitors());
-            List<RegattaDTO> regattasList = getRegattaDTOs(event, withRacePlaces);
+            List<RegattaDTO> regattasList = getRegattaDTOs(event);
             EventDTO eventDTO = new EventDTO(event.getName(), regattasList, competitorList);
             for (RegattaDTO regatta : regattasList) {
                 regatta.setEvent(eventDTO);
@@ -353,7 +354,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    private List<RegattaDTO> getRegattaDTOs(Event event, boolean withRacePlaces) {
+    private List<RegattaDTO> getRegattaDTOs(Event event) {
         Map<BoatClass, Set<RaceDefinition>> racesByBoatClass = new HashMap<BoatClass, Set<RaceDefinition>>();
         for (RaceDefinition r : event.getAllRaces()) {
             Set<RaceDefinition> racesForBoatClass = racesByBoatClass.get(r.getBoatClass());
@@ -365,7 +366,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         for (Map.Entry<BoatClass, Set<RaceDefinition>> e : racesByBoatClass.entrySet()) {
-            List<RaceDTO> raceDTOsInBoatClass = getRaceDTOs(event, e.getValue(), withRacePlaces);
+            List<RaceDTO> raceDTOsInBoatClass = getRaceDTOs(event, e.getValue());
             if (!raceDTOsInBoatClass.isEmpty()) {
                 RegattaDTO regatta = new RegattaDTO(new BoatClassDTO(e.getKey()==null?"":e.getKey().getName()), raceDTOsInBoatClass);
                 for (RaceDTO race : raceDTOsInBoatClass) {
@@ -377,7 +378,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    private List<RaceDTO> getRaceDTOs(Event event, Set<RaceDefinition> races, boolean withRacePlaces) {
+    private List<RaceDTO> getRaceDTOs(Event event, Set<RaceDefinition> races) {
         List<RaceDTO> result = new ArrayList<RaceDTO>();
         for (RaceDefinition r : races) {
             RaceDTO raceDTO = new RaceDTO(r.getName(), getCompetitorDTOs(r.getCompetitors()), getService().isRaceBeingTracked(r));
@@ -388,9 +389,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 raceDTO.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
                 raceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
                 raceDTO.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
-                if (withRacePlaces) {
-                    raceDTO.racePlaces = trackedRace.getPlaceOrder();
-                }
             }
             result.add(raceDTO);
         }

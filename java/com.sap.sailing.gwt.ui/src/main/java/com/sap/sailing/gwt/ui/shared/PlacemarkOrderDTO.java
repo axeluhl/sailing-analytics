@@ -28,14 +28,16 @@ public class PlacemarkOrderDTO extends NamedDTO implements IsSerializable {
     
     public String placemarksAsString() {
         StringBuilder sb = new StringBuilder();
-        PlacemarkDTO placemarkBefore = placemarks.get(0);
-        sb.append(placemarkBefore.asString());
-        for (int i = 1; i < placemarks.size(); i++) {
-            PlacemarkDTO placemark = placemarks.get(i);
-            if (!placemarkBefore.equals(placemark)) {
-                sb.append(" -> ");
-                sb.append(placemark.asString());
-                placemarkBefore = placemark;
+        if (!placemarks.isEmpty()) {
+            PlacemarkDTO placemarkBefore = placemarks.get(0);
+            sb.append(placemarkBefore.asString());
+            for (int i = 1; i < placemarks.size(); i++) {
+                PlacemarkDTO placemark = placemarks.get(i);
+                if (!placemarkBefore.equals(placemark)) {
+                    sb.append(" -> ");
+                    sb.append(placemark.asString());
+                    placemarkBefore = placemark;
+                }
             }
         }
         return sb.toString();

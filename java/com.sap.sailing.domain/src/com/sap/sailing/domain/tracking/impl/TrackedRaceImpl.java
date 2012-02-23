@@ -42,11 +42,9 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.impl.RacePlaceOrderImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -74,7 +72,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 320;
     
     /**
-     * Used in {@link #getPlaceOrder()} to calculate the radius for the
+     * Used in {@link #getStartFinishPlacemarks()} to calculate the radius for the
      * {@link ReverseGeocoder#getPlacemarksNear(Position, double) GetPlacemarksNear-Service}.
      */
     private static final double GEONAMES_RADIUS_CACLCULATION_FACTOR = 10.0;
@@ -1094,8 +1092,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     @Override
-    public RacePlaceOrder getPlaceOrder() {
-        RacePlaceOrder order = null;
+    public Pair<Placemark, Placemark> getStartFinishPlacemarks() {
+        Pair<Placemark, Placemark> placemarks = new Pair<Placemark, Placemark>(null, null);
         Placemark startBest = null;
         Placemark finishBest = null;
         
@@ -1149,14 +1147,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
 
             if (startBest != null) {
-                if (finishBest != null) {
-                    order = new RacePlaceOrderImpl(startBest, finishBest);
-                } else {
-                    order = new RacePlaceOrderImpl(startBest, startBest);
-                }
+                placemarks.setA(startBest);
+            }
+            if (finishBest != null) {
+                placemarks.setB(finishBest);
             }
         }
-        return order;
+        return placemarks;
     }
     
 }

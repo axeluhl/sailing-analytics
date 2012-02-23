@@ -39,7 +39,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
  */
 public interface SailingServiceAsync {
     
-    void listEvents(boolean withRacePlaces, AsyncCallback<List<EventDTO>> callback);
+    void listEvents(AsyncCallback<List<EventDTO>> callback);
     
     /**
      * The string returned in the callback's pair is the common event name

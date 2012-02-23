@@ -82,7 +82,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             };
         }
             
-        sailingService.listEvents(false, listEventsCallback);
+        sailingService.listEvents(listEventsCallback);
         sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
         if(leaderboardGroupName != null)
             sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, getLeaderboardGroupByNameCallback);
