@@ -267,7 +267,7 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
                 errorReporter.reportError("Error trying to obtain the data: " + t.getMessage());
             }
         };
-        sailingService.getLeaderboardGroups(getGroupsCallback);
+        sailingService.getLeaderboardGroups(true, getGroupsCallback);
     }
     
     private void groupSelectionChanged() {

@@ -25,6 +25,10 @@ public class PlacemarkOrderDTO extends NamedDTO implements IsSerializable {
     public void setPlacemarks(Collection<PlacemarkDTO> placemarks) {
         this.placemarks = new ArrayList<PlacemarkDTO>(placemarks);;
     }
+
+    public boolean isEmpty() {
+        return placemarks.isEmpty();
+    }
     
     /**
      * Builds a string with all {@link PlacemarkDTO placemarks} of this order. Each string representation of a placemark has the format given by {@link PlacemarkDTO#asString()}.<br />

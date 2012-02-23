@@ -26,7 +26,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
             groupName = null;
         } else {
             groupName = groupParamValue;
-            sailingService.getLeaderboardGroupByName(groupName, new AsyncCallback<LeaderboardGroupDTO>() {
+            sailingService.getLeaderboardGroupByName(groupName, false, new AsyncCallback<LeaderboardGroupDTO>() {
                 @Override
                 public void onFailure(Throwable t) {
                     reportError(stringMessages.noLeaderboardGroupWithNameFound(groupName));

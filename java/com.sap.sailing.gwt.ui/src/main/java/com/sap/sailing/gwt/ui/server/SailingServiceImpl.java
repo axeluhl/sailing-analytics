@@ -59,6 +59,7 @@ import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -114,6 +115,8 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.PlacemarkDTO;
+import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
@@ -1551,28 +1554,58 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<LeaderboardGroupDTO> getLeaderboardGroups() {
+    public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withAdditionalInformation) {
         ArrayList<LeaderboardGroupDTO> leaderboardGroupDTOs = new ArrayList<LeaderboardGroupDTO>();
         Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
         
         for (LeaderboardGroup leaderboardGroup : leaderboardGroups.values()) {
-            leaderboardGroupDTOs.add(convertToLeaderboardGroupDTO(leaderboardGroup));
+            leaderboardGroupDTOs.add(convertToLeaderboardGroupDTO(leaderboardGroup, withAdditionalInformation));
         }
         
         return leaderboardGroupDTOs;
     }
 
     @Override
-    public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName) {
-        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName));
+    public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName, boolean withAdditionalInformation) {
+        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName), withAdditionalInformation);
     }
     
-    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup) {
-        ArrayList<LeaderboardDTO> leaderboards = new ArrayList<LeaderboardDTO>();
+    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup, boolean withAdditionalInformation) {
+        LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO();
+        groupDTO.name = leaderboardGroup.getName();
+        groupDTO.description = leaderboardGroup.getDescription();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-            leaderboards.add(createStrippedLeaderboardDTO(leaderboard));
+            groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard));
+            if (withAdditionalInformation) {
+                for (RaceInLeaderboard raceInLeaderboard : leaderboard.getRaceColumns()) {
+                    TrackedRace trackedRace = raceInLeaderboard.getTrackedRace();
+                    
+                    if (trackedRace != null) {
+                        RaceIdentifier trackedRaceId = trackedRace.getRaceIdentifier();
+                        groupDTO.setRaceStartDate(trackedRaceId, trackedRace.getStart().asDate());
+                        
+                        Pair<Placemark, Placemark> startAndFinish = trackedRace.getStartFinishPlacemarks();
+                        PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
+                        if (startAndFinish.getA() != null) {
+                            racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
+                        }
+                        if (startAndFinish.getB() != null) {
+                            racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
+                        }
+                        if (!racePlaces.isEmpty()) {
+                            groupDTO.setRacePlaces(trackedRaceId, racePlaces);
+                        }
+                    }
+                }
+            }
         }
-        return new LeaderboardGroupDTO(leaderboardGroup.getName(), leaderboardGroup.getDescription(), leaderboards);
+        return groupDTO;
+    }
+    
+    private PlacemarkDTO convertToPlacemarkDTO(Placemark placemark) {
+        Position position = placemark.getPosition();
+        return new PlacemarkDTO(placemark.getName(), placemark.getCountryCode(), new PositionDTO(position.getLatDeg(),
+                position.getLngDeg()), placemark.getPopulation());
     }
 
     @Override
@@ -1587,7 +1620,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description) {
-        return convertToLeaderboardGroupDTO(getService().addLeaderboardGroup(groupName, description, new ArrayList<String>()));
+        return convertToLeaderboardGroupDTO(getService().addLeaderboardGroup(groupName, description, new ArrayList<String>()), false);
     }
 
     @Override
