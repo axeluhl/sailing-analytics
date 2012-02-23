@@ -30,17 +30,22 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
+import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 /**
  * 
@@ -69,6 +74,7 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
     
     private List<LeaderboardGroupDTO> availableGroups;
     private HashMap<RaceIdentifier, Date> availableRaceStartDates;
+    private HashMap<RaceIdentifier, RacePlaceOrder> availabeRaceLocations;
 
     public LeaderboardGroupOverviewPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
             ErrorReporter errorReporter, final StringMessages stringConstants) {
@@ -76,6 +82,7 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
         
         availableGroups = new ArrayList<LeaderboardGroupDTO>();
         availableRaceStartDates = new HashMap<RaceIdentifier, Date>();
+        availabeRaceLocations = new HashMap<RaceIdentifier, RacePlaceOrder>();
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -149,27 +156,32 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
         mainPanel.add(groupPanel);
         
         groupsTable = new CellTable<LeaderboardGroupDTO>();
+        groupsTable.setWidth("100%");
         groupPanel.add(groupsTable);
         
         groupsDataProvider = new ListDataProvider<LeaderboardGroupDTO>();
         ListHandler<LeaderboardGroupDTO> groupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsDataProvider.getList());
         groupsDataProvider.addDataDisplay(groupsTable);
         
+        groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
+        groupsTable.setSelectionModel(groupsSelectionModel);
+        
         TextColumn<LeaderboardGroupDTO> groupsLocationColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
-                // TODO Auto-generated method stub
-                return null;
+                // TODO Figure out a better way to save the locations
+                return "Not Available";
             }
         };
-        groupsLocationColumn.setSortable(true);
-        groupsListHandler.setComparator(groupsLocationColumn, new Comparator<LeaderboardGroupDTO>() {
-            @Override
-            public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
-                // TODO Auto-generated method stub
-                return 0;
-            }
-        });
+        groupsLocationColumn.setSortable(false);
+//        groupsLocationColumn.setSortable(true);
+//        groupsListHandler.setComparator(groupsLocationColumn, new Comparator<LeaderboardGroupDTO>() {
+//            @Override
+//            public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
+//                // TODO Auto-generated method stub
+//                return 0;
+//            }
+//        });
         
         AnchorCell groupsNameAnchorCell = new AnchorCell();
         Column<LeaderboardGroupDTO, SafeHtml> groupsNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(groupsNameAnchorCell) {
@@ -209,9 +221,10 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
         TextColumn<LeaderboardGroupDTO> groupsStartDateColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
+                //TODO Figure out a better way to save the start dates
                 RaceIdentifier race = getFirstTrackedRaceInGroup(group);
                 Date startDate = race == null ? null : availableRaceStartDates.get(race);
-                return startDate == null ? stringConstants.untracked() : DateTimeFormat.getFormat(PredefinedFormat.DATE_FULL).format(startDate);
+                return startDate == null ? stringConstants.untracked() : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(startDate);
             }
         };
         groupsStartDateColumn.setSortable(true);
@@ -234,7 +247,8 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
         
         //Build group details GUI TODO
         
-        //Loading the data TODO
+        //Loading the data
+        loadData();
         
         //Set checkbox as true, because we can't search for old events right now
         //TODO Remove after searching for old events is possible
@@ -243,21 +257,42 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
         //Until here
     }
 
-    private void loadEvents() {
-        //TODO
-        //Get all groups
-        //Get all events for the time information
-    }
-    
-    private void refreshEventsTable() {
-        //TODO
+    private void loadData() {
+        final ParallelExecutionCallback<List<LeaderboardGroupDTO>> getGroupsCallback = new ParallelExecutionCallback<List<LeaderboardGroupDTO>>();
+        final ParallelExecutionCallback<List<EventDTO>> getEventsCallback = new ParallelExecutionCallback<List<EventDTO>>();
+        new ParallelExecutionHolder(getGroupsCallback, getEventsCallback) {
+            @Override
+            protected void handleSuccess() {
+                //Update the groups
+                availableGroups = getGroupsCallback.getData() == null ? new ArrayList<LeaderboardGroupDTO>() : getGroupsCallback.getData();
+                groupsDataProvider.getList().clear();
+                groupsDataProvider.getList().addAll(availableGroups);
+                
+                //Add the additional data, like the start time and the location
+                List<EventDTO> events = getEventsCallback.getData();
+                for (EventDTO event : events) {
+                    for (RegattaDTO regatta : event.regattas) {
+                        for (RaceDTO race : regatta.races) {
+                            for (LeaderboardGroupDTO group : availableGroups) {
+                                if (group.containsRace(race.getRaceIdentifier())) {
+                                    availableRaceStartDates.put(race.getRaceIdentifier(), race.startOfRace);
+                                    availabeRaceLocations.put(race.getRaceIdentifier(), race.racePlaces);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            @Override
+            protected void handleFailure(Throwable t) {
+                errorReporter.reportError("Error trying to obtain the data: " + t.getMessage());
+            }
+        };
+        sailingService.getLeaderboardGroups(getGroupsCallback);
+        sailingService.listEvents(true, getEventsCallback);
     }
     
     private void groupSelectionChanged() {
-        //TODO
-    }
-    
-    private void loadGroupDetails(LeaderboardGroupDTO group) {
         //TODO
     }
     
@@ -330,7 +365,7 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
         return result;
     }
     
-    public RaceIdentifier getFirstTrackedRaceInGroup(LeaderboardGroupDTO group) {
+    private RaceIdentifier getFirstTrackedRaceInGroup(LeaderboardGroupDTO group) {
         RaceIdentifier firstTrackedRace = null;
         groupLoop:
         for (LeaderboardDTO leaderboard : group.leaderboards) {
@@ -342,6 +377,18 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
             }
         }
         return firstTrackedRace;
+    }
+    
+    private RaceIdentifier getLastTrackedRaceInGroup(LeaderboardGroupDTO group) {
+        RaceIdentifier lastTrackedRace = null;
+        for (LeaderboardDTO leaderboard : group.leaderboards) {
+            for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
+                if (availableRaceStartDates.containsKey(race.getRaceIdentifier())) {
+                    lastTrackedRace = race.getRaceIdentifier();
+                }
+            }
+        }
+        return lastTrackedRace;
     }
     
     @Override

@@ -490,6 +490,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
             }
             @Override
             public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to obtain list of leaderboard groups: " + t.getMessage());
             }
         });
     }
