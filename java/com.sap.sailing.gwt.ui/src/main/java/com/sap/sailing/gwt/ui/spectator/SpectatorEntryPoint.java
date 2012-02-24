@@ -48,7 +48,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         
         FormPanel panelToDisplay = null;
         if (groupName == null) {
-            panelToDisplay = new LeaderboardGroupOverviewPanel(sailingService, this, this, stringMessages);
+            panelToDisplay = new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages);
         } else {
             panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root);
             LeaderboardGroupPanel groupPanel = (LeaderboardGroupPanel) panelToDisplay;

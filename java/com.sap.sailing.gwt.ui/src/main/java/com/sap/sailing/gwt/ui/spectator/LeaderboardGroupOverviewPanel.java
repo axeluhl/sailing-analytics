@@ -3,10 +3,10 @@ package com.sap.sailing.gwt.ui.spectator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -21,37 +21,28 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
-import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
-import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
-import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 
 /**
  * 
  * @author Lennart Hensler (D054527)
  * 
  */
-public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
+public class LeaderboardGroupOverviewPanel extends FormPanel {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
@@ -61,6 +52,10 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
     public static final String STYLE_NAME_PREFIX = "groupOverviewPanel-";
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
+    private SailingServiceAsync sailingService;
+    private ErrorReporter errorReporter;
+    private StringMessages stringMessages;
+
     private TextBox locationTextBox;
     private TextBox nameTextBox;
     private TextBox fromTextBox;
@@ -73,77 +68,91 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
     
     private List<LeaderboardGroupDTO> availableGroups;
 
-    public LeaderboardGroupOverviewPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
-            ErrorReporter errorReporter, final StringMessages stringConstants) {
-        super(sailingService, eventRefresher, errorReporter, stringConstants);
-        
+    public LeaderboardGroupOverviewPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages) {
+        this.sailingService = sailingService;
+        this.errorReporter = errorReporter;
+        this.stringMessages = stringMessages;
         availableGroups = new ArrayList<LeaderboardGroupDTO>();
 
-        VerticalPanel mainPanel = new VerticalPanel();
+        FlowPanel mainPanel = new FlowPanel();
         this.setWidget(mainPanel);
-        mainPanel.setWidth("95%");
-
+        mainPanel.setSize("100%", "100%");
+        
         // Build search GUI
-        CaptionPanel searchCaptionPanel = new CaptionPanel(stringConstants.searchEvents());
-        searchCaptionPanel.setWidth("100%");
-        mainPanel.add(searchCaptionPanel);
+        FlowPanel searchPanel = new FlowPanel();
+        searchPanel.setWidth("100%");
+        mainPanel.add(searchPanel);
         
-        HorizontalPanel searchFunctionalPanel = new HorizontalPanel();
-        searchCaptionPanel.add(searchFunctionalPanel);
-        searchFunctionalPanel.setWidth("100%");
-        
-        Label locationLbl = new Label(stringConstants.location() + ":");
-        searchFunctionalPanel.add(locationLbl);
+        Label locationLabel = new Label(this.stringMessages.location() + ":");
+        locationLabel.setStyleName(STYLE_NAME_PREFIX + "searchLabel");
+        locationLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        searchPanel.add(locationLabel);
         locationTextBox = new TextBox();
+        locationTextBox.setStyleName(STYLE_NAME_PREFIX + "searchInputField");
+        locationTextBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         locationTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 onSearchCriteriaChange();
             }
         });
-        searchFunctionalPanel.add(locationTextBox);
+        searchPanel.add(locationTextBox);
         
-        Label nameLbl = new Label(stringConstants.name() + ":");
-        searchFunctionalPanel.add(nameLbl);
+        Label nameLabel = new Label(this.stringMessages.name() + ":");
+        nameLabel.setStyleName(STYLE_NAME_PREFIX + "searchLabel");
+        nameLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        searchPanel.add(nameLabel);
         nameTextBox = new TextBox();
+        nameTextBox.setStyleName(STYLE_NAME_PREFIX + "searchInputField");
+        nameTextBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         nameTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 onSearchCriteriaChange();
             }
         });
-        searchFunctionalPanel.add(nameTextBox);
+        searchPanel.add(nameTextBox);
         
-        onlyLiveCheckBox = new CheckBox(stringConstants.onlyLiveEvents());
+        onlyLiveCheckBox = new CheckBox(this.stringMessages.onlyLiveEvents());
+        onlyLiveCheckBox.setStyleName(STYLE_NAME_PREFIX + "searchCheckBox");
+        onlyLiveCheckBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         onlyLiveCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 onCheckBoxLiveChange();
             }
         });
-        searchFunctionalPanel.add(onlyLiveCheckBox);
+        searchPanel.add(onlyLiveCheckBox);
         
-        Label fromDateLbl = new Label(stringConstants.from() + ":");
-        searchFunctionalPanel.add(fromDateLbl);
+        Label fromDateLabel = new Label(this.stringMessages.from() + ":");
+        fromDateLabel.setStyleName(STYLE_NAME_PREFIX + "searchLabel");
+        fromDateLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        searchPanel.add(fromDateLabel);
         fromTextBox = new TextBox();
+        fromTextBox.setStyleName(STYLE_NAME_PREFIX + "searchInputField");
+        fromTextBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         fromTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 onSearchCriteriaChange();
             }
         });
-        searchFunctionalPanel.add(fromTextBox);
+        searchPanel.add(fromTextBox);
         
-        Label toDateLbl = new Label(stringConstants.until() + ":");
-        searchFunctionalPanel.add(toDateLbl);
+        Label toDateLabel = new Label(this.stringMessages.until() + ":");
+        toDateLabel.setStyleName(STYLE_NAME_PREFIX + "searchLabel");
+        toDateLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        searchPanel.add(toDateLabel);
         untilTextBox = new TextBox();
+        untilTextBox.setStyleName(STYLE_NAME_PREFIX + "searchInputField");
+        untilTextBox.getElement().setPropertyString("clear", "right");
         untilTextBox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 onSearchCriteriaChange();
             }
         });
-        searchFunctionalPanel.add(untilTextBox);
+        searchPanel.add(untilTextBox);
         
         //Build group GUI
         FlowPanel groupPanel = new FlowPanel();
@@ -154,7 +163,7 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
                 List<PlacemarkOrderDTO> groupPlaces = group.getGroupPlaces();
-                return groupPlaces.isEmpty() ? LeaderboardGroupOverviewPanel.this.stringConstants.notAvailable()
+                return groupPlaces.isEmpty() ? LeaderboardGroupOverviewPanel.this.stringMessages.notAvailable()
                         : PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(groupPlaces, true);
             }
         };
@@ -193,7 +202,7 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
                 Date startDate = group.getGroupStartDate();
-                return startDate == null ? LeaderboardGroupOverviewPanel.this.stringConstants.untracked()
+                return startDate == null ? LeaderboardGroupOverviewPanel.this.stringMessages.untracked()
                         : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(startDate);
             }
         };
@@ -204,10 +213,10 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
         groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
         groupsTable.setSelectionModel(groupsSelectionModel);
         
-        groupsTable.addColumn(groupsLocationColumn, stringConstants.location());
-        groupsTable.addColumn(groupsNameColumn, stringConstants.name());
-        groupsTable.addColumn(groupsLeaderboardsColumn, stringConstants.leaderboards());
-        groupsTable.addColumn(groupsStartDateColumn, stringConstants.startDate());
+        groupsTable.addColumn(groupsLocationColumn, this.stringMessages.location());
+        groupsTable.addColumn(groupsNameColumn, this.stringMessages.name());
+        groupsTable.addColumn(groupsLeaderboardsColumn, this.stringMessages.leaderboards());
+        groupsTable.addColumn(groupsStartDateColumn, this.stringMessages.startDate());
         groupPanel.add(groupsTable);
         
         groupsDataProvider = new ListDataProvider<LeaderboardGroupDTO>();
@@ -333,12 +342,6 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
         }
         
         return result;
-    }
-    
-    @Override
-    public void fillEvents(List<EventDTO> result) {
-        // TODO Auto-generated method stub
-        
     }
 
 }
