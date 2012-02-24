@@ -43,6 +43,7 @@ import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 
 /**
@@ -149,34 +150,15 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
         groupPanel.setStyleName(STYLE_NAME_PREFIX + "groupPanel");
         mainPanel.add(groupPanel);
         
-        groupsTable = new CellTable<LeaderboardGroupDTO>();
-        groupsTable.setWidth("100%");
-        groupPanel.add(groupsTable);
-        
-        groupsDataProvider = new ListDataProvider<LeaderboardGroupDTO>();
-        ListHandler<LeaderboardGroupDTO> groupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsDataProvider.getList());
-        groupsDataProvider.addDataDisplay(groupsTable);
-        
-        groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
-        groupsTable.setSelectionModel(groupsSelectionModel);
-        
         TextColumn<LeaderboardGroupDTO> groupsLocationColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
-                // TODO Whats a good representation for the location of a group?
-                return "Not Available";
+                List<PlacemarkOrderDTO> groupPlaces = group.getGroupPlaces();
+                return groupPlaces.isEmpty() ? LeaderboardGroupOverviewPanel.this.stringConstants.notAvailable()
+                        : PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(groupPlaces, true);
             }
         };
-        groupsLocationColumn.setSortable(false);
-        //TODO enable the code below, after the location column is filled
-//        groupsLocationColumn.setSortable(true);
-//        groupsListHandler.setComparator(groupsLocationColumn, new Comparator<LeaderboardGroupDTO>() {
-//            @Override
-//            public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
-//                // TODO Auto-generated method stub
-//                return 0;
-//            }
-//        });
+        groupsLocationColumn.setSortable(true);
         
         AnchorCell groupsNameAnchorCell = new AnchorCell();
         Column<LeaderboardGroupDTO, SafeHtml> groupsNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(groupsNameAnchorCell) {
@@ -189,12 +171,6 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
             }
         };
         groupsNameColumn.setSortable(true);
-        groupsListHandler.setComparator(groupsNameColumn, new Comparator<LeaderboardGroupDTO>() {
-            @Override
-            public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
-                return g1.name.compareTo(g2.name);
-            }
-        });
         
         TextColumn<LeaderboardGroupDTO> groupsLeaderboardsColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
@@ -216,22 +192,48 @@ public class LeaderboardGroupOverviewPanel extends AbstractEventPanel {
         TextColumn<LeaderboardGroupDTO> groupsStartDateColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
             public String getValue(LeaderboardGroupDTO group) {
-                Date startDate = group.getOverallStartDate();
-                return startDate == null ? stringConstants.untracked() : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(startDate);
+                Date startDate = group.getGroupStartDate();
+                return startDate == null ? LeaderboardGroupOverviewPanel.this.stringConstants.untracked()
+                        : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(startDate);
             }
         };
         groupsStartDateColumn.setSortable(true);
-        groupsListHandler.setComparator(groupsStartDateColumn, new Comparator<LeaderboardGroupDTO>() {
-            @Override
-            public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
-                return g1.getOverallStartDate().compareTo(g2.getOverallStartDate());
-            }
-        });
+
+        groupsTable = new CellTable<LeaderboardGroupDTO>();
+        groupsTable.setWidth("100%");
+        groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
+        groupsTable.setSelectionModel(groupsSelectionModel);
         
         groupsTable.addColumn(groupsLocationColumn, stringConstants.location());
         groupsTable.addColumn(groupsNameColumn, stringConstants.name());
         groupsTable.addColumn(groupsLeaderboardsColumn, stringConstants.leaderboards());
         groupsTable.addColumn(groupsStartDateColumn, stringConstants.startDate());
+        groupPanel.add(groupsTable);
+        
+        groupsDataProvider = new ListDataProvider<LeaderboardGroupDTO>();
+        groupsDataProvider.addDataDisplay(groupsTable);
+
+        ListHandler<LeaderboardGroupDTO> groupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsDataProvider.getList());
+      groupsListHandler.setComparator(groupsLocationColumn, new Comparator<LeaderboardGroupDTO>() {
+      @Override
+      public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
+          String places1 = PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(g1.getGroupPlaces(), true);
+          String places2 = PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(g2.getGroupPlaces(), true);
+          return places1.compareTo(places2);
+      }
+  });
+        groupsListHandler.setComparator(groupsNameColumn, new Comparator<LeaderboardGroupDTO>() {
+            @Override
+            public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
+                return g1.name.compareTo(g2.name);
+            }
+        });
+        groupsListHandler.setComparator(groupsStartDateColumn, new Comparator<LeaderboardGroupDTO>() {
+            @Override
+            public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
+                return g1.getGroupStartDate().compareTo(g2.getGroupStartDate());
+            }
+        });
         
         //Build group details GUI TODO
         

@@ -262,4 +262,5 @@ public interface StringMessages extends Messages {
     String degreesShort();
     String untracked();
     String delayForLiveMode();
+    String notAvailable();
 }
