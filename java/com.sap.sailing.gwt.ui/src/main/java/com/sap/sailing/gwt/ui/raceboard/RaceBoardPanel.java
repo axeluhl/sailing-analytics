@@ -99,6 +99,11 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         String debugParam = Window.Location.getParameter("gwt.codesvr");
 
         if(leaderboardGroupName != null) {
+            if (Window.Location.getParameter("root").equals("overview")) {
+                String link = "/gwt/Spectator.html"
+                        + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
+                breadcrumbLinksData.add(new Pair<String, String>(link, stringMessages.home()));
+            }
             String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName +
                     (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
             breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
