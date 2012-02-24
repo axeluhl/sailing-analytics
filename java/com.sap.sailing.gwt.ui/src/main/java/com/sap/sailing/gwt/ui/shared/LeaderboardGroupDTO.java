@@ -48,7 +48,9 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         this.leaderboards = leaderboards;
         
         this.racesStartDates = new HashMap<RaceIdentifier, Date>();
+        this.leaderboardsStartDates = new HashMap<LeaderboardDTO, Date>();
         this.racesPlaces = new HashMap<RaceIdentifier, PlacemarkOrderDTO>();
+        this.leaderboardsPlaces = new HashMap<LeaderboardDTO, PlacemarkOrderDTO>();
         this.dataNeedsCalculation = new HashMap<LeaderboardDTO, Pair<Boolean,Boolean>>();
         this.dataNeedsCalculationNeedsInitialization = true;
     }
@@ -89,7 +91,8 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
      *         <code>leaderboard</code> isn't contained or no start dates of the races are contained.
      */
     public Date getLeaderboardStartDate(LeaderboardDTO leaderboard) {
-        if (dataNeedsCalculation.get(leaderboard).getA()) {
+        Pair<Boolean, Boolean> dataNeedsCalculation = this.dataNeedsCalculation.get(leaderboard);
+        if (dataNeedsCalculation != null && dataNeedsCalculation.getA()) {
             leaderboardsStartDates.put(leaderboard, calculateLeaderboardStartDate(leaderboard));
         }
         return leaderboardsStartDates.get(leaderboard);
@@ -160,7 +163,8 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
      *         <code>leaderboard</code> are contained
      */
     public PlacemarkOrderDTO getLeaderboardPlaces(LeaderboardDTO leaderboard) {
-        if (dataNeedsCalculation.get(leaderboard).getB()) {
+        Pair<Boolean, Boolean> dataNeedsCalculation = this.dataNeedsCalculation.get(leaderboard);
+        if (dataNeedsCalculation != null && dataNeedsCalculation.getB()) {
             leaderboardsPlaces.put(leaderboard, calculateLeaderboardPlaces(leaderboard));
         }
         return leaderboardsPlaces.get(leaderboard);
