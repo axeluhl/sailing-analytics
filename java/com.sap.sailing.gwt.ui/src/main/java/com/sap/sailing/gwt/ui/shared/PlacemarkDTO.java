@@ -53,7 +53,7 @@ public class PlacemarkDTO extends NamedDTO implements IsSerializable {
     
     @Override
     public String toString() {
-        return countryCode + ", " + name + ", " + population + "]" + position.toString() + ", ";
+        return countryCode + ", " + name + ", " + population + "]" + position.toString();
     }
 
     @Override
