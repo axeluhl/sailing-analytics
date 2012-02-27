@@ -353,15 +353,15 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
 
     /**
      * From {@link #fixes} as well as the selection of {@link #getCompetitorsToShow competitors to show}, computes the
-     * from/to times for which to request GPS raceMapData.fixes from the server. No update is performed here to {@link #fixes}. The
+     * from/to times for which to request GPS fixes from the server. No update is performed here to {@link #fixes}. The
      * result guarantees that, when used in
      * {@link SailingServiceAsync#getBoatPositions(String, String, Map, Map, boolean, AsyncCallback)}, for each
-     * competitor from {@link #competitorsToShow} there are all raceMapData.fixes known by the server for that competitor starting
+     * competitor from {@link #competitorsToShow} there are all fixes known by the server for that competitor starting
      * at <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive).
      * 
      * @return a triple whose {@link Triple#getA() first} component contains the "from", and whose {@link Triple#getB()
      *         second} component contains the "to" times for the competitors whose trails / positions to show; the
-     *         {@link Triple#getC() third} component tells whether the existing raceMapData.fixes can remain and be augmented by
+     *         {@link Triple#getC() third} component tells whether the existing fixes can remain and be augmented by
      *         those requested or need to be replaced
      */
     protected Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
@@ -382,6 +382,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
                     && !tailstart.after(timepointOfLastKnownFix)) {
                 // the beginning of what we need is contained in the interval we already have; skip what we already have
+                // FIXME requests the lastKnownFix again because "from" is *inclusive*; could lead to bug 319
                 fromDate = timepointOfLastKnownFix;
                 overlap = true;
             } else {
@@ -409,10 +410,10 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
 
 
     /**
-     * Adds the raceMapData.fixes received in <code>result</code> to {@link #fixes} and ensures they are still contiguous for each
-     * competitor. If <code>overlapsWithKnownraceMapData.fixes</code> indicates that the raceMapData.fixes received in <code>result</code>
-     * overlap with those already known, the raceMapData.fixes are merged into the list of already known raceMapData.fixes for the competitor.
-     * Otherwise, the raceMapData.fixes received in <code>result</code> replace those known so far for the respective competitor.
+     * Adds the fixes received in <code>result</code> to {@link #fixes} and ensures they are still contiguous for each
+     * competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in <code>result</code>
+     * overlap with those already known, the fixes are merged into the list of already known fixes for the competitor.
+     * Otherwise, the fixes received in <code>result</code> replace those known so far for the respective competitor.
      */
     protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> result,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes) {
@@ -425,8 +426,8 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                 }
                 if (!overlapsWithKnownFixes.get(e.getKey())) {
                     fixesForCompetitor.clear();
-                    // to re-establish the invariants for raceMapData.tails, raceMapData.firstShownFix and raceMapData.lastShownFix, we now need to remove
-                    // all points from the competitor's polyline and clear the entries in raceMapData.firstShownFix and raceMapData.lastShownFix
+                    // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
+                    // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
                     if (map != null && tails.containsKey(e.getKey())) {
                         map.removeOverlay(tails.remove(e.getKey()));
                     }

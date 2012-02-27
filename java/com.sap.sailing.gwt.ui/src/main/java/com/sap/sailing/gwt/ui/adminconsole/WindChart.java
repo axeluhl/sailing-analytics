@@ -92,6 +92,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
             public String format(ToolTipData toolTipData) {
+                // TODO consider using toolTipData.getPoint().getName() instead...
                 return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                         + "</b><br/>" +  
                         dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
