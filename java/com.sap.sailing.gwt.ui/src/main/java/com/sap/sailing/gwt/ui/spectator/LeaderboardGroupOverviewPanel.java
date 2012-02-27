@@ -17,6 +17,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -32,6 +33,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -372,8 +374,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         TextColumn<RaceInLeaderboardDTO> racesLocationColumn = new TextColumn<RaceInLeaderboardDTO>() {
             @Override
             public String getValue(RaceInLeaderboardDTO race) {
-                // TODO Auto-generated method stub
-                return null;
+                PlacemarkOrderDTO racePlaces = race.getPlaces();
+                return racePlaces == null ? LeaderboardGroupOverviewPanel.this.stringMessages.locationNotAvailable() : racePlaces.placemarksAsString();
             }
         };
         
@@ -381,16 +383,29 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         Column<RaceInLeaderboardDTO, SafeHtml> racesNameColumn = new Column<RaceInLeaderboardDTO, SafeHtml>(racesNameAnchorCell) {
             @Override
             public SafeHtml getValue(RaceInLeaderboardDTO race) {
-                // TODO Auto-generated method stub
-                return null;
+                SafeHtml name = null;
+                if (race.getRaceIdentifier() != null) {
+                    LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+                    LeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
+                    EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
+                    String debugParam = Window.Location.getParameter("gwt.codesvr");
+                    String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName()
+                            + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
+                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                    name = ANCHORTEMPLATE.anchor(link, raceId.getRaceName());
+                } else {
+                    name = new SafeHtmlBuilder().appendHtmlConstant(race.getRaceColumnName()).toSafeHtml();
+                }
+                return name;
             }
         };
         
         TextColumn<RaceInLeaderboardDTO> racesStartDateColumn = new TextColumn<RaceInLeaderboardDTO>() {
             @Override
             public String getValue(RaceInLeaderboardDTO race) {
-                // TODO Auto-generated method stub
-                return null;
+                Date raceStart = race.getStartDate();
+                return raceStart == null ? LeaderboardGroupOverviewPanel.this.stringMessages.untracked()
+                        : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(raceStart);
             }
         };
         
