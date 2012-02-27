@@ -14,21 +14,6 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     public String description;
     public List<LeaderboardDTO> leaderboards;
     
-    //Additional data
-    private HashMap<RaceIdentifier, Date> racesStartDates;
-    private HashMap<LeaderboardDTO, Date> leaderboardsStartDates;
-    
-    private HashMap<RaceIdentifier, PlacemarkOrderDTO> racesPlaces;
-    private HashMap<LeaderboardDTO, PlacemarkOrderDTO> leaderboardsPlaces;
-    
-    /**
-     * Contains booleans to check if the data for a leaderboard needs to be calculated.<br />
-     * A: leaderboard start date<br />
-     * B: leaderboard places
-     */
-    private HashMap<LeaderboardDTO, Pair<Boolean, Boolean>> dataNeedsCalculation;
-    private boolean dataNeedsCalculationNeedsInitialization;
-    
     /**
      * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.<br />
      * The additional data (start dates and places for the races) will be initialized but empty.
@@ -46,13 +31,6 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         super(name);
         this.description = description;
         this.leaderboards = leaderboards;
-        
-        this.racesStartDates = new HashMap<RaceIdentifier, Date>();
-        this.leaderboardsStartDates = new HashMap<LeaderboardDTO, Date>();
-        this.racesPlaces = new HashMap<RaceIdentifier, PlacemarkOrderDTO>();
-        this.leaderboardsPlaces = new HashMap<LeaderboardDTO, PlacemarkOrderDTO>();
-        this.dataNeedsCalculation = new HashMap<LeaderboardDTO, Pair<Boolean,Boolean>>();
-        this.dataNeedsCalculationNeedsInitialization = true;
     }
     
     public boolean containsRace(RaceIdentifier race) {
@@ -70,40 +48,37 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     }
     
     /**
-     * Sets the <code>startDate</code> for the <code>race</code>. If a date for the race is already contained, the old date will be replaced.
+     * @return The start date of the given <code>race</code>, or <code>null</code> if no date for <code>race</code> is available.
      */
-    public void setRaceStartDate(RaceIdentifier race, Date startDate) {
-        racesStartDates.put(race, startDate);
-        if (dataNeedsCalculationNeedsInitialization) {
-            initializeDataNeedsCalculation();
+    public Date getRaceStartDate(RaceIdentifier raceID) {
+        Date startDate = null;
+        for (LeaderboardDTO leaderboard : leaderboards) {
+            for (RaceInLeaderboardDTO raceInLeaderboard : leaderboard.getRaceList()) {
+                RaceIdentifier raceInLeaderboardID = raceInLeaderboard.getRaceIdentifier();
+                StrippedRaceDTO raceData = raceInLeaderboard.getRace();
+                if (raceInLeaderboardID != null && raceInLeaderboardID.equals(raceID) && raceData != null) {
+                    startDate = raceData.startOfRace != null ? raceData.startOfRace : raceData.startOfTracking;
+                }
+            }
         }
-    }
-    
-    /**
-     * @return The start date of the given <code>race</code>, or <code>null</code> if no date for <code>race</code> is contained.
-     */
-    public Date getRaceStartDate(RaceIdentifier race) {
-        return racesStartDates.get(race);
+        return startDate;
     }
     
     /**
      * @return The earliest start date of the races in the given <code>leaderboard</code>, or <code>null</code> if
-     *         <code>leaderboard</code> isn't contained or no start dates of the races are contained.
+     *         <code>leaderboard</code> isn't contained or no start dates of the races are available.
      */
     public Date getLeaderboardStartDate(LeaderboardDTO leaderboard) {
-        Pair<Boolean, Boolean> dataNeedsCalculation = this.dataNeedsCalculation.get(leaderboard);
-        if (dataNeedsCalculation != null && dataNeedsCalculation.getA()) {
-            leaderboardsStartDates.put(leaderboard, calculateLeaderboardStartDate(leaderboard));
-        }
-        return leaderboardsStartDates.get(leaderboard);
-    }
-
-    private Date calculateLeaderboardStartDate(LeaderboardDTO leaderboard) {
         Date leaderboardStart = null;
         if (leaderboards.contains(leaderboard)) {
             for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
                 if (race.isTrackedRace()) {
-                    Date raceStart = racesStartDates.get(race.getRaceIdentifier());
+                    Date raceStart = null;
+                    StrippedRaceDTO raceData = race.getRace();
+                    if (raceData != null) {
+                        raceStart = raceData.startOfRace != null ? raceData.startOfRace : raceData.startOfTracking;
+                    }
+                    
                     if (raceStart != null) {
                         if (leaderboardStart == null) {
                             leaderboardStart = new Date();
@@ -112,8 +87,6 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
                     }
                 }
             }
-            dataNeedsCalculation.get(leaderboard).setA(false);
-            dataNeedsCalculationNeedsInitialization = true;
         }
         return leaderboardStart;
     }
@@ -137,45 +110,42 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     }
     
     /**
-     * Sets the <code>places</code> for the given <code>race</code>. If places for the race are already contained, the old places will be replaced.
+     * @return The {@link PlacemarkOrderDTO places} of the given <code>race</code>, or <code>null</code> if no places for <code>race</code> are available.
      */
-    public void setRacePlaces(RaceIdentifier race, PlacemarkOrderDTO places) {
-        racesPlaces.put(race, places);
-        if (dataNeedsCalculationNeedsInitialization) {
-            initializeDataNeedsCalculation();
+    public PlacemarkOrderDTO getRacePlaces(RaceIdentifier raceID) {
+        PlacemarkOrderDTO racePlaces = null;
+        for (LeaderboardDTO leaderboard : leaderboards) {
+            for (RaceInLeaderboardDTO raceInLeaderboard : leaderboard.getRaceList()) {
+                RaceIdentifier raceInLeaderboardID = raceInLeaderboard.getRaceIdentifier();
+                StrippedRaceDTO raceData = raceInLeaderboard.getRace();
+                if (raceInLeaderboardID != null && raceInLeaderboardID.equals(raceID) && raceData != null) {
+                    racePlaces = raceData.places;
+                }
+            }
         }
-    }
-    
-    /**
-     * @return The {@link PlacemarkOrderDTO places} of the given <code>race</code>, or <code>null</code> if no places for <code>race</code> are contained.
-     */
-    public PlacemarkOrderDTO getRacePlaces(RaceIdentifier race) {
-        return racesPlaces.get(race);
+        return racePlaces;
     }
     
     /**
      * Takes the {@link PlacemarkOrderDTO} of all races in the {@link LeaderboardDTO} <code>leaderboard</code>, if the
-     * PlacemarkOrderDTO for the race is contained, and fills all {@link PlacemarkDTO} in a new PlacemarkOrderDTO.<br />
+     * PlacemarkOrderDTO for the race is available, and fills all {@link PlacemarkDTO} in a new PlacemarkOrderDTO.<br />
      * The order of the races in the leaderboard determine the order of the PlacemarkDTOs in the PlacemarkOrderDTO.
      * 
      * @return The places of <code>leaderboard</code> in form of a {@link PlacemarkOrderDTO}, or <code>null</code> if
      *         <code>leaderboard</code> isn't contained or the {@link PlacemarkOrderDTO places} of no race in
-     *         <code>leaderboard</code> are contained
+     *         <code>leaderboard</code> are available
      */
     public PlacemarkOrderDTO getLeaderboardPlaces(LeaderboardDTO leaderboard) {
-        Pair<Boolean, Boolean> dataNeedsCalculation = this.dataNeedsCalculation.get(leaderboard);
-        if (dataNeedsCalculation != null && dataNeedsCalculation.getB()) {
-            leaderboardsPlaces.put(leaderboard, calculateLeaderboardPlaces(leaderboard));
-        }
-        return leaderboardsPlaces.get(leaderboard);
-    }
-
-    private PlacemarkOrderDTO calculateLeaderboardPlaces(LeaderboardDTO leaderboard) {
         PlacemarkOrderDTO leaderboardPlaces = null;
         if (leaderboards.contains(leaderboard)) {
             for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
                 if (race.isTrackedRace()) {
-                    PlacemarkOrderDTO racePlaces = racesPlaces.get(race.getRaceIdentifier());
+                    PlacemarkOrderDTO racePlaces = null;
+                    StrippedRaceDTO raceData = race.getRace();
+                    if (raceData != null) {
+                        racePlaces = raceData.places;
+                    }
+                    
                     if (racePlaces != null) {
                         if (leaderboardPlaces == null) {
                             leaderboardPlaces = new PlacemarkOrderDTO();
@@ -184,8 +154,6 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
                     }
                 }
             }
-            dataNeedsCalculation.get(leaderboard).setB(false);
-            dataNeedsCalculationNeedsInitialization = true;
         }
         return leaderboardPlaces;
     }
@@ -206,13 +174,6 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
             }
         }
         return places;
-    }
-    
-    private void initializeDataNeedsCalculation() {
-        for (LeaderboardDTO leaderboard : leaderboards) {
-            dataNeedsCalculation.put(leaderboard, new Pair<Boolean, Boolean>(true, true));
-        }
-        dataNeedsCalculationNeedsInitialization = false;
     }
     
     @Override
