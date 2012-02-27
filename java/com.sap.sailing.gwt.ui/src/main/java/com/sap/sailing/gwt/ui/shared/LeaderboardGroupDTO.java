@@ -2,12 +2,10 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
 

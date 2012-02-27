@@ -17,6 +17,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
@@ -219,7 +220,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
         };
         groupsStartDateColumn.setSortable(true);
-
+        
         groupsTable = new CellTable<LeaderboardGroupDTO>();
         groupsTable.setWidth("100%");
         groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
@@ -252,20 +253,21 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         groupsListHandler.setComparator(groupsStartDateColumn, new Comparator<LeaderboardGroupDTO>() {
             @Override
             public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
-                return g1.getGroupStartDate().compareTo(g2.getGroupStartDate());
+                Date d1 = g1.getGroupStartDate();
+                Date d2 = g2.getGroupStartDate();
+                if (d1 == null || d2 == null) {
+                    return d1 == null && d2 == null ? 0 : d1 == null ? -1 : 1;
+                } else {
+                    return g1.getGroupStartDate().compareTo(g2.getGroupStartDate());
+                }
             }
         });
+        groupsTable.addColumnSortHandler(groupsListHandler);
         
         //Build group details GUI TODO
         
         //Loading the data
         loadData();
-        
-        //Set checkbox as true, because we can't search for old events right now
-        //TODO Remove after searching for old events is possible
-        onlyLiveCheckBox.setValue(true, true);
-        onlyLiveCheckBox.setEnabled(false);
-        //Until here
     }
 
     private void loadData() {
@@ -309,6 +311,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         String location = locationTextBox.getText();
         String name = nameTextBox.getText();
         boolean onlyLive = onlyLiveCheckBox.getValue();
+        
         Date from = null;
         Date until = null;
         try {
@@ -319,41 +322,52 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             long time = until.getTime() + 24 * 60 * 60 * 1000;
             until = new Date(time);
         } catch (IllegalArgumentException e) {}
-        //Filter list by criteria TODO
-//        eventsTableProvider.getList().clear();
-//        for (EventDTO event : availableEvents) {
-//            if (checkSearchCriteria(event, location, name, onlyLive, from, until)) {
-//                eventsTableProvider.getList().add(event);
-//            }
-//        }
-//        //Now sort again according to selected criterion
-//        ColumnSortEvent.fire(eventsTable, eventsTable.getColumnSortList());
+
+        groupsDataProvider.getList().clear();
+        for (LeaderboardGroupDTO group : availableGroups) {
+            if (checkSearchCriteria(group, location, name, onlyLive, from, until)) {
+                groupsDataProvider.getList().add(group);
+            }
+        }
+        //Now sort again according to selected criterion
+        ColumnSortEvent.fire(groupsTable, groupsTable.getColumnSortList());
     }
     
     private boolean checkSearchCriteria(LeaderboardGroupDTO forGroup, String location, String name, boolean onlyLive, Date from, Date until) {
         boolean result = true;
-        //TODO
-        if (result && !location.equals("")) {
-//            result = !textContainingStringsToCheck(Arrays.asList(location.split("\\s")), forEvent.locations);
+        if (result && location != null && !location.equals("")) {
+            result = textContainsStringsToCheck(
+                    PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(forGroup.getGroupPlaces(), true),
+                    location.split("\\s"));
         }
-        if (result && !name.equals("")) {
-//            result = !textContainingStringsToCheck(Arrays.asList(name.split("\\s")), forEvent.name);
+        if (result && name != null && !name.equals("")) {
+            result = textContainsStringsToCheck(forGroup.name, name.split("\\s"));
         }
-        //If only live events are allowed the check of the dates isn't needed
-        if (result && onlyLive) {
-//            result = forEvent.currentlyTracked();
-        } else if (result) {
-//            Date startDate = forEvent.getStartDate();
-//            if (from != null && until != null) {
-//                result = from.before(startDate) && until.after(startDate); 
-//            } else if (from != null) {
-//                result = from.before(startDate);
-//            } else if (until != null) {
-//                result = until.after(startDate); 
-//            }
+        if (result) {
+            Date startDate = forGroup.getGroupStartDate();
+            if (startDate != null) {
+                if (from != null && until != null) {
+                    result = from.before(startDate) && until.after(startDate);
+                } else if (from != null) {
+                    result = from.before(startDate);
+                } else if (until != null) {
+                    result = until.after(startDate);
+                }
+            }
         }
         
         return result;
+    }
+    
+    private boolean textContainsStringsToCheck(String text, String[] stringsToCheck) {
+        boolean contains = false;
+        for (String stringToCheck : stringsToCheck) {
+            contains = text.contains(stringToCheck);
+            if (contains) {
+                break;
+            }
+        }
+        return contains;
     }
 
 }
