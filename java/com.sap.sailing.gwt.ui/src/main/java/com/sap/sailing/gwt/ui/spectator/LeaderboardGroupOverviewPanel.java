@@ -371,7 +371,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         
         TextColumn<RaceInLeaderboardDTO> racesLocationColumn = new TextColumn<RaceInLeaderboardDTO>() {
             @Override
-            public String getValue(RaceInLeaderboardDTO object) {
+            public String getValue(RaceInLeaderboardDTO race) {
                 // TODO Auto-generated method stub
                 return null;
             }
@@ -380,7 +380,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         AnchorCell racesNameAnchorCell = new AnchorCell();
         Column<RaceInLeaderboardDTO, SafeHtml> racesNameColumn = new Column<RaceInLeaderboardDTO, SafeHtml>(racesNameAnchorCell) {
             @Override
-            public SafeHtml getValue(RaceInLeaderboardDTO object) {
+            public SafeHtml getValue(RaceInLeaderboardDTO race) {
                 // TODO Auto-generated method stub
                 return null;
             }
@@ -388,7 +388,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         
         TextColumn<RaceInLeaderboardDTO> racesStartDateColumn = new TextColumn<RaceInLeaderboardDTO>() {
             @Override
-            public String getValue(RaceInLeaderboardDTO object) {
+            public String getValue(RaceInLeaderboardDTO race) {
                 // TODO Auto-generated method stub
                 return null;
             }

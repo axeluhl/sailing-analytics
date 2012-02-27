@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 
@@ -54,6 +56,29 @@ public class RaceInLeaderboardDTO implements IsSerializable {
 
     public void setRace(StrippedRaceDTO race) {
         this.race = race;
+    }
+    
+    /**
+     * @return The start of race, or the start of tracking if the start of race is <code>null</code>, or
+     *         <code>null</code> if no start date is available.
+     */
+    public Date getStartDate() {
+        Date start = null;
+        if (race != null) {
+            start = race.getStartDate();
+        }
+        return start;
+    }
+    
+    /**
+     * @return The {@link PlacemarkOrderDTO places} or <code>null</code>, if no places are available
+     */
+    public PlacemarkOrderDTO getPlaces() {
+        PlacemarkOrderDTO places = null;
+        if (race != null) {
+            places = race.places;
+        }
+        return places;
     }
 
     @Override

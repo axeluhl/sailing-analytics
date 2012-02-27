@@ -353,24 +353,17 @@ public class LeaderboardDTO implements IsSerializable {
     public Date getStartDate() {
         Date leaderboardStart = null;
         for (RaceInLeaderboardDTO race : getRaceList()) {
-            if (race.isTrackedRace()) {
-                Date raceStart = null;
-                StrippedRaceDTO raceData = race.getRace();
-                if (raceData != null) {
-                    raceStart = raceData.getStartDate();
+            Date raceStart = race.getStartDate();
+            if (raceStart != null) {
+                if (leaderboardStart == null) {
+                    leaderboardStart = new Date();
                 }
-
-                if (raceStart != null) {
-                    if (leaderboardStart == null) {
-                        leaderboardStart = new Date();
-                    }
-                    leaderboardStart = leaderboardStart.before(raceStart) ? leaderboardStart : raceStart;
-                }
+                leaderboardStart = leaderboardStart.before(raceStart) ? leaderboardStart : raceStart;
             }
         }
         return leaderboardStart;
     }
-    
+
     /**
      * Takes the {@link PlacemarkOrderDTO} of all races in this leaderboard, if the PlacemarkOrderDTO for the race is
      * available, and fills all {@link PlacemarkDTO} in a new PlacemarkOrderDTO.<br />
@@ -382,19 +375,12 @@ public class LeaderboardDTO implements IsSerializable {
     public PlacemarkOrderDTO getPlaces() {
         PlacemarkOrderDTO leaderboardPlaces = null;
         for (RaceInLeaderboardDTO race : getRaceList()) {
-            if (race.isTrackedRace()) {
-                PlacemarkOrderDTO racePlaces = null;
-                StrippedRaceDTO raceData = race.getRace();
-                if (raceData != null) {
-                    racePlaces = raceData.places;
+            PlacemarkOrderDTO racePlaces = race.getPlaces();
+            if (racePlaces != null) {
+                if (leaderboardPlaces == null) {
+                    leaderboardPlaces = new PlacemarkOrderDTO();
                 }
-
-                if (racePlaces != null) {
-                    if (leaderboardPlaces == null) {
-                        leaderboardPlaces = new PlacemarkOrderDTO();
-                    }
-                    leaderboardPlaces.getPlacemarks().addAll(racePlaces.getPlacemarks());
-                }
+                leaderboardPlaces.getPlacemarks().addAll(racePlaces.getPlacemarks());
             }
         }
         return leaderboardPlaces;
