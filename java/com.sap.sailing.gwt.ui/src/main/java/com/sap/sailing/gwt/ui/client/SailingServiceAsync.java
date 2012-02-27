@@ -264,14 +264,14 @@ public interface SailingServiceAsync {
      * Creates a {@link LeaderboardGroupDTO} for each {@link LeaderboardGroup} known by the server, which contains the
      * name, the description and a list with {@link LeaderboardDTO LeaderboardDTOs} contained by the group.
      */
-    void getLeaderboardGroups(boolean withAdditionalInformation, AsyncCallback<List<LeaderboardGroupDTO>> callback);
+    void getLeaderboardGroups(AsyncCallback<List<LeaderboardGroupDTO>> callback);
 
     /**
      * Creates a {@link LeaderboardGroupDTO} for the {@link LeaderboardGroup} with the name <code>groupName</code>, which contains the
      * name, the description and a list with {@link LeaderboardDTO LeaderboardDTOs} contained by the group.<br />
      * If no group with the name <code>groupName</code> is known, an {@link IllegalArgumentException} is thrown.
      */
-    void getLeaderboardGroupByName(String groupName, boolean withAdditionalInformation, AsyncCallback<LeaderboardGroupDTO> callback);
+    void getLeaderboardGroupByName(String groupName, AsyncCallback<LeaderboardGroupDTO> callback);
     
     /**
     * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />

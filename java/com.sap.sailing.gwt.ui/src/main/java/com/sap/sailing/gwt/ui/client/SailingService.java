@@ -153,9 +153,9 @@ public interface SailingService extends RemoteService {
 
     List<LeaderboardDTO> getLeaderboardsByRace(RaceDTO race);
     
-    List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withAdditionalInformation);
+    List<LeaderboardGroupDTO> getLeaderboardGroups();
     
-    LeaderboardGroupDTO getLeaderboardGroupByName(String groupName, boolean withAdditionalInformation);
+    LeaderboardGroupDTO getLeaderboardGroupByName(String groupName);
     
     void renameLeaderboardGroup(String oldName, String newName);
     

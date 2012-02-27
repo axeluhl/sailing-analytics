@@ -269,7 +269,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     }
 
     private void loadData() {
-        sailingService.getLeaderboardGroups(true, new AsyncCallback<List<LeaderboardGroupDTO>>() {
+        sailingService.getLeaderboardGroups(new AsyncCallback<List<LeaderboardGroupDTO>>() {
             @Override
             public void onSuccess(List<LeaderboardGroupDTO> result) {
                 availableGroups = result == null ? new ArrayList<LeaderboardGroupDTO>() : result;

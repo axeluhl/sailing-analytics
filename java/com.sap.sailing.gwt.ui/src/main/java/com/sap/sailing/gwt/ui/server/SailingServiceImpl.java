@@ -1595,50 +1595,28 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withAdditionalInformation) {
+    public List<LeaderboardGroupDTO> getLeaderboardGroups() {
         ArrayList<LeaderboardGroupDTO> leaderboardGroupDTOs = new ArrayList<LeaderboardGroupDTO>();
         Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
         
         for (LeaderboardGroup leaderboardGroup : leaderboardGroups.values()) {
-            leaderboardGroupDTOs.add(convertToLeaderboardGroupDTO(leaderboardGroup, withAdditionalInformation));
+            leaderboardGroupDTOs.add(convertToLeaderboardGroupDTO(leaderboardGroup));
         }
         
         return leaderboardGroupDTOs;
     }
 
     @Override
-    public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName, boolean withAdditionalInformation) {
-        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName), withAdditionalInformation);
+    public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName) {
+        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName));
     }
     
-    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup, boolean withAdditionalInformation) {
+    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup) {
         LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO();
         groupDTO.name = leaderboardGroup.getName();
         groupDTO.description = leaderboardGroup.getDescription();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard));
-            if (withAdditionalInformation) {
-                for (RaceInLeaderboard raceInLeaderboard : leaderboard.getRaceColumns()) {
-                    TrackedRace trackedRace = raceInLeaderboard.getTrackedRace();
-                    
-                    if (trackedRace != null) {
-                        RaceIdentifier trackedRaceId = trackedRace.getRaceIdentifier();
-                        groupDTO.setRaceStartDate(trackedRaceId, trackedRace.getStart().asDate());
-                        
-                        Pair<Placemark, Placemark> startAndFinish = trackedRace.getStartFinishPlacemarks();
-                        PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
-                        if (startAndFinish.getA() != null) {
-                            racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
-                        }
-                        if (startAndFinish.getB() != null) {
-                            racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
-                        }
-                        if (!racePlaces.isEmpty()) {
-                            groupDTO.setRacePlaces(trackedRaceId, racePlaces);
-                        }
-                    }
-                }
-            }
         }
         return groupDTO;
     }
@@ -1661,7 +1639,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description) {
-        return convertToLeaderboardGroupDTO(getService().addLeaderboardGroup(groupName, description, new ArrayList<String>()), false);
+        return convertToLeaderboardGroupDTO(getService().addLeaderboardGroup(groupName, description, new ArrayList<String>()));
     }
 
     @Override
