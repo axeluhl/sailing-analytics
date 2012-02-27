@@ -12,7 +12,6 @@ public class StrippedRaceDTO extends NamedDTO implements IsSerializable {
     
     public Date startOfRace;
     public Date startOfTracking;
-    public Date endOfTracking;
     public Date endOfRace;
     
     /**

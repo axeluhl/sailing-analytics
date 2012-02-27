@@ -268,11 +268,12 @@ public class LeaderboardDTO implements IsSerializable {
         return getRaceInLeaderboardByName(raceColumnName).isMedalRace();
     }
 
-    public void addRace(String raceColumnName, boolean medalRace, RaceIdentifier trackedRaceIdentifier) {
+    public void addRace(String raceColumnName, boolean medalRace, RaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
         raceInLeaderboardDTO.setRaceIdentifier(trackedRaceIdentifier);
+        raceInLeaderboardDTO.setRace(race);
     	races.add(raceInLeaderboardDTO);
     }
 

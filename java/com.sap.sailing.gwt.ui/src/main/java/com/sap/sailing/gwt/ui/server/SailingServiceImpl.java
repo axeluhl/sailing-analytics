@@ -124,6 +124,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedRaceDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -197,11 +198,31 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                 RaceIdentifier raceIdentifier = null;
+                StrippedRaceDTO race = null;
                 if(raceColumn.getTrackedRace() != null) {
-                    raceIdentifier = new EventNameAndRaceName(raceColumn.getTrackedRace().getTrackedEvent().getEvent().getName(),
-                            raceColumn.getTrackedRace().getRace().getName());
+                    TrackedRace trackedRace = raceColumn.getTrackedRace();
+                    raceIdentifier = new EventNameAndRaceName(trackedRace.getTrackedEvent().getEvent().getName(), trackedRace.getRace().getName());
+                    
+                    //Getting the places of the race
+                    Pair<Placemark, Placemark> startAndFinish = trackedRace.getStartFinishPlacemarks();
+                    PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
+                    if (startAndFinish.getA() != null) {
+                        racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
+                    }
+                    if (startAndFinish.getB() != null) {
+                        racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
+                    }
+                    if (racePlaces.isEmpty()) {
+                        racePlaces = null;
+                    }
+                    
+                    //Creating raceDTO and getting the dates
+                    StrippedRaceDTO raceDTO = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
+                    raceDTO.startOfTracking = trackedRace.getStartOfTracking().asDate();
+                    raceDTO.startOfRace = trackedRace.getStart().asDate();
+                    raceDTO.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
                 }
-                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier);
+                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
             }
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -995,11 +1016,31 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         dto.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
             RaceIdentifier raceIdentifier = null;
+            StrippedRaceDTO race = null;
             if(raceColumn.getTrackedRace() != null) {
-                raceIdentifier = new EventNameAndRaceName(raceColumn.getTrackedRace().getTrackedEvent().getEvent().getName(),
-                        raceColumn.getTrackedRace().getRace().getName());
+                TrackedRace trackedRace = raceColumn.getTrackedRace();
+                raceIdentifier = new EventNameAndRaceName(trackedRace.getTrackedEvent().getEvent().getName(), trackedRace.getRace().getName());
+                
+                //Getting the places of the race
+                Pair<Placemark, Placemark> startAndFinish = trackedRace.getStartFinishPlacemarks();
+                PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
+                if (startAndFinish.getA() != null) {
+                    racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
+                }
+                if (startAndFinish.getB() != null) {
+                    racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
+                }
+                if (racePlaces.isEmpty()) {
+                    racePlaces = null;
+                }
+                
+                //Creating raceDTO and getting the dates
+                StrippedRaceDTO raceDTO = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
+                raceDTO.startOfTracking = trackedRace.getStartOfTracking().asDate();
+                raceDTO.startOfRace = trackedRace.getStart().asDate();
+                raceDTO.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
             }
-            dto.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier);
+            dto.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
         }
         dto.hasCarriedPoints = leaderboard.hasCarriedPoints();
         dto.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
