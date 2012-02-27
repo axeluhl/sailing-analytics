@@ -7,6 +7,7 @@ public class RaceInLeaderboardDTO implements IsSerializable {
     private String raceColumnName;
     private boolean medalRace;
     private RaceIdentifier trackedRaceIdentifier;
+    private StrippedRaceDTO race;
 
     public String getRaceColumnName() {
         return raceColumnName;
@@ -39,6 +40,20 @@ public class RaceInLeaderboardDTO implements IsSerializable {
      */
     public RaceIdentifier getRaceIdentifier() {
         return trackedRaceIdentifier;
+    }
+
+    /**
+     * Returns an object with data (e.g. start date or places) for the RaceInLeaderboardDTO. Is <code>null</code>, if
+     * the method {@link RaceInLeaderboardDTO#isTrackedRace()} returns <code>false</code>.
+     * 
+     * @return An Object with additional data, or <code>null</code> if the race isn't tracked
+     */
+    public StrippedRaceDTO getRace() {
+        return race;
+    }
+
+    public void setRace(StrippedRaceDTO race) {
+        this.race = race;
     }
 
     @Override
