@@ -25,6 +25,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
@@ -37,6 +38,7 @@ import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 
 /**
@@ -48,7 +50,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
-        SafeHtml cell(String url, String displayName);
+        SafeHtml anchor(String url, String displayName);
     }
 
     public static final String STYLE_NAME_PREFIX = "groupOverviewPanel-";
@@ -67,6 +69,20 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     private CellTable<LeaderboardGroupDTO> groupsTable;
     private ListDataProvider<LeaderboardGroupDTO> groupsDataProvider;
     private SingleSelectionModel<LeaderboardGroupDTO> groupsSelectionModel;
+    
+    private Label noGroupSelectedLabel;
+    
+    private FlowPanel groupDetailsPanel;
+    private HTML groupDescription;
+    private CellTable<LeaderboardDTO> leaderboardsTable;
+    private ListDataProvider<LeaderboardDTO> leaderboardsDataProvider;
+    private SingleSelectionModel<LeaderboardDTO> leaderboardsSelectionModel;
+    
+    private CellTable<RaceInLeaderboardDTO> racesTable;
+    private ListDataProvider<RaceInLeaderboardDTO> racesDataProvider;
+    private SingleSelectionModel<RaceInLeaderboardDTO> racesSelectionModel;
+    
+    
     
     private List<LeaderboardGroupDTO> availableGroups;
 
@@ -189,7 +205,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.name + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                return ANCHORTEMPLATE.cell(link, group.name);
+                return ANCHORTEMPLATE.anchor(link, group.name);
             }
         };
         groupsNameColumn.setSortable(true);
@@ -264,7 +280,84 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         });
         groupsTable.addColumnSortHandler(groupsListHandler);
         
+        //Build details GUI
+        FlowPanel detailsPanel = new FlowPanel();
+        detailsPanel.setStyleName(STYLE_NAME_PREFIX + "detailsPanel");
+        
+        CollapsablePanel collapsableDetailsPanel = new CollapsablePanel(this.stringMessages.details(), false);
+        collapsableDetailsPanel.setContent(detailsPanel);
+        collapsableDetailsPanel.setWidth("100%");
+        mainPanel.add(collapsableDetailsPanel);
+        
+        noGroupSelectedLabel = new Label(this.stringMessages.noGroupSelected());
+        detailsPanel.add(noGroupSelectedLabel);
+        
         //Build group details GUI TODO
+        groupDetailsPanel = new FlowPanel();
+        groupDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "groupDetailsPanel");
+        groupDetailsPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        detailsPanel.add(groupDetailsPanel);
+        
+        groupDescription = new HTML();
+        groupDescription.setStyleName(STYLE_NAME_PREFIX + "groupDescription");
+        groupDescription.setVisible(false);
+        groupDetailsPanel.add(groupDescription);
+        
+        TextColumn<LeaderboardDTO> leaderboardsLocationColumn = new TextColumn<LeaderboardDTO>() {
+            @Override
+            public String getValue(LeaderboardDTO leaderboard) {
+                LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+                PlacemarkOrderDTO leaderboardPlaces = selectedGroup == null ? null : selectedGroup.getLeaderboardPlaces(leaderboard);
+                return leaderboardPlaces == null ? LeaderboardGroupOverviewPanel.this.stringMessages
+                        .locationNotAvailable() : leaderboardPlaces.placemarksAsString();
+            }
+        };
+        
+        AnchorCell leaderboardsNameAnchorCell = new AnchorCell();
+        Column<LeaderboardDTO, SafeHtml> leaderboardsNameColumn = new Column<LeaderboardDTO, SafeHtml>(leaderboardsNameAnchorCell) {
+            @Override
+            public SafeHtml getValue(LeaderboardDTO leaderboard) {
+                LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+                String debugParam = Window.Location.getParameter("gwt.codesvr");
+                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
+                        + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                return ANCHORTEMPLATE.anchor(link, leaderboard.name);
+            }
+        };
+        
+        TextColumn<LeaderboardDTO> leaderboardsRacesColumn = new TextColumn<LeaderboardDTO>() {
+            @Override
+            public String getValue(LeaderboardDTO leaderboard) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
+        
+        TextColumn<LeaderboardDTO> leaderboardsStartDateColumn = new TextColumn<LeaderboardDTO>() {
+            @Override
+            public String getValue(LeaderboardDTO leaderboard) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
+        
+        leaderboardsTable = new CellTable<LeaderboardDTO>();
+        leaderboardsTable.setWidth("100%");
+        leaderboardsTable.setVisible(false);
+        leaderboardsSelectionModel = new SingleSelectionModel<LeaderboardDTO>();
+        leaderboardsTable.setSelectionModel(leaderboardsSelectionModel);
+        
+        leaderboardsTable.addColumn(leaderboardsLocationColumn, this.stringMessages.location());
+        leaderboardsTable.addColumn(leaderboardsNameColumn, this.stringMessages.name());
+        leaderboardsTable.addColumn(leaderboardsRacesColumn, this.stringMessages.races());
+        leaderboardsTable.addColumn(leaderboardsStartDateColumn, this.stringMessages.startDate());
+        groupDetailsPanel.add(leaderboardsTable);
+        
+        leaderboardsDataProvider = new ListDataProvider<LeaderboardDTO>();
+        leaderboardsDataProvider.addDataDisplay(leaderboardsTable);
+
+        //Build leaderboard details GUI TODO
         
         //Loading the data
         loadData();

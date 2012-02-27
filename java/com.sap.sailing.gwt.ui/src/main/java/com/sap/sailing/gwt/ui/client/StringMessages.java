@@ -263,4 +263,6 @@ public interface StringMessages extends Messages {
     String untracked();
     String delayForLiveMode();
     String notAvailable();
+    String details();
+    String noGroupSelected();
 }
