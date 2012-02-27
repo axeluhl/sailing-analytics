@@ -296,6 +296,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         
         //Build group details GUI
         groupDetailsPanel = new FlowPanel();
+        groupDetailsPanel.setVisible(false);
         groupDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "groupDetailsPanel");
         groupDetailsPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
         detailsPanel.add(groupDetailsPanel);
@@ -330,8 +331,16 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         TextColumn<LeaderboardDTO> leaderboardsRacesColumn = new TextColumn<LeaderboardDTO>() {
             @Override
             public String getValue(LeaderboardDTO leaderboard) {
-                // TODO Auto-generated method stub
-                return null;
+                StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
+                    if (!first) {
+                        sb.append(", ");
+                    }
+                    sb.append(race.getRaceColumnName());
+                    first = false;
+                }
+                return sb.toString();
             }
         };
         
@@ -346,7 +355,6 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         
         leaderboardsTable = new CellTable<LeaderboardDTO>();
         leaderboardsTable.setWidth("100%");
-        leaderboardsTable.setVisible(false);
         leaderboardsSelectionModel = new SingleSelectionModel<LeaderboardDTO>();
         leaderboardsTable.setSelectionModel(leaderboardsSelectionModel);
         
@@ -360,6 +368,43 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         leaderboardsDataProvider.addDataDisplay(leaderboardsTable);
 
         //Build leaderboard details GUI TODO
+        
+        TextColumn<RaceInLeaderboardDTO> racesLocationColumn = new TextColumn<RaceInLeaderboardDTO>() {
+            @Override
+            public String getValue(RaceInLeaderboardDTO object) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
+        
+        AnchorCell racesNameAnchorCell = new AnchorCell();
+        Column<RaceInLeaderboardDTO, SafeHtml> racesNameColumn = new Column<RaceInLeaderboardDTO, SafeHtml>(racesNameAnchorCell) {
+            @Override
+            public SafeHtml getValue(RaceInLeaderboardDTO object) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
+        
+        TextColumn<RaceInLeaderboardDTO> racesStartDateColumn = new TextColumn<RaceInLeaderboardDTO>() {
+            @Override
+            public String getValue(RaceInLeaderboardDTO object) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
+        
+        racesTable = new CellTable<RaceInLeaderboardDTO>();
+        racesTable.setWidth("100%");
+        racesTable.setVisible(false);
+        racesTable.getElement().setPropertyString("clear", "right");
+        racesSelectionModel = new SingleSelectionModel<RaceInLeaderboardDTO>();
+        racesTable.setSelectionModel(racesSelectionModel);
+        
+        racesTable.addColumn(racesLocationColumn, this.stringMessages.location());
+        racesTable.addColumn(racesNameColumn, this.stringMessages.name());
+        racesTable.addColumn(racesStartDateColumn, this.stringMessages.startDate());
+        detailsPanel.add(racesTable);        
         
         //Loading the data
         loadData();
