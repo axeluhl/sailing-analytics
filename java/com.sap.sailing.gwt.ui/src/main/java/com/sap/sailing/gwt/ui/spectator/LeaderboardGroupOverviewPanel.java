@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.tools.ant.taskdefs.Sleep;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -292,7 +294,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         noGroupSelectedLabel = new Label(this.stringMessages.noGroupSelected());
         detailsPanel.add(noGroupSelectedLabel);
         
-        //Build group details GUI TODO
+        //Build group details GUI
         groupDetailsPanel = new FlowPanel();
         groupDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "groupDetailsPanel");
         groupDetailsPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -306,8 +308,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         TextColumn<LeaderboardDTO> leaderboardsLocationColumn = new TextColumn<LeaderboardDTO>() {
             @Override
             public String getValue(LeaderboardDTO leaderboard) {
-                LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
-                PlacemarkOrderDTO leaderboardPlaces = selectedGroup == null ? null : selectedGroup.getLeaderboardPlaces(leaderboard);
+                PlacemarkOrderDTO leaderboardPlaces = leaderboard.getPlaces();
                 return leaderboardPlaces == null ? LeaderboardGroupOverviewPanel.this.stringMessages
                         .locationNotAvailable() : leaderboardPlaces.placemarksAsString();
             }
@@ -337,8 +338,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         TextColumn<LeaderboardDTO> leaderboardsStartDateColumn = new TextColumn<LeaderboardDTO>() {
             @Override
             public String getValue(LeaderboardDTO leaderboard) {
-                // TODO Auto-generated method stub
-                return null;
+                Date leaderboardStart = leaderboard.getStartDate();
+                return leaderboardStart == null ? LeaderboardGroupOverviewPanel.this.stringMessages.untracked()
+                        : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(leaderboardStart);
             }
         };
         

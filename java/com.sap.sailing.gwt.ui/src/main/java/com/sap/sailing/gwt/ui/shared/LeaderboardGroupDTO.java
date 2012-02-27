@@ -46,57 +46,12 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     }
     
     /**
-     * @return The start date of the given <code>race</code>, or <code>null</code> if no date for <code>race</code> is available.
-     */
-    public Date getRaceStartDate(RaceIdentifier raceID) {
-        Date startDate = null;
-        for (LeaderboardDTO leaderboard : leaderboards) {
-            for (RaceInLeaderboardDTO raceInLeaderboard : leaderboard.getRaceList()) {
-                RaceIdentifier raceInLeaderboardID = raceInLeaderboard.getRaceIdentifier();
-                StrippedRaceDTO raceData = raceInLeaderboard.getRace();
-                if (raceInLeaderboardID != null && raceInLeaderboardID.equals(raceID) && raceData != null) {
-                    startDate = raceData.startOfRace != null ? raceData.startOfRace : raceData.startOfTracking;
-                }
-            }
-        }
-        return startDate;
-    }
-    
-    /**
-     * @return The earliest start date of the races in the given <code>leaderboard</code>, or <code>null</code> if
-     *         <code>leaderboard</code> isn't contained or no start dates of the races are available.
-     */
-    public Date getLeaderboardStartDate(LeaderboardDTO leaderboard) {
-        Date leaderboardStart = null;
-        if (leaderboards.contains(leaderboard)) {
-            for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-                if (race.isTrackedRace()) {
-                    Date raceStart = null;
-                    StrippedRaceDTO raceData = race.getRace();
-                    if (raceData != null) {
-                        raceStart = raceData.startOfRace != null ? raceData.startOfRace : raceData.startOfTracking;
-                    }
-                    
-                    if (raceStart != null) {
-                        if (leaderboardStart == null) {
-                            leaderboardStart = new Date();
-                        }
-                        leaderboardStart = leaderboardStart.before(raceStart) ? leaderboardStart : raceStart;
-                    }
-                }
-            }
-        }
-        return leaderboardStart;
-    }
-    
-    /**
-     * 
-     * @return The earliest date in the start dates of the races, or <code>null</code> if no start dates are contained
+     * @return The earliest date in the start dates of the leaderboards, or <code>null</code> if no start dates are contained
      */
     public Date getGroupStartDate() {
         Date groupStart = null;
         for (LeaderboardDTO leaderboard : leaderboards) {
-            Date leaderboardStart = getLeaderboardStartDate(leaderboard);
+            Date leaderboardStart = leaderboard.getStartDate();
             if (leaderboardStart != null) {
                 if (groupStart == null) {
                     groupStart = new Date();
@@ -105,55 +60,6 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
             }
         }
         return groupStart;
-    }
-    
-    /**
-     * @return The {@link PlacemarkOrderDTO places} of the given <code>race</code>, or <code>null</code> if no places for <code>race</code> are available.
-     */
-    public PlacemarkOrderDTO getRacePlaces(RaceIdentifier raceID) {
-        PlacemarkOrderDTO racePlaces = null;
-        for (LeaderboardDTO leaderboard : leaderboards) {
-            for (RaceInLeaderboardDTO raceInLeaderboard : leaderboard.getRaceList()) {
-                RaceIdentifier raceInLeaderboardID = raceInLeaderboard.getRaceIdentifier();
-                StrippedRaceDTO raceData = raceInLeaderboard.getRace();
-                if (raceInLeaderboardID != null && raceInLeaderboardID.equals(raceID) && raceData != null) {
-                    racePlaces = raceData.places;
-                }
-            }
-        }
-        return racePlaces;
-    }
-    
-    /**
-     * Takes the {@link PlacemarkOrderDTO} of all races in the {@link LeaderboardDTO} <code>leaderboard</code>, if the
-     * PlacemarkOrderDTO for the race is available, and fills all {@link PlacemarkDTO} in a new PlacemarkOrderDTO.<br />
-     * The order of the races in the leaderboard determine the order of the PlacemarkDTOs in the PlacemarkOrderDTO.
-     * 
-     * @return The places of <code>leaderboard</code> in form of a {@link PlacemarkOrderDTO}, or <code>null</code> if
-     *         <code>leaderboard</code> isn't contained or the {@link PlacemarkOrderDTO places} of no race in
-     *         <code>leaderboard</code> are available
-     */
-    public PlacemarkOrderDTO getLeaderboardPlaces(LeaderboardDTO leaderboard) {
-        PlacemarkOrderDTO leaderboardPlaces = null;
-        if (leaderboards.contains(leaderboard)) {
-            for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-                if (race.isTrackedRace()) {
-                    PlacemarkOrderDTO racePlaces = null;
-                    StrippedRaceDTO raceData = race.getRace();
-                    if (raceData != null) {
-                        racePlaces = raceData.places;
-                    }
-                    
-                    if (racePlaces != null) {
-                        if (leaderboardPlaces == null) {
-                            leaderboardPlaces = new PlacemarkOrderDTO();
-                        }
-                        leaderboardPlaces.getPlacemarks().addAll(racePlaces.getPlacemarks());
-                    }
-                }
-            }
-        }
-        return leaderboardPlaces;
     }
     
     /**
@@ -166,7 +72,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     public List<PlacemarkOrderDTO> getGroupPlaces() {
         List<PlacemarkOrderDTO> places = new ArrayList<PlacemarkOrderDTO>();
         for (LeaderboardDTO leaderboard : leaderboards) {
-            PlacemarkOrderDTO leaderboardPlaces = getLeaderboardPlaces(leaderboard);
+            PlacemarkOrderDTO leaderboardPlaces = leaderboard.getPlaces();
             if (leaderboardPlaces != null) {
                 places.add(leaderboardPlaces);
             }

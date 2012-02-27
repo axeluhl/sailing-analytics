@@ -24,5 +24,9 @@ public class StrippedRaceDTO extends NamedDTO implements IsSerializable {
         this.identifier = identifier;
         this.places = places;
     }
+    
+    public Date getStartDate() {
+        return startOfRace == null ? startOfTracking : startOfRace;
+    }
 
 }

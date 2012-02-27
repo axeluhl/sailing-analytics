@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -344,6 +345,59 @@ public class LeaderboardDTO implements IsSerializable {
 
     public void setIsMedalRace(String raceColumnName, boolean medalRace) {
         getRaceInLeaderboardByName(raceColumnName).setMedalRace(medalRace);
+    }
+    
+    /**
+     * @return The earliest start date of the races, or <code>null</code> if no start dates of the races are available.
+     */
+    public Date getStartDate() {
+        Date leaderboardStart = null;
+        for (RaceInLeaderboardDTO race : getRaceList()) {
+            if (race.isTrackedRace()) {
+                Date raceStart = null;
+                StrippedRaceDTO raceData = race.getRace();
+                if (raceData != null) {
+                    raceStart = raceData.getStartDate();
+                }
+
+                if (raceStart != null) {
+                    if (leaderboardStart == null) {
+                        leaderboardStart = new Date();
+                    }
+                    leaderboardStart = leaderboardStart.before(raceStart) ? leaderboardStart : raceStart;
+                }
+            }
+        }
+        return leaderboardStart;
+    }
+    
+    /**
+     * Takes the {@link PlacemarkOrderDTO} of all races in this leaderboard, if the PlacemarkOrderDTO for the race is
+     * available, and fills all {@link PlacemarkDTO} in a new PlacemarkOrderDTO.<br />
+     * The order of the races in this leaderboard determine the order of the PlacemarkDTOs in the PlacemarkOrderDTO.
+     * 
+     * @return The places of this leaderboard in form of a {@link PlacemarkOrderDTO}, or <code>null</code> if the
+     *         {@link PlacemarkOrderDTO places} of no race are available
+     */
+    public PlacemarkOrderDTO getPlaces() {
+        PlacemarkOrderDTO leaderboardPlaces = null;
+        for (RaceInLeaderboardDTO race : getRaceList()) {
+            if (race.isTrackedRace()) {
+                PlacemarkOrderDTO racePlaces = null;
+                StrippedRaceDTO raceData = race.getRace();
+                if (raceData != null) {
+                    racePlaces = raceData.places;
+                }
+
+                if (racePlaces != null) {
+                    if (leaderboardPlaces == null) {
+                        leaderboardPlaces = new PlacemarkOrderDTO();
+                    }
+                    leaderboardPlaces.getPlacemarks().addAll(racePlaces.getPlacemarks());
+                }
+            }
+        }
+        return leaderboardPlaces;
     }
 
     @Override
