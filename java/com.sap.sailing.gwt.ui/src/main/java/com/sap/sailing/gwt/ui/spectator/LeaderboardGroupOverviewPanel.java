@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
+import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 
 /**
  * 
@@ -81,7 +82,13 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         // Build search GUI
         FlowPanel searchPanel = new FlowPanel();
         searchPanel.setWidth("100%");
-        mainPanel.add(searchPanel);
+        
+        CollapsablePanel collapsableSearchPanel = new CollapsablePanel(this.stringMessages.searchEvents(), false);
+        collapsableSearchPanel.setContent(searchPanel);
+        collapsableSearchPanel.setCollapsingEnabled(false);
+        collapsableSearchPanel.setOpen(true);
+        collapsableSearchPanel.setWidth("100%");
+        mainPanel.add(collapsableSearchPanel);
         
         Label locationLabel = new Label(this.stringMessages.location() + ":");
         locationLabel.setStyleName(STYLE_NAME_PREFIX + "searchLabel");
@@ -157,7 +164,12 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         //Build group GUI
         FlowPanel groupPanel = new FlowPanel();
         groupPanel.setStyleName(STYLE_NAME_PREFIX + "groupPanel");
-        mainPanel.add(groupPanel);
+        
+        CollapsablePanel collapsableGroupPanel = new CollapsablePanel(this.stringMessages.leaderboardGroups(), false);
+        collapsableGroupPanel.setContent(groupPanel);
+        collapsableGroupPanel.setOpen(true);
+        collapsableGroupPanel.setWidth("100%");
+        mainPanel.add(collapsableGroupPanel);
         
         TextColumn<LeaderboardGroupDTO> groupsLocationColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
@@ -223,14 +235,14 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         groupsDataProvider.addDataDisplay(groupsTable);
 
         ListHandler<LeaderboardGroupDTO> groupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsDataProvider.getList());
-      groupsListHandler.setComparator(groupsLocationColumn, new Comparator<LeaderboardGroupDTO>() {
-      @Override
-      public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
-          String places1 = PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(g1.getGroupPlaces(), true);
-          String places2 = PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(g2.getGroupPlaces(), true);
-          return places1.compareTo(places2);
-      }
-  });
+        groupsListHandler.setComparator(groupsLocationColumn, new Comparator<LeaderboardGroupDTO>() {
+            @Override
+            public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
+                String places1 = PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(g1.getGroupPlaces(), true);
+                String places2 = PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(g2.getGroupPlaces(), true);
+                return places1.compareTo(places2);
+            }
+        });
         groupsListHandler.setComparator(groupsNameColumn, new Comparator<LeaderboardGroupDTO>() {
             @Override
             public int compare(LeaderboardGroupDTO g1, LeaderboardGroupDTO g2) {
