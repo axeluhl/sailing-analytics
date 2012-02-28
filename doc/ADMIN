@@ -8,45 +8,58 @@ Emergency Startup After Reboot
 When for some reason the server re-booted, a number of manual steps
 need to be performed to get back up and running. Proceed as follows:
 
- - "ssh -A -L 5911:localhost:5902 trac@kielweek.web4sap.com"
+ - "ssh -A trac@sapsailing.com"
 
- - "vncserver -depth 24 -geometry 1600x900 :2"
+ - "screen"
 
-Connect with your VNC viewer to localhost:11 and open six console
-windows. Perform the steps "Launching Readily-built Java Server
-Instances" for the <instance> names dev, test, prod1 and prod2 in a
-separate console window each.
+Open 10 screen sessions, using the "Ctrl-a c" keyboard shortcut in the screen session.
+Name them, using "Ctrl-a A", according to the following scheme:
+
+0$ dev  1$ test  2$ prod1  3$ prod2  4$ wind  5$ mongo  6$ ssh tunnel  7-$ build  8$ logs  9*$ storeandforward
+
+The first four sessions are used to run the four server instances. Session 4
+is used to run the udpmirror script that receives wind data through UDP and
+forwards to the four server instances. Session 5 hosts a test MongoDB instance.
+Session 6 hosts an ssh tunnel making sure port 12347 forwards to local port 22 to
+create homogeneous SSH access to the machine for build and deploy scripts.
+Session 7 is used for build processes. Session 8 can be used to monitor logs
+and server load. Session 9 is used to record and forward inbound SwissTiming data.
+
+In each screen session it is necessary to run the /home/trac/.bash_profile script by
+entering
+
+  ". .bash_profile"
+
+This, in particular, adjusts the JAVA_HOME variable as needed.
 
 Perform the steps "Launch MongoDB" and "Launch Python Server"
-described below. Use one of the two spare consoles in VNC to perform
-the step "Launch UDP Mirror" described below.
+described below. Launch the four server instances by cd'ing to
+/home/trac/servers/<instance> and invoke "./start" there. If you
+additionally want to upgrade from a fresh build, call "./install"
+before calling "./start".
+
+Follow the step "Launch UDP Mirror" described below. Follow the step
+"Launch SwissTiming forwarder" described below.
 
 Launching Readily-built Java Server Instances
 ---------------------------------------------
 
 We usually launch, manage and observe the Java server instances using
-a VNC viewer which connects to port 5902 of the server. We have a
-console window there for each server instance, and the console
-windows' title bars indicate by the current working directory which
-window represents which instance. This section describes how to
-initially start a server instance. See below for how to update and
+a screen session.  See below for how to update and
 restart an already running instance.
 
-Port 5902 is blocked by the firewall, so you have to establish an SSH
-tunnel, e.g., by
+ - ssh -A trac@sapsailing.com
+ - screen -rd
+ - Connect to the screen session for your server, e.g., session 0 for dev:
 
- - ssh -A -L 5911:localhost:22 trac@kielweek.web4sap.com
-
-You can then have your VNC viewer connect to you localhost:11. In the
-console for the server instance you want to launch, ensure you're in
-the correct directory, if not already there:
+   Ctrl-a 0
 
  - "cd servers/<instance>" where <instance> is one of
    dev/test/prod1/prod2
 
 Then launch the server:
 
- - ./start 2>&1 | tee log
+ - ./start
 
 This should start an OSGi console with the latest version of the
 bundles deployed to ~trac/servers/<instance>/plugins.
@@ -58,17 +71,14 @@ The MongoDB is used to store wind information and general
 leaderboard-related information required by the Python web
 application.
 
- - log in as user "web"
+ - log in as user "root"
 
- - "cd project/dev/python"
+ - "cd /opt/mongodb/bin"
 
- - "bin/supervisord"
+ - "./supervisord"
 
-This will launch the MongoDB server, listening on port 10200. You can
-check whether the MongoDB server started successfully by issuing the
-following command:
-
- - "bin/supervisorctl"
+This will launch the MongoDB servers. If not, check for old mongod.lock
+files in the server directories and remove them, then try again.
 
 Launch Python Server
 ---------------------
@@ -90,8 +100,7 @@ information. Therefore, it is necessary to launch a "UDP mirror" that
 distributes UDP packets received on the single inbound UDP port for
 the production instances to the two Java server instances.
 
-In the VNC session, use a separate console window for user "trac" and
-do the following:
+In screen session 4 (Ctrl-a 4), do the following:
 
  - "cd ~/servers/prod1"
 
@@ -102,6 +111,15 @@ the console. The process will listen for inbound UDP packets on port
 2012 and forward anything received on that port to localhost:2013 as
 well as localhost:2014. See also the list of ports as documented in
 the README file.
+
+Launch SwissTiming forwarder
+----------------------------
+
+Go to screen session 9 (Ctrl-a 9), then do the following:
+
+ - "cd ~/servers/prod1"
+
+ - "./swisstiminglistener 3500 3501"
 
 Apache HTTP Server configuration
 --------------------------------
