@@ -43,6 +43,7 @@ public class RaceRankComparator implements Comparator<Competitor> {
         if (o1 == o2) {
             result = 0;
         } else {
+            // TODO see also bug 340/342; need to synchronize on TrackedRace to avoid concurrent updates to MarkPassings, although this is course-grained
             NavigableSet<MarkPassing> o1MarkPassings = trackedRace.getMarkPassings(o1).headSet(
                     markPassingWithTimePoint, /* inclusive */true);
             NavigableSet<MarkPassing> o2MarkPassings = trackedRace.getMarkPassings(o2).headSet(

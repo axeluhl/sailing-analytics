@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
@@ -39,6 +40,10 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
         this.fixes = fixes;
     }
 
+    /**
+     * Callers that want to iterate over the collection returned need to synchronize on <code>this</code> object to avoid
+     * {@link ConcurrentModificationException}s.
+     */
     protected NavigableSet<FixType> getInternalRawFixes() {
         @SuppressWarnings("unchecked")
         NavigableSet<FixType> result = (NavigableSet<FixType>) fixes;
@@ -46,8 +51,11 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     }
     
     /**
-     * @return the smoothened fixes; this implementation simply delegates to {@link #getInternalRawFixes()} because for only
-     *         {@link Timed} fixes we can't know how to remove outliers. Subclasses that constrain the
+     * Callers that want to iterate over the collection returned need to synchronize on <code>this</code> object to
+     * avoid {@link ConcurrentModificationException}s.
+     * 
+     * @return the smoothened fixes; this implementation simply delegates to {@link #getInternalRawFixes()} because for
+     *         only {@link Timed} fixes we can't know how to remove outliers. Subclasses that constrain the
      *         <code>FixType</code> may provide smoothening implementations.
      */
     protected NavigableSet<FixType> getInternalFixes() {
