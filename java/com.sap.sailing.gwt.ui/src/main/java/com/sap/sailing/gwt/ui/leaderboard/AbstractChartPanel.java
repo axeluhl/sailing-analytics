@@ -183,13 +183,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 chartData = new MultiCompetitorRaceDataDTO(getDataToShow());
             }
             
-            final ArrayList<Pair<Long, CompetitorDTO>> competitorsToLoad = new ArrayList<Pair<Long, CompetitorDTO>>();
+            final ArrayList<Pair<Date, CompetitorDTO>> competitorsToLoad = new ArrayList<Pair<Date, CompetitorDTO>>();
             for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
+                Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
                 if (!chartData.contains(competitor)) {
-                    competitorsToLoad.add(new Pair<Long, CompetitorDTO>(-1l, competitor));
-                } else if (chartData.getCompetitorRaceData(competitor).getTimePointOfNewestEvent() < chartData.getTimePointOfNewestEvent()) {
-                    competitorsToLoad.add(new Pair<Long, CompetitorDTO>(chartData.getCompetitorRaceData(competitor)
-                            .getTimePointOfNewestEvent() + getStepSize(), competitor));
+                    competitorsToLoad.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
+                } else if (chartData.getCompetitorRaceData(competitor).getDateOfNewestData().before(chartDataDateOfNewestData)) {
+                    Date competitorDateOfNewestData = chartData.getCompetitorRaceData(competitor).getDateOfNewestData();
+                    competitorsToLoad.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime() + getStepSize()), competitor));
                 }
             }
             
@@ -263,22 +264,22 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 if (isCompetitorVisible(competitor)) {
                     CompetitorRaceDataDTO competitorData = chartData.getCompetitorRaceData(competitor);
                     if (competitorData != null) { //TODO Exception?
-                        List<Triple<String, Long, Double>> markPassingsData = competitorData.getMarkPassingsData();
+                        List<Triple<String, Date, Double>> markPassingsData = competitorData.getMarkPassingsData();
                         List<Point> markPassingPoints = new ArrayList<Point>();
-                        for (Triple<String, Long, Double> markPassingData : markPassingsData) {
+                        for (Triple<String, Date, Double> markPassingData : markPassingsData) {
                             if (markPassingData.getB() != null && markPassingData.getC() != null) {
-                                Point markPassingPoint = new Point(markPassingData.getB(), markPassingData.getC());
+                                Point markPassingPoint = new Point(markPassingData.getB().getTime(), markPassingData.getC());
                                 markPassingPoint.setName(markPassingData.getA());
                                 markPassingPoints.add(markPassingPoint);
                             }
                         }
                         
                         markSeries.setPoints(markPassingPoints.toArray(new Point[0]));
-                        List<Pair<Long, Double>> raceData = competitorData.getRaceData();
+                        List<Pair<Date, Double>> raceData = competitorData.getRaceData();
                         List<Point> competitorPoints = new ArrayList<Point>();
-                        for (Pair<Long, Double> data : raceData) {
+                        for (Pair<Date, Double> data : raceData) {
                             if (data.getA() != null && data.getB() != null) {
-                                Point competitorPoint = new Point(data.getA(), data.getB());
+                                Point competitorPoint = new Point(data.getA().getTime(), data.getB());
                                 competitorPoints.add(competitorPoint);
                             }
                         }
@@ -522,9 +523,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     public void timeChanged(Date date) {
         //Load the new data only if the timer is in live mode and the data has been initialized by loadData()
         if (timer.getPlayMode() == PlayModes.Live && getChartData() != null) {
-            long newestEvent = getChartData().getTimePointOfNewestEvent();
+            Date newestEvent = getChartData().getDateOfNewestData();
             if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext() &&
-                    newestEvent < date.getTime() && (date.getTime() - newestEvent) >= getStepSize()) {
+                    newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()) {
                 loadData();
             }
         }

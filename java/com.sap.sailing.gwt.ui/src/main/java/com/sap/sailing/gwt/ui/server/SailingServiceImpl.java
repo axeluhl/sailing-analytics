@@ -1342,43 +1342,44 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Long, CompetitorDTO>> competitorsQuery,
+    public MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitorsQuery,
             long stepSize, DetailType detailType) throws NoWindException {
         MultiCompetitorRaceDataDTO data = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
-            data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStart().asMillis(),
-                        trackedRace.getTimePointOfNewestEvent().asMillis(), stepSize, detailType);
+            data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStart().asDate(),
+                        trackedRace.getTimePointOfNewestEvent().asDate(), stepSize, detailType);
         }
         return data;
     }
     
     private MultiCompetitorRaceDataDTO getMultiCompetitorRaceDataDTO(TrackedRace race,
-            List<Pair<Long, CompetitorDTO>> competitorsQuery, long startTime, long endTime, long stepSize,
+            List<Pair<Date, CompetitorDTO>> competitorsQuery, Date startDate, Date endDate, long stepSize,
             DetailType detailType) throws NoWindException {
         MultiCompetitorRaceDataDTO data = new MultiCompetitorRaceDataDTO(detailType);
         // Fetching the data from the TrackedRace
-        for (Pair<Long, CompetitorDTO> competitorQuery : competitorsQuery) {
+        for (Pair<Date, CompetitorDTO> competitorQuery : competitorsQuery) {
             List<Long> timePoints = new ArrayList<Long>();
-            for (long i = competitorQuery.getA() < startTime ? startTime : competitorQuery.getA(); i <= endTime; i += stepSize) {
+            for (long i = competitorQuery.getA().before(startDate) ? startDate.getTime() : competitorQuery.getA()
+                    .getTime(); i <= endDate.getTime(); i += stepSize) {
                 timePoints.add(i);
             }
 
             Competitor competitor = getCompetitorById(race.getRace().getCompetitors(), competitorQuery.getB().id);
-            ArrayList<Triple<String, Long, Double>> markPassingsData = new ArrayList<Util.Triple<String, Long, Double>>();
-            ArrayList<Pair<Long, Double>> raceData = new ArrayList<Util.Pair<Long, Double>>();
+            ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
+            ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
             // Filling the mark passings
             for (MarkPassing markPassing : race.getMarkPassings(competitor)) {
                 MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                if (time.asMillis() >= competitorQuery.getA()) {
-                    markPassingsData.add(new Triple<String, Long, Double>(markPassing.getWaypoint().getName(), time
-                            .asMillis(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
+                if (time.asDate().after(competitorQuery.getA())) {
+                    markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
+                            .asDate(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
                 }
             }
             // Filling the race data
             for (Long timePoint : timePoints) {
                 MillisecondsTimePoint time = new MillisecondsTimePoint(timePoint);
-                raceData.add(new Pair<Long, Double>(timePoint, getCompetitorRaceDataEntry(detailType, race, competitor,
+                raceData.add(new Pair<Date, Double>(time.asDate(), getCompetitorRaceDataEntry(detailType, race, competitor,
                         time)));
             }
             // Adding fetched data to the container

@@ -13,8 +13,8 @@ import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -282,6 +282,6 @@ public interface SailingServiceAsync {
      * returned. If this time point is lesser than the start of race, all available data for this competitor is
      * returned.
      */
-    void getCompetitorsRaceData(RaceIdentifier race, List<Pair<Long, CompetitorDTO>> competitorsQuery, long stepSize,
+    void getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, long stepSize,
             DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 }

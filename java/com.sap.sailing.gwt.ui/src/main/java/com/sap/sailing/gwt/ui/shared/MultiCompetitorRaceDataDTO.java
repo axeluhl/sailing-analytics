@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -79,13 +80,17 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
         return detailType;
     }
 
-    public long getTimePointOfNewestEvent() {
-        long result = -1;
+    public Date getDateOfNewestData() {
+        Date dateOfNewestData = null;
         for (CompetitorRaceDataDTO competitorRaceData : raceData.values()) {
-            long raceDataNewestEvent = competitorRaceData.getTimePointOfNewestEvent();
-            result = result >= raceDataNewestEvent ? result : raceDataNewestEvent;
+            Date raceDateOfNewestData = competitorRaceData.getDateOfNewestData();
+            if (dateOfNewestData == null) {
+                dateOfNewestData = raceDateOfNewestData;
+            } else {
+                dateOfNewestData = dateOfNewestData.after(raceDateOfNewestData) ? dateOfNewestData : raceDateOfNewestData;
+            }
         }
-        return result;
+        return dateOfNewestData;
     }
 
     public boolean isEmpty() {

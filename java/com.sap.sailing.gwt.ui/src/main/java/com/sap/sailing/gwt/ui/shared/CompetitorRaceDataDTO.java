@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -14,25 +15,25 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     
     private CompetitorDTO competitor;
     private DetailType detailType;
-    private long timePointOfNewestEvent; //TODO Javadoc
+    private Date dateOfNewestData; //TODO Javadoc
     /**
-     * A: Bouy-Name; B: Timepoint; C: Data
+     * A: Bouy-Name; B: Data-Date; C: Data
      */
-    private List<Triple<String, Long, Double>> markPassingsData;
+    private List<Triple<String, Date, Double>> markPassingsData;
     /**
-     * A: Timepoint; B: Data
+     * A: Data-Date; B: Data
      */
-    private List<Pair<Long, Double>> raceData;
+    private List<Pair<Date, Double>> raceData;
     
     CompetitorRaceDataDTO() {}
     
     public CompetitorRaceDataDTO(CompetitorDTO competitor, DetailType detailType, 
-            Collection<Triple<String, Long, Double>> markPassingsData, Collection<Pair<Long, Double>> raceData) {
+            Collection<Triple<String, Date, Double>> markPassingsData, Collection<Pair<Date, Double>> raceData) {
         this.competitor = competitor;
         this.detailType = detailType;
-        this.markPassingsData = new ArrayList<Triple<String, Long, Double>>();
+        this.markPassingsData = new ArrayList<Triple<String, Date, Double>>();
         addAllMarkPassingsData(markPassingsData);
-        this.raceData = new ArrayList<Pair<Long, Double>>();
+        this.raceData = new ArrayList<Pair<Date, Double>>();
         addAllRaceData(raceData);
     }
 
@@ -44,43 +45,43 @@ public class CompetitorRaceDataDTO implements IsSerializable {
         return detailType;
     }
     
-    public long getTimePointOfNewestEvent() {
-        return timePointOfNewestEvent;
+    public Date getDateOfNewestData() {
+        return dateOfNewestData;
     }
 
-    public List<Triple<String, Long, Double>> getMarkPassingsData() {
+    public List<Triple<String, Date, Double>> getMarkPassingsData() {
         return Collections.unmodifiableList(markPassingsData);
     }
     
-    public void addAllMarkPassingsData(Collection<Triple<String, Long, Double>> markPassingsDataToAdd) {
-        for (Triple<String, Long, Double> data : markPassingsDataToAdd) {
+    public void addAllMarkPassingsData(Collection<Triple<String, Date, Double>> markPassingsDataToAdd) {
+        for (Triple<String, Date, Double> data : markPassingsDataToAdd) {
             addMarkPassingsData(data);
         }
     }
     
-    public void addMarkPassingsData(Triple<String, Long, Double> markPassingsDataToAdd) {
+    public void addMarkPassingsData(Triple<String, Date, Double> markPassingsDataToAdd) {
         getMarkPassingsData().add(markPassingsDataToAdd);
         //Updating the timePointOfNewestEvent
-        if (markPassingsDataToAdd.getB() > timePointOfNewestEvent) {
-            timePointOfNewestEvent = markPassingsDataToAdd.getB();
+        if (markPassingsDataToAdd.getB().after(dateOfNewestData)) {
+            dateOfNewestData = markPassingsDataToAdd.getB();
         }
     }
 
-    public List<Pair<Long, Double>> getRaceData() {
+    public List<Pair<Date, Double>> getRaceData() {
         return Collections.unmodifiableList(raceData);
     }
     
-    public void addAllRaceData(Collection<Pair<Long, Double>> raceDataToAdd) {
-        for (Pair<Long, Double> data : raceDataToAdd) {
+    public void addAllRaceData(Collection<Pair<Date, Double>> raceDataToAdd) {
+        for (Pair<Date, Double> data : raceDataToAdd) {
             addRaceData(data);
         }
     }
     
-    public void addRaceData(Pair<Long, Double> raceDataToAdd) {
+    public void addRaceData(Pair<Date, Double> raceDataToAdd) {
         getRaceData().add(raceDataToAdd);
         //Updating the timePointOfNewestEvent
-        if (raceDataToAdd.getA() > timePointOfNewestEvent) {
-            timePointOfNewestEvent = raceDataToAdd.getA();
+        if (raceDataToAdd.getA().after(dateOfNewestData)) {
+            dateOfNewestData = raceDataToAdd.getA();
         }
     }
 
