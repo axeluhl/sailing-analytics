@@ -72,8 +72,8 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     }
     
     /**
-     * {@link #addMarkPassingsData(Triple) Adds} all elements in <code>markPassingsDataToAdd</code>. Just adds the data and doesn't do any
-     * checks, like if the data is already contained or if the detail types fit.
+     * {@link #addMarkPassingsData(Triple) Adds} all elements in <code>markPassingsDataToAdd</code>.
+     * Checks if the data is already contained, but not if the detailTypes fit. The data will not be added, if it's already contained.
      * 
      * @param markPassingsDataToAdd
      */
@@ -85,12 +85,16 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     
     /**
      * Adds the data <code>markPassingsDataToAdd</code> at the correct index (via binary search) to {@link #markPassingsData}.
-     * Just adds the data and doesn't do any checks, like if the data is already contained or if the detail types fit.
+     * Checks if the data is already contained, but not if the detailTypes fit. The data will not be added, if it's already contained.
      * 
      * @param markPassingsDataToAdd
      */
     public void addMarkPassingsData(Triple<String, Date, Double> markPassingsDataToAdd) {
-        markPassingsData.add(Collections.binarySearch(markPassingsData, markPassingsDataToAdd, new MarkPassingsByTime()), markPassingsDataToAdd);
+        int index = Collections.binarySearch(markPassingsData, markPassingsDataToAdd, new MarkPassingsByTime());
+        //binarySearch returns a value smaller then 0 if the key isn't contained
+        if (index < 0) {
+            markPassingsData.add((-1 * index) - 1, markPassingsDataToAdd);
+        }
     }
 
     /**
@@ -101,8 +105,8 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     }
     
     /**
-     * {@link #addRaceData(Pair) Adds} all elements in <code>raceDataToAdd</code>. Just adds the data and doesn't do any
-     * checks, like if the data is already contained or if the detail types fit.
+     * {@link #addRaceData(Pair) Adds} all elements in <code>raceDataToAdd</code>.
+     * Checks if the data is already contained, but not if the detailTypes fit. The data will not be added, if it's already contained.
      * 
      * @param raceDataToAdd
      */
@@ -114,17 +118,21 @@ public class CompetitorRaceDataDTO implements IsSerializable {
 
     /**
      * Adds the data <code>raceDataToAdd</code> at the correct index (via binary search) to {@link #raceData}.
-     * Just adds the data and doesn't do any checks, like if the data is already contained or if the detail types fit.
+     * Checks if the data is already contained, but not if the detailTypes fit. The data will not be added, if it's already contained.
      * 
      * @param raceDataToAdd
      */
     public void addRaceData(Pair<Date, Double> raceDataToAdd) {
-        raceData.add(Collections.binarySearch(raceData, raceDataToAdd, new RaceDataByTime()), raceDataToAdd);
+        int index = Collections.binarySearch(raceData, raceDataToAdd, new RaceDataByTime());
+        //binarySearch returns a value smaller then 0 if the key isn't contained
+        if (index < 0) {
+            raceData.add((-1 * index) - 1, raceDataToAdd);
+        }
     }
 
     /**
      * Adds all data with {@link #addAllMarkPassingsData(Collection)} and {@link #addAllRaceData(Collection)}, if the
-     * detailTypes fit. Just adds the data and doesn't do any checks, like if the data is already contained.
+     * detailTypes fit. Checks if the data is already contained. The data will not be added, if it's already contained.
      * 
      * @param dataToAdd
      */

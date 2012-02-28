@@ -244,7 +244,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        loadData(false);
+        loadData(true);
     }
     
     @Override
@@ -293,7 +293,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         markSeries.setPoints(markPassingPoints.toArray(new Point[0]));
                         
                         Point[] compSeriesPoints = compSeries.getPoints();
-                        Date dateOfNewestSeriesPoint = new Date(compSeriesPoints[compSeriesPoints.length - 1].getX().longValue());
+                        Date dateOfNewestSeriesPoint = compSeriesPoints.length == 0 ? new Date(0) : new Date(
+                                compSeriesPoints[compSeriesPoints.length - 1].getX().longValue());
                         List<Pair<Date, Double>> raceData = competitorData.getRaceDataAfterDate(dateOfNewestSeriesPoint);
                         for (Pair<Date, Double> data : raceData) {
                             if (data.getA() != null && data.getB() != null) {
@@ -474,7 +475,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
       setChartData(null);
       clearChart();
-      loadData(false);
+      loadData(true);
     }
 
     /**
