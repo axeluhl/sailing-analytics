@@ -55,8 +55,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private Position loadPosition(DBObject object) {
-        Double lat = (Double) object.get(FieldNames.LAT_DEG.name());
-        Double lng = (Double) object.get(FieldNames.LNG_DEG.name());
+        Double lat = ((Number) object.get(FieldNames.LAT_DEG.name())).doubleValue();
+        Double lng = ((Number) object.get(FieldNames.LNG_DEG.name())).doubleValue();
         if (lat != null && lng != null) {
             return new DegreePosition(lat, lng);
         } else {
@@ -69,8 +69,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private SpeedWithBearing loadSpeedWithBearing(DBObject object) {
-        return new KnotSpeedWithBearingImpl((Double) object.get(FieldNames.KNOT_SPEED.name()),
-                new DegreeBearingImpl((Double) object.get(FieldNames.DEGREE_BEARING.name())));
+        return new KnotSpeedWithBearingImpl(((Number) object.get(FieldNames.KNOT_SPEED.name())).doubleValue(),
+                new DegreeBearingImpl(((Number) object.get(FieldNames.DEGREE_BEARING.name())).doubleValue()));
     }
 
     @Override
