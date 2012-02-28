@@ -781,7 +781,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         while (iterator.hasNext()) { 
                             MarkPassing currentMarkPassing = iterator.next();
                             long diff = currentMarkPassing.getTimePoint().asMillis() - currentTimeToCheck;
-                            if(diff > maxTimeFrameInMs) {
+                            if (diff > maxTimeFrameInMs) {
                                 // reset the check
                                 currentCompetitorsInTime = 0;
                                 currentTimeToCheck = currentMarkPassing.getTimePoint().asMillis();
@@ -1577,13 +1577,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, List<String> leaderboardNames) {
-        return convertToLeaderboardGroupDTO(getService().addLeaderboardGroup(groupName, description, leaderboardNames));
-    }
-
-    @Override
     public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description) {
-        return createLeaderboardGroup(groupName, description, new ArrayList<String>());
+        return convertToLeaderboardGroupDTO(getService().addLeaderboardGroup(groupName, description, new ArrayList<String>()));
     }
 
     @Override

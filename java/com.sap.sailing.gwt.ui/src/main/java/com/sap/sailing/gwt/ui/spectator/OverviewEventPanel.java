@@ -43,6 +43,7 @@ import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
@@ -479,7 +480,8 @@ public class OverviewEventPanel extends AbstractEventPanel {
             }
             currentLeaderboard = boardToDisplay;
             CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(true);
-            displayedLeaderboardPanel = new LeaderboardPanel(sailingService, null, competitorSelectionModel,
+            displayedLeaderboardPanel = new LeaderboardPanel(sailingService, LeaderboardSettingsFactory.getInstance()
+                    .createNewDefaultSettings(/* autoExpandFirstRace */false), competitorSelectionModel,
                     currentLeaderboard.name, null, errorReporter, stringConstants, null);
             leaderboardPanel.add(displayedLeaderboardPanel);
         }

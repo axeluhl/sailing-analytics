@@ -32,31 +32,26 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
-        
         eventName = Window.Location.getParameter("eventName");
         raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
         String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
-
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
         } else {
             leaderboardName = leaderboardNameParamValue;
         }
-
-        if(leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty())
+        if(leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
             leaderboardGroupName = leaderboardGroupNameParamValue; 
-
+        }
         if (eventName == null || eventName.isEmpty() || raceName == null || raceName.isEmpty()) {
             createErrorPage("This page requires a valid event name and race name.");
             return;
         }
-        
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
         final ParallelExecutionCallback<List<EventDTO>> listEventsCallback = new ParallelExecutionCallback<List<EventDTO>>();  
         final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();  
         final ParallelExecutionCallback<UserDTO> getUserCallback = new ParallelExecutionCallback<UserDTO>();  
-            
         if (leaderboardGroupName != null) {
             new ParallelExecutionHolder(getLeaderboardNamesCallback, getLeaderboardGroupByNameCallback, listEventsCallback, getUserCallback) {
                 @Override
@@ -81,21 +76,19 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             };
         }
-            
         sailingService.listEvents(false, listEventsCallback);
         sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
-        if(leaderboardGroupName != null)
+        if(leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, getLeaderboardGroupByNameCallback);
+        }
         userManagementService.getUser(getUserCallback);
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<EventDTO> events, UserDTO user)
-    {
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<EventDTO> events, UserDTO user) {
         if (!leaderboardNames.contains(leaderboardName)) {
           createErrorPage(stringMessages.noSuchLeaderboard());
           return;
         }
-
         if (leaderboardGroupName != null && leaderboardGroup != null) {
             boolean foundLeaderboard = false; 
             for(LeaderboardDTO leaderBoard:  leaderboardGroup.leaderboards) {
@@ -109,13 +102,11 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 return;
             }
         }
-
         selectedRace = findRace(eventName, raceName, events);
         if(selectedRace == null) {
             createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
             return;
         }
-         
         createRaceBoardPanel(selectedRace, events, user);
     }  
 

@@ -14,17 +14,15 @@ public class RaceTimePanelSettingsDialogComponent extends TimePanelSettingsDialo
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<RaceTimePanelSettings> dialog) {
         Widget widget = super.getAdditionalWidget(dialog);
-
         HorizontalPanel labelAndTDelayForLiveBoxPanel = new HorizontalPanel();
         labelAndTDelayForLiveBoxPanel.setSpacing(5);
-        labelAndTDelayForLiveBoxPanel.add(new Label("Delay for live mode:"));
+        labelAndTDelayForLiveBoxPanel.add(new Label(getStringMessages().delayForLiveMode()));
         RaceTimesInfoDTO raceTimesInfo = initialSettings.getRaceTimesInfo();
-        if(raceTimesInfo != null && raceTimesInfo.startOfTracking != null) {
+        if (raceTimesInfo != null && raceTimesInfo.startOfTracking != null) {
             long delayforLiveModeInMs = System.currentTimeMillis() - raceTimesInfo.getStartOfTracking().getTime();
             labelAndTDelayForLiveBoxPanel.add(new Label(delayforLiveModeInMs / 1000 + " s"));
         }
         mainContentPanel.add(labelAndTDelayForLiveBoxPanel);
-        
         return widget;
     }
     

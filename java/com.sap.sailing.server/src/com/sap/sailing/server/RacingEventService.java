@@ -227,16 +227,51 @@ public interface RacingEventService extends TrackedEventRegistry {
 
     TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier);
     
+    /**
+     * Obtains an unmodifiable map of the leaderboard groups configured in this service keyed by their names.
+     */
     Map<String, LeaderboardGroup> getLeaderboardGroups();
     
+    /**
+     * @param groupName The name of the requested leaderboard group
+     * @return The leaderboard group with the name <code>groupName</code>, or <code>null</code> if theres no such group
+     */
     LeaderboardGroup getLeaderboardGroupByName(String groupName);
     
+    /**
+     * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
+     * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
+     * 
+     * @param groupName
+     *            The name of the new group
+     * @param description
+     *            The description of the new group
+     * @param leaderboardNames
+     *            The names of the leaderboards, which should be contained by the new group.<br />
+     *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
+     * @return The new leaderboard group
+     */
     LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<String> leaderboardNames);
     
+    /**
+     * Removes the group with the name <code>groupName</code> from the service and the database.
+     * @param groupName The name of the group which shall be removed.
+     */
     void removeLeaderboardGroup(String groupName);
     
+    /**
+     * Renames the group with the name <code>oldName</code> to the <code>newName</code>.<br />
+     * If there's no group with the name <code>oldName</code> or there's already a group with the name
+     * <code>newName</code> a {@link IllegalArgumentException} is thrown.
+     * 
+     * @param oldName The old name of the group
+     * @param newName The new name of the group
+     */
     void renameLeaderboardGroup(String oldName, String newName);
     
+    /**
+     * Updates the group data in the persistant store.
+     */
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 
     void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException;

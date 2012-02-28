@@ -118,6 +118,10 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             @Override
             public void onValueChange(ValueChangeEvent<Double> newValue) {
                 if(sliderBar.getCurrentValue() != null) {
+                    if (TimePanel.this.timer.getPlayMode() == PlayModes.Live) {
+                        // put timer into replay mode when user explicitly adjusts time; avoids having to press pause first
+                        TimePanel.this.timer.setPlayMode(PlayModes.Replay);
+                    }
                     TimePanel.this.timer.setTime(sliderBar.getCurrentValue().longValue());
                 }
             }
@@ -156,10 +160,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playPauseImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
         playControlPanel.add(playPauseImage);
 
-        backToLivePlayButton = new Button("Live");
+        backToLivePlayButton = new Button(stringMessages.playModeLive());
         backToLivePlayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                TimePanel.this.timer.setPlayMode(PlayModes.Live);
                 TimePanel.this.timer.play();
             }
         });
@@ -327,20 +332,22 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
+        boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
+        setLiveGenerallyPossible(liveModeToBeMadePossible);
+        setJumpToLiveEnablement(liveModeToBeMadePossible && playMode != PlayModes.Live);
         switch (playState) {
         case Playing:
             playPauseImage.setResource(pauseButtonImg);
-            if (playMode == PlayModes.Live)
+            if (playMode == PlayModes.Live) {
                 playModeImage.setResource(playModeLiveActiveImg);
-            else
+            } else {
                 playModeImage.setResource(playModeReplayActiveImg);
-            backToLivePlayButton.setEnabled(false);
+            }
             break;
         case Paused:
         case Stopped:
             playPauseImage.setResource(playButtonImg);
             playModeImage.setResource(playModeInactiveImg);
-            backToLivePlayButton.setEnabled(true);
             break;
         }
         
@@ -350,7 +357,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             timeDelayLabel.setText(stringMessages.timeDelay() + ": " + timer.getCurrentDelayInMillis() / 1000 + " s");
             timeDelayLabel.setVisible(true);
             sliderBar.setEnabled(true);
-            backToLivePlayButton.setVisible(true);
             playSpeedBox.setEnabled(false);
             slowDownButton.setEnabled(false);
             speedUpButton.setEnabled(false);
@@ -360,12 +366,29 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             timeDelayLabel.setText("");
             playModeLabel.setText(stringMessages.playModeReplay());
             sliderBar.setEnabled(true);
-            backToLivePlayButton.setVisible(false);
             playSpeedBox.setEnabled(true);
             slowDownButton.setEnabled(true);
             speedUpButton.setEnabled(true);
             break;
         }
+    }
+    
+    protected boolean isLiveModeToBeMadePossible() {
+        return false;
+    }
+    
+    /**
+     * Enables the {@link #backToLivePlayButton} if and only if <code>enabled</code> is <code>true</code>.
+     */
+    protected void setJumpToLiveEnablement(boolean enabled) {
+        backToLivePlayButton.setEnabled(enabled);
+    }
+    
+    /**
+     * Iff <code>possible</code>, makes the {@link #backToLivePlayButton} button visible. 
+     */
+    protected void setLiveGenerallyPossible(boolean possible) {
+        backToLivePlayButton.setVisible(possible);
     }
 
     @SuppressWarnings("unchecked")
@@ -396,12 +419,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
         if (delayChanged) {
             timer.setDelay(1000l * newSettings.getDelayToLivePlayInSeconds());
-            
             if(timer.getPlayMode() == PlayModes.Live) {
                 timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
             }
         }
-        timer.setRefreshInterval(getSettings().getRefreshInterval());
+        timer.setRefreshInterval(newSettings.getRefreshInterval());
     }
 
     @Override
@@ -416,7 +438,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         if (child instanceof RequiresResize) {
             ((RequiresResize) child).onResize();
         }
-
         sliderBar.onResize();
     }
 

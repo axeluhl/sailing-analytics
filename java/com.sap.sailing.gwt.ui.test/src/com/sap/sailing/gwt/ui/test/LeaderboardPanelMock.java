@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.SortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
@@ -16,7 +17,10 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     public LeaderboardPanelMock(SailingServiceAsync sailingService,
             String leaderboardName, ErrorReporter errorReporter,
             StringMessages stringConstants) {
-        super(sailingService, null, new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardName, null, errorReporter, stringConstants, null);
+        super(sailingService, LeaderboardSettingsFactory.getInstance()
+.createNewDefaultSettings(
+                /* autoExpandFirstRace */false), new CompetitorSelectionModel(/* hasMultiSelection */true),
+                leaderboardName, null, errorReporter, stringConstants, null);
         // TODO Auto-generated constructor stub
     }
 

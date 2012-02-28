@@ -124,6 +124,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if(!selectedRaces.isEmpty()) {
             loadData();
         }
+        timer.addTimeListener(this);
     }
 
     protected void selectRace(final RaceIdentifier selectedRace) {

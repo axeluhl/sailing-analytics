@@ -230,10 +230,11 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
+                        map.checkResizeAndCenter();
                         mapZoomedOrPannedSinceLastRaceSelectionChange = true;
                         Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatMarkers.keySet());
                         for (CompetitorDTO competitorDTO : getCompetitorsToShow()) {
-                                boolean usedExistingMarker = updateMarkerForCompetitor(competitorDTO);
+                                boolean usedExistingMarker = updateBoatMarkerForCompetitor(competitorDTO);
                                 if (usedExistingMarker) {
                                     competitorDTOsOfUnusedMarkers.remove(competitorDTO);
                                 }
@@ -352,15 +353,15 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
 
     /**
      * From {@link #fixes} as well as the selection of {@link #getCompetitorsToShow competitors to show}, computes the
-     * from/to times for which to request GPS raceMapData.fixes from the server. No update is performed here to {@link #fixes}. The
+     * from/to times for which to request GPS fixes from the server. No update is performed here to {@link #fixes}. The
      * result guarantees that, when used in
      * {@link SailingServiceAsync#getBoatPositions(String, String, Map, Map, boolean, AsyncCallback)}, for each
-     * competitor from {@link #competitorsToShow} there are all raceMapData.fixes known by the server for that competitor starting
+     * competitor from {@link #competitorsToShow} there are all fixes known by the server for that competitor starting
      * at <code>upTo-{@link #tailLengthInMilliSeconds}</code> and ending at <code>upTo</code> (exclusive).
      * 
      * @return a triple whose {@link Triple#getA() first} component contains the "from", and whose {@link Triple#getB()
      *         second} component contains the "to" times for the competitors whose trails / positions to show; the
-     *         {@link Triple#getC() third} component tells whether the existing raceMapData.fixes can remain and be augmented by
+     *         {@link Triple#getC() third} component tells whether the existing fixes can remain and be augmented by
      *         those requested or need to be replaced
      */
     protected Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
@@ -381,6 +382,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
                     && !tailstart.after(timepointOfLastKnownFix)) {
                 // the beginning of what we need is contained in the interval we already have; skip what we already have
+                // FIXME requests the lastKnownFix again because "from" is *inclusive*; could lead to bug 319
                 fromDate = timepointOfLastKnownFix;
                 overlap = true;
             } else {
@@ -408,10 +410,10 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
 
 
     /**
-     * Adds the raceMapData.fixes received in <code>result</code> to {@link #fixes} and ensures they are still contiguous for each
-     * competitor. If <code>overlapsWithKnownraceMapData.fixes</code> indicates that the raceMapData.fixes received in <code>result</code>
-     * overlap with those already known, the raceMapData.fixes are merged into the list of already known raceMapData.fixes for the competitor.
-     * Otherwise, the raceMapData.fixes received in <code>result</code> replace those known so far for the respective competitor.
+     * Adds the fixes received in <code>result</code> to {@link #fixes} and ensures they are still contiguous for each
+     * competitor. If <code>overlapsWithKnownFixes</code> indicates that the fixes received in <code>result</code>
+     * overlap with those already known, the fixes are merged into the list of already known fixes for the competitor.
+     * Otherwise, the fixes received in <code>result</code> replace those known so far for the respective competitor.
      */
     protected void updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> result,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes) {
@@ -424,8 +426,8 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                 }
                 if (!overlapsWithKnownFixes.get(e.getKey())) {
                     fixesForCompetitor.clear();
-                    // to re-establish the invariants for raceMapData.tails, raceMapData.firstShownFix and raceMapData.lastShownFix, we now need to remove
-                    // all points from the competitor's polyline and clear the entries in raceMapData.firstShownFix and raceMapData.lastShownFix
+                    // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
+                    // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
                     if (map != null && tails.containsKey(e.getKey())) {
                         map.removeOverlay(tails.remove(e.getKey()));
                     }
@@ -481,7 +483,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                         updateTail(tail, competitorDTO, from, to);
                         competitorDTOsOfUnusedTails.remove(competitorDTO);
                     }
-                    boolean usedExistingMarker = updateMarkerForCompetitor(competitorDTO);
+                    boolean usedExistingMarker = updateBoatMarkerForCompetitor(competitorDTO);
                     if (usedExistingMarker) {
                         competitorDTOsOfUnusedMarkers.remove(competitorDTO);
                     }
@@ -499,88 +501,14 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
     
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
-            map.setZoomLevel(map.getBoundsZoomLevel(newBounds));
+            boolean oldMapZoomedOrPannedSinceLastRaceSelectionChange = mapZoomedOrPannedSinceLastRaceSelectionChange;
             map.setCenter(newBounds.getCenter());
-            map.checkResizeAndCenter();
+            map.setZoomLevel(map.getBoundsZoomLevel(newBounds));
+            mapZoomedOrPannedSinceLastRaceSelectionChange = oldMapZoomedOrPannedSinceLastRaceSelectionChange;
         }
     }
     
-    /**
-     * Calculates the new map bounds for the given data considering the current {@link ZoomTypes} of the map.
-     * @return The new map bounds
-     */
-//    private LatLngBounds getNewMapBounds(Iterable<CompetitorDTO> competitorsToZoom, Iterable<MarkDTO> marksToZoom) {
-//        LatLngBounds newBounds = null;
-//        if (getSettings().getZoomSetting() != ZoomTypes.MANUAL) {
-//            //Extend bounds for the boats
-//            if (getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BOATS
-//                    || getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BOATS_AND_BUOYS) {
-//                LatLngBounds boatBounds = getBoundsForBoats(competitorsToZoom);
-//                if (boatBounds != null) {
-//                    newBounds = boatBounds;
-//                }
-//            }
-//            //Extend bounds for the marks
-//            if (getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BUOYS
-//                    || getSettings().getZoomSetting() == ZoomTypes.ZOOM_TO_BOATS_AND_BUOYS) {
-//                LatLngBounds markBounds = getBoundsForMarks(marksToZoom);
-//                if (markBounds != null) {
-//                    if (newBounds == null) {
-//                        newBounds = markBounds;
-//                    } else {
-//                        newBounds.extend(markBounds.getNorthEast());
-//                        newBounds.extend(markBounds.getSouthWest());
-//                    }
-//                }
-//            }
-//        }
-//        return newBounds;
-//    }
-    
-//    private LatLngBounds getBoundsForBoats(Iterable<CompetitorDTO> competitorsToZoom) {
-//        LatLngBounds newBounds = null;
-//        for (CompetitorDTO competitorDTO : competitorsToZoom) {
-//            LatLngBounds bounds = null;
-//            if (getSettings().isIncludeTailsToAutoZoom()) {
-//                Polyline tail = tails.get(competitorDTO);
-//                bounds = tail != null ? tail.getBounds() : null;
-//            } else {
-//                List<GPSFixDTO> competitorFixes = fixes.get(competitorDTO);
-//                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(competitorFixes.size() - 1) : null;
-//                PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
-//                LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg, competitorPosition.lngDeg) : null;
-//                bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng, competitorLatLng) : null;
-//            }
-//            if (bounds != null) {
-//                if (newBounds == null) {
-//                    newBounds = bounds;
-//                } else {
-//                    newBounds.extend(bounds.getNorthEast());
-//                    newBounds.extend(bounds.getSouthWest());
-//                }
-//            }
-//        }
-//        return newBounds;
-//    }
-    
-//    private LatLngBounds getBoundsForMarks(Iterable<MarkDTO> marksToZoom) {
-//        LatLngBounds newBounds = null;
-//        if (marksToZoom != null) {
-//            for (MarkDTO markDTO : marksToZoom) {
-//                LatLng markLatLng = LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg);
-//                LatLngBounds bounds = LatLngBounds.newInstance(markLatLng, markLatLng);
-//                if (newBounds == null) {
-//                    newBounds = bounds;
-//                } else {
-//                    newBounds.extend(bounds.getNorthEast());
-//                    newBounds.extend(bounds.getSouthWest());
-//                }
-//            }
-//        }
-//        return newBounds;
-//    }
-
-    private boolean updateMarkerForCompetitor(CompetitorDTO competitorDTO) {
+    private boolean updateBoatMarkerForCompetitor(CompetitorDTO competitorDTO) {
         boolean usedExistingMarker = false;
         if (lastShownFix.containsKey(competitorDTO) && lastShownFix.get(competitorDTO) != -1) {
             GPSFixDTO lastPos = getBoatFix(competitorDTO);
@@ -1179,7 +1107,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             }
             for (CompetitorDTO competitor : competitors) {
                 List<GPSFixDTO> competitorFixes = forMap.fixes.get(competitor);
-                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(competitorFixes.size() - 1) : null;
+                GPSFixDTO competitorFix = competitorFixes != null ? competitorFixes.get(forMap.lastShownFix.get(competitor)) : null;
                 PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
                 LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
                         competitorPosition.lngDeg) : null;
@@ -1235,8 +1163,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     if (newBounds == null) {
                         newBounds = bounds;
                     } else {
-                        newBounds.extend(bounds.getNorthEast());
-                        newBounds.extend(bounds.getSouthWest());
+                        newBounds.extend(markLatLng);
                     }
                 }
             }

@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -25,7 +27,27 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
 
     @Override
     public Competitor getCompetitor() {
-        throw new UnsupportedOperationException("getCompetitor() not supported");
+        return new Competitor() {
+            @Override
+            public String getName() {
+                return "Dummy";
+            }
+
+            @Override
+            public Object getId() {
+                return "Dummy";
+            }
+
+            @Override
+            public Team getTeam() {
+                return null;
+            }
+
+            @Override
+            public Boat getBoat() {
+                return null;
+            }
+        };
     }
 
 }

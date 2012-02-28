@@ -166,12 +166,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
         tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
         for (Competitor competitor : race.getCompetitors()) {
-            markPassingsForCompetitor.put(competitor, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
+            markPassingsForCompetitor.put(competitor, new ConcurrentSkipListSet<MarkPassing>(MarkPassingByTimeComparator.INSTANCE));
             tracks.put(competitor, new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, millisecondsOverWhichToAverageSpeed));
         }
         markPassingsForWaypoint = new HashMap<Waypoint, NavigableSet<MarkPassing>>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
-            markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
+            markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(MarkPassingByTimeComparator.INSTANCE));
         }
         windTracks = new HashMap<WindSource, WindTrack>();
         for (WindSource windSource : WindSource.values()) {
@@ -305,9 +305,27 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         NavigableSet<MarkPassing> roundings = markPassingsForCompetitor.get(competitor);
         MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
         TrackedLegOfCompetitor result = null;
+        TrackedLeg trackedLeg;
         // already finished the race?
-        if (lastBeforeOrAt != null && getRace().getCourse().getLastWaypoint() != lastBeforeOrAt.getWaypoint()) {
-            TrackedLeg trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
+        if (lastBeforeOrAt != null) {
+            // and not at or after last mark passing
+            if (getRace().getCourse().getLastWaypoint() != lastBeforeOrAt.getWaypoint()) {
+                trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
+            } else {
+                // exactly *at* last mark passing?
+                if (at.equals(roundings.last().getTimePoint())) {
+                    // exactly at finish line; return last leg
+                    trackedLeg = getTrackedLegFinishingAt(lastBeforeOrAt.getWaypoint());
+                } else {
+                    // no, then we're after the last mark passing
+                    trackedLeg = null;
+                }
+            }
+        } else {
+            // before beginning of race
+            trackedLeg = null;
+        }
+        if (trackedLeg != null) {
             result = trackedLeg.getTrackedLeg(competitor);
         }
         return result;
@@ -548,7 +566,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public synchronized void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
-        markPassingsForWaypoint.put(waypointThatGotAdded, new ConcurrentSkipListSet<MarkPassing>(TimedComparator.INSTANCE));
+        markPassingsForWaypoint.put(waypointThatGotAdded, new ConcurrentSkipListSet<MarkPassing>(MarkPassingByTimeComparator.INSTANCE));
         for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
             getOrCreateTrack(buoy);
         }

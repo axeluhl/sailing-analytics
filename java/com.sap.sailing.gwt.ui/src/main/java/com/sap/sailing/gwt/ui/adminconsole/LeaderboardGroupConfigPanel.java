@@ -702,8 +702,15 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     
     private void moveToGroup() {
         LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
-        Set<LeaderboardDTO> selectedLeaderboards = leaderboardsSelectionModel.getSelectedSet();
-        if (selectedGroup != null && selectedLeaderboards != null && selectedLeaderboards.size() > 0) {
+        ArrayList<LeaderboardDTO> selectedLeaderboards = new ArrayList<LeaderboardDTO>(leaderboardsSelectionModel.getSelectedSet());
+        if (selectedGroup != null && selectedLeaderboards != null && !selectedLeaderboards.isEmpty()) {
+            Collections.sort(selectedLeaderboards, new Comparator<LeaderboardDTO>() {
+                @Override
+                public int compare(LeaderboardDTO l1, LeaderboardDTO l2) {
+                    List<LeaderboardDTO> leaderboards = leaderboardsProvider.getList();
+                    return ((Integer) leaderboards.indexOf(l1)).compareTo(leaderboards.indexOf(l2));
+                }
+            });
             for (LeaderboardDTO leaderboard : selectedLeaderboards) {
                 if (!selectedGroup.leaderboards.contains(leaderboard)) {
                     selectedGroup.leaderboards.add(leaderboard);
