@@ -1383,7 +1383,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
             // Adding fetched data to the container
             data.setCompetitorRaceData(competitorQuery.getB(), new CompetitorRaceDataDTO(competitorQuery.getB(),
-                    detailType, startTime, markPassingsData, raceData));
+                    detailType, markPassingsData, raceData));
         }
         return data;
     }

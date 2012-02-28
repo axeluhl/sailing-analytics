@@ -87,15 +87,6 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
         }
         return result;
     }
-    
-    public long getStartTime() {
-        long result = -1;
-        for (CompetitorRaceDataDTO competitorRaceData : raceData.values()) {
-            long raceDataNewestEvent = competitorRaceData.getStartTime();
-            result = result <= raceDataNewestEvent ? result : raceDataNewestEvent;
-        }
-        return result;
-    }
 
     public boolean isEmpty() {
         return raceData.isEmpty();

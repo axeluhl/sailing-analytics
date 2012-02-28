@@ -1,12 +1,11 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -75,12 +74,11 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected Chart chart;
     protected final AbsolutePanel busyIndicatorPanel;
     protected final Label noCompetitorsSelectedLabel;
-    protected final Map<CompetitorDTO, Series> seriesByCompetitor;
+    protected final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
     protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
     protected final RaceSelectionProvider raceSelectionProvider;
     protected long stepSize = 5000;
     protected final StringMessages stringMessages;
-    protected final Set<Series> seriesIsUsed;
     protected final Timer timer;
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     protected DetailType dataToShow;
@@ -90,7 +88,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow) {
         this.stringMessages = stringMessages;
-    	seriesByCompetitor = new HashMap<CompetitorDTO, Series>();
+    	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
     	this.timer = timer;
     	this.timer.addTimeListener(this);
@@ -99,7 +97,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	this.errorReporter = errorReporter;
         this.dataToShow = dataToShow;
         chartData = null;
-    	seriesIsUsed = new HashSet<Series>();
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -130,6 +127,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected void selectRace(final RaceIdentifier selectedRace) {
     }
     
+    /**
+     * Creates a new chart for the given {@link DetailType} <code>dataToShow</code> and also 
+     * clears the {@link #chartData}, the {@link #dataSeriesByCompetitor} and the {@link #markPassingSeriesByCompetitor}.
+     * @param dataToShow The detail type for the new chart.
+     * @return A chart for the given detail Type
+     */
     private Chart createChart(DetailType dataToShow) {
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
@@ -164,6 +167,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         numberFormat.format(toolTipData.getYAsDouble()) + unit;
             }
         }));
+        
+        setChartData(null);
+        dataSeriesByCompetitor.clear();
+        markPassingSeriesByCompetitor.clear();
         return chart;
     }
 
@@ -201,7 +208,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                             if (result != null) {
                                 chartData.addAllRaceData(result);
                             }
-                            updateTableData(competitorSelectionProvider.getSelectedCompetitors());
+                            drawChartData();
                             setWidget(chart);
                         }
                     });
@@ -239,43 +246,56 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         }
     }
     
-    private synchronized void updateTableData(Iterable<CompetitorDTO> competitors) {
+    /**
+     * Creates the series for all selected competitors if these aren't created yet.<br />
+     * Fills the series for the selected competitors with the data in {@link AbstractChartPanel#chartData}.<br />
+     * Removes series of competitors, which aren't selected and adds series for competitors, which are newly selected.
+     */
+    private synchronized void drawChartData() {
         //Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
+        Iterable<CompetitorDTO> competitors = competitorSelectionProvider.getAllCompetitors();
         if (chartData != null && competitors != null && competitors.iterator().hasNext()) {
-            //Clearing the series to keep the chart clean
-            chart.removeAllSeries();
+            List<Series> chartSeries = Arrays.asList(chart.getSeries());
             for (CompetitorDTO competitor : competitors) {
                 Series compSeries = getCompetitorSeries(competitor);
-                seriesIsUsed.add(compSeries);
                 Series markSeries = getCompetitorMarkPassingSeries(competitor);
-                seriesIsUsed.add(markSeries);
-                CompetitorRaceDataDTO competitorData = chartData.getCompetitorRaceData(competitor);
-                if (isCompetitorVisible(competitor) && competitorData != null) {
-                    List<Triple<String, Long, Double>> markPassingsData = competitorData.getMarkPassingsData();
-                    List<Point> markPassingPoints = new ArrayList<Point>();
-                    for (Triple<String, Long, Double> markPassingData : markPassingsData) {
-                        if (markPassingData.getB() != null && markPassingData.getC() != null) {
-                            Point markPassingPoint = new Point(markPassingData.getB(), markPassingData.getC());
-                            markPassingPoint.setName(markPassingData.getA());
-                            markPassingPoints.add(markPassingPoint);
-                        }
-                    }
-                    markSeries.setPoints(markPassingPoints.toArray(new Point[0]));
-                    
-                    List<Pair<Long, Double>> raceData = competitorData.getRaceData();
-                    List<Point> competitorPoints = new ArrayList<Point>();
-                    for (Pair<Long, Double> data : raceData) {
-                        if (data.getA() != null && data.getB() != null) {
-                            Point competitorPoint = new Point(data.getA(), data.getB());
-                            competitorPoints.add(competitorPoint);
-                        }
-                    }
-                    compSeries.setPoints(competitorPoints.toArray(new Point[0]));
-                }
                 if (isCompetitorVisible(competitor)) {
-                    chart.addSeries(compSeries);
-                    chart.addSeries(markSeries);
+                    CompetitorRaceDataDTO competitorData = chartData.getCompetitorRaceData(competitor);
+                    if (competitorData != null) { //TODO Exception?
+                        List<Triple<String, Long, Double>> markPassingsData = competitorData.getMarkPassingsData();
+                        List<Point> markPassingPoints = new ArrayList<Point>();
+                        for (Triple<String, Long, Double> markPassingData : markPassingsData) {
+                            if (markPassingData.getB() != null && markPassingData.getC() != null) {
+                                Point markPassingPoint = new Point(markPassingData.getB(), markPassingData.getC());
+                                markPassingPoint.setName(markPassingData.getA());
+                                markPassingPoints.add(markPassingPoint);
+                            }
+                        }
+                        
+                        markSeries.setPoints(markPassingPoints.toArray(new Point[0]));
+                        List<Pair<Long, Double>> raceData = competitorData.getRaceData();
+                        List<Point> competitorPoints = new ArrayList<Point>();
+                        for (Pair<Long, Double> data : raceData) {
+                            if (data.getA() != null && data.getB() != null) {
+                                Point competitorPoint = new Point(data.getA(), data.getB());
+                                competitorPoints.add(competitorPoint);
+                            }
+                        }
+                        compSeries.setPoints(competitorPoints.toArray(new Point[0]));
+                        
+                        //Adding the series if chart doesn't contain it
+                        if (!chartSeries.contains(compSeries)) {
+                            chart.addSeries(compSeries);
+                            chart.addSeries(markSeries);
+                        }
+                    }
+                } else {
+                    //Removing the series if chart contains it
+                    if (chartSeries.contains(compSeries)) {
+                        chart.removeSeries(compSeries);
+                        chart.removeSeries(markSeries);
+                    }
                 }
             }
         }
@@ -318,7 +338,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      * @return A series in the chart, that can be used to show the data of a specific competitor.
      */
     private Series getCompetitorSeries(final CompetitorDTO competitor){
-        Series result = seriesByCompetitor.get(competitor);
+        Series result = dataSeriesByCompetitor.get(competitor);
     	if (result == null) {
     	    result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.name);
             result.setPlotOptions(new LinePlotOptions()
@@ -326,7 +346,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
                     .setShadow(false).setHoverStateLineWidth(LINE_WIDTH)
                     .setColor(competitorSelectionProvider.getColor(competitor)));
-            seriesByCompetitor.put(competitor, result);
+            dataSeriesByCompetitor.put(competitor, result);
     	}
     	return result;
     }
@@ -369,14 +389,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     
     /**
      * Clears the whole chart and empties cached data.
-     * 
-     * @param clearCheckBoxes Declares whether the checkboxes for the visibility of the competitors should be cleared too. Should be true, when you change the race to show.
      */
-    protected void clearChart(boolean clearCheckBoxes) {
-        if (clearCheckBoxes) {
-            seriesIsUsed.clear();
-        }
-        seriesByCompetitor.clear();
+    protected void clearChart() {
+        setChartData(null);
+        dataSeriesByCompetitor.clear();
         markPassingSeriesByCompetitor.clear();
         chart.removeAllSeries();
     }
@@ -399,12 +415,17 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     /**
      * Updates the settings known to be contained in {@link ChartSettings}. Subclasses have to update settings provided
-     * by subclasses thereof. Subclasses also need to call {@link #clearChart(boolean)} and {@link #loadData()} after
-     * updating all settings.
+     * by subclasses thereof. Subclasses also need to call {@link #clearChart()} and {@link #loadData()}, if this method returns <code>true</code>;
+     * 
+     * @return <code>true</code> if the settings had been changed and a clearing and loading is needed.
      */
-    protected void updateSettingsOnly(ChartSettings newSettings) {
-        setStepSize(newSettings.getStepSize());
-        setChartData(null);
+    protected boolean updateSettingsOnly(ChartSettings newSettings) {
+        boolean settingsChanged = false;
+        if (getStepSize() != newSettings.getStepSize()) {
+            setStepSize(newSettings.getStepSize());
+            settingsChanged = true;
+        }
+        return settingsChanged;
     }
 
     protected StringMessages getStringMessages() {
@@ -424,14 +445,21 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     }
     
     /**
-     * Updates the {@link #dataToShow} field but does not yet {@link #clearChart(boolean) clear the chart} nor
-     * {@link #loadData load the data}.
+     * Updates the {@link #dataToShow} field, creates a new chart for the new <code>dataToShow</code> and clears the {@link #chartData}.<br />
+     * Doesn't {@link #loadData() load the data}.
+     * 
+     * @return <code>true</code> if the data to show changed
      */
-    protected void setDataToShow(DetailType dataToShow) {
+    protected boolean setDataToShow(DetailType dataToShow) {
         if (dataToShow != this.dataToShow) {
             this.dataToShow = dataToShow;
+            setChartData(null);
             chart = createChart(dataToShow);
-            this.setWidget(chart);
+            setWidget(chart);
+            
+            return true;
+        } else {
+            return false;
         }
     }
     
@@ -446,7 +474,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
       setChartData(null);
-      clearChart(true);
+      clearChart();
       loadData();
     }
 

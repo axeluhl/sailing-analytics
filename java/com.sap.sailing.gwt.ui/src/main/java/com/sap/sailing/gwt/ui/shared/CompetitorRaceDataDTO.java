@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -13,8 +14,7 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     
     private CompetitorDTO competitor;
     private DetailType detailType;
-    private long timePointOfNewestEvent;
-    private long startTime;
+    private long timePointOfNewestEvent; //TODO Javadoc
     /**
      * A: Bouy-Name; B: Timepoint; C: Data
      */
@@ -26,22 +26,18 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     
     CompetitorRaceDataDTO() {}
     
-    public CompetitorRaceDataDTO(CompetitorDTO competitor, DetailType detailType, long startTime,
+    public CompetitorRaceDataDTO(CompetitorDTO competitor, DetailType detailType, 
             Collection<Triple<String, Long, Double>> markPassingsData, Collection<Pair<Long, Double>> raceData) {
         this.competitor = competitor;
         this.detailType = detailType;
-        this.startTime = startTime;
-        this.timePointOfNewestEvent = 0;
-        this.markPassingsData = new ArrayList<Triple<String, Long, Double>>(markPassingsData);
-        this.raceData = new ArrayList<Pair<Long, Double>>(raceData);
+        this.markPassingsData = new ArrayList<Triple<String, Long, Double>>();
+        addAllMarkPassingsData(markPassingsData);
+        this.raceData = new ArrayList<Pair<Long, Double>>();
+        addAllRaceData(raceData);
     }
 
     public CompetitorDTO getCompetitor() {
         return competitor;
-    }
-
-    public void setCompetitor(CompetitorDTO competitor) {
-        this.competitor = competitor;
     }
 
     public DetailType getDetailType() {
@@ -51,21 +47,9 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     public long getTimePointOfNewestEvent() {
         return timePointOfNewestEvent;
     }
-    
-    public long getStartTime() {
-        return startTime;
-    }
-    
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
 
     public List<Triple<String, Long, Double>> getMarkPassingsData() {
-        return markPassingsData;
-    }
-
-    public void setMarkPassingsData(Collection<Triple<String, Long, Double>> markPassingsData) {
-        this.markPassingsData = new ArrayList<Triple<String, Long, Double>>(markPassingsData);
+        return Collections.unmodifiableList(markPassingsData);
     }
     
     public void addAllMarkPassingsData(Collection<Triple<String, Long, Double>> markPassingsDataToAdd) {
@@ -83,11 +67,7 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     }
 
     public List<Pair<Long, Double>> getRaceData() {
-        return raceData;
-    }
-
-    public void setRaceData(Collection<Pair<Long, Double>> raceData) {
-        this.raceData = new ArrayList<Pair<Long, Double>>(raceData);
+        return Collections.unmodifiableList(raceData);
     }
     
     public void addAllRaceData(Collection<Pair<Long, Double>> raceDataToAdd) {
