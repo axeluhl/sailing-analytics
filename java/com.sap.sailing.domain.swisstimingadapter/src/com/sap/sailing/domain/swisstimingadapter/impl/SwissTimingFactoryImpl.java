@@ -39,11 +39,13 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
         Triple<String, Integer, RaceSpecificMessageLoader> key = new Triple<String, Integer, RaceSpecificMessageLoader>(host, port, messageLoader);
         SailMasterConnector result = connectors.get(key);
         if (result == null) {
-            result = new SailMasterConnectorImpl(host, port, messageLoader, canSendRequests);
+//            result = new SailMasterConnectorImpl(host, port, messageLoader, canSendRequests);
+            result = new SailMasterLiveSimulatorConnectorImpl(host, port, messageLoader, canSendRequests);
             connectors.put(key, result);
             // TODO how do connectors get stopped, terminated and removed from the connectors map again?
         } else if (result.isStopped()) {
-            result = new SailMasterConnectorImpl(host, port, messageLoader, canSendRequests);
+//            result = new SailMasterConnectorImpl(host, port, messageLoader, canSendRequests);
+            result = new SailMasterLiveSimulatorConnectorImpl(host, port, messageLoader, canSendRequests);
             connectors.put(key, result);
         }
         return result;

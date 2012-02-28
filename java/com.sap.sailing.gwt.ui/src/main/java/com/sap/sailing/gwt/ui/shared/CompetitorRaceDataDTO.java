@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -15,13 +16,13 @@ public class CompetitorRaceDataDTO implements IsSerializable {
     
     private CompetitorDTO competitor;
     private DetailType detailType;
-    private Date dateOfNewestData; //TODO Javadoc
+
     /**
-     * A: Bouy-Name; B: Data-Date; C: Data
+     * A: Bouy-Name; B: mark passing time; C: data as defined by {@link #detailType} for {@link #competitor} for time point B
      */
     private List<Triple<String, Date, Double>> markPassingsData;
     /**
-     * A: Data-Date; B: Data
+     * A: time for B; B: data as defined by {@link #detailType} for {@link #competitor} for time point A
      */
     private List<Pair<Date, Double>> raceData;
     
@@ -45,54 +46,115 @@ public class CompetitorRaceDataDTO implements IsSerializable {
         return detailType;
     }
     
+    /**
+     * Takes the {@link Date} of the last elements in {@link #raceData} and {@link #markPassingsData} and returns the newer date.
+     */
     public Date getDateOfNewestData() {
-        return dateOfNewestData;
+        Date dateOfNewestRaceData = raceData.get(raceData.size() - 1).getA();
+        Date dateOfNewestMarkPassing = markPassingsData.get(markPassingsData.size() - 1).getB();
+        return dateOfNewestRaceData.after(dateOfNewestMarkPassing) ? dateOfNewestRaceData : dateOfNewestMarkPassing;
+    }
+    
+    /**
+     * Clears the old {@link #markPassingsData} and {@link #addAllMarkPassingsData(Collection) adds} the data in <code>markPassingsData</code> afterwards.
+     * @param markPassingsData
+     */
+    public void setMarkPassingsData(List<Triple<String, Date, Double>> markPassingsData) {
+        this.markPassingsData = new ArrayList<Triple<String,Date,Double>>();
+        addAllMarkPassingsData(markPassingsData);
     }
 
+    /**
+     * @return An unmodifiable list of the {@link #markPassingsData}.
+     */
     public List<Triple<String, Date, Double>> getMarkPassingsData() {
         return Collections.unmodifiableList(markPassingsData);
     }
     
+    /**
+     * {@link #addMarkPassingsData(Triple) Adds} all elements in <code>markPassingsDataToAdd</code>. Just adds the data and doesn't do any
+     * checks, like if the data is already contained or if the detail types fit.
+     * 
+     * @param markPassingsDataToAdd
+     */
     public void addAllMarkPassingsData(Collection<Triple<String, Date, Double>> markPassingsDataToAdd) {
         for (Triple<String, Date, Double> data : markPassingsDataToAdd) {
             addMarkPassingsData(data);
         }
     }
     
+    /**
+     * Adds the data <code>markPassingsDataToAdd</code> at the correct index (via binary search) to {@link #markPassingsData}.
+     * Just adds the data and doesn't do any checks, like if the data is already contained or if the detail types fit.
+     * 
+     * @param markPassingsDataToAdd
+     */
     public void addMarkPassingsData(Triple<String, Date, Double> markPassingsDataToAdd) {
-        getMarkPassingsData().add(markPassingsDataToAdd);
-        //Updating the timePointOfNewestEvent
-        if (markPassingsDataToAdd.getB().after(dateOfNewestData)) {
-            dateOfNewestData = markPassingsDataToAdd.getB();
-        }
+        markPassingsData.add(Collections.binarySearch(markPassingsData, markPassingsDataToAdd, new MarkPassingsByTime()), markPassingsDataToAdd);
     }
 
+    /**
+     * @return An unmodifiable list of the {@link #raceData}
+     */
     public List<Pair<Date, Double>> getRaceData() {
         return Collections.unmodifiableList(raceData);
     }
     
+    /**
+     * {@link #addRaceData(Pair) Adds} all elements in <code>raceDataToAdd</code>. Just adds the data and doesn't do any
+     * checks, like if the data is already contained or if the detail types fit.
+     * 
+     * @param raceDataToAdd
+     */
     public void addAllRaceData(Collection<Pair<Date, Double>> raceDataToAdd) {
         for (Pair<Date, Double> data : raceDataToAdd) {
             addRaceData(data);
         }
     }
-    
+
+    /**
+     * Adds the data <code>raceDataToAdd</code> at the correct index (via binary search) to {@link #raceData}.
+     * Just adds the data and doesn't do any checks, like if the data is already contained or if the detail types fit.
+     * 
+     * @param raceDataToAdd
+     */
     public void addRaceData(Pair<Date, Double> raceDataToAdd) {
-        getRaceData().add(raceDataToAdd);
-        //Updating the timePointOfNewestEvent
-        if (raceDataToAdd.getA().after(dateOfNewestData)) {
-            dateOfNewestData = raceDataToAdd.getA();
-        }
+        raceData.add(Collections.binarySearch(raceData, raceDataToAdd, new RaceDataByTime()), raceDataToAdd);
     }
 
     /**
-     * Adds all data, if the detailTypes fit.
+     * Adds all data with {@link #addAllMarkPassingsData(Collection)} and {@link #addAllRaceData(Collection)}, if the
+     * detailTypes fit. Just adds the data and doesn't do any checks, like if the data is already contained.
+     * 
      * @param dataToAdd
      */
     public void addAllData(CompetitorRaceDataDTO dataToAdd) {
         if (detailType == dataToAdd.getDetailType()) {
             addAllMarkPassingsData(dataToAdd.getMarkPassingsData());
             addAllRaceData(dataToAdd.getRaceData());
+        }
+    }
+
+    /**
+     * @param after The date, exclusive, from where the data should be returned
+     * @return An unmodifiable sublist of {@link #raceData}
+     */
+    public List<Pair<Date, Double>> getRaceDataAfterDate(Date after) {
+        int from = Collections.binarySearch(raceData, new Pair<Date, Double>(after, 0.0), new RaceDataByTime());
+        return Collections.unmodifiableList(raceData.subList(from + 1, raceData.size()));
+    }
+    
+    public class RaceDataByTime implements Comparator<Pair<Date, Double>> {
+        @Override
+        public int compare(Pair<Date, Double> d1, Pair<Date, Double> d2) {
+            return d1.getA().compareTo(d2.getA());
+        }
+    }
+    
+    public class MarkPassingsByTime implements Comparator<Triple<String, Date, Double>> {
+        @Override
+        public int compare(Triple<String, Date, Double> m1, Triple<String, Date, Double> m2) {
+            return m1.getB().compareTo(m2.getB());
         }
     }
 

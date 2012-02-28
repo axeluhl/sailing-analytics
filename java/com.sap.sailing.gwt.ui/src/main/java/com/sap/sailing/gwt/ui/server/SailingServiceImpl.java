@@ -1347,43 +1347,36 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         MultiCompetitorRaceDataDTO data = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
-            data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStart().asDate(),
-                        trackedRace.getTimePointOfNewestEvent().asDate(), stepSize, detailType);
+            data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStart(),
+                        trackedRace.getTimePointOfNewestEvent(), stepSize, detailType);
         }
         return data;
     }
     
     private MultiCompetitorRaceDataDTO getMultiCompetitorRaceDataDTO(TrackedRace race,
-            List<Pair<Date, CompetitorDTO>> competitorsQuery, Date startDate, Date endDate, long stepSize,
+            List<Pair<Date, CompetitorDTO>> competitorsQuery, TimePoint startTime, TimePoint endTime, long stepSize,
             DetailType detailType) throws NoWindException {
         MultiCompetitorRaceDataDTO data = new MultiCompetitorRaceDataDTO(detailType);
         // Fetching the data from the TrackedRace
         for (Pair<Date, CompetitorDTO> competitorQuery : competitorsQuery) {
-            List<Long> timePoints = new ArrayList<Long>();
-            for (long i = competitorQuery.getA().before(startDate) ? startDate.getTime() : competitorQuery.getA()
-                    .getTime(); i <= endDate.getTime(); i += stepSize) {
-                timePoints.add(i);
-            }
-
             Competitor competitor = getCompetitorById(race.getRace().getCompetitors(), competitorQuery.getB().id);
             ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
             ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
             // Filling the mark passings
             for (MarkPassing markPassing : race.getMarkPassings(competitor)) {
                 MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                if (time.asDate().after(competitorQuery.getA())) {
-                    markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
-                            .asDate(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
-                }
+                markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
+                        .asDate(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
             }
             // Filling the race data
-            for (Long timePoint : timePoints) {
-                MillisecondsTimePoint time = new MillisecondsTimePoint(timePoint);
+            for (long i = competitorQuery.getA().before(startTime.asDate()) ? startTime.asMillis() : competitorQuery.getA()
+                    .getTime(); i <= endTime.asMillis(); i += stepSize) {
+                MillisecondsTimePoint time = new MillisecondsTimePoint(i);
                 raceData.add(new Pair<Date, Double>(time.asDate(), getCompetitorRaceDataEntry(detailType, race, competitor,
                         time)));
             }
             // Adding fetched data to the container
-            data.setCompetitorRaceData(competitorQuery.getB(), new CompetitorRaceDataDTO(competitorQuery.getB(),
+            data.setCompetitorData(competitorQuery.getB(), new CompetitorRaceDataDTO(competitorQuery.getB(),
                     detailType, markPassingsData, raceData));
         }
         return data;

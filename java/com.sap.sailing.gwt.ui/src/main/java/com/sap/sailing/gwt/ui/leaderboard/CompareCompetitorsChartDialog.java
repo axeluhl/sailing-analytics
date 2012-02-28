@@ -58,6 +58,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         multiChartPanel = new MultiChartPanel(sailingService, competitorSelectionProvider, raceSelectionProvider,
                 timer, stringConstants, errorReporter);
         multiChartPanel.setSize("100%", "100%");
+        //TODO Delete DataLoadedHandler
         multiChartPanel.addDataLoadedHandler(new DataLoadedHandler() {
             @Override
             public void onDataLoaded(DataLoadedEvent event) {

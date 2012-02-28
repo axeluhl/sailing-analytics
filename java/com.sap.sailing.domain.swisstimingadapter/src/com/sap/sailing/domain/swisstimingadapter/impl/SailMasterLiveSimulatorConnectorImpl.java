@@ -11,7 +11,7 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImpl {
     private final List<SailMasterMessage> bufferedMessageList;
 
-    private long messageDeliveryIntervalInMs = 250;
+    private long messageDeliveryIntervalInMs = 500;
     
     public SailMasterLiveSimulatorConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
         super(host, port, messageLoader, canSendRequests);

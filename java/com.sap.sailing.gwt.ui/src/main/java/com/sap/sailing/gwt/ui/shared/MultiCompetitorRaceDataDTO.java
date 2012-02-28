@@ -11,69 +11,68 @@ import com.sap.sailing.domain.common.DetailType;
 public class MultiCompetitorRaceDataDTO implements IsSerializable {
     
     private DetailType detailType;
-    private HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData;
+    private HashMap<CompetitorDTO, CompetitorRaceDataDTO> competitorsData;
     
     MultiCompetitorRaceDataDTO() {}
     
     public MultiCompetitorRaceDataDTO(DetailType detailType) {
         this.detailType = detailType;
-        this.raceData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>();
+        this.competitorsData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>();
     }
     
     public MultiCompetitorRaceDataDTO(DetailType detailType, HashMap<CompetitorDTO, CompetitorRaceDataDTO> raceData) {
         this.detailType = detailType;
-        this.raceData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
+        this.competitorsData = new HashMap<CompetitorDTO, CompetitorRaceDataDTO>(raceData);
     }
     
     public Set<CompetitorDTO> getCompetitors() {
-        return raceData.keySet();
+        return competitorsData.keySet();
     }
     
-    public CompetitorRaceDataDTO getCompetitorRaceData(CompetitorDTO competitor) {
-        return raceData.get(competitor);
+    public CompetitorRaceDataDTO getCompetitorData(CompetitorDTO competitor) {
+        return competitorsData.get(competitor);
     }
     
     /**
      * Sets the data for a competitor, if the <code>detailTypes</code> fit.<br />
      * If the competitor is already contained, the data will be overwritten.
      */
-    public void setCompetitorRaceData(CompetitorDTO competitor, CompetitorRaceDataDTO raceData) {
-        if (detailType == raceData.getDetailType()) {
-            this.raceData.put(competitor, raceData);
+    public void setCompetitorData(CompetitorDTO competitor, CompetitorRaceDataDTO competitorData) {
+        if (detailType == competitorData.getDetailType()) {
+            this.competitorsData.put(competitor, competitorData);
         }
     }
     
     /**
-     * Adds all data in <code>raceDataToAdd</code> to the existing data of the <code>competitor</code>, if the <code>detailTypes</code> fit.<br />
-     * If the <code>competitor</code> is not contained, the data will be
-     * {@link MultiCompetitorRaceDataDTO#setCompetitorRaceData(CompetitorDTO, CompetitorRaceDataDTO) set}.
+     * Replaces the {@link CompetitorRaceDataDTO#markPassingsData} from the {@link CompetitorRaceDataDTO data} of the
+     * {@link CompetitorDTO} in <code>competitorData</code> with the markPassingsData in <code>competitorData</code>.<br />
+     * If the competitor is not contained, nothing happens.
+     * 
+     * @param competitorData
      */
-    public void addCompetitorRaceData(CompetitorDTO competitor, CompetitorRaceDataDTO raceDataToAdd) {
-        if (detailType == raceDataToAdd.getDetailType()) {
-            if (raceData.containsKey(competitor)) {
-                raceData.get(competitor).addAllData(raceDataToAdd);
-            } else {
-                raceData.put(competitor, raceDataToAdd);
+    public void setCompetitorMarkPassingsData(CompetitorRaceDataDTO competitorData) {
+        if (detailType == competitorData.getDetailType()) {
+            if (competitorsData.containsKey(competitorData.getCompetitor())) {
+                competitorsData.get(competitorData.getCompetitor()).setMarkPassingsData(competitorData.getMarkPassingsData());
+            }
+        }
+    }
+    
+    /**
+     * Adds all {@link CompetitorRaceDataDTO#raceData} in <code>competitorDataToAdd</code> to the existing data of the
+     * {@link CompetitorDTO} in <code>competitorDataToAdd</code>, if the {@link DetailType DetailTypes} fit.<br />
+     * If the competitor is not contained, nothing happens.
+     */
+    public void addCompetitorRaceData(CompetitorRaceDataDTO competitorDataToAdd) {
+        if (detailType == competitorDataToAdd.getDetailType()) {
+            if (competitorsData.containsKey(competitorDataToAdd.getCompetitor())) {
+                competitorsData.get(competitorDataToAdd.getCompetitor()).addAllRaceData(competitorDataToAdd.getRaceData());
             }
         }
     }
     
     public Collection<CompetitorRaceDataDTO> getAllRaceData() {
-        return raceData.values();
-    }
-    
-    /**
-     * Adds all data in <code>dataToAdd</code>, if the <code>detailTypes</code> fit.<br />
-     * The data which are not contained, will be
-     * {@link MultiCompetitorRaceDataDTO#setCompetitorRaceData(CompetitorDTO, CompetitorRaceDataDTO) set}.
-     * 
-     * @param dataToAdd
-     */
-    public void addAllRaceData(MultiCompetitorRaceDataDTO dataToAdd) {
-        //The check if the detailType fits will be done by addCompetitorRaceDataDTO
-        for (CompetitorRaceDataDTO competitorDataToAdd : dataToAdd.getAllRaceData()) {
-            addCompetitorRaceData(competitorDataToAdd.getCompetitor(), competitorDataToAdd);
-        }
+        return competitorsData.values();
     }
     
     public DetailType getDetailType() {
@@ -82,7 +81,7 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
 
     public Date getDateOfNewestData() {
         Date dateOfNewestData = null;
-        for (CompetitorRaceDataDTO competitorRaceData : raceData.values()) {
+        for (CompetitorRaceDataDTO competitorRaceData : competitorsData.values()) {
             Date raceDateOfNewestData = competitorRaceData.getDateOfNewestData();
             if (dateOfNewestData == null) {
                 dateOfNewestData = raceDateOfNewestData;
@@ -93,12 +92,25 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
         return dateOfNewestData;
     }
 
+    public Date getOldestDateOfNewestData() {
+        Date dateOfNewestData = null;
+        for (CompetitorRaceDataDTO competitorRaceData : competitorsData.values()) {
+            Date raceDateOfNewestData = competitorRaceData.getDateOfNewestData();
+            if (dateOfNewestData == null) {
+                dateOfNewestData = raceDateOfNewestData;
+            } else {
+                dateOfNewestData = dateOfNewestData.before(raceDateOfNewestData) ? dateOfNewestData : raceDateOfNewestData;
+            }
+        }
+        return dateOfNewestData;
+    }
+
     public boolean isEmpty() {
-        return raceData.isEmpty();
+        return competitorsData.isEmpty();
     }
 
     public boolean contains(CompetitorDTO competitor) {
-        return raceData.containsKey(competitor);
+        return competitorsData.containsKey(competitor);
     }
     
 }

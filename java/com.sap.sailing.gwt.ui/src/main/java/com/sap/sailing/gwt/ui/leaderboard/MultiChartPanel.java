@@ -40,7 +40,7 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
         boolean dataToShowChanged = setDataToShow(newSettings.getDataToShow());
         if (dataToShowChanged || settingsChanged) {
             clearChart();
-            loadData();
+            loadData(false);
         }
     }
 
