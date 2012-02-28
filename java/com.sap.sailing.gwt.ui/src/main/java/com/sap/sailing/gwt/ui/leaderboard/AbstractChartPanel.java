@@ -23,7 +23,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -215,7 +214,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
                         @Override
                         public void onSuccess(MultiCompetitorRaceDataDTO result) {
-                            fireEvent(new DataLoadedEvent());
                             if (result != null) {
                                 for (CompetitorRaceDataDTO competitorData : result.getAllRaceData()) {
                                     if (chartData.contains(competitorData.getCompetitor())) {
@@ -318,33 +316,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     }
                 }
             }
-        }
-    }
-
-    // DataLoaded event handling.
-    public void addDataLoadedHandler(DataLoadedHandler handler) {
-        this.addHandler(handler, DataLoadedEvent.TYPE);
-    }
-
-    public interface DataLoadedHandler extends com.google.gwt.event.shared.EventHandler {
-        public void onDataLoaded(DataLoadedEvent event);
-    }
-
-    public static class DataLoadedEvent extends GwtEvent<DataLoadedHandler> {
-        public static Type<DataLoadedHandler> TYPE = new Type<DataLoadedHandler>();
-
-        public DataLoadedEvent() {
-            super();
-        }
-
-        @Override
-        protected void dispatch(DataLoadedHandler handler) {
-            handler.onDataLoaded(this);
-        }
-
-        @Override
-        public com.google.gwt.event.shared.GwtEvent.Type<DataLoadedHandler> getAssociatedType() {
-            return TYPE;
         }
     }
 
