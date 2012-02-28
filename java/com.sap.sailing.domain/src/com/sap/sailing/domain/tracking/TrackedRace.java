@@ -194,6 +194,13 @@ public interface TrackedRace {
      */
     TimePoint getTimePointOfNewestEvent();
 
+    /**
+     * @return the mark passings for <code>competitor</code> in this race received so far; the mark passing objects are
+     * returned such that their {@link MarkPassing#getWaypoint() waypoints} are ordered in the same way they are ordered
+     * in the race's {@link Course}. Note, that this doesn't necessarily guarantee ascending time points, particularly
+     * if premature mark passings have been detected accidentally as can be the case with some tracking providers such
+     * as TracTrac.
+     */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
 
     void removeWind(Wind wind, WindSource windSource);
