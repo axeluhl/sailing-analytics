@@ -11,14 +11,14 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 public class SailMasterLiveSimulatorConnectorImpl extends SailMasterConnectorImpl {
     private final List<SailMasterMessage> bufferedMessageList;
 
-    private long messageDeliveryIntervalInMs = 500;
+    private long messageDeliveryIntervalInMs = Long.valueOf(System.getProperty("simulateLiveMode.delayInMillis", "250"));
     
     public SailMasterLiveSimulatorConnectorImpl(String host, int port, RaceSpecificMessageLoader messageLoader, boolean canSendRequests) throws InterruptedException {
         super(host, port, messageLoader, canSendRequests);
         
         bufferedMessageList = Collections.synchronizedList(new ArrayList<SailMasterMessage>());
         
-        Thread messageDeliveryThread = new Thread(" SailMasterLiveSimulatorConnector") {
+        Thread messageDeliveryThread = new Thread("SailMasterLiveSimulatorConnector") {
             public void run() {
                 while(true) {
                     try {
