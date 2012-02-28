@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -71,6 +70,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -102,8 +102,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -114,6 +113,7 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
@@ -1340,38 +1340,47 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         return result;
     }
-
+    
     @Override
-    public CompetitorInRaceDTO getCompetitorRaceData(RaceIdentifier race,
-            CompetitorsAndTimePointsDTO competitorAndTimePointsDTO, DetailType dataType) throws NoWindException {
-        CompetitorInRaceDTO competitorData = new CompetitorInRaceDTO();
+    public MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitorsQuery,
+            long stepSize, DetailType detailType) throws NoWindException {
+        MultiCompetitorRaceDataDTO data = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
-            List<Competitor> selectedCompetitors = new ArrayList<Competitor>();
-            for (CompetitorDTO cDTO : competitorAndTimePointsDTO.getCompetitors()) {
-                selectedCompetitors.add(getCompetitorById(trackedRace.getRace().getCompetitors(), cDTO.id));
-            }
-            for (CompetitorDTO competitorDTO : competitorAndTimePointsDTO.getCompetitors()) {
-                Competitor competitor = getCompetitorById(trackedRace.getRace().getCompetitors(), competitorDTO.id);
-                List<Long> timePoints = competitorAndTimePointsDTO.getTimePoints();
-                List<Double> entries = new ArrayList<Double>();
-                for (int i = 0; i < timePoints.size(); i++) {
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(timePoints.get(i));
-                    entries.add(getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time));
-                }
-                competitorData.setRaceData(competitorDTO, entries);
-                entries = new ArrayList<Double>();
-                for (int i = 0; i < competitorAndTimePointsDTO.getMarkPassings(competitorDTO).size(); i++) {
-                    MillisecondsTimePoint time = new MillisecondsTimePoint(
-                            competitorAndTimePointsDTO.getMarkPassings(competitorDTO).get(i).getB());
-                    entries.add(getCompetitorRaceDataEntry(dataType, trackedRace, competitor, time));
-                }
-                competitorData.setMarkPassingData(competitorDTO, entries);
-            }
+            data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStart(),
+                        trackedRace.getTimePointOfNewestEvent(), stepSize, detailType);
         }
-        return competitorData;
+        return data;
     }
     
+    private MultiCompetitorRaceDataDTO getMultiCompetitorRaceDataDTO(TrackedRace race,
+            List<Pair<Date, CompetitorDTO>> competitorsQuery, TimePoint startTime, TimePoint endTime, long stepSize,
+            DetailType detailType) throws NoWindException {
+        MultiCompetitorRaceDataDTO data = new MultiCompetitorRaceDataDTO(detailType);
+        // Fetching the data from the TrackedRace
+        for (Pair<Date, CompetitorDTO> competitorQuery : competitorsQuery) {
+            Competitor competitor = getCompetitorById(race.getRace().getCompetitors(), competitorQuery.getB().id);
+            ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
+            ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
+            // Filling the mark passings
+            for (MarkPassing markPassing : race.getMarkPassings(competitor)) {
+                MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
+                markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
+                        .asDate(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
+            }
+            // Filling the race data
+            for (long i = competitorQuery.getA().before(startTime.asDate()) ? startTime.asMillis() : competitorQuery.getA()
+                    .getTime(); i <= endTime.asMillis(); i += stepSize) {
+                MillisecondsTimePoint time = new MillisecondsTimePoint(i);
+                raceData.add(new Pair<Date, Double>(time.asDate(), getCompetitorRaceDataEntry(detailType, race, competitor,
+                        time)));
+            }
+            // Adding fetched data to the container
+            data.setCompetitorData(competitorQuery.getB(), new CompetitorRaceDataDTO(competitorQuery.getB(),
+                    detailType, markPassingsData, raceData));
+        }
+        return data;
+    }
     @Override
     public Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
@@ -1505,32 +1514,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private Event getEvent(EventIdentifier eventIdentifier) {
         return (Event) eventIdentifier.getEvent(this);
-    }
-
-    @Override
-    public CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize) {
-        CompetitorsAndTimePointsDTO competitorAndTimePointsDTO = new CompetitorsAndTimePointsDTO(stepSize);
-        TrackedRace trackedRace = getExistingTrackedRace(race);
-        if (trackedRace != null) {
-            List<CompetitorDTO> competitors = new ArrayList<CompetitorDTO>();
-            for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-                NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
-                List<Pair<String, Long>> markPassingTimes = new ArrayList<Pair<String, Long>>();
-                for (MarkPassing markPassing : markPassings) {
-                    markPassingTimes.add(new Pair<String, Long>(markPassing.getWaypoint().getName(), markPassing
-                            .getTimePoint().asMillis()));
-                }
-                competitors.add(getCompetitorDTO(competitor));
-                // The following line will create a "Unchecked type safety warning".
-                // There is no way to solve this, so it is okay to suppress this warning.
-                competitorAndTimePointsDTO.setMarkPassings(getCompetitorDTO(competitor), markPassingTimes);
-            }
-            competitorAndTimePointsDTO.setCompetitors(competitors);
-            competitorAndTimePointsDTO.setStartTime(trackedRace.getStart().asMillis());
-            TimePoint timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent();
-            competitorAndTimePointsDTO.setTimePointOfNewestEvent(timePointOfNewestEvent == null ? -1 : timePointOfNewestEvent.asMillis());
-        }
-        return competitorAndTimePointsDTO;
     }
 
     /**

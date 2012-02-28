@@ -489,9 +489,11 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         || fixSections[fixDetailIndex].trim().length() == 0 ? null : new MeterDistance(
                         Double.valueOf(fixSections[fixDetailIndex]));
                 fixDetailIndex++;
-                fixes.add(new FixImpl(boatID, trackerType, ageOfDataInMilliseconds, position, speed, nextMarkIndex,
-                        rank,
-                        averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark));
+                //TODO Remove "if" after testing
+                if (boatID.startsWith("S") || boatID.startsWith("M") || boatID.startsWith("F") /*|| boatID.equals("GER 66") || boatID.equals("GER 72") || boatID.equals("CAN 11") || boatID.equals("CHN 221")*/) {
+                    fixes.add(new FixImpl(boatID, trackerType, ageOfDataInMilliseconds, position, speed, nextMarkIndex,
+                            rank, averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark));
+                }
             }
         }
         for (SailMasterListener listener : listeners) {
