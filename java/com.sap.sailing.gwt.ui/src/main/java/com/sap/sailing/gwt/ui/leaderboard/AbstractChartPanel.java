@@ -1,12 +1,11 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
@@ -22,10 +21,8 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -36,6 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -46,10 +44,9 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.panels.BusyIndicator;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
@@ -69,19 +66,17 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
 implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
     protected static final int LINE_WIDTH = 1;
-    protected CompetitorInRaceDTO chartData;
-    protected CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO = null;
+    protected MultiCompetitorRaceDataDTO chartData;
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected Chart chart;
     protected final AbsolutePanel busyIndicatorPanel;
     protected final Label noCompetitorsSelectedLabel;
-    protected final Map<CompetitorDTO, Series> seriesByCompetitor;
+    protected final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
     protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
     protected final RaceSelectionProvider raceSelectionProvider;
     protected long stepSize = 5000;
     protected final StringMessages stringMessages;
-    protected final Set<Series> seriesIsUsed;
     protected final Timer timer;
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     protected DetailType dataToShow;
@@ -91,15 +86,15 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow) {
         this.stringMessages = stringMessages;
-    	seriesByCompetitor = new HashMap<CompetitorDTO, Series>();
+    	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
     	this.timer = timer;
+    	this.timer.addTimeListener(this);
     	this.competitorSelectionProvider = competitorSelectionProvider;
     	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
     	this.errorReporter = errorReporter;
-    	chartData = new CompetitorInRaceDTO();
         this.dataToShow = dataToShow;
-    	seriesIsUsed = new HashSet<Series>();
+        chartData = null;
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -122,7 +117,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
         List<RaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
         if(!selectedRaces.isEmpty()) {
-            loadData();
+            loadData(true);
         }
         timer.addTimeListener(this);
     }
@@ -130,6 +125,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected void selectRace(final RaceIdentifier selectedRace) {
     }
     
+    /**
+     * Creates a new chart for the given {@link DetailType} <code>dataToShow</code> and also 
+     * clears the {@link #chartData}, the {@link #dataSeriesByCompetitor} and the {@link #markPassingSeriesByCompetitor}.
+     * @param dataToShow The detail type for the new chart.
+     * @return A chart for the given detail Type
+     */
     private Chart createChart(DetailType dataToShow) {
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
@@ -164,82 +165,69 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         numberFormat.format(toolTipData.getYAsDouble()) + unit;
             }
         }));
+        
+        setChartData(null);
+        dataSeriesByCompetitor.clear();
+        markPassingSeriesByCompetitor.clear();
         return chart;
     }
 
     protected abstract Component<SettingsType> getComponent();
     
-    protected void loadData() {
-        setWidget(busyIndicatorPanel);
-        if (getCompetitorsAndTimePointsDTO() != null) {
-            doLoadData();
-        } else {
-            this.sailingService.getCompetitorsAndTimePoints(getSelectedRace(), getStepSize(),
-                    new AsyncCallback<CompetitorsAndTimePointsDTO>() {
+    /**
+     * Loads the needed data (data which isn't in the {@link #chartData cache}) for the {@link #getVisibleCompetitors()
+     * visible competitors} via
+     * {@link SailingServiceAsync#getCompetitorsRaceData(RaceIdentifier, List, long, DetailType, AsyncCallback)}. After
+     * loading is the method {@link #drawChartData()} called.<br />
+     * If no competitor is visible, is the {@link #noCompetitorsSelectedLabel} displayed.
+     * 
+     * @param showBusyIndicator If <code>true</code> is the busy indicator shown while loading the data from the server.
+     */
+    protected void loadData(boolean showBusyIndicator) {
+        if (hasVisibleCompetitors()) {
+            if (showBusyIndicator) {
+                setWidget(busyIndicatorPanel);
+            }
+            if (chartData == null || chartData.getDetailType() != getDataToShow()) {
+                chartData = new MultiCompetitorRaceDataDTO(getDataToShow());
+            }
+            
+            final ArrayList<Pair<Date, CompetitorDTO>> competitorsToLoad = new ArrayList<Pair<Date, CompetitorDTO>>();
+            for (CompetitorDTO competitor : getVisibleCompetitors()) {
+                Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
+                if (!chartData.contains(competitor)) {
+                    competitorsToLoad.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
+                } else if (chartData.getCompetitorData(competitor).getDateOfNewestData().before(chartDataDateOfNewestData)) {
+                    Date competitorDateOfNewestData = chartData.getCompetitorData(competitor).getDateOfNewestData();
+                    competitorsToLoad.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime() + getStepSize()), competitor));
+                }
+            }
+            
+            sailingService.getCompetitorsRaceData(getSelectedRace(), competitorsToLoad, getStepSize(),
+                    getDataToShow(), new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError(stringMessages.failedToLoadRaceInformation(caught.toString()));
+                            errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": "
+                                    + caught.toString());
                         }
 
                         @Override
-                        public void onSuccess(CompetitorsAndTimePointsDTO result) {
-                            setCompetitorsAndTimePointsDTO(result);
-                            doLoadData();
+                        public void onSuccess(MultiCompetitorRaceDataDTO result) {
+                            if (result != null) {
+                                for (CompetitorRaceDataDTO competitorData : result.getAllRaceData()) {
+                                    if (chartData.contains(competitorData.getCompetitor())) {
+                                        chartData.addCompetitorRaceData(competitorData);
+                                        chartData.setCompetitorMarkPassingsData(competitorData);
+                                    } else {
+                                        chartData.setCompetitorData(competitorData.getCompetitor(), competitorData);
+                                    }
+                                }
+                            }
+                            drawChartData();
+                            setWidget(chart);
                         }
                     });
-        }
-    }
-
-    private void doLoadData() {
-        if (competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
-            final List<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
-            List<CompetitorDTO> competitorsWhoseAlreadyLoadedDataNeedsToBeAdded = new ArrayList<CompetitorDTO>();
-            // Assumption: for those competitors shown in chart we already have all data that's needed (TODO: what to do in live mode?)
-            // Therefore, we only need to load race data for those to be shown but not yet in the chart. Find them:
-            for (CompetitorDTO competitor : competitorSelectionProvider.getSelectedCompetitors()) {
-                if (!seriesByCompetitor.keySet().contains(competitor)) {
-                    competitorsToLoad.add(competitor);
-                } else {
-                    competitorsWhoseAlreadyLoadedDataNeedsToBeAdded.add(competitor);
-                }
-            }
-            
-            if (competitorsToLoad != null && !competitorsToLoad.isEmpty()) {
-                final CompetitorsAndTimePointsDTO competitorsAndTimePointsToLoad = new CompetitorsAndTimePointsDTO(
-                        getStepSize());
-                competitorsAndTimePointsToLoad.setStartTime(getCompetitorsAndTimePointsDTO().getStartTime());
-                competitorsAndTimePointsToLoad.setTimePointOfNewestEvent(getCompetitorsAndTimePointsDTO()
-                        .getTimePointOfNewestEvent());
-                for (CompetitorDTO competitor : competitorsToLoad) {
-                    competitorsAndTimePointsToLoad.setMarkPassings(competitor, getCompetitorsAndTimePointsDTO()
-                            .getMarkPassings(competitor));
-                }
-                competitorsAndTimePointsToLoad.setCompetitors(competitorsToLoad);
-                AbstractChartPanel.this.sailingService.getCompetitorRaceData(getSelectedRace(),
-                        competitorsAndTimePointsToLoad, getDataToShow(), new AsyncCallback<CompetitorInRaceDTO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": "
-                                        + caught.toString());
-                            }
-
-                            @Override
-                            public void onSuccess(CompetitorInRaceDTO result) {
-                                fireEvent(new DataLoadedEvent());
-                                for (CompetitorDTO competitor : competitorsToLoad) {
-                                    chartData.setRaceData(competitor, result.getRaceData(competitor));
-                                    chartData.setMarkPassingData(competitor, result.getMarkPassings(competitor));
-                                }
-                                updateTableData(competitorsAndTimePointsToLoad.getCompetitors());
-                                setWidget(chart);
-                            }
-                        });
-            }
-            
-            if (competitorsWhoseAlreadyLoadedDataNeedsToBeAdded != null
-                    && !competitorsWhoseAlreadyLoadedDataNeedsToBeAdded.isEmpty()) {
-                updateTableData(competitorsWhoseAlreadyLoadedDataNeedsToBeAdded);
-            }
         } else {
             setWidget(noCompetitorsSelectedLabel);
         }
@@ -256,7 +244,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        loadData();
+        loadData(true);
     }
     
     @Override
@@ -269,84 +257,75 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if (competitorMarkPassingSeries != null) {
             chart.removeSeries(competitorMarkPassingSeries);
         }
-        if (!competitorSelectionProvider.getSelectedCompetitors().iterator().hasNext()) {
+        if (!hasVisibleCompetitors()) {
             setWidget(noCompetitorsSelectedLabel);
         }
     }
     
-    private synchronized void updateTableData(List<CompetitorDTO> competitors) {
+    /**
+     * Creates the series for all selected competitors if these aren't created yet.<br />
+     * Fills the series for the selected competitors with the data in {@link AbstractChartPanel#chartData}.<br />
+     * Removes series of competitors, which aren't selected and adds series for competitors, which are newly selected.<br /><br />
+     * 
+     * The data for all {@link #getVisibleCompetitors() visible competitors} needs to be filled before calling this method.
+     */
+    private synchronized void drawChartData() {
         //Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
-        if (getCompetitorsAndTimePointsDTO() != null && chartData != null
-                && competitors != null && !competitors.isEmpty()) {
-            //Clearing the series to keep the chart clean
-            chart.removeAllSeries();
+        Iterable<CompetitorDTO> competitors = competitorSelectionProvider.getAllCompetitors();
+        if (chartData != null && competitors != null && competitors.iterator().hasNext()) {
+            List<Series> chartSeries = Arrays.asList(chart.getSeries());
             for (CompetitorDTO competitor : competitors) {
                 Series compSeries = getCompetitorSeries(competitor);
-                seriesIsUsed.add(compSeries);
                 Series markSeries = getCompetitorMarkPassingSeries(competitor);
-                seriesIsUsed.add(markSeries);
-                if (isCompetitorVisible(competitor) && chartData.getRaceData(competitor) != null) {
-                    long starttime = System.currentTimeMillis();
-                    List<Pair<String, Long>> markPassingTimes = getCompetitorsAndTimePointsDTO().getMarkPassings(competitor);
-                    List<Point> markPassingPoints = new ArrayList<Point>();
-                    List<Double> markPassingValues = chartData.getMarkPassings(competitor);
-                    for (int j = 0; j < markPassingTimes.size(); j++) {
-                        if (markPassingValues.get(j) != null && markPassingTimes.get(j).getB() != null) {
-                            Point markPassingPoint = new Point(markPassingTimes.get(j).getB(), markPassingValues.get(j));
-                            markPassingPoint.setName(markPassingTimes.get(j).getA());
-                            markPassingPoints.add(markPassingPoint);
-                        }
-                    }
-                    markSeries.setPoints(markPassingPoints.toArray(new Point[0]));
-                    GWT.log("Update mark passings time for " + competitor.name + ": "
-                            + (System.currentTimeMillis() - starttime));
-                    starttime = System.currentTimeMillis();
-                    List<Double> data = chartData.getRaceData(competitor);
-                    List<Long> timepoints = getCompetitorsAndTimePointsDTO().getTimePoints();
-                    List<Point> competitorPoints = new ArrayList<Point>();
-                    for (int j = 0; j < timepoints.size(); j++) {
-                        if (data.get(j) != null) {
-                            Point competitorPoint = new Point(timepoints.get(j), data.get(j));
-                            competitorPoints.add(competitorPoint);
-                        }
-                    }
-                    compSeries.setPoints(competitorPoints.toArray(new Point[0]));
-                    GWT.log("Update data time for " + competitor.name + ": " + (System.currentTimeMillis() - starttime));
-                }
                 if (isCompetitorVisible(competitor)) {
-                    chart.addSeries(compSeries);
-                    chart.addSeries(markSeries);
+                    CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
+                    if (competitorData != null) {
+                        List<Triple<String, Date, Double>> markPassingsData = competitorData.getMarkPassingsData();
+                        List<Point> markPassingPoints = new ArrayList<Point>();
+                        for (Triple<String, Date, Double> markPassingData : markPassingsData) {
+                            if (markPassingData.getB() != null && markPassingData.getC() != null) {
+                                Point markPassingPoint = new Point(markPassingData.getB().getTime(), markPassingData.getC());
+                                markPassingPoint.setName(markPassingData.getA());
+                                markPassingPoints.add(markPassingPoint);
+                            }
+                        }
+                        markSeries.setPoints(markPassingPoints.toArray(new Point[0]));
+                        
+                        Point[] compSeriesPoints = compSeries.getPoints();
+                        Date dateOfNewestSeriesPoint = compSeriesPoints.length == 0 ? new Date(0) : new Date(
+                                compSeriesPoints[compSeriesPoints.length - 1].getX().longValue());
+                        List<Pair<Date, Double>> raceData = competitorData.getRaceDataAfterDate(dateOfNewestSeriesPoint);
+                        for (Pair<Date, Double> data : raceData) {
+                            if (data.getA() != null && data.getB() != null) {
+                                Point competitorPoint = new Point(data.getA().getTime(), data.getB());
+                                compSeries.addPoint(competitorPoint);
+                            }
+                        }
+                        
+                        //Adding the series if chart doesn't contain it
+                        if (!chartSeries.contains(compSeries)) {
+                            chart.addSeries(compSeries);
+                            chart.addSeries(markSeries);
+                        }
+                    }
+                } else {
+                    //Removing the series if chart contains it
+                    if (chartSeries.contains(compSeries)) {
+                        chart.removeSeries(compSeries);
+                        chart.removeSeries(markSeries);
+                    }
                 }
             }
         }
     }
 
-    // DataLoaded event handling.
-    public void addDataLoadedHandler(DataLoadedHandler handler) {
-        this.addHandler(handler, DataLoadedEvent.TYPE);
+    private Iterable<CompetitorDTO> getVisibleCompetitors() {
+        return competitorSelectionProvider.getSelectedCompetitors();
     }
 
-    public interface DataLoadedHandler extends com.google.gwt.event.shared.EventHandler {
-        public void onDataLoaded(DataLoadedEvent event);
-    }
-
-    public static class DataLoadedEvent extends GwtEvent<DataLoadedHandler> {
-        public static Type<DataLoadedHandler> TYPE = new Type<DataLoadedHandler>();
-
-        public DataLoadedEvent() {
-            super();
-        }
-
-        @Override
-        protected void dispatch(DataLoadedHandler handler) {
-            handler.onDataLoaded(this);
-        }
-
-        @Override
-        public com.google.gwt.event.shared.GwtEvent.Type<DataLoadedHandler> getAssociatedType() {
-            return TYPE;
-        }
+    private boolean hasVisibleCompetitors() {
+        return getVisibleCompetitors().iterator().hasNext();
     }
 
     private boolean isCompetitorVisible(CompetitorDTO competitor) {
@@ -359,7 +338,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      * @return A series in the chart, that can be used to show the data of a specific competitor.
      */
     private Series getCompetitorSeries(final CompetitorDTO competitor){
-        Series result = seriesByCompetitor.get(competitor);
+        Series result = dataSeriesByCompetitor.get(competitor);
     	if (result == null) {
     	    result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.name);
             result.setPlotOptions(new LinePlotOptions()
@@ -367,7 +346,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
                     .setShadow(false).setHoverStateLineWidth(LINE_WIDTH)
                     .setColor(competitorSelectionProvider.getColor(competitor)));
-            seriesByCompetitor.put(competitor, result);
+            dataSeriesByCompetitor.put(competitor, result);
     	}
     	return result;
     }
@@ -410,14 +389,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     
     /**
      * Clears the whole chart and empties cached data.
-     * 
-     * @param clearCheckBoxes Declares whether the checkboxes for the visibility of the competitors should be cleared too. Should be true, when you change the race to show.
      */
-    protected void clearChart(boolean clearCheckBoxes) {
-        if (clearCheckBoxes) {
-            seriesIsUsed.clear();
-        }
-        seriesByCompetitor.clear();
+    protected void clearChart() {
+        setChartData(null);
+        dataSeriesByCompetitor.clear();
         markPassingSeriesByCompetitor.clear();
         chart.removeAllSeries();
     }
@@ -440,12 +415,17 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     /**
      * Updates the settings known to be contained in {@link ChartSettings}. Subclasses have to update settings provided
-     * by subclasses thereof. Subclasses also need to call {@link #clearChart(boolean)} and {@link #loadData()} after
-     * updating all settings.
+     * by subclasses thereof. Subclasses also need to call {@link #clearChart()} and {@link #loadData(boolean)}, if this method returns <code>true</code>;
+     * 
+     * @return <code>true</code> if the settings had been changed and a clearing and loading is needed.
      */
-    protected void updateSettingsOnly(ChartSettings newSettings) {
-        setStepSize(newSettings.getStepSize());
-        setCompetitorsAndTimePointsDTO(null);
+    protected boolean updateSettingsOnly(ChartSettings newSettings) {
+        boolean settingsChanged = false;
+        if (getStepSize() != newSettings.getStepSize()) {
+            setStepSize(newSettings.getStepSize());
+            settingsChanged = true;
+        }
+        return settingsChanged;
     }
 
     protected StringMessages getStringMessages() {
@@ -465,30 +445,37 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     }
     
     /**
-     * Updates the {@link #dataToShow} field but does not yet {@link #clearChart(boolean) clear the chart} nor
-     * {@link #loadData load the data}.
+     * Updates the {@link #dataToShow} field, creates a new chart for the new <code>dataToShow</code> and clears the {@link #chartData}.<br />
+     * Doesn't {@link #loadData(boolean) load the data}.
+     * 
+     * @return <code>true</code> if the data to show changed
      */
-    protected void setDataToShow(DetailType dataToShow) {
+    protected boolean setDataToShow(DetailType dataToShow) {
         if (dataToShow != this.dataToShow) {
             this.dataToShow = dataToShow;
+            setChartData(null);
             chart = createChart(dataToShow);
-            this.setWidget(chart);
+            setWidget(chart);
+            
+            return true;
+        } else {
+            return false;
         }
     }
-
-    protected CompetitorsAndTimePointsDTO getCompetitorsAndTimePointsDTO() {
-        return competitorsAndTimePointsDTO;
+    
+    protected MultiCompetitorRaceDataDTO getChartData() {
+        return chartData;
     }
-
-    protected void setCompetitorsAndTimePointsDTO(CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO) {
-        this.competitorsAndTimePointsDTO = competitorsAndTimePointsDTO;
+    
+    protected void setChartData(MultiCompetitorRaceDataDTO chartData) {
+        this.chartData = chartData;
     }
-
+    
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
-      setCompetitorsAndTimePointsDTO(null);
-      clearChart(true);
-      loadData();
+      setChartData(null);
+      clearChart();
+      loadData(true);
     }
 
     /**
@@ -533,10 +520,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     @Override
     public void timeChanged(Date date) {
-        if (timer.getPlayMode() == PlayModes.Live) {
-            // TODO fetch parts missing so far from cache 
-        } else {
-            // TODO check if fetched already; if not, fetch all
+        if (getChartData() != null) {
+            Date newestEvent = getChartData().getOldestDateOfNewestData();
+            if (hasVisibleCompetitors()
+                    && (newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
+                loadData(false);
+            }
         }
     }
 }

@@ -36,14 +36,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     /**
      * The start time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
      * 
-     * @see #setMinMax(Date, Date)
+     * @see #setMinMax(Date, Date, boolean)
      */
     private Date min;
     
     /**
      * The end time point of the time interval visualized by this time panel. May be <code>null</code> if not yet initialized.
      * 
-     * @see #setMinMax(Date, Date)
+     * @see #setMinMax(Date, Date, boolean)
      */
     private Date max;
     
@@ -271,7 +271,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             // Handle it equally for replay and live mode for robustness reasons. This at least allows a user
             // to watch on even if the time panel was off in its assumptions about race end and end of tracking.
             if (time.after(getMax())) {
-                setMinMax(getMin(), time);
+                setMinMax(getMin(), time, /* fireEvent */ false); // no event because we guarantee that time is between min/max
             }
             long t = time.getTime();
             sliderBar.setCurrentValue(new Double(t), false);
@@ -295,22 +295,23 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     /**
      * @param min must not be <code>null</code>
      * @param max must not be <code>null</code>
+     * @param fireEvent TODO
      */
-    public void setMinMax(Date min, Date max) {
+    public void setMinMax(Date min, Date max, boolean fireEvent) {
         assert min != null && max != null;
         boolean changed = false;
         int numTicks = 8;
         if (!max.equals(this.max)) {
             changed = true;
             this.max = max;
-            sliderBar.setMaxValue(new Double(max.getTime()));
+            sliderBar.setMaxValue(new Double(max.getTime()), fireEvent);
         }
         if (!min.equals(this.min)) {
             changed = true;
             this.min = min;
-            sliderBar.setMinValue(new Double(min.getTime()));
+            sliderBar.setMinValue(new Double(min.getTime()), fireEvent);
             if (sliderBar.getCurrentValue() == null) {
-                sliderBar.setCurrentValue(new Double(min.getTime()));
+                sliderBar.setCurrentValue(new Double(min.getTime()), fireEvent);
             }
         }
         if (changed) {
@@ -318,9 +319,9 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             sliderBar.setNumTicks(numTicks);
             int numSteps = sliderBar.getElement().getClientWidth();
             if (numSteps > 0) {
-                sliderBar.setStepSize(numSteps);
+                sliderBar.setStepSize(numSteps, fireEvent);
             } else {
-                sliderBar.setStepSize(1000);
+                sliderBar.setStepSize(1000, fireEvent);
             }
         }
     }
