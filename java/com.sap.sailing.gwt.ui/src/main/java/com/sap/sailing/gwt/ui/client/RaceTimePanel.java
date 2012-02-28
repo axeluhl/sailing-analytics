@@ -174,7 +174,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
         // never reduce max if it was already set
         if (min != null && max != null && (getMax() == null || getMax().before(max))) {
-            setMinMax(min, max);
+            setMinMax(min, max, false);
         }
     }
     

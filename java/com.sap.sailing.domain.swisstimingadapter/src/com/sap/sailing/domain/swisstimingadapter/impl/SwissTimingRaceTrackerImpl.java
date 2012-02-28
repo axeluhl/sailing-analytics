@@ -261,7 +261,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
      * {@link #trackedRace} with data received from the trackers.
      */
     private boolean isTrackedRaceStillReachable() {
-        return Util.contains(getEvent().getAllRaces(), trackedRace.getRace()) &&
+        return trackedRace != null && Util.contains(getEvent().getAllRaces(), trackedRace.getRace()) &&
                 getTrackedEvent().getExistingTrackedRace(trackedRace.getRace()) == trackedRace;
     }
 
