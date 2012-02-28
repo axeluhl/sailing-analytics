@@ -523,7 +523,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if (getChartData() != null) {
             Date newestEvent = getChartData().getOldestDateOfNewestData();
             if (hasVisibleCompetitors()
-                    && ((newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()) || newestEvent == null)) {
+                    && (newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
                 loadData(false);
             }
         }
