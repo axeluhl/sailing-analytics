@@ -708,7 +708,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         for (Iterator<GPSFixDTO> fixIter = fixesForCompetitor.iterator(); fixIter.hasNext() && indexOfLast == -1;) {
             GPSFixDTO fix = fixIter.next();
             if (!fix.timepoint.before(to)) {
-                indexOfLast = i;
+                indexOfLast = i-1;
             } else {
                 LatLng point = null;
                 if (indexOfFirst == -1) {
@@ -918,11 +918,13 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
      * When this method returns, {@link #firstShownFix} and {@link #lastShownFix} have been updated accordingly.
      */
     protected void updateTail(Polyline tail, CompetitorDTO competitorDTO, Date from, Date to) {
+        int vertexCount = tail.getVertexCount();
         final List<GPSFixDTO> fixesForCompetitor = fixes.get(competitorDTO);
         int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
-        while (indexOfFirstShownFix != -1 && tail.getVertexCount() > 0
+        while (indexOfFirstShownFix != -1 && vertexCount > 0
                 && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
             tail.deleteVertex(0);
+            vertexCount--;
             indexOfFirstShownFix++;
         }
         // now the polyline contains no more vertices representing fixes before "from";
@@ -932,12 +934,13 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             indexOfFirstShownFix--;
             GPSFixDTO fix = fixesForCompetitor.get(indexOfFirstShownFix);
             tail.insertVertex(0, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+            vertexCount++;
         }
         // now adjust the polylines tail: remove excess vertices that are after "to"
         int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
-        while (indexOfLastShownFix != -1 && tail.getVertexCount() > 0
+        while (indexOfLastShownFix != -1 && vertexCount > 0
                 && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
-            tail.deleteVertex(tail.getVertexCount() - 1);
+            tail.deleteVertex(--vertexCount);
             indexOfLastShownFix--;
         }
         // now the polyline contains no more vertices representing fixes after "to";
@@ -947,7 +950,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                 && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
             indexOfLastShownFix++;
             GPSFixDTO fix = fixesForCompetitor.get(indexOfLastShownFix);
-            tail.insertVertex(tail.getVertexCount(), LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
+            tail.insertVertex(vertexCount++, LatLng.newInstance(fix.position.latDeg, fix.position.lngDeg));
         }
         firstShownFix.put(competitorDTO, indexOfFirstShownFix);
         lastShownFix.put(competitorDTO, indexOfLastShownFix);
