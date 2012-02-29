@@ -1,0 +1,8 @@
+#!/bin/sh
+if [ "$1" = "" ]; then
+  echo "Usage: updateIPToBoat2 <port>"
+else
+  ip=`ipconfig /all | grep Bevorzugt | grep IPv4 | sed -e 's/^.*: \([^(]*\)(.*$/\1/'`
+  echo IP address is $ip
+  wget -O /tmp/updateIPToBoat2.out "http://bugzilla.sapsailing.com/cgi-bin/updateRedirect?name=boat2&ip=$ip&port=$1"
+fi
