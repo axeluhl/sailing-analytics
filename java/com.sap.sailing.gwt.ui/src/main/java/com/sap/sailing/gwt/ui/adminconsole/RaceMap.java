@@ -893,6 +893,12 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             }
             intoThisIndex++;
         }
+        if (indexOfFirstShownFix != -1) {
+            firstShownFix.put(competitorDTO, indexOfFirstShownFix);
+        }
+        if (indexOfLastShownFix != -1) {
+            lastShownFix.put(competitorDTO, indexOfLastShownFix);
+        }
     }
 
     protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO) {
