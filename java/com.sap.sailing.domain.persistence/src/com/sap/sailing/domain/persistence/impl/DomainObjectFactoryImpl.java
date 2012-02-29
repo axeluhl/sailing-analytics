@@ -55,8 +55,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private Position loadPosition(DBObject object) {
-        Double lat = ((Number) object.get(FieldNames.LAT_DEG.name())).doubleValue();
-        Double lng = ((Number) object.get(FieldNames.LNG_DEG.name())).doubleValue();
+        Number latNumber = (Number) object.get(FieldNames.LAT_DEG.name());
+        Double lat = latNumber == null ? null : latNumber.doubleValue();
+        Number lngNumber = (Number) object.get(FieldNames.LNG_DEG.name());
+        Double lng = lngNumber == null ? null : lngNumber.doubleValue();
         if (lat != null && lng != null) {
             return new DegreePosition(lat, lng);
         } else {
