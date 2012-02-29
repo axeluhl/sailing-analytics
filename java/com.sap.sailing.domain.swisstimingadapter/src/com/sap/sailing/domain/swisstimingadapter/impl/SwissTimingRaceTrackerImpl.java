@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -193,9 +194,13 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             // we need to use this to *update* the competitor's mark passings list, not *replace* it
             TreeMap<Integer, MarkPassing> markPassingsByMarkIndex = new TreeMap<Integer, MarkPassing>();
             // now fill with the already existing mark passings for the competitor identified by boatID...
-            for (MarkPassing markPassing : trackedRace.getMarkPassings(competitor)) {
-                markPassingsByMarkIndex.put(
-                        trackedRace.getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()), markPassing);
+            NavigableSet<MarkPassing> markPassings = trackedRace.getMarkPassings(competitor);
+            synchronized (markPassings) {
+                for (MarkPassing markPassing : markPassings) {
+                    markPassingsByMarkIndex.put(
+                            trackedRace.getRace().getCourse().getIndexOfWaypoint(markPassing.getWaypoint()),
+                            markPassing);
+                }
             }
             // ...and then overwrite those for which we received "new evidence"
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {

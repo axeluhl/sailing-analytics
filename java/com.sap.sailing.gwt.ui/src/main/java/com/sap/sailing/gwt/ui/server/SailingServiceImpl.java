@@ -769,32 +769,35 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     // try to calculate the point in time where all boats passed the start line in a small time frame
                     Waypoint from = trackedLeg.getLeg().getFrom();
                     Iterable<MarkPassing> markPassings = trackedRace.getMarkPassingsInOrder(from);
-                    int markPassingsCount = Util.size(markPassings);
-                    // require more than half the boats registered for the race to have passed the start mark
-                    if (markPassings != null && markPassingsCount > Util.size(trackedRace.getRace().getCompetitors())/2) {
-                        long maxTimeFrameInMs = 60 * 1000; // = 1 minute
-                        Iterator<MarkPassing> iterator = markPassings.iterator();
-                        long currentTimeToCheck = 0;
-                        int enoughCompetitors = markPassingsCount / 2;
-                        int currentCompetitorsInTime = 0;
-                        
-                        while (iterator.hasNext()) { 
-                            MarkPassing currentMarkPassing = iterator.next();
-                            long diff = currentMarkPassing.getTimePoint().asMillis() - currentTimeToCheck;
-                            if (diff > maxTimeFrameInMs) {
-                                // reset the check
-                                currentCompetitorsInTime = 0;
-                                currentTimeToCheck = currentMarkPassing.getTimePoint().asMillis();
-                            } else {
-                                currentCompetitorsInTime++;
-                                if(currentCompetitorsInTime == enoughCompetitors) {
-                                    Date passingDate = currentMarkPassing.getTimePoint().asDate();
-                                    LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("S");
-                                    legTimepointDTO.firstPassingDate = passingDate; 
-                                    legTimes.add(legTimepointDTO);
-                                    raceTimesInfo.setStartOfRace(passingDate);
-                                    lastLegPassingTime = passingDate;
-                                    break;
+                    synchronized (markPassings) {
+                        int markPassingsCount = Util.size(markPassings);
+                        // require more than half the boats registered for the race to have passed the start mark
+                        if (markPassings != null
+                                && markPassingsCount > Util.size(trackedRace.getRace().getCompetitors()) / 2) {
+                            long maxTimeFrameInMs = 60 * 1000; // = 1 minute
+                            Iterator<MarkPassing> iterator = markPassings.iterator();
+                            long currentTimeToCheck = 0;
+                            int enoughCompetitors = markPassingsCount / 2;
+                            int currentCompetitorsInTime = 0;
+
+                            while (iterator.hasNext()) {
+                                MarkPassing currentMarkPassing = iterator.next();
+                                long diff = currentMarkPassing.getTimePoint().asMillis() - currentTimeToCheck;
+                                if (diff > maxTimeFrameInMs) {
+                                    // reset the check
+                                    currentCompetitorsInTime = 0;
+                                    currentTimeToCheck = currentMarkPassing.getTimePoint().asMillis();
+                                } else {
+                                    currentCompetitorsInTime++;
+                                    if (currentCompetitorsInTime == enoughCompetitors) {
+                                        Date passingDate = currentMarkPassing.getTimePoint().asDate();
+                                        LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("S");
+                                        legTimepointDTO.firstPassingDate = passingDate;
+                                        legTimes.add(legTimepointDTO);
+                                        raceTimesInfo.setStartOfRace(passingDate);
+                                        lastLegPassingTime = passingDate;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -807,17 +810,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     // ensure the passing date is in the right time order; there may perhaps be left-overs for marks to be reached later that
                     // claim it has been passed in the past which may have been an accidental tracker read-out;
                     // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point ordering
-                    for (MarkPassing currentMarkPassing : markPassings) {
-                        Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
-                        if (lastLegPassingTime == null) {
-                            lastLegPassingTime = currentPassingDate;
-                        }
-                        if (currentPassingDate.after(lastLegPassingTime)) {
-                            LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("L" + i++);
-                            legTimepointDTO.firstPassingDate = currentPassingDate; 
-                            legTimes.add(legTimepointDTO);
-                            lastLegPassingTime = currentPassingDate;
-                            break;
+                    synchronized (markPassings) {
+                        for (MarkPassing currentMarkPassing : markPassings) {
+                            Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
+                            if (lastLegPassingTime == null) {
+                                lastLegPassingTime = currentPassingDate;
+                            }
+                            if (currentPassingDate.after(lastLegPassingTime)) {
+                                LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("L" + i++);
+                                legTimepointDTO.firstPassingDate = currentPassingDate;
+                                legTimes.add(legTimepointDTO);
+                                lastLegPassingTime = currentPassingDate;
+                                break;
+                            }
                         }
                     }
                 }

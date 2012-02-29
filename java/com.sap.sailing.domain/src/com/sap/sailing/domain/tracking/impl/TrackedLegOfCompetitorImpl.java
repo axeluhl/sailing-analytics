@@ -374,13 +374,17 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (windwardSpeed == null) {
             return null;
         } else {
-            Iterator<MarkPassing> markPassingsForLegEnd = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo())
-                    .iterator();
             // Has our competitor started the leg already? If not, we won't be able to compute a gap
             if (hasStartedLeg(timePoint)) {
-                if (markPassingsForLegEnd.hasNext()) {
+                Iterable<MarkPassing> markPassingsInOrder = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
+                MarkPassing firstMarkPassing = null;
+                synchronized (markPassingsInOrder) {
+                    Iterator<MarkPassing> markPassingsForLegEnd = markPassingsInOrder.iterator();
+                    firstMarkPassing = markPassingsForLegEnd.next();
+                }
+                if (firstMarkPassing != null) {
                     // someone has already finished the leg
-                    TimePoint whenLeaderFinishedLeg = markPassingsForLegEnd.next().getTimePoint();
+                    TimePoint whenLeaderFinishedLeg = firstMarkPassing.getTimePoint();
                     // Was it before the requested timePoint?
                     if (whenLeaderFinishedLeg.compareTo(timePoint) <= 0) {
                         // Has our competitor also already finished this leg?
