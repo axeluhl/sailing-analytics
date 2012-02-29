@@ -43,28 +43,35 @@ public class RaceRankComparator implements Comparator<Competitor> {
         if (o1 == o2) {
             result = 0;
         } else {
-            // TODO see also bug 340/342; need to synchronize on TrackedRace to avoid concurrent updates to MarkPassings, although this is course-grained
-            NavigableSet<MarkPassing> o1MarkPassings = trackedRace.getMarkPassings(o1).headSet(
-                    markPassingWithTimePoint, /* inclusive */true);
-            NavigableSet<MarkPassing> o2MarkPassings = trackedRace.getMarkPassings(o2).headSet(
-                    markPassingWithTimePoint, /* inclusive */true);
-            result = o2MarkPassings.size() - o1MarkPassings.size(); // inverted: more legs means smaller rank
-            if (result == 0 && o1MarkPassings.size() > 0) {
-                // Competitors are on same leg and both have already started the first leg.
-                // TrackedLegOfCompetitor comparison also correctly uses finish times for a leg
-                // in case we have the final leg, so both competitors finished the race.
-                TrackedLegOfCompetitor o1Leg = trackedRace.getCurrentLeg(o1, timePoint);
-                if (o1Leg == null) {
-                    // both must already finished race; sort by race finish time: earlier time means smaller (better)
-                    // rank
-                    result = o1MarkPassings.last().getTimePoint().compareTo(o2MarkPassings.last().getTimePoint());
-                } else {
-                    TrackedLegOfCompetitor o2Leg = trackedRace.getCurrentLeg(o2, timePoint);
-                    if (o2Leg == null) {
-                        result = 1; // o1Leg != null, so o1 has started leg already, o2 hasn't
-                    } else {
-                        result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()), timePoint)
-                                .compare(o1Leg, o2Leg);
+            NavigableSet<MarkPassing> o1MarkPassings = trackedRace.getMarkPassings(o1);
+            synchronized (o1MarkPassings) {
+                NavigableSet<MarkPassing> o2MarkPassings = trackedRace.getMarkPassings(o2);
+                synchronized (o2MarkPassings) {
+                    NavigableSet<MarkPassing> o1MarkPassingsBeforeTimePoint = o1MarkPassings.headSet(
+                            markPassingWithTimePoint, /* inclusive */true);
+                    NavigableSet<MarkPassing> o2MarkPassingsBeforeTimePoint = o2MarkPassings.headSet(
+                            markPassingWithTimePoint, /* inclusive */true);
+                    result = o2MarkPassingsBeforeTimePoint.size() - o1MarkPassingsBeforeTimePoint.size(); // inverted: more legs means smaller rank
+                    if (result == 0 && o1MarkPassingsBeforeTimePoint.size() > 0) {
+                        // Competitors are on same leg and both have already started the first leg.
+                        // TrackedLegOfCompetitor comparison also correctly uses finish times for a leg
+                        // in case we have the final leg, so both competitors finished the race.
+                        TrackedLegOfCompetitor o1Leg = trackedRace.getCurrentLeg(o1, timePoint);
+                        if (o1Leg == null) {
+                            // both must already finished race; sort by race finish time: earlier time means smaller
+                            // (better)
+                            // rank
+                            result = o1MarkPassingsBeforeTimePoint.last().getTimePoint()
+                                    .compareTo(o2MarkPassingsBeforeTimePoint.last().getTimePoint());
+                        } else {
+                            TrackedLegOfCompetitor o2Leg = trackedRace.getCurrentLeg(o2, timePoint);
+                            if (o2Leg == null) {
+                                result = 1; // o1Leg != null, so o1 has started leg already, o2 hasn't
+                            } else {
+                                result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()),
+                                        timePoint).compare(o1Leg, o2Leg);
+                            }
+                        }
                     }
                 }
             }

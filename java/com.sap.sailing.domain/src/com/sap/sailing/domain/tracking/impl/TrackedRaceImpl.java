@@ -208,9 +208,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public TimePoint getStart() {
         TimePoint result;
-        Iterator<MarkPassing> markPassingsFirstMarkIter = getMarkPassingsInOrder(getRace().getCourse().getFirstWaypoint()).iterator();
-        if (markPassingsFirstMarkIter.hasNext()) {
-            MarkPassing firstMarkPassingFirstMark = markPassingsFirstMarkIter.next();
+        Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getFirstWaypoint());
+        MarkPassing firstMarkPassingFirstMark = null;
+        synchronized (markPassingsInOrder) {
+            Iterator<MarkPassing> markPassingsFirstMarkIter = markPassingsInOrder.iterator();
+            if (markPassingsFirstMarkIter.hasNext()) {
+                firstMarkPassingFirstMark = markPassingsFirstMarkIter.next();
+            }
+        }
+        if (firstMarkPassingFirstMark != null) {
             TimePoint timeOfFirstMarkPassingFirstMark = firstMarkPassingFirstMark.getTimePoint();
             if (startTimeReceived != null) {
                 long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassingFirstMark.asMillis() -
@@ -232,8 +238,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public TimePoint getAssumedEnd() {
         TimePoint result = null;
-        for (MarkPassing passingFinishLine : getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint())) {
-            result = passingFinishLine.getTimePoint();
+        Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint());
+        synchronized (markPassingsInOrder) {
+            for (MarkPassing passingFinishLine : markPassingsInOrder) {
+                result = passingFinishLine.getTimePoint();
+            }
         }
         return result;
     }
@@ -756,19 +765,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
                         // reduce confidence around mark passings:
                         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-                        NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(dummyMarkPassingForNow, /* inclusive */ true);
-                        NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(dummyMarkPassingForNow, /* inclusive */ true);
                         double markPassingProximityConfidenceReduction = 1.0;
-                        if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
-                            markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                    1.0-weigherForMarkPassingProximity.getConfidence(prevMarkPassing.last().getTimePoint(), timePoint));
+                        synchronized (markPassings) {
+                            NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(dummyMarkPassingForNow, /* inclusive */ true);
+                            NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(dummyMarkPassingForNow, /* inclusive */ true);
+                            if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
+                                markPassingProximityConfidenceReduction *= Math.max(0.0,
+                                        1.0-weigherForMarkPassingProximity.getConfidence(prevMarkPassing.last().getTimePoint(), timePoint));
+                            }
+                            if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
+                                markPassingProximityConfidenceReduction *= Math.max(0.0,
+                                        1.0-weigherForMarkPassingProximity.getConfidence(nextMarkPassing.first().getTimePoint(), timePoint));
+                            }
                         }
-                        if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
-                            markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                    1.0-weigherForMarkPassingProximity.getConfidence(nextMarkPassing.first().getTimePoint(), timePoint));
-                        }
-                        SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track.getEstimatedSpeed(timePoint,
-                                weigher);
+                        SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track.getEstimatedSpeed(timePoint, weigher);
                         if (estimatedSpeedWithConfidence != null) {
                             BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
                                     estimatedSpeedWithConfidence.getObject() == null ? null : estimatedSpeedWithConfidence.getObject().getBearing(),
@@ -1117,13 +1127,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Placemark startBest = null;
         Placemark finishBest = null;
         
-        //Get start postition
+        // Get start postition
         Waypoint start = getRace().getCourse().getFirstWaypoint();
         Iterable<MarkPassing> startPassings = getMarkPassingsInOrder(start);
-        if (startPassings.iterator().hasNext()) {
-            MarkPassing startPassing = startPassings.iterator().next();
+        MarkPassing startPassing = null;
+        synchronized (startPassings) {
+            Iterator<MarkPassing> iterator = startPassings.iterator();
+            if (iterator.hasNext()) {
+                startPassing = iterator.next();
+            }
+        }
+        if (startPassing != null) {
             Position startPosition = getApproximatePosition(start, startPassing.getTimePoint());
-
             try {
                 // Get distance to nearest placemark and calculate the search radius
                 Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
@@ -1142,13 +1157,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             // Get finish position
             Waypoint finish = getRace().getCourse().getLastWaypoint();
             Iterable<MarkPassing> finishPassings = getMarkPassingsInOrder(finish);
-            Iterator<MarkPassing> finishPassingsIterator = finishPassings.iterator();
             MarkPassing finishPassing = null;
-            while (finishPassingsIterator.hasNext()) {
-                finishPassing = (MarkPassing) finishPassingsIterator.next();
+            synchronized (finishPassings) {
+                Iterator<MarkPassing> finishPassingsIterator = finishPassings.iterator();
+                while (finishPassingsIterator.hasNext()) {
+                    finishPassing = (MarkPassing) finishPassingsIterator.next();
+                }
             }
             Position finishPosition = getApproximatePosition(finish, finishPassing.getTimePoint());
-
             if (startPosition.getDistance(finishPosition).getKilometers() > ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
                 try {
                     // Get distance to nearest placemark and calculate the search radius
