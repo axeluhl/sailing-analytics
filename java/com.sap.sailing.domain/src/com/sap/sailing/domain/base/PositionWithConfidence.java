@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.base.impl.ScalablePosition;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
 
 /**
@@ -11,5 +11,5 @@ import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
  * @author Axel Uhl (d043530)
  *
  */
-public interface PositionWithConfidence<RelativeTo> extends HasConfidenceAndIsScalable<Triple<Double, Double, Double>, Position, RelativeTo> {
+public interface PositionWithConfidence<RelativeTo> extends HasConfidenceAndIsScalable<ScalablePosition, Position, RelativeTo> {
 }

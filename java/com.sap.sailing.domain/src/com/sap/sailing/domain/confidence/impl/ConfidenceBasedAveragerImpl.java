@@ -63,7 +63,7 @@ public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implem
             }
             // TODO consider greater variance to reduce the confidence
             double newConfidence = confidenceSum / Util.size(values);
-            BaseType result = numerator.divide(confidenceSum, newConfidence);
+            BaseType result = numerator.divide(confidenceSum);
             return new HasConfidenceImpl<ValueType, BaseType, RelativeTo>(result, newConfidence, at);
         }
     }

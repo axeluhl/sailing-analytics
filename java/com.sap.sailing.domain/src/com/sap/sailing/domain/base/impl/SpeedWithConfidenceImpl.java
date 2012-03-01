@@ -36,7 +36,7 @@ public class SpeedWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Doubl
         }
 
         @Override
-        public Speed divide(double divisor, double confidence) {
+        public Speed divide(double divisor) {
             return new KnotSpeedImpl(knots / divisor);
         }
 
