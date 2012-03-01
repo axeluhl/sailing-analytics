@@ -45,25 +45,29 @@ public class RaceRankComparator implements Comparator<Competitor> {
         } else {
             NavigableSet<MarkPassing> o1MarkPassings = trackedRace.getMarkPassings(o1);
             NavigableSet<MarkPassing> o1MarkPassingsBeforeTimePoint;
-            MarkPassing o1LastMarkPassingBeforeTimePoint;
+            MarkPassing o1LastMarkPassingBeforeTimePoint = null;
             int o1MarkPassingsBeforeTimePointSize;
             TrackedLegOfCompetitor o1Leg;
             synchronized (o1MarkPassings) {
                 o1MarkPassingsBeforeTimePoint = o1MarkPassings.headSet(
                         markPassingWithTimePoint, /* inclusive */true);
-                o1LastMarkPassingBeforeTimePoint = o1MarkPassingsBeforeTimePoint.last();
                 o1MarkPassingsBeforeTimePointSize = o1MarkPassingsBeforeTimePoint.size();
+                if (o1MarkPassingsBeforeTimePointSize > 0) {
+                    o1LastMarkPassingBeforeTimePoint = o1MarkPassingsBeforeTimePoint.last();
+                }
                 o1Leg = trackedRace.getCurrentLeg(o1, timePoint);
             }
             NavigableSet<MarkPassing> o2MarkPassings = trackedRace.getMarkPassings(o2);
             NavigableSet<MarkPassing> o2MarkPassingsBeforeTimePoint;
-            MarkPassing o2LastMarkPassingBeforeTimePoint;
+            MarkPassing o2LastMarkPassingBeforeTimePoint = null;
             int o2MarkPassingsBeforeTimePointSize;
             TrackedLegOfCompetitor o2Leg;
             synchronized (o2MarkPassings) {
                 o2MarkPassingsBeforeTimePoint = o2MarkPassings.headSet(markPassingWithTimePoint, /* inclusive */true);
-                o2LastMarkPassingBeforeTimePoint = o2MarkPassingsBeforeTimePoint.last();
                 o2MarkPassingsBeforeTimePointSize = o2MarkPassingsBeforeTimePoint.size();
+                if (o2MarkPassingsBeforeTimePointSize > 0) {
+                    o2LastMarkPassingBeforeTimePoint = o2MarkPassingsBeforeTimePoint.last();
+                }
                 o2Leg = trackedRace.getCurrentLeg(o2, timePoint);
             }
             result = o2MarkPassingsBeforeTimePointSize - o1MarkPassingsBeforeTimePointSize; // inverted: more legs means
