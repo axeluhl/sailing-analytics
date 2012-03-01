@@ -7,6 +7,16 @@ import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
+/**
+ * Separately scales speed and bearing. Instead of considering speed and bearing a single vector that can be scaled, the
+ * bearing is scaled separately, and the speed is scaled as a scalar value independently of the bearing. This is
+ * particularly useful for {@link Wind} scaling where it makes more sense to average the wind speed independently of the
+ * wind direction / bearing than adding up the "wind vectors" and averaging, which would reduce the resulting wind speed
+ * for constant wind speeds across all fixes with different directions.
+ * 
+ * @author Axel Uhl (d043530)
+ * 
+ */
 public class ScalableSpeedWithBearing implements ScalableValue<Triple<Speed, Double, Double>, SpeedWithBearing> {
     private final Speed speed;
     private final double sin;

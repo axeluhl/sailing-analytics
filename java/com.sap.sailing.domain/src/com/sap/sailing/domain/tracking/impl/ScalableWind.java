@@ -6,6 +6,13 @@ import com.sap.sailing.domain.base.impl.ScalableSpeedWithBearing;
 import com.sap.sailing.domain.confidence.ScalableValue;
 import com.sap.sailing.domain.tracking.Wind;
 
+/**
+ * Wind values are scaled by separately scaling their speed and bearing, and separately scaling their time point, and separately
+ * scaling their position. For the separate speed/bearing scaling see also {@link ScalableSpeedWithBearing}.
+ *  
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
     private final ScalablePosition scalablePosition;
     private final double scaledTimePointSumInMilliseconds;
