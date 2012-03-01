@@ -27,7 +27,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
  * {@link ScalableValue} which is then used for computing a weighed sum. The values' weight is their
  * {@link #getConfidence() confidence}. The sum (which is still a {@link ScalableValue} because
  * {@link ScalableValue#add(ScalableValue)} returns again a {@link ScalableValue}) is then
- * {@link ScalableValue#divide(double, double) divided} by the sum of the confidences. This "division" is expected to
+ * {@link ScalableValue#divide(double) divided} by the sum of the confidences. This "division" is expected to
  * produce an object of type <code>AveragesTo</code>. Usually, <code>AveragesTo</code> would be the same as the class
  * implementing this interface.
  * 

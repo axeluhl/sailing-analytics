@@ -17,6 +17,8 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
+import com.google.gwt.maps.client.control.ControlAnchor;
+import com.google.gwt.maps.client.control.ControlPosition;
 import com.google.gwt.maps.client.control.LargeMapControl3D;
 import com.google.gwt.maps.client.control.MenuMapTypeControl;
 import com.google.gwt.maps.client.control.ScaleControl;
@@ -219,9 +221,9 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             public void run() {
                 map = new MapWidget();
                 imageResources.setMap(map);
-                map.addControl(new LargeMapControl3D());
+                map.addControl(new LargeMapControl3D(), new ControlPosition(ControlAnchor.TOP_RIGHT, /* offsetX */ 0, /* offsetY */ 30));
                 map.addControl(new MenuMapTypeControl());
-                map.addControl(new ScaleControl());
+                map.addControl(new ScaleControl(), new ControlPosition(ControlAnchor.BOTTOM_RIGHT, /* offsetX */ 10, /* offsetY */ 20));
                 // Add the map to the HTML host page
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);

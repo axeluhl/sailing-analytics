@@ -161,7 +161,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     private Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate, FixType lastFixAtOrBefore,
             FixType firstFixAtOrAfter) {
-        // TODO bug #169: compute a confidence value for the position returned based on time difference between fix(es) and timePoint; consider using Taylor approximation of more fixes around timePoint to predict and weigh position
+        // TODO bug #346: compute a confidence value for the position returned based on time difference between fix(es) and timePoint; consider using Taylor approximation of more fixes around timePoint to predict and weigh position
         if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
             return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
         } else {
@@ -356,9 +356,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             Iterator<GPSFix> fixIter = relevantFixes.iterator();
             GPSFix last = fixIter.next();
             while (fixIter.hasNext()) {
-                // TODO bug #169: consider time difference between next.getTimepoint() and at to compute a confidence
+                // TODO bug #346: consider time difference between next.getTimepoint() and at to compute a confidence
                 GPSFix next = fixIter.next();
-                // TODO bug #169: use SpeedWithConfidence to aggregate confidence-tagged speed values
+                // TODO bug #345: use SpeedWithConfidence to aggregate confidence-tagged speed values
                 MillisecondsTimePoint relativeTo = new MillisecondsTimePoint((last.getTimePoint().asMillis() + next.getTimePoint().asMillis())/2);
                 Speed speed = last.getPosition().getDistance(next.getPosition())
                         .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis());

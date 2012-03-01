@@ -50,7 +50,7 @@ implements BearingWithConfidence<RelativeTo>, IsScalable<Pair<Double, Double>, B
          * is returned in such cases.
          */
         @Override
-        public Bearing divide(double divisor, double confidence) {
+        public Bearing divide(double divisor) {
             Bearing result;
             if (sin == 0 && cos == 0) {
                 result = null;

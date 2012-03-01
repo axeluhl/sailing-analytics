@@ -44,34 +44,46 @@ public class RaceRankComparator implements Comparator<Competitor> {
             result = 0;
         } else {
             NavigableSet<MarkPassing> o1MarkPassings = trackedRace.getMarkPassings(o1);
+            NavigableSet<MarkPassing> o1MarkPassingsBeforeTimePoint;
+            MarkPassing o1LastMarkPassingBeforeTimePoint;
+            int o1MarkPassingsBeforeTimePointSize;
+            TrackedLegOfCompetitor o1Leg;
             synchronized (o1MarkPassings) {
-                NavigableSet<MarkPassing> o2MarkPassings = trackedRace.getMarkPassings(o2);
-                synchronized (o2MarkPassings) {
-                    NavigableSet<MarkPassing> o1MarkPassingsBeforeTimePoint = o1MarkPassings.headSet(
-                            markPassingWithTimePoint, /* inclusive */true);
-                    NavigableSet<MarkPassing> o2MarkPassingsBeforeTimePoint = o2MarkPassings.headSet(
-                            markPassingWithTimePoint, /* inclusive */true);
-                    result = o2MarkPassingsBeforeTimePoint.size() - o1MarkPassingsBeforeTimePoint.size(); // inverted: more legs means smaller rank
-                    if (result == 0 && o1MarkPassingsBeforeTimePoint.size() > 0) {
-                        // Competitors are on same leg and both have already started the first leg.
-                        // TrackedLegOfCompetitor comparison also correctly uses finish times for a leg
-                        // in case we have the final leg, so both competitors finished the race.
-                        TrackedLegOfCompetitor o1Leg = trackedRace.getCurrentLeg(o1, timePoint);
-                        if (o1Leg == null) {
-                            // both must already finished race; sort by race finish time: earlier time means smaller
-                            // (better)
-                            // rank
-                            result = o1MarkPassingsBeforeTimePoint.last().getTimePoint()
-                                    .compareTo(o2MarkPassingsBeforeTimePoint.last().getTimePoint());
-                        } else {
-                            TrackedLegOfCompetitor o2Leg = trackedRace.getCurrentLeg(o2, timePoint);
-                            if (o2Leg == null) {
-                                result = 1; // o1Leg != null, so o1 has started leg already, o2 hasn't
-                            } else {
-                                result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()),
-                                        timePoint).compare(o1Leg, o2Leg);
-                            }
-                        }
+                o1MarkPassingsBeforeTimePoint = o1MarkPassings.headSet(
+                        markPassingWithTimePoint, /* inclusive */true);
+                o1LastMarkPassingBeforeTimePoint = o1MarkPassingsBeforeTimePoint.last();
+                o1MarkPassingsBeforeTimePointSize = o1MarkPassingsBeforeTimePoint.size();
+                o1Leg = trackedRace.getCurrentLeg(o1, timePoint);
+            }
+            NavigableSet<MarkPassing> o2MarkPassings = trackedRace.getMarkPassings(o2);
+            NavigableSet<MarkPassing> o2MarkPassingsBeforeTimePoint;
+            MarkPassing o2LastMarkPassingBeforeTimePoint;
+            int o2MarkPassingsBeforeTimePointSize;
+            TrackedLegOfCompetitor o2Leg;
+            synchronized (o2MarkPassings) {
+                o2MarkPassingsBeforeTimePoint = o2MarkPassings.headSet(markPassingWithTimePoint, /* inclusive */true);
+                o2LastMarkPassingBeforeTimePoint = o2MarkPassingsBeforeTimePoint.last();
+                o2MarkPassingsBeforeTimePointSize = o2MarkPassingsBeforeTimePoint.size();
+                o2Leg = trackedRace.getCurrentLeg(o2, timePoint);
+            }
+            result = o2MarkPassingsBeforeTimePointSize - o1MarkPassingsBeforeTimePointSize; // inverted: more legs means
+                                                                                            // smaller rank
+            if (result == 0 && o1MarkPassingsBeforeTimePointSize > 0) {
+                // Competitors are on same leg and both have already started the first leg.
+                // TrackedLegOfCompetitor comparison also correctly uses finish times for a leg
+                // in case we have the final leg, so both competitors finished the race.
+                if (o1Leg == null) {
+                    // both must already finished race; sort by race finish time: earlier time means smaller
+                    // (better)
+                    // rank
+                    result = o1LastMarkPassingBeforeTimePoint.getTimePoint().compareTo(
+                            o2LastMarkPassingBeforeTimePoint.getTimePoint());
+                } else {
+                    if (o2Leg == null) {
+                        result = 1; // o1Leg != null, so o1 has started leg already, o2 hasn't
+                    } else {
+                        result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()), timePoint)
+                                .compare(o1Leg, o2Leg);
                     }
                 }
             }

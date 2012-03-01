@@ -700,7 +700,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 getMillisecondsOverWhichToAverageSpeed());
         Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = clusterBearingsForWindEstimation(timePoint,
-                dummyMarkPassingForNow, weigher);
+                position, dummyMarkPassingForNow, weigher);
         // use the minimum confidence of the four "quadrants" as the result's confidence
         BearingWithConfidenceImpl<TimePoint> reversedUpwindAverage = null;
         int upwindNumberOfRelevantBoats = 0;
@@ -742,8 +742,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 new KnotSpeedWithBearingImpl(/* speedInKnots */ numberOfBoatsRelevantForEstimate, resultBearing.getObject()));
     }
 
+    // TODO confidences need to be computed not only based on timePoint but also on position: boats far away don't contribute as confidently as boats close by
     private Map<LegType, BearingWithConfidenceCluster<TimePoint>> clusterBearingsForWindEstimation(TimePoint timePoint,
-            DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
+            Position position, DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
         Weigher<TimePoint> weigherForMarkPassingProximity = new LinearTimeDifferenceWeigher(getMillisecondsOverWhichToAverageSpeed()*5);
         Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<LegType, BearingWithConfidenceCluster<TimePoint>>();
         for (LegType legType : LegType.values()) {
