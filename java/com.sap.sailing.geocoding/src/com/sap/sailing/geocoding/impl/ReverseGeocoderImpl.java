@@ -53,7 +53,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
             p = cachedPlacemarks.getC().get(0);
         } else {
             JSONArray geonames = callNearestService(position);
-            if (!geonames.isEmpty()) {
+            if (geonames != null && !geonames.isEmpty()) {
                 p = JSONToPlacemark((JSONObject) geonames.get(0));
 
                 if (p != null) {
