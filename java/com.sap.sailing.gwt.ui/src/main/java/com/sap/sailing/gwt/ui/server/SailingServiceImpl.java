@@ -1041,8 +1041,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 
                 //Creating raceDTO and getting the dates
                 race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
-                race.startOfTracking = trackedRace.getStartOfTracking().asDate();
-                race.startOfRace = trackedRace.getStart().asDate();
+                race.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
+                race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                 race.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
             }
             dto.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
