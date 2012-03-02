@@ -192,19 +192,20 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 chartData = new MultiCompetitorRaceDataDTO(getDataToShow());
             }
             
-            final ArrayList<Pair<Date, CompetitorDTO>> competitorsToLoad = new ArrayList<Pair<Date, CompetitorDTO>>();
+            final ArrayList<Pair<Date, CompetitorDTO>> dataQuery = new ArrayList<Pair<Date, CompetitorDTO>>();
             for (CompetitorDTO competitor : getVisibleCompetitors()) {
                 Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
                 if (!chartData.contains(competitor)) {
-                    competitorsToLoad.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
+                    dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
                 } else if (chartData.getCompetitorData(competitor).getDateOfNewestData().before(chartDataDateOfNewestData)) {
                     Date competitorDateOfNewestData = chartData.getCompetitorData(competitor).getDateOfNewestData();
-                    competitorsToLoad.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime() + getStepSize()), competitor));
+                    dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime() + getStepSize()), competitor));
                 }
             }
             
-            sailingService.getCompetitorsRaceData(getSelectedRace(), competitorsToLoad, getStepSize(),
-                    getDataToShow(), new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+            sailingService.getCompetitorsRaceData(getSelectedRace(), dataQuery, new Date(System.currentTimeMillis()
+                    - timer.getLivePlayDelayInMillis()), getStepSize(), getDataToShow(),
+                    new AsyncCallback<MultiCompetitorRaceDataDTO>() {
 
                         @Override
                         public void onFailure(Throwable caught) {

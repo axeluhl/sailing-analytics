@@ -1390,12 +1390,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitorsQuery,
-            long stepSize, DetailType detailType) throws NoWindException {
+            Date to, long stepSize, DetailType detailType) throws NoWindException {
         MultiCompetitorRaceDataDTO data = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
+            TimePoint endTime = to != null ? new MillisecondsTimePoint(to) : trackedRace.getTimePointOfNewestEvent();
             data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStart(),
-                        trackedRace.getTimePointOfNewestEvent(), stepSize, detailType);
+                        endTime, stepSize, detailType);
         }
         return data;
     }
