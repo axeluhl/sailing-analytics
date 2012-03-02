@@ -12,6 +12,7 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Legend;
+import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
@@ -27,6 +28,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -49,7 +51,9 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     /**
      * After the constructor finishes, holds one series for each wind source.
      */
-    private final Map<WindSource, Series> windSourceSeries;
+    private final Map<WindSource, Series> windSourceDirectionSeries;
+    private final Map<WindSource, Series> windSourceSpeedSeries;
+    
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final Chart chart;
@@ -59,6 +63,8 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
     private RaceIdentifier selectedRaceIdentifier;
+    
+    private final ColorMap<WindSource> colorMap;
 
     private final SimplePanel mainPanel;
 
@@ -74,7 +80,9 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.windSourceSeries = new HashMap<WindSource, Series>();
+        this.windSourceDirectionSeries = new HashMap<WindSource, Series>();
+        this.windSourceSpeedSeries = new HashMap<WindSource, Series>();
+        this.colorMap = new ColorMap<WindSource>();
         this.windSourcesToDisplay = new HashSet<WindSource>();
         this.timer = timer;
         chart = new Chart()
@@ -102,14 +110,17 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
-        chart.getYAxis(1).setAxisTitleText(stringMessages.averageSpeedInKnotsUnit()).setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
+            .setStartOnTick(false).setShowFirstLabel(false);
         
         mainPanel = new SimplePanel();
         mainPanel.setWidget(chart);
         
         for (WindSource windSource : WindSource.values()) {
-            Series series = createSeries(windSource);
-            windSourceSeries.put(windSource, series);
+            Series directionSeries = createDirectionSeries(windSource);
+            windSourceDirectionSeries.put(windSource, directionSeries);
+            Series speedSeries = createSpeedSeries(windSource);
+            windSourceSpeedSeries.put(windSource, speedSeries);
         }
         updateSettings(settings);
         if (raceSelectionProvider != null) {
@@ -137,11 +148,14 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             visible.add(series);
         }
         for (WindSource windSource : windSourcesToDisplay) {
-            Series series = windSourceSeries.get(windSource);
-            if (!visible.contains(series)) {
-                chart.addSeries(series);
+            Series directionSeries = windSourceDirectionSeries.get(windSource);
+            Series speedSeries = windSourceSpeedSeries.get(windSource);
+            if (!visible.contains(directionSeries)) {
+                chart.addSeries(directionSeries);
+                chart.addSeries(speedSeries);
             } else {
-                visible.remove(series);
+                visible.remove(directionSeries);
+                visible.remove(speedSeries);
             }
         }
         for (Series seriesToRemove : visible) {
@@ -149,11 +163,24 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         }
     }
 
-    private Series createSeries(WindSource windSource) {
+    private Series createDirectionSeries(WindSource windSource) {
         Series newSeries = chart
                 .createSeries()
                 .setType(Series.Type.LINE)
-                .setName(windSource.name());
+                .setName(stringMessages.fromDeg()+" "+windSource.name())
+                .setYAxis(0)
+                .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)));
+        return newSeries;
+    }
+
+    private Series createSpeedSeries(WindSource windSource) {
+        Series newSeries = chart
+                .createSeries()
+                .setType(Series.Type.LINE)
+                .setName(stringMessages.windSpeed()+" "+windSource.name())
+                .setYAxis(1) // use the second Y-axis
+                .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.DOT)
+                        .setColor(colorMap.getColorByID(windSource))); // show only the markers, not the connecting lines
         return newSeries;
     }
 
@@ -165,9 +192,11 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
             WindSource windSource = e.getKey();
-            Series series = windSourceSeries.get(windSource);
+            Series directionSeries = windSourceDirectionSeries.get(windSource);
+            Series speedSeries = windSourceSpeedSeries.get(windSource);
             WindTrackInfoDTO windTrackInfo = e.getValue();
-            Point[] points = new Point[windTrackInfo.windFixes.size()];
+            Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
+            Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
             int i=0;
             for (WindDTO wind : windTrackInfo.windFixes) {
                 if (timeOfEarliestRequestInMillis == null || wind.timepoint<timeOfEarliestRequestInMillis) {
@@ -176,22 +205,31 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 if (timeOfLatestRequestInMillis == null || wind.timepoint>timeOfLatestRequestInMillis) {
                     timeOfLatestRequestInMillis = wind.timepoint;
                 }
-                Point newPoint = new Point(wind.timepoint, wind.dampenedTrueWindFromDeg);
+                Point newDirectionPoint = new Point(wind.timepoint, wind.dampenedTrueWindFromDeg);
                 if (wind.dampenedTrueWindSpeedInKnots != null) {
-                    newPoint.setName(numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+stringMessages.averageSpeedInKnotsUnit());
+                    newDirectionPoint.setName(numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+stringMessages.averageSpeedInKnotsUnit());
                 }
-                points[i++] = newPoint;
+                directionPoints[i] = newDirectionPoint;
+                Point newSpeedPoint = new Point(wind.timepoint, wind.dampenedTrueWindSpeedInKnots);
+                speedPoints[i++] = newSpeedPoint;
             }
-            Point[] newPoints;
+            Point[] newDirectionPoints;
+            Point[] newSpeedPoints;
             if (append) {
-                Point[] oldPoints = series.getPoints();
-                newPoints = new Point[oldPoints.length + points.length];
-                System.arraycopy(oldPoints, 0, newPoints, 0, oldPoints.length);
-                System.arraycopy(points, 0, newPoints, oldPoints.length, points.length);
+                Point[] oldDirectionPoints = directionSeries.getPoints();
+                newDirectionPoints = new Point[oldDirectionPoints.length + directionPoints.length];
+                System.arraycopy(oldDirectionPoints, 0, newDirectionPoints, 0, oldDirectionPoints.length);
+                System.arraycopy(directionPoints, 0, newDirectionPoints, oldDirectionPoints.length, directionPoints.length);
+                Point[] oldSpeedPoints = speedSeries.getPoints();
+                newSpeedPoints = new Point[oldSpeedPoints.length + speedPoints.length];
+                System.arraycopy(oldSpeedPoints, 0, newSpeedPoints, 0, oldSpeedPoints.length);
+                System.arraycopy(speedPoints, 0, newSpeedPoints, oldSpeedPoints.length, speedPoints.length);
             } else {
-                newPoints = points;
+                newDirectionPoints = directionPoints;
+                newSpeedPoints = speedPoints;
             }
-            series.setPoints(newPoints);
+            directionSeries.setPoints(newDirectionPoints);
+            speedSeries.setPoints(newSpeedPoints);
         }
     }
 
@@ -215,8 +253,10 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         windSourcesToDisplay.addAll(newSettings.getWindSourcesToDisplay());
         chart.removeAllSeries(/* redraw */ false);
         for (WindSource windSourceToDisplay : windSourcesToDisplay) {
-            Series series = windSourceSeries.get(windSourceToDisplay);
-            chart.addSeries(series);
+            Series directionSeries = windSourceDirectionSeries.get(windSourceToDisplay);
+            chart.addSeries(directionSeries);
+            Series speedSeries = windSourceSpeedSeries.get(windSourceToDisplay);
+            chart.addSeries(speedSeries);
         }
     }
 
