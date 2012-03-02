@@ -101,7 +101,8 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         }));
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
-        chart.getYAxis().setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis(1).setAxisTitleText(stringMessages.averageSpeedInKnotsUnit()).setStartOnTick(false).setShowFirstLabel(false);
         
         mainPanel = new SimplePanel();
         mainPanel.setWidget(chart);
