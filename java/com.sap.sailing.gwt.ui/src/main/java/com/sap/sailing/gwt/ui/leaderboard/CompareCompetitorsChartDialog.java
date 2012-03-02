@@ -28,8 +28,6 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedEvent;
-import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel.DataLoadedHandler;
 import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
 
@@ -58,13 +56,6 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         multiChartPanel = new MultiChartPanel(sailingService, competitorSelectionProvider, raceSelectionProvider,
                 timer, stringConstants, errorReporter);
         multiChartPanel.setSize("100%", "100%");
-        multiChartPanel.addDataLoadedHandler(new DataLoadedHandler() {
-            @Override
-            public void onDataLoaded(DataLoadedEvent event) {
-                CompareCompetitorsChartDialog.this.setPopupPosition(5, 5);
-                CompareCompetitorsChartDialog.this.show();
-            }
-        });
         
         FlowPanel contentPanel = new FlowPanel();
 

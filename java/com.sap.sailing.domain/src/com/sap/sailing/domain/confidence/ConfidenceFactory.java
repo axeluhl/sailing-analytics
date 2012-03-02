@@ -7,8 +7,11 @@ public interface ConfidenceFactory {
     ConfidenceFactory INSTANCE = new ConfidenceBasedAveragerFactoryImpl();
     
     /**
-     * @param weigher used to determine the confidence of the elements to be averaged, relative to the reference point given
-     * as parameter to {@link ConfidenceBasedAverager#getAverage(Iterable, Object)}.
+     * @param weigher
+     *            used to determine the confidence of the elements to be averaged, relative to the reference point given
+     *            as parameter to {@link ConfidenceBasedAverager#getAverage(Iterable, Object)}. If <code>null</code>,
+     *            1.0 will be assumed as default confidence for all values provided, regardless the reference point
+     *            relative to which the average is to be computed
      */
     <ValueType, BaseType, RelativeTo> ConfidenceBasedAverager<ValueType, BaseType, RelativeTo> createAverager(Weigher<RelativeTo> weigher);
     

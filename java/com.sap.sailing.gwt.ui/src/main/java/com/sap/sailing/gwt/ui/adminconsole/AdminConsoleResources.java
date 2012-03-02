@@ -59,7 +59,4 @@ interface AdminConsoleResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_DW_Starbord_Selected.png")
     ImageResource highlightedBoatIconDW_Starboard();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/StartFinishBoat/start_finishboat.png")
-    ImageResource startFinishBoat();
 }

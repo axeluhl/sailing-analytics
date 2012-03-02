@@ -240,15 +240,22 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
         Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
         synchronized (this) {
-            for (MarkPassing oldMarkPassing : getMarkPassings(competitor)) {
-                oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);
+            NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
+            synchronized (markPassingsForCompetitor) {
+                for (MarkPassing oldMarkPassing : markPassingsForCompetitor) {
+                    oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);
+                }
             }
             clearMarkPassings(competitor);
-            NavigableSet<MarkPassing> competitorMarkPassings = getMarkPassings(competitor);
             TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
             for (MarkPassing markPassing : markPassings) {
-                competitorMarkPassings.add(markPassing);
-                getMarkPassingsInOrder(markPassing.getWaypoint()).add(markPassing);
+                synchronized (markPassingsForCompetitor) {
+                    markPassingsForCompetitor.add(markPassing);
+                }
+                Collection<MarkPassing> markPassingsInOrderForWaypoint = getMarkPassingsInOrder(markPassing.getWaypoint());
+                synchronized (markPassingsInOrderForWaypoint) {
+                    markPassingsInOrderForWaypoint.add(markPassing);
+                }
                 if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
                     timePointOfLatestEvent = markPassing.getTimePoint();
                 }
@@ -267,11 +274,17 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     private void clearMarkPassings(Competitor competitor) {
-        Iterator<MarkPassing> mpIter = getMarkPassings(competitor).iterator();
-        while (mpIter.hasNext()) {
-            MarkPassing mp = mpIter.next();
-            mpIter.remove();
-            getMarkPassingsInOrder(mp.getWaypoint()).remove(mp);
+        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        synchronized (markPassings) {
+            Iterator<MarkPassing> mpIter = markPassings.iterator();
+            while (mpIter.hasNext()) {
+                MarkPassing mp = mpIter.next();
+                mpIter.remove();
+                Collection<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(mp.getWaypoint());
+                synchronized (markPassingsInOrder) {
+                    markPassingsInOrder.remove(mp);
+                }
+            }
         }
     }
 

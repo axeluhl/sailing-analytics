@@ -15,14 +15,13 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorInRaceDTO;
-import com.sap.sailing.gwt.ui.shared.CompetitorsAndTimePointsDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -140,10 +139,10 @@ public interface SailingService extends RemoteService {
     
     String[] getCountryCodes();
     
-    CompetitorInRaceDTO getCompetitorRaceData(RaceIdentifier race,
-            CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO, DetailType dataType) throws NoWindException;
+//    CompetitorInRaceDTO getCompetitorRaceData(RaceIdentifier race,
+//            CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO, DetailType dataType) throws NoWindException;
 
-    CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize);
+//    CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize);
     
     Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, double meters) throws NoWindException;
@@ -164,4 +163,7 @@ public interface SailingService extends RemoteService {
     LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description);
     
     void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards);
+
+    MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitors, long stepSize, DetailType detailType) 
+            throws NoWindException;
 }

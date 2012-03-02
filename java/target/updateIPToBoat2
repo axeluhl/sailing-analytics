@@ -1,0 +1,11 @@
+#!/bin/sh
+# updates a Windows machine's WiFi IP address to the sapsailing.com apache configuration
+# using the updateRedirect CGI-BIN script on the server side
+# Note the "grep" for the German output of ipconfig on a German Windows installation...
+if [ "$1" = "" ]; then
+  echo "Usage: updateIPToBoat2 <port>"
+else
+  ip=`ipconfig /all | grep Bevorzugt | grep IPv4 | sed -e 's/^.*: \([^(]*\)(.*$/\1/'`
+  echo IP address is $ip
+  wget -O /tmp/updateIPToBoat2.out "http://bugzilla.sapsailing.com/cgi-bin/updateRedirect?name=boat2&ip=$ip&port=$1"
+fi

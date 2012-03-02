@@ -135,7 +135,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         Iterator<Wind> beforeIter = beforeSet.descendingIterator();
         Iterator<Wind> afterIter = afterSet.iterator();
         double knotSum = 0;
-        // TODO bug #169: also measure speed with confidence; return confidence
+        // TODO bug #345: also measure speed with confidence; return confidence
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(millisecondsOverWhichToAverage/10);
         BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         int count = 0;
@@ -161,7 +161,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     beforeIntervalEnd = beforeWind.getTimePoint();
                 }
                 knotSum += beforeWind.getKnots();
-                // TODO bug #169: replace confidence with passed-through confidence of beforeWind fix's confidence
+                // TODO bug #346: replace confidence with passed-through confidence of beforeWind fix's confidence
                 bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(beforeWind.getBearing(), /* confidence */ 0.9, beforeWind.getTimePoint()));
                 count++;
                 if (beforeIter.hasNext()) {
@@ -176,7 +176,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     afterIntervalStart = afterWind.getTimePoint();
                 }
                 knotSum += afterWind.getKnots();
-                // TODO bug #169: replace confidence with passed-through confidence of beforeWind fix's confidence
+                // TODO bug #346: replace confidence with passed-through confidence of beforeWind fix's confidence
                 bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(afterWind.getBearing(), /* confidence */ 0.9, afterWind.getTimePoint()));
                 count++;
                 if (afterIter.hasNext()) {
@@ -191,7 +191,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         if (count == 0) {
             return null;
         } else {
-            // TODO bug #169: pass on confidence
+            // TODO bug #346: pass on confidence
             BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
             SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, average == null ? null : average.getObject());
             return new WindImpl(p, at, avgWindSpeed);
