@@ -260,6 +260,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             selectedRaceIdentifier = selectedRaces.iterator().next();
             timeOfEarliestRequestInMillis = null;
             timeOfLatestRequestInMillis = null;
+            // TODO bug #363: if race is not in replay mode, fetch only up to now-delay
             loadData(selectedRaceIdentifier, /* from */null, /* to */
                     new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */false);
         } else {
@@ -279,6 +280,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > date.getTime()) {
                 loadData(selectedRaceIdentifier, null, date, /* append */ true);
             } else if (timeOfLatestRequestInMillis < date.getTime()) {
+                // TODO bug #363: if race is not in replay mode, fetch only up to now-delay
                 loadData(selectedRaceIdentifier, new Date(timeOfLatestRequestInMillis), /* to */
                         new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */true);
             }
