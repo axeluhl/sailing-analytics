@@ -44,6 +44,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
@@ -117,7 +118,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
         List<RaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
         if(!selectedRaces.isEmpty()) {
-            loadData(true);
+            Date to = timer.getPlayMode() == PlayModes.Live ? new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()) : null;
+            loadData(true, to);
         }
         timer.addTimeListener(this);
     }
@@ -182,8 +184,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      * If no competitor is visible, is the {@link #noCompetitorsSelectedLabel} displayed.
      * 
      * @param showBusyIndicator If <code>true</code> is the busy indicator shown while loading the data from the server.
+     * @param to The date until the data should be loaded
      */
-    protected void loadData(boolean showBusyIndicator) {
+    protected void loadData(boolean showBusyIndicator, Date to) {
         if (hasVisibleCompetitors()) {
             if (showBusyIndicator) {
                 setWidget(busyIndicatorPanel);
@@ -203,8 +206,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 }
             }
             
-            sailingService.getCompetitorsRaceData(getSelectedRace(), dataQuery, new Date(System.currentTimeMillis()
-                    - timer.getLivePlayDelayInMillis()), getStepSize(), getDataToShow(),
+            sailingService.getCompetitorsRaceData(getSelectedRace(), dataQuery, to, getStepSize(), getDataToShow(),
                     new AsyncCallback<MultiCompetitorRaceDataDTO>() {
 
                         @Override
@@ -245,7 +247,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        loadData(true);
+        Date to = timer.getPlayMode() == PlayModes.Live ? new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()) : null;
+        loadData(true, to);
     }
     
     @Override
@@ -416,7 +419,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     /**
      * Updates the settings known to be contained in {@link ChartSettings}. Subclasses have to update settings provided
-     * by subclasses thereof. Subclasses also need to call {@link #clearChart()} and {@link #loadData(boolean)}, if this method returns <code>true</code>;
+     * by subclasses thereof. Subclasses also need to call {@link #clearChart()} and {@link #loadData(boolean, Date)}, if this method returns <code>true</code>;
      * 
      * @return <code>true</code> if the settings had been changed and a clearing and loading is needed.
      */
@@ -447,7 +450,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     
     /**
      * Updates the {@link #dataToShow} field, creates a new chart for the new <code>dataToShow</code> and clears the {@link #chartData}.<br />
-     * Doesn't {@link #loadData(boolean) load the data}.
+     * Doesn't {@link #loadData(boolean, Date) load the data}.
      * 
      * @return <code>true</code> if the data to show changed
      */
@@ -476,7 +479,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
       setChartData(null);
       clearChart();
-      loadData(true);
+      loadData(true, null);
     }
 
     /**
@@ -525,7 +528,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             Date newestEvent = getChartData().getOldestDateOfNewestData();
             if (hasVisibleCompetitors()
                     && (newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
-                loadData(false);
+                loadData(false, new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()));
             }
         }
     }

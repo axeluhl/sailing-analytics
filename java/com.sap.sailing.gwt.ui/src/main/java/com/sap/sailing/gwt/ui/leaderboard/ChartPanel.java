@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Date;
+
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -7,6 +9,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
@@ -44,7 +47,8 @@ public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Com
     public void updateSettings(ChartSettings newSettings) {
         updateSettingsOnly(newSettings);
         clearChart();
-        loadData(true);
+        Date to = timer.getPlayMode() == PlayModes.Live ? new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()) : null;
+        loadData(true, to);
     }
 
     @Override
