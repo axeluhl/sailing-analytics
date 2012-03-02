@@ -97,16 +97,17 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
             }
             
             JSONArray geonames = callNearbyService(searchPosition, limitedRadius, maxRows);
-            Iterator<Object> iterator = geonames.iterator();
-            placemarks = !geonames.isEmpty() ? new ArrayList<Placemark>() : null;
-            while (iterator.hasNext()) {
-                JSONObject object = (JSONObject) iterator.next();
-                Placemark place = JSONToPlacemark(object);
-                if (place != null) {
-                    placemarks.add(JSONToPlacemark(object));
+            if (geonames != null) {
+                Iterator<Object> iterator = geonames.iterator();
+                placemarks = iterator.hasNext() ? new ArrayList<Placemark>() : null;
+                while (iterator.hasNext()) {
+                    JSONObject object = (JSONObject) iterator.next();
+                    Placemark place = JSONToPlacemark(object);
+                    if (place != null) {
+                        placemarks.add(JSONToPlacemark(object));
+                    }
                 }
             }
-
             // If there are no cached placemarks for the requested Position just cache them, otherwise update the cache
             if (cachedPlacemarks == null && placemarks != null) {
                 cachePlacemarks(searchPosition, limitedRadius, placemarks);
@@ -191,8 +192,8 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      *            The results of the search
      */
     private void cachePlacemarks(Position position, Double radius, List<Placemark> placemarks) {
-//        Collections.sort(placemarks, new Placemark.ByDistance(position));
-//        cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
+        Collections.sort(placemarks, new Placemark.ByDistance(position));
+        cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
     }
     
     /**
@@ -200,7 +201,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      * 
      * @param cachedPoint
      *            The position of the data which should be replaced. Has to be a Position which was cached before.<br />
-     *            The paramater is as best a value from a Triple in the cache, like <code>cachedData.getA()</code>.
+     *            The parameter is as best a value from a Triple in the cache, like <code>cachedData.getA()</code>.
      * @param newRadius
      *            The new radius of the cached search results
      * @param newPlacemarks
