@@ -261,8 +261,8 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             selectedRaceIdentifier = selectedRaces.iterator().next();
             timeOfEarliestRequestInMillis = null;
             timeOfLatestRequestInMillis = null;
-            Date to = timer.getPlayMode() == PlayModes.Live ? new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()) : null;
-            loadData(selectedRaceIdentifier, /* from */null, to, /* append */false);
+            loadData(selectedRaceIdentifier, /* from */null, /* to */
+                    new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */false);
         } else {
             clearChart();
         }
@@ -280,14 +280,15 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > date.getTime()) {
                 loadData(selectedRaceIdentifier, null, date, /* append */ true);
             } else if (timeOfLatestRequestInMillis < date.getTime()) {
-                Date to = timer.getPlayMode() == PlayModes.Live ? new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()) : null;
-                loadData(selectedRaceIdentifier, new Date(timeOfLatestRequestInMillis), to, /* append */true);
+                loadData(selectedRaceIdentifier, new Date(timeOfLatestRequestInMillis), /* to */
+                        new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */true);
             }
             // otherwise the cache spans across date and so we don't need to load anything
         } else {
             // assuming play mode is replay / non-live
             if (timeOfLatestRequestInMillis == null) {
-                loadData(selectedRaceIdentifier, /* from */null, /* to */ null, /* append */false); // replace old series
+                loadData(selectedRaceIdentifier, /* from */null, /* to */
+                        new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */false); // replace old series
             }
         }
     }
