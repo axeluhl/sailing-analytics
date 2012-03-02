@@ -112,7 +112,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setAxisTitleText(stringMessages.time());
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
-            .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0);
+            .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         
         mainPanel = new SimplePanel();
         mainPanel.setWidget(chart);
