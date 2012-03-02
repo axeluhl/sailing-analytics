@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -148,6 +149,10 @@ public interface TrackedRace {
      * which point in time. This can, e.g., be used to sort those competitors who already finished a leg within the leg
      * that ends with <code>waypoint</code>. The remaining competitors need to be ordered by the advantage line-related
      * distance to the waypoint.
+     * 
+     * @return the iterable sequence of {@link MarkPassing}s as described above. To iterate on the resulting collection
+     *         the caller needs to synchronize on the iterable returned because insertions into the underlying
+     *         collection will also synchronize on that collection.
      */
     Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint);
 
@@ -194,6 +199,16 @@ public interface TrackedRace {
      */
     TimePoint getTimePointOfNewestEvent();
 
+    /**
+     * @return the mark passings for <code>competitor</code> in this race received so far; the mark passing objects are
+     * returned such that their {@link MarkPassing#getWaypoint() waypoints} are ordered in the same way they are ordered
+     * in the race's {@link Course}. Note, that this doesn't necessarily guarantee ascending time points, particularly
+     * if premature mark passings have been detected accidentally as can be the case with some tracking providers such
+     * as TracTrac. If the caller wants to iterate on the resulting collection or construct a {@link SortedSet#headSet(Object)}
+     * or {@link SortedSet#tailSet(Object)} and then iterate over that, the caller needs to synchronize on the
+     * collection returned because insertions into the competitor's mark passing collection will also synchronize
+     * on that collection.
+     */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
 
     void removeWind(Wind wind, WindSource windSource);

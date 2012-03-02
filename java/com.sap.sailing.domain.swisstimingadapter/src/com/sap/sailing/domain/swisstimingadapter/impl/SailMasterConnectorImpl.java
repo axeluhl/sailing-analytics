@@ -490,8 +490,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
                         Double.valueOf(fixSections[fixDetailIndex]));
                 fixDetailIndex++;
                 fixes.add(new FixImpl(boatID, trackerType, ageOfDataInMilliseconds, position, speed, nextMarkIndex,
-                        rank,
-                        averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark));
+                        rank, averageSpeedOverGround, velocityMadeGood, distanceToLeader, distanceToNextMark));
             }
         }
         for (SailMasterListener listener : listeners) {

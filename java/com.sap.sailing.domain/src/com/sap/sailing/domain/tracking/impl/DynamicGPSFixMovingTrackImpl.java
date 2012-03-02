@@ -100,10 +100,15 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
             NavigableSet<GPSFixMoving> fixesToUseForSpeedEstimation) {
         // TODO factor out the obtaining of relevant fixes which should be the same in super.getEstimatedSpeed(at)
         DummyGPSFixMoving atTimed = new DummyGPSFixMoving(at);
-        NavigableSet<GPSFixMoving> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
-        NavigableSet<GPSFixMoving> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
         List<GPSFixMoving> relevantFixes = new LinkedList<GPSFixMoving>();
+        boolean beforeSetEmpty;
+        GPSFixMoving beforeSetLast = null;
         synchronized (this) {
+            NavigableSet<GPSFixMoving> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
+            beforeSetEmpty = beforeSet.isEmpty(); // ask this while holding the lock
+            if (!beforeSetEmpty) {
+                beforeSetLast = beforeSet.last();
+            }
             for (GPSFixMoving beforeFix : beforeSet.descendingSet()) {
                 if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
                     break;
@@ -111,7 +116,14 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 relevantFixes.add(0, beforeFix);
             }
         }
+        boolean afterSetEmpty;
+        GPSFixMoving afterSetFirst = null;
         synchronized (this) {
+            NavigableSet<GPSFixMoving> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
+            afterSetEmpty = afterSet.isEmpty(); // ask this while holding the lock
+            if (!afterSetEmpty) {
+                afterSetFirst = afterSet.first();
+            }
             for (GPSFixMoving afterFix : afterSet) {
                 if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
                     break;
@@ -121,16 +133,16 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         }
         if (relevantFixes.isEmpty()) {
             // find the fix closest to "at":
-            if (beforeSet.isEmpty()) {
-                if (!afterSet.isEmpty()) {
-                    relevantFixes.add(afterSet.first());
+            if (beforeSetEmpty) {
+                if (!afterSetEmpty) {
+                    relevantFixes.add(afterSetFirst);
                 }
             } else {
-                if (afterSet.isEmpty()) {
-                    relevantFixes.add(beforeSet.last());
+                if (afterSetEmpty) {
+                    relevantFixes.add(beforeSetLast);
                 } else {
-                    GPSFixMoving beforeFix = beforeSet.last();
-                    GPSFixMoving afterFix = afterSet.first();
+                    GPSFixMoving beforeFix = beforeSetLast;
+                    GPSFixMoving afterFix = afterSetFirst;
                     relevantFixes.add(at.asMillis() - beforeFix.getTimePoint().asMillis() <= afterFix.getTimePoint()
                             .asMillis() - at.asMillis() ? beforeFix : afterFix);
                 }

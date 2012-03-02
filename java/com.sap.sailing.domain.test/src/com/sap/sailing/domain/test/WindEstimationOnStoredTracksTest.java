@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PositionWithConfidenceImpl;
+import com.sap.sailing.domain.base.impl.ScalablePosition;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -23,7 +24,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
@@ -50,8 +50,8 @@ public class WindEstimationOnStoredTracksTest extends StoredTrackBasedTestWithTr
     
     @Test
     public void testZeroConfidenceLeadsToNullPositionAverage() {
-        ConfidenceBasedAverager<Triple<Double, Double, Double>, Position, Void> averager = ConfidenceFactory.INSTANCE.createAverager(null);
-        HasConfidence<Triple<Double, Double, Double>, Position, Void> average = averager.getAverage(
+        ConfidenceBasedAverager<ScalablePosition, Position, Void> averager = ConfidenceFactory.INSTANCE.createAverager(null);
+        HasConfidence<ScalablePosition, Position, Void> average = averager.getAverage(
                 Collections.singleton(new PositionWithConfidenceImpl<Void>(new DegreePosition(123, 12), /* confidence */
                         0.0, null)), null);
         assertNull(average.getObject());

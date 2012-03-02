@@ -636,7 +636,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @param curValue
      *            the current value
      */
-    public void setCurrentValue(Double curValue) {
+    public synchronized void setCurrentValue(Double curValue) {
         setCurrentValue(curValue, true);
     }
 
@@ -648,7 +648,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @param fireEvent
      *            fire the onValue change event if true
      */
-    public void setCurrentValue(Double curValue, boolean fireEvent) {
+    public synchronized void setCurrentValue(Double curValue, boolean fireEvent) {
         // Confine the value to the range
         if (!isMinMaxInitialized() || curValue == null) {
             return;
@@ -702,10 +702,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @param maxValue
      *            the current value
      */
-    public void setMaxValue(Double maxValue) {
+    public void setMaxValue(Double maxValue, boolean fireEvent) {
         this.maxValue = maxValue;
         drawTickLabels();
-        resetCurrentValue();
+        resetCurrentValue(fireEvent);
     }
 
     /**
@@ -714,10 +714,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @param minValue
      *            the current value
      */
-    public void setMinValue(Double minValue) {
+    public void setMinValue(Double minValue, boolean fireEvent) {
         this.minValue = minValue;
         drawTickLabels();
-        resetCurrentValue();
+        resetCurrentValue(fireEvent);
     }
 
     /**
@@ -767,9 +767,9 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @param stepSize
      *            the current value
      */
-    public void setStepSize(double stepSize) {
+    public void setStepSize(double stepSize, boolean fireEvent) {
         this.stepSize = stepSize;
-        resetCurrentValue();
+        resetCurrentValue(fireEvent);
     }
 
     public void setValue(Double value) {
@@ -1088,8 +1088,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * Reset the progress to constrain the progress to the current range and redraw the knob as needed.
      */
-    private void resetCurrentValue() {
-        setCurrentValue(getCurrentValue());
+    private synchronized void resetCurrentValue(boolean fireEvent) {
+        setCurrentValue(getCurrentValue(), fireEvent);
     }
 
     /**
