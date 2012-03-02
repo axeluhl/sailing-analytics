@@ -92,9 +92,10 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
-                .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
-                                                new Marker().setEnabled(true).setRadius(4))).setShadow(false)
-                                .setHoverStateLineWidth(LINE_WIDTH));
+                .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(
+                        new Marker().setEnabled(false).setHoverState(
+                                new Marker().setEnabled(true).setRadius(4))).setShadow(false)
+                                    .setHoverStateLineWidth(LINE_WIDTH));
         final String unit = "deg";
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
@@ -111,7 +112,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setAxisTitleText(stringMessages.time());
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
-            .setStartOnTick(false).setShowFirstLabel(false);
+            .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0);
         
         mainPanel = new SimplePanel();
         mainPanel.setWidget(chart);
@@ -179,7 +180,8 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setType(Series.Type.LINE)
                 .setName(stringMessages.windSpeed()+" "+windSource.name())
                 .setYAxis(1) // use the second Y-axis
-                .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.DOT)
+                .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.SHORT_DOT)
+                        .setLineWidth(3).setHoverStateLineWidth(3)
                         .setColor(colorMap.getColorByID(windSource))); // show only the markers, not the connecting lines
         return newSeries;
     }
