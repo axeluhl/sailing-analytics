@@ -198,31 +198,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
             for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
                 RaceIdentifier raceIdentifier = null;
-                StrippedRaceDTO race = null;
                 if(raceColumn.getTrackedRace() != null) {
                     TrackedRace trackedRace = raceColumn.getTrackedRace();
                     raceIdentifier = new EventNameAndRaceName(trackedRace.getTrackedEvent().getEvent().getName(), trackedRace.getRace().getName());
-                    
-                    //Getting the places of the race
-                    Pair<Placemark, Placemark> startAndFinish = trackedRace.getStartFinishPlacemarks();
-                    PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
-                    if (startAndFinish.getA() != null) {
-                        racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
-                    }
-                    if (startAndFinish.getB() != null) {
-                        racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
-                    }
-                    if (racePlaces.isEmpty()) {
-                        racePlaces = null;
-                    }
-                    
-                    //Creating raceDTO and getting the dates
-                    race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
-                    race.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
-                    race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
-                    race.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
                 }
-                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
+                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, null);
             }
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -956,7 +936,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public LeaderboardDTO createLeaderboard(String leaderboardName, int[] discardThresholds) {
-        return createStrippedLeaderboardDTO(getService().addLeaderboard(leaderboardName, discardThresholds));
+        return createStrippedLeaderboardDTO(getService().addLeaderboard(leaderboardName, discardThresholds), false);
     }
 
     @Override
@@ -964,7 +944,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
         for(Leaderboard leaderboard: leaderboards.values()) {
-            LeaderboardDTO dao = createStrippedLeaderboardDTO(leaderboard);
+            LeaderboardDTO dao = createStrippedLeaderboardDTO(leaderboard, false);
             results.add(dao);
         }
         
@@ -1000,7 +980,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 TrackedRace trackedRace = raceInLeaderboard.getTrackedRace();
                 RaceDefinition trackedRaceDef = trackedRace != null ? trackedRace.getRace() : null;
                 if (trackedRaceDef != null && trackedRaceDef.getName().equals(race.name)) {
-                    results.add(createStrippedLeaderboardDTO(leaderboard));
+                    results.add(createStrippedLeaderboardDTO(leaderboard, false));
                     break;
                 }
             }
@@ -1013,9 +993,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * in the form of {@link RaceInLeaderboardDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints carried points}
      * and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
      * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
-     * is used for {@link LeaderboardDTO#competitorDisplayNames}.
+     * is used for {@link LeaderboardDTO#competitorDisplayNames}.<br />
+     * If <code>withAdditionalData</code> is <code>true</code>, additional data (like location and race dates) will be loaded.
      */
-    private LeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard) {
+    private LeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withAdditionalData) {
         LeaderboardDTO dto = new LeaderboardDTO();
         dto.name = leaderboard.getName();
         dto.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
@@ -1026,24 +1007,26 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 TrackedRace trackedRace = raceColumn.getTrackedRace();
                 raceIdentifier = new EventNameAndRaceName(trackedRace.getTrackedEvent().getEvent().getName(), trackedRace.getRace().getName());
                 
-                //Getting the places of the race
-                Pair<Placemark, Placemark> startAndFinish = trackedRace.getStartFinishPlacemarks();
-                PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
-                if (startAndFinish.getA() != null) {
-                    racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
+                if (withAdditionalData) {
+                    //Getting the places of the race
+                    Pair<Placemark, Placemark> startAndFinish = trackedRace.getStartFinishPlacemarks();
+                    PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
+                    if (startAndFinish.getA() != null) {
+                        racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
+                    }
+                    if (startAndFinish.getB() != null) {
+                        racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
+                    }
+                    if (racePlaces.isEmpty()) {
+                        racePlaces = null;
+                    }
+                    //Creating raceDTO and getting the dates
+                    race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
+                    race.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
+                    race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace
+                            .getStartOfTracking().asDate();
+                    race.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
                 }
-                if (startAndFinish.getB() != null) {
-                    racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
-                }
-                if (racePlaces.isEmpty()) {
-                    racePlaces = null;
-                }
-                
-                //Creating raceDTO and getting the dates
-                race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
-                race.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
-                race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
-                race.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
             }
             dto.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
         }
@@ -1605,7 +1588,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         groupDTO.name = leaderboardGroup.getName();
         groupDTO.description = leaderboardGroup.getDescription();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-            groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard));
+            groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, true));
         }
         return groupDTO;
     }
