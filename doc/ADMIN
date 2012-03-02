@@ -234,6 +234,11 @@ wind data from the dev DB instance, execute:
 
   /opt/mongodb/bin/mongoexport -h localhost:10200 -d winddb -c WIND_TRACKS >/tmp/wind-tracks-dev.json
 
+  or with an additional query parameter if only want to export the wind of a specific race
+
+  /opt/mongodb/bin/mongoexport -h localhost:10200 -d winddb -c WIND_TRACKS -q "{EVENT_NAME:'Sailing Team Germany (Melges 24)'}" >/tmp/wind-tracks-dev.json
+   
+  
 To import the resulting JSON file into the test DB instance, execute:
 
   /opt/mongodb/bin/mongoimport -h localhost:10201 -d winddb -c WIND_TRACKS /tmp/wind-tracks-dev.json
