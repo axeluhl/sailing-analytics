@@ -300,12 +300,18 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         Date dateOfNewestSeriesPoint = compSeriesPoints.length == 0 ? new Date(0) : new Date(
                                 compSeriesPoints[compSeriesPoints.length - 1].getX().longValue());
                         List<Pair<Date, Double>> raceData = competitorData.getRaceDataAfterDate(dateOfNewestSeriesPoint);
+                        Point[] points = new Point[raceData.size()];
+                        int i=0;
                         for (Pair<Date, Double> data : raceData) {
                             if (data.getA() != null && data.getB() != null) {
                                 Point competitorPoint = new Point(data.getA().getTime(), data.getB());
-                                compSeries.addPoint(competitorPoint);
+                                points[i++] = competitorPoint;
                             }
                         }
+                        Point[] newPoints = new Point[compSeriesPoints.length + points.length];
+                        System.arraycopy(compSeriesPoints, 0, newPoints, 0, compSeriesPoints.length);
+                        System.arraycopy(points, 0, newPoints, compSeriesPoints.length, points.length);
+                        compSeries.setPoints(newPoints);
                         
                         //Adding the series if chart doesn't contain it
                         if (!chartSeries.contains(compSeries)) {
