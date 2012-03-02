@@ -101,7 +101,8 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         }));
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
-        chart.getYAxis().setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis(1).setAxisTitleText(stringMessages.averageSpeedInKnotsUnit()).setStartOnTick(false).setShowFirstLabel(false);
         
         mainPanel = new SimplePanel();
         mainPanel.setWidget(chart);
@@ -260,6 +261,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             selectedRaceIdentifier = selectedRaces.iterator().next();
             timeOfEarliestRequestInMillis = null;
             timeOfLatestRequestInMillis = null;
+            // TODO bug #363: if race is not in replay mode, fetch only up to now-delay
             loadData(selectedRaceIdentifier, /* from */ null, /* to */ null, /* append */ false);
         } else {
             clearChart();
@@ -278,6 +280,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > date.getTime()) {
                 loadData(selectedRaceIdentifier, null, date, /* append */ true);
             } else if (timeOfLatestRequestInMillis < date.getTime()) {
+                // TODO bug #363: if race is not in replay mode, fetch only up to now-delay
                 loadData(selectedRaceIdentifier, new Date(timeOfLatestRequestInMillis), /* to */ null, /* append */ true);
             }
             // otherwise the cache spans across date and so we don't need to load anything
