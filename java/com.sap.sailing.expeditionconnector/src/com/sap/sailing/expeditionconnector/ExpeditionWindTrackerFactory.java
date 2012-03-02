@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
@@ -16,12 +13,10 @@ import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.expeditionconnector.impl.Activator;
 
-public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleActivator {
+public class ExpeditionWindTrackerFactory implements WindTrackerFactory {
     private static Logger logger = Logger.getLogger(ExpeditionWindTrackerFactory.class.getName());
     
     private static ExpeditionWindTrackerFactory defaultInstance;
-    
-    private static BundleContext defaultBundleContext;
 
     /**
      * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
@@ -47,10 +42,6 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
         return defaultInstance;
     }
     
-    public static BundleContext getBundleContext() {
-        return defaultBundleContext;
-    }
-
     @Override
     public WindTracker createWindTracker(DynamicTrackedEvent trackedEvent, RaceDefinition race,
             boolean correctByDeclination) throws SocketException {
@@ -98,15 +89,4 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory, BundleA
             windReceivers.remove(windTracker.getReceiver().getPort());
         }
     }
-
-    @Override
-    public void start(BundleContext context) throws Exception {
-        defaultBundleContext = context;
-        defaultInstance = this;
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-    }
-    
 }
