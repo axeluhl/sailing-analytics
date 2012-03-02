@@ -537,7 +537,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             result.selectedWindSource = trackedRace.getWindSource();
             TimePoint from = fromDate == null ? trackedRace.getStart() : new MillisecondsTimePoint(fromDate);
-            TimePoint to = toDate == null ? trackedRace.getTimePointOfNewestEvent() : new MillisecondsTimePoint(toDate);
+            TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
+            TimePoint to = (toDate == null || toDate.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(toDate);
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             if (from != null && to != null) {
@@ -1373,11 +1374,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitorsQuery,
-            Date to, long stepSize, DetailType detailType) throws NoWindException {
+            Date toDate, long stepSize, DetailType detailType) throws NoWindException {
         MultiCompetitorRaceDataDTO data = null;
         TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
-            TimePoint endTime = to != null ? new MillisecondsTimePoint(to) : trackedRace.getTimePointOfNewestEvent();
+            TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
+            TimePoint endTime = (toDate == null || toDate.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(toDate);
             data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStart(),
                         endTime, stepSize, detailType);
         }

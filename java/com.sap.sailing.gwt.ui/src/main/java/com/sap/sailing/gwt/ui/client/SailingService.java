@@ -160,6 +160,6 @@ public interface SailingService extends RemoteService {
     void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards);
 
     MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitors,
-            Date to, long stepSize, DetailType detailType) 
+            Date toDate, long stepSize, DetailType detailType) 
             throws NoWindException;
 }

@@ -283,6 +283,6 @@ public interface SailingServiceAsync {
      * returned.<br />
      * Returns <code>null</code>, if <code>race</code> isn't tracked. 
      */
-    void getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, Date to, long stepSize,
+    void getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, Date toDate, long stepSize,
             DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 }

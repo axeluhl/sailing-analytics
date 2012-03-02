@@ -48,7 +48,7 @@ public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Com
         updateSettingsOnly(newSettings);
         clearChart();
         Date to = timer.getPlayMode() == PlayModes.Live ? new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()) : null;
-        loadData(true, to);
+        loadData(true);
     }
 
     @Override
