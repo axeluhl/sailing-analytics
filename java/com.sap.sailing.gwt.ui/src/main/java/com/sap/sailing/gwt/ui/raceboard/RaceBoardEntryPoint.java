@@ -28,10 +28,17 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private String raceName;
     private String leaderboardName;
     private String leaderboardGroupName;
+    private RaceBoardViewMode viewMode;
 
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
+        String viewModeParamValue = Window.Location.getParameter("viewMode");
+        try {
+            viewMode = RaceBoardViewMode.valueOf(RaceBoardViewMode.class, viewModeParamValue);
+        } catch (IllegalArgumentException e) {
+            viewMode = RaceBoardViewMode.ONE_SCREEN;
+        }
         eventName = Window.Location.getParameter("eventName");
         raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
@@ -132,7 +139,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
         raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, raceSelectionModel, leaderboardName, leaderboardGroupName,
-                RaceBoardEntryPoint.this, stringMessages, userAgentType);
+                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode);
         raceBoardPanel.fillEvents(events);
 
         logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
