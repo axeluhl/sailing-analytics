@@ -56,6 +56,7 @@ import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
  */
 public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
+    private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private String raceBoardName;
     
@@ -70,40 +71,61 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private int scrollOffset;
 
     private final List<CollapsableComponentViewer<?>> collapsableViewers;
-    private final FlowPanel componentsNavigationPanel;
-    private final BreadcrumbPanel breadcrumbPanel; 
-    private final RaceTimePanel timePanel;
+    private FlowPanel componentsNavigationPanel;
+    private BreadcrumbPanel breadcrumbPanel; 
+    private RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
+    private final UserAgentTypes userAgentType;
+    private final CompetitorSelectionModel competitorSelectionModel;
+    private final RaceIdentifier selectedRaceIdentifier;
     
     public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName,
-            String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType) {
+            String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType, RaceBoardViewMode viewMode) {
         this.sailingService = sailingService;
+        this.stringMessages = stringMessages;
         this.raceSelectionProvider = theRaceSelectionProvider;
         this.scrollOffset = 0;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
-        RaceIdentifier selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
+        selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
         this.errorReporter = errorReporter;
+        this.userAgentType = userAgentType;
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
 
         timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */1000);
         collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
-        CompetitorSelectionModel competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
+        competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
-        // create the breadcrumb navigation
-        ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
-        String debugParam = Window.Location.getParameter("gwt.codesvr");
-
-        if(leaderboardGroupName != null) {
-            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName +
-                    (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
-            breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
+        switch (viewMode) {
+        case CASCADING:
+            createCascadingView(leaderboardName, leaderboardGroupName, mainPanel);
+            break;
+        case ONE_SCREEN:
+            createOneScreenView();
+            break;
+        case TV_MODE:
+            createTVView();
+            break;
         }
-        breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, selectedRaceIdentifier.getRaceName());
+    }
+
+    private void createTVView() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private void createOneScreenView() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private void createCascadingView(String leaderboardName,  String leaderboardGroupName, FlowPanel mainPanel) {
+        // create the breadcrumb navigation
+        breadcrumbPanel = createBreadcrumbPanel(leaderboardGroupName);
         mainPanel.add(breadcrumbPanel);
 
         componentsNavigationPanel = new FlowPanel();
@@ -165,6 +187,18 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         timePanel = new RaceTimePanel(sailingService, timer, errorReporter, stringMessages);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+    }
+
+    private BreadcrumbPanel createBreadcrumbPanel(String leaderboardGroupName) {
+        ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
+        String debugParam = Window.Location.getParameter("gwt.codesvr");
+
+        if(leaderboardGroupName != null) {
+            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName +
+                    (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
+            breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
+        }
+        return new BreadcrumbPanel(breadcrumbLinksData, selectedRaceIdentifier.getRaceName());
     }
     
     private void addComponentViewerMenuEntry(final ComponentViewer c) {
