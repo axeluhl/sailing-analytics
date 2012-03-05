@@ -30,6 +30,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
@@ -72,18 +74,19 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     private ListDataProvider<LeaderboardGroupDTO> groupsDataProvider;
     private SingleSelectionModel<LeaderboardGroupDTO> groupsSelectionModel;
     
+    private CollapsablePanel collapsableDetailsPanel;
     private Label noGroupSelectedLabel;
     
     private FlowPanel groupDetailsPanel;
-    private HTML groupDescription;
+    private HTML groupDescriptionHTML;
     private CellTable<LeaderboardDTO> leaderboardsTable;
     private ListDataProvider<LeaderboardDTO> leaderboardsDataProvider;
     private SingleSelectionModel<LeaderboardDTO> leaderboardsSelectionModel;
     
+    private FlowPanel leaderboardDetailsPanel;
     private CellTable<RaceInLeaderboardDTO> racesTable;
-    private SingleSelectionModel<RaceInLeaderboardDTO> racesSelectionModel;
-    
-    
+    private NoSelectionModel<RaceInLeaderboardDTO> racesSelectionModel;
+    private ListDataProvider<RaceInLeaderboardDTO> racesDataProvider;
     
     private List<LeaderboardGroupDTO> availableGroups;
 
@@ -241,6 +244,12 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         groupsTable = new CellTable<LeaderboardGroupDTO>();
         groupsTable.setWidth("100%");
         groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
+        groupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                onGroupSelectionChanged();
+            }
+        });
         groupsTable.setSelectionModel(groupsSelectionModel);
         
         groupsTable.addColumn(groupsLocationColumn, this.stringMessages.location());
@@ -285,7 +294,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         FlowPanel detailsPanel = new FlowPanel();
         detailsPanel.setStyleName(STYLE_NAME_PREFIX + "detailsPanel");
         
-        CollapsablePanel collapsableDetailsPanel = new CollapsablePanel(this.stringMessages.details(), false);
+        collapsableDetailsPanel = new CollapsablePanel(this.stringMessages.details(), false);
         collapsableDetailsPanel.setContent(detailsPanel);
         collapsableDetailsPanel.setWidth("100%");
         mainPanel.add(collapsableDetailsPanel);
@@ -296,21 +305,21 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         //Build group details GUI
         groupDetailsPanel = new FlowPanel();
         groupDetailsPanel.setVisible(false);
+        groupDetailsPanel.setSize("100%", "100%");
         groupDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "groupDetailsPanel");
         groupDetailsPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
         detailsPanel.add(groupDetailsPanel);
         
-        groupDescription = new HTML();
-        groupDescription.setStyleName(STYLE_NAME_PREFIX + "groupDescription");
-        groupDescription.setVisible(false);
-        groupDetailsPanel.add(groupDescription);
+        groupDescriptionHTML = new HTML();
+        groupDescriptionHTML.setStyleName(STYLE_NAME_PREFIX + "groupDescription");
+        groupDetailsPanel.add(groupDescriptionHTML);
         
         TextColumn<LeaderboardDTO> leaderboardsLocationColumn = new TextColumn<LeaderboardDTO>() {
             @Override
             public String getValue(LeaderboardDTO leaderboard) {
                 PlacemarkOrderDTO leaderboardPlaces = leaderboard.getPlaces();
                 return leaderboardPlaces == null ? LeaderboardGroupOverviewPanel.this.stringMessages
-                        .locationNotAvailable() : leaderboardPlaces.placemarksAsString();
+                        .notAvailable() : leaderboardPlaces.placemarksAsString();
             }
         };
         
@@ -355,6 +364,13 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         leaderboardsTable = new CellTable<LeaderboardDTO>();
         leaderboardsTable.setWidth("100%");
         leaderboardsSelectionModel = new SingleSelectionModel<LeaderboardDTO>();
+        leaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                onLeaderboardSelectionChanged();
+            }
+        });
         leaderboardsTable.setSelectionModel(leaderboardsSelectionModel);
         
         leaderboardsTable.addColumn(leaderboardsLocationColumn, this.stringMessages.location());
@@ -366,7 +382,13 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         leaderboardsDataProvider = new ListDataProvider<LeaderboardDTO>();
         leaderboardsDataProvider.addDataDisplay(leaderboardsTable);
 
-        //Build leaderboard details GUI TODO
+        //Build leaderboard details GUI
+        leaderboardDetailsPanel = new FlowPanel();
+        leaderboardDetailsPanel.setSize("50%", "100%");
+        leaderboardDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "leaderboardDetailsPanel");
+        leaderboardDetailsPanel.setVisible(false);
+        leaderboardDetailsPanel.getElement().setPropertyString("clear", "right");
+        detailsPanel.add(leaderboardDetailsPanel);
         
         TextColumn<RaceInLeaderboardDTO> racesLocationColumn = new TextColumn<RaceInLeaderboardDTO>() {
             @Override
@@ -408,21 +430,22 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         
         racesTable = new CellTable<RaceInLeaderboardDTO>();
         racesTable.setWidth("100%");
-        racesTable.setVisible(false);
-        racesTable.getElement().setPropertyString("clear", "right");
-        racesSelectionModel = new SingleSelectionModel<RaceInLeaderboardDTO>();
+        racesSelectionModel = new NoSelectionModel<RaceInLeaderboardDTO>();
         racesTable.setSelectionModel(racesSelectionModel);
         
         racesTable.addColumn(racesLocationColumn, this.stringMessages.location());
         racesTable.addColumn(racesNameColumn, this.stringMessages.name());
         racesTable.addColumn(racesStartDateColumn, this.stringMessages.startDate());
-        detailsPanel.add(racesTable);        
+        leaderboardDetailsPanel.add(racesTable);
+        
+        racesDataProvider = new ListDataProvider<RaceInLeaderboardDTO>();
+        racesDataProvider.addDataDisplay(racesTable);
         
         //Loading the data
-        loadData();
+        loadGroups();
     }
 
-    private void loadData() {
+    private void loadGroups() {
         sailingService.getLeaderboardGroups(new AsyncCallback<List<LeaderboardGroupDTO>>() {
             @Override
             public void onSuccess(List<LeaderboardGroupDTO> result) {
@@ -435,6 +458,54 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 errorReporter.reportError("Error trying to obtain the data: " + t.getMessage());
             }
         });
+    }
+    
+    private void onGroupSelectionChanged() {
+        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+        LeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
+        
+        if (selectedGroup != null) {
+            setGroupDetailsVisible(true);
+            if (selectedLeaderboard != null) {
+                setLeaderboardDetailsVisible(selectedGroup.leaderboards.contains(selectedLeaderboard));
+            }
+            fillGroupDetails(selectedGroup);
+        } else {
+            setGroupDetailsVisible(false);
+            setLeaderboardDetailsVisible(false);
+        }
+    }
+    
+    private void setGroupDetailsVisible(boolean visible) {
+        noGroupSelectedLabel.setVisible(!visible);
+        groupDetailsPanel.setVisible(visible);
+        if (visible) {
+            collapsableDetailsPanel.setOpen(true);
+        }
+    }
+    
+    private void fillGroupDetails(LeaderboardGroupDTO group) {
+        groupDescriptionHTML.setHTML(new SafeHtmlBuilder().appendEscapedLines(group.description).toSafeHtml());
+        leaderboardsDataProvider.getList().clear();
+        leaderboardsDataProvider.getList().addAll(group.leaderboards);
+    }
+    
+    private void onLeaderboardSelectionChanged() {
+        LeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
+        setLeaderboardDetailsVisible(selectedLeaderboard != null);
+        if (selectedLeaderboard != null) {
+            fillLeaderboardDetails(selectedLeaderboard);
+        }
+    }
+    
+    private void setLeaderboardDetailsVisible(boolean visible) {
+        leaderboardDetailsPanel.setVisible(visible);
+        groupDetailsPanel.setWidth(visible ? "50%" : "100%");
+    }
+    
+    private void fillLeaderboardDetails(LeaderboardDTO leaderboard) {
+        racesDataProvider.getList().clear();
+        racesDataProvider.getList().addAll(leaderboard.getRaceList());
     }
     
     private void onCheckBoxLiveChange() {
