@@ -12,7 +12,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -70,7 +69,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
      */
     private int scrollOffset;
 
-    private final List<CollapsableComponentViewer<?>> collapsableViewers;
+    private final List<ComponentViewer> componentViewers;
     private FlowPanel componentsNavigationPanel;
     private BreadcrumbPanel breadcrumbPanel; 
     private RaceTimePanel timePanel;
@@ -97,32 +96,62 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         setWidget(mainPanel);
 
         timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */1000);
-        collapsableViewers = new ArrayList<CollapsableComponentViewer<?>>();
+        componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
         switch (viewMode) {
-        case CASCADING:
-            createCascadingView(leaderboardName, leaderboardGroupName, mainPanel);
-            break;
-        case ONE_SCREEN:
-            createOneScreenView();
-            break;
-        case TV_MODE:
-            createTVView();
-            break;
+            case CASCADING:
+                createCascadingView(leaderboardName, leaderboardGroupName, mainPanel);
+                break;
+            case ONE_SCREEN:
+                createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);
+                break;
         }
+
+        for (ComponentViewer componentViewer : componentViewers) {
+            mainPanel.add(componentViewer.getViewerWidget());
+            addComponentViewerMenuEntry(componentViewer);
+        }
+
+        timePanel = new RaceTimePanel(sailingService, timer, errorReporter, stringMessages);
+        raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
+        timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+    }
+    
+    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
+        componentsNavigationPanel = new FlowPanel();
+        componentsNavigationPanel.addStyleName("raceBoardNavigation");
+
+        // create the default leaderboard and select the right race
+
+        LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode());
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings, selectedRaceIdentifier, competitorSelectionModel,
+                timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
+        RaceMap raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionModel, stringMessages);
+
+        SideBySideComponentViewer leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, "auto", "500px");  
+        componentViewers.add(leaderboardAndMapViewer);
+
+        raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
+            
+        WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
+        WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
+                stringMessages, errorReporter);
+        SimpleComponentViewer<WindChartSettings> windChartViewer = new SimpleComponentViewer<WindChartSettings>(
+                windChart, "auto", "200px");
+        windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+        componentViewers.add(windChartViewer);
+
+        MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
+                    timer, stringMessages, errorReporter);
+            SimpleComponentViewer<MultiChartSettings> chartViewer = new SimpleComponentViewer<MultiChartSettings>(
+                    competitorCharts, "auto", "200px");
+
+            competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+            componentViewers.add(chartViewer);
     }
 
-    private void createTVView() {
-        // TODO Auto-generated method stub
-    }
-
-    private void createOneScreenView() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    private void createCascadingView(String leaderboardName,  String leaderboardGroupName, FlowPanel mainPanel) {
+    private void createCascadingView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
         // create the breadcrumb navigation
         breadcrumbPanel = createBreadcrumbPanel(leaderboardGroupName);
         mainPanel.add(breadcrumbPanel);
@@ -141,7 +170,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
             CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
                     leaderboardPanel, "100%", "100%", stringMessages, ViewerPanelTypes.SCROLL_PANEL);
-            collapsableViewers.add(leaderboardViewer);
+            componentViewers.add(leaderboardViewer);
         }
 
         // create the race map
@@ -150,9 +179,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
                     raceMap, "auto", "500px", stringMessages);
 
-            ((Panel) raceMapViewer.getViewerWidget().getContent()).add(raceMap);
+            //((Panel) raceMapViewer.getViewerWidget().getContent()).add(raceMap);
             raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
-            collapsableViewers.add(raceMapViewer);
+            componentViewers.add(raceMapViewer);
         }
 
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
@@ -161,7 +190,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
                 windChart, "auto", "400px", stringMessages);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        collapsableViewers.add(windChartViewer);
+        componentViewers.add(windChartViewer);
         if (showCompetitorCharts) {
             // DON'T DELETE -> this is temporary for testing of different chart types
 //            ChartPanel competitorCharts = new ChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
@@ -175,17 +204,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                     competitorCharts, "auto", "400px", stringMessages);
 
             competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-            collapsableViewers.add(chartViewer);
+            componentViewers.add(chartViewer);
         }
         
-        for (CollapsableComponentViewer<?> componentViewer : collapsableViewers) {
-            mainPanel.add(componentViewer.getViewerWidget());
-            addComponentViewerMenuEntry(componentViewer);
-        }
-
-        timePanel = new RaceTimePanel(sailingService, timer, errorReporter, stringMessages);
-        raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
-        timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
 
     private BreadcrumbPanel createBreadcrumbPanel(String leaderboardGroupName) {
@@ -271,71 +292,5 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
     }
-//    
-//        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-//            RaceDTO selectedRace = racesByIdentifier.get(selectedRaces.iterator().next());
-//            
-//            Date min = null;
-//            Date max = null;
-//            
-//            if (selectedRace.startOfTracking != null) {
-//                min = selectedRace.startOfTracking;
-//            }
-//            if (selectedRace.endOfRace != null) {
-//                max = selectedRace.endOfRace;
-//            } else if (selectedRace.timePointOfNewestEvent != null) {
-//                max = selectedRace.timePointOfNewestEvent;
-//                timer.setPlayMode(PlayModes.Live);
-//            }
-//
-//            if(min != null && max != null)
-//                timePanel.setMinMax(min, max);
-//            
-//            // set initial timer position
-//            switch(timer.getPlayMode()) {
-//                case Live:
-//                    if(selectedRace.timePointOfNewestEvent != null) {
-//                        timer.setTime(selectedRace.timePointOfNewestEvent.getTime());
-//                    }
-//                    break;
-//                case Replay:
-//                    if(selectedRace.endOfRace != null) {
-//                        timer.setTime(selectedRace.endOfRace.getTime());
-//                    } else {
-//                        timer.setTime(selectedRace.startOfRace.getTime());
-//                    }
-//                    break;
-//            }
-//
-//            sailingService.getRaceTimesInfo(selectedRace.getRaceIdentifier(), 
-//                    new AsyncCallback<RaceTimesInfoDTO>() {
-//                        @Override
-//                        public void onFailure(Throwable caught) {
-//                            errorReporter.reportError("Error obtaining leg timepoints: " + caught.getMessage());
-//                        }
-//
-//                        @Override
-//                        public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
-//                            // raceTimesInfo can be null if the race is not tracked anymore
-//                            if (raceTimesInfo != null) {
-//                                timePanel.setLegMarkers(raceTimesInfo.getLegTimes());
-//                                if (raceTimesInfo.getStartOfRace() != null) {
-//                                    // set the new start time 
-//                                    Date startOfRace = raceTimesInfo.getStartOfRace();
-//                                    Date startOfTimeslider = new Date(startOfRace.getTime() - 5 * 60 * 1000);
-//
-//                                    timePanel.changeMin(startOfTimeslider);
-//                                }
-//                                // set time to end of race
-//                                if(raceTimesInfo.getLastLegTimes() != null) {
-//                                    timer.setTime(raceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
-//                                }
-//                            } else {
-//                                timePanel.reset();
-//                            }
-//                        }
-//                    });
-//        }
-//    }
 }
 
