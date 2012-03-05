@@ -291,7 +291,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 entryDTO.legDetails.add(legEntry);
             }
         }
-        final Distance windwardDistanceToOverallLeader = trackedRace.getWindwardDistanceToOverallLeader(competitor, timePoint);
+        final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace.getWindwardDistanceToOverallLeader(competitor, timePoint);
         entryDTO.windwardDistanceToOverallLeaderInMeters = windwardDistanceToOverallLeader == null ? null : windwardDistanceToOverallLeader.getMeters();
         return entryDTO;
     }
