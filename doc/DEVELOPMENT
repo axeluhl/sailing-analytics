@@ -1,4 +1,5 @@
-This file explains the development environment and some typical usecases you will need to work with race analysis project.
+This file explains the development environment and some typical
+usecases you will need to work with race analysis project.
 
 IDE
 ---
@@ -8,67 +9,142 @@ Additional mandatory installations:
 - Git (file versioning system)
 - Maven 3.x (build system)
 
+TODO: Explain at least "on-boarding" use case (what to install, where
+to get it, prerequisites, Bugzilla, git, git account and SSH keys, SAP
+internal vs. external, file share, Wiki, project import into Eclipse,
+JDK setup 1.6/1.7, Eclipse JRE config, ...). Distinguish setup
+variants: a) SAP-internal; b) extenral; c) offline
+
 Configure the IDE
 -----------------
 
 1. Target Platform
 
-After the import of all required projects from git into your eclipse workspace you need to setup the target platform.
-A target platform is an Eclipse concept to define the set of java classes (from a set of jars) your compiler can use to build the sources.
-We have defined a target-platform for the project which can be found inside the project "com.sap.sailing.targetplatform" in the folder 'definitions'.
-There you will find 3 definitions: race-analysis-p2-ide-local, race-analysis-p2-maven-local and race-analysis-p2-maven-central
-The definition 'race-analysis-p2-ide-local' is intended to be used for the IDE whereas the other definitions are used for the local and central maven build.
-The target definition contains a list of URLs to different p2 repositories containing the actual bundles. The URLs can be either URLs to local or remote repositories
-depending on your access to those repositories. Normally you should bind your target platform to central (remote) repositories in order to keep the content up-to-date.
-In case you don't have access to specific remote repositories you can create a local copy of a p2 repository and change the URL to this local copy.
+After the import of all required projects from the local git
+repository into your eclipse workspace you need to setup the target
+platform.  A target platform is an Eclipse concept to define the set
+of java classes (from a set of jars/libs) your compiler can use to
+build the sources.  We have defined some target-platforms for the
+project which can be found inside the project
+"com.sap.sailing.targetplatform" in the folder 'definitions'.  There
+you will find 3 definitions: race-analysis-p2-ide-local,
+race-analysis-p2-maven-local and race-analysis-p2-maven-central. The
+definition 'race-analysis-p2-ide-local' is intended to be used for the
+IDE whereas the other definitions are used for the local and central
+maven builds.  The target definition contains a list of URLs to
+different p2 repositories containing the actual bundles. The URLs can
+be either URLs to local or remote repositories depending on your
+access to those repositories. Normally you should bind your target
+platform to central (remote) repositories in order to keep the content
+up-to-date.  In case you don't have access to specific remote
+repositories you can create a local copy of a p2 repository and change
+the URL to this local copy.
 
-The used target platform sources are:
+!!!ATTENTION!!!
+
+It's important that we can NOT use any other options
+(like directories or update site) than p2 repositories for the target
+platform definition. The reason is that Tycho (the tool we use for the
+maven/osgi build integration) does only support p2 repositories (in
+version 0.14.0). Therefore we must convert any jars/libs/etc.  into a
+p2 repository if we want to use them in our target definition. Eclipse
+equinox provides an application supporting the creation of p2
+repositories from a directory with of jar files and a feature.xml
+(org.eclipse.equinox.p2.publisher.UpdateSitePublisher).  You can use
+the the script createLocalBaseP2repository.sh (in project
+com.sap.sailing.targetplatform/scripts) as a template.
+
+The currently used target platform types:
 a) Remote p2 repositories (like http://download.eclipse.org/releases/indigo)
 b) SAP Nexus repositories (like http://nexus:8081/nexus/content/...)
 c) Our own p2 repository served by our central server via Apache WebServer (http://sapcoe-app01.pironet-ndh.com/p2/...)
 
 Local maven build
 -----------------
-If you run a local build with maven the used target platform defintion is 'race-analysis-p2-maven-local'. The reference to this definition is defined in the pom.xml
-of the /git/java folder.
+
+TODO: how to run a maven build; which current working directory to
+use? For example, when to delete
+git/java/com.sap.sailing.gwt.ui/com.sap.sailing.*?
+
+If you run a local build with maven the used target platform defintion
+is 'race-analysis-p2-maven-local'. The reference to this definition is
+defined in the pom.xml of the /git/java folder.
 
 The "SAP Race Analysis" Product
 -------------------------------
-The project com.sap.sailing.feature.p2build contains an eclipse product definition with the name "SAP Race Analysis".
-This product contains a list of features defining the product.
-These features are:
+
+The project com.sap.sailing.feature.p2build contains an eclipse
+product definition with the name "SAP Race Analysis".  This product
+contains a list of features defining the product.  These features are:
+
 - com.sap.sailing.feature (contains all development bundles and it's dependencies)
 - com.sap.sailing.feature.runtime (contains additional libraries only needed at runtime)
 
-The maven/tycho build creates an deployable eclipse product based on this product defintion which is the basis for the server installation.
-The resulting deployable files can be found in /bin/products/raceanalysis.product.id/<os>/<ws>/<arch>/...
+The maven/tycho build creates an deployable eclipse product containing
+all required runtime artifacts based on this product defintion.  This
+is also the basis for the server installation. The resulting files can
+be found in /bin/products/raceanalysis.product.id/<os>/<ws>/<arch>/...
 
 Target-Platform related projects
 --------------------------------
-com.sap.sailing.targetplatform.base-> contains all files required to build a p2 repository for all library files defining the base target platform for the sailing project
-com.sap.sailing.targetplatform -> contains the p2 repository generation scripts and the target platform definitions (.target files)
 
-com.sap.sailing.feature -> contains the feature.xml for the race analysis project itself (required for the product build)
-com.sap.sailing.feature.runtime -> contains the feature.xml for additional runtime libraries which are not required for the source build (e.g. jetty.osgi bundle) 
-com.sap.sailing.feature.p2build -> contains the product defintion (.product file) for the race analysis project (required for the product build)
+com.sap.sailing.targetplatform.base -> contains all files required to
+build a p2 repository for all library files defining the base target
+platform for the sailing project
 
-Typical usecases changing the target platform definition
---------------------------------------------------------
+com.sap.sailing.targetplatform -> contains the p2 repository
+generation scripts and the target platform definitions (.target files)
 
-1. Adding an external open source library to the target-platform
+com.sap.sailing.feature -> contains the feature.xml for the race
+analysis project itself (required for the product build)
 
-To add a new library which can not be found in any SAP repository you need to follow some steps.
-a) Check if the library is already OSGi-enabled (normally this means there is a manifest.mf in the META-INF folder of the jar file containing valid OSGi metadata.
-b) In case the library is not OSGi-enabled someone has to create such a OSGI-enabled version (ask the technical lead of the project)
-c) Add the library to an appropriate target folder in the project com.sap.sailing.targetplatform.base (e.g. target-base)
-d) Add an corresponding entry to the corresponding feature.xml in the project com.sap.sailing.targetplatform.base
-e) Rebuild the base target platform by running the script createLocalBaseP2repository.sh (com.sap.sailing.targetplatform/scripts)
+com.sap.sailing.feature.runtime -> contains the feature.xml for
+additional runtime libraries which are not required for the source
+build (e.g. jetty.osgi bundle)
+
+com.sap.sailing.feature.p2build -> contains the product defintion
+(.product file) for the race analysis project (required for the
+product build)
+
+Typical development usecases affecting the target platform and the maven build
+------------------------------------------------------------------------------
+
+1. Adding an external open source library
+
+To add a new library which can not be found in any SAP repository you
+need to follow some steps.
+
+a) Check if the library is already OSGi-enabled (normally this means
+there is a manifest.mf in the META-INF folder of the jar file
+containing valid OSGi metadata.
+
+b) In case the library is not OSGi-enabled someone has to create such
+a OSGI-enabled version (ask the technical lead of the project)
+
+c) Add the library to an appropriate target folder in the project
+com.sap.sailing.targetplatform.base (e.g. target-base)
+
+d) Add an corresponding entry to the corresponding feature.xml in the
+project com.sap.sailing.targetplatform.base
+
+e) Rebuild the base target platform by running the script
+createLocalBaseP2repository.sh
+(com.sap.sailing.targetplatform/scripts)
+
 f) Reload the target platform in the IDE
-g) Submit the changes to the git repository
 
 2. Adding a library from an internal SAP repository (e.g. Nexus)
 
-3. Adding a p2 repository as new source of libraries
+not used yet.
+
+3. Adding an existing remote p2 repository as new source of libraries
+
+a) Add the URL of the remote p2 repository to all target definition
+files in com.sap.sailing.targetplatform/defintions
+
+b) Select the features of the p2 repository you want to use in the project
+
+c) Reload the target platform
 
 4. Adding a GWT library to the com.sap.sailing.gwt.ui project
 
@@ -78,11 +154,44 @@ c) Add a build dependency for the GWT compiler to the pom.xml
 d) Add the library to the central maven repository /home/trac/maven-repositories
    by using the mvn install:install -file command
 
+5. Adding an GWT extension library (with source code)
+
+TODO (see Highcharts example)
+
+6. Adding a self created p2 repository from a maven based external
+project as new source of libraries
+
+Example: Integration of 'Atmosphere' framework (Server push technology) 
+
+TODO
 
 Typical usecases changing the features and product definition
 -------------------------------------------------------------
 
-5. Adding a new bundle project
+1. Adding a new bundle project
+
+a) add a new bundle project in the IDE
+
+b) add the project to the product definition by adding it to the
+feature.xml in the project com.sap.sailing.feature
+
+c) add the project to the launch configurations in com.sap.sailing.server
+
+d) add the project to the main pom.xml (/java dir in the git repository)
 
 
+TODO: launch OSGi runtime (debug vs. run), compile / launch GWT application
+in hosted / non-hosted mode, maven-compile GWT app and launch non-hosted, ...
 
+TODO: How does our git branch structure work? (master -> dev -> test
+-> prod1 -> prod2) When to merge from where to where?
+
+TODO: Server Deployment: how to use the screen sessions on sapsailing.com?
+How to deploy changes from master branch to dev server, etc.?
+
+TODO: keep this documentation in WikiMarkup format and explain how the
+process of updating this documentation and synchronizing with the Wiki
+shall work. Consider using a Wiki branch in git that represents the
+last deployment.
+
+TODO: runtime installation, e.g., as done for Hawaii on separate laptops
