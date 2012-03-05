@@ -34,7 +34,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -133,7 +133,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         Waypoint windwardMark = waypointsIter.next();
         Position leewardGatePosition = getTrackedRace().getApproximatePosition(leewardMark, checkTime);
         Distance d = new NauticalMileDistance(1);
-        Wind wind = getTrackedRace().getWind(null, checkTime, WindSource.TRACK_BASED_ESTIMATION);
+        Wind wind = getTrackedRace().getWind(null, checkTime, getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         Position newWindwardMarkPosition = leewardGatePosition.translateGreatCircle(wind.getBearing(), d);
         getTrackedRace().getOrCreateTrack(windwardMark.getBuoys().iterator().next()).addGPSFix(
                 new GPSFixImpl(newWindwardMarkPosition, checkTime));

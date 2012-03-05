@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -202,7 +203,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void recordWind(Wind wind, WindSource windSource) {
-        if (windSource == WindSource.EXPEDITION) {
+        if (windSource.getType() == WindSourceType.EXPEDITION) {
             windTrack.add(wind);
         }
     }

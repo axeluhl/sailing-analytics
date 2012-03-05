@@ -18,11 +18,13 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 /**
@@ -119,16 +121,22 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      */
     @Override
     public synchronized Wind getEstimatedWind(Position p, TimePoint at) {
-        return getEstimatedWindUnsynchronized(p, at);
+        return getEstimatedWindUnsynchronized(p, at).getObject();
     }
     
+    @Override
+    public synchronized WindWithConfidence<Pair<Position, TimePoint>> getEstimatedWindWithConfidence(Position p, TimePoint at) {
+        return getEstimatedWindUnsynchronized(p, at);
+    }
+
     /**
      * This method implements the functionality of the {@link #getEstimatedWind(Position, TimePoint)} interface
      * method. However, not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses
      * may use this carefully if they can guarantee there are no concurrency issues with the internal fixes
      * while iterating over the result of {@link #getInternalFixes()}.
      */
-    protected Wind getEstimatedWindUnsynchronized(Position p, TimePoint at) {
+    protected WindWithConfidence<Pair<Position, TimePoint>> getEstimatedWindUnsynchronized(Position p, TimePoint at) {
+        // TODO aggregate confidences, using a weigher
         DummyWind atTimed = new DummyWind(at);
         NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ false);
         NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
@@ -194,7 +202,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             // TODO bug #346: pass on confidence
             BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
             SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, average == null ? null : average.getObject());
-            return new WindImpl(p, at, avgWindSpeed);
+            return new WindWithConfidenceImpl<Pair<Position,TimePoint>>(new WindImpl(p, at, avgWindSpeed), /* TODO confidence */ 0.5,
+                    new Pair<Position, TimePoint>(p, at));
         }
     }
     

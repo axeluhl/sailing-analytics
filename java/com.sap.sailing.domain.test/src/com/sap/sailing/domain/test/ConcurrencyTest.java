@@ -19,7 +19,7 @@ import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -41,10 +41,10 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
         super.setUp("event_20110815_RCSwedenCu",
         /* raceId */ "1cdf8398-cafe-11e0-8c8e-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS,
                 ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
-        getTrackedRace().setWindSource(WindSource.WEB);
+        getTrackedRace().setWindSource(WindSourceType.WEB);
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(10))), WindSource.WEB);
+                        new DegreeBearingImpl(10))), WindSourceType.WEB);
     }
 
     @Override

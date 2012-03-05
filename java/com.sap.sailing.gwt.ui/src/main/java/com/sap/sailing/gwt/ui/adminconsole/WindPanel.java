@@ -39,6 +39,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
@@ -175,7 +176,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         windSourceSelectionPanel.add(showConfigAnchor);
         grid.setWidget(1, 0, windSourceSelectionPanel);
         windChart = new WindChart(sailingService, /* race selection provider */ raceSelectionProvider,
-                new Timer(PlayModes.Replay), new WindChartSettings(WindSource.values()), stringMessages, errorReporter);
+                new Timer(PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, errorReporter);
         grid.setWidget(2, 0, windChart.getEntryWidget());
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);

@@ -198,7 +198,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
         if (adjustedAt != null) {
             // we can use the unsynchronized version here because our getInternalFixes() method operates
             // only on a virtual sequence of wind fixes where no concurrency issues have to be observed
-            result = getEstimatedWindUnsynchronized(p, adjustedAt);
+            result = getEstimatedWindUnsynchronized(p, adjustedAt).getObject();
         }
         return result;
     }

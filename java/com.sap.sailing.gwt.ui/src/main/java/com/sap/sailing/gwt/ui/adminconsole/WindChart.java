@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
@@ -46,10 +47,10 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 public class WindChart implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener {
     private static final int LINE_WIDTH = 1;
     private final StringMessages stringMessages;
-    private final Set<WindSource> windSourcesToDisplay;
+    private final Set<WindSourceType> windSourcesToDisplay;
     
     /**
-     * After the constructor finishes, holds one series for each wind source.
+     * Holds one series for each wind source for which data has been received.
      */
     private final Map<WindSource, Series> windSourceDirectionSeries;
     private final Map<WindSource, Series> windSourceSpeedSeries;
@@ -83,7 +84,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         this.windSourceDirectionSeries = new HashMap<WindSource, Series>();
         this.windSourceSpeedSeries = new HashMap<WindSource, Series>();
         this.colorMap = new ColorMap<WindSource>();
-        this.windSourcesToDisplay = new HashSet<WindSource>();
+        this.windSourcesToDisplay = new HashSet<WindSourceType>();
         this.timer = timer;
         chart = new Chart()
                 .setZoomType(Chart.ZoomType.X)
@@ -116,13 +117,6 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         
         mainPanel = new SimplePanel();
         mainPanel.setWidget(chart);
-        
-        for (WindSource windSource : WindSource.values()) {
-            Series directionSeries = createDirectionSeries(windSource);
-            windSourceDirectionSeries.put(windSource, directionSeries);
-            Series speedSeries = createSpeedSeries(windSource);
-            windSourceSpeedSeries.put(windSource, speedSeries);
-        }
         updateSettings(settings);
         if (raceSelectionProvider != null) {
             raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -148,20 +142,36 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         for (Series series : currentlyVisible) {
             visible.add(series);
         }
-        for (WindSource windSource : windSourcesToDisplay) {
-            Series directionSeries = windSourceDirectionSeries.get(windSource);
-            Series speedSeries = windSourceSpeedSeries.get(windSource);
-            if (!visible.contains(directionSeries)) {
-                chart.addSeries(directionSeries);
-                chart.addSeries(speedSeries);
-            } else {
-                visible.remove(directionSeries);
-                visible.remove(speedSeries);
+        for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
+            if (windSourcesToDisplay.contains(e.getKey().getType())) {
+                if (!visible.contains(e.getValue())) {
+                    chart.addSeries(e.getValue());
+                } else {
+                    visible.remove(e.getValue());
+                }
+            }
+        }
+        for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
+            if (windSourcesToDisplay.contains(e.getKey().getType())) {
+                if (!visible.contains(e.getValue())) {
+                    chart.addSeries(e.getValue());
+                } else {
+                    visible.remove(e.getValue());
+                }
             }
         }
         for (Series seriesToRemove : visible) {
             chart.removeSeries(seriesToRemove);
         }
+    }
+
+    private Series getOrCreateSpeedSeries(WindSource windSource) {
+        Series result = windSourceSpeedSeries.get(windSource);
+        if (result == null) {
+            result = createSpeedSeries(windSource);
+            windSourceSpeedSeries.put(windSource, result);
+        }
+        return result;
     }
 
     private Series createDirectionSeries(WindSource windSource) {
@@ -194,8 +204,8 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
             WindSource windSource = e.getKey();
-            Series directionSeries = windSourceDirectionSeries.get(windSource);
-            Series speedSeries = windSourceSpeedSeries.get(windSource);
+            Series directionSeries = getOrCreateDirectionSeries(windSource);
+            Series speedSeries = getOrCreateSpeedSeries(windSource);
             WindTrackInfoDTO windTrackInfo = e.getValue();
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
@@ -252,14 +262,27 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     @Override
     public void updateSettings(WindChartSettings newSettings) {
         windSourcesToDisplay.clear();
-        windSourcesToDisplay.addAll(newSettings.getWindSourcesToDisplay());
+        windSourcesToDisplay.addAll(newSettings.getWindSourceTypesToDisplay());
         chart.removeAllSeries(/* redraw */ false);
-        for (WindSource windSourceToDisplay : windSourcesToDisplay) {
-            Series directionSeries = windSourceDirectionSeries.get(windSourceToDisplay);
-            chart.addSeries(directionSeries);
-            Series speedSeries = windSourceSpeedSeries.get(windSourceToDisplay);
-            chart.addSeries(speedSeries);
+        for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
+            if (windSourcesToDisplay.contains(e.getKey().getType())) {
+                chart.addSeries(e.getValue());
+            }
         }
+        for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
+            if (windSourcesToDisplay.contains(e.getKey().getType())) {
+                chart.addSeries(e.getValue());
+            }
+        }
+    }
+
+    private Series getOrCreateDirectionSeries(WindSource windSource) {
+        Series result = windSourceDirectionSeries.get(windSource);
+        if (result == null) {
+            result = createDirectionSeries(windSource);
+            windSourceDirectionSeries.put(windSource, result);
+        }
+        return result;
     }
 
     /**
