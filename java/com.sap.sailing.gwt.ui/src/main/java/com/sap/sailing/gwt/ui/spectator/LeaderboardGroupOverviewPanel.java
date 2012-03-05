@@ -100,6 +100,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         this.setWidget(mainPanel);
         mainPanel.setSize("100%", "100%");
         
+        LeaderboardGroupOverviewTableResources tableResources = GWT.create(LeaderboardGroupOverviewTableResources.class);
+        
         // Build search GUI
         FlowPanel searchPanel = new FlowPanel();
         searchPanel.setWidth("100%");
@@ -241,7 +243,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         };
         groupsStartDateColumn.setSortable(true);
         
-        groupsTable = new CellTable<LeaderboardGroupDTO>();
+        groupsTable = new CellTable<LeaderboardGroupDTO>(200, tableResources);
         groupsTable.setWidth("100%");
         groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
         groupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -361,7 +363,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
         };
         
-        leaderboardsTable = new CellTable<LeaderboardDTO>();
+        leaderboardsTable = new CellTable<LeaderboardDTO>(200, tableResources);
         leaderboardsTable.setWidth("100%");
         leaderboardsSelectionModel = new SingleSelectionModel<LeaderboardDTO>();
         leaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -428,7 +430,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
         };
         
-        racesTable = new CellTable<RaceInLeaderboardDTO>();
+        racesTable = new CellTable<RaceInLeaderboardDTO>(200, tableResources);
         racesTable.setWidth("100%");
         racesSelectionModel = new NoSelectionModel<RaceInLeaderboardDTO>();
         racesTable.setSelectionModel(racesSelectionModel);
