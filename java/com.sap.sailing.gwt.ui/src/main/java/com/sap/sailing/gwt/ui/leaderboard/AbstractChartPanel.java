@@ -272,7 +272,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      */
     private synchronized void drawChartData() {
         //Make sure the busy indicator is removed at this point, or plotting the data results in an exception
-        setWidget(chart); //TODO
+        setWidget(chart);
         Iterable<CompetitorDTO> competitors = competitorSelectionProvider.getAllCompetitors();
         if (chartData != null && competitors != null && competitors.iterator().hasNext()) {
             List<Series> chartSeries = Arrays.asList(chart.getSeries());
@@ -299,23 +299,18 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         markSeries.setPoints(markPassingPoints.toArray(new Point[0]));
                         
                         Point[] compSeriesPoints = compSeries.getPoints();
-//                        Date dateOfNewestSeriesPoint = compSeriesPoints.length == 0 ? new Date(0) : new Date(
-//                                compSeriesPoints[compSeriesPoints.length - 1].getX().longValue());
-                        List<Pair<Date, Double>> raceData = competitorData.getRaceData();
-                        List<Point> points = new ArrayList<Point>();
+                        Date dateOfNewestSeriesPoint = compSeriesPoints.length == 0 ? null :
+                            new Date(compSeriesPoints[compSeriesPoints.length - 1].getX().longValue());
+                        List<Pair<Date, Double>> raceData = dateOfNewestSeriesPoint == null ? competitorData
+                                .getRaceData() : competitorData.getRaceDataAfterDate(dateOfNewestSeriesPoint);
                         for (Pair<Date, Double> data : raceData) {
                             if (data.getA() != null && data.getB() != null) {
                                 if (data.getA().before(toDate)) {
                                     Point competitorPoint = new Point(data.getA().getTime(), data.getB());
-                                    points.add(competitorPoint);
+                                    compSeries.addPoint(competitorPoint);
                                 }
                             }
                         }
-                        //TODO add points instead of set points
-                        Point[] newPoints = new Point[compSeriesPoints.length + points.size()];
-                        System.arraycopy(compSeriesPoints, 0, newPoints, 0, compSeriesPoints.length);
-                        System.arraycopy(points.toArray(), 0, newPoints, compSeriesPoints.length, points.size());
-                        compSeries.setPoints(newPoints);
                         
                         //Adding the series if chart doesn't contain it
                         if (!chartSeries.contains(compSeries)) {

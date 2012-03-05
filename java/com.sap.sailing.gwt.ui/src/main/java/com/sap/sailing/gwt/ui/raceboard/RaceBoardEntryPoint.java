@@ -36,7 +36,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         String viewModeParamValue = Window.Location.getParameter("viewMode");
         try {
             viewMode = RaceBoardViewMode.valueOf(RaceBoardViewMode.class, viewModeParamValue);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             viewMode = RaceBoardViewMode.ONE_SCREEN;
         }
         eventName = Window.Location.getParameter("eventName");
