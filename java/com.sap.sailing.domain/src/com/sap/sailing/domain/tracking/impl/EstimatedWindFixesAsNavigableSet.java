@@ -60,8 +60,13 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
 
     private TimePoint lowerToResolution(Wind w) {
         TimePoint result;
-        if (w.getTimePoint().compareTo(trackedRace.getTimePointOfLastEvent()) > 0) {
-            result = lowerToResolution(new DummyWind(trackedRace.getTimePointOfLastEvent()));
+        final TimePoint timePointOfLastEvent = trackedRace.getTimePointOfLastEvent();
+        if (timePointOfLastEvent == null) {
+            // nothing received yet; "lowering" to end of time
+            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / RESOLUTION_IN_MILLISECONDS
+                    * RESOLUTION_IN_MILLISECONDS);
+        } else if (w.getTimePoint().compareTo(timePointOfLastEvent) > 0) {
+            result = lowerToResolution(new DummyWind(timePointOfLastEvent));
         } else {
             result = new MillisecondsTimePoint((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS
                     * RESOLUTION_IN_MILLISECONDS);
@@ -71,8 +76,13 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
 
     private TimePoint floorToResolution(Wind w) {
         TimePoint result;
-        if (w.getTimePoint().compareTo(trackedRace.getTimePointOfLastEvent()) > 0) {
-            result = floorToResolution(new DummyWind(trackedRace.getTimePointOfLastEvent()));
+        final TimePoint timePointOfLastEvent = trackedRace.getTimePointOfLastEvent();
+        if (timePointOfLastEvent == null) {
+            // nothing received yet; "lowering" to end of time
+            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / RESOLUTION_IN_MILLISECONDS
+                    * RESOLUTION_IN_MILLISECONDS);
+        } else if (w.getTimePoint().compareTo(timePointOfLastEvent) > 0) {
+            result = floorToResolution(new DummyWind(timePointOfLastEvent));
         } else {
             result = new MillisecondsTimePoint(w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS
                     * RESOLUTION_IN_MILLISECONDS);
@@ -82,8 +92,12 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
 
     private TimePoint ceilingToResolution(Wind w) {
         TimePoint result;
-        if (w.getTimePoint().compareTo(trackedRace.getStartOfTracking()) < 0) {
-            result = ceilingToResolution(new DummyWind(trackedRace.getStartOfTracking()));
+        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        if (startOfTracking == null) {
+            // no start of tracking yet; "ceiling" to beginning of time
+            result = new MillisecondsTimePoint(0);
+        } else if (w.getTimePoint().compareTo(startOfTracking) < 0) {
+            result = ceilingToResolution(new DummyWind(startOfTracking));
         } else {
             result = new MillisecondsTimePoint(((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS + 1)
                     * RESOLUTION_IN_MILLISECONDS);
@@ -93,8 +107,12 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
 
     private TimePoint higherToResolution(Wind w) {
         TimePoint result;
-        if (w.getTimePoint().compareTo(trackedRace.getStartOfTracking()) < 0) {
-            result = higherToResolution(new DummyWind(trackedRace.getStartOfTracking()));
+        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        if (startOfTracking == null) {
+            // no start of tracking yet; "ceiling" to beginning of time
+            result = new MillisecondsTimePoint(0);
+        } else if (w.getTimePoint().compareTo(startOfTracking) < 0) {
+            result = higherToResolution(new DummyWind(startOfTracking));
         } else {
             result = new MillisecondsTimePoint((w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS + 1)
                     * RESOLUTION_IN_MILLISECONDS);
