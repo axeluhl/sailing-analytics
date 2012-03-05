@@ -134,7 +134,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
             
-        WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
+        WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
                 stringMessages, errorReporter);
         SimpleComponentViewer<WindChartSettings> windChartViewer = new SimpleComponentViewer<WindChartSettings>(
