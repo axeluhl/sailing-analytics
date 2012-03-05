@@ -5,8 +5,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.tools.ant.taskdefs.Sleep;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -83,7 +81,6 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     private SingleSelectionModel<LeaderboardDTO> leaderboardsSelectionModel;
     
     private CellTable<RaceInLeaderboardDTO> racesTable;
-    private ListDataProvider<RaceInLeaderboardDTO> racesDataProvider;
     private SingleSelectionModel<RaceInLeaderboardDTO> racesSelectionModel;
     
     
@@ -438,10 +435,6 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 errorReporter.reportError("Error trying to obtain the data: " + t.getMessage());
             }
         });
-    }
-    
-    private void groupSelectionChanged() {
-        //TODO
     }
     
     private void onCheckBoxLiveChange() {

@@ -380,7 +380,9 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 MarkPassing firstMarkPassing = null;
                 synchronized (markPassingsInOrder) {
                     Iterator<MarkPassing> markPassingsForLegEnd = markPassingsInOrder.iterator();
-                    firstMarkPassing = markPassingsForLegEnd.next();
+                    if (markPassingsForLegEnd.hasNext()) {
+                        firstMarkPassing = markPassingsForLegEnd.next();
+                    }
                 }
                 if (firstMarkPassing != null) {
                     // someone has already finished the leg

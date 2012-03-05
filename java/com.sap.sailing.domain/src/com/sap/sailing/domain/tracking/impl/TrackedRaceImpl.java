@@ -1134,12 +1134,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             try {
                 // Get distance to nearest placemark and calculate the search radius
                 Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
-                Distance startNearestDistance = startNearest.distanceFrom(startPosition);
-                double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
+                if (startNearest != null) {
+                    Distance startNearestDistance = startNearest.distanceFrom(startPosition);
+                    double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
 
-                // Get the estimated best start place
-                startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
-                        new Placemark.ByPopulationDistanceRatio(startPosition));
+                    // Get the estimated best start place
+                    startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
+                            new Placemark.ByPopulationDistanceRatio(startPosition));
+                }
             } catch (IOException e) {
                 logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
             } catch (ParseException e) {
@@ -1169,7 +1171,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
             }
         }
-
+        
         if (startBest != null) {
             placemarks.setA(startBest);
         }
