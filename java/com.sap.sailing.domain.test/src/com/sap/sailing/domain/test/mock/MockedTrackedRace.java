@@ -461,4 +461,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint)
+            throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

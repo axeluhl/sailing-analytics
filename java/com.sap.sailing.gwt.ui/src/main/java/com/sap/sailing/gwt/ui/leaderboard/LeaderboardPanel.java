@@ -454,7 +454,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
         return new DetailType[] { DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
-                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
+                DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG };
     }
 
@@ -517,6 +517,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                     new FormattedDoubleLegDetailColumn(stringMessages.gapToLeaderInSeconds(), "["+stringMessages
                             .gapToLeaderInSecondsUnit()+"]", new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
+                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(
+                    DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
+                    new FormattedDoubleLegDetailColumn(stringMessages.windwardDistanceToOverallLeader(), "["+stringMessages
+                            .distanceInMetersUnit()+"]", new RaceDistanceToLeaderInMeters(), 0, getLeaderboardPanel()
                             .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
             result.put(DetailType.CURRENT_LEG, new FormattedDoubleLegDetailColumn(stringMessages.currentLeg(), "",
@@ -674,6 +679,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     if (lastLegDetail != null) {
                         result = lastLegDetail.gapToLeaderInSeconds;
                     }
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Computes the windward distance to the overall leader in meters
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceDistanceToLeaderInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                if (fieldsForRace != null && fieldsForRace.windwardDistanceToOverallLeaderInMeters != null) {
+                    result = fieldsForRace.windwardDistanceToOverallLeaderInMeters;
                 }
                 return result;
             }

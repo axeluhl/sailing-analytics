@@ -30,7 +30,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private final String COLUMN1_NAME = "r1";
     private final String EVENT_NAME = "Sailing Team Germany (STG)";
     protected static final boolean tractracTunnel = true; // Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
-    protected static final String tractracTunnelHost = "10.18.10.38"; // System.getProperty("tractrac.tunnel.host", "localhost");
+    protected static final String tractracTunnelHost = "10.18.206.73"; // System.getProperty("tractrac.tunnel.host", "localhost");
     private final String JSON_URL= "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/jsonservice.php";
     private final String TRACKED_RACE = "schwerttest";
     
