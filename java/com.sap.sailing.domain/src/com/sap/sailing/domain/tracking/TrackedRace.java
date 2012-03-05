@@ -295,5 +295,6 @@ public interface TrackedRace {
     void addListener(RaceChangeListener listener);
 
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
-    
+
+    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
 }
