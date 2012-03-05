@@ -116,8 +116,6 @@ public interface SailingServiceAsync {
 
     void getQuickRanks(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<QuickRankDTO>> callback);
 
-    void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind, AsyncCallback<Void> callback);
-
     /**
      * Returns a {@link LeaderboardDTO} will information about all races, their points and competitor display names
      * filled in. The column details are filled for the races whose named are provided in
@@ -285,4 +283,7 @@ public interface SailingServiceAsync {
      */
     void getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, Date toDate, long stepSize,
             DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
+
+    void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
+            AsyncCallback<Void> callback);
 }

@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -10,9 +12,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
 /**
  * Displays a bit of wind history around the time notified to this time listener.
@@ -70,14 +74,15 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
                         new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
                             public void onSuccess(WindInfoForRaceDTO result) {
+                                WindSource bestWindSource = getBestWindSource(result, windIndicators.length);
                                 // expecting to find windIndicators.length fixes
-                                if (result == null || result.windTrackInfoByWindSource.get(result.selectedWindSource).windFixes
+                                if (result == null || result.windTrackInfoByWindSource.get(bestWindSource).windFixes
                                         .size() != windIndicators.length) {
                                     clearWindDisplay();
                                 } else {
-                                    setSelectedWindSource(result.selectedWindSource);
+                                    setSelectedWindSource(bestWindSource);
                                     int i = 0;
-                                    for (WindDTO fix : result.windTrackInfoByWindSource.get(result.selectedWindSource).windFixes) {
+                                    for (WindDTO fix : result.windTrackInfoByWindSource.get(bestWindSource).windFixes) {
                                         updateWindIndicator(i, fix);
                                         i++;
                                     }
@@ -94,6 +99,29 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
         }
     }
     
+    /**
+     * Looks for the best wind source in <code>windInfo</code> that has <code>length</code> fixes. Uses the order of
+     * literals of {@link WindSourceType} to determine precedence.
+     * 
+     * @return <code>null</code> if no wind source has the expected number of fixes; the best wind source with the
+     *         expected number of fixes otherwise
+     */
+    private WindSource getBestWindSource(WindInfoForRaceDTO windInfo, int expectedNumberOfFixes) {
+        List<WindSourceType> windSourceTypesInOrder = Arrays.asList(WindSourceType.values());
+        WindSource result = null;
+        int bestIndexSoFar = Integer.MAX_VALUE;
+        for (Map.Entry<WindSource, WindTrackInfoDTO> e : windInfo.windTrackInfoByWindSource.entrySet()) {
+            if (e.getValue().windFixes.size() == expectedNumberOfFixes) {
+                int index = windSourceTypesInOrder.indexOf(e.getKey());
+                if (index < bestIndexSoFar) {
+                    bestIndexSoFar = index;
+                    result = e.getKey();
+                }
+            }
+        }
+        return result;
+    }
+
     private void clearWindDisplay() {
         for (int i=0; i<windIndicators.length; i++) {
             windIndicators[i].setFromDeg(0);
