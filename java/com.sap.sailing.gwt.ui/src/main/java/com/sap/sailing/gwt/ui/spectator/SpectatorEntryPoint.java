@@ -48,9 +48,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         
         FormPanel panelToDisplay = null;
         if (groupName == null) {
-            //TODO Adjust the code after the OverviewEventPanel is ready for the leaderboard groups
-//            panelToDisplay = new OverviewEventPanel(sailingService, this, this, stringMessages);
-            Window.alert(stringMessages.noLeaderboardGroupToLoad() + ".");
+            panelToDisplay = new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages);
         } else {
             panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root);
             LeaderboardGroupPanel groupPanel = (LeaderboardGroupPanel) panelToDisplay;
@@ -61,9 +59,8 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
                             " the leader board displays information such as in-race ranking, average speeds, distance travelled, ETA" +
                             " (estimated time of arrival at the next mark rounding), gaps to leader, gains and losses per leg.\n\n" +
                             "Check out the results for yourself to see who triumphed - and how they did it."));
-            rootPanel.add(panelToDisplay);
         }
-//        rootPanel.add(panelToDisplay);
+        rootPanel.add(panelToDisplay);
 
         fillEvents();
     }

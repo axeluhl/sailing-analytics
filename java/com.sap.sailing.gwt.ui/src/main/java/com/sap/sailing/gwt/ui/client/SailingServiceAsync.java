@@ -40,7 +40,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
  */
 public interface SailingServiceAsync {
     
-    void listEvents(boolean withRacePlaces, AsyncCallback<List<EventDTO>> callback);
+    void listEvents(AsyncCallback<List<EventDTO>> callback);
     
     /**
      * The string returned in the callback's pair is the common event name
@@ -283,6 +283,6 @@ public interface SailingServiceAsync {
      * returned.<br />
      * Returns <code>null</code>, if <code>race</code> isn't tracked. 
      */
-    void getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, long stepSize,
+    void getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, Date toDate, long stepSize,
             DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 }

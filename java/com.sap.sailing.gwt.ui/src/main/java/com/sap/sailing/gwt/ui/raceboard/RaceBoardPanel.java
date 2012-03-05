@@ -115,7 +115,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
     private void createTVView() {
         // TODO Auto-generated method stub
-        
     }
 
     private void createOneScreenView() {

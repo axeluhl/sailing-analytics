@@ -240,10 +240,6 @@ public class Timer {
             setTime(new Date().getTime() - delayInMilliseconds);
         }
     }
-
-    public long getDelay() {
-        return livePlayDelayInMillis;
-    }
     
     /**
      * Tells how much the timer is currently behind "now." Note that this is not the same as asking
