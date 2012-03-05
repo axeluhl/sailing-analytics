@@ -121,7 +121,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      */
     @Override
     public synchronized Wind getEstimatedWind(Position p, TimePoint at) {
-        return getEstimatedWindUnsynchronized(p, at).getObject();
+        final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getEstimatedWindUnsynchronized(p, at);
+        return estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
     }
     
     @Override

@@ -523,7 +523,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
-        return getWindWithConfidence(p, at, windSourcesToExclude).getObject();
+        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getWindWithConfidence(p, at, windSourcesToExclude);
+        return windWithConfidence == null ? null : windWithConfidence.getObject();
     }
     
     @Override
@@ -542,10 +543,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (!Util.contains(windSourcesToExclude, windSource)) {
                 WindTrack track = getWindTrack(windSource);
                 WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getEstimatedWindWithConfidence(p, at);
-                windFixesWithConfidences.add(windWithConfidence);
+                if (windWithConfidence != null) {
+                    windFixesWithConfidences.add(windWithConfidence);
+                }
             }
         }
-        HasConfidence<ScalableWind, Wind, Pair<Position, TimePoint>> average = averager.getAverage(windFixesWithConfidences, new Pair<Position, TimePoint>(p, at));
+        HasConfidence<ScalableWind, Wind, Pair<Position, TimePoint>> average = averager.getAverage(
+                windFixesWithConfidences, new Pair<Position, TimePoint>(p, at));
         WindWithConfidence<Pair<Position, TimePoint>> result = new WindWithConfidenceImpl<Pair<Position,TimePoint>>(
                 average.getObject(), average.getConfidence(), new Pair<Position, TimePoint>(p, at));
         return result;

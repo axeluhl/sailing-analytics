@@ -59,23 +59,47 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
     }
 
     private TimePoint lowerToResolution(Wind w) {
-        return new MillisecondsTimePoint((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS
-                * RESOLUTION_IN_MILLISECONDS);
+        TimePoint result;
+        if (w.getTimePoint().compareTo(trackedRace.getTimePointOfLastEvent()) > 0) {
+            result = lowerToResolution(new DummyWind(trackedRace.getTimePointOfLastEvent()));
+        } else {
+            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS
+                    * RESOLUTION_IN_MILLISECONDS);
+        }
+        return result;
     }
 
     private TimePoint floorToResolution(Wind w) {
-        return new MillisecondsTimePoint(w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS
-                * RESOLUTION_IN_MILLISECONDS);
+        TimePoint result;
+        if (w.getTimePoint().compareTo(trackedRace.getTimePointOfLastEvent()) > 0) {
+            result = floorToResolution(new DummyWind(trackedRace.getTimePointOfLastEvent()));
+        } else {
+            result = new MillisecondsTimePoint(w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS
+                    * RESOLUTION_IN_MILLISECONDS);
+        }
+        return result;
     }
 
     private TimePoint ceilingToResolution(Wind w) {
-        return new MillisecondsTimePoint(((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS + 1)
-                * RESOLUTION_IN_MILLISECONDS);
+        TimePoint result;
+        if (w.getTimePoint().compareTo(trackedRace.getStartOfTracking()) < 0) {
+            result = ceilingToResolution(new DummyWind(trackedRace.getStartOfTracking()));
+        } else {
+            result = new MillisecondsTimePoint(((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS + 1)
+                    * RESOLUTION_IN_MILLISECONDS);
+        }
+        return result;
     }
 
     private TimePoint higherToResolution(Wind w) {
-        return new MillisecondsTimePoint((w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS + 1)
-                * RESOLUTION_IN_MILLISECONDS);
+        TimePoint result;
+        if (w.getTimePoint().compareTo(trackedRace.getStartOfTracking()) < 0) {
+            result = higherToResolution(new DummyWind(trackedRace.getStartOfTracking()));
+        } else {
+            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS + 1)
+                    * RESOLUTION_IN_MILLISECONDS);
+        }
+        return result;
     }
 
     /**
