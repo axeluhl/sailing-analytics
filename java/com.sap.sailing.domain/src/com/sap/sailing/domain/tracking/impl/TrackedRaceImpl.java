@@ -539,9 +539,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 ConfidenceFactory.INSTANCE.createAverager(timeWeigherThatPretendsToAlsoWeighPositions);
         List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
         for (WindSource windSource : getWindSources()) {
-            WindTrack track = getWindTrack(windSource);
-            WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getEstimatedWindWithConfidence(p, at);
-            windFixesWithConfidences.add(windWithConfidence);
+            if (!Util.contains(windSourcesToExclude, windSource)) {
+                WindTrack track = getWindTrack(windSource);
+                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getEstimatedWindWithConfidence(p, at);
+                windFixesWithConfidences.add(windWithConfidence);
+            }
         }
         HasConfidence<ScalableWind, Wind, Pair<Position, TimePoint>> average = averager.getAverage(windFixesWithConfidences, new Pair<Position, TimePoint>(p, at));
         WindWithConfidence<Pair<Position, TimePoint>> result = new WindWithConfidenceImpl<Pair<Position,TimePoint>>(
