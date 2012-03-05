@@ -12,7 +12,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
@@ -107,9 +106,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             case ONE_SCREEN:
                 createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);
                 break;
-            case TV_MODE:
-                createTVView(leaderboardName, leaderboardGroupName, mainPanel);
-                break;
         }
 
         for (ComponentViewer componentViewer : componentViewers) {
@@ -122,14 +118,10 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
     
-    private void createTVView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
-    }
-
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
         componentsNavigationPanel = new FlowPanel();
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
-        boolean showCompetitorCharts = true;
         // create the default leaderboard and select the right race
 
         LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode());
@@ -137,28 +129,26 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                 timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
         RaceMap raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionModel, stringMessages);
 
-        SideBySideComponentViewer leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, "auto", "500px", stringMessages);  
+        SideBySideComponentViewer leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, "auto", "500px");  
         componentViewers.add(leaderboardAndMapViewer);
 
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
             
-//        WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
-//        WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
-//                stringMessages, errorReporter);
-//        CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
-//                windChart, "auto", "400px", stringMessages);
-//        windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-//        collapsableViewers.add(windChartViewer);
-//        if (showCompetitorCharts) {
-//            MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
-//                    timer, stringMessages, errorReporter);
-//            CollapsableComponentViewer<MultiChartSettings> chartViewer = new CollapsableComponentViewer<MultiChartSettings>(
-//                    competitorCharts, "auto", "400px", stringMessages);
-//
-//            competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-//            collapsableViewers.add(chartViewer);
-//        }
-        
+        WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
+        WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
+                stringMessages, errorReporter);
+        SimpleComponentViewer<WindChartSettings> windChartViewer = new SimpleComponentViewer<WindChartSettings>(
+                windChart, "auto", "200px");
+        windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+        componentViewers.add(windChartViewer);
+
+        MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
+                    timer, stringMessages, errorReporter);
+            SimpleComponentViewer<MultiChartSettings> chartViewer = new SimpleComponentViewer<MultiChartSettings>(
+                    competitorCharts, "auto", "200px");
+
+            competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+            componentViewers.add(chartViewer);
     }
 
     private void createCascadingView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {

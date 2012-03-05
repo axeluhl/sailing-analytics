@@ -47,7 +47,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapZoomSettings.ZoomTypes;
@@ -70,9 +69,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
-import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
@@ -452,19 +449,20 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
     }
 
     protected void showWindOnMap(WindInfoForRaceDTO windInfo) {
-        System.out.println("Windsources: " + windInfo.windTrackInfoByWindSource.size());
-        for(WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
-            switch (windSource) {
-                case COURSE_BASED:
-                case EXPEDITION: 
-                case TRACK_BASED_ESTIMATION:
-                case WEB:
-                    WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
-                    for(WindDTO windDTO: windTrackInfoDTO.windFixes) {
-                        Long timepoint = windDTO.timepoint;
-                    }
-            }
-        }
+        // DON'T DELETE... THIS WILL BE IMPLEMENTED SOON
+//        System.out.println("Windsources: " + windInfo.windTrackInfoByWindSource.size());
+//        for(WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
+//            switch (windSource) {
+//                case COURSE_BASED:
+//                case EXPEDITION: 
+//                case TRACK_BASED_ESTIMATION:
+//                case WEB:
+//                    WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
+//                    for(WindDTO windDTO: windTrackInfoDTO.windFixes) {
+//                        Long timepoint = windDTO.timepoint;
+//                    }
+//            }
+//        }
     }
     
     protected void showMarksOnMap(List<MarkDTO> result) {

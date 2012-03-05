@@ -42,7 +42,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         if(viewModeParamValue != null && !viewModeParamValue.isEmpty()) {
             try {
                 
-                viewMode = RaceBoardViewMode.valueOf(RaceBoardViewMode.class, viewModeParamValue);
+                viewMode = RaceBoardViewMode.valueOf(viewModeParamValue);
             } catch (IllegalArgumentException e) {
                 viewMode = RaceBoardViewMode.ONE_SCREEN;
             }
@@ -89,7 +89,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             };
         }
-        sailingService.listEvents(false, listEventsCallback);
+        sailingService.listEvents(listEventsCallback);
         sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
         if(leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, getLeaderboardGroupByNameCallback);
