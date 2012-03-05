@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Date;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 
@@ -7,6 +9,7 @@ public class RaceInLeaderboardDTO implements IsSerializable {
     private String raceColumnName;
     private boolean medalRace;
     private RaceIdentifier trackedRaceIdentifier;
+    private StrippedRaceDTO race;
 
     public String getRaceColumnName() {
         return raceColumnName;
@@ -39,6 +42,43 @@ public class RaceInLeaderboardDTO implements IsSerializable {
      */
     public RaceIdentifier getRaceIdentifier() {
         return trackedRaceIdentifier;
+    }
+
+    /**
+     * Returns an object with data (e.g. start date or places) for the RaceInLeaderboardDTO. Is <code>null</code>, if
+     * the method {@link RaceInLeaderboardDTO#isTrackedRace()} returns <code>false</code>.
+     * 
+     * @return An Object with additional data, or <code>null</code> if the race isn't tracked
+     */
+    public StrippedRaceDTO getRace() {
+        return race;
+    }
+
+    public void setRace(StrippedRaceDTO race) {
+        this.race = race;
+    }
+    
+    /**
+     * @return The start of race, or the start of tracking if the start of race is <code>null</code>, or
+     *         <code>null</code> if no start date is available.
+     */
+    public Date getStartDate() {
+        Date start = null;
+        if (race != null) {
+            start = race.getStartDate();
+        }
+        return start;
+    }
+    
+    /**
+     * @return The {@link PlacemarkOrderDTO places} or <code>null</code>, if no places are available
+     */
+    public PlacemarkOrderDTO getPlaces() {
+        PlacemarkOrderDTO places = null;
+        if (race != null) {
+            places = race.places;
+        }
+        return places;
     }
 
     @Override

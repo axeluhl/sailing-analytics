@@ -42,11 +42,9 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.impl.RacePlaceOrderImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -74,7 +72,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 320;
     
     /**
-     * Used in {@link #getPlaceOrder()} to calculate the radius for the
+     * Used in {@link #getStartFinishPlacemarks()} to calculate the radius for the
      * {@link ReverseGeocoder#getPlacemarksNear(Position, double) GetPlacemarksNear-Service}.
      */
     private static final double GEONAMES_RADIUS_CACLCULATION_FACTOR = 10.0;
@@ -312,30 +310,32 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at) {
         NavigableSet<MarkPassing> roundings = markPassingsForCompetitor.get(competitor);
-        MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
         TrackedLegOfCompetitor result = null;
-        TrackedLeg trackedLeg;
-        // already finished the race?
-        if (lastBeforeOrAt != null) {
-            // and not at or after last mark passing
-            if (getRace().getCourse().getLastWaypoint() != lastBeforeOrAt.getWaypoint()) {
-                trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
-            } else {
-                // exactly *at* last mark passing?
-                if (at.equals(roundings.last().getTimePoint())) {
-                    // exactly at finish line; return last leg
-                    trackedLeg = getTrackedLegFinishingAt(lastBeforeOrAt.getWaypoint());
+        if (roundings != null) {
+            MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
+            TrackedLeg trackedLeg;
+            // already finished the race?
+            if (lastBeforeOrAt != null) {
+                // and not at or after last mark passing
+                if (getRace().getCourse().getLastWaypoint() != lastBeforeOrAt.getWaypoint()) {
+                    trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
                 } else {
-                    // no, then we're after the last mark passing
-                    trackedLeg = null;
+                    // exactly *at* last mark passing?
+                    if (at.equals(roundings.last().getTimePoint())) {
+                        // exactly at finish line; return last leg
+                        trackedLeg = getTrackedLegFinishingAt(lastBeforeOrAt.getWaypoint());
+                    } else {
+                        // no, then we're after the last mark passing
+                        trackedLeg = null;
+                    }
                 }
+            } else {
+                // before beginning of race
+                trackedLeg = null;
             }
-        } else {
-            // before beginning of race
-            trackedLeg = null;
-        }
-        if (trackedLeg != null) {
-            result = trackedLeg.getTrackedLeg(competitor);
+            if (trackedLeg != null) {
+                result = trackedLeg.getTrackedLeg(competitor);
+            }
         }
         return result;
     }
@@ -1123,75 +1123,69 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     @Override
-    public RacePlaceOrder getPlaceOrder() {
-        RacePlaceOrder order = null;
+    public Pair<Placemark, Placemark> getStartFinishPlacemarks() {
+        Pair<Placemark, Placemark> placemarks = new Pair<Placemark, Placemark>(null, null);
         Placemark startBest = null;
         Placemark finishBest = null;
         
         // Get start postition
-        Waypoint start = getRace().getCourse().getFirstWaypoint();
-        Iterable<MarkPassing> startPassings = getMarkPassingsInOrder(start);
-        MarkPassing startPassing = null;
-        synchronized (startPassings) {
-            Iterator<MarkPassing> iterator = startPassings.iterator();
-            if (iterator.hasNext()) {
-                startPassing = iterator.next();
-            }
-        }
-        if (startPassing != null) {
-            Position startPosition = getApproximatePosition(start, startPassing.getTimePoint());
+        Iterator<Buoy> startBuoys = getRace().getCourse().getFirstWaypoint().getBuoys().iterator();
+        GPSFix startBuoyFix = startBuoys.hasNext() ? getOrCreateTrack(startBuoys.next()).getLastRawFix() : null;
+        Position startPosition = startBuoyFix != null ? startBuoyFix.getPosition() : null;
+        if (startPosition != null) {
             try {
                 // Get distance to nearest placemark and calculate the search radius
                 Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
-                Distance startNearestDistance = startNearest.distanceFrom(startPosition);
-                double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
+                if (startNearest != null) {
+                    Distance startNearestDistance = startNearest.distanceFrom(startPosition);
+                    double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
 
-                // Get the estimated best start place
-                startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
-                        new Placemark.ByPopulationDistanceRatio(startPosition));
+                    // Get the estimated best start place
+                    startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
+                            new Placemark.ByPopulationDistanceRatio(startPosition));
+                }
             } catch (IOException e) {
                 logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
             } catch (ParseException e) {
                 logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
             }
+        }
 
-            // Get finish position
-            Waypoint finish = getRace().getCourse().getLastWaypoint();
-            Iterable<MarkPassing> finishPassings = getMarkPassingsInOrder(finish);
-            MarkPassing finishPassing = null;
-            synchronized (finishPassings) {
-                Iterator<MarkPassing> finishPassingsIterator = finishPassings.iterator();
-                while (finishPassingsIterator.hasNext()) {
-                    finishPassing = (MarkPassing) finishPassingsIterator.next();
-                }
-            }
-            Position finishPosition = getApproximatePosition(finish, finishPassing.getTimePoint());
-            if (startPosition.getDistance(finishPosition).getKilometers() > ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
-                try {
-                    // Get distance to nearest placemark and calculate the search radius
-                    Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
-                    Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
-                    double finishRadius = finishNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
+        // Get finish position
+        Iterator<Buoy> finishBuoys = getRace().getCourse().getFirstWaypoint().getBuoys().iterator();
+        GPSFix finishBuoyFix = finishBuoys.hasNext() ? getOrCreateTrack(finishBuoys.next()).getLastRawFix() : null;
+        Position finishPosition = finishBuoyFix != null ? finishBuoyFix.getPosition() : null;
+        if (startPosition != null
+                && finishPosition != null
+                && startPosition.getDistance(finishPosition).getKilometers() > ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
+            try {
+                // Get distance to nearest placemark and calculate the search radius
+                Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
+                Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
+                double finishRadius = finishNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
 
-                    // Get the estimated best finish place
-                    finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
-                            new Placemark.ByPopulationDistanceRatio(finishPosition));
-                } catch (IOException e) {
-                    logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-                } catch (ParseException e) {
-                    logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-                }
-            }
-
-            if (startBest != null) {
-                if (finishBest != null) {
-                    order = new RacePlaceOrderImpl(startBest, finishBest);
-                } else {
-                    order = new RacePlaceOrderImpl(startBest, startBest);
-                }
+                // Get the estimated best finish place
+                finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
+                        new Placemark.ByPopulationDistanceRatio(finishPosition));
+            } catch (IOException e) {
+                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+            } catch (ParseException e) {
+                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
             }
         }
-        return order;
+        
+        if (startBest != null) {
+            placemarks.setA(startBest);
+        }
+        if (finishBest != null) {
+            placemarks.setB(finishBest);
+        }
+        return placemarks;
     }
     
+    @Override
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        final TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
+        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint);
+    }
 }

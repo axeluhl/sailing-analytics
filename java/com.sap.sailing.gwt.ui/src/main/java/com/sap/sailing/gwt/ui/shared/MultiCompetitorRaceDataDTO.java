@@ -86,7 +86,8 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
             if (dateOfNewestData == null) {
                 dateOfNewestData = raceDateOfNewestData;
             } else {
-                dateOfNewestData = dateOfNewestData.after(raceDateOfNewestData) ? dateOfNewestData : raceDateOfNewestData;
+                dateOfNewestData = (dateOfNewestData.after(raceDateOfNewestData) || raceDateOfNewestData == null) ? dateOfNewestData
+                        : raceDateOfNewestData;
             }
         }
         return dateOfNewestData;
@@ -99,7 +100,8 @@ public class MultiCompetitorRaceDataDTO implements IsSerializable {
             if (dateOfNewestData == null) {
                 dateOfNewestData = raceDateOfNewestData;
             } else {
-                dateOfNewestData = dateOfNewestData.before(raceDateOfNewestData) ? dateOfNewestData : raceDateOfNewestData;
+                dateOfNewestData = (dateOfNewestData.before(raceDateOfNewestData) || raceDateOfNewestData == null) ? dateOfNewestData
+                        : raceDateOfNewestData;
             }
         }
         return dateOfNewestData;

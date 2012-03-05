@@ -14,12 +14,13 @@ import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 /**
  * Live tracking data of a single race. The race follows a defined {@link Course} with a sequence of {@link Leg}s. The
@@ -44,10 +45,10 @@ public interface TrackedRace {
     RaceIdentifier getRaceIdentifier();
     
     /**
-     * @return The locations (start, finish, ...) of the race in form of {@link RacePlaceOrder} or <code>null</code> if
-     *         there are no valid locations
+     * @return A pair of placemarks, where A is the start placemark and B is the finish placemark.<br />
+     *         The returning pair is never <code>null</code>, but A and/or B can be <code>null</code>.
      */
-    RacePlaceOrder getPlaceOrder();
+    Pair<Placemark, Placemark> getStartFinishPlacemarks();
     
     /**
      * Computes the estimated start time for this race. When there are no {@link MarkPassing}s for the first mark, the
@@ -295,5 +296,6 @@ public interface TrackedRace {
     void addListener(RaceChangeListener listener);
 
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
-    
+
+    Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
 }

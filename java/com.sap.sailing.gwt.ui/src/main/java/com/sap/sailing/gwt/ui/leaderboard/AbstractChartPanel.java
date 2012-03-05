@@ -192,19 +192,20 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 chartData = new MultiCompetitorRaceDataDTO(getDataToShow());
             }
             
-            final ArrayList<Pair<Date, CompetitorDTO>> competitorsToLoad = new ArrayList<Pair<Date, CompetitorDTO>>();
+            Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
+            final ArrayList<Pair<Date, CompetitorDTO>> dataQuery = new ArrayList<Pair<Date, CompetitorDTO>>();
             for (CompetitorDTO competitor : getVisibleCompetitors()) {
                 Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
+                Date competitorDateOfNewestData = chartData.contains(competitor) ? chartData.getCompetitorData(competitor).getDateOfNewestData() : null;
                 if (!chartData.contains(competitor)) {
-                    competitorsToLoad.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
-                } else if (chartData.getCompetitorData(competitor).getDateOfNewestData().before(chartDataDateOfNewestData)) {
-                    Date competitorDateOfNewestData = chartData.getCompetitorData(competitor).getDateOfNewestData();
-                    competitorsToLoad.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime() + getStepSize()), competitor));
+                    dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
+                } else if (competitorDateOfNewestData.before(chartDataDateOfNewestData) || competitorDateOfNewestData.before(toDate)) {
+                    dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime() + getStepSize()), competitor));
                 }
             }
             
-            sailingService.getCompetitorsRaceData(getSelectedRace(), competitorsToLoad, getStepSize(),
-                    getDataToShow(), new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+            sailingService.getCompetitorsRaceData(getSelectedRace(), dataQuery, toDate, getStepSize(), getDataToShow(),
+                    new AsyncCallback<MultiCompetitorRaceDataDTO>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -281,25 +282,33 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 if (isCompetitorVisible(competitor)) {
                     CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
                     if (competitorData != null) {
+                        Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
+                        
                         List<Triple<String, Date, Double>> markPassingsData = competitorData.getMarkPassingsData();
                         List<Point> markPassingPoints = new ArrayList<Point>();
                         for (Triple<String, Date, Double> markPassingData : markPassingsData) {
                             if (markPassingData.getB() != null && markPassingData.getC() != null) {
-                                Point markPassingPoint = new Point(markPassingData.getB().getTime(), markPassingData.getC());
-                                markPassingPoint.setName(markPassingData.getA());
-                                markPassingPoints.add(markPassingPoint);
+                                if (markPassingData.getB().before(toDate)) {
+                                    Point markPassingPoint = new Point(markPassingData.getB().getTime(),
+                                            markPassingData.getC());
+                                    markPassingPoint.setName(markPassingData.getA());
+                                    markPassingPoints.add(markPassingPoint);
+                                }
                             }
                         }
                         markSeries.setPoints(markPassingPoints.toArray(new Point[0]));
                         
                         Point[] compSeriesPoints = compSeries.getPoints();
-                        Date dateOfNewestSeriesPoint = compSeriesPoints.length == 0 ? new Date(0) : new Date(
-                                compSeriesPoints[compSeriesPoints.length - 1].getX().longValue());
-                        List<Pair<Date, Double>> raceData = competitorData.getRaceDataAfterDate(dateOfNewestSeriesPoint);
+                        Date dateOfNewestSeriesPoint = compSeriesPoints.length == 0 ? null :
+                            new Date(compSeriesPoints[compSeriesPoints.length - 1].getX().longValue());
+                        List<Pair<Date, Double>> raceData = dateOfNewestSeriesPoint == null ? competitorData
+                                .getRaceData() : competitorData.getRaceDataAfterDate(dateOfNewestSeriesPoint);
                         for (Pair<Date, Double> data : raceData) {
                             if (data.getA() != null && data.getB() != null) {
-                                Point competitorPoint = new Point(data.getA().getTime(), data.getB());
-                                compSeries.addPoint(competitorPoint);
+                                if (data.getA().before(toDate)) {
+                                    Point competitorPoint = new Point(data.getA().getTime(), data.getB());
+                                    compSeries.addPoint(competitorPoint);
+                                }
                             }
                         }
                         

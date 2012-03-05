@@ -17,10 +17,11 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
@@ -63,7 +64,8 @@ public class LongRangeRegattaGeocoderTest extends AbstractManeuverDetectionTestC
     @Test
     public void testSetupOK() throws ParseException, NoWindException {
         assertNotNull(getTrackedRace());
-        RacePlaceOrder order = getTrackedRace().getPlaceOrder();
-        assertNotNull(order);
+        Pair<Placemark, Placemark> placemarks = getTrackedRace().getStartFinishPlacemarks();
+        assertNotNull(placemarks.getA());
+        assertNotNull(placemarks.getB());
     }
 }

@@ -40,7 +40,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 public interface SailingService extends RemoteService {
     List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception;
     
-    List<EventDTO> listEvents(boolean withRacePlaces);
+    List<EventDTO> listEvents();
 
     Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
 
@@ -139,11 +139,6 @@ public interface SailingService extends RemoteService {
     
     String[] getCountryCodes();
     
-//    CompetitorInRaceDTO getCompetitorRaceData(RaceIdentifier race,
-//            CompetitorsAndTimePointsDTO competitorsAndTimePointsDTO, DetailType dataType) throws NoWindException;
-
-//    CompetitorsAndTimePointsDTO getCompetitorsAndTimePoints(RaceIdentifier race, long stepSize);
-    
     Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, double meters) throws NoWindException;
 
@@ -164,6 +159,7 @@ public interface SailingService extends RemoteService {
     
     void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards);
 
-    MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitors, long stepSize, DetailType detailType) 
+    MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitors,
+            Date toDate, long stepSize, DetailType detailType) 
             throws NoWindException;
 }

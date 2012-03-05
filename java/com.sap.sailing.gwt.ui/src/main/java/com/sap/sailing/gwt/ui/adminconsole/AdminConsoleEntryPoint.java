@@ -91,7 +91,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
 
     @Override
     public void fillEvents() {
-        sailingService.listEvents(false, new AsyncCallback<List<EventDTO>>() {
+        sailingService.listEvents(new AsyncCallback<List<EventDTO>>() {
             @Override
             public void onSuccess(List<EventDTO> result) {
                 for (EventDisplayer eventDisplayer : eventDisplayers) {

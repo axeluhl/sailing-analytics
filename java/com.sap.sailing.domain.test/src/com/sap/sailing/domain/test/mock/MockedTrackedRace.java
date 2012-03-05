@@ -12,14 +12,15 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
@@ -437,7 +438,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public RacePlaceOrder getPlaceOrder() {
+    public Pair<Placemark, Placemark> getStartFinishPlacemarks() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -456,6 +457,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint)
+            throws NoWindException {
         // TODO Auto-generated method stub
         return null;
     }
