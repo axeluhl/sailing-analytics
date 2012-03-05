@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.common;
 
+import java.io.Serializable;
+
+
 
 /**
  * Possible sources for wind data. Used to key and select between different {@link WindTrack}s. Objects of this
@@ -8,7 +11,7 @@ package com.sap.sailing.domain.common;
  * @author Axel Uhl (d043530)
  *
  */
-public interface WindSource {
+public interface WindSource extends Serializable {
     WindSourceType getType();
     
     /**

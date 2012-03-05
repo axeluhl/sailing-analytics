@@ -10,6 +10,8 @@ import com.sap.sailing.domain.common.WindSourceType;
  *
  */
 public class WindSourceWithAdditionalID extends WindSourceImpl {
+    private static final long serialVersionUID = -142955860536561690L;
+
     private final String id;
 
     public WindSourceWithAdditionalID(WindSourceType type, String id) {
