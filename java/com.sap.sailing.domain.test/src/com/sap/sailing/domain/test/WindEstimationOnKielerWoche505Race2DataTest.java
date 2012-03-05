@@ -16,7 +16,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -39,10 +39,9 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
                 ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
         MillisecondsTimePoint timePointForFixes = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), timePointForFixes);
-        getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, timePointForFixes, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(70))), WindSource.WEB);
+                        new DegreeBearingImpl(70))), getTrackedRace().getWindSources(WindSourceType.WEB).iterator().next());
     }
     
     /**

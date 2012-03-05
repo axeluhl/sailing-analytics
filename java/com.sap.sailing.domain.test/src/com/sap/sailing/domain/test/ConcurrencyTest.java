@@ -41,10 +41,9 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
         super.setUp("event_20110815_RCSwedenCu",
         /* raceId */ "1cdf8398-cafe-11e0-8c8e-406186cbf87c", new ReceiverType[] { ReceiverType.MARKPASSINGS,
                 ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
-        getTrackedRace().setWindSource(WindSourceType.WEB);
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(10))), WindSourceType.WEB);
+                        new DegreeBearingImpl(10))), getTrackedRace().getWindSources(WindSourceType.WEB).iterator().next());
     }
 
     @Override
