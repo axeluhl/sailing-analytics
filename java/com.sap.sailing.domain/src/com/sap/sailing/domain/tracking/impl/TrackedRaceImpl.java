@@ -1156,21 +1156,24 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         GPSFix finishBuoyFix = finishBuoys.hasNext() ? getOrCreateTrack(finishBuoys.next()).getLastRawFix() : null;
         Position finishPosition = finishBuoyFix != null ? finishBuoyFix.getPosition() : null;
         if (startPosition != null
-                && finishPosition != null
-                && startPosition.getDistance(finishPosition).getKilometers() > ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
-            try {
-                // Get distance to nearest placemark and calculate the search radius
-                Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
-                Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
-                double finishRadius = finishNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
+                && finishPosition != null) {
+            if (startPosition.getDistance(finishPosition).getKilometers() <= ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
+                finishBest = startBest;
+            } else {
+                try {
+                    // Get distance to nearest placemark and calculate the search radius
+                    Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
+                    Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
+                    double finishRadius = finishNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
 
-                // Get the estimated best finish place
-                finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
-                        new Placemark.ByPopulationDistanceRatio(finishPosition));
-            } catch (IOException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            } catch (ParseException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                    // Get the estimated best finish place
+                    finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
+                            new Placemark.ByPopulationDistanceRatio(finishPosition));
+                } catch (IOException e) {
+                    logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                } catch (ParseException e) {
+                    logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                }
             }
         }
         
