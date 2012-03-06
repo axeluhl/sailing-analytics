@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
@@ -61,9 +61,8 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
     private void loadRace(String raceId) throws MalformedURLException, IOException, InterruptedException,
             URISyntaxException {
         setUp("event_20110609_KielerWoch", raceId, ReceiverType.RACECOURSE, ReceiverType.RACESTARTFINISH, ReceiverType.MARKPASSINGS);
-        getTrackedRace().setWindSource(WindSource.WEB);
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), WindSource.WEB);
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(70))), getTrackedRace().getWindSources(WindSourceType.WEB).iterator().next());
         fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
     }
 }

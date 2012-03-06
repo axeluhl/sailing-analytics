@@ -7,7 +7,6 @@ import com.sap.sailing.domain.common.WindSource;
 
 public class WindInfoForRaceDTO implements IsSerializable {
     public Map<WindSource, WindTrackInfoDTO> windTrackInfoByWindSource;
-    public WindSource selectedWindSource;
     public boolean raceIsKnownToStartUpwind;
     
     public WindInfoForRaceDTO() {}

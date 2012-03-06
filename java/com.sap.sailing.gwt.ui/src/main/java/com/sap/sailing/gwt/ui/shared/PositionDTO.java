@@ -17,4 +17,16 @@ public class PositionDTO implements IsSerializable {
     public String toString() {
         return "("+latDeg+", "+lngDeg+")";
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        long temp;
+        temp = (int) latDeg;
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = (int) lngDeg;
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
 }

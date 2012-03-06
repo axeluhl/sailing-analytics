@@ -44,12 +44,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     private boolean raceIsKnownToStartUpwind;
     
     /**
-     * The wind source to be used for all computations based on wind. Used as key into
-     * {@link #windTracks}. The default value is {@link WindSource#EXPEDITION}.
-     */
-    private WindSource currentWindSource;
-
-    /**
      * {@link #raceIsKnownToStartUpwind} (see also {@link #raceIsKnownToStartUpwind()}) is initialized based on the <code>race</code>'s
      * {@link RaceDefinition#getBoatClass()} boat class's {@link BoatClass#typicallyStartsUpwind()} result. It can be changed
      * using {@link #setRaceIsKnownToStartUpwind(boolean)}.
@@ -62,10 +56,10 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
         }
-        for (WindSource windSource : WindSource.values()) {
+        // TODO ensure that when a wind source is added or removed, this object is added/removed as listener accordingly
+        for (WindSource windSource : getWindSources()) {
             getWindTrack(windSource).addListener(this);
         }
-        currentWindSource = WindSource.EXPEDITION;
     }
 
     @Override
@@ -76,6 +70,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     @Override
     public void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed) {
+        this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed; 
         for (Competitor competitor : getRace().getCompetitors()) {
             getTrack(competitor).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
         }
@@ -89,7 +84,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind) {
-        for (WindSource windSource : WindSource.values()) {
+        this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
+        for (WindSource windSource : getWindSources()) {
             getWindTrack(windSource).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
         }
         updated(MillisecondsTimePoint.now());
@@ -293,6 +289,15 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         super.setStartTimeReceived(start);
     }
 
+    /**
+     * In addition to calling the super class implementation, adds this tracked race as a listener for the wind track.
+     */
+    protected WindTrack createWindTrack(WindSource windSource) {
+        WindTrack result = super.createWindTrack(windSource);
+        result.addListener(this);
+        return result;
+    }
+
     @Override
     public synchronized void recordWind(Wind wind, WindSource windSource) {
         getWindTrack(windSource).add(wind);
@@ -356,7 +361,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public long getMillisecondsOverWhichToAverageWind() {
         long result = 0; // default in case there is no competitor
-        for (WindSource windSource : WindSource.values()) {
+        for (WindSource windSource : getWindSources()) {
             WindTrack someTrack = getWindTrack(windSource);
             result = someTrack.getMillisecondsOverWhichToAverageWind();
         }
@@ -378,15 +383,4 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         return raceIsKnownToStartUpwind;
     }
     
-    @Override
-    public WindSource getWindSource() {
-        return this.currentWindSource;
-    }
-    
-    @Override
-    public void setWindSource(WindSource windSource) {
-        this.currentWindSource = windSource;
-        updated(/* timepoint */ null);
-    }
-
 }

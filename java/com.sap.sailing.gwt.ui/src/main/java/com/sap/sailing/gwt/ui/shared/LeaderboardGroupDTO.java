@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.RaceIdentifier;
 
 public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
 
@@ -11,24 +13,73 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     public List<LeaderboardDTO> leaderboards;
     
     /**
-     * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.
+     * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.<br />
+     * The additional data (start dates and places for the races) will be initialized but empty.
      */
     public LeaderboardGroupDTO() {
-        this.name = "";
-        this.description = "";
-        this.leaderboards = new ArrayList<LeaderboardDTO>();
+        this("", "", new ArrayList<LeaderboardDTO>());
     }
 
     /**
      * Creates a new LeaderboardGroupDTO with the given parameters as attributes.<br />
-     * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.
+     * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.<br />
+     * The additional data (start dates and places for the races) will be initialized but empty.
      */
     public LeaderboardGroupDTO(String name, String description, List<LeaderboardDTO> leaderboards) {
         super(name);
         this.description = description;
         this.leaderboards = leaderboards;
     }
-
+    
+    public boolean containsRace(RaceIdentifier race) {
+        boolean containsRace = false;
+        leaderboardsLoop:
+        for (LeaderboardDTO leaderboard : leaderboards) {
+            for (RaceInLeaderboardDTO raceInLeaderboard : leaderboard.getRaceList()) {
+                if (raceInLeaderboard.getRaceIdentifier() != null && raceInLeaderboard.getRaceIdentifier().equals(race)) {
+                    containsRace = true;
+                    break leaderboardsLoop;
+                }
+            }
+        }
+        return containsRace;
+    }
+    
+    /**
+     * @return The earliest date in the start dates of the leaderboards, or <code>null</code> if no start dates are contained
+     */
+    public Date getGroupStartDate() {
+        Date groupStart = null;
+        for (LeaderboardDTO leaderboard : leaderboards) {
+            Date leaderboardStart = leaderboard.getStartDate();
+            if (leaderboardStart != null) {
+                if (groupStart == null) {
+                    groupStart = new Date();
+                }
+                groupStart = groupStart.before(leaderboardStart) ? groupStart : leaderboardStart;
+            }
+        }
+        return groupStart;
+    }
+    
+    /**
+     * Uses {@link LeaderboardGroupDTO#getLeaderboardPlaces(leaderboard) LeaderboardGroupDTO.getLeaderboardPlaces} to
+     * create the {@link PlacemarkOrderDTO places} for all contained leaderboards and returns them as a list.
+     * 
+     * @return A list of the {@link PlacemarkDTO places} of all contained leaderboards.<br />
+     *         The returning list is never <code>null</code>, but can be empty.
+     */
+    public List<PlacemarkOrderDTO> getGroupPlaces() {
+        List<PlacemarkOrderDTO> places = new ArrayList<PlacemarkOrderDTO>();
+        for (LeaderboardDTO leaderboard : leaderboards) {
+            PlacemarkOrderDTO leaderboardPlaces = leaderboard.getPlaces();
+            if (leaderboardPlaces != null) {
+                places.add(leaderboardPlaces);
+            }
+        }
+        return places;
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;

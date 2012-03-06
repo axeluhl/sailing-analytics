@@ -50,9 +50,8 @@ public class CompetitorRaceDataDTO implements IsSerializable {
      * Takes the {@link Date} of the last elements in {@link #raceData} and {@link #markPassingsData} and returns the newer date.
      */
     public Date getDateOfNewestData() {
-        Date dateOfNewestRaceData = raceData.get(raceData.size() - 1).getA();
-        Date dateOfNewestMarkPassing = markPassingsData.get(markPassingsData.size() - 1).getB();
-        return dateOfNewestRaceData.after(dateOfNewestMarkPassing) ? dateOfNewestRaceData : dateOfNewestMarkPassing;
+        Date dateOfNewestRaceData = !raceData.isEmpty() ? raceData.get(raceData.size() - 1).getA() : null;
+            return dateOfNewestRaceData != null ? dateOfNewestRaceData : null;
     }
     
     /**

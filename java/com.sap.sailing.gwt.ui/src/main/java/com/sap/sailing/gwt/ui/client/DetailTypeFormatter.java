@@ -29,6 +29,8 @@ public class DetailTypeFormatter {
             return stringMessages.averageSpeedInKnots();
         case RACE_GAP_TO_LEADER_IN_SECONDS:
             return stringMessages.gapToLeaderInSeconds();
+        case RACE_DISTANCE_TO_LEADER_IN_METERS:
+            return stringMessages.windwardDistanceToLeaderInMeters();
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             return stringMessages.windwardDistanceToOverallLeader();
         case HEAD_UP:

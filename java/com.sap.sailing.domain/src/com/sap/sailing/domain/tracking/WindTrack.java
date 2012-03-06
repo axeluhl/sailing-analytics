@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public interface WindTrack extends Track<Wind> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND = 30000;
@@ -20,7 +21,9 @@ public interface WindTrack extends Track<Wind> {
      * 
      * If the track has no wind data at all, <code>null</code> will be returned.
      */
-    Wind getEstimatedWind(Position p, TimePoint at);
+    Wind getAveragedWind(Position p, TimePoint at);
+    
+    WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at);
 
     /**
      * A listener is notified whenever a new fix is added to this track

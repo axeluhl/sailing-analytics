@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
@@ -119,12 +120,17 @@ public interface TrackedLegOfCompetitor {
     SpeedWithBearing getSpeedOverGround(TimePoint at);
 
     /**
-     * Computes the distance along the wind track to the wind-projected position of the race's
-     * overall leader. If leader and competitor are in the same leg, this is simply the windward
-     * distance. If the leader is already one or more legs ahead, it's the competitor's winward
-     * distance to go plus the windward distance between the marks of all legs that the leader
-     * completed after this competitor's leg plus the windard distance between the leader and
-     * the leader's leg's start.
+     * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader
+     * and competitor are in the same leg, this is simply the windward distance. If the leader is already one or more
+     * legs ahead, it's the competitor's winward distance to go plus the windward distance between the marks of all legs
+     * that the leader completed after this competitor's leg plus the windard distance between the leader and the
+     * leader's leg's start.
+     * <p>
+     * 
+     * If the leg is neither an {@link LegType#UPWIND upwind} nor a {@link LegType#DOWNWIND downwind} leg, the geometric
+     * distance between this leg's competitor and the leader is returned. Note that this can lead to a situation where
+     * the distance to leader is unrelated to the {@link #getWindwardDistanceToGo(TimePoint) distance to go} which is
+     * used for ranking.
      */
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
 

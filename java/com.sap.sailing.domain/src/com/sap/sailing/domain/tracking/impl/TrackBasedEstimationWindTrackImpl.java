@@ -42,8 +42,9 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * {@link TrackedRace#getMillisecondsOverWhichToAverageSpeed() averaging speeds}. For a new mark passing, all fixes
  * between the old and new mark passing times as well as those
  * {@link TrackedRace#getMillisecondsOverWhichToAverageSpeed()} before and after this time period are removed from the
- * cache. If the {@link #speedAveragingChanged(long, long) speed averaging changes}, the entire cache is cleared.
+ * cache. If the {@link #speedAveragingChanged(long, long) speed averaging changes}, the entire cache is cleared.<p>
  * 
+ * Note the {@link #getMillisecondsOverWhichToAverageWind() reduced averaging interval} used by this track type.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -67,6 +68,17 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
         this.virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(this, trackedRace);
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(AbstractTimePoint.TIMEPOINT_COMPARATOR);
         this.timePointsWithCachedNullResultFastContains = new HashSet<TimePoint>();
+    }
+    
+    /**
+     * The track-based estimation already averages the boats' bearings over time before averaging those across legs and
+     * tacks. There is no use in again averaging over a longer period of time. Therefore, we set the averaging interval
+     * to two times the resolution of the {@link EstimatedWindFixesAsNavigableSet virtual fixes collection} plus two
+     * milliseconds, so that at most one fix before and one fix after the time point requested will be used.
+     */
+    @Override
+    public long getMillisecondsOverWhichToAverageWind() {
+        return 2*virtualInternalRawFixes.getResolutionInMilliseconds()+2;
     }
 
     private NavigableSet<Wind> getCachedFixes() {
@@ -171,7 +183,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
      * time point is used instead. If both time points are not known, <code>null</code> is returned immediately.
      */
     @Override
-    public Wind getEstimatedWind(Position p, TimePoint at) {
+    public Wind getAveragedWind(Position p, TimePoint at) {
         Wind result = null;
         TimePoint adjustedAt;
         TimePoint raceStartTimePoint = trackedRace.getStart();
@@ -198,7 +210,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
         if (adjustedAt != null) {
             // we can use the unsynchronized version here because our getInternalFixes() method operates
             // only on a virtual sequence of wind fixes where no concurrency issues have to be observed
-            result = getEstimatedWindUnsynchronized(p, adjustedAt);
+            result = getEstimatedWindUnsynchronized(p, adjustedAt).getObject();
         }
         return result;
     }

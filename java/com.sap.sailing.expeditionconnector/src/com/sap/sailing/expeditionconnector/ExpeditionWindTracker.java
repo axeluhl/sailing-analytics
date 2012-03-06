@@ -8,7 +8,7 @@ import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -111,7 +111,8 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
             }
             if (windSpeed != null && lastKnownPosition != null) {
                 Wind wind = new WindImpl(lastKnownPosition, message.getTimePoint(), windSpeed);
-                race.recordWind(wind, WindSource.EXPEDITION);
+                String windSourceID = Integer.valueOf(message.getBoatID()).toString();
+                race.recordWind(wind, race.getOrCreateWindSource(WindSourceType.EXPEDITION, windSourceID));
             }
         }
     }

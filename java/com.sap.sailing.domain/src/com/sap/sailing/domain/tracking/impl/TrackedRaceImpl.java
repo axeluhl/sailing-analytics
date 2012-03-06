@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,17 +44,20 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RacePlaceOrder;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.impl.RacePlaceOrderImpl;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.Weigher;
-import com.sap.sailing.domain.confidence.impl.LinearTimeDifferenceWeigher;
+import com.sap.sailing.domain.confidence.impl.HyperbolicTimeDifferenceWeigher;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -66,6 +71,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
@@ -74,7 +80,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 320;
     
     /**
-     * Used in {@link #getPlaceOrder()} to calculate the radius for the
+     * Used in {@link #getStartFinishPlacemarks()} to calculate the radius for the
      * {@link ReverseGeocoder#getPlacemarksNear(Position, double) GetPlacemarksNear-Service}.
      */
     private static final double GEONAMES_RADIUS_CACLCULATION_FACTOR = 10.0;
@@ -132,9 +138,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
     
-    private final long millisecondsOverWhichToAverageSpeed;
+    protected long millisecondsOverWhichToAverageSpeed;
 
     private final Map<Buoy, StartToNextMarkCacheInvalidationListener> startToNextMarkCacheInvalidationListeners;
+
+    protected long millisecondsOverWhichToAverageWind;
     
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
@@ -142,6 +150,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.updateCount = 0;
         this.race = race;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
+        this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.startToNextMarkCacheInvalidationListeners = new HashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = new HashMap<Competitor, Util.Triple<TimePoint,TimePoint,List<Maneuver>>>();
         this.buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
@@ -174,9 +183,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(MarkPassingByTimeComparator.INSTANCE));
         }
         windTracks = new HashMap<WindSource, WindTrack>();
-        for (WindSource windSource : WindSource.values()) {
-            windTracks.put(windSource, windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind));
-        }
+        // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
+        // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received for them.
+        WindSource courseBasedWindSource = new WindSourceImpl(WindSourceType.COURSE_BASED);
+        windTracks.put(courseBasedWindSource, windStore.getWindTrack(trackedEvent, this, courseBasedWindSource, millisecondsOverWhichToAverageWind));
+        WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
+        windTracks.put(trackBasedWindSource, windStore.getWindTrack(trackedEvent, this, trackBasedWindSource, millisecondsOverWhichToAverageWind));
+        WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
+        windTracks.put(webWindSource, windStore.getWindTrack(trackedEvent, this, webWindSource, millisecondsOverWhichToAverageWind));
+        // FIXME need to do something to load expedition wind that was stored in DB because no recordWind will be called
         this.trackedEvent = trackedEvent;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
     }
@@ -312,30 +327,32 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at) {
         NavigableSet<MarkPassing> roundings = markPassingsForCompetitor.get(competitor);
-        MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
         TrackedLegOfCompetitor result = null;
-        TrackedLeg trackedLeg;
-        // already finished the race?
-        if (lastBeforeOrAt != null) {
-            // and not at or after last mark passing
-            if (getRace().getCourse().getLastWaypoint() != lastBeforeOrAt.getWaypoint()) {
-                trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
-            } else {
-                // exactly *at* last mark passing?
-                if (at.equals(roundings.last().getTimePoint())) {
-                    // exactly at finish line; return last leg
-                    trackedLeg = getTrackedLegFinishingAt(lastBeforeOrAt.getWaypoint());
+        if (roundings != null) {
+            MarkPassing lastBeforeOrAt = roundings.floor(new DummyMarkPassingWithTimePointOnly(at));
+            TrackedLeg trackedLeg;
+            // already finished the race?
+            if (lastBeforeOrAt != null) {
+                // and not at or after last mark passing
+                if (getRace().getCourse().getLastWaypoint() != lastBeforeOrAt.getWaypoint()) {
+                    trackedLeg = getTrackedLegStartingAt(lastBeforeOrAt.getWaypoint());
                 } else {
-                    // no, then we're after the last mark passing
-                    trackedLeg = null;
+                    // exactly *at* last mark passing?
+                    if (at.equals(roundings.last().getTimePoint())) {
+                        // exactly at finish line; return last leg
+                        trackedLeg = getTrackedLegFinishingAt(lastBeforeOrAt.getWaypoint());
+                    } else {
+                        // no, then we're after the last mark passing
+                        trackedLeg = null;
+                    }
                 }
+            } else {
+                // before beginning of race
+                trackedLeg = null;
             }
-        } else {
-            // before beginning of race
-            trackedLeg = null;
-        }
-        if (trackedLeg != null) {
-            result = trackedLeg.getTrackedLeg(competitor);
+            if (trackedLeg != null) {
+                result = trackedLeg.getTrackedLeg(competitor);
+            }
         }
         return result;
     }
@@ -484,28 +501,59 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public WindTrack getWindTrack(WindSource windSource) {
-        return windTracks.get(windSource);
+        WindTrack result = windTracks.get(windSource);
+        if (result == null) {
+            result = createWindTrack(windSource);
+        }
+        return result;
+    }
+    
+    /**
+     * Creates a wind track for the <code>windSource</code> specified and stores it in {@link #windTracks}. The averaging interval is
+     * set according to the averaging interval set for all other wind sources, or the default if no other wind source exists yet.
+     */
+    protected WindTrack createWindTrack(WindSource windSource) {
+        return new WindTrackImpl(millisecondsOverWhichToAverageWind);
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at, WindSource... windSourcesToExclude) {
-        List<WindSource> windSourcesToConsider = new ArrayList<WindSource>();
-        windSourcesToConsider.add(getWindSource());
-        for (WindSource windSource : WindSource.values()) {
-            if (windSource != getWindSource()) {
-                windSourcesToConsider.add(windSource);
+    public Wind getWind(Position p, TimePoint at) {
+        List<WindSource> emptyWindSourcesList = Collections.emptyList();
+        return getWind(p, at, emptyWindSourcesList);
+    }
+
+    @Override
+    public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getWindWithConfidence(p, at, windSourcesToExclude);
+        return windWithConfidence == null ? null : windWithConfidence.getObject();
+    }
+    
+    @Override
+    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+        final Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(/*halfConfidenceAfterMilliseconds*/ 10000l);
+        Weigher<Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new Weigher<Util.Pair<Position,TimePoint>>() {
+            @Override
+            public double getConfidence(Pair<Position, TimePoint> fix, Pair<Position, TimePoint> request) {
+                return weigher.getConfidence(fix.getB(), request.getB());
+            }
+        };
+        ConfidenceBasedAverager<ScalableWind, Wind, Pair<Position, TimePoint>> averager =
+                ConfidenceFactory.INSTANCE.createAverager(timeWeigherThatPretendsToAlsoWeighPositions);
+        List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
+        for (WindSource windSource : getWindSources()) {
+            if (!Util.contains(windSourcesToExclude, windSource)) {
+                WindTrack track = getWindTrack(windSource);
+                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(p, at);
+                if (windWithConfidence != null) {
+                    windFixesWithConfidences.add(windWithConfidence);
+                }
             }
         }
-        for (WindSource windSourceToExclude : windSourcesToExclude) {
-            windSourcesToConsider.remove(windSourceToExclude);
-        }
-        for (WindSource windSource : windSourcesToConsider) {
-            Wind result = getWindTrack(windSource).getEstimatedWind(p, at);
-            if (result != null) {
-                return result;
-            }
-        }
-        return null;
+        HasConfidence<ScalableWind, Wind, Pair<Position, TimePoint>> average = averager.getAverage(
+                windFixesWithConfidences, new Pair<Position, TimePoint>(p, at));
+        WindWithConfidence<Pair<Position, TimePoint>> result = new WindWithConfidenceImpl<Pair<Position,TimePoint>>(
+                average.getObject(), average.getConfidence(), new Pair<Position, TimePoint>(p, at));
+        return result;
     }
 
     @Override
@@ -745,7 +793,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     // TODO confidences need to be computed not only based on timePoint but also on position: boats far away don't contribute as confidently as boats close by
     private Map<LegType, BearingWithConfidenceCluster<TimePoint>> clusterBearingsForWindEstimation(TimePoint timePoint,
             Position position, DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
-        Weigher<TimePoint> weigherForMarkPassingProximity = new LinearTimeDifferenceWeigher(getMillisecondsOverWhichToAverageSpeed()*5);
+        Weigher<TimePoint> weigherForMarkPassingProximity = new HyperbolicTimeDifferenceWeigher(getMillisecondsOverWhichToAverageSpeed()*5);
         Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<LegType, BearingWithConfidenceCluster<TimePoint>>();
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));
@@ -1123,50 +1171,43 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     @Override
-    public RacePlaceOrder getPlaceOrder() {
-        RacePlaceOrder order = null;
+    public Pair<Placemark, Placemark> getStartFinishPlacemarks() {
+        Pair<Placemark, Placemark> placemarks = new Pair<Placemark, Placemark>(null, null);
         Placemark startBest = null;
         Placemark finishBest = null;
         
         // Get start postition
-        Waypoint start = getRace().getCourse().getFirstWaypoint();
-        Iterable<MarkPassing> startPassings = getMarkPassingsInOrder(start);
-        MarkPassing startPassing = null;
-        synchronized (startPassings) {
-            Iterator<MarkPassing> iterator = startPassings.iterator();
-            if (iterator.hasNext()) {
-                startPassing = iterator.next();
-            }
-        }
-        if (startPassing != null) {
-            Position startPosition = getApproximatePosition(start, startPassing.getTimePoint());
+        Iterator<Buoy> startBuoys = getRace().getCourse().getFirstWaypoint().getBuoys().iterator();
+        GPSFix startBuoyFix = startBuoys.hasNext() ? getOrCreateTrack(startBuoys.next()).getLastRawFix() : null;
+        Position startPosition = startBuoyFix != null ? startBuoyFix.getPosition() : null;
+        if (startPosition != null) {
             try {
                 // Get distance to nearest placemark and calculate the search radius
                 Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
-                Distance startNearestDistance = startNearest.distanceFrom(startPosition);
-                double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
+                if (startNearest != null) {
+                    Distance startNearestDistance = startNearest.distanceFrom(startPosition);
+                    double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
 
-                // Get the estimated best start place
-                startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
-                        new Placemark.ByPopulationDistanceRatio(startPosition));
+                    // Get the estimated best start place
+                    startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
+                            new Placemark.ByPopulationDistanceRatio(startPosition));
+                }
             } catch (IOException e) {
                 logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
             } catch (ParseException e) {
                 logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
             }
+        }
 
-            // Get finish position
-            Waypoint finish = getRace().getCourse().getLastWaypoint();
-            Iterable<MarkPassing> finishPassings = getMarkPassingsInOrder(finish);
-            MarkPassing finishPassing = null;
-            synchronized (finishPassings) {
-                Iterator<MarkPassing> finishPassingsIterator = finishPassings.iterator();
-                while (finishPassingsIterator.hasNext()) {
-                    finishPassing = (MarkPassing) finishPassingsIterator.next();
-                }
-            }
-            Position finishPosition = getApproximatePosition(finish, finishPassing.getTimePoint());
-            if (startPosition.getDistance(finishPosition).getKilometers() > ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
+        // Get finish position
+        Iterator<Buoy> finishBuoys = getRace().getCourse().getFirstWaypoint().getBuoys().iterator();
+        GPSFix finishBuoyFix = finishBuoys.hasNext() ? getOrCreateTrack(finishBuoys.next()).getLastRawFix() : null;
+        Position finishPosition = finishBuoyFix != null ? finishBuoyFix.getPosition() : null;
+        if (startPosition != null
+                && finishPosition != null) {
+            if (startPosition.getDistance(finishPosition).getKilometers() <= ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
+                finishBest = startBest;
+            } else {
                 try {
                     // Get distance to nearest placemark and calculate the search radius
                     Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
@@ -1182,16 +1223,56 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
                 }
             }
+        }
+        
+        if (startBest != null) {
+            placemarks.setA(startBest);
+        }
+        if (finishBest != null) {
+            placemarks.setB(finishBest);
+        }
+        return placemarks;
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        final TrackedLegOfCompetitor trackedLeg = getTrackedLeg(competitor, timePoint);
+        return trackedLeg == null ? null : trackedLeg.getWindwardDistanceToOverallLeader(timePoint);
+    }
 
-            if (startBest != null) {
-                if (finishBest != null) {
-                    order = new RacePlaceOrderImpl(startBest, finishBest);
-                } else {
-                    order = new RacePlaceOrderImpl(startBest, startBest);
-                }
+    @Override
+    public Iterable<WindSource> getWindSources(WindSourceType type) {
+        Set<WindSource> result = new HashSet<WindSource>();
+        for (WindSource windSource : getWindSources()) {
+            if (windSource.getType() == type) {
+                result.add(windSource);
             }
         }
-        return order;
+        return result;
+    }
+    
+    @Override
+    public WindSource getOrCreateWindSource(WindSourceType type, String id) {
+        WindSource result = null;
+        for (WindSource windSource : getWindSources(type)) {
+            if (windSource.getType() == type && windSource.getId().equals(id)) {
+                result = windSource;
+                break;
+            }
+        }
+        if (result == null) {
+            result = createWindSource(type, id);
+        }
+        return result;
+    }
+
+    private WindSource createWindSource(WindSourceType type, String id) {
+        return new WindSourceWithAdditionalID(type, id);
+    }
+
+    @Override
+    public Iterable<WindSource> getWindSources() {
+        return windTracks.keySet();
     }
     
 }

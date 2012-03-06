@@ -39,6 +39,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
@@ -87,7 +88,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         windSourceSelection.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                setWindSource(/* runOnSuccess */ null);
+                setRaceIsKnownToStartUpwind(/* runOnSuccess */ null);
             }
         });
         removeColumn = new IdentityColumn<WindDTO>(new ActionCell<WindDTO>(stringMessages.remove(), new Delegate<WindDTO>() {
@@ -99,7 +100,11 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
                     @Override
                     public void onSuccess(Void result) {
                         // remove row from underlying list:
-                        windLists.get(WindSource.WEB).getList().remove(wind);
+                        for (Map.Entry<WindSource, ListDataProvider<WindDTO>> e : windLists.entrySet()) {
+                            if (e.getKey().getType() == WindSourceType.WEB) {
+                                e.getValue().getList().remove(wind);
+                            }
+                        }
                     }
                     @Override
                     public void onFailure(Throwable caught) {
@@ -156,7 +161,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         raceIsKnownToStartUpwindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                setWindSource(/* runOnSuccess */ new Runnable() {
+                setRaceIsKnownToStartUpwind(/* runOnSuccess */ new Runnable() {
                     public void run() {
                         clearOrShowWindBasedOnRaceSelection(raceSelectionProvider.getSelectedRaces());
                     }
@@ -175,7 +180,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         windSourceSelectionPanel.add(showConfigAnchor);
         grid.setWidget(1, 0, windSourceSelectionPanel);
         windChart = new WindChart(sailingService, /* race selection provider */ raceSelectionProvider,
-                new Timer(PlayModes.Replay), new WindChartSettings(WindSource.values()), stringMessages, errorReporter);
+                new Timer(PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, errorReporter);
         grid.setWidget(2, 0, windChart.getEntryWidget());
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);
@@ -221,7 +226,6 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     }
     
     private void updateWindSources(WindInfoForRaceDTO result) {
-        int selectedIndex = -1;
         for (WindSource windSource : result.windTrackInfoByWindSource.keySet()) {
             boolean found = false;
             int i=0;
@@ -235,11 +239,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
             if (!found) {
                 windSourceSelection.addItem(windSource.name());
             }
-            if (windSource == result.selectedWindSource) {
-                selectedIndex = i;
-            }
         }
-        windSourceSelection.setSelectedIndex(selectedIndex);
     }
 
     private void clearWindDisplay() {
@@ -264,7 +264,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
             dampenedSpeedInKnotsColumn.setSortable(true);
             dampenedWindDirectionInDegColumn.setSortable(true);
             CellTable<WindDTO> windTable = new CellTable<WindDTO>(/* pageSize */ 10000);
-            if (e.getKey() == WindSource.WEB) {
+            if (e.getKey().getType() == WindSourceType.WEB) {
                 // only the WEB wind source is editable, hence has a "Remove" column
                 windTable.addColumn(removeColumn, "Remove");
             }
@@ -339,13 +339,13 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         return result;
     }
 
-    private void setWindSource(final Runnable runOnSuccess) {
+    private void setRaceIsKnownToStartUpwind(final Runnable runOnSuccess) {
         List<RaceIdentifier> selection = raceSelectionProvider.getSelectedRaces();
         if (selection != null && !selection.isEmpty()) {
             final RaceIdentifier selectedRace = selection.get(0);
             final String windSourceName = windSourceSelection.getItemText(windSourceSelection.getSelectedIndex());
-            sailingService.setWindSource(selectedRace,
-                    windSourceName, raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
+            sailingService.setRaceIsKnownToStartUpwind(selectedRace,
+                    raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(WindPanel.this.stringMessages.errorWhileTryingToSetWindSourceForRace()+
