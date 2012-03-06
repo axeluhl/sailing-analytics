@@ -144,11 +144,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     protected long millisecondsOverWhichToAverageWind;
     
+    private final WindStore windStore;
+    
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super();
         this.updateCount = 0;
         this.race = race;
+        this.windStore = windStore;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.startToNextMarkCacheInvalidationListeners = new HashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
@@ -183,6 +186,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(MarkPassingByTimeComparator.INSTANCE));
         }
         windTracks = new HashMap<WindSource, WindTrack>();
+        windTracks.putAll(windStore.loadWindTracks(trackedEvent, this, millisecondsOverWhichToAverageWind));
         // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
         // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received for them.
         WindSource courseBasedWindSource = new WindSourceImpl(WindSourceType.COURSE_BASED);
@@ -191,7 +195,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         windTracks.put(trackBasedWindSource, windStore.getWindTrack(trackedEvent, this, trackBasedWindSource, millisecondsOverWhichToAverageWind));
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
         windTracks.put(webWindSource, windStore.getWindTrack(trackedEvent, this, webWindSource, millisecondsOverWhichToAverageWind));
-        // FIXME need to do something to load expedition wind that was stored in DB because no recordWind will be called
+        // FIXME bug #372: need to do something to load expedition wind that was stored in DB because no recordWind will be called
         this.trackedEvent = trackedEvent;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
     }
@@ -500,10 +504,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public WindTrack getWindTrack(WindSource windSource) {
+    public synchronized WindTrack getOrCreateWindTrack(WindSource windSource) {
         WindTrack result = windTracks.get(windSource);
         if (result == null) {
             result = createWindTrack(windSource);
+            windTracks.put(windSource, result);
         }
         return result;
     }
@@ -513,7 +518,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * set according to the averaging interval set for all other wind sources, or the default if no other wind source exists yet.
      */
     protected WindTrack createWindTrack(WindSource windSource) {
-        return new WindTrackImpl(millisecondsOverWhichToAverageWind);
+        return windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind);
     }
 
     @Override
@@ -542,7 +547,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
         for (WindSource windSource : getWindSources()) {
             if (!Util.contains(windSourcesToExclude, windSource)) {
-                WindTrack track = getWindTrack(windSource);
+                WindTrack track = getOrCreateWindTrack(windSource);
                 WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(p, at);
                 if (windWithConfidence != null) {
                     windFixesWithConfidences.add(windWithConfidence);

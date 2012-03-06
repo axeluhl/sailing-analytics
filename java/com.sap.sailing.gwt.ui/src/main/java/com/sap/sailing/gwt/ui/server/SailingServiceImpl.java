@@ -547,7 +547,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 for (WindSource windSource : (windSources == null ? trackedRace.getWindSources() : Arrays.asList(windSources))) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
-                    WindTrack windTrack = trackedRace.getWindTrack(windSource);
+                    WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
                     windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack
                             .getMillisecondsOverWhichToAverageWind();
                     Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
@@ -607,7 +607,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     TimePoint fromTimePoint = new MillisecondsTimePoint(from);
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
-                    WindTrack windTrack = trackedRace.getWindTrack(windSource);
+                    WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
                     windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                     windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack
                             .getMillisecondsOverWhichToAverageWind();

@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,8 +25,10 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
@@ -260,6 +264,36 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "getAllLeaderboards", t);
+        }
+        return result;
+    }
+
+    @Override
+    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Event event, RaceDefinition race,
+            long millisecondsOverWhichToAverageWind) {
+        Map<WindSource, WindTrack> result = new HashMap<WindSource, WindTrack>();
+        try {
+            BasicDBObject query = new BasicDBObject();
+            query.put(FieldNames.EVENT_NAME.name(), event.getName());
+            query.put(FieldNames.RACE_NAME.name(), race.getName());
+            DBCollection windTracks = database.getCollection(CollectionNames.WIND_TRACKS.name());
+            for (DBObject o : windTracks.find(query)) {
+                Wind wind = loadWind((DBObject) o.get(FieldNames.WIND.name()));
+                WindSourceType windSourceType = WindSourceType.valueOf((String) o.get(FieldNames.WIND_SOURCE_NAME.name()));
+                // TODO bug #374: consider optional additional wind store ID
+//                WindSource windSource = new WindSourceWithAdditionalID(windSourceType, null);
+                WindSource windSource = new WindSourceImpl(windSourceType);
+                WindTrack track = result.get(windSource);
+                if (track == null) {
+                    track = new WindTrackImpl(millisecondsOverWhichToAverageWind);
+                    result.put(windSource, track);
+                }
+                track.add(wind);
+            }
+        } catch (Throwable t) {
+             // something went wrong during DB access; report, then use empty new wind track
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded wind data. Check MongoDB settings.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadWindTrack", t);
         }
         return result;
     }

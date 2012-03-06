@@ -81,7 +81,7 @@ public abstract class TrackBasedTest {
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.234451), MillisecondsTimePoint.now()));
         trackedRace.getOrCreateTrack(right).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.24), MillisecondsTimePoint.now()));
         trackedRace.getOrCreateTrack(windwardMark).addGPSFix(new GPSFixImpl(topPosition, MillisecondsTimePoint.now()));
-        trackedRace.getWindTrack(trackedRace.getWindSources(WindSourceType.WEB).iterator().next()).add(
+        trackedRace.getOrCreateWindTrack(trackedRace.getWindSources(WindSourceType.WEB).iterator().next()).add(
                 new WindImpl(topPosition, timePointForFixes,
                         new KnotSpeedWithBearingImpl(/* speedInKnots */14.7, new DegreeBearingImpl(180))));
         return trackedRace;

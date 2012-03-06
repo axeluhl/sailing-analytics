@@ -203,7 +203,7 @@ public interface TrackedRace {
      */
     Iterable<WindSource> getWindSources();
 
-    WindTrack getWindTrack(WindSource windSource);
+    WindTrack getOrCreateWindTrack(WindSource windSource);
 
     /**
      * Waits until {@link #getUpdateCount()} is after <code>sinceUpdate</code>.

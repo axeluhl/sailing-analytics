@@ -74,7 +74,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void addWindTrackDumper(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource) {
-        WindTrack windTrack = trackedRace.getWindTrack(windSource);
+        WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
         windTrack.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, this, database));
     }
 

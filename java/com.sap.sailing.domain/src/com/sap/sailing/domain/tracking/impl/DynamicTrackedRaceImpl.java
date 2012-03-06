@@ -58,7 +58,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
         // TODO ensure that when a wind source is added or removed, this object is added/removed as listener accordingly
         for (WindSource windSource : getWindSources()) {
-            getWindTrack(windSource).addListener(this);
+            getOrCreateWindTrack(windSource).addListener(this);
         }
     }
 
@@ -86,7 +86,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind) {
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         for (WindSource windSource : getWindSources()) {
-            getWindTrack(windSource).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
+            getOrCreateWindTrack(windSource).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
         }
         updated(MillisecondsTimePoint.now());
     }
@@ -300,13 +300,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public synchronized void recordWind(Wind wind, WindSource windSource) {
-        getWindTrack(windSource).add(wind);
+        getOrCreateWindTrack(windSource).add(wind);
         updated(null); // wind events shouldn't advance race time
     }
     
     @Override
     public synchronized void removeWind(Wind wind, WindSource windSource) {
-        getWindTrack(windSource).remove(wind);
+        getOrCreateWindTrack(windSource).remove(wind);
         updated(wind.getTimePoint());
     }
 
@@ -362,7 +362,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public long getMillisecondsOverWhichToAverageWind() {
         long result = 0; // default in case there is no competitor
         for (WindSource windSource : getWindSources()) {
-            WindTrack someTrack = getWindTrack(windSource);
+            WindTrack someTrack = getOrCreateWindTrack(windSource);
             result = someTrack.getMillisecondsOverWhichToAverageWind();
         }
         return result;
