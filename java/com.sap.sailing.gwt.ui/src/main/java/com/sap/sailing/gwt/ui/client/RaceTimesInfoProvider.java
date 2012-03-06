@@ -19,7 +19,7 @@ public class RaceTimesInfoProvider {
     
     private RaceTimesInfoDTO raceTimesInfo;
     
-    private Set<RaceTimesInfoChangeListener> listeners;
+    private Set<RaceTimesInfoProviderListener> listeners;
 
     public RaceTimesInfoProvider(SailingServiceAsync sailingService, ErrorReporter errorReporter, RaceIdentifier raceIdentifier, long requestInterval) {
         this.sailingService = sailingService;
@@ -27,7 +27,7 @@ public class RaceTimesInfoProvider {
         this.raceIdentifier = raceIdentifier;
         this.requestInterval = requestInterval;
         raceTimesInfo = null;
-        listeners = new HashSet<RaceTimesInfoChangeListener>();
+        listeners = new HashSet<RaceTimesInfoProviderListener>();
         
         RepeatingCommand command = new RepeatingCommand() {
             @Override
@@ -67,11 +67,11 @@ public class RaceTimesInfoProvider {
         return raceTimesInfo;
     }
     
-    public void addRaceTimesInfoChangeListener(RaceTimesInfoChangeListener listener) {
+    public void addRaceTimesInfoChangeListener(RaceTimesInfoProviderListener listener) {
         listeners.add(listener);
     }
     
-    public void removeRaceTimesInfoChangeListener(RaceTimesInfoChangeListener listener){
+    public void removeRaceTimesInfoChangeListener(RaceTimesInfoProviderListener listener){
         listeners.remove(listener);
     }
     
@@ -81,8 +81,8 @@ public class RaceTimesInfoProvider {
                 @Override
                 public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
                     RaceTimesInfoProvider.this.raceTimesInfo = raceTimesInfo;
-                    for (RaceTimesInfoChangeListener listener : listeners) {
-                        listener.raceTimesInfoChanged(getRaceTimesInfo());
+                    for (RaceTimesInfoProviderListener listener : listeners) {
+                        listener.raceTimesInfoReceived(getRaceTimesInfo());
                     }
                 }
                 @Override
