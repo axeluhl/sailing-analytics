@@ -543,7 +543,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         for (WindSource windSource : getWindSources()) {
             if (!Util.contains(windSourcesToExclude, windSource)) {
                 WindTrack track = getWindTrack(windSource);
-                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getEstimatedWindWithConfidence(p, at);
+                WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(p, at);
                 if (windWithConfidence != null) {
                     windFixesWithConfidences.add(windWithConfidence);
                 }

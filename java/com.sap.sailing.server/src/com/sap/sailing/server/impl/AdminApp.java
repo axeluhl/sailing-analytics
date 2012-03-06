@@ -277,12 +277,12 @@ public class AdminApp extends Servlet {
                             if (wind.getTimePoint() != null) {
                                 jsonWind.put("timepoint", wind.getTimePoint().asMillis());
                                 jsonWind.put("dampenedtruebearingdeg",
-                                        windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint())
+                                        windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint())
                                                 .getBearing().getDegrees());
                                 jsonWind.put("dampenedknotspeed",
-                                        windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint()).getKnots());
+                                        windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint()).getKnots());
                                 jsonWind.put("dampenedmeterspersecondspeed",
-                                        windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint())
+                                        windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint())
                                                 .getMetersPerSecond());
                             }
                             if (wind.getPosition() != null) {

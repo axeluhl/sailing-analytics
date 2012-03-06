@@ -120,18 +120,18 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      * object.
      */
     @Override
-    public synchronized Wind getEstimatedWind(Position p, TimePoint at) {
+    public synchronized Wind getAveragedWind(Position p, TimePoint at) {
         final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getEstimatedWindUnsynchronized(p, at);
         return estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
     }
     
     @Override
-    public synchronized WindWithConfidence<Pair<Position, TimePoint>> getEstimatedWindWithConfidence(Position p, TimePoint at) {
+    public synchronized WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
         return getEstimatedWindUnsynchronized(p, at);
     }
 
     /**
-     * This method implements the functionality of the {@link #getEstimatedWind(Position, TimePoint)} interface
+     * This method implements the functionality of the {@link #getAveragedWind(Position, TimePoint)} interface
      * method. However, not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses
      * may use this carefully if they can guarantee there are no concurrency issues with the internal fixes
      * while iterating over the result of {@link #getInternalFixes()}.
@@ -220,7 +220,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     result.append("ms)");
                 } else {
                     result.append("ms): ");
-                    result.append(getEstimatedWind(wind.getPosition(), wind.getTimePoint()));
+                    result.append(getAveragedWind(wind.getPosition(), wind.getTimePoint()));
                 }
                 result.append("\n");
             }
@@ -233,7 +233,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         synchronized (this) {
             for (Wind wind : getRawFixes()) {
                 append(result, wind);
-                Wind estimate = getEstimatedWind(wind.getPosition(), wind.getTimePoint());
+                Wind estimate = getAveragedWind(wind.getPosition(), wind.getTimePoint());
                 append(result, estimate);
                 result.append("\n");
             }

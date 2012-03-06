@@ -579,7 +579,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (wind.getTimePoint() != null) {
             windDTO.timepoint = wind.getTimePoint().asMillis();
             Wind estimatedWind = windTrack
-                    .getEstimatedWind(wind.getPosition(), wind.getTimePoint());
+                    .getAveragedWind(wind.getPosition(), wind.getTimePoint());
             if (estimatedWind != null) {
                 windDTO.dampenedTrueWindBearingDeg = estimatedWind.getBearing().getDegrees();
                 windDTO.dampenedTrueWindFromDeg = estimatedWind.getBearing().reverse().getDegrees();
@@ -613,7 +613,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             .getMillisecondsOverWhichToAverageWind();
                     TimePoint timePoint = fromTimePoint;
                     for (int i = 0; i < numberOfFixes; i++) {
-                        Wind wind = windTrack.getEstimatedWind(position, timePoint);
+                        Wind wind = windTrack.getAveragedWind(position, timePoint);
                         if (wind != null) {
                             WindDTO windDTO = createWindDTO(wind, windTrack);
                             windTrackInfoDTO.windFixes.add(windDTO);

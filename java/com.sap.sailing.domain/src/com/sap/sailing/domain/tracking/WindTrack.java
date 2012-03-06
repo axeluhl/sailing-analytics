@@ -21,9 +21,9 @@ public interface WindTrack extends Track<Wind> {
      * 
      * If the track has no wind data at all, <code>null</code> will be returned.
      */
-    Wind getEstimatedWind(Position p, TimePoint at);
+    Wind getAveragedWind(Position p, TimePoint at);
     
-    WindWithConfidence<Pair<Position, TimePoint>> getEstimatedWindWithConfidence(Position p, TimePoint at);
+    WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at);
 
     /**
      * A listener is notified whenever a new fix is added to this track

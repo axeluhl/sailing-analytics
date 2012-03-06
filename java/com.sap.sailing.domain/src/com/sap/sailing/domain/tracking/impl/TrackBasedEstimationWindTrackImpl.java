@@ -183,7 +183,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
      * time point is used instead. If both time points are not known, <code>null</code> is returned immediately.
      */
     @Override
-    public Wind getEstimatedWind(Position p, TimePoint at) {
+    public Wind getAveragedWind(Position p, TimePoint at) {
         Wind result = null;
         TimePoint adjustedAt;
         TimePoint raceStartTimePoint = trackedRace.getStart();

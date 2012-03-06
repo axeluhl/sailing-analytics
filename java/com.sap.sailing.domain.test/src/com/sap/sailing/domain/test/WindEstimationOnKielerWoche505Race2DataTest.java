@@ -60,7 +60,7 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND);
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
-        Wind estimationBasedOnTrack = estimatedWindTrack.getEstimatedWind(null, middle);
+        Wind estimationBasedOnTrack = estimatedWindTrack.getAveragedWind(null, middle);
         assertEquals(estimatedWindDirection.getFrom().getDegrees(), estimationBasedOnTrack.getFrom().getDegrees(), 5.);
     }
 
