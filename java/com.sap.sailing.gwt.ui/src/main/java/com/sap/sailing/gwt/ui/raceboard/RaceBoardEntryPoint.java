@@ -28,6 +28,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private String raceName;
     private String leaderboardName;
     private String leaderboardGroupName;
+    private RaceBoardViewMode viewMode;
 
     @Override
     public void onModuleLoad() {     
@@ -36,6 +37,18 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
         String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
+        String viewModeParamValue = Window.Location.getParameter("viewMode");
+        // set the view mode for the race board 
+        if(viewModeParamValue != null && !viewModeParamValue.isEmpty()) {
+            try {
+                
+                viewMode = RaceBoardViewMode.valueOf(viewModeParamValue);
+            } catch (IllegalArgumentException e) {
+                viewMode = RaceBoardViewMode.ONE_SCREEN;
+            }
+        } else {
+            viewMode = RaceBoardViewMode.ONE_SCREEN;
+        }
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
         } else {
@@ -76,7 +89,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             };
         }
-        sailingService.listEvents(false, listEventsCallback);
+        sailingService.listEvents(listEventsCallback);
         sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
         if(leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, getLeaderboardGroupByNameCallback);
@@ -132,14 +145,15 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
         raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, raceSelectionModel, leaderboardName, leaderboardGroupName,
-                RaceBoardEntryPoint.this, stringMessages, userAgentType);
+                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode);
         raceBoardPanel.fillEvents(events);
 
         logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
         
         FlowPanel raceBoardHeaderPanel = new FlowPanel();
         raceBoardHeaderPanel.addStyleName("RaceBoardHeaderPanel");
-        raceBoardHeaderPanel.add(raceBoardPanel.getBreadcrumbWidget());
+        if(raceBoardPanel.getBreadcrumbWidget() != null)
+            raceBoardHeaderPanel.add(raceBoardPanel.getBreadcrumbWidget());
         
         FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
         contentOuterPanel.addStyleName("contentOuterPanel");

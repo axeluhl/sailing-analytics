@@ -4,13 +4,10 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.RacePlaceOrder;
 
 public class EventDTO extends NamedDTO implements IsSerializable {
     public List<RegattaDTO> regattas;
     public List<CompetitorDTO> competitors;
-    
-    public String locations;
 
     public EventDTO() {
     }
@@ -20,36 +17,6 @@ public class EventDTO extends NamedDTO implements IsSerializable {
         this.name = name;
         this.regattas = regattas;
         this.competitors = competitors;
-        fillLocations();
-    }
-
-    private void fillLocations() {
-        StringBuilder b = new StringBuilder();
-        boolean first = true;
-        RacePlaceOrder previousOrder = null;
-        locations = "";
-        for (RegattaDTO regattaDTO : regattas) {
-            for (RaceDTO raceDTO : regattaDTO.races) {
-                RacePlaceOrder order = raceDTO.racePlaces;
-                if (order != null) {
-                    if (first) {
-                        b.append(order.toString());
-                        previousOrder = order;
-                        first = false;
-                    } else {
-                        if (previousOrder.getFinishPlace().equals(order.getStartPlace())) {
-                            if (!order.startEqualsFinish()) {
-                                b.append(" -> " + order.finishToString());
-                            }
-                        } else {
-                            b.append("; " + order.toString());
-                        }
-                        previousOrder = order;
-                    }
-                }
-            }
-        }
-        locations = b.toString().equals("") ? null : b.toString();
     }
 
     /**
@@ -84,7 +51,6 @@ public class EventDTO extends NamedDTO implements IsSerializable {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((competitors == null) ? 0 : competitors.hashCode());
-        result = prime * result + ((locations == null) ? 0 : locations.hashCode());
         return result;
     }
 
@@ -101,11 +67,6 @@ public class EventDTO extends NamedDTO implements IsSerializable {
             if (other.competitors != null)
                 return false;
         } else if (!competitors.equals(other.competitors))
-            return false;
-        if (locations == null) {
-            if (other.locations != null)
-                return false;
-        } else if (!locations.equals(other.locations))
             return false;
         return true;
     }

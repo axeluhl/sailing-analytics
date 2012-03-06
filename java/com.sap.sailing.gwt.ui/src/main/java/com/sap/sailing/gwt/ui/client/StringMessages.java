@@ -249,7 +249,6 @@ public interface StringMessages extends Messages {
     String autoZoomOff();
     String autoZoomTails();
     String autoZoomSelectedCompetitors();
-    String noLeaderboardGroupToLoad();
     String bearing();
     String zoom();
     String stepSizeMustBeGreaterThanNull();
@@ -261,5 +260,9 @@ public interface StringMessages extends Messages {
     String directionChange();
     String speedChange();
     String degreesShort();
+    String untracked();
     String delayForLiveMode();
+    String notAvailable();
+    String details();
+    String noGroupSelected();
 }

@@ -5,7 +5,8 @@ import java.util.Date;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.RacePlaceOrder;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 
 public class RaceDTO extends NamedDTO implements IsSerializable {
     public Iterable<CompetitorDTO> competitors;
@@ -23,8 +24,6 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
     public Date timePointOfNewestEvent;
     public Date endOfTracking;
     public Date endOfRace;
-    
-    public RacePlaceOrder racePlaces = null;
     
     private RegattaDTO regatta;
     

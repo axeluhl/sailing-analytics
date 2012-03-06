@@ -48,9 +48,9 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         
         FormPanel panelToDisplay = null;
         if (groupName == null) {
-            //TODO Adjust the code after the OverviewEventPanel is ready for the leaderboard groups
-//            panelToDisplay = new OverviewEventPanel(sailingService, this, this, stringMessages);
-            Window.alert(stringMessages.noLeaderboardGroupToLoad() + ".");
+            //TODO Enable code below, when the LeaderboardGroupOverviewPanel was styled
+//            panelToDisplay = new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages);
+            Window.alert("No leaderboard group name was given.");
         } else {
             panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root);
             LeaderboardGroupPanel groupPanel = (LeaderboardGroupPanel) panelToDisplay;
