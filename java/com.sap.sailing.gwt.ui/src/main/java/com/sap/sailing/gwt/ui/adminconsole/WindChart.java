@@ -76,7 +76,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, WindChartSettings settings, StringMessages stringMessages, ErrorReporter errorReporter) {
+            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -97,12 +97,12 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                         new Marker().setEnabled(false).setHoverState(
                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                     .setHoverStateLineWidth(LINE_WIDTH));
-        final String unit = "deg";
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
             public String format(ToolTipData toolTipData) {
-                // TODO consider using toolTipData.getPoint().getName() instead...
+                final String unit = toolTipData.getSeriesName().startsWith(stringMessages.fromDeg()+" ") ? stringMessages.degreesShort() :
+                    stringMessages.averageSpeedInKnotsUnit();
                 return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                         + "</b><br/>" +  
                         dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
