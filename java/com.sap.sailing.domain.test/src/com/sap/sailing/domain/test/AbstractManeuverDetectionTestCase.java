@@ -52,7 +52,7 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
     }
 
     /**
-     * Checks if there where additional maneuvers of the given types listed in <code>maneuverTypesFound</code> found,
+     * Checks if there were additional maneuvers of the given types listed in <code>maneuverTypesFound</code> found,
      * that where not found by {@link ManeuverAnalysisIDMChampionsFinalTest#assertManeuver(List, ManeuverType, MillisecondsTimePoint, int)}.
      * 
      * @param maneuverTypesFound
