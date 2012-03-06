@@ -83,3 +83,25 @@
 	padding: 9px;
 	
 }
+
+.breadcrumbPanel-NextArrow {
+	display: none;
+}
+
+.breadcrumbPanel-ActiveBreadcrumb {
+	font-size: 18px;
+	font-family: 'UbuntuLight',Arial,Verdana,sans-serif;
+	margin: 5px 10px 0 0;
+}
+
+.breadcrumbPanel-InactiveBreadcrumb {
+	font-size: 24px;
+}
+
+.breadcrumbPanel-ActiveBreadcrumb a, .breadcrumbPanel-InactiveBreadcrumb a, .breadcrumbPanel-NextArrow a {
+	color:#A1A1A1;
+	}
+	
+	.breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb, .breadcrumbPanel-NextArrow {
+	color:#A1A1A1;
+	}
