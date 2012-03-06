@@ -592,7 +592,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources)
+            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSourceTypeNames)
             throws NoWindException {
         Position position = new DegreePosition(latDeg, lngDeg);
         WindInfoForRaceDTO result = null;
@@ -603,7 +603,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             for (WindSource windSource : trackedRace.getWindSources()) {
-                if (windSources == null || windSources.contains(windSource.name())) {
+                if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
                     TimePoint fromTimePoint = new MillisecondsTimePoint(from);
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();

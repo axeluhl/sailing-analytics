@@ -43,6 +43,10 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
     public EstimatedWindFixesAsNavigableSet(TrackBasedEstimationWindTrackImpl track, TrackedRace trackedRace) {
         this(track, trackedRace, null, null);
     }
+    
+    public long getResolutionInMilliseconds() {
+        return RESOLUTION_IN_MILLISECONDS;
+    }
 
     /**
      * @param from expected to be an integer multiple of {@link #RESOLUTION_IN_MILLISECONDS} or <code>null</code>

@@ -79,12 +79,12 @@ public interface SailingServiceAsync {
             AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
-     * @param windSources
+     * @param windSourceTypeNames
      *            if <code>null</code>, data from all available wind sources will be returned, otherwise only from those
      *            whose {@link WindSource} name is contained in the <code>windSources</code> collection.
      */
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
-            double latDeg, double lngDeg, Collection<String> windSources,
+            double latDeg, double lngDeg, Collection<String> windSourceTypeNames,
             AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);

@@ -145,7 +145,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         Iterator<Wind> afterIter = afterSet.iterator();
         double knotSum = 0;
         // TODO bug #345: also measure speed with confidence; return confidence
-        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(millisecondsOverWhichToAverage/10);
+        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind()/10);
         BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         int count = 0;
         long beforeDistanceToAt = 0;
@@ -196,7 +196,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     afterWind = null;
                 }
             }
-        } while (beforeIntervalLength + afterIntervalLength < millisecondsOverWhichToAverage && (beforeWind != null || afterWind != null));
+        } while (beforeIntervalLength + afterIntervalLength < getMillisecondsOverWhichToAverageWind() && (beforeWind != null || afterWind != null));
         if (count == 0) {
             return null;
         } else {
@@ -215,7 +215,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             for (Wind wind : getRawFixes()) {
                 result.append(wind);
                 result.append(" avg(");
-                result.append(millisecondsOverWhichToAverage);
+                result.append(getMillisecondsOverWhichToAverageWind());
                 if (wind == null) {
                     result.append("ms)");
                 } else {

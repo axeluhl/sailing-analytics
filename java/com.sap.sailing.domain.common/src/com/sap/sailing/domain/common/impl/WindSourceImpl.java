@@ -56,4 +56,8 @@ public class WindSourceImpl implements WindSource {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return getType().toString()+(getId() != null ? " ("+getId()+")" : "");
+    }
 }
