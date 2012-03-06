@@ -68,6 +68,6 @@ public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
         return super.toString() + " " + type + " on new tack " + newTack + " on position " + position
                 + " at time point " + timePoint + ". " + "Speed before maneuver " + speedWithBearingBefore
                 + " speed after maneuver " + speedWithBearingAfter + ". The maneuver changed the course by "
-                + directionChangeInDegrees + ".";
+                + directionChangeInDegrees + "deg.";
     }
 }
