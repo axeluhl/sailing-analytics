@@ -45,11 +45,13 @@ public class RaceTimesInfoProvider {
     }
     
     /**
-     * Sets the race identifier and resets the time info to <code>null</code>.
+     * Sets the race identifier, resets the time info to <code>null</code> and forces a
+     * {@link RaceTimesInfoProvider#readTimesInfo() read} of the times info.
      */
     public void setRaceIdentifier(RaceIdentifier raceIdentifier) {
         this.raceIdentifier = raceIdentifier;
         raceTimesInfo = null;
+        readTimesInfo();
     }
     
     public long getRequestInterval() {

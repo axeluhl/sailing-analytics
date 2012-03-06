@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SmallWindHistoryPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -108,7 +109,9 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalPanelRadioAndCheckboxes);
         grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
 
-        timePanel = new RaceTimePanel(sailingService, timer, errorReporter, stringMessages);
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, null, timer.getRefreshInterval());
+        timePanel = new RaceTimePanel(timer, stringMessages, raceTimesInfoProvider);
+        raceTimesInfoProvider.addRaceTimesInfoChangeListener(timePanel);
         raceSelectionModel.addRaceSelectionChangeListener(timePanel);
         timePanel.onRaceSelectionChange(raceSelectionModel.getSelectedRaces());
 
