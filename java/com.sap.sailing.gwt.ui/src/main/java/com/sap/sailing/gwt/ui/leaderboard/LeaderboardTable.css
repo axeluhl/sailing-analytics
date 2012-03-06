@@ -55,7 +55,7 @@
 	border-left: none;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 17px 5px !important;
+	padding: 5px 5px 5px !important;
 	white-space: nowrap;
 	font-family: 'OpenSansCondensedLight', 'UbuntuRegular', Arial, Verdana, sans-serif;
 }
@@ -70,7 +70,7 @@
 	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 17px 5px !important;
+	padding: 5px 5px 5px !important;
 	white-space: nowrap;
 	font-family: 'OpenSansCondensedLight', 'UbuntuRegular', Arial, Verdana, sans-serif;
 }
