@@ -80,8 +80,10 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final CompetitorSelectionModel competitorSelectionModel;
     private final RaceIdentifier selectedRaceIdentifier;
     
-    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName,
-            String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType, RaceBoardViewMode viewMode) {
+    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser,
+            RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
+            ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType,
+            RaceBoardViewMode viewMode, RaceTimesInfoProvider raceTimesInfoProvider) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.raceSelectionProvider = theRaceSelectionProvider;
@@ -114,8 +116,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             addComponentViewerMenuEntry(componentViewer);
         }
 
-
-        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, null, timer.getRefreshInterval());
         timePanel = new RaceTimePanel(timer, stringMessages, raceTimesInfoProvider);
         raceTimesInfoProvider.addRaceTimesInfoChangeListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);

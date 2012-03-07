@@ -1175,7 +1175,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return rankColumn;
     }
 
-    private void setLeaderboard(LeaderboardDTO leaderboard) {
+    protected void setLeaderboard(LeaderboardDTO leaderboard) {
         this.leaderboard = leaderboard;
     }
 
