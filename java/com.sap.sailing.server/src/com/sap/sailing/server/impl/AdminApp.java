@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -66,8 +67,6 @@ public class AdminApp extends Servlet {
     private static final String ACTION_NAME_SET_WIND = "setwind";
     
     private static final String ACTION_NAME_REMOVE_WIND = "removewind";
-    
-    private static final String ACTION_NAME_SELECT_WIND_SOURCE = "selectwindsource";
     
     private static final String ACTION_NAME_SHOW_WIND = "showwind";
     
@@ -147,8 +146,6 @@ public class AdminApp extends Servlet {
                     setWind(req, resp);
                 } else if (ACTION_NAME_REMOVE_WIND.equals(action)) {
                     removeWind(req, resp);
-                } else if (ACTION_NAME_SELECT_WIND_SOURCE.equals(action)) {
-                    selectWindSource(req, resp);
                 } else if (ACTION_NAME_SHOW_WIND.equals(action)) {
                     showWind(req, resp);
                 } else if (ACTION_NAME_ADD_WIND_TO_MARKS.equals(action)) {
@@ -263,8 +260,7 @@ public class AdminApp extends Servlet {
                             /* 24h before race start */ new MillisecondsTimePoint(trackedRace.getStart().asMillis()-24*3600*1000));
                 TimePoint to = getTimePoint(req, PARAM_NAME_TO_TIME, PARAM_NAME_TO_TIME_MILLIS, MillisecondsTimePoint.now());
                 JSONObject jsonWindTracks = new JSONObject();
-                jsonWindTracks.put("currentwindsource", trackedRace.getWindSource().toString());
-                for (WindSource windSource : WindSource.values()) {
+                for (WindSource windSource : trackedRace.getWindSources()) {
                     JSONArray jsonWindArray = new JSONArray();
                     WindTrack windTrack = trackedRace.getWindTrack(windSource);
                     synchronized (windTrack) {
@@ -281,12 +277,12 @@ public class AdminApp extends Servlet {
                             if (wind.getTimePoint() != null) {
                                 jsonWind.put("timepoint", wind.getTimePoint().asMillis());
                                 jsonWind.put("dampenedtruebearingdeg",
-                                        windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint())
+                                        windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint())
                                                 .getBearing().getDegrees());
                                 jsonWind.put("dampenedknotspeed",
-                                        windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint()).getKnots());
+                                        windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint()).getKnots());
                                 jsonWind.put("dampenedmeterspersecondspeed",
-                                        windTrack.getEstimatedWind(wind.getPosition(), wind.getTimePoint())
+                                        windTrack.getAveragedWind(wind.getPosition(), wind.getTimePoint())
                                                 .getMetersPerSecond());
                             }
                             if (wind.getPosition() != null) {
@@ -299,46 +295,6 @@ public class AdminApp extends Servlet {
                     jsonWindTracks.put(windSource.toString(), jsonWindArray);
                 }
                 jsonWindTracks.writeJSONString(resp.getWriter());
-            }
-        }
-    }
-
-    private void selectWindSource(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String sourceName = req.getParameter(PARAM_NAME_WINDSOURCE_NAME);
-        if (sourceName == null) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Wind source name not provided");
-        } else {
-            try {
-                WindSource windSource = WindSource.valueOf(sourceName);
-                Event event = getEvent(req);
-                if (event == null) {
-                    resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
-                } else {
-                    RaceDefinition race = getRaceDefinition(req);
-                    if (race == null) {
-                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
-                    } else {
-                        DynamicTrackedRace trackedRace = getService().getOrCreateTrackedEvent(event)
-                                .getTrackedRace(race);
-                        trackedRace.setWindSource(windSource);
-                        resp.getWriter().println(
-                                "Successfully set wind source for event " + event.getName() + " and race "
-                                        + race.getName() + " to " + windSource);
-                    }
-                }
-            } catch (IllegalArgumentException e) {
-                StringBuilder errorMessage = new StringBuilder("Wind source name " + sourceName
-                        + " not known. Known wind source names: ");
-                boolean first = true;
-                for (WindSource s : WindSource.values()) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        errorMessage.append(", ");
-                    }
-                    errorMessage.append(s.toString());
-                }
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, errorMessage.toString());
             }
         }
     }
@@ -382,7 +338,8 @@ public class AdminApp extends Servlet {
                     try {
                         TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                         Wind wind = new WindImpl(p, timePoint, speed);
-                        getService().getOrCreateTrackedEvent(event).getTrackedRace(race).recordWind(wind, WindSource.WEB);
+                        final DynamicTrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
+                        trackedRace.recordWind(wind, trackedRace.getWindSources(WindSourceType.WEB).iterator().next());
                     } catch (InvalidDateException ex) {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + ex.getMessage());
                     }
@@ -406,13 +363,14 @@ public class AdminApp extends Servlet {
                 if (sourceName == null) {
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Wind source name not provided");
                 } else {
-                    WindSource windSource = WindSource.valueOf(sourceName);
-                    if (windSource == null) {
-                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Wind source name " + sourceName + " unknown");
+                    WindSourceType windSourceType = WindSourceType.valueOf(sourceName);
+                    if (windSourceType == null) {
+                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Wind source type name " + sourceName + " unknown");
                     } else {
                         try {
-                            WindTrack windTrack = getService().getOrCreateTrackedEvent(event)
-                                    .getTrackedRace(race).getWindTrack(windSource);
+                            final DynamicTrackedRace trackedRace = getService().getOrCreateTrackedEvent(event)
+                                    .getTrackedRace(race);
+                            WindTrack windTrack = trackedRace.getWindTrack(trackedRace.getWindSources(windSourceType).iterator().next());
                             TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
                                     MillisecondsTimePoint.now());
                             Wind wind = windTrack.getLastFixAtOrBefore(timePoint);

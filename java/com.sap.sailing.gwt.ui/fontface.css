@@ -92,3 +92,35 @@
 
 }
 
+@font-face {
+    font-family: 'OpenSansCondensedLight';
+    src: url('webfonts/OpenSans-CondLight-webfont.eot');
+    src: url('webfonts/OpenSans-CondLight-webfont.eot?#iefix') format('embedded-opentype'),
+         url('webfonts/OpenSans-CondLight-webfont.woff') format('woff'),
+         url('webfonts/OpenSans-CondLight-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'OpenSansCondensedLightItalic';
+    src: url('webfonts/OpenSans-CondLightItalic-webfont.eot');
+    src: url('webfonts/OpenSans-CondLightItalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('webfonts/OpenSans-CondLightItalic-webfont.woff') format('woff'),
+         url('webfonts/OpenSans-CondLightItalic-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'OpenSansCondensedBold';
+    src: url('webfonts/OpenSans-CondBold-webfont.eot');
+    src: url('webfonts/OpenSans-CondBold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('webfonts/OpenSans-CondBold-webfont.woff') format('woff'),
+         url('webfonts/OpenSans-CondBold-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}

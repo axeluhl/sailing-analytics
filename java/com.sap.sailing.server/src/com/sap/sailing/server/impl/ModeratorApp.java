@@ -217,7 +217,6 @@ public class ModeratorApp extends Servlet {
                     jsonWind.put("truebearingdeg", currentWind.getBearing().getDegrees());
                     jsonWind.put("knotspeed", currentWind.getKnots());
                     jsonWind.put("meterspersecondspeed", currentWind.getMetersPerSecond());
-                    jsonWind.put("source", trackedRace.getWindSource().toString());
                     jsonRace.put("wind", jsonWind);
                 }
                 JSONArray jsonLegs = new JSONArray();
