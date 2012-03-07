@@ -6,7 +6,7 @@ public enum FieldNames {
     EVENT_NAME, RACE_NAME,
     
     // wind:
-    WIND_SOURCE_NAME, WIND,
+    WIND_SOURCE_NAME, WIND_SOURCE_ID, WIND,
     
     // SwissTiming configuration parameters:
     ST_CONFIG_NAME, ST_CONFIG_HOSTNAME, ST_CONFIG_PORT,

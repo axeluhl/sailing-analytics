@@ -238,7 +238,6 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             WindSource windSource = e.getKey();
             Series directionSeries = getOrCreateDirectionSeries(windSource);
             Series speedSeries = getOrCreateSpeedSeries(windSource);
-            // FIXME probably need to add the series to the chart...
             WindTrackInfoDTO windTrackInfo = e.getValue();
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];

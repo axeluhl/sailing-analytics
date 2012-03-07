@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.Collections;
+import java.util.Map;
+
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -20,6 +23,12 @@ public class EmptyWindStore implements WindStore {
         default:
             return new WindTrackImpl(millisecondsOverWhichToAverage);
         }
+    }
+
+    @Override
+    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(TrackedEvent trackedEvent,
+            TrackedRace trackedRace, long millisecondsOverWhichToAverageWind) {
+        return Collections.emptyMap();
     }
 
 }
