@@ -18,11 +18,13 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 /**
@@ -118,17 +120,24 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      * object.
      */
     @Override
-    public synchronized Wind getEstimatedWind(Position p, TimePoint at) {
-        return getEstimatedWindUnsynchronized(p, at);
+    public synchronized Wind getAveragedWind(Position p, TimePoint at) {
+        final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getEstimatedWindUnsynchronized(p, at);
+        return estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
     }
     
+    @Override
+    public synchronized WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
+        return getEstimatedWindUnsynchronized(p, at);
+    }
+
     /**
-     * This method implements the functionality of the {@link #getEstimatedWind(Position, TimePoint)} interface
+     * This method implements the functionality of the {@link #getAveragedWind(Position, TimePoint)} interface
      * method. However, not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses
      * may use this carefully if they can guarantee there are no concurrency issues with the internal fixes
      * while iterating over the result of {@link #getInternalFixes()}.
      */
-    protected Wind getEstimatedWindUnsynchronized(Position p, TimePoint at) {
+    protected WindWithConfidence<Pair<Position, TimePoint>> getEstimatedWindUnsynchronized(Position p, TimePoint at) {
+        // TODO aggregate confidences, using a weigher
         DummyWind atTimed = new DummyWind(at);
         NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ false);
         NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
@@ -136,7 +145,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         Iterator<Wind> afterIter = afterSet.iterator();
         double knotSum = 0;
         // TODO bug #345: also measure speed with confidence; return confidence
-        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(millisecondsOverWhichToAverage/10);
+        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind()/10);
         BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         int count = 0;
         long beforeDistanceToAt = 0;
@@ -187,14 +196,15 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     afterWind = null;
                 }
             }
-        } while (beforeIntervalLength + afterIntervalLength < millisecondsOverWhichToAverage && (beforeWind != null || afterWind != null));
+        } while (beforeIntervalLength + afterIntervalLength < getMillisecondsOverWhichToAverageWind() && (beforeWind != null || afterWind != null));
         if (count == 0) {
             return null;
         } else {
             // TODO bug #346: pass on confidence
             BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
             SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, average == null ? null : average.getObject());
-            return new WindImpl(p, at, avgWindSpeed);
+            return new WindWithConfidenceImpl<Pair<Position,TimePoint>>(new WindImpl(p, at, avgWindSpeed), /* TODO confidence */ 0.5,
+                    new Pair<Position, TimePoint>(p, at));
         }
     }
     
@@ -205,12 +215,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             for (Wind wind : getRawFixes()) {
                 result.append(wind);
                 result.append(" avg(");
-                result.append(millisecondsOverWhichToAverage);
+                result.append(getMillisecondsOverWhichToAverageWind());
                 if (wind == null) {
                     result.append("ms)");
                 } else {
                     result.append("ms): ");
-                    result.append(getEstimatedWind(wind.getPosition(), wind.getTimePoint()));
+                    result.append(getAveragedWind(wind.getPosition(), wind.getTimePoint()));
                 }
                 result.append("\n");
             }
@@ -223,7 +233,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         synchronized (this) {
             for (Wind wind : getRawFixes()) {
                 append(result, wind);
-                Wind estimate = getEstimatedWind(wind.getPosition(), wind.getTimePoint());
+                Wind estimate = getAveragedWind(wind.getPosition(), wind.getTimePoint());
                 append(result, estimate);
                 result.append("\n");
             }

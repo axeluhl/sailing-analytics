@@ -74,12 +74,6 @@ table td, table th {
 	visibility: hidden;
 }
 
-.breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb, .breadcrumbPanel-NextArrow {
-	font-size: 20px;
-	text-transform: uppercase;
-	color: #a1a1a1;
-	font-weight: 500;
-}
 
 .sapLogo {
 	float: left;
@@ -130,17 +124,8 @@ body, table td, select, button {
     font-size: 14px;
 }
 
-.breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb, .breadcrumbPanel-NextArrow {
-	font-size: 20px;
-	text-transform: uppercase;
-	color: #a1a1a1;
-	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
-}
-
-.breadcrumbPanel-ActiveBreadcrumb a, .breadcrumbPanel-InactiveBreadcrumb a, .breadcrumbPanel-NextArrow a {
-	color:#A1A1A1;
-	}
 	
 .busyIndicator-simpleBusyIndicator {
 	margin-top: 7px;
 }
+

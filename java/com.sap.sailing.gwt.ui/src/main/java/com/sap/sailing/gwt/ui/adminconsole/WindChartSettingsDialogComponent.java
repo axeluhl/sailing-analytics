@@ -9,28 +9,28 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class WindChartSettingsDialogComponent implements SettingsDialogComponent<WindChartSettings> {
     private final WindChartSettings initialSettings;
-    private final Map<WindSource, CheckBox> checkboxes;
+    private final Map<WindSourceType, CheckBox> checkboxes;
     
     public WindChartSettingsDialogComponent(WindChartSettings initialSettings) {
         super();
         this.initialSettings = initialSettings;
-        checkboxes = new LinkedHashMap<WindSource, CheckBox>();
+        checkboxes = new LinkedHashMap<WindSourceType, CheckBox>();
     }
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<WindChartSettings> dialog) {
         VerticalPanel vp = new VerticalPanel();
-        for (WindSource windSource : WindSource.values()) {
-            CheckBox checkbox = dialog.createCheckbox(windSource.name());
-            checkboxes.put(windSource, checkbox);
-            checkbox.setValue(initialSettings.getWindSourcesToDisplay().contains(windSource));
+        for (WindSourceType windSourceType : WindSourceType.values()) {
+            CheckBox checkbox = dialog.createCheckbox(windSourceType.name());
+            checkboxes.put(windSourceType, checkbox);
+            checkbox.setValue(initialSettings.getWindSourceTypesToDisplay().contains(windSourceType));
             vp.add(checkbox);
         }
         return vp;
@@ -38,13 +38,13 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
 
     @Override
     public WindChartSettings getResult() {
-        Set<WindSource> windSourcesToDisplay = new HashSet<WindSource>();
-        for (Map.Entry<WindSource, CheckBox> e : checkboxes.entrySet()) {
+        Set<WindSourceType> windSourceTypesToDisplay = new HashSet<WindSourceType>();
+        for (Map.Entry<WindSourceType, CheckBox> e : checkboxes.entrySet()) {
             if (e.getValue().getValue()) {
-                windSourcesToDisplay.add(e.getKey());
+                windSourceTypesToDisplay.add(e.getKey());
             }
         }
-        return new WindChartSettings(windSourcesToDisplay);
+        return new WindChartSettings(windSourceTypesToDisplay);
     }
 
     @Override

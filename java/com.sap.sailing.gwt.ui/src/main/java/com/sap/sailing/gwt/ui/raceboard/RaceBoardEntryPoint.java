@@ -44,10 +44,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 
                 viewMode = RaceBoardViewMode.valueOf(viewModeParamValue);
             } catch (IllegalArgumentException e) {
-                viewMode = RaceBoardViewMode.ONE_SCREEN;
+                viewMode = RaceBoardViewMode.CASCADING;
             }
         } else {
-            viewMode = RaceBoardViewMode.ONE_SCREEN;
+            viewMode = RaceBoardViewMode.CASCADING;
         }
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;

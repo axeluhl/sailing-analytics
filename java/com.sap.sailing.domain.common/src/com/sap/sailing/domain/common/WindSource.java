@@ -1,45 +1,32 @@
 package com.sap.sailing.domain.common;
 
+import java.io.Serializable;
+
+
 
 /**
- * Possible sources for wind data. Used to key and select between different {@link WindTrack}s. Literals
- * are given in descending order of precedence. Particularly, the {@link #COURSE_BASED} source should
- * really only be used if nothing else is known about the wind.
+ * Possible sources for wind data. Used to key and select between different {@link WindTrack}s. Objects of this
+ * class have their {@link Object#equals(Object)} and {@link Object#hashCode()} methods defined accordingly.
  * 
  * @author Axel Uhl (d043530)
  *
  */
-public enum WindSource {
-    /**
-     * Manually entered via a web form or received through a REST service call, e.g., from BeTomorrow's estimation
-     */
-    WEB(true),
+public interface WindSource extends Serializable {
+    WindSourceType getType();
     
     /**
-     * Measured using wind sensors
+     * @return {@link #getType()}.{@link WindSourceType#canBeStored() canBeStored()}
      */
-    EXPEDITION(true),
-    
-    /**
-     * Estimates wind conditions by analyzing the boat tracks; may not have results for all time points, e.g.,
-     * because at a given time point all boats may sail on the same tack and hence no averaging between the
-     * two tacks is possible. This is the more likely to happen the smaller the fleet tracked is.
-     */
-    TRACK_BASED_ESTIMATION(false),
+    boolean canBeStored();
 
     /**
-     * Inferred from the race course layout if the course is known to have its first leg be an upwind leg
+     * Usually the name of this wind source's {@link #getType() type}, optionally suffixed by an identifier, e.g., in case
+     * there are multiple sources of the same type.
      */
-    COURSE_BASED(false);
-    
-    private final boolean canBeStored;
-    
-    private WindSource(boolean canBeStored) {
-        this.canBeStored = canBeStored;
-    }
-    
-    public boolean canBeStored() {
-        return canBeStored;
-    }
-    
+    String name();
+
+    /**
+     * An optional ID. May be <code>null</code>. Can be used to distinguish different wind sources of the same type.
+     */
+    Object getId();
 }

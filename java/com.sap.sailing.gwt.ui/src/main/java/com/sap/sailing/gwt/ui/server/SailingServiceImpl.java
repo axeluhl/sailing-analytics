@@ -66,6 +66,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
@@ -114,8 +115,8 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.gwt.ui.shared.PlacemarkDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.PlacemarkDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
@@ -537,14 +538,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            result.selectedWindSource = trackedRace.getWindSource();
             TimePoint from = fromDate == null ? trackedRace.getStart() : new MillisecondsTimePoint(fromDate);
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             TimePoint to = (toDate == null || toDate.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(toDate);
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             if (from != null && to != null) {
-                for (WindSource windSource : (windSources == null ? WindSource.values() : windSources)) {
+                for (WindSource windSource : (windSources == null ? trackedRace.getWindSources() : Arrays.asList(windSources))) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
                     WindTrack windTrack = trackedRace.getWindTrack(windSource);
@@ -579,7 +579,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (wind.getTimePoint() != null) {
             windDTO.timepoint = wind.getTimePoint().asMillis();
             Wind estimatedWind = windTrack
-                    .getEstimatedWind(wind.getPosition(), wind.getTimePoint());
+                    .getAveragedWind(wind.getPosition(), wind.getTimePoint());
             if (estimatedWind != null) {
                 windDTO.dampenedTrueWindBearingDeg = estimatedWind.getBearing().getDegrees();
                 windDTO.dampenedTrueWindFromDeg = estimatedWind.getBearing().reverse().getDegrees();
@@ -592,7 +592,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources)
+            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSourceTypeNames)
             throws NoWindException {
         Position position = new DegreePosition(latDeg, lngDeg);
         WindInfoForRaceDTO result = null;
@@ -600,11 +600,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            result.selectedWindSource = trackedRace.getWindSource();
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
-            for (WindSource windSource : WindSource.values()) {
-                if (windSources == null || windSources.contains(windSource.name())) {
+            for (WindSource windSource : trackedRace.getWindSources()) {
+                if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
                     TimePoint fromTimePoint = new MillisecondsTimePoint(from);
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
@@ -614,7 +613,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             .getMillisecondsOverWhichToAverageWind();
                     TimePoint timePoint = fromTimePoint;
                     for (int i = 0; i < numberOfFixes; i++) {
-                        Wind wind = windTrack.getEstimatedWind(position, timePoint);
+                        Wind wind = windTrack.getAveragedWind(position, timePoint);
                         if (wind != null) {
                             WindDTO windDTO = createWindDTO(wind, windTrack);
                             windTrackInfoDTO.windFixes.add(windDTO);
@@ -660,20 +659,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
             Wind wind = new WindImpl(p, at, speedWithBearing);
-            trackedRace.recordWind(wind, WindSource.WEB);
+            trackedRace.recordWind(wind, trackedRace.getWindSources(WindSourceType.WEB).iterator().next());
         }
     }
     
-    @Override
-    public void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind) {
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        if (trackedRace != null && trackedRace instanceof DynamicTrackedRace) {
-            DynamicTrackedRace dtr = (DynamicTrackedRace) trackedRace;
-            dtr.setWindSource(WindSource.valueOf(windSourceName));
-            dtr.setRaceIsKnownToStartUpwind(raceIsKnownToStartUpwind);
-        }
-    }
-
     @Override
     public Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
@@ -890,6 +879,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         return result;
     }
+    
+    @Override
+    public void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind) {
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) getExistingTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            trackedRace.setRaceIsKnownToStartUpwind(raceIsKnownToStartUpwind);
+        }
+    }
 
     @Override
     public void removeWind(RaceIdentifier raceIdentifier, WindDTO windDTO) {
@@ -924,7 +921,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
             Wind wind = new WindImpl(p, at, speedWithBearing);
-            trackedRace.removeWind(wind, WindSource.WEB);
+            trackedRace.removeWind(wind, trackedRace.getWindSources(WindSourceType.WEB).iterator().next());
         }
    }
 

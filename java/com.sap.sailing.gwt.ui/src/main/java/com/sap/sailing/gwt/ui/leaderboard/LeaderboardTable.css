@@ -13,9 +13,10 @@
 	border-right: 1px solid #ffffff !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 3px 12px;
+	padding: 3px 5px;
 	padding-bottom: 5px;
 	text-align: center;
+	font-family: 'OpenSansCondensedLight', 'UbuntuRegular', Arial, Verdana, sans-serif;
 }
 
 .cellTableFirstColumnHeader {
@@ -26,8 +27,6 @@
 	border-right: 1px solid #ffffff !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 3px 12px;
-		padding-bottom: 5px;
 	text-align: center;
 }
 
@@ -38,8 +37,6 @@
 	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 3px 12px;
-		padding-bottom: 5px;
 	text-align: center;
 }
 
@@ -58,8 +55,9 @@
 	border-left: none;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 17px 5px !important;
+	padding: 5px 5px 5px !important;
 	white-space: nowrap;
+	font-family: 'OpenSansCondensedLight', 'UbuntuRegular', Arial, Verdana, sans-serif;
 }
 
 .cellTableOddRow {
@@ -72,8 +70,9 @@
 	border-right: 1px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 17px 5px !important;
+	padding: 5px 5px 5px !important;
 	white-space: nowrap;
+	font-family: 'OpenSansCondensedLight', 'UbuntuRegular', Arial, Verdana, sans-serif;
 }
 
 .cellTableHoveredRow {

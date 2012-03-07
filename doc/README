@@ -365,21 +365,10 @@ into one in the future.
 		    2011-08-01T15:44:00
     timeasmillis: time stamp for the wind measurement
     		  in milliseconds since 1970-01-01T00:00:00 UTC
-  action=selectwindsource: selects the wind track to be used for
-                  all computations for the race specified. This can
-		  be used to switch, e.g., from EXPEDITION-provided
-		  wind to manually or BeTomorrow-provided wind
-		  information.
-    eventname:    name of the event, as returned by the "listevents"
-    		  action on the /moderator servlet
-    racename:     name of the race, as returned by the "listevents"
-    		  action on the /moderator servlet
-    sourcename:	  name of the wind source, such as WEB or EXPEDITION
   action=showwind: shows the wind tracks that exist for the race
   		  specified. The output is a JSON object with the
 		  following structure:
-		    { "currentwindsource": WEB|EXPEDITION,
-		      [ "WEB": { "truebearingdeg": ...,
+		    { [ "WEB": { "truebearingdeg": ...,
                                  "knotspeed": ...,
 				 "meterspersecondspeed": ...,
 				 "timepoint": ... (optional, if time point is known),
@@ -541,8 +530,7 @@ into one in the future.
 		      "wind": {		       // optional, if wind set
 		        "truebearingdeg": ...,
 			"knotspeed": ...,
-			"meterspersecondspeed": ...,
-			"source": ... },
+			"meterspersecondspeed": ... },
 		      "legs": [ {              // leg tracking info per leg
 		        "from": ...,	       // name of from-waypoint
 			"fromwaypointid": ..., // a unique integer for the

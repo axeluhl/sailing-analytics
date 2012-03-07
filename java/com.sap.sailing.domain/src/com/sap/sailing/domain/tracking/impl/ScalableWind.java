@@ -19,7 +19,7 @@ public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
     private final ScalableSpeedWithBearing scalableSpeedWithBearing;
     
     public ScalableWind(Wind wind) {
-        this.scalablePosition = new ScalablePosition(wind.getPosition());
+        this.scalablePosition = wind.getPosition() == null ? null : new ScalablePosition(wind.getPosition());
         this.scaledTimePointSumInMilliseconds = wind.getTimePoint().asMillis();
         this.scalableSpeedWithBearing = new ScalableSpeedWithBearing(wind);
     }
@@ -34,19 +34,20 @@ public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
 
     @Override
     public ScalableWind multiply(double factor) {
-        return new ScalableWind(scalablePosition.multiply(factor), factor*scaledTimePointSumInMilliseconds, scalableSpeedWithBearing.multiply(factor));
+        return new ScalableWind(scalablePosition == null ? null : scalablePosition.multiply(factor),
+                factor * scaledTimePointSumInMilliseconds, scalableSpeedWithBearing.multiply(factor));
     }
 
     @Override
     public ScalableWind add(ScalableValue<ScalableWind, Wind> t) {
-        return new ScalableWind(scalablePosition.add(t.getValue().scalablePosition),
+        return new ScalableWind(scalablePosition == null ? t.getValue().scalablePosition : scalablePosition.add(t.getValue().scalablePosition),
                 scaledTimePointSumInMilliseconds+t.getValue().scaledTimePointSumInMilliseconds,
                 scalableSpeedWithBearing.add(t.getValue().scalableSpeedWithBearing));
     }
 
     @Override
     public Wind divide(double divisor) {
-        return new WindImpl(scalablePosition.divide(divisor), new MillisecondsTimePoint(
+        return new WindImpl(scalablePosition == null ? null : scalablePosition.divide(divisor), new MillisecondsTimePoint(
                 (long) (scaledTimePointSumInMilliseconds / divisor)), scalableSpeedWithBearing.divide(divisor));
     }
 

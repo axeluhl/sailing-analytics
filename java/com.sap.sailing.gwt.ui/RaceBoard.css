@@ -125,10 +125,8 @@ table {
 	padding: 0 0 0 0;
 }
 
-.race-name {
-	margin: 2px 10px 0 0;
+.race-name {	
 	line-height: 1.0;
-	float: left;
 }
 
 input.magnifier {
@@ -235,16 +233,6 @@ input.magnifier {
 	z-index: 20;
 }
 
-.breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb, .breadcrumbPanel-NextArrow {
-	font-size: 20px;
-	text-transform: uppercase;
-	color: #a1a1a1;
-	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
-}
-
-.breadcrumbPanel-ActiveBreadcrumb a, .breadcrumbPanel-InactiveBreadcrumb a, .breadcrumbPanel-NextArrow a {
-	color:#A1A1A1;
-	}
 
 .abstractChartPanel-importantMessageOfChart {
     font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
@@ -255,4 +243,8 @@ input.magnifier {
     width: 300px;
     color: #7c7c7c;
 	background: url(images/important-message.png) left center no-repeat;	
+}
+
+.breadcrumbPanel-NextArrow {
+	display: none;
 }

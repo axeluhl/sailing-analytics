@@ -43,6 +43,10 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
     public EstimatedWindFixesAsNavigableSet(TrackBasedEstimationWindTrackImpl track, TrackedRace trackedRace) {
         this(track, trackedRace, null, null);
     }
+    
+    public long getResolutionInMilliseconds() {
+        return RESOLUTION_IN_MILLISECONDS;
+    }
 
     /**
      * @param from expected to be an integer multiple of {@link #RESOLUTION_IN_MILLISECONDS} or <code>null</code>
@@ -59,23 +63,65 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
     }
 
     private TimePoint lowerToResolution(Wind w) {
-        return new MillisecondsTimePoint((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS
-                * RESOLUTION_IN_MILLISECONDS);
+        TimePoint result;
+        final TimePoint timePointOfLastEvent = trackedRace.getTimePointOfLastEvent();
+        if (timePointOfLastEvent == null) {
+            // nothing received yet; "lowering" to end of time
+            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / RESOLUTION_IN_MILLISECONDS
+                    * RESOLUTION_IN_MILLISECONDS);
+        } else if (w.getTimePoint().compareTo(timePointOfLastEvent) > 0) {
+            result = lowerToResolution(new DummyWind(timePointOfLastEvent));
+        } else {
+            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS
+                    * RESOLUTION_IN_MILLISECONDS);
+        }
+        return result;
     }
 
     private TimePoint floorToResolution(Wind w) {
-        return new MillisecondsTimePoint(w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS
-                * RESOLUTION_IN_MILLISECONDS);
+        TimePoint result;
+        final TimePoint timePointOfLastEvent = trackedRace.getTimePointOfLastEvent();
+        if (timePointOfLastEvent == null) {
+            // nothing received yet; "lowering" to end of time
+            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / RESOLUTION_IN_MILLISECONDS
+                    * RESOLUTION_IN_MILLISECONDS);
+        } else if (w.getTimePoint().compareTo(timePointOfLastEvent) > 0) {
+            result = floorToResolution(new DummyWind(timePointOfLastEvent));
+        } else {
+            result = new MillisecondsTimePoint(w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS
+                    * RESOLUTION_IN_MILLISECONDS);
+        }
+        return result;
     }
 
     private TimePoint ceilingToResolution(Wind w) {
-        return new MillisecondsTimePoint(((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS + 1)
-                * RESOLUTION_IN_MILLISECONDS);
+        TimePoint result;
+        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        if (startOfTracking == null) {
+            // no start of tracking yet; "ceiling" to beginning of time
+            result = new MillisecondsTimePoint(0);
+        } else if (w.getTimePoint().compareTo(startOfTracking) < 0) {
+            result = ceilingToResolution(new DummyWind(startOfTracking));
+        } else {
+            result = new MillisecondsTimePoint(((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS + 1)
+                    * RESOLUTION_IN_MILLISECONDS);
+        }
+        return result;
     }
 
     private TimePoint higherToResolution(Wind w) {
-        return new MillisecondsTimePoint((w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS + 1)
-                * RESOLUTION_IN_MILLISECONDS);
+        TimePoint result;
+        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        if (startOfTracking == null) {
+            // no start of tracking yet; "ceiling" to beginning of time
+            result = new MillisecondsTimePoint(0);
+        } else if (w.getTimePoint().compareTo(startOfTracking) < 0) {
+            result = higherToResolution(new DummyWind(startOfTracking));
+        } else {
+            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS + 1)
+                    * RESOLUTION_IN_MILLISECONDS);
+        }
+        return result;
     }
 
     /**

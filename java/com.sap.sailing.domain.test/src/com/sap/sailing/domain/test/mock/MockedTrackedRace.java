@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -35,6 +36,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
@@ -153,18 +155,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void setWindSource(WindSource windSource) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public WindSource getWindSource() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public WindTrack getWindTrack(WindSource windSource) {
         // TODO Auto-generated method stub
         return null;
@@ -202,7 +192,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void recordWind(Wind wind, WindSource windSource) {
-        if (windSource == WindSource.EXPEDITION) {
+        if (windSource.getType() == WindSourceType.EXPEDITION) {
             windTrack.add(wind);
         }
     }
@@ -432,12 +422,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Wind getWind(Position p, TimePoint at, WindSource... windSourcesToConsider) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Pair<Placemark, Placemark> getStartFinishPlacemarks() {
         // TODO Auto-generated method stub
         return null;
@@ -464,6 +448,43 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint)
             throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Wind getWind(Position p, TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Iterable<WindSource> getWindSources(WindSourceType type) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public WindSource getOrCreateWindSource(WindSourceType type, String windSourceID) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Iterable<WindSource> getWindSources() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+            Iterable<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
     }

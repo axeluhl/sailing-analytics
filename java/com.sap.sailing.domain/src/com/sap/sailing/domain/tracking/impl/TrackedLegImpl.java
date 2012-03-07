@@ -17,6 +17,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -169,11 +170,12 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         // would therefore lead to an endless recursion without further tricks being applied
         Wind wind = getWind(
                 approximateLegStartPosition.translateGreatCircle(approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition),
-                        approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at, WindSource.TRACK_BASED_ESTIMATION);
+                        approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at,
+                        getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         return wind;
     }
 
-    private Wind getWind(Position p, TimePoint at, WindSource... windSourcesToExclude) {
+    private Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
         return getTrackedRace().getWind(p, at, windSourcesToExclude);
     }
 
