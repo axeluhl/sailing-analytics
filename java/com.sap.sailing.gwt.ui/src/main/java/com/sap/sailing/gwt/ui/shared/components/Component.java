@@ -14,4 +14,8 @@ public interface Component<SettingsType> extends ComponentSettings<SettingsType>
      * in which to aggregate their entries' widgets.
      */
     Widget getEntryWidget();
+    
+    boolean isVisible();
+    
+    void setVisible(boolean visibility);
 }

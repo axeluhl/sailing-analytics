@@ -6,12 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -41,6 +43,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
+import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
@@ -99,18 +102,16 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
+        componentsNavigationPanel = new FlowPanel();
+        componentsNavigationPanel.addStyleName("raceBoardNavigation");
+
         switch (viewMode) {
             case CASCADING:
                 createCascadingView(leaderboardName, leaderboardGroupName, mainPanel);
                 break;
             case ONE_SCREEN:
-                createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);
+                createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
                 break;
-        }
-
-        for (ComponentViewer componentViewer : componentViewers) {
-            mainPanel.add(componentViewer.getViewerWidget());
-            addComponentViewerMenuEntry(componentViewer);
         }
 
         timePanel = new RaceTimePanel(sailingService, timer, errorReporter, stringMessages);
@@ -123,41 +124,48 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
         // create the default leaderboard and select the right race
-
         LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode());
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings, selectedRaceIdentifier, competitorSelectionModel,
                 timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
         RaceMap raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionModel, stringMessages);
-
-        SideBySideComponentViewer leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, "auto", "500px");  
-        componentViewers.add(leaderboardAndMapViewer);
-
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
-            
+
+        List<Component<?>> components = new ArrayList<Component<?>>();
+
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
                 stringMessages, errorReporter, 200, true);
-        SimpleComponentViewer<WindChartSettings> windChartViewer = new SimpleComponentViewer<WindChartSettings>(
-                windChart, "auto", "200px");
+//        SimpleComponentViewer<WindChartSettings> windChartViewer = new SimpleComponentViewer<WindChartSettings>(
+//                windChart, "auto", "200px");
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        componentViewers.add(windChartViewer);
+        components.add(windChart);
 
         MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
                     timer, stringMessages, errorReporter, 200, true);
-            SimpleComponentViewer<MultiChartSettings> chartViewer = new SimpleComponentViewer<MultiChartSettings>(
-                    competitorCharts, "auto", "200px");
+//        SimpleComponentViewer<MultiChartSettings> chartViewer = new SimpleComponentViewer<MultiChartSettings>(
+//                competitorCharts, "auto", "200px");
 
-            competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-            componentViewers.add(chartViewer);
+        competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+        components.add(competitorCharts);
+
+        
+        SideBySideComponentViewer leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, "auto", "500px");  
+        componentViewers.add(leaderboardAndMapViewer);
+            
+        for (ComponentViewer componentViewer : componentViewers) {
+            mainPanel.add(componentViewer.getViewerWidget());
+        }
+        
+        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel);
+        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, raceMap);
+        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, windChart);
+        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, competitorCharts);
     }
 
     private void createCascadingView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
         // create the breadcrumb navigation
         breadcrumbPanel = createBreadcrumbPanel(leaderboardGroupName);
         mainPanel.add(breadcrumbPanel);
-
-        componentsNavigationPanel = new FlowPanel();
-        componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
         boolean showLeaderboard = true;
         boolean showMap = true;
@@ -179,14 +187,13 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
                     raceMap, "auto", "500px", stringMessages);
 
-            //((Panel) raceMapViewer.getViewerWidget().getContent()).add(raceMap);
             raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
             componentViewers.add(raceMapViewer);
         }
 
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
-                stringMessages, errorReporter, 400, true);//TODO set to false after testing
+                stringMessages, errorReporter, 400, false);
         CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
                 windChart, "auto", "400px", stringMessages);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
@@ -206,7 +213,11 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
             componentViewers.add(chartViewer);
         }
-        
+
+        for (ComponentViewer componentViewer : componentViewers) {
+            mainPanel.add(componentViewer.getViewerWidget());
+            addComponentViewerAsAnchorToNavigationMenu(componentViewer);
+        }
     }
 
     private BreadcrumbPanel createBreadcrumbPanel(String leaderboardGroupName) {
@@ -220,15 +231,35 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         }
         return new BreadcrumbPanel(breadcrumbLinksData, selectedRaceIdentifier.getRaceName());
     }
-    
-    private void addComponentViewerMenuEntry(final ComponentViewer c) {
-        Anchor menuEntry = new Anchor(c.getViewerName());
+
+    private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer, final Component<?> component) {
+        final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(), component.getLocalizedShortName());
+        toggleButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+        toggleButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        toggleButton.getElement().getStyle().setMargin(3, Style.Unit.PX);
+        toggleButton.addClickHandler(new ClickHandler() {
+          public void onClick(ClickEvent event) {
+            if (toggleButton.isDown()) {
+                component.setVisible(false);
+                componentViewer.forceLayout();
+            } else {
+                component.setVisible(true);
+                componentViewer.forceLayout();
+            }
+          }
+        });
+        
+        componentsNavigationPanel.add(toggleButton);
+    }
+
+    private void addComponentViewerAsAnchorToNavigationMenu(final ComponentViewer componentViewer) {
+        Anchor menuEntry = new Anchor(componentViewer.getViewerName());
         menuEntry.addStyleName("raceBoardNavigation-navigationitem");
         
         menuEntry.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.scrollTo(Window.getScrollLeft(), c.getViewerWidget().getAbsoluteTop() - scrollOffset);
+                Window.scrollTo(Window.getScrollLeft(), componentViewer.getViewerWidget().getAbsoluteTop() - scrollOffset);
             }
         });
         componentsNavigationPanel.add(menuEntry);

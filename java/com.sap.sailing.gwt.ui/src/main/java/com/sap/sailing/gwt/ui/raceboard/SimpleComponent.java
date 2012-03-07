@@ -40,4 +40,13 @@ public class SimpleComponent implements Component<SimpleComponentSettings> {
     public void updateSettings(SimpleComponentSettings newSettings) {
     }
 
+    @Override
+    public boolean isVisible() {
+        return true;
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+    }
+
 }

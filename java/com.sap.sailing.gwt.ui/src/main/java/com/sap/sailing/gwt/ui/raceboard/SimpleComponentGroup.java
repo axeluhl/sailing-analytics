@@ -57,4 +57,13 @@ public class SimpleComponentGroup<SettingsType> implements ComponentGroup<Settin
     public Iterable<Component<?>> getComponents() {
         return components;
     }
+    
+    @Override
+    public boolean isVisible() {
+        return true;
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+    }
 }
