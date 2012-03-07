@@ -28,6 +28,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
@@ -50,7 +51,7 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         fixApproximateMarkPositionsForWindReadOut(getTrackedRace());
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(65))), getTrackedRace().getWindSources(WindSourceType.WEB).iterator().next());
+                        new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
     }
     
     /**

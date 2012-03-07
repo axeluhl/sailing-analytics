@@ -382,5 +382,5 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public boolean raceIsKnownToStartUpwind() {
         return raceIsKnownToStartUpwind;
     }
-    
+
 }

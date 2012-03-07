@@ -52,7 +52,6 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
@@ -193,9 +192,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         windTracks.put(courseBasedWindSource, windStore.getWindTrack(trackedEvent, this, courseBasedWindSource, millisecondsOverWhichToAverageWind));
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
         windTracks.put(trackBasedWindSource, windStore.getWindTrack(trackedEvent, this, trackBasedWindSource, millisecondsOverWhichToAverageWind));
-        WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
-        windTracks.put(webWindSource, windStore.getWindTrack(trackedEvent, this, webWindSource, millisecondsOverWhichToAverageWind));
-        // FIXME bug #372: need to do something to load expedition wind that was stored in DB because no recordWind will be called
         this.trackedEvent = trackedEvent;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
     }
@@ -1256,25 +1252,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return result;
     }
     
-    @Override
-    public WindSource getOrCreateWindSource(WindSourceType type, String id) {
-        WindSource result = null;
-        for (WindSource windSource : getWindSources(type)) {
-            if (windSource.getType() == type && windSource.getId().equals(id)) {
-                result = windSource;
-                break;
-            }
-        }
-        if (result == null) {
-            result = createWindSource(type, id);
-        }
-        return result;
-    }
-
-    private WindSource createWindSource(WindSourceType type, String id) {
-        return new WindSourceWithAdditionalID(type, id);
-    }
-
     @Override
     public Iterable<WindSource> getWindSources() {
         return windTracks.keySet();

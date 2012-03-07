@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
@@ -42,7 +43,7 @@ public class ManeuverAnalysis505Test extends AbstractManeuverDetectionTestCase {
                 new GregorianCalendar(2011, 05, 23).getTime()));
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(65))), getTrackedRace().getWindSources(WindSourceType.WEB).iterator().next());
+                        new DegreeBearingImpl(65))), new WindSourceImpl(WindSourceType.WEB));
         dateFormat = new SimpleDateFormat("MM/dd/yyyy-HH:mm:ss");
     }
     
