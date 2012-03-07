@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings;
@@ -132,16 +132,16 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         List<Component<?>> components = new ArrayList<Component<?>>();
 
-        WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
+        WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
-                stringMessages, errorReporter);
+                stringMessages, errorReporter, 200, true);
 //        SimpleComponentViewer<WindChartSettings> windChartViewer = new SimpleComponentViewer<WindChartSettings>(
 //                windChart, "auto", "200px");
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(windChart);
 
         MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
-                    timer, stringMessages, errorReporter);
+                    timer, stringMessages, errorReporter, 200, true);
 //        SimpleComponentViewer<MultiChartSettings> chartViewer = new SimpleComponentViewer<MultiChartSettings>(
 //                competitorCharts, "auto", "200px");
 
@@ -191,9 +191,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             componentViewers.add(raceMapViewer);
         }
 
-        WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
+        WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
-                stringMessages, errorReporter);
+                stringMessages, errorReporter, 400, false);
         CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
                 windChart, "auto", "400px", stringMessages);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
@@ -206,7 +206,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 //                    competitorCharts, "auto", "400px", stringMessages);
 
             MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
-                    timer, stringMessages, errorReporter);
+                    timer, stringMessages, errorReporter, 400, false);
             CollapsableComponentViewer<MultiChartSettings> chartViewer = new CollapsableComponentViewer<MultiChartSettings>(
                     competitorCharts, "auto", "400px", stringMessages);
 
