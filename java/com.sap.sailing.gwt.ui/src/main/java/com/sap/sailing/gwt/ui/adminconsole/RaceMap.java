@@ -296,8 +296,9 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     final ParallelExecutionCallback<Map<CompetitorDTO, List<GPSFixDTO>>> getBoatsCallback = new ParallelExecutionCallback<Map<CompetitorDTO, List<GPSFixDTO>>>();
                     final ParallelExecutionCallback<List<MarkDTO>> getMarksCallback = new ParallelExecutionCallback<List<MarkDTO>>();
                     final ParallelExecutionCallback<List<QuickRankDTO>> getQuickRanksCallback = new ParallelExecutionCallback<List<QuickRankDTO>>();
-                    final ParallelExecutionCallback<WindInfoForRaceDTO> getWindCallback = new ParallelExecutionCallback<WindInfoForRaceDTO>();
-                    new ParallelExecutionHolder(getBoatsCallback, getMarksCallback, getQuickRanksCallback, getWindCallback) {
+//                    final ParallelExecutionCallback<WindInfoForRaceDTO> getWindCallback = new ParallelExecutionCallback<WindInfoForRaceDTO>();
+//                    new ParallelExecutionHolder(getBoatsCallback, getMarksCallback, getQuickRanksCallback, getWindCallback) {
+                        new ParallelExecutionHolder(getBoatsCallback, getMarksCallback, getQuickRanksCallback) {
                         @Override
                         protected void handleSuccess() {
                             quickRanks = getQuickRanksCallback.getData();
@@ -338,7 +339,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                                         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
                                     }
                                 }
-                                showWindOnMap(getWindCallback.getData());
+//                                showWindOnMap(getWindCallback.getData());
                             } else {
                                 lastTimeChangeBeforeInitialization = date;
                             }
@@ -352,7 +353,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     sailingService.getBoatPositions(race, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, getBoatsCallback);
                     sailingService.getMarkPositions(race, date, getMarksCallback);
                     sailingService.getQuickRanks(race, date, getQuickRanksCallback);
-                    sailingService.getWindInfo(race, date, date, null, getWindCallback);
+//                    sailingService.getWindInfo(race, date, date, null, getWindCallback);
                 }
             }
         }
