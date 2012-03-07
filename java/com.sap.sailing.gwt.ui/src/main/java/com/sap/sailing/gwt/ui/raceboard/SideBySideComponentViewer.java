@@ -2,28 +2,26 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.List;
 
-import com.google.gwt.user.client.ui.HorizontalSplitPanel;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 
-@SuppressWarnings("deprecation")
 public class SideBySideComponentViewer implements ComponentViewer {
     
     /** there is no easy replacement for the HorizontalSplitPanel available */ 
     private final Component<?> leftComponent;
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
+    private final ScrollPanel leftScrollPanel;
     
-    private HorizontalSplitPanel mainPanel;
-    
-    private LayoutPanel mainPanel2;
+    private LayoutPanel mainPanel;
     
     private SplitLayoutPanel splitLayoutPanel; 
     private int savedSplitPosition = -1;
-    private boolean isLeftComponentHidden = false; 
     
     public SideBySideComponentViewer(Component<?> leftComponent, Component<?> rightComponent, List<Component<?>> components, 
             String defaultWidth, String defaultHeight) {
@@ -31,82 +29,70 @@ public class SideBySideComponentViewer implements ComponentViewer {
         this.rightComponent = rightComponent;
         this.components = components;
 
-//        createOldDesign(defaultWidth, defaultHeight);
+        leftScrollPanel = new ScrollPanel();
+        leftScrollPanel.add(leftComponent.getEntryWidget());
 
-        createNewDesign(defaultWidth, defaultHeight);
-    }
-
-    public void createOldDesign(String defaultWidth, String defaultHeight) {
-        mainPanel = new HorizontalSplitPanel();
+        mainPanel = new LayoutPanel();
         mainPanel.setSize(defaultWidth, defaultHeight);
-        mainPanel.setLeftWidget(leftComponent.getEntryWidget());
-        mainPanel.setRightWidget(rightComponent.getEntryWidget());
-    }
-    
-    public void createNewDesign(String defaultWidth, String defaultHeight) {
-        mainPanel2 = new LayoutPanel();
-        mainPanel2.setSize(defaultWidth, defaultHeight);
         splitLayoutPanel = new SplitLayoutPanel();
-        mainPanel2.add(splitLayoutPanel);
+        mainPanel.add(splitLayoutPanel);
          
-        savedSplitPosition = 500;
         splitLayoutPanel.setSize(defaultWidth, defaultHeight);
         
         for(Component<?> component: components) {
-            splitLayoutPanel.addSouth(component.getEntryWidget(), 200);
+            if(component.isVisible())
+                splitLayoutPanel.addSouth(component.getEntryWidget(), 200);
         }
-        splitLayoutPanel.addWest(leftComponent.getEntryWidget(), savedSplitPosition);
-        splitLayoutPanel.add(rightComponent.getEntryWidget());
         
-        // dockLayoutPanel.getWidgetContainerElement(flowPanel).getStyle().setOverflowY(Overflow.AUTO);
+        savedSplitPosition = 500;
+        splitLayoutPanel.addWest(leftScrollPanel, savedSplitPosition);
+        splitLayoutPanel.add(rightComponent.getEntryWidget());
     }
-    
+
     public void forceLayout() {
         if(leftComponent.isVisible() && !rightComponent.isVisible()) {
-            isLeftComponentHidden = false;
-            splitLayoutPanel.remove(rightComponent.getEntryWidget());
-            splitLayoutPanel.forceLayout();
+            // the leaderboard is visible, but not the map
+            if(isWidgetInSplitPanel(rightComponent.getEntryWidget()))
+                splitLayoutPanel.remove(rightComponent.getEntryWidget());
         }
-        if(!leftComponent.isVisible() && rightComponent.isVisible()) {
-            isLeftComponentHidden = true;
-            splitLayoutPanel.remove(leftComponent.getEntryWidget());
-            splitLayoutPanel.forceLayout();
+        else if(!leftComponent.isVisible() && rightComponent.isVisible()) {
+            // the leaderboard is not visible, but the map is
+            if(isWidgetInSplitPanel(leftScrollPanel))
+                splitLayoutPanel.remove(leftScrollPanel);
         }
-        if(leftComponent.isVisible() && rightComponent.isVisible()) {
-            if(isLeftComponentHidden)
-                splitLayoutPanel.insertWest(leftComponent.getEntryWidget(), savedSplitPosition, rightComponent.getEntryWidget());
-            else
-                splitLayoutPanel.add(rightComponent.getEntryWidget());
+        else if(leftComponent.isVisible() && rightComponent.isVisible()) {
+            if(!isWidgetInSplitPanel(leftScrollPanel) || !isWidgetInSplitPanel(rightComponent.getEntryWidget())) {
+                if(!isWidgetInSplitPanel(leftScrollPanel))
+                    splitLayoutPanel.insertWest(leftScrollPanel, savedSplitPosition, rightComponent.getEntryWidget());
+                else
+                    splitLayoutPanel.insertEast(rightComponent.getEntryWidget(), savedSplitPosition, leftScrollPanel);
+            }
         }
-        if(!leftComponent.isVisible() && !rightComponent.isVisible()) {
-            // should be support this?
+        else if(!leftComponent.isVisible() && !rightComponent.isVisible()) {
         }
         
-//        if(leftComponent.isVisible() && !rightComponent.isVisible()) {
-//            savedSplitPosition = mainPanel.getLeftWidget().getElement().getClientWidth();
-//            mainPanel.setRightWidget(null);
-//            mainPanel.setSplitPosition("0px");
-//        }
-//        if(!leftComponent.isVisible() && rightComponent.isVisible()) {
-//            savedSplitPosition = mainPanel.getLeftWidget().getElement().getClientWidth();
-//            mainPanel.setLeftWidget(null);
-//            mainPanel.setSplitPosition("0px");
-//        }
-//        if(leftComponent.isVisible() && rightComponent.isVisible()) {
-//            mainPanel.setLeftWidget(leftComponent.getEntryWidget());
-//            mainPanel.setRightWidget(rightComponent.getEntryWidget());
-//            mainPanel.setSplitPosition(savedSplitPosition + "px");
-//        }
-//        if(!leftComponent.isVisible() && !rightComponent.isVisible()) {
-//            // should be support this?
-//        }
+        for(Component<?> component: components) {
+            boolean isComponentInSplitPanel = isWidgetInSplitPanel(component.getEntryWidget());
+            if(component.isVisible()) {
+//              splitLayoutPanel.addSouth(component.getEntryWidget(), 200);
+            } else {
+                if(isComponentInSplitPanel)
+                    splitLayoutPanel.remove(component.getEntryWidget());
+            }
+        }        
+        splitLayoutPanel.forceLayout();
     }
-    
+
+    private boolean isWidgetInSplitPanel(Widget widget) {
+        int widgetIndex = splitLayoutPanel.getWidgetIndex(widget);
+        if(widgetIndex < 0)
+            return false;
+            
+        return true;
+    }
+
     public Panel getViewerWidget() {
-        if(mainPanel != null)
-            return mainPanel;
-        else
-            return mainPanel2;
+        return mainPanel;
     }
 
     public Component<?> getRootComponent() {
