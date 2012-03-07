@@ -136,14 +136,14 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
-                stringMessages, errorReporter, 200);
+                stringMessages, errorReporter, 200, true);
         SimpleComponentViewer<WindChartSettings> windChartViewer = new SimpleComponentViewer<WindChartSettings>(
                 windChart, "auto", "200px");
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         componentViewers.add(windChartViewer);
 
         MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
-                    timer, stringMessages, errorReporter, 200);
+                    timer, stringMessages, errorReporter, 200, true);
             SimpleComponentViewer<MultiChartSettings> chartViewer = new SimpleComponentViewer<MultiChartSettings>(
                     competitorCharts, "auto", "200px");
 
@@ -186,7 +186,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
-                stringMessages, errorReporter, 400);
+                stringMessages, errorReporter, 400, true);//TODO set to false after testing
         CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
                 windChart, "auto", "400px", stringMessages);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
@@ -199,7 +199,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 //                    competitorCharts, "auto", "400px", stringMessages);
 
             MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
-                    timer, stringMessages, errorReporter, 400);
+                    timer, stringMessages, errorReporter, 400, false);
             CollapsableComponentViewer<MultiChartSettings> chartViewer = new CollapsableComponentViewer<MultiChartSettings>(
                     competitorCharts, "auto", "400px", stringMessages);
 
