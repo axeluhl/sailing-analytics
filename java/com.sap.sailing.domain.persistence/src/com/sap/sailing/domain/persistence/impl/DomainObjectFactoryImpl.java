@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
@@ -280,9 +281,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             for (DBObject o : windTracks.find(query)) {
                 Wind wind = loadWind((DBObject) o.get(FieldNames.WIND.name()));
                 WindSourceType windSourceType = WindSourceType.valueOf((String) o.get(FieldNames.WIND_SOURCE_NAME.name()));
-                // TODO bug #374: consider optional additional wind store ID
-//                WindSource windSource = new WindSourceWithAdditionalID(windSourceType, null);
-                WindSource windSource = new WindSourceImpl(windSourceType);
+                WindSource windSource;
+                if (o.containsField(FieldNames.WIND_SOURCE_ID.name())) {
+                    windSource = new WindSourceWithAdditionalID(windSourceType, (String) o.get(FieldNames.WIND_SOURCE_ID.name()));
+                } else {
+                    windSource = new WindSourceImpl(windSourceType);
+                }
                 WindTrack track = result.get(windSource);
                 if (track == null) {
                     track = new WindTrackImpl(millisecondsOverWhichToAverageWind);
