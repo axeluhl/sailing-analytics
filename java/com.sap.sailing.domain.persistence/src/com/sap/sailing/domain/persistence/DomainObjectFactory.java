@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.persistence;
 
+import java.util.Map;
+
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -42,5 +44,8 @@ public interface DomainObjectFactory {
      * @return All leaderboards in the database, which aren't contained by a leaderboard group
      */
     Iterable<Leaderboard> getLeaderboardsNotInGroup();
+
+    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Event event, RaceDefinition race,
+            long millisecondsOverWhichToAverageWind);
 
 }

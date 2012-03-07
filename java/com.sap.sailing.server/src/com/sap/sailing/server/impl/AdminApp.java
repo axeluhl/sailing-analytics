@@ -262,7 +262,7 @@ public class AdminApp extends Servlet {
                 JSONObject jsonWindTracks = new JSONObject();
                 for (WindSource windSource : trackedRace.getWindSources()) {
                     JSONArray jsonWindArray = new JSONArray();
-                    WindTrack windTrack = trackedRace.getWindTrack(windSource);
+                    WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
                     synchronized (windTrack) {
                         Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
                         while (windIter.hasNext()) {
@@ -370,7 +370,7 @@ public class AdminApp extends Servlet {
                         try {
                             final DynamicTrackedRace trackedRace = getService().getOrCreateTrackedEvent(event)
                                     .getTrackedRace(race);
-                            WindTrack windTrack = trackedRace.getWindTrack(trackedRace.getWindSources(windSourceType).iterator().next());
+                            WindTrack windTrack = trackedRace.getOrCreateWindTrack(trackedRace.getWindSources(windSourceType).iterator().next());
                             TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
                                     MillisecondsTimePoint.now());
                             Wind wind = windTrack.getLastFixAtOrBefore(timePoint);
