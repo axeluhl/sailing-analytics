@@ -5,3 +5,14 @@ Bundle-SymbolicName: com.sap.sailing.simulator
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
+ com.sap.sailing.domain;bundle-version="1.0.0",
+ com.sap.sailing.server;bundle-version="1.0.0"
+Bundle-ActivationPolicy: lazy
+Import-Package: javax.servlet;version="2.5.0",
+ javax.servlet.http;version="2.5.0",
+ org.osgi.framework;version="1.6.0"
+Bundle-ClassPath: .
+Export-Package: com.sap.sailing.simulator,
+ com.sap.sailing.simulator.impl;x-friends:="com.sap.sailing.simulator.test"
+Web-ContextPath: /simulator
