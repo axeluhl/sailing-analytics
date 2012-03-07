@@ -50,6 +50,8 @@
 		<module>com.sap.sailing.feature.runtime</module>
 		<module>com.sap.sailing.feature.p2build</module>
 		<module>org.moxieapps.gwt.highcharts</module>
+		<module>com.sap.sailing.simulator</module>
+		<module>com.sap.sailing.simulator.test</module>
 	</modules>
 	
 	<properties>
