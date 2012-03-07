@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
 /**
@@ -176,14 +177,31 @@ public interface TrackedRace {
     Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
     
     /**
+     * Same as {@link #getWind(Position, TimePoint, Iterable) getWind(p, at, Collections.emptyList())}
+     */
+    Wind getWind(Position p, TimePoint at);
+
+    /**
      * Obtains estimated interpolated wind information for a given position and time point. The information is taken
      * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, with preferences
      * controlled by the {@link #getWindSource() current wind source} which can be selected using {@link #setWindSource},
      * and by the order of the {@link WindSource} literals.
      */
-    Wind getWind(Position p, TimePoint at, WindSource... windSourcesToExclude);
+    Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude);
 
-    WindSource getWindSource();
+    /**
+     * Retrieves the wind sources used by this race that have the specified <code>type</code> as their {@link WindSource#getType() type}.
+     * Always returns a non-<code>null</code> iterable which may be empty in case the race does not use any wind source of the
+     * specified type.
+     */
+    Iterable<WindSource> getWindSources(WindSourceType type);
+
+    WindSource getOrCreateWindSource(WindSourceType type, String windSourceID);
+    
+    /**
+     * Retrieves all wind sources used by this race.
+     */
+    Iterable<WindSource> getWindSources();
 
     WindTrack getWindTrack(WindSource windSource);
 
@@ -298,4 +316,6 @@ public interface TrackedRace {
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
+
+    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude);
 }

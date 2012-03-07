@@ -3,10 +3,10 @@ package com.sap.sailing.domain.confidence.impl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.confidence.Weigher;
 
-public class LinearTimeDifferenceWeigher implements Weigher<TimePoint> {
+public class HyperbolicTimeDifferenceWeigher implements Weigher<TimePoint> {
     private final long halfConfidenceAfterMilliseconds;
     
-    public LinearTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds) {
+    public HyperbolicTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds) {
         this.halfConfidenceAfterMilliseconds = halfConfidenceAfterMilliseconds;
     }
 

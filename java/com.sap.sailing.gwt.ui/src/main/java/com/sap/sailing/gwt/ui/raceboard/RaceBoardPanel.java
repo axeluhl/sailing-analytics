@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings;
@@ -134,7 +134,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
             
-        WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
+        WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
                 stringMessages, errorReporter);
         SimpleComponentViewer<WindChartSettings> windChartViewer = new SimpleComponentViewer<WindChartSettings>(
@@ -184,7 +184,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             componentViewers.add(raceMapViewer);
         }
 
-        WindChartSettings windChartSettings = new WindChartSettings(WindSource.values());
+        WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
                 stringMessages, errorReporter);
         CollapsableComponentViewer<WindChartSettings> windChartViewer = new CollapsableComponentViewer<WindChartSettings>(

@@ -15,4 +15,8 @@ public class WindWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Scalab
         return new ScalableWind(getObject());
     }
 
+    @Override
+    public String toString() {
+        return (getObject() != null ? getObject().toString() : "null")+"@"+getConfidence();
+    }
 }

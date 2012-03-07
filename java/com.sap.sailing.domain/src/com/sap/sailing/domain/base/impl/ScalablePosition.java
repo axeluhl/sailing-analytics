@@ -26,7 +26,13 @@ public class ScalablePosition implements ScalableValue<ScalablePosition, Positio
 
     @Override
     public ScalablePosition add(ScalableValue<ScalablePosition, Position> t) {
-        return new ScalablePosition(x+t.getValue().x, y+t.getValue().y, z+t.getValue().z);
+        ScalablePosition result;
+        if (t == null) {
+            result = this;
+        } else {
+            result = new ScalablePosition(x+t.getValue().x, y+t.getValue().y, z+t.getValue().z);
+        }
+        return result;
     }
 
     /**

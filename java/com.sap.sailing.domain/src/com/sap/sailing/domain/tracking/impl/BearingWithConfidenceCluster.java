@@ -92,20 +92,33 @@ public class BearingWithConfidenceCluster<RelativeTo> {
         return (BearingWithConfidenceCluster<RelativeTo>[]) new BearingWithConfidenceCluster<?>[2];
     }
     
+    /**
+     * To avoid that a bearing with low confidence decides about the clustering, the difference between two bearings
+     * is scaled by their confidences. This scaled distance is then maximized for those bearings at least
+     * <code>minimumDegreeDifferenceBetweenTacks</code> degrees apart.
+     */
     private Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> getExtremeBearings(double minimumDegreeDifferenceBetweenTacks) {
         assert bearings.size() >= 2;
-        double maxAbsDegDiff = minimumDegreeDifferenceBetweenTacks;
+        double maxAbsDegDiff = 0;
         Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>> result = null;
         for (int i=0; i<bearings.size(); i++) {
             for (int j=i+1; j<bearings.size(); j++) {
-                if (Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees()) >= maxAbsDegDiff) {
+                final double confidenceScaledDifference = getConfidenceScaledDifference(bearings.get(i), bearings.get(j));
+                if (Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees()) >= minimumDegreeDifferenceBetweenTacks
+                        && confidenceScaledDifference > maxAbsDegDiff) {
                     result = new Pair<BearingWithConfidence<RelativeTo>, BearingWithConfidence<RelativeTo>>(bearings.get(i), bearings.get(j));
-                    maxAbsDegDiff = Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees());
+                    maxAbsDegDiff = confidenceScaledDifference;
                     assert Math.abs(bearings.get(i).getObject().getDifferenceTo(bearings.get(j).getObject()).getDegrees()) <= 180.;
                 }
             }
         }
         return result;
+    }
+
+    private double getConfidenceScaledDifference(BearingWithConfidence<RelativeTo> bearingWithConfidence1,
+            BearingWithConfidence<RelativeTo> bearingWithConfidence2) {
+        return bearingWithConfidence1.getObject().getDifferenceTo(bearingWithConfidence2.getObject()).getDegrees() *
+                bearingWithConfidence1.getConfidence() * bearingWithConfidence2.getConfidence();
     }
 
     public boolean isEmpty() {

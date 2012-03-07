@@ -79,12 +79,12 @@ public interface SailingServiceAsync {
             AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
-     * @param windSources
+     * @param windSourceTypeNames
      *            if <code>null</code>, data from all available wind sources will be returned, otherwise only from those
      *            whose {@link WindSource} name is contained in the <code>windSources</code> collection.
      */
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
-            double latDeg, double lngDeg, Collection<String> windSources,
+            double latDeg, double lngDeg, Collection<String> windSourceTypeNames,
             AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
@@ -115,8 +115,6 @@ public interface SailingServiceAsync {
     void getMarkPositions(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<MarkDTO>> asyncCallback);
 
     void getQuickRanks(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<QuickRankDTO>> callback);
-
-    void setWindSource(RaceIdentifier raceIdentifier, String windSourceName, boolean raceIsKnownToStartUpwind, AsyncCallback<Void> callback);
 
     /**
      * Returns a {@link LeaderboardDTO} will information about all races, their points and competitor display names
@@ -285,4 +283,7 @@ public interface SailingServiceAsync {
      */
     void getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, Date toDate, long stepSize,
             DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
+
+    void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
+            AsyncCallback<Void> callback);
 }
