@@ -155,7 +155,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public WindTrack getWindTrack(WindSource windSource) {
+    public WindTrack getOrCreateWindTrack(WindSource windSource) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -466,12 +466,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Iterable<WindSource> getWindSources(WindSourceType type) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public WindSource getOrCreateWindSource(WindSourceType type, String windSourceID) {
         // TODO Auto-generated method stub
         return null;
     }

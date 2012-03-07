@@ -70,6 +70,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected Chart chart;
+    private int chartHeight;
     protected final AbsolutePanel busyIndicatorPanel;
     protected final Label noCompetitorsSelectedLabel;
     protected final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
@@ -84,7 +85,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow) {
+            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow, int chartHeight) {
         this.stringMessages = stringMessages;
     	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
@@ -95,6 +96,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	this.errorReporter = errorReporter;
         this.dataToShow = dataToShow;
         chartData = null;
+        this.chartHeight = chartHeight;
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -135,6 +137,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setWidth100()
+                .setHeight(chartHeight)
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(

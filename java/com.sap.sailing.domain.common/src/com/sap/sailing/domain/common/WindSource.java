@@ -5,11 +5,12 @@ import java.io.Serializable;
 
 
 /**
- * Possible sources for wind data. Used to key and select between different {@link WindTrack}s. Objects of this
- * class have their {@link Object#equals(Object)} and {@link Object#hashCode()} methods defined accordingly.
+ * Value-object identifying possible sources for wind data. Used to key and select between different {@link WindTrack}s.
+ * Objects of this class have their {@link Object#equals(Object)} and {@link Object#hashCode()} methods defined
+ * accordingly.
  * 
  * @author Axel Uhl (d043530)
- *
+ * 
  */
 public interface WindSource extends Serializable {
     WindSourceType getType();

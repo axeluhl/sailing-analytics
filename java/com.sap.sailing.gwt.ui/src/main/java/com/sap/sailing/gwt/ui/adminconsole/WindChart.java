@@ -76,7 +76,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter) {
+            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter, int chartHeight) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -90,6 +90,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setWidth100()
+                .setHeight(chartHeight)
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
@@ -221,7 +222,6 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             WindSource windSource = e.getKey();
             Series directionSeries = getOrCreateDirectionSeries(windSource);
             Series speedSeries = getOrCreateSpeedSeries(windSource);
-            // FIXME probably need to add the series to the chart...
             WindTrackInfoDTO windTrackInfo = e.getValue();
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
