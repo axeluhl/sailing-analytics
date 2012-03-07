@@ -72,6 +72,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected Chart chart;
+    private boolean compactChart;
     private int chartHeight;
     protected final AbsolutePanel busyIndicatorPanel;
     protected final Label noCompetitorsSelectedLabel;
@@ -87,7 +88,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow, int chartHeight) {
+            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow, int chartHeight, boolean compactChart) {
         this.stringMessages = stringMessages;
     	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
@@ -98,6 +99,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	this.errorReporter = errorReporter;
         this.dataToShow = dataToShow;
         chartData = null;
+        this.compactChart = compactChart;
         this.chartHeight = chartHeight;
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
@@ -178,6 +180,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         numberFormat.format(toolTipData.getYAsDouble()) + unit;
             }
         }));
+        
+        if (compactChart) {
+            chart.setSpacingBottom(4).setSpacingLeft(0).setSpacingRight(0).setSpacingTop(2)
+                 .setLegend(new Legend().setMargin(2))
+                 .setOption("title/margin", 5)
+                 .setChartSubtitle(null)
+                 .getXAxis().setAxisTitle(null);
+        }
         
         setChartData(null);
         dataSeriesByCompetitor.clear();

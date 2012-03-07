@@ -78,7 +78,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter, int chartHeight) {
+            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter, int chartHeight, boolean compactChart) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -124,6 +124,13 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
             .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
+        if (compactChart) {
+            chart.setSpacingBottom(4).setSpacingLeft(0).setSpacingRight(0).setSpacingTop(2)
+                 .setLegend(new Legend().setMargin(2))
+                 .setOption("title/margin", 5)
+                 .setChartSubtitle(null)
+                 .getXAxis().setAxisTitle(null);
+        }
         
         mainPanel = new SimplePanel();
         mainPanel.setWidget(chart);
