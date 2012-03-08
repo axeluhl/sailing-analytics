@@ -151,7 +151,7 @@ public class RaceTimesInfoProvider {
     
     private void readTimesInfos() {
         if (!raceIdentifiers.isEmpty()) {
-            sailingService.getRaceTimesInfos(getRaceIdentifiers(), new AsyncCallback<List<RaceTimesInfoDTO>>() {
+            sailingService.getRaceTimesInfos(raceIdentifiers, new AsyncCallback<List<RaceTimesInfoDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to obtain the race time infos: " + caught.getMessage());
