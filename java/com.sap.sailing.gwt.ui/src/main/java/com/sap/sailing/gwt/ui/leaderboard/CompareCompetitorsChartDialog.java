@@ -54,7 +54,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         raceSelectionProvider.setAllRaces(races);
         
         multiChartPanel = new MultiChartPanel(sailingService, competitorSelectionProvider, raceSelectionProvider,
-                timer, stringConstants, errorReporter);
+                timer, stringConstants, errorReporter, 400, false);
         multiChartPanel.setSize("100%", "100%");
         
         FlowPanel contentPanel = new FlowPanel();

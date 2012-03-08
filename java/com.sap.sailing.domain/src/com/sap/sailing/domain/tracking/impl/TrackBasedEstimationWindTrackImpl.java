@@ -17,6 +17,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 /**
@@ -210,7 +211,8 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
         if (adjustedAt != null) {
             // we can use the unsynchronized version here because our getInternalFixes() method operates
             // only on a virtual sequence of wind fixes where no concurrency issues have to be observed
-            result = getEstimatedWindUnsynchronized(p, adjustedAt).getObject();
+            final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getEstimatedWindUnsynchronized(p, adjustedAt);
+            result = estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
         }
         return result;
     }

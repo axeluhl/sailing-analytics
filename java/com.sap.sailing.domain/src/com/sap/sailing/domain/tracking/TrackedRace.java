@@ -190,20 +190,19 @@ public interface TrackedRace {
     Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude);
 
     /**
-     * Retrieves the wind sources used by this race that have the specified <code>type</code> as their {@link WindSource#getType() type}.
-     * Always returns a non-<code>null</code> iterable which may be empty in case the race does not use any wind source of the
-     * specified type.
+     * Retrieves the wind sources used so far by this race that have the specified <code>type</code> as their
+     * {@link WindSource#getType() type}. Always returns a non-<code>null</code> iterable which may be empty in case the
+     * race does not use any wind source of the specified type (yet). Additional sources may be returned after
+     * 
      */
     Iterable<WindSource> getWindSources(WindSourceType type);
 
-    WindSource getOrCreateWindSource(WindSourceType type, String windSourceID);
-    
     /**
      * Retrieves all wind sources used by this race.
      */
     Iterable<WindSource> getWindSources();
 
-    WindTrack getWindTrack(WindSource windSource);
+    WindTrack getOrCreateWindTrack(WindSource windSource);
 
     /**
      * Waits until {@link #getUpdateCount()} is after <code>sinceUpdate</code>.

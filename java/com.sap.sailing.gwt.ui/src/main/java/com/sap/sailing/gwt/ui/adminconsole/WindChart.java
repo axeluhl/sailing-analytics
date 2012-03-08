@@ -18,6 +18,8 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
@@ -76,7 +78,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter) {
+            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter, int chartHeight, boolean compactChart) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -90,6 +92,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setWidth100()
+                .setHeight(chartHeight)
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
@@ -109,11 +112,25 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                         numberFormat.format(toolTipData.getYAsDouble()) + unit;
             }
         }));
+        chart.setClickEventHandler(new ChartClickEventHandler() {
+            @Override
+            public boolean onClick(ChartClickEvent chartClickEvent) {
+                WindChart.this.timer.setTime(chartClickEvent.getXAxisValueAsLong());
+                return true;
+            }
+        });
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
             .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
+        if (compactChart) {
+            chart.setSpacingBottom(4).setSpacingLeft(0).setSpacingRight(0).setSpacingTop(2)
+                 .setLegend(new Legend().setMargin(2))
+                 .setOption("title/margin", 5)
+                 .setChartSubtitle(null)
+                 .getXAxis().setAxisTitle(null);
+        }
         
         mainPanel = new SimplePanel();
         mainPanel.setWidget(chart);
@@ -134,6 +151,16 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     @Override
     public Widget getEntryWidget() {
         return mainPanel;
+    }
+
+    @Override
+    public boolean isVisible() {
+        return mainPanel.isVisible();
+    }
+
+    @Override
+    public void setVisible(boolean visibility) {
+        mainPanel.setVisible(visibility);
     }
 
     private void showVisibleSeries() {
@@ -221,7 +248,6 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             WindSource windSource = e.getKey();
             Series directionSeries = getOrCreateDirectionSeries(windSource);
             Series speedSeries = getOrCreateSpeedSeries(windSource);
-            // FIXME probably need to add the series to the chart...
             WindTrackInfoDTO windTrackInfo = e.getValue();
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
