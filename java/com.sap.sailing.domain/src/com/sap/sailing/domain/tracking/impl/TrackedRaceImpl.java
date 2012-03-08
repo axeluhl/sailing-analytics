@@ -792,7 +792,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
             BearingWithConfidence<TimePoint> average0 = bearingClustersUpwind[0].getAverage(timePoint);
             BearingWithConfidence<TimePoint> average1 = bearingClustersUpwind[1].getAverage(timePoint);
-            confidence = Math.min(average0.getConfidence(), average1.getConfidence());
+            confidence = Math.min(average0.getConfidence(), average1.getConfidence())*getRace().getBoatClass().getUpwindWindEstimationConfidence();
             reversedUpwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject()
                     .middle(average1.getObject()).reverse(), confidence, timePoint);
             upwindNumberOfRelevantBoats = Math.min(bearingClustersUpwind[0].size(), bearingClustersUpwind[1].size());
@@ -805,7 +805,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             BearingWithConfidence<TimePoint> average0 = bearingClustersDownwind[0].getAverage(timePoint);
             BearingWithConfidence<TimePoint> average1 = bearingClustersDownwind[1].getAverage(timePoint);
             double downwindConfidence = Math.min(average0.getConfidence(), average1.getConfidence());
-            confidence = Math.min(confidence, downwindConfidence);
+            confidence = Math.min(confidence, downwindConfidence)*getRace().getBoatClass().getDownwindWindEstimationConfidence();
             downwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject()
                     .middle(average1.getObject()), downwindConfidence, timePoint);
             downwindNumberOfRelevantBoats = Math.min(bearingClustersDownwind[0].size(),
