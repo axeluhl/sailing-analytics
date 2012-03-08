@@ -163,7 +163,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         
         FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
         contentOuterPanel.addStyleName("contentOuterPanel");
-        contentOuterPanel.setSize("100%", "100%");
         contentOuterPanel.add(raceBoardPanel);
 
         //FlowPanel footerShadowPanel = new FlowPanel();
