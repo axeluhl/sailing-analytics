@@ -106,10 +106,10 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
         switch (viewMode) {
-            case CASCADING:
+            case CASCADE:
                 createCascadingView(leaderboardName, leaderboardGroupName, mainPanel);
                 break;
-            case ONE_SCREEN:
+            case ONESCREEN:
                 createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
                 break;
         }
@@ -145,7 +145,8 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         windChart.setVisible(false);
         components.add(windChart);
         
-        SideBySideComponentViewer leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, "auto", "500px");  
+        SideBySideComponentViewer leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, 
+                components, "100%", "100%");  
         componentViewers.add(leaderboardAndMapViewer);
             
         for (ComponentViewer componentViewer : componentViewers) {
@@ -153,7 +154,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         }
         
         addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel);
-        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, raceMap);
+        //addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, raceMap);
         addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, windChart);
         addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, competitorCharts);
     }
