@@ -108,8 +108,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(3), now, 220); // on the same tack, should give no read-out
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
         assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
-        CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace(), /* millisecondsOverWhichToAverage */
-                15000l);
+        CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace());
         Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
         assertEquals(180., combinedWindDirection.getBearing().getDegrees(), 0.0001); // a bit less precise as course-based wind isn't exactly 180deg
     }
