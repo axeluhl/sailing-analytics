@@ -62,7 +62,7 @@ public class CompositeTabbedSettingsDialog extends SettingsDialog<CompositeSetti
 
             @Override
             public Widget getEntryWidget() {
-                throw new NoSuchMethodError("Virtual composite component doesn't have a widget of its own");
+                throw new RuntimeException("Virtual composite component doesn't have a widget of its own");
             }
 
             @Override
@@ -72,7 +72,7 @@ public class CompositeTabbedSettingsDialog extends SettingsDialog<CompositeSetti
 
             @Override
             public void setVisible(boolean visibility) {
-                throw new NoSuchMethodError("Virtual composite component doesn't know how to make itself visible");
+                throw new RuntimeException("Virtual composite component doesn't know how to make itself visible");
             }
         }, stringConstants);
         settingsDialogComponents = new HashMap<Component<?>, SettingsDialogComponent<?>>();
