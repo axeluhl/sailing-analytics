@@ -183,9 +183,8 @@ public interface TrackedRace {
 
     /**
      * Obtains estimated interpolated wind information for a given position and time point. The information is taken
-     * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, with preferences
-     * controlled by the {@link #getWindSource() current wind source} which can be selected using {@link #setWindSource},
-     * and by the order of the {@link WindSource} literals.
+     * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, using the confidences
+     * of the wind values provided by the various sources during averaging.
      */
     Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude);
 

@@ -22,7 +22,7 @@ public class ConfidenceBasedAveragerFactoryImpl implements ConfidenceFactory {
     }
 
     @Override
-    public Weigher<TimePoint> createLinearTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds) {
+    public Weigher<TimePoint> createHyperbolicTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds) {
         return new HyperbolicTimeDifferenceWeigher(halfConfidenceAfterMilliseconds);
     }
     

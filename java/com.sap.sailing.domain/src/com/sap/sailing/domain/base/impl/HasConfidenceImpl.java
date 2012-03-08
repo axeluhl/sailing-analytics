@@ -28,4 +28,8 @@ public class HasConfidenceImpl<ValueType, BaseType, RelativeTo> implements HasCo
         return object;
     }
 
+    @Override
+    public String toString() {
+        return ""+getObject()+"@"+getConfidence();
+    }
 }

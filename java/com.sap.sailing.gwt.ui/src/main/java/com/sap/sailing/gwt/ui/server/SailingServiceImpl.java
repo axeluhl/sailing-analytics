@@ -73,6 +73,7 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -544,12 +545,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             if (from != null && to != null) {
-                for (WindSource windSource : (windSources == null ? trackedRace.getWindSources() : Arrays.asList(windSources))) {
+                List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+                if (windSources == null) {
+                    windSourcesToDeliver.addAll(Arrays.asList(windSources));
+                } else {
+                    Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
+                }
+                windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
+                for (WindSource windSource : windSourcesToDeliver) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
                     WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                    windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack
-                            .getMillisecondsOverWhichToAverageWind();
+                    windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
                     Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
                     while (windIter.hasNext()) {
                         Wind wind = windIter.next();

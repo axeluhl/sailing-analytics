@@ -92,8 +92,8 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     }
 
     private void setBearingForCompetitor(Competitor competitor, TimePoint timePoint, double bearingDeg) {
-        DynamicGPSFixTrack<Competitor, GPSFixMoving> hungersTrack = getTrackedRace().getTrack(competitor);
-        hungersTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedRace().getTrack(competitor);
+        competitorTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg))));
     }
 
@@ -104,11 +104,13 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     public void testWindEstimationCacheInvalidationAfterLegTypeChange() throws NoWindException {
         TimePoint fixTime = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
         TimePoint checkTime = new MillisecondsTimePoint(fixTime.asMillis()+60000); // one minute later
-        initRace(2, new int[] { 1, 1 }, fixTime);
+        initRace(4, new int[] { 1, 1, 1, 1 }, fixTime);
         getTrackedRace().setRaceIsKnownToStartUpwind(false); // use only WEB wind to determine leg type
         TimePoint now = checkTime;
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 50);
+        setBearingForCompetitor(competitors.get(2), now, 140);
+        setBearingForCompetitor(competitors.get(3), now, 230);
         TrackedLeg firstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().iterator().next());
         assertEquals(LegType.UPWIND, firstLeg.getLegType(new MillisecondsTimePoint(MillisecondsTimePoint.now().asMillis())));
         final Map<TimePoint, Wind> cachedFixes = new HashMap<TimePoint, Wind>();
@@ -140,7 +142,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertEquals(LegType.DOWNWIND, firstLeg.getLegType(fixTime));
         Wind estimatedWindDirectionDownwind = track.getAveragedWind(/* position */ null, checkTime);
         assertNotNull(estimatedWindDirectionDownwind);
-        assertEquals(5., estimatedWindDirectionDownwind.getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., estimatedWindDirectionDownwind.getBearing().getDegrees(), 0.00000001);
     }
     
     @Test
