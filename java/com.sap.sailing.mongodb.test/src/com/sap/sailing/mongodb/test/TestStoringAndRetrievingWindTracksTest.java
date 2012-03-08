@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
@@ -86,7 +87,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                     public void addRaceDefinition(RaceDefinition race) {
                     }
                 });
-        WindSource windSource = trackedRace.getWindSources(WindSourceType.WEB).iterator().next();
+        WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());
         new MongoObjectFactoryImpl(firstDatabase).addWindTrackDumper(trackedEvent, trackedRace, windSource);
