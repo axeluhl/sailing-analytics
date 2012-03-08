@@ -26,6 +26,10 @@ public class EstimatedWindFixesAsNavigableSet extends VirtualWindFixesAsNavigabl
         this(track, trackedRace, null, null);
     }
     
+    protected TrackBasedEstimationWindTrackImpl getTrack() {
+        return (TrackBasedEstimationWindTrackImpl) super.getTrack();
+    }
+    
     /**
      * @param from expected to be an integer multiple of {@link #getResolutionInMilliseconds()} or <code>null</code>
      * @param to expected to be an integer multiple of {@link #getResolutionInMilliseconds()} or <code>null</code>
@@ -36,7 +40,7 @@ public class EstimatedWindFixesAsNavigableSet extends VirtualWindFixesAsNavigabl
     }
 
     protected Wind getWind(Position p, TimePoint timePoint) {
-        return getTrackedRace().getEstimatedWindDirection(p, timePoint);
+        return getTrack().getEstimatedWindDirection(p, timePoint);
     }
 
     @Override
