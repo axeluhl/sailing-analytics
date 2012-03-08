@@ -30,6 +30,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
@@ -66,7 +67,7 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
  * 
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
-implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
+implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener, RequiresResize {
     protected static final int LINE_WIDTH = 1;
     protected MultiCompetitorRaceDataDTO chartData;
     protected final SailingServiceAsync sailingService;
@@ -102,6 +103,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
+        setSize("100%", "100%");
 
         noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
@@ -155,7 +157,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         });
         
         final String unit = getUnit();
-        chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
+        if(!compactChart)
+            chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
+        else
+            chart.getYAxis().setAxisTitleText("["+unit+"]");
         chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis().setReversed((dataToShow == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || 
                                       dataToShow == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true : false);
@@ -184,7 +189,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                  .setLegend(new Legend().setMargin(2))
                  .setOption("title/margin", 5)
                  .setChartSubtitle(null)
-                 .getXAxis().setAxisTitle(null);
+                 .getXAxis().setAxisTitleText(null);
         }
         
         setChartData(null);
@@ -556,6 +561,13 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     && (newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
                 loadData(false);
             }
+        }
+    }
+
+    @Override
+    public void onResize() {
+        if(getChartData() != null) {
+            chart.setSizeToMatchContainer();
         }
     }
 }

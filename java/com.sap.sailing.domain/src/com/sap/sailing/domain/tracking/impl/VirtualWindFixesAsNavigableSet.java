@@ -77,13 +77,13 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         final TimePoint timePointOfLastEvent = trackedRace.getTimePointOfLastEvent();
         if (timePointOfLastEvent == null) {
             // nothing received yet; "lowering" to end of time
-            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / resolutionInMilliseconds
-                    * resolutionInMilliseconds);
+            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / getResolutionInMilliseconds()
+                    * getResolutionInMilliseconds());
         } else if (w.getTimePoint().compareTo(timePointOfLastEvent) > 0) {
             result = lowerToResolution(new DummyWind(timePointOfLastEvent));
         } else {
-            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() - 1) / resolutionInMilliseconds
-                    * resolutionInMilliseconds);
+            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() - 1) / getResolutionInMilliseconds()
+                    * getResolutionInMilliseconds());
         }
         return result;
     }
@@ -93,13 +93,13 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         final TimePoint timePointOfLastEvent = trackedRace.getTimePointOfLastEvent();
         if (timePointOfLastEvent == null) {
             // nothing received yet; "lowering" to end of time
-            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / resolutionInMilliseconds
-                    * resolutionInMilliseconds);
+            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / getResolutionInMilliseconds()
+                    * getResolutionInMilliseconds());
         } else if (w.getTimePoint().compareTo(timePointOfLastEvent) > 0) {
             result = floorToResolution(new DummyWind(timePointOfLastEvent));
         } else {
-            result = new MillisecondsTimePoint(w.getTimePoint().asMillis() / resolutionInMilliseconds
-                    * resolutionInMilliseconds);
+            result = new MillisecondsTimePoint(w.getTimePoint().asMillis() / getResolutionInMilliseconds()
+                    * getResolutionInMilliseconds());
         }
         return result;
     }
@@ -113,8 +113,8 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         } else if (w.getTimePoint().compareTo(startOfTracking) < 0) {
             result = ceilingToResolution(new DummyWind(startOfTracking));
         } else {
-            result = new MillisecondsTimePoint(((w.getTimePoint().asMillis() - 1) / resolutionInMilliseconds + 1)
-                    * resolutionInMilliseconds);
+            result = new MillisecondsTimePoint(((w.getTimePoint().asMillis() - 1) / getResolutionInMilliseconds() + 1)
+                    * getResolutionInMilliseconds());
         }
         return result;
     }
@@ -128,8 +128,8 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         } else if (w.getTimePoint().compareTo(startOfTracking) < 0) {
             result = higherToResolution(new DummyWind(startOfTracking));
         } else {
-            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() / resolutionInMilliseconds + 1)
-                    * resolutionInMilliseconds);
+            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() / getResolutionInMilliseconds() + 1)
+                    * getResolutionInMilliseconds());
         }
         return result;
     }
@@ -200,7 +200,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
             @Override
             public Wind next() {
                 Wind result = floor(new DummyWind(timePoint));
-                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + resolutionInMilliseconds);
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + getResolutionInMilliseconds());
                 return result;
             }
 
@@ -229,7 +229,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
             @Override
             public Wind next() {
                 Wind result = floor(new DummyWind(timePoint));
-                timePoint = new MillisecondsTimePoint(timePoint.asMillis() - resolutionInMilliseconds);
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() - getResolutionInMilliseconds());
                 return result;
             }
 
@@ -297,7 +297,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     @Override
     public int size() {
-        return (int) ((getTo().asMillis() - getFrom().asMillis()) / resolutionInMilliseconds);
+        return (int) ((getTo().asMillis() - getFrom().asMillis()) / getResolutionInMilliseconds());
     }
 
     @Override
@@ -305,7 +305,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         boolean result = false;
         if (o instanceof Wind) {
             Wind wind = (Wind) o;
-            result = wind.getTimePoint().asMillis() % resolutionInMilliseconds == 0
+            result = wind.getTimePoint().asMillis() % getResolutionInMilliseconds() == 0
                     && wind.getTimePoint().compareTo(getFrom()) >= 0 && wind.getTimePoint().compareTo(getTo()) < 0;
         }
         return result;

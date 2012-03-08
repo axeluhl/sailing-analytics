@@ -75,8 +75,9 @@ public class SideBySideComponentViewer implements ComponentViewer {
         for(Component<?> component: components) {
             boolean isComponentInSplitPanel = isWidgetInSplitPanel(component.getEntryWidget());
             if(component.isVisible()) {
-                if(!isComponentInSplitPanel)
+                if(!isComponentInSplitPanel) {
                     splitLayoutPanel.insertSouth(component.getEntryWidget(), 200, splitLayoutPanel.getWidget(0));
+                }
             } else {
                 if(isComponentInSplitPanel)
                     splitLayoutPanel.remove(component.getEntryWidget());

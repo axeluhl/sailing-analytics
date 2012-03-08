@@ -17,6 +17,16 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND = 25.;
 
     private static final Distance MAXIMUM_DISTANCE_FOR_COURSE_APPROXIMATION = new MeterDistance(3);
+
+    /**
+     * Upwind course-based wind estimations are pretty confident for most boat classes.
+     */
+    private static final double UPWIND_WIND_ESTIMATION_CONFIDENCE = .9;
+
+    /**
+     * Downwind estimations are less confident than upwind because jibing angles vary more.
+     */
+    private static final double DOWNWIND_WIND_ESTIMATION_CONFIDENCE = .5;
     
     private final long approximateManeuverDurationInMilliseconds;
 
@@ -64,5 +74,15 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     @Override
     public Distance getHullLength() {
         return hullLength;
+    }
+
+    @Override
+    public double getDownwindWindEstimationConfidence() {
+        return DOWNWIND_WIND_ESTIMATION_CONFIDENCE;
+    }
+
+    @Override
+    public double getUpwindWindEstimationConfidence() {
+        return UPWIND_WIND_ESTIMATION_CONFIDENCE;
     }
 }

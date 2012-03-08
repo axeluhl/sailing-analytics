@@ -26,6 +26,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -46,7 +47,7 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class WindChart implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener {
+public class WindChart extends SimplePanel implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener, RequiresResize {
     private static final int LINE_WIDTH = 1;
     private final StringMessages stringMessages;
     private final Set<WindSourceType> windSourceTypesToDisplay;
@@ -68,8 +69,6 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     private RaceIdentifier selectedRaceIdentifier;
     
     private final ColorMap<WindSource> colorMap;
-
-    private final SimplePanel mainPanel;
 
     /**
      * @param raceSelectionProvider
@@ -132,9 +131,8 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                  .getXAxis().setAxisTitle(null);
         }
         
-        mainPanel = new SimplePanel();
-        mainPanel.setWidget(chart);
-        mainPanel.setSize("100%", "100%");
+        setWidget(chart);
+        setSize("100%", "100%");
         updateSettings(settings);
         if (raceSelectionProvider != null) {
             raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -151,17 +149,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
 
     @Override
     public Widget getEntryWidget() {
-        return mainPanel;
-    }
-
-    @Override
-    public boolean isVisible() {
-        return mainPanel.isVisible();
-    }
-
-    @Override
-    public void setVisible(boolean visibility) {
-        mainPanel.setVisible(visibility);
+        return this;
     }
 
     private void showVisibleSeries() {
@@ -407,4 +395,10 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             }
         }
     }
+    
+    @Override
+    public void onResize() {
+        chart.setSizeToMatchContainer();
+    }
+
 }

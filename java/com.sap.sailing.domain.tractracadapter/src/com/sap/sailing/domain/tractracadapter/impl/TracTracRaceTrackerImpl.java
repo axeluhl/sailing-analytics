@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
@@ -75,26 +76,37 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * <p>
      * 
      * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one
-     * race. The {@link DomainFactory} is asked to retrieve an existing or create a new {@link com.sap.sailing.domain.base.Event}
-     * based on the TracTrac event. The {@link RaceDefinition} for the race, however, isn't created until the {@link Course} has been
-     * received. Therefore, the {@link RaceCourseReceiver} will create the {@link RaceDefinition} and will add it to the
-     * {@link com.sap.sailing.domain.base.Event}.
+     * race. The {@link DomainFactory} is asked to retrieve an existing or create a new
+     * {@link com.sap.sailing.domain.base.Event} based on the TracTrac event. The {@link RaceDefinition} for the race,
+     * however, isn't created until the {@link Course} has been received. Therefore, the {@link RaceCourseReceiver} will
+     * create the {@link RaceDefinition} and will add it to the {@link com.sap.sailing.domain.base.Event}.
      * <p>
      * 
      * The link to the {@link RaceDefinition} is created in the {@link DomainFactory} when the
      * {@link RaceCourseReceiver} creates the {@link TrackedRace} object. Starting then, the {@link DomainFactory} will
-     * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRaces(Event)} is called with the TracTrac
-     * {@link Event} as argument that is used for its tracking.
+     * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRaces(Event)} is called with the
+     * TracTrac {@link Event} as argument that is used for its tracking.
      * <p>
+     * 
+     * @param startOfTracking
+     *            if <code>null</code>, all stored data from the "beginning of time" will be loaded that the event has
+     *            to provide, particularly for the mark positions which are stored per event, not per race; otherwise,
+     *            particularly the mark position loading will be constrained to this start time.
+     * @param endOfTracking
+     *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to
+     *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
+     *            particularly the mark position loading will be constrained to this end time.
      * @param windStore
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
-     * @param trackedEventRegistry used to create the {@link TrackedEvent} for the domain event
+     * @param trackedEventRegistry
+     *            used to create the {@link TrackedEvent} for the domain event
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
-            WindStore windStore, TrackedEventRegistry trackedEventRegistry) throws URISyntaxException,
-            MalformedURLException, FileNotFoundException {
+            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            TrackedEventRegistry trackedEventRegistry) throws URISyntaxException, MalformedURLException,
+            FileNotFoundException {
         super();
         urls = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         this.races = new HashSet<RaceDefinition>();
@@ -123,7 +135,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         setTrackedEvent(trackedEventRegistry.getOrCreateTrackedEvent(domainEvent));
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
-        for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedEvent(), tractracEvent, windStore, this)) {
+        for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedEvent(), tractracEvent, startOfTracking,
+                endOfTracking, windStore, this)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 typeControllers.add(typeController);

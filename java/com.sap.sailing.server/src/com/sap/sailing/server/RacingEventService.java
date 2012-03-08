@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -111,6 +112,15 @@ public interface RacingEventService extends TrackedEventRegistry {
      *            that race is stopped; use -1 to wait forever
      */
     RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException;
+
+    /**
+     * Same as {@link #addTracTracRace(URL, URI, URI, WindStore, long)}, only that start and end of tracking are
+     * specified which may help reducing the amount of stored data (particularly mark positions) that needs to be
+     * loaded.
+     */
+    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, TimePoint trackingStartTime,
+            TimePoint trackingEndTime, WindStore windStore, long timeoutForReceivingRaceDefinitionInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException;
 
     /**

@@ -379,10 +379,18 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     @Override
     public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
             long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException {
+        return addTracTracRace(paramURL, liveURI, storedURI, /* startOfTracking */ null,
+                /* endOfTracking */ null, windStore, timeoutInMilliseconds);
+    }
+    
+    @Override
+    public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI,
+            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException {
         Triple<URL, URI, URI> key = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
         RaceTracker tracker = raceTrackersByID.get(key);
         if (tracker == null) {
-            tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, windStore, this);
+            tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, startOfTracking, endOfTracking, windStore, this);
             raceTrackersByID.put(tracker.getID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {

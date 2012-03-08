@@ -444,6 +444,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             storedURI = rr.storedURI;
         }
         final RacesHandle raceHandle = getService().addTracTracRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
+                new MillisecondsTimePoint(rr.trackingStartTime), new MillisecondsTimePoint(rr.trackingEndTime),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory), TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
             new Thread("Wind tracking starter for race "+rr.eventName+"/"+rr.name) {
@@ -550,6 +551,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     windSourcesToDeliver.addAll(Arrays.asList(windSources));
                 } else {
                     Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
+                    // TODO bug #375: add the combined wind; currently, CombinedWindTrackImpl just takes too long to return results...
                     windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
                 }
                 for (WindSource windSource : windSourcesToDeliver) {
@@ -611,6 +613,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
             Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
+            // TODO bug #375: add the combined wind; currently, CombinedWindTrackImpl just takes too long to return results...
             windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
             for (WindSource windSource : windSourcesToDeliver) {
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {

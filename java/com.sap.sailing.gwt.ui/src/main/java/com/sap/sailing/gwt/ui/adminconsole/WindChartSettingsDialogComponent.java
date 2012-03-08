@@ -25,7 +25,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
     }
 
     @Override
-    public Widget getAdditionalWidget(DataEntryDialog<WindChartSettings> dialog) {
+    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
         for (WindSourceType windSourceType : WindSourceType.values()) {
             CheckBox checkbox = dialog.createCheckbox(windSourceType.name());

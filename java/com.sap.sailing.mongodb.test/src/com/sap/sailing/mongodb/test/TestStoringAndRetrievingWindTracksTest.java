@@ -73,7 +73,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         Event domainEvent = domainFactory.getOrCreateEvent(getEvent());
         DynamicTrackedEvent trackedEvent = new RacingEventServiceImpl().getOrCreateTrackedEvent(domainEvent);
         Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
-                EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                EmptyWindStore.INSTANCE, /* startOfTracking */ null, /* endOfTracking */ null, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }

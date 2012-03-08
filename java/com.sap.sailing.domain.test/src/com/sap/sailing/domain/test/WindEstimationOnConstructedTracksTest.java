@@ -107,11 +107,11 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(2), now, 135);
         setBearingForCompetitor(competitors.get(3), now, 220); // on the same tack, should give no read-out
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
-        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
-        CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace(), /* millisecondsOverWhichToAverage */
-                15000l);
+        // less precision because downwind estimation has less confidence
+        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.2);
+        CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace());
         Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
-        assertEquals(180., combinedWindDirection.getBearing().getDegrees(), 0.0001); // a bit less precise as course-based wind isn't exactly 180deg
+        assertEquals(180., combinedWindDirection.getBearing().getDegrees(), 0.2); // a bit less precise as course-based wind isn't exactly 180deg
     }
 
     /**
@@ -283,7 +283,8 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(2), now, 135);
         setBearingForCompetitor(competitors.get(3), now, 220); // on the same tack, should give no read-out
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
-        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+        // not so exact because downwind estimations have lesser confidence
+        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.2);
     }
 
 }

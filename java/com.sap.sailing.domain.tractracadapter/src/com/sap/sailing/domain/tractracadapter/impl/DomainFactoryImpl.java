@@ -269,8 +269,9 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
-            WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types) {
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent,
+            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, TimePoint startOfTracking,
+            TimePoint endOfTracking, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types) {
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
@@ -281,7 +282,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
-                        trackedEvent, tractracEvent, this));
+                        trackedEvent, tractracEvent, startOfTracking, endOfTracking, this));
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(
@@ -302,10 +303,10 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent,
-            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, raceDefinitionSetToUpdate, ReceiverType.RACECOURSE,
-                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
-                ReceiverType.RAWPOSITIONS);
+            com.tractrac.clientmodule.Event tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, startOfTracking, endOfTracking,
+                raceDefinitionSetToUpdate, ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS,
+                ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
     
     @Override
@@ -450,10 +451,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
-            TrackedEventRegistry trackedEventRegistry) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException {
-        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, windStore, trackedEventRegistry);
+    public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
+            TimePoint endOfTracking, WindStore windStore, TrackedEventRegistry trackedEventRegistry)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException {
+        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, startOfTracking, endOfTracking,
+                windStore, trackedEventRegistry);
     }
 
     @Override
