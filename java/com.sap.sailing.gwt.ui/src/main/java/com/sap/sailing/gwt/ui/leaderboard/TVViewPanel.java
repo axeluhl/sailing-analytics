@@ -67,6 +67,9 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
                 TVViewPanel.this.leaderboard = leaderboard;
                 if (raceTimesInfoProvider == null) {
                     raceTimesInfoProvider = createRaceTimesInfoProvider(sailingService, stringMessages, errorReporter);
+                    if (raceTimesInfoProvider != null) {
+                        raceTimesInfoProvider.addRaceTimesInfoChangeListener(TVViewPanel.this);
+                    }
                 }
             }
         };

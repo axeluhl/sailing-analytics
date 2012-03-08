@@ -29,7 +29,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 leaderboardName = Window.Location.getParameter("name");
                 leaderboardGroupName = Window.Location.getParameter("leaderboardGroupName");
                 if (leaderboardNames.contains(leaderboardName)) {
-                    createLeaderboardPanel();
+                    String tvModeParam = Window.Location.getParameter("tvMode");
+                    if (tvModeParam != null) {
+                        createTVViewPanel();
+                    } else {
+                        createLeaderboardPanel();
+                    }
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
@@ -69,4 +74,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         RootPanel.get().add(breadcrumbPanel);
         RootPanel.get().add(leaderboardPanel);
     }    
+
+    private void createTVViewPanel() {
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName, userAgentType, null);
+        RootPanel.get().add(logoAndTitlePanel);
+        RootPanel.get().add(tvViewPanel);
+    }
 }
