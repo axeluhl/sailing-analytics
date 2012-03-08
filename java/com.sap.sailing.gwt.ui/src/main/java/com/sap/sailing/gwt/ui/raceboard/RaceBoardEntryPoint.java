@@ -3,8 +3,11 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -23,7 +26,6 @@ import com.sap.sailing.gwt.ui.shared.UserDTO;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
-    private RaceBoardPanel raceBoardPanel;
 
     private String eventName;
     private String raceName;
@@ -45,10 +47,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 
                 viewMode = RaceBoardViewMode.valueOf(viewModeParamValue);
             } catch (IllegalArgumentException e) {
-                viewMode = RaceBoardViewMode.CASCADING;
+                viewMode = RaceBoardViewMode.CASCADE;
             }
         } else {
-            viewMode = RaceBoardViewMode.CASCADING;
+            viewMode = RaceBoardViewMode.CASCADE;
         }
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
@@ -121,7 +123,22 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
             return;
         }
-        createRaceBoardPanel(selectedRace, events, user);
+
+        RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
+        List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
+        raceSelectionModel.setSelection(singletonList);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, raceSelectionModel, leaderboardName, leaderboardGroupName,
+                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, new RaceTimesInfoProvider(sailingService, this, singletonList, 1000l));
+        raceBoardPanel.fillEvents(events);
+
+        switch (viewMode) {
+            case CASCADE:
+                createRaceBoardInCascadeMode(raceBoardPanel);
+                break;
+            case ONESCREEN:
+                createRaceBoardInOneScreenMode(raceBoardPanel);
+                break;
+        }
     }  
 
     private RaceDTO findRace(String eventName, String raceName, List<EventDTO> events) {
@@ -139,27 +156,40 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return null;
     }
 
-    private void createRaceBoardPanel(RaceDTO selectedRace, List<EventDTO> events, UserDTO userDTO) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
-        raceSelectionModel.setSelection(singletonList);
-        raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, raceSelectionModel, leaderboardName, leaderboardGroupName,
-                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, new RaceTimesInfoProvider(sailingService, this, singletonList, 1000l));
-        raceBoardPanel.fillEvents(events);
+    private void createRaceBoardInCascadeMode(RaceBoardPanel raceBoardPanel) {
 
-        logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
+        FlowPanel raceBoardHeaderPanel = createBoardHeaderPanel(raceBoardPanel);
+        FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
+        FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
+        FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
+        contentOuterPanel.addStyleName("contentOuterPanel");
+        contentOuterPanel.setSize("100%", "100%");
+        contentOuterPanel.add(raceBoardPanel);
+
+        //FlowPanel footerShadowPanel = new FlowPanel();
+        // footerShadowPanel.addStyleName("footerShadowPanel");
+        
+        RootPanel.get().add(raceBoardHeaderPanel);        
+        RootPanel.get().add(contentOuterPanel);
+        
+        // Don't change this order because of the inner logic in html of "position fixed"-elements
+        RootPanel.get().add(logoAndTitlePanel);                 // position:fixed        
+        RootPanel.get().add(timePanel);                     // position:fixed
+        //RootPanel.get().add(footerShadowPanel);                 // position:fixed
+        raceBoardPanel.setScrollOffset(logoAndTitlePanel.getOffsetHeight());
+    }
+    
+    private FlowPanel createBoardHeaderPanel(RaceBoardPanel raceBoardPanel)
+    {
         FlowPanel raceBoardHeaderPanel = new FlowPanel();
         raceBoardHeaderPanel.addStyleName("RaceBoardHeaderPanel");
         if(raceBoardPanel.getBreadcrumbWidget() != null)
             raceBoardHeaderPanel.add(raceBoardPanel.getBreadcrumbWidget());
-        
-        FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
-        contentOuterPanel.addStyleName("contentOuterPanel");
-        contentOuterPanel.add(raceBoardPanel);
+        return raceBoardHeaderPanel;
+    }
 
+    private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
         FlowPanel timeLineInnerBgPanel = new FlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
         timeLineInnerBgPanel.add(raceBoardPanel.getTimeWidget());
@@ -172,16 +202,29 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         timelinePanel.add(timeLineInnerPanel);
         timelinePanel.addStyleName("timeLinePanel");
         
-        //FlowPanel footerShadowPanel = new FlowPanel();
-        // footerShadowPanel.addStyleName("footerShadowPanel");
-        
-        RootPanel.get().add(raceBoardHeaderPanel);        
-        RootPanel.get().add(contentOuterPanel);
-        
-        // Don't change this order because of the inner logic in html of "position fixed"-elements
-        RootPanel.get().add(logoAndTitlePanel);                 // position:fixed        
-        RootPanel.get().add(timelinePanel);                     // position:fixed
-        //RootPanel.get().add(footerShadowPanel);                 // position:fixed
-        raceBoardPanel.setScrollOffset(logoAndTitlePanel.getOffsetHeight());
+        return timelinePanel;
     }
+
+    private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        
+        logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
+        
+        return logoAndTitlePanel;
+    }
+    
+    private void createRaceBoardInOneScreenMode(RaceBoardPanel raceBoardPanel) {
+        DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
+        RootLayoutPanel.get().add(p);
+        
+        FlowPanel raceBoardHeaderPanel = createBoardHeaderPanel(raceBoardPanel);
+        FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
+        FlowPanel timePanel = createTimePanel(raceBoardPanel);
+        
+        p.addNorth(logoAndTitlePanel, 68);        
+        p.addNorth(raceBoardHeaderPanel,30);
+        p.addSouth(timePanel, 140);                     
+        p.add(raceBoardPanel);
+    }    
 }

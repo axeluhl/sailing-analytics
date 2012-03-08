@@ -92,8 +92,8 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     }
 
     private void setBearingForCompetitor(Competitor competitor, TimePoint timePoint, double bearingDeg) {
-        DynamicGPSFixTrack<Competitor, GPSFixMoving> hungersTrack = getTrackedRace().getTrack(competitor);
-        hungersTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedRace().getTrack(competitor);
+        competitorTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg))));
     }
 
@@ -138,9 +138,12 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         getTrackedRace().getOrCreateTrack(windwardMark.getBuoys().iterator().next()).addGPSFix(
                 new GPSFixImpl(newWindwardMarkPosition, checkTime));
         assertEquals(LegType.DOWNWIND, firstLeg.getLegType(fixTime));
-        Wind estimatedWindDirectionDownwind = track.getAveragedWind(/* position */ null, checkTime);
+        TimePoint tenMinutesLater = new MillisecondsTimePoint(checkTime.asMillis()+600000l);
+        setBearingForCompetitor(competitors.get(0), tenMinutesLater, 140);
+        setBearingForCompetitor(competitors.get(1), tenMinutesLater, 230);
+        Wind estimatedWindDirectionDownwind = track.getAveragedWind(/* position */ null, tenMinutesLater);
         assertNotNull(estimatedWindDirectionDownwind);
-        assertEquals(5., estimatedWindDirectionDownwind.getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., estimatedWindDirectionDownwind.getBearing().getDegrees(), 0.00000001);
     }
     
     @Test

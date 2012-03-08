@@ -105,7 +105,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         List<RaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, raceSelectionModel, leaderboardName, null,
-                errorReporter, stringMessages, userAgentType, RaceBoardViewMode.ONE_SCREEN, raceTimesInfoProvider);
+                errorReporter, stringMessages, userAgentType, RaceBoardViewMode.ONESCREEN, raceTimesInfoProvider);
         return raceBoardPanel;
     }
     

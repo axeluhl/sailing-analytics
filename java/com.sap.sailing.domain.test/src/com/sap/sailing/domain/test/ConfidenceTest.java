@@ -116,14 +116,14 @@ public class ConfidenceTest {
     
     @Test
     public void testLinearWeigherHalfTime() {
-        Weigher<TimePoint> w = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(1000);
+        Weigher<TimePoint> w = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000);
         double confidence = w.getConfidence(new MillisecondsTimePoint(1000), new MillisecondsTimePoint(0));
         assertEquals(0.5, confidence, 0.00000001);
     }
     
     @Test
     public void testLinearWeigherZeroTimeDifference() {
-        Weigher<TimePoint> w = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(1000);
+        Weigher<TimePoint> w = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000);
         double confidence = w.getConfidence(new MillisecondsTimePoint(1000), new MillisecondsTimePoint(1000));
         assertEquals(1.0, confidence, 0.00000001);
     }
@@ -150,7 +150,7 @@ public class ConfidenceTest {
         WindWithConfidence<TimePoint> d2 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0), new MillisecondsTimePoint(20),
                 new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(180))), /* confidence */ 0.5, /* relativeTo */ new MillisecondsTimePoint(20));
         ConfidenceBasedAverager<ScalableWind, Wind, TimePoint> averager = ConfidenceFactory.INSTANCE
-                .createAverager(ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(1000));
+                .createAverager(ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000));
         List<WindWithConfidence<TimePoint>> list = Arrays.asList(d1, d2);
         HasConfidence<ScalableWind, Wind, TimePoint> average = averager.getAverage(list, new MillisecondsTimePoint(10));
         assertEquals(0.5, average.getObject().getPosition().getLatDeg(), 0.00000001);

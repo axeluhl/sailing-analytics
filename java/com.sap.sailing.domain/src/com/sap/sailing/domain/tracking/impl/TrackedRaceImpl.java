@@ -534,7 +534,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     @Override
     public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
-        final Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(/*halfConfidenceAfterMilliseconds*/ 10000l);
+        final Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(/*halfConfidenceAfterMilliseconds*/ 10000l);
         Weigher<Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new Weigher<Util.Pair<Position,TimePoint>>() {
             @Override
             public double getConfidence(Pair<Position, TimePoint> fix, Pair<Position, TimePoint> request) {
@@ -751,7 +751,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
         // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 getMillisecondsOverWhichToAverageSpeed());
-        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = clusterBearingsForWindEstimation(timePoint,
+        Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = clusterBearingsByLegType(timePoint,
                 position, dummyMarkPassingForNow, weigher);
         // use the minimum confidence of the four "quadrants" as the result's confidence
         BearingWithConfidenceImpl<TimePoint> reversedUpwindAverage = null;
@@ -795,7 +795,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     // TODO confidences need to be computed not only based on timePoint but also on position: boats far away don't contribute as confidently as boats close by
-    private Map<LegType, BearingWithConfidenceCluster<TimePoint>> clusterBearingsForWindEstimation(TimePoint timePoint,
+    private Map<LegType, BearingWithConfidenceCluster<TimePoint>> clusterBearingsByLegType(TimePoint timePoint,
             Position position, DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow, Weigher<TimePoint> weigher) {
         Weigher<TimePoint> weigherForMarkPassingProximity = new HyperbolicTimeDifferenceWeigher(getMillisecondsOverWhichToAverageSpeed()*5);
         Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = new HashMap<LegType, BearingWithConfidenceCluster<TimePoint>>();
@@ -816,26 +816,34 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 if (legType != LegType.REACHING) {
                     GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
                     if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
-                        // reduce confidence around mark passings:
-                        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-                        double markPassingProximityConfidenceReduction = 1.0;
-                        synchronized (markPassings) {
-                            NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(dummyMarkPassingForNow, /* inclusive */ true);
-                            NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(dummyMarkPassingForNow, /* inclusive */ true);
-                            if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
-                                markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                        1.0-weigherForMarkPassingProximity.getConfidence(prevMarkPassing.last().getTimePoint(), timePoint));
-                            }
-                            if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
-                                markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                        1.0-weigherForMarkPassingProximity.getConfidence(nextMarkPassing.first().getTimePoint(), timePoint));
-                            }
-                        }
                         SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track.getEstimatedSpeed(timePoint, weigher);
-                        if (estimatedSpeedWithConfidence != null) {
+                        if (estimatedSpeedWithConfidence != null && estimatedSpeedWithConfidence.getObject() != null &&
+                        // Mark passings may be missing or far off. This can lead to boats apparently going "backwards" regarding the leg's direction; ignore those
+                            isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(), trackedLeg, timePoint)) {
+                            // additionally to generally excluding maneuvers, reduce confidence around mark passings:
+                            NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+                            double markPassingProximityConfidenceReduction = 1.0;
+                            synchronized (markPassings) {
+                                NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(
+                                        dummyMarkPassingForNow, /* inclusive */true);
+                                NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(
+                                        dummyMarkPassingForNow, /* inclusive */true);
+                                if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
+                                    markPassingProximityConfidenceReduction *= Math.max(0.0,
+                                            1.0 - weigherForMarkPassingProximity.getConfidence(prevMarkPassing.last()
+                                                    .getTimePoint(), timePoint));
+                                }
+                                if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
+                                    markPassingProximityConfidenceReduction *= Math.max(0.0,
+                                            1.0 - weigherForMarkPassingProximity.getConfidence(nextMarkPassing.first()
+                                                    .getTimePoint(), timePoint));
+                                }
+                            }
                             BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
-                                    estimatedSpeedWithConfidence.getObject() == null ? null : estimatedSpeedWithConfidence.getObject().getBearing(),
-                                    markPassingProximityConfidenceReduction*estimatedSpeedWithConfidence.getConfidence(),
+                                    estimatedSpeedWithConfidence.getObject() == null ? null
+                                            : estimatedSpeedWithConfidence.getObject().getBearing(),
+                                    markPassingProximityConfidenceReduction
+                                            * estimatedSpeedWithConfidence.getConfidence(),
                                     estimatedSpeedWithConfidence.getRelativeTo());
                             BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings.get(legType);
                             bearingClusterForLegType.add(bearing);
@@ -847,6 +855,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return bearings;
     }
     
+    /**
+     * Checks if the <code>bearing</code> generally moves in the direction that the <code>trackedLeg</code> has at time point
+     * <code>at</code>.
+     */
+    private boolean isNavigatingForward(Bearing bearing, TrackedLeg trackedLeg, TimePoint at) {
+        Bearing legBearing = trackedLeg.getLegBearing(at);
+        return Math.abs(bearing.getDifferenceTo(legBearing).getDegrees()) < 90;
+    }
+
     /**
      * This is probably best explained by example. If the wind bearing is from port to starboard, the situation looks
      * like this:
