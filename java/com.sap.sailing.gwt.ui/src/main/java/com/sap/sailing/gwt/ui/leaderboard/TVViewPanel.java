@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -24,18 +26,19 @@ import com.sap.sailing.gwt.ui.shared.UserDTO;
 
 public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderListener {
     
+    private SailingServiceAsync sailingService;
+    private StringMessages stringMessages;
+    private ErrorReporter errorReporter;
+    private UserAgentTypes userAgentType;
+    private UserDTO userDTO;
+    
     private RaceTimesInfoProvider raceTimesInfoProvider;
     
     private LeaderboardPanel leaderboardPanel;
     private LeaderboardDTO leaderboard;
     
     private RaceBoardPanel raceBoardPanel;
-    
-    private SailingServiceAsync sailingService;
-    private StringMessages stringMessages;
-    private ErrorReporter errorReporter;
-    private UserAgentTypes userAgentType;
-    private UserDTO userDTO;
+    private RaceIdentifier currentRace;
     
     public TVViewPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             String leaderboardName, UserAgentTypes userAgentType, UserDTO userDTO) {
@@ -48,13 +51,11 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         raceTimesInfoProvider = null;
         raceBoardPanel = null;
         
-        leaderboardPanel = createLeaderboardPanel(sailingService, stringMessages, errorReporter, leaderboardName, userAgentType);
-        setWidget(leaderboardPanel);
+        leaderboardPanel = createLeaderboardPanel(leaderboardName);
+        showLeaderboard();
     }
     
-    private LeaderboardPanel createLeaderboardPanel(final SailingServiceAsync sailingService,
-            final StringMessages stringMessages, final ErrorReporter errorReporter, String leaderboardName,
-            UserAgentTypes userAgentType) {
+    private LeaderboardPanel createLeaderboardPanel(String leaderboardName) {
         LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(/* autoExpandFirstRace */ false); 
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         Timer timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
@@ -65,32 +66,41 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);
                 TVViewPanel.this.leaderboard = leaderboard;
-                if (raceTimesInfoProvider == null) {
-                    raceTimesInfoProvider = createRaceTimesInfoProvider(sailingService, stringMessages, errorReporter);
-                    if (raceTimesInfoProvider != null) {
-                        raceTimesInfoProvider.addRaceTimesInfoChangeListener(TVViewPanel.this);
-                    }
-                }
+                createOrUpdateRaceTimesInfoProvider();
             }
         };
         return leaderboardPanel;
     }
     
-    private RaceTimesInfoProvider createRaceTimesInfoProvider(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter) {
-        RaceIdentifier raceId = null;
-        for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-            if (race.isTrackedRace()) {
-                raceId = race.getRaceIdentifier();
-                break;
+    private void createOrUpdateRaceTimesInfoProvider() {
+        if (raceTimesInfoProvider == null) {
+            List<RaceIdentifier> raceIdentifiers = new ArrayList<RaceIdentifier>();
+            for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
+                RaceIdentifier raceIdentifier = race.getRaceIdentifier();
+                if (raceIdentifier != null) {
+                    raceIdentifiers.add(raceIdentifier);
+                }
+            }
+            raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, raceIdentifiers, 3000l);
+            raceTimesInfoProvider.addRaceTimesInfoProviderListener(TVViewPanel.this);
+        } else {
+            boolean providerChanged = false;
+            for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
+                RaceIdentifier raceIdentifier = race.getRaceIdentifier();
+                if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
+                    raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
+                    providerChanged = true;
+                }
+            }
+            if (providerChanged) {
+                raceTimesInfoProvider.forceTimesInfosUpdate();
             }
         }
-        return raceId == null ? null : new RaceTimesInfoProvider(sailingService, errorReporter, raceId, 3000l);
     }
     
-    private RaceBoardPanel createRaceBoardPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            String leaderboardName, UserAgentTypes userAgentType, UserDTO userDTO) {
+    private RaceBoardPanel createRaceBoardPanel(String leaderboardName, RaceIdentifier raceToShow) {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        List<RaceIdentifier> singletonList = Collections.singletonList(raceTimesInfoProvider.getRaceIdentifier());
+        List<RaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, raceSelectionModel, leaderboardName, null,
                 errorReporter, stringMessages, userAgentType, RaceBoardViewMode.ONE_SCREEN, raceTimesInfoProvider);
@@ -101,19 +111,23 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         setWidget(leaderboardPanel);
         raceBoardPanel = null;
     }
-
+    
     @Override
-    public void raceTimesInfoReceived(RaceTimesInfoDTO raceTimesInfo) {
-        if (raceTimesInfo != null) {
-            if (raceTimesInfo.endOfRace != null) {
-                showLeaderboard();
-            } else if (raceTimesInfo.startOfTracking != null && raceBoardPanel == null) {
-                raceBoardPanel = createRaceBoardPanel(sailingService, stringMessages, errorReporter, leaderboard.name, userAgentType, userDTO);
-                setWidget(raceBoardPanel);
+    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    private RaceIdentifier getFirstUnfinishedRace() {
+        RaceIdentifier firstUnfinishedRace = null;
+        Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
+        for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
+            RaceIdentifier raceIdentifier = race.getRaceIdentifier();
+            if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
+                //TODO
             }
-        } else {
-            showLeaderboard();
         }
+        return firstUnfinishedRace;
     }
 
 }

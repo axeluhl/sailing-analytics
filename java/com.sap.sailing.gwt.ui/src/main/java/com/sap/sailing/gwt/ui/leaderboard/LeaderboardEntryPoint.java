@@ -65,6 +65,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     leaderboardName, leaderboardGroupName,
                     LeaderboardEntryPoint.this, stringMessages, userAgentType);
             BreadcrumbPanel breadcrumbPanel = createBreadcrumbPanel();
+            
             mainPanel.addNorth(breadcrumbPanel, 30);
             mainPanel.add(leaderboardPanel);
         }

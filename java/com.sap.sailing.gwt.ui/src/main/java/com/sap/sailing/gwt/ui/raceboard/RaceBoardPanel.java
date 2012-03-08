@@ -118,7 +118,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         }
 
         timePanel = new RaceTimePanel(timer, stringMessages, raceTimesInfoProvider);
-        raceTimesInfoProvider.addRaceTimesInfoChangeListener(timePanel);
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }

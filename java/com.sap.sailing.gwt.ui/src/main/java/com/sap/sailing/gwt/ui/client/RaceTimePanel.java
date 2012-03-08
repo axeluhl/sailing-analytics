@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
@@ -12,10 +13,12 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
     private RaceTimesInfoProvider raceTimesInfoProvider;
+    private RaceIdentifier selectedRace;
     
     public RaceTimePanel(Timer timer, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
         super(timer, stringMessages);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
+        selectedRace = null;
     }
     
     @Override
@@ -29,7 +32,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         RaceTimePanelSettings result = new RaceTimePanelSettings();
         result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
         result.setRefreshInterval(timer.getRefreshInterval());
-        result.setRaceTimesInfo(raceTimesInfoProvider.getRaceTimesInfo());
+        result.setRaceTimesInfo(raceTimesInfoProvider.getRaceTimesInfo(selectedRace));
         return result;
     }
 
@@ -67,7 +70,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
         long eventTimeoutTolerance = 30 * 1000; // 30s 
         long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
-        RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo() : null;
+        RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
         return lastRaceTimesInfo != null &&
                 lastRaceTimesInfo.timePointOfNewestEvent != null &&
                 liveTimePointInMillis < lastRaceTimesInfo.timePointOfNewestEvent.getTime() + eventTimeoutTolerance &&
@@ -78,9 +81,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            RaceIdentifier raceIdentifier = selectedRaces.iterator().next();
-            if (!raceIdentifier.equals(raceTimesInfoProvider.getRaceIdentifier())) {
-               raceTimesInfoProvider.setRaceIdentifier(raceIdentifier); 
+            selectedRace = selectedRaces.iterator().next();
+            if (!selectedRace.equals(raceTimesInfoProvider.getRaceIdentifiers())) {
+                raceTimesInfoProvider.clearRaceIdentifiers();
+                raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
             }
         }
     }
@@ -198,8 +202,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
     
     @Override
-    public void raceTimesInfoReceived(RaceTimesInfoDTO raceTimesInfo) {
-        // raceTimesInfo can be null if the race is not tracked anymore
-        updateTimeInfo(raceTimesInfo);
+    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+      // raceTimesInfo can be null if the race is not tracked anymore
+      updateTimeInfo(raceTimesInfos.get(selectedRace));
     }
 }

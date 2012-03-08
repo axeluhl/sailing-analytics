@@ -111,7 +111,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
 
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, null, timer.getRefreshInterval());
         timePanel = new RaceTimePanel(timer, stringMessages, raceTimesInfoProvider);
-        raceTimesInfoProvider.addRaceTimesInfoChangeListener(timePanel);
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionModel.addRaceSelectionChangeListener(timePanel);
         timePanel.onRaceSelectionChange(raceSelectionModel.getSelectedRaces());
 
