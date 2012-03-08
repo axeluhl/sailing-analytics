@@ -29,7 +29,13 @@ public enum WindSourceType {
     /**
      * Inferred from the race course layout if the course is known to have its first leg be an upwind leg
      */
-    COURSE_BASED(false);
+    COURSE_BASED(false),
+    
+    /**
+     * Wind estimation combined from all other wind sources, using <code>TrackedRace.getWind(...)</code>, based on
+     * confidences
+     */
+    COMBINED(false);
     
     private final boolean canBeStored;
     
