@@ -107,6 +107,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         initRace(2, new int[] { 1, 1 }, fixTime);
         getTrackedRace().setRaceIsKnownToStartUpwind(false); // use only WEB wind to determine leg type
         TimePoint now = checkTime;
+        // TODO consider adding two more competitors which go the other way and are initially ignored, after leg type change included...
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 50);
         TrackedLeg firstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().iterator().next());
