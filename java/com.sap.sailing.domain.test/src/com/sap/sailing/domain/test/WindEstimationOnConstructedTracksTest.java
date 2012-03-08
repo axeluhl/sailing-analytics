@@ -43,6 +43,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
@@ -95,6 +96,22 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedRace().getTrack(competitor);
         competitorTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg))));
+    }
+    
+    @Test
+    public void testCombinedWindTrack() throws NoWindException {
+        initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        setBearingForCompetitor(competitors.get(0), now, 315);
+        setBearingForCompetitor(competitors.get(1), now, 50); // on the same tack, should give no read-out
+        setBearingForCompetitor(competitors.get(2), now, 135);
+        setBearingForCompetitor(competitors.get(3), now, 220); // on the same tack, should give no read-out
+        Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
+        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
+        CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace(), /* millisecondsOverWhichToAverage */
+                15000l);
+        Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
+        assertEquals(180., combinedWindDirection.getBearing().getDegrees(), 0.0001); // a bit less precise as course-based wind isn't exactly 180deg
     }
 
     /**

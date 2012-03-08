@@ -10,7 +10,9 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 
 /**
- * A virtual wind track based on some virtual sequence of raw wind fixes.
+ * A virtual wind track based on some virtual sequence of raw wind fixes. Subclasses should override
+ * {@link WindTrackImpl#getInternalRawFixes()} so that it returns a {@link VirtualWindFixesAsNavigableSet}.
+ * The base class's {@link WindTrackImpl#getInternalRawFixes()} may then be used as a cache, if needed.
  * 
  * @author Axel Uhl (d043530)
  * 
