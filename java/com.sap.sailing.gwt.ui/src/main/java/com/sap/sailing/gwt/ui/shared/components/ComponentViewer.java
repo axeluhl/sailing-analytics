@@ -9,4 +9,6 @@ public interface ComponentViewer {
     String getViewerName();
 
     Component<?> getRootComponent();
+    
+    void forceLayout();
 }

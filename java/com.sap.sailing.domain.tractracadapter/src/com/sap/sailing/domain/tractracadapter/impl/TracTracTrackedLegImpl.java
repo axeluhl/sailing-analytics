@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
@@ -64,6 +65,12 @@ public class TracTracTrackedLegImpl implements TrackedLeg {
 
     @Override
     public LegType getLegType(TimePoint at) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Bearing getLegBearing(TimePoint at) {
         // TODO Auto-generated method stub
         return null;
     }

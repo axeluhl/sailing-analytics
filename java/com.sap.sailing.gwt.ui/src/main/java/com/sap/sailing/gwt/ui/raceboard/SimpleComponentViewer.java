@@ -16,6 +16,9 @@ public class SimpleComponentViewer<SettingsType> implements ComponentViewer {
         mainPanel.setWidget(component.getEntryWidget());
     }
 
+    public void forceLayout() {
+    }
+
     public Panel getViewerWidget() {
         return mainPanel;
     }

@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
@@ -37,5 +38,7 @@ public interface TrackedLeg {
      * The iteration order of the linked hash map returned is leader to last.
      */
     LinkedHashMap<Competitor, Integer> getRanks(TimePoint timePoint);
+
+    Bearing getLegBearing(TimePoint at);
 
 }

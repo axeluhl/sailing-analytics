@@ -61,6 +61,9 @@ public class CollapsableComponentViewer<SettingsType> implements ComponentViewer
                 defaultHeight);
     }
 
+    public void forceLayout() {
+    }
+
     public CollapsablePanel getViewerWidget() {
         return collapsablePanel;
     }
