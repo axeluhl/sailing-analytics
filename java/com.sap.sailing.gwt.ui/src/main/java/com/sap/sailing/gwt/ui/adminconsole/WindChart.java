@@ -78,7 +78,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter, int chartHeight, boolean compactChart) {
+            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter, boolean compactChart) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -92,7 +92,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setWidth100()
-                .setHeight(chartHeight)
+                .setHeight100()
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
@@ -125,7 +125,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
             .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         if (compactChart) {
-            chart.setSpacingBottom(4).setSpacingLeft(0).setSpacingRight(0).setSpacingTop(2)
+            chart.setSpacingBottom(4).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
                  .setLegend(new Legend().setMargin(2))
                  .setOption("title/margin", 5)
                  .setChartSubtitle(null)
@@ -134,6 +134,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
         
         mainPanel = new SimplePanel();
         mainPanel.setWidget(chart);
+        mainPanel.setSize("100%", "100%");
         updateSettings(settings);
         if (raceSelectionProvider != null) {
             raceSelectionProvider.addRaceSelectionChangeListener(this);
