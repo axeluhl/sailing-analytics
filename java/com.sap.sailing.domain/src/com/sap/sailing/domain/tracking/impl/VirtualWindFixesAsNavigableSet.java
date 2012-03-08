@@ -52,7 +52,6 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
     /**
      * @param from expected to be an integer multiple of {@link #resolutionInMilliseconds} or <code>null</code>
      * @param to expected to be an integer multiple of {@link #resolutionInMilliseconds} or <code>null</code>
-     * @param resolutionInMilliseconds TODO
      */
     protected VirtualWindFixesAsNavigableSet(WindTrack track, TrackedRace trackedRace,
             TimePoint from, TimePoint to, long resolutionInMilliseconds) {
