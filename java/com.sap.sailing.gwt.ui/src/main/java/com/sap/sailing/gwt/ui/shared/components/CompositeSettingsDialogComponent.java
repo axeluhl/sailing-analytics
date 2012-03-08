@@ -32,13 +32,17 @@ public class CompositeSettingsDialogComponent implements SettingsDialogComponent
 
     @Override
     public Validator<CompositeSettings> getValidator() {
-        // TODO Auto-generated method stub
-        return null;
+        return new CompositeValidator(components);
     }
 
     @Override
     public FocusWidget getFocusWidget() {
-        // TODO Auto-generated method stub
+        for (Component<?> component : components) {
+            FocusWidget fw = component.getSettingsDialogComponent().getFocusWidget();
+            if (fw != null) {
+                return fw;
+            }
+        }
         return null;
     }
 

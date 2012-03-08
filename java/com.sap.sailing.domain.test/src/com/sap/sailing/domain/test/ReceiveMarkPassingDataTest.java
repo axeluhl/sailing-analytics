@@ -94,11 +94,11 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         receivers.add(receiver);
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
                 new DynamicTrackedEventImpl(DomainFactory.INSTANCE.getOrCreateEvent(getEvent())),
-                getEvent(), EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                getEvent(), EmptyWindStore.INSTANCE, /* startOfTracking */ null, /* endOfTracking */ null,
+                new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {}
-                }, ReceiverType.RACECOURSE,
-                ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
+                }, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
