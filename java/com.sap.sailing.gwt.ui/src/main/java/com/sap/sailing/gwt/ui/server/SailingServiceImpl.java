@@ -826,7 +826,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public List<RaceTimesInfoDTO> getRaceTimesInfos(Iterable<RaceIdentifier> raceIdentifiers) {
+    public List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RaceIdentifier> raceIdentifiers) {
         List<RaceTimesInfoDTO> raceTimesInfos = new ArrayList<RaceTimesInfoDTO>();
         for (RaceIdentifier raceIdentifier : raceIdentifiers) {
             RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);

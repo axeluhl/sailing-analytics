@@ -63,7 +63,7 @@ public interface SailingService extends RemoteService {
 
     RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier);
     
-    List<RaceTimesInfoDTO> getRaceTimesInfos(Iterable<RaceIdentifier> raceIdentifiers);
+    List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RaceIdentifier> raceIdentifiers);
     
     List<MarkDTO> getMarkPositions(RaceIdentifier raceIdentifier, Date date);
 

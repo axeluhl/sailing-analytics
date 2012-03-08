@@ -109,7 +109,7 @@ public interface SailingServiceAsync {
 
     void getRaceTimesInfo(RaceIdentifier raceIdentifier, AsyncCallback<RaceTimesInfoDTO> callback);
     
-    void getRaceTimesInfos(Iterable<RaceIdentifier> raceIdentifiers, AsyncCallback<List<RaceTimesInfoDTO>> callback);
+    void getRaceTimesInfos(Collection<RaceIdentifier> raceIdentifiers, AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
     void getMarkPositions(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<MarkDTO>> asyncCallback);
 

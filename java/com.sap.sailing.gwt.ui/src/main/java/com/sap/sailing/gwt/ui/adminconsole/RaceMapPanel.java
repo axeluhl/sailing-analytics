@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -109,7 +110,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalPanelRadioAndCheckboxes);
         grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
 
-        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, null, timer.getRefreshInterval());
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter,
+                new HashSet<RaceIdentifier>(), timer.getRefreshInterval());
         timePanel = new RaceTimePanel(timer, stringMessages, raceTimesInfoProvider);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionModel.addRaceSelectionChangeListener(timePanel);

@@ -83,6 +83,8 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             }
             raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, raceIdentifiers, 3000l);
             raceTimesInfoProvider.addRaceTimesInfoProviderListener(TVViewPanel.this);
+            
+            currentRace = getFirstStartedAndUnfinishedRace();
         } else {
             boolean providerChanged = false;
             for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
@@ -110,24 +112,40 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private void showLeaderboard() {
         setWidget(leaderboardPanel);
         raceBoardPanel = null;
+        currentRace = null;
     }
     
     @Override
     public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
-        // TODO Auto-generated method stub
-        
+        if (currentRace == null) {
+            currentRace = getFirstStartedAndUnfinishedRace();
+            if (currentRace != null) {
+                raceBoardPanel = createRaceBoardPanel(leaderboard.name, currentRace);
+                setWidget(raceBoardPanel);
+            } else {
+                showLeaderboard();
+            }
+        } else {
+            RaceTimesInfoDTO currentRaceTimes = raceTimesInfo.get(currentRace);
+            if (currentRaceTimes.endOfRace != null) {
+                showLeaderboard();
+            }
+        }
     }
     
-    private RaceIdentifier getFirstUnfinishedRace() {
-        RaceIdentifier firstUnfinishedRace = null;
+    private RaceIdentifier getFirstStartedAndUnfinishedRace() {
+        RaceIdentifier firstStartedAndUnfinishedRace = null;
         Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
             RaceIdentifier raceIdentifier = race.getRaceIdentifier();
-            if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
-                //TODO
+            RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
+            if (raceIdentifier != null && raceTimes != null && raceTimes.startOfTracking != null
+                    && raceTimes.endOfRace == null) {
+                firstStartedAndUnfinishedRace = raceIdentifier;
+                break;
             }
         }
-        return firstUnfinishedRace;
+        return firstStartedAndUnfinishedRace;
     }
 
 }
