@@ -180,7 +180,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         windSourceSelectionPanel.add(showConfigAnchor);
         grid.setWidget(1, 0, windSourceSelectionPanel);
         windChart = new WindChart(sailingService, /* race selection provider */ raceSelectionProvider,
-                new Timer(PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, errorReporter, 400, false);
+                new Timer(PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, errorReporter, false);
         grid.setWidget(2, 0, windChart.getEntryWidget());
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);

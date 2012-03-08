@@ -23,8 +23,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
     private SplitLayoutPanel splitLayoutPanel; 
     private int savedSplitPosition = -1;
     
-    public SideBySideComponentViewer(Component<?> leftComponent, Component<?> rightComponent, List<Component<?>> components, 
-            String defaultWidth, String defaultHeight) {
+    public SideBySideComponentViewer(Component<?> leftComponent, Component<?> rightComponent, List<Component<?>> components) {
         this.leftComponent = leftComponent;
         this.rightComponent = rightComponent;
         this.components = components;
@@ -33,11 +32,11 @@ public class SideBySideComponentViewer implements ComponentViewer {
         leftScrollPanel.add(leftComponent.getEntryWidget());
 
         mainPanel = new LayoutPanel();
-        mainPanel.setSize(defaultWidth, defaultHeight);
+        mainPanel.setSize("100%", "100%");
         splitLayoutPanel = new SplitLayoutPanel();
+        
         mainPanel.add(splitLayoutPanel);
-         
-        splitLayoutPanel.setSize(defaultWidth, defaultHeight);
+//        splitLayoutPanel.setSize(defaultWidth, defaultHeight);
         
         for(Component<?> component: components) {
             if(component.isVisible())

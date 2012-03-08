@@ -73,7 +73,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final ErrorReporter errorReporter;
     protected Chart chart;
     private boolean compactChart;
-    private int chartHeight;
     protected final AbsolutePanel busyIndicatorPanel;
     protected final Label noCompetitorsSelectedLabel;
     protected final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
@@ -88,7 +87,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow, int chartHeight, boolean compactChart) {
+            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow, boolean compactChart) {
         this.stringMessages = stringMessages;
     	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
@@ -100,7 +99,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         this.dataToShow = dataToShow;
         chartData = null;
         this.compactChart = compactChart;
-        this.chartHeight = chartHeight;
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -116,7 +114,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                busyIndicatorPanel.setSize("100%", "400px");
+                busyIndicatorPanel.setSize("100%", "100%");
                 busyIndicatorPanel.add(busyIndicator, busyIndicatorPanel.getOffsetWidth() / 2, busyIndicatorPanel.getOffsetHeight() / 2);
             }
         });
@@ -141,7 +139,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setWidth100()
-                .setHeight(chartHeight)
+                .setHeight100()
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
@@ -182,7 +180,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         }));
         
         if (compactChart) {
-            chart.setSpacingBottom(4).setSpacingLeft(0).setSpacingRight(0).setSpacingTop(2)
+            chart.setSpacingBottom(4).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
                  .setLegend(new Legend().setMargin(2))
                  .setOption("title/margin", 5)
                  .setChartSubtitle(null)
