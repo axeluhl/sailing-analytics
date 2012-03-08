@@ -43,7 +43,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     }
 
     @Override
-    public Widget getAdditionalWidget(DataEntryDialog<RaceMapSettings> dialog) {
+    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel labelAndTailLengthBoxPanel = new HorizontalPanel();
         labelAndTailLengthBoxPanel.add(new Label(stringMessages.tailLength()));

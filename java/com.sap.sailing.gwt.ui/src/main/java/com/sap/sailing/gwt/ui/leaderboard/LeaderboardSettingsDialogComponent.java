@@ -57,7 +57,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     }
     
     @Override
-    public Widget getAdditionalWidget(DataEntryDialog<LeaderboardSettings> dialog) {
+    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         delayBetweenAutoAdvancesInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds/1000l, 4);
         delayInSecondsBox = dialog.createLongBox(delayInMilliseconds/1000l, 4);
         HorizontalPanel hp = new HorizontalPanel();
