@@ -106,10 +106,10 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
         switch (viewMode) {
-            case CASCADING:
+            case CASCADE:
                 createCascadingView(leaderboardName, leaderboardGroupName, mainPanel);
                 break;
-            case ONE_SCREEN:
+            case ONESCREEN:
                 createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
                 break;
         }
@@ -132,24 +132,21 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         List<Component<?>> components = new ArrayList<Component<?>>();
 
+        MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
+                    timer, stringMessages, errorReporter, 200, true);
+        competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+        components.add(competitorCharts);
+        competitorCharts.setVisible(false);
+
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         WindChart windChart = new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
                 stringMessages, errorReporter, 200, true);
-//        SimpleComponentViewer<WindChartSettings> windChartViewer = new SimpleComponentViewer<WindChartSettings>(
-//                windChart, "auto", "200px");
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
+        windChart.setVisible(false);
         components.add(windChart);
-
-        MultiChartPanel competitorCharts = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
-                    timer, stringMessages, errorReporter, 200, true);
-//        SimpleComponentViewer<MultiChartSettings> chartViewer = new SimpleComponentViewer<MultiChartSettings>(
-//                competitorCharts, "auto", "200px");
-
-        competitorCharts.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        components.add(competitorCharts);
-
         
-        SideBySideComponentViewer leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components, "auto", "500px");  
+        SideBySideComponentViewer leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, 
+                components, "100%", "100%");  
         componentViewers.add(leaderboardAndMapViewer);
             
         for (ComponentViewer componentViewer : componentViewers) {
@@ -157,7 +154,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         }
         
         addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel);
-        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, raceMap);
+        //addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, raceMap);
         addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, windChart);
         addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, competitorCharts);
     }
@@ -237,13 +234,19 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         toggleButton.getElement().getStyle().setFloat(Style.Float.LEFT);
         toggleButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
         toggleButton.getElement().getStyle().setMargin(3, Style.Unit.PX);
+        toggleButton.setDown(component.isVisible());
+        
         toggleButton.addClickHandler(new ClickHandler() {
           public void onClick(ClickEvent event) {
+            // make the map invisible is this is not supported yet due to problems with disabling the center element of a DockPanel
+            if(component instanceof RaceMap)
+                return;
+            
             if (toggleButton.isDown()) {
-                component.setVisible(false);
+                component.setVisible(true);
                 componentViewer.forceLayout();
             } else {
-                component.setVisible(true);
+                component.setVisible(false);
                 componentViewer.forceLayout();
             }
           }

@@ -155,11 +155,12 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
 
     @Override
     public boolean isVisible() {
-        return true;
+        return mainPanel.isVisible();
     }
 
     @Override
     public void setVisible(boolean visibility) {
+        mainPanel.setVisible(visibility);
     }
 
     private void showVisibleSeries() {
