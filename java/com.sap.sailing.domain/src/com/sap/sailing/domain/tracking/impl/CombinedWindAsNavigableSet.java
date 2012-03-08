@@ -16,8 +16,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
  */
 public class CombinedWindAsNavigableSet extends VirtualWindFixesAsNavigableSet {
 
-    public CombinedWindAsNavigableSet(WindTrack track, TrackedRace trackedRace,
-            long resolutionInMilliseconds) {
+    public CombinedWindAsNavigableSet(WindTrack track, TrackedRace trackedRace, long resolutionInMilliseconds) {
         super(track, trackedRace, resolutionInMilliseconds);
     }
     

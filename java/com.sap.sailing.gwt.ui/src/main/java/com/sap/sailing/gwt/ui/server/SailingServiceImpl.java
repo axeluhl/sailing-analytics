@@ -609,7 +609,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
-            for (WindSource windSource : trackedRace.getWindSources()) {
+            List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+            Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
+            windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
+            for (WindSource windSource : windSourcesToDeliver) {
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
                     TimePoint fromTimePoint = new MillisecondsTimePoint(from);
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
