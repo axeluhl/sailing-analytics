@@ -500,11 +500,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public synchronized WindTrack getOrCreateWindTrack(WindSource windSource) {
-        WindTrack result = windTracks.get(windSource);
-        if (result == null) {
-            result = createWindTrack(windSource);
-            windTracks.put(windSource, result);
+    public WindTrack getOrCreateWindTrack(WindSource windSource) {
+        WindTrack result;
+        synchronized (windTracks) {
+            result = windTracks.get(windSource);
+            if (result == null) {
+                result = createWindTrack(windSource);
+                windTracks.put(windSource, result);
+            }
         }
         return result;
     }
