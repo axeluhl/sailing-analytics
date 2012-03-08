@@ -19,6 +19,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -91,9 +92,10 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         new MongoObjectFactoryImpl(firstDatabase).addWindTrackDumper(trackedEvent, trackedRace, windSource);
         WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
         Position pos = new DegreePosition(54, 9);
+        TimePoint timePoint = MillisecondsTimePoint.now();
         for (double bearingDeg = 123.4; bearingDeg<140; bearingDeg += 1.1) {
-            windTrack.add(new WindImpl(pos, MillisecondsTimePoint.now(), new KnotSpeedWithBearingImpl(10., new DegreeBearingImpl(bearingDeg))));
-            Thread.sleep(10); // ensure that the next now() call is distinguishably later
+            windTrack.add(new WindImpl(pos, timePoint, new KnotSpeedWithBearingImpl(10., new DegreeBearingImpl(bearingDeg))));
+            timePoint = new MillisecondsTimePoint(timePoint.asMillis()+1);
         }
         Thread.sleep(2000); // give MongoDB some time to make written data available to other connections
         
