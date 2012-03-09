@@ -79,7 +79,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     public DBCollection getWindTrackCollection() {
-        return database.getCollection(CollectionNames.WIND_TRACKS.name());
+        DBCollection result = database.getCollection(CollectionNames.WIND_TRACKS.name());
+        result.ensureIndex(new BasicDBObject(FieldNames.EVENT_NAME.name(), null));
+        return result;
     }
 
     public DBObject storeWindTrackEntry(Event event, RaceDefinition race, WindSource windSource, Wind wind) {
