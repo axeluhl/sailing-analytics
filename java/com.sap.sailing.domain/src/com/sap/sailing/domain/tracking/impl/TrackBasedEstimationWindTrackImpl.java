@@ -61,8 +61,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      */
     private final HashSet<TimePoint> timePointsWithCachedNullResultFastContains;
 
-    public TrackBasedEstimationWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage) {
-        super(trackedRace, millisecondsOverWhichToAverage);
+    public TrackBasedEstimationWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence) {
+        super(trackedRace, millisecondsOverWhichToAverage, baseConfidence);
         virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
         trackedRace.addListener(this);
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(AbstractTimePoint.TIMEPOINT_COMPARATOR);
