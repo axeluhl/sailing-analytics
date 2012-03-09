@@ -33,7 +33,9 @@ public class LeaderboardSettingsFactory {
                 legDetails.add(DetailType.RANK_GAIN);
                 ArrayList<DetailType> raceDetails = new ArrayList<DetailType>();
                 ArrayList<RaceInLeaderboardDTO> raceColumns = new ArrayList<RaceInLeaderboardDTO>();
-                settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, true, 0l, 0l);
+                settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, true,
+                        /* refresh interval */ 3000l, /* delay to live */ 5000l,
+                        /* sort by column */ null, /* ascending */ true);
                 break;
             case Replay:
                 settings = createNewDefaultSettings(true);
@@ -54,6 +56,8 @@ public class LeaderboardSettingsFactory {
         ArrayList<DetailType> raceDetails = new ArrayList<DetailType>();
         raceDetails.add(DetailType.DISPLAY_LEGS);
         ArrayList<RaceInLeaderboardDTO> raceColumns = new ArrayList<RaceInLeaderboardDTO>();
-        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, autoExpandFirstRace, 0l, 0l);
+        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, autoExpandFirstRace,
+                /* refresh interval */ 3000l, /* delay to live */ 5000l,
+                /* sort by column */ null, /* ascending */ true);
     }
 }
