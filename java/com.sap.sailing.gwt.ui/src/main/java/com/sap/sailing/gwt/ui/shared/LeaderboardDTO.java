@@ -303,15 +303,6 @@ public class LeaderboardDTO implements IsSerializable {
         }
         return null;
     }
-/*
-    public List<String> getRaceColumnNameList() {
-        List<String> raceColumnNames = new ArrayList<String>();
-        for (RaceInLeaderboardDTO raceInLeaderboardDTO : races) {
-            raceColumnNames.add(raceInLeaderboardDTO.getRaceColumnName());
-        }
-        return raceColumnNames;
-    }
-*/
 
     public List<RaceInLeaderboardDTO> getRaceList() {
         return races;
