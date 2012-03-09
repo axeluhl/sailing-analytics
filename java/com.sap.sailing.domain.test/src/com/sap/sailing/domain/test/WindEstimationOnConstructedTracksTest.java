@@ -109,7 +109,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
         // less precision because downwind estimation has less confidence
         assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.2);
-        CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace());
+        CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace(), WindSourceType.COMBINED.getBaseConfidence());
         Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
         assertEquals(180., combinedWindDirection.getBearing().getDegrees(), 0.2); // a bit less precise as course-based wind isn't exactly 180deg
     }
@@ -132,7 +132,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertEquals(LegType.UPWIND, firstLeg.getLegType(new MillisecondsTimePoint(MillisecondsTimePoint.now().asMillis())));
         final Map<TimePoint, Wind> cachedFixes = new HashMap<TimePoint, Wind>();
         TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
-                getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000) {
+                getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence()) {
                     @Override
                     protected void cache(TimePoint timePoint, Wind fix) {
                         super.cache(timePoint, fix);
@@ -172,7 +172,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(1), checkTime, 50);
         final Map<TimePoint, Wind> cachedFixes = new HashMap<TimePoint, Wind>();
         TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
-                getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000) {
+                getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence()) {
                     @Override
                     protected void cache(TimePoint timePoint, Wind fix) {
                         super.cache(timePoint, fix);

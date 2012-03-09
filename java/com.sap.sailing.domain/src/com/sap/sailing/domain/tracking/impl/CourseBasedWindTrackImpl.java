@@ -29,8 +29,8 @@ public class CourseBasedWindTrackImpl extends WindTrackImpl {
     private final TrackedRace trackedRace;
     private static final NavigableSet<Wind> empty = new UnmodifiableNavigableSet<Wind>(new ArrayListNavigableSet<Wind>(WindComparator.INSTANCE));
     
-    public CourseBasedWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage) {
-        super(millisecondsOverWhichToAverage);
+    public CourseBasedWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence) {
+        super(millisecondsOverWhichToAverage, baseConfidence);
         this.trackedRace = trackedRace;
     }
 

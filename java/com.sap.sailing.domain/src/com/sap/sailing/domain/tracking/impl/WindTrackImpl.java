@@ -37,11 +37,24 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
 public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     private final static Logger logger = Logger.getLogger(WindTrackImpl.class.getName());
     
+    private final static double DEFAULT_BASE_CONFIDENCE = 0.9;
+    
+    private final double baseConfidence;
+    
     private long millisecondsOverWhichToAverage;
     private final Set<WindListener> listeners;
 
     public WindTrackImpl(long millisecondsOverWhichToAverage) {
+        this(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE);
+    }
+    
+    /**
+     * @param baseConfidence
+     *            the confidence to attribute to the raw wind fixes in this track
+     */
+    public WindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence) {
         super(new ArrayListNavigableSet<Timed>(WindComparator.INSTANCE));
+        this.baseConfidence = baseConfidence;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         listeners = new HashSet<WindListener>();
     }
@@ -209,7 +222,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      * represent <em>the truth</em>. 0.0 means "no relevance at all."
      */
     private double getBaseConfidence() {
-        return /* confidence */ 0.9;
+        return baseConfidence;
     }
     
     @Override
