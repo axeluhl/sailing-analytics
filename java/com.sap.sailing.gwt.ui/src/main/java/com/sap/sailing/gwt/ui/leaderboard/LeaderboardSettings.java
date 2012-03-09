@@ -12,8 +12,8 @@ public class LeaderboardSettings {
     private final List<DetailType> legDetailsToShow;
     private final List<DetailType> raceDetailsToShow;
     private final boolean autoExpandFirstRace;
-    private final long delayBetweenAutoAdvancesInMilliseconds;
-    private final long delayInMilliseconds;
+    private final Long delayBetweenAutoAdvancesInMilliseconds;
+    private final Long delayInMilliseconds;
     
     /**
      * An optional sort column; if <code>null</code>, the leaderboard sorting won't be touched when updating the settings.
@@ -24,7 +24,7 @@ public class LeaderboardSettings {
     
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
             List<DetailType> raceDetailsToShow, List<RaceInLeaderboardDTO> raceColumnsToShow,
-            boolean autoExpandFirstRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
+            boolean autoExpandFirstRace, Long delayBetweenAutoAdvancesInMilliseconds, Long delayInMilliseconds,
             SortableColumn<LeaderboardRowDTO, ?> sortByColumn, boolean sortAscending) {
         this.legDetailsToShow = legDetailsToShow;
         this.raceDetailsToShow = raceDetailsToShow;
@@ -61,11 +61,18 @@ public class LeaderboardSettings {
         return autoExpandFirstRace;
     }
 
-    public long getDelayBetweenAutoAdvancesInMilliseconds() {
+    /**
+     * @return if <code>null</code>, leave refresh interval alone (don't change in
+     *         {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}
+     */
+    public Long getDelayBetweenAutoAdvancesInMilliseconds() {
         return delayBetweenAutoAdvancesInMilliseconds;
     }
 
-    public long getDelayInMilliseconds() {
+    /**
+     * @return if <code>null</code>, leave delay alone (don't change in {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}
+     */
+    public Long getDelayInMilliseconds() {
         return delayInMilliseconds;
     }
 

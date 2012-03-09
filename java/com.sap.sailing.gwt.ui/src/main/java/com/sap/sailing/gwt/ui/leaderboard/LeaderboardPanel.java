@@ -254,12 +254,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 }
             }
         }
-        selectedManeuverDetails.clear();
-        selectedManeuverDetails.addAll(newSettings.getManeuverDetailsToShow());
-        selectedLegDetails.clear();
-        selectedLegDetails.addAll(newSettings.getLegDetailsToShow());
-        selectedRaceDetails.clear();
-        selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
+        if (newSettings.getManeuverDetailsToShow() != null) {
+            selectedManeuverDetails.clear();
+            selectedManeuverDetails.addAll(newSettings.getManeuverDetailsToShow());
+        }
+        if (newSettings.getLegDetailsToShow() != null) {
+            selectedLegDetails.clear();
+            selectedLegDetails.addAll(newSettings.getLegDetailsToShow());
+        }
+        if (newSettings.getRaceDetailsToShow() != null) {
+            selectedRaceDetails.clear();
+            selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
+        }
         if (newSettings.getRaceColumnsToShow() != null) {
             selectedRaceColumns.clear();
             selectedRaceColumns.addAll(newSettings.getRaceColumnsToShow());
@@ -269,8 +275,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         updateLeaderboard(leaderboard);
         setAutoExpandFirstRace(newSettings.isAutoExpandFirstRace());
 
-        timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
-        setDelayInMilliseconds(newSettings.getDelayInMilliseconds());
+        if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
+            timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
+        }
+        if (newSettings.getDelayInMilliseconds() != null) {
+            setDelayInMilliseconds(newSettings.getDelayInMilliseconds());
+        }
         for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
             expandableSortableColumn.toggleExpansion();
         }

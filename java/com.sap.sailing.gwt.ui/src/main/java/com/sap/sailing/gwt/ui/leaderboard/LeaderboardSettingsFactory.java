@@ -36,7 +36,7 @@ public class LeaderboardSettingsFactory {
                 raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails,
                         /* don't change raceColumns */ null, true,
-                        /* refresh interval */ 3000l, /* delay to live */ 5000l,
+                        /* refresh interval */ null, /* delay to live */ null,
                         /* sort by column */ null, /* ascending */ true);
                 break;
             case Replay:
