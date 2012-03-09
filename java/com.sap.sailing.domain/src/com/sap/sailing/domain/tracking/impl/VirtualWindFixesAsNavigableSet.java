@@ -74,7 +74,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     protected TimePoint lowerToResolution(Wind w) {
         TimePoint result;
-        final TimePoint timePointOfLastEvent = trackedRace.getTimePointOfLastEvent();
+        final TimePoint timePointOfLastEvent = getTrackedRace().getTimePointOfLastEvent();
         if (timePointOfLastEvent == null) {
             // nothing received yet; "lowering" to end of time
             result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / getResolutionInMilliseconds()
@@ -90,7 +90,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     protected TimePoint floorToResolution(Wind w) {
         TimePoint result;
-        final TimePoint timePointOfLastEvent = trackedRace.getTimePointOfLastEvent();
+        final TimePoint timePointOfLastEvent = getTrackedRace().getTimePointOfLastEvent();
         if (timePointOfLastEvent == null) {
             // nothing received yet; "lowering" to end of time
             result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / getResolutionInMilliseconds()
@@ -106,7 +106,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     protected TimePoint ceilingToResolution(Wind w) {
         TimePoint result;
-        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        final TimePoint startOfTracking = getTrackedRace().getStartOfTracking();
         if (startOfTracking == null) {
             // no start of tracking yet; "ceiling" to beginning of time
             result = new MillisecondsTimePoint(0);
@@ -121,7 +121,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     protected TimePoint higherToResolution(Wind w) {
         TimePoint result;
-        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        final TimePoint startOfTracking = getTrackedRace().getStartOfTracking();
         if (startOfTracking == null) {
             // no start of tracking yet; "ceiling" to beginning of time
             result = new MillisecondsTimePoint(0);
@@ -141,9 +141,9 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
      * will be returned instead. If no valid start time can be obtained from the race, <code>Long.MAX_VALUE</code> is
      * returned instead.
      */
-    private TimePoint getFrom() {
-        return from == null ? trackedRace.getStart() == null ? new MillisecondsTimePoint(Long.MAX_VALUE)
-                : floorToResolution(new DummyWind(trackedRace.getStart())) : from;
+    protected TimePoint getFrom() {
+        return from == null ? getTrackedRace().getStart() == null ? new MillisecondsTimePoint(Long.MAX_VALUE)
+                : floorToResolution(new DummyWind(getTrackedRace().getStart())) : from;
     }
 
     /**
@@ -153,9 +153,9 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
      * {@link #ceilingToResolution(Wind) ceiled to the resolution of this set} will be returned instead. If no valid
      * time of a newest event can be obtained from the race, <code>MillisecondsTimePoint(1)</code> is returned instead.
      */
-    private TimePoint getTo() {
-        return to == null ? trackedRace.getTimePointOfNewestEvent() == null ? new MillisecondsTimePoint(1)
-                : ceilingToResolution(new DummyWind(trackedRace.getTimePointOfNewestEvent())) : to;
+    protected TimePoint getTo() {
+        return getToInternal() == null ? getTrackedRace().getTimePointOfNewestEvent() == null ? new MillisecondsTimePoint(1)
+                : ceilingToResolution(new DummyWind(getTrackedRace().getTimePointOfNewestEvent())) : getToInternal();
     }
 
     @Override
@@ -242,7 +242,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     @Override
     public NavigableSet<Wind> subSet(Wind fromElement, boolean fromInclusive, Wind toElement, boolean toInclusive) {
-        return createSubset(track, trackedRace, fromInclusive ? ceilingToResolution(fromElement)
+        return createSubset(track, getTrackedRace(), fromInclusive ? ceilingToResolution(fromElement)
                 : higherToResolution(fromElement), toInclusive ? floorToResolution(toElement)
                 : lowerToResolution(toElement));
     }
@@ -254,13 +254,13 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     @Override
     public NavigableSet<Wind> headSet(Wind toElement, boolean inclusive) {
-        return createSubset(track, trackedRace, /* from */ null,
+        return createSubset(track, getTrackedRace(), /* from */ null,
                 inclusive ? ceilingToResolution(toElement) : lowerToResolution(toElement));
     }
 
     @Override
     public NavigableSet<Wind> tailSet(Wind fromElement, boolean inclusive) {
-        return createSubset(track, trackedRace, inclusive ? floorToResolution(fromElement)
+        return createSubset(track, getTrackedRace(), inclusive ? floorToResolution(fromElement)
                 : higherToResolution(fromElement),
         /* to */ null);
     }
@@ -334,6 +334,10 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         @SuppressWarnings("unchecked")
         T[] tResult = (T[]) result;
         return tResult;
+    }
+
+    protected TimePoint getToInternal() {
+        return to;
     }
 }
 

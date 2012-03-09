@@ -248,3 +248,7 @@ input.magnifier {
 .breadcrumbPanel-NextArrow {
 	display: none;
 }
+
+.errorLabel {
+	color: #FF0000;
+}
