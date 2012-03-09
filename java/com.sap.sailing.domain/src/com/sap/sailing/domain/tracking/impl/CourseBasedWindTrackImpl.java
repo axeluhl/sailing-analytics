@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -19,6 +20,12 @@ import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
  * 
  */
 public class CourseBasedWindTrackImpl extends WindTrackImpl {
+    /**
+     * The first leg's direction will be measured this many milliseconds before the estimated race start time,
+     * at estimated race start time and this many milliseconds after estimated race start time.
+     */
+    private final long MILLISECONDS_AROUND_START_TO_TRACK = 30000l;
+    
     private final TrackedRace trackedRace;
     private static final NavigableSet<Wind> empty = new UnmodifiableNavigableSet<Wind>(new ArrayListNavigableSet<Wind>(WindComparator.INSTANCE));
     
@@ -33,10 +40,13 @@ public class CourseBasedWindTrackImpl extends WindTrackImpl {
         if (trackedRace.raceIsKnownToStartUpwind()) {
             TimePoint startTime = trackedRace.getStart();
             if (startTime != null) {
-                result = new ArrayListNavigableSet<Wind>(1, WindComparator.INSTANCE);
-                final Wind directionFromStartToNextMark = trackedRace.getDirectionFromStartToNextMark(startTime);
-                if (directionFromStartToNextMark != null) {
-                    result.add(directionFromStartToNextMark);
+                result = new ArrayListNavigableSet<Wind>(3, WindComparator.INSTANCE);
+                for (long t = startTime.asMillis() - MILLISECONDS_AROUND_START_TO_TRACK; t <= startTime.asMillis()
+                        + MILLISECONDS_AROUND_START_TO_TRACK; t += MILLISECONDS_AROUND_START_TO_TRACK) {
+                    final Wind directionFromStartToNextMark = trackedRace.getDirectionFromStartToNextMark(new MillisecondsTimePoint(t));
+                    if (directionFromStartToNextMark != null) {
+                        result.add(directionFromStartToNextMark);
+                    }
                 }
             } else {
                 result = empty;
