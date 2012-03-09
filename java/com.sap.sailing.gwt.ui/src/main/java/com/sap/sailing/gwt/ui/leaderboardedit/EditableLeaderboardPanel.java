@@ -253,7 +253,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     public EditableLeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, StringMessages stringConstants, UserAgentTypes userAgentType) {
         super(sailingService, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                /* autoExpandFirstRace */false), new CompetitorSelectionModel(/* hasMultiSelection */true),
+                /* racesToShow */ null, /* autoExpandFirstRace */false), new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, leaderboardGroupName, errorReporter, stringConstants, userAgentType);
     }
 

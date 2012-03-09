@@ -391,7 +391,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return race;
         }
 
-        public String getRaceName() {
+        public String getRaceColumnName() {
             return race.getRaceColumnName();
         }
 
@@ -419,7 +419,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
          */
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder html) {
-            LeaderboardEntryDTO entry = object.fieldsByRaceName.get(getRaceName());
+            LeaderboardEntryDTO entry = object.fieldsByRaceName.get(getRaceColumnName());
             if (entry != null) {
                 // don't show points if max points / penalty
                 if (entry.reasonForMaxPoints.equals("NONE")) {
@@ -492,12 +492,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return "" + object.fieldsByRaceName.get(getRaceName()).totalPoints;
+            return "" + object.fieldsByRaceName.get(getRaceColumnName()).totalPoints;
         }
 
         @Override
         protected void ensureExpansionDataIsLoaded(final Runnable callWhenExpansionDataIsLoaded) {
-            if (getLeaderboard().getLegCount(getRaceName()) != -1) {
+            if (getLeaderboard().getLegCount(getRaceColumnName()) != -1) {
                 callWhenExpansionDataIsLoaded.run();
             } else {
                 getSailingService().getLeaderboardByName(getLeaderboardName(), getLeaderboardDisplayDate(),
@@ -565,7 +565,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
                 // is based on column identity
-                int legCount = getLeaderboard().getLegCount(getRaceName());
+                int legCount = getLeaderboard().getLegCount(getRaceColumnName());
                 if (legCount != -1) {
                     for (int i = 0; i < legCount; i++) {
                         LegColumn legColumn = getLegColumn(i);
@@ -588,7 +588,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (legColumns.size() > legNumber && legColumns.get(legNumber) != null) {
                 result = legColumns.get(legNumber);
             } else {
-                result = new LegColumn(LeaderboardPanel.this, getRaceName(), legNumber, stringMessages,
+                result = new LegColumn(LeaderboardPanel.this, getRaceColumnName(), legNumber, stringMessages,
                         Collections.unmodifiableList(selectedLegDetails), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                         LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
                 while (legColumns.size() <= legNumber) {
@@ -608,7 +608,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null) {
                     double distanceTraveledInMeters = 0;
                     long timeInMilliseconds = 0;
@@ -635,7 +635,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null) {
                     for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
                         if (legDetail != null) {
@@ -656,7 +656,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null && !fieldsForRace.legDetails.isEmpty()) {
                     for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
                         if (legDetail != null) {
@@ -687,7 +687,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null) {
                     int lastLegIndex = fieldsForRace.legDetails.size() - 1;
                     LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(lastLegIndex);
@@ -712,7 +712,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.windwardDistanceToOverallLeaderInMeters != null) {
                     result = fieldsForRace.windwardDistanceToOverallLeaderInMeters;
                 }
@@ -974,7 +974,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private RaceColumn<?> getRaceColumnByRaceName(String raceName) {
         for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
-            if (column instanceof RaceColumn<?> && ((RaceColumn<?>) column).getRaceName().equals(raceName)) {
+            if (column instanceof RaceColumn<?>
+                    && ((RaceColumn<?>) column).getRace().getRaceIdentifier().getRaceName().equals(raceName)) {
                 return (RaceColumn<?>) column;
             }
         }
@@ -1103,7 +1104,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (column instanceof RaceColumn<?>) {
                 RaceColumn<?> raceColumn = (RaceColumn<?>) column;
                 if (raceColumn.isExpanded()) {
-                    namesOfExpandedRaces.add(raceColumn.getRaceName());
+                    namesOfExpandedRaces.add(raceColumn.getRaceColumnName());
                 }
             }
         }
@@ -1264,7 +1265,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
             if (c instanceof RaceColumn) {
                 RaceColumn<?> raceColumn = (RaceColumn<?>) c;
-                if (raceColumn.getRaceName().equals(race.getRaceColumnName())) {
+                if (raceColumn.getRaceColumnName().equals(race.getRaceColumnName())) {
                     correctColumnData(raceColumn);
                     return true;
                 }
@@ -1306,7 +1307,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(leaderboardposition);
             if (c instanceof RaceColumn) {
                 RaceColumn<?> raceColumn = (RaceColumn<?>) c;
-                if (!raceColumn.getRaceName().equals(race.getRaceColumnName()) && raceColumnStartIndex == counter) {
+                if (!raceColumn.getRaceColumnName().equals(race.getRaceColumnName()) && raceColumnStartIndex == counter) {
                     removeColumn(raceColumn);
                 } else {
                     return;
@@ -1384,7 +1385,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
             if (c instanceof RaceColumn
-                    && (leaderboard == null || !selectedRaceColumnNames.contains(((RaceColumn<?>) c).getRaceName()))) {
+                    && (leaderboard == null || !selectedRaceColumnNames.contains(((RaceColumn<?>) c).getRaceColumnName()))) {
                 columnsToRemove.add(c);
             }
         }
@@ -1437,7 +1438,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
             if (c instanceof RaceColumn
-                    && (leaderboard == null || !leaderboard.raceListContains(((RaceColumn<?>) c).getRaceName()))) {
+                    && (leaderboard == null || !leaderboard.raceListContains(((RaceColumn<?>) c).getRaceColumnName()))) {
                 columnsToRemove.add(c);
             }
         }
@@ -1571,7 +1572,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             // if settings weren't explicitly modified, auto-switch to live mode settings and sort for
             // any pre-selected race
             updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(playMode,
-                    /* don't touch columnToSort */ preSelectedRace == null ? null : preSelectedRace.getRaceName()));
+                    /* don't touch columnToSort */ preSelectedRace == null ? null : preSelectedRace.getRaceName(), null));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;
