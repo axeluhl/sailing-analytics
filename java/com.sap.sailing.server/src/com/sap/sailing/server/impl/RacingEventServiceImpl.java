@@ -279,8 +279,8 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
     
     @Override
-    public Iterable<Event> getAllEvents() {
-        return Collections.unmodifiableCollection(eventsByName.values());
+    public synchronized Iterable<Event> getAllEvents() {
+        return Collections.unmodifiableCollection(new ArrayList<Event>(eventsByName.values()));
     }
     
     @Override
@@ -659,7 +659,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     @Override
     public synchronized Iterable<Triple<Event, RaceDefinition, String>> getWindTrackedRaces() {
         List<Triple<Event, RaceDefinition, String>> result = new ArrayList<Triple<Event, RaceDefinition, String>>();
-        for (Event event : eventsByName.values()) {
+        for (Event event : getAllEvents()) {
             for (RaceDefinition race : event.getAllRaces()) {
                 if (windTrackers.containsKey(race)) {
                     result.add(new Triple<Event, RaceDefinition, String>(event, race, windTrackers.get(race).toString()));

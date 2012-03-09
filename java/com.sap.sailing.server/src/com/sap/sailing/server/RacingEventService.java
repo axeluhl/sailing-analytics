@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +43,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  * {@link #addEvent(URL, URI, URI, WindStore, long)} call will have no effect, even if a different
  * {@link WindStore} is requested.<p>
  * 
- * TODO When the tracking of a race/event is {@link #stopTracking(Event, RaceDefinition) stopped}, the next
+ * When the tracking of a race/event is {@link #stopTracking(Event, RaceDefinition) stopped}, the next
  * time it's started to be tracked, a new {@link TrackedRace} at least will be constructed. This also
  * means that when a {@link TrackedEvent} exists that still holds other {@link TrackedRace}s, the
  * no longer tracked {@link TrackedRace} will be removed from the {@link TrackedEvent}.
@@ -53,6 +54,10 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  *
  */
 public interface RacingEventService extends TrackedEventRegistry {
+    /**
+     * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
+     *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
+     */
     Iterable<Event> getAllEvents();
 
     Event getEventByName(String name);
