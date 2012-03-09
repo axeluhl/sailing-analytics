@@ -143,7 +143,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         Long delayInSecondsValue = delayInSecondsBox.getValue();
         return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, raceColumnsToShow, autoExpandFirstRace,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
-                1000 * (delayInSecondsValue==null?0:delayInSecondsValue.longValue()));
+                1000 * (delayInSecondsValue==null?0:delayInSecondsValue.longValue()), null, true);
     }
 
     @Override

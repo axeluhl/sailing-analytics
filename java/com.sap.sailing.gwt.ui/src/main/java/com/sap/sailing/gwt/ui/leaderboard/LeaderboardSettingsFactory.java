@@ -19,7 +19,10 @@ public class LeaderboardSettingsFactory {
         return instance;
     }
 
-    public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode) {
+    /**
+     * @param nameOfRaceToSort if <code>null</code>, don't sort any race column
+     */
+    public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort) {
         LeaderboardSettings settings = null;
         switch (playMode) {
             case Live:  
@@ -32,8 +35,12 @@ public class LeaderboardSettingsFactory {
                 legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
                 legDetails.add(DetailType.RANK_GAIN);
                 ArrayList<DetailType> raceDetails = new ArrayList<DetailType>();
-                ArrayList<RaceInLeaderboardDTO> raceColumns = new ArrayList<RaceInLeaderboardDTO>();
-                settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, true, 0l, 0l);
+                raceDetails.add(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS);
+                raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
+                settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails,
+                        /* don't change raceColumns */ null, true,
+                        /* refresh interval */ null, /* delay to live */ null,
+                        /* name of race to sort*/ nameOfRaceToSort, /* ascending */ true);
                 break;
             case Replay:
                 settings = createNewDefaultSettings(true);
@@ -54,6 +61,8 @@ public class LeaderboardSettingsFactory {
         ArrayList<DetailType> raceDetails = new ArrayList<DetailType>();
         raceDetails.add(DetailType.DISPLAY_LEGS);
         ArrayList<RaceInLeaderboardDTO> raceColumns = new ArrayList<RaceInLeaderboardDTO>();
-        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, autoExpandFirstRace, 0l, 0l);
+        return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, autoExpandFirstRace,
+                /* refresh interval */ null, /* delay to live */ null,
+                /* sort by column */ null, /* ascending */ true);
     }
 }

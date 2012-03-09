@@ -853,52 +853,52 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 LegType legType;
                 try {
                     legType = trackedLeg.getLegType(timePoint);
+                    if (legType != LegType.REACHING) {
+                        GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+                        if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
+                            SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track
+                                    .getEstimatedSpeed(timePoint, weigher);
+                            if (estimatedSpeedWithConfidence != null
+                                    && estimatedSpeedWithConfidence.getObject() != null
+                                    &&
+                                    // Mark passings may be missing or far off. This can lead to boats apparently going
+                                    // "backwards" regarding the leg's direction; ignore those
+                                    isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(), trackedLeg,
+                                            timePoint)) {
+                                // additionally to generally excluding maneuvers, reduce confidence around mark passings:
+                                NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+                                double markPassingProximityConfidenceReduction = 1.0;
+                                synchronized (markPassings) {
+                                    NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(
+                                            dummyMarkPassingForNow, /* inclusive */true);
+                                    NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(
+                                            dummyMarkPassingForNow, /* inclusive */true);
+                                    if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
+                                        markPassingProximityConfidenceReduction *= Math.max(0.0,
+                                                1.0 - weigherForMarkPassingProximity.getConfidence(prevMarkPassing.last()
+                                                        .getTimePoint(), timePoint));
+                                    }
+                                    if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
+                                        markPassingProximityConfidenceReduction *= Math.max(0.0,
+                                                1.0 - weigherForMarkPassingProximity.getConfidence(nextMarkPassing.first()
+                                                        .getTimePoint(), timePoint));
+                                    }
+                                }
+                                BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
+                                        estimatedSpeedWithConfidence.getObject() == null ? null
+                                                : estimatedSpeedWithConfidence.getObject().getBearing(),
+                                        markPassingProximityConfidenceReduction
+                                                * estimatedSpeedWithConfidence.getConfidence(),
+                                        estimatedSpeedWithConfidence.getRelativeTo());
+                                BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings.get(legType);
+                                bearingClusterForLegType.add(bearing);
+                            }
+                        }
+                    }
                 } catch (NoWindException e) {
                     logger.warning("Unable to determine leg type for race " + getRace().getName()
                             + " while trying to estimate wind");
-                    return null;
-                }
-                if (legType != LegType.REACHING) {
-                    GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-                    if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
-                        SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track
-                                .getEstimatedSpeed(timePoint, weigher);
-                        if (estimatedSpeedWithConfidence != null
-                                && estimatedSpeedWithConfidence.getObject() != null
-                                &&
-                                // Mark passings may be missing or far off. This can lead to boats apparently going
-                                // "backwards" regarding the leg's direction; ignore those
-                                isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(), trackedLeg,
-                                        timePoint)) {
-                            // additionally to generally excluding maneuvers, reduce confidence around mark passings:
-                            NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-                            double markPassingProximityConfidenceReduction = 1.0;
-                            synchronized (markPassings) {
-                                NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(
-                                        dummyMarkPassingForNow, /* inclusive */true);
-                                NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(
-                                        dummyMarkPassingForNow, /* inclusive */true);
-                                if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
-                                    markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                            1.0 - weigherForMarkPassingProximity.getConfidence(prevMarkPassing.last()
-                                                    .getTimePoint(), timePoint));
-                                }
-                                if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
-                                    markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                            1.0 - weigherForMarkPassingProximity.getConfidence(nextMarkPassing.first()
-                                                    .getTimePoint(), timePoint));
-                                }
-                            }
-                            BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
-                                    estimatedSpeedWithConfidence.getObject() == null ? null
-                                            : estimatedSpeedWithConfidence.getObject().getBearing(),
-                                    markPassingProximityConfidenceReduction
-                                            * estimatedSpeedWithConfidence.getConfidence(),
-                                    estimatedSpeedWithConfidence.getRelativeTo());
-                            BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings.get(legType);
-                            bearingClusterForLegType.add(bearing);
-                        }
-                    }
+                    bearings = null;
                 }
             }
         }
