@@ -21,6 +21,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
     public void onModuleLoad() {
         super.onModuleLoad();
         String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
+        String viewModeParamValue = Window.Location.getParameter("viewMode");
         final String groupName;
         if (groupParamValue == null || groupParamValue.isEmpty()) {
             groupName = null;
@@ -52,7 +53,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
 //            panelToDisplay = new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages);
             Window.alert("No leaderboard group name was given.");
         } else {
-            panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root);
+            panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root, viewModeParamValue);
             LeaderboardGroupPanel groupPanel = (LeaderboardGroupPanel) panelToDisplay;
             groupPanel.setWelcomeWidget(new SimpleWelcomeWidget( stringMessages.welcomeToSailingAnalytics(),
                             "Understanding what happens out on the race course isn't always easy. To help solve this challenge and" +
