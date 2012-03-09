@@ -985,18 +985,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private RaceInLeaderboardDTO getRaceByName(String raceName) {
-        for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
-            if (race.getRaceIdentifier() != null && raceName.equals(race.getRaceIdentifier().getRaceName())) {
-                return race;
+        if (getLeaderboard() != null) {
+            for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
+                if (race.getRaceIdentifier() != null && raceName.equals(race.getRaceIdentifier().getRaceName())) {
+                    return race;
+                }
             }
         }
         return null;
     }
     
     private RaceInLeaderboardDTO getRaceByColumnName(String columnName) {
-        for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
-            if (columnName.equals(race.getRaceColumnName())) {
-                return race;
+        if (getLeaderboard() != null) {
+            for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
+                if (columnName.equals(race.getRaceColumnName())) {
+                    return race;
+                }
             }
         }
         return null;
