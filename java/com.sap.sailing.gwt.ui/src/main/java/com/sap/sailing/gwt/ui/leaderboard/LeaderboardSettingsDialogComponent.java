@@ -133,17 +133,18 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 legDetailsToShow.add(entry.getKey());
             }
         }
-        List<RaceInLeaderboardDTO> raceColumnsToShow = new ArrayList<RaceInLeaderboardDTO>();
+        List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
         for (Map.Entry<RaceInLeaderboardDTO, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
             if(entry.getValue().getValue()){
-                raceColumnsToShow.add(entry.getKey());
+                namesOfRaceColumnsToShow.add(entry.getKey().getRaceColumnName());
             }
         }
         Long delayBetweenAutoAdvancesValue = delayBetweenAutoAdvancesInSecondsBox.getValue();
         Long delayInSecondsValue = delayInSecondsBox.getValue();
-        return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow, raceColumnsToShow, autoExpandFirstRace,
+        return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow,
+                namesOfRaceColumnsToShow, /* nameOfRacesToShow */null, autoExpandFirstRace,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
-                1000 * (delayInSecondsValue==null?0:delayInSecondsValue.longValue()), null, true);
+                1000 * (delayInSecondsValue == null ? 0 : delayInSecondsValue.longValue()), null, true);
     }
 
     @Override

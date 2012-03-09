@@ -3,10 +3,17 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 
 public class LeaderboardSettings {
-    private final List<RaceInLeaderboardDTO> raceColumnsToShow;
+    /**
+     * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
+     */
+    private final List<String> namesOfRaceColumnsToShow;
+
+    /**
+     * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
+     */
+    private final List<String> namesOfRacesToShow;
     private final List<DetailType> maneuverDetailsToShow;
     private final List<DetailType> legDetailsToShow;
     private final List<DetailType> raceDetailsToShow;
@@ -21,13 +28,29 @@ public class LeaderboardSettings {
     private final String nameOfRaceToSort;
     private final boolean sortAscending;
     
+    /**
+     * @param meneuverDetailsToShow
+     * @param legDetailsToShow
+     * @param raceDetailsToShow
+     * @param namesOfRacesToShow
+     * @param autoExpandFirstRace
+     * @param delayBetweenAutoAdvancesInMilliseconds
+     * @param delayInMilliseconds
+     * @param nameOfRaceToSort
+     * @param sortAscending
+     * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
+     */
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
-            List<DetailType> raceDetailsToShow, List<RaceInLeaderboardDTO> raceColumnsToShow,
-            boolean autoExpandFirstRace, Long delayBetweenAutoAdvancesInMilliseconds, Long delayInMilliseconds,
-            String nameOfRaceToSort, boolean sortAscending) {
+            List<DetailType> raceDetailsToShow, List<String> namesOfRaceColumnsToShow,
+            List<String> namesOfRacesToShow, boolean autoExpandFirstRace, Long delayBetweenAutoAdvancesInMilliseconds,
+            Long delayInMilliseconds, String nameOfRaceToSort, boolean sortAscending) {
+        if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
+            throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
+        }
         this.legDetailsToShow = legDetailsToShow;
         this.raceDetailsToShow = raceDetailsToShow;
-        this.raceColumnsToShow = raceColumnsToShow;
+        this.namesOfRacesToShow = namesOfRacesToShow;
+        this.namesOfRaceColumnsToShow = namesOfRaceColumnsToShow;
         this.autoExpandFirstRace = autoExpandFirstRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
@@ -52,8 +75,16 @@ public class LeaderboardSettings {
      * If <code>null</code>, this is to mean that the race columns should not be modified by
      * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
      */
-    public List<RaceInLeaderboardDTO> getRaceColumnsToShow(){
-        return raceColumnsToShow;
+    public List<String> getNamesOfRaceColumnsToShow() {
+        return namesOfRaceColumnsToShow;
+    }
+
+    /**
+     * If <code>null</code>, this is to mean that the race columns should not be modified by
+     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
+     */
+    public List<String> getNamesOfRacesToShow() {
+        return namesOfRacesToShow;
     }
 
     public boolean isAutoExpandFirstRace() {

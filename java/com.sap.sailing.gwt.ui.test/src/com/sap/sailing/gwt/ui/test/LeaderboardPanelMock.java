@@ -17,11 +17,9 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     public LeaderboardPanelMock(SailingServiceAsync sailingService,
             String leaderboardName, ErrorReporter errorReporter,
             StringMessages stringConstants) {
-        super(sailingService, LeaderboardSettingsFactory.getInstance()
-.createNewDefaultSettings(
-                /* racesToShow */ null, /* autoExpandFirstRace */false), new CompetitorSelectionModel(/* hasMultiSelection */true),
-                leaderboardName, null, errorReporter, stringConstants, null);
-        // TODO Auto-generated constructor stub
+        super(sailingService, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
+        /* racesToShow */null, /* namesOfRacesToShow */ null, /* autoExpandFirstRace */false), new CompetitorSelectionModel(
+                /* hasMultiSelection */true), leaderboardName, null, errorReporter, stringConstants, null);
     }
 
     @Override
