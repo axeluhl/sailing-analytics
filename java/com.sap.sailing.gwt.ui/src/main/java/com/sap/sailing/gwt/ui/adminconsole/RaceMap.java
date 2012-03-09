@@ -41,6 +41,7 @@ import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -74,7 +75,7 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class RaceMap extends SimplePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
-        Component<RaceMapSettings>, RequiresDataInitialization {
+        Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
     protected MapWidget map;
 
     private final SailingServiceAsync sailingService;
@@ -925,6 +926,9 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         }
     }
 
+    /**
+     * @return The last shown GPS fix for the given competitor
+     */
     protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO) {
         return fixes.get(competitorDTO).get(lastShownFix.get(competitorDTO));
     }
@@ -1138,21 +1142,23 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                 competitors = isZoomOnlyToSelectedCompetitors() ? selectedCompetitors : forMap.getCompetitorsToShow();
             }
             for (CompetitorDTO competitor : competitors) {
-                List<GPSFixDTO> competitorFixes = forMap.fixes.get(competitor);
-                Integer lastShownFixForCompetitor = forMap.lastShownFix.get(competitor);
-                GPSFixDTO competitorFix = competitorFixes != null && lastShownFixForCompetitor != null ? competitorFixes.get(lastShownFixForCompetitor) : null;
-                PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
-                LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
-                        competitorPosition.lngDeg) : null;
-                LatLngBounds bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng,
-                        competitorLatLng) : null;
-                if (bounds != null) {
-                    if (newBounds == null) {
-                        newBounds = bounds;
-                    } else {
-                        newBounds.extend(bounds.getNorthEast());
-                        newBounds.extend(bounds.getSouthWest());
+                try {
+                    GPSFixDTO competitorFix = forMap.getBoatFix(competitor);
+                    PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
+                    LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
+                            competitorPosition.lngDeg) : null;
+                    LatLngBounds bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng,
+                            competitorLatLng) : null;
+                    if (bounds != null) {
+                        if (newBounds == null) {
+                            newBounds = bounds;
+                        } else {
+                            newBounds.extend(bounds.getNorthEast());
+                            newBounds.extend(bounds.getSouthWest());
+                        }
                     }
+                } catch (IndexOutOfBoundsException e) {
+                    //Catch this in case the competitor has no GPS fixes at the current time (e.g. in race 'Finale 2' of STG)
                 }
             }
             return newBounds;
@@ -1213,5 +1219,11 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
     @Override
     public boolean isDataInitialized() {
         return dataInitialized;
+    }
+
+    @Override
+    public void onResize() {
+        map.checkResize();
+        zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
     }
 }
