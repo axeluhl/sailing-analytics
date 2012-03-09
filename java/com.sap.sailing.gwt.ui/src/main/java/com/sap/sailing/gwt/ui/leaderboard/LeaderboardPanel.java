@@ -147,11 +147,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final Timer timer;
 
-    /**
-     * The delay with which the timer shall work. Before the timer is resumed, the delay is set to this value.
-     */
-    private long delayInMilliseconds;
-    
     private boolean autoExpandFirstRace;
 
     /**
@@ -844,7 +839,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentTypes userAgentType) {
         this(sailingService, settings, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                 leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
-        timer.setDelay(getDelayInMilliseconds()); // set time/delay before adding as listener
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
@@ -865,7 +859,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedLegDetails.addAll(settings.getLegDetailsToShow());
         selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
         selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
-        delayInMilliseconds = settings.getDelayInMilliseconds();
         setAutoExpandFirstRace(settings.isAutoExpandFirstRace());
 
         this.timer = timer;
@@ -930,7 +923,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (LeaderboardPanel.this.timer.getPlayState() == PlayStates.Playing) {
                     LeaderboardPanel.this.timer.pause();
                 } else {
-                    LeaderboardPanel.this.timer.setDelay(getDelayInMilliseconds());
                     LeaderboardPanel.this.timer.play();
                 }
             }
@@ -996,16 +988,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return AbstractImagePrototype.create(playIcon).getSafeHtml();
     }
 
-    private long getDelayInMilliseconds() {
-        return delayInMilliseconds;
-    }
-
     private void setDelayInMilliseconds(long delayInMilliseconds) {
-        this.delayInMilliseconds = delayInMilliseconds;
         timer.setDelay(delayInMilliseconds);
-        if (timer.getPlayMode() == PlayModes.Live) {
-            
-        }
     }
     
     public boolean isAutoExpandFirstRace() {
@@ -1584,7 +1568,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playPause.setHTML(getPlayPauseImgHtml(playState));
         playPause.setTitle(playState == PlayStates.Playing ? stringMessages.pauseAutomaticRefresh() : stringMessages.autoRefresh());
         if (!settingsUpdatedExplicitly && playMode != oldPlayMode) {
-            updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(playMode, /* columnToSort */ null));
+            // if settings weren't explicitly modified, auto-switch to live mode settings and sort for
+            // any pre-selected race
+            updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(playMode,
+                    /* don't touch columnToSort */ preSelectedRace == null ? null : preSelectedRace.getRaceName()));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;
@@ -1623,7 +1610,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.unmodifiableList(selectedLegDetails),
                 Collections.unmodifiableList(selectedRaceDetails), /*  All races to select */
                 leaderboard.getRaceList(), selectedRaceColumns,
-                autoExpandFirstRace, timer.getRefreshInterval(), delayInMilliseconds, stringMessages);
+                autoExpandFirstRace, timer.getRefreshInterval(), timer.getLivePlayDelayInMillis(), stringMessages);
     }
 
     @Override
