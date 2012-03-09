@@ -1571,8 +1571,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         if (!settingsUpdatedExplicitly && playMode != oldPlayMode) {
             // if settings weren't explicitly modified, auto-switch to live mode settings and sort for
             // any pre-selected race
-            updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(playMode,
-                    /* don't touch columnToSort */ preSelectedRace == null ? null : preSelectedRace.getRaceName(), null));
+            updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(
+                playMode,
+                /* don't touch columnToSort if no race was pre-selected */preSelectedRace == null ? null : preSelectedRace.getRaceName(),
+                /* raceToShow */null));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;

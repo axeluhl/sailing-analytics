@@ -46,12 +46,12 @@ public class LeaderboardSettingsFactory {
                 raceDetails.add(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS);
                 raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails,
-                        racesToShow, /* autoExpandFirstRace */ true,
+                        racesToShow, /* autoExpandFirstRace */ raceToShow != null,
                         /* refresh interval */ null, /* delay to live */ null,
                         /* name of race to sort*/ nameOfRaceToSort, /* ascending */ true);
                 break;
             case Replay:
-                settings = createNewDefaultSettings(racesToShow, /* autoExpandFirstRace */ true);
+                settings = createNewDefaultSettings(racesToShow, /* autoExpandFirstRace */ raceToShow != null);
                 break;
         }
         return settings;

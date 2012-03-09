@@ -21,6 +21,17 @@ public class LeaderboardSettings {
     private final String nameOfRaceToSort;
     private final boolean sortAscending;
     
+    /**
+     * @param meneuverDetailsToShow
+     * @param legDetailsToShow
+     * @param raceDetailsToShow
+     * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
+     * @param autoExpandFirstRace
+     * @param delayBetweenAutoAdvancesInMilliseconds
+     * @param delayInMilliseconds
+     * @param nameOfRaceToSort
+     * @param sortAscending
+     */
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
             List<DetailType> raceDetailsToShow, List<RaceInLeaderboardDTO> raceColumnsToShow,
             boolean autoExpandFirstRace, Long delayBetweenAutoAdvancesInMilliseconds, Long delayInMilliseconds,
@@ -52,7 +63,7 @@ public class LeaderboardSettings {
      * If <code>null</code>, this is to mean that the race columns should not be modified by
      * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
      */
-    public List<RaceInLeaderboardDTO> getRaceColumnsToShow(){
+    public List<RaceInLeaderboardDTO> getRaceColumnsToShow() {
         return raceColumnsToShow;
     }
 
