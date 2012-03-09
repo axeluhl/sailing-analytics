@@ -286,8 +286,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
             expandableSortableColumn.toggleExpansion();
         }
-        if (newSettings.getSortByColumn() != null) {
-            sort(newSettings.getSortByColumn(), true);
+        if (newSettings.getNameOfRaceToSort() != null) {
+            sort(getRaceColumnByRaceName(newSettings.getNameOfRaceToSort()), /* ascending */ true);
         }
     }
 
@@ -973,9 +973,20 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         contentPanel.add(getLeaderboardTable());
         setWidget(contentPanel);
-        if (settings.getSortByColumn() != null) {
-            sort(settings.getSortByColumn(), settings.isSortAscending());
+        if (settings.getNameOfRaceToSort() != null) {
+            RaceColumn<?> column = getRaceColumnByRaceName(settings.getNameOfRaceToSort());
+            sort(column, settings.isSortAscending());
         }
+    }
+
+    private RaceColumn<?> getRaceColumnByRaceName(String raceName) {
+        for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
+            Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
+            if (column instanceof RaceColumn<?> && ((RaceColumn<?>) column).getRaceName().equals(raceName)) {
+                return (RaceColumn<?>) column;
+            }
+        }
+        return null;
     }
 
     private SafeHtml getPlayPauseImgHtml(PlayStates playState) {
@@ -1573,7 +1584,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         playPause.setHTML(getPlayPauseImgHtml(playState));
         playPause.setTitle(playState == PlayStates.Playing ? stringMessages.pauseAutomaticRefresh() : stringMessages.autoRefresh());
         if (!settingsUpdatedExplicitly && playMode != oldPlayMode) {
-            updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(playMode));
+            updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(playMode, /* columnToSort */ null));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;

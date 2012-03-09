@@ -129,7 +129,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
         // create the default leaderboard and select the right race
-        LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode());
+        LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode(), /* columnToSort */ null);
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings, selectedRaceIdentifier, competitorSelectionModel,
                 timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
         RaceMap raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionModel, stringMessages);
@@ -200,10 +200,11 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         boolean showCompetitorCharts = true;
         // create the default leaderboard and select the right race
         if(showLeaderboard) {
-            LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(timer.getPlayMode());
-            LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings, selectedRaceIdentifier, competitorSelectionModel,
-                    timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
-
+            LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
+                    .createNewSettingsForPlayMode(timer.getPlayMode(), /* nameOfRaceToSort */null);
+            LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings,
+                    selectedRaceIdentifier, competitorSelectionModel, timer, leaderboardName, leaderboardGroupName,
+                    errorReporter, stringMessages, userAgentType);
             CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
                     leaderboardPanel, "100%", "100%", stringMessages, ViewerPanelTypes.SCROLL_PANEL);
             componentViewers.add(leaderboardViewer);

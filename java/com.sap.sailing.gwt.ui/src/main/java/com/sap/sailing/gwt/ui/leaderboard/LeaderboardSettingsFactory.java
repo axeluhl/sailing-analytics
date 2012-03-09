@@ -19,7 +19,10 @@ public class LeaderboardSettingsFactory {
         return instance;
     }
 
-    public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode) {
+    /**
+     * @param nameOfRaceToSort if <code>null</code>, don't sort any race column
+     */
+    public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort) {
         LeaderboardSettings settings = null;
         switch (playMode) {
             case Live:  
@@ -37,7 +40,7 @@ public class LeaderboardSettingsFactory {
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails,
                         /* don't change raceColumns */ null, true,
                         /* refresh interval */ null, /* delay to live */ null,
-                        /* sort by column */ null, /* ascending */ true);
+                        /* name of race to sort*/ nameOfRaceToSort, /* ascending */ true);
                 break;
             case Replay:
                 settings = createNewDefaultSettings(true);
