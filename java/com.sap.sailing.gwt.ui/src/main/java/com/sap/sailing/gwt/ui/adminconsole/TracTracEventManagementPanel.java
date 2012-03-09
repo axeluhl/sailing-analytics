@@ -459,7 +459,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register race " + rr.name + " for tracking: "
-                                + caught.getMessage());
+                                + caught.getMessage()+". Check live/stored URI syntax.");
                     }
 
                     @Override
