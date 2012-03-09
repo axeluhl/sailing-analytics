@@ -59,12 +59,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
         }
         BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, leaderboardName.toUpperCase());
-        LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService,
-                LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(/* racesToShow */ null, /* autoExpandFirstRace */ false),
-                /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
-                new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
-                leaderboardName, leaderboardGroupName,
-                LeaderboardEntryPoint.this, stringMessages, userAgentType);
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, LeaderboardSettingsFactory
+                .getInstance().createNewDefaultSettings(/* namesOfRacesToShow */null, /* namesOfRacesToShow */null, /* autoExpandFirstRace */
+                false),
+                /* preSelectedRace */null, new CompetitorSelectionModel(/* hasMultiSelection */true), new Timer(
+                PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardName,
+                leaderboardGroupName, LeaderboardEntryPoint.this, stringMessages, userAgentType);
         RootPanel.get().add(logoAndTitlePanel);
         RootPanel.get().add(breadcrumbPanel);
         RootPanel.get().add(leaderboardPanel);

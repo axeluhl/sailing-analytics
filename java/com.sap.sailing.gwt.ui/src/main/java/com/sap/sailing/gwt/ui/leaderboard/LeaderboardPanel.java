@@ -263,9 +263,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             selectedRaceDetails.clear();
             selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
         }
-        if (newSettings.getRaceColumnsToShow() != null) {
+        if (newSettings.getNamesOfRaceColumnsToShow() != null) {
             selectedRaceColumns.clear();
-            selectedRaceColumns.addAll(newSettings.getRaceColumnsToShow());
+            for (String nameOfRaceColumnToShow : newSettings.getNamesOfRaceColumnsToShow()) {
+                RaceInLeaderboardDTO raceColumnToShow = getRaceByColumnName(nameOfRaceColumnToShow);
+                if (raceColumnToShow != null) {
+                    selectedRaceColumns.add(raceColumnToShow);
+                }
+            }
+        } else if (newSettings.getNamesOfRacesToShow() != null) {
+            selectedRaceColumns.clear();
+            for (String nameOfRaceToShow : newSettings.getNamesOfRacesToShow()) {
+                RaceInLeaderboardDTO raceColumnToShow = getRaceByName(nameOfRaceToShow);
+                if (raceColumnToShow != null) {
+                    selectedRaceColumns.add(raceColumnToShow);
+                }
+            }
         }
         setAutoExpandFirstRace(false); // avoid expansion during updateLeaderboard(...); will expand later if it was expanded before
         // update leaderboard after settings panel column selection change
@@ -971,6 +984,24 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
+    private RaceInLeaderboardDTO getRaceByName(String raceName) {
+        for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
+            if (race.getRaceIdentifier() != null && raceName.equals(race.getRaceIdentifier().getRaceName())) {
+                return race;
+            }
+        }
+        return null;
+    }
+    
+    private RaceInLeaderboardDTO getRaceByColumnName(String columnName) {
+        for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
+            if (columnName.equals(race.getRaceColumnName())) {
+                return race;
+            }
+        }
+        return null;
+    }
+    
     private RaceColumn<?> getRaceColumnByRaceName(String raceName) {
         for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
@@ -1573,8 +1604,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             // any pre-selected race
             updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(
                 playMode,
-                /* don't touch columnToSort if no race was pre-selected */preSelectedRace == null ? null : preSelectedRace.getRaceName(),
-                /* raceToShow */null));
+                /* don't touch columnToSort if no race was pre-selected */ preSelectedRace == null ? null : preSelectedRace.getRaceName(),
+                /* don't change nameOfRaceColumnToShow */ null,
+                /* set nameOfRaceToShow if race was pre-selected */ preSelectedRace == null ? null : preSelectedRace.getRaceName()));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;

@@ -130,7 +130,8 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
         // create the default leaderboard and select the right race
         LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
-                .createNewSettingsForPlayMode(timer.getPlayMode(), /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(), null);
+                .createNewSettingsForPlayMode(timer.getPlayMode(), /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
+                        /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName());
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings,
                 selectedRaceIdentifier, competitorSelectionModel,
                 timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
@@ -203,7 +204,8 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         // create the default leaderboard and select the right race
         if(showLeaderboard) {
             LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
-                    .createNewSettingsForPlayMode(timer.getPlayMode(), /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(), null);
+                    .createNewSettingsForPlayMode(timer.getPlayMode(), /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
+                            /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName());
             LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, leaderBoardSettings,
                     selectedRaceIdentifier, competitorSelectionModel, timer, leaderboardName, leaderboardGroupName,
                     errorReporter, stringMessages, userAgentType);
