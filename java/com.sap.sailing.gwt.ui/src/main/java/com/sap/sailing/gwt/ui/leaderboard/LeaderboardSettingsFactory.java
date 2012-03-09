@@ -32,8 +32,11 @@ public class LeaderboardSettingsFactory {
                 legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
                 legDetails.add(DetailType.RANK_GAIN);
                 ArrayList<DetailType> raceDetails = new ArrayList<DetailType>();
-                ArrayList<RaceInLeaderboardDTO> raceColumns = new ArrayList<RaceInLeaderboardDTO>();
-                settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, true,
+                raceDetails.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
+                raceDetails.add(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS);
+                raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
+                settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails,
+                        /* don't change raceColumns */ null, true,
                         /* refresh interval */ 3000l, /* delay to live */ 5000l,
                         /* sort by column */ null, /* ascending */ true);
                 break;

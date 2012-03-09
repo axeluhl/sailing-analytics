@@ -49,6 +49,10 @@ public class LeaderboardSettings {
         return raceDetailsToShow;
     }
     
+    /**
+     * If <code>null</code>, this is to mean that the race columns should not be modified by
+     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
+     */
     public List<RaceInLeaderboardDTO> getRaceColumnsToShow(){
         return raceColumnsToShow;
     }

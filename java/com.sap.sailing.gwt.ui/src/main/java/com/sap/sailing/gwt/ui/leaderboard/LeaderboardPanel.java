@@ -260,8 +260,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedLegDetails.addAll(newSettings.getLegDetailsToShow());
         selectedRaceDetails.clear();
         selectedRaceDetails.addAll(newSettings.getRaceDetailsToShow());
-        selectedRaceColumns.clear();
-        selectedRaceColumns.addAll(newSettings.getRaceColumnsToShow());
+        if (newSettings.getRaceColumnsToShow() != null) {
+            selectedRaceColumns.clear();
+            selectedRaceColumns.addAll(newSettings.getRaceColumnsToShow());
+        }
         setAutoExpandFirstRace(false); // avoid expansion during updateLeaderboard(...); will expand later if it was expanded before
         // update leaderboard after settings panel column selection change
         updateLeaderboard(leaderboard);
