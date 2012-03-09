@@ -34,9 +34,7 @@ public class SideBySideComponentViewer implements ComponentViewer {
         mainPanel = new LayoutPanel();
         mainPanel.setSize("100%", "100%");
         splitLayoutPanel = new SplitLayoutPanel();
-        
         mainPanel.add(splitLayoutPanel);
-//        splitLayoutPanel.setSize(defaultWidth, defaultHeight);
         
         for(Component<?> component: components) {
             if(component.isVisible())
