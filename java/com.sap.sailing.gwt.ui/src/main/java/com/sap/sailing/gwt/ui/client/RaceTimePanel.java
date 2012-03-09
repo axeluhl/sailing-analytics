@@ -82,8 +82,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             selectedRace = selectedRaces.iterator().next();
-            if (!selectedRace.equals(raceTimesInfoProvider.getRaceIdentifiers())) {
-                raceTimesInfoProvider.clearRaceIdentifiers();
+            if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
                 raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
             }
         }

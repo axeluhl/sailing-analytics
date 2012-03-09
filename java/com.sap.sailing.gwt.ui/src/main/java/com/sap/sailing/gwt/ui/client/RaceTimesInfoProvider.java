@@ -46,6 +46,8 @@ public class RaceTimesInfoProvider {
             }
         };
         Scheduler.get().scheduleFixedPeriod(command, (int) this.requestInterval);
+        
+        forceTimesInfosUpdate();
     }
     
     /**

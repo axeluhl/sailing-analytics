@@ -42,6 +42,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     
     public TVViewPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             String leaderboardName, UserAgentTypes userAgentType, UserDTO userDTO) {
+        setSize("100%", "100%");
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -58,7 +59,8 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName) {
         LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(/* autoExpandFirstRace */ false); 
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        Timer timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
+        Timer timer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
+        timer.play();
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, settings,
         /* preSelectedRace */null, selectionModel, timer, leaderboardName, null, errorReporter, stringMessages,
                 userAgentType) {
