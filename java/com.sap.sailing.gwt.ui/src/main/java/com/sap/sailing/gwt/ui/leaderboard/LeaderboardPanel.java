@@ -197,6 +197,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * {@link #settingsUpdatedExplicitly} flag.
      */
     private boolean currentlyHandlingPlayStateChange;
+
+    private PlayModes oldPlayMode;
     
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -1570,10 +1572,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         currentlyHandlingPlayStateChange = true;
         playPause.setHTML(getPlayPauseImgHtml(playState));
         playPause.setTitle(playState == PlayStates.Playing ? stringMessages.pauseAutomaticRefresh() : stringMessages.autoRefresh());
-        if (!settingsUpdatedExplicitly) {
+        if (!settingsUpdatedExplicitly && playMode != oldPlayMode) {
             updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(playMode));
         }
         currentlyHandlingPlayStateChange = false;
+        oldPlayMode = playMode;
     }
     
     private void compareCompetitors() {

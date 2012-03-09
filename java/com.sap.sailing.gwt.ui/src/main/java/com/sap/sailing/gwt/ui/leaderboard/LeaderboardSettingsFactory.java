@@ -59,7 +59,7 @@ public class LeaderboardSettingsFactory {
         raceDetails.add(DetailType.DISPLAY_LEGS);
         ArrayList<RaceInLeaderboardDTO> raceColumns = new ArrayList<RaceInLeaderboardDTO>();
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, autoExpandFirstRace,
-                /* refresh interval */ 3000l, /* delay to live */ 5000l,
+                /* refresh interval */ null, /* delay to live */ null,
                 /* sort by column */ null, /* ascending */ true);
     }
 }
