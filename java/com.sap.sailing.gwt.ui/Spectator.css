@@ -343,3 +343,7 @@ input.magnifier {
 	background: #c0bebe;
 	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif
 }
+
+.errorLabel {
+	color: #FF0000;
+}

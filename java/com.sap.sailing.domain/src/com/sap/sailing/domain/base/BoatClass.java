@@ -39,4 +39,8 @@ public interface BoatClass extends Named {
     boolean typicallyStartsUpwind();
     
     Distance getHullLength();
+
+    double getDownwindWindEstimationConfidence();
+
+    double getUpwindWindEstimationConfidence();
 }

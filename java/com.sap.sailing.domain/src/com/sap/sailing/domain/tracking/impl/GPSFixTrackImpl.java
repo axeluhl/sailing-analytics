@@ -134,9 +134,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     private Pair<FixType, FixType> getFixesForPositionEstimation(TimePoint timePoint, boolean inclusive) {
-        FixType lastFix = inclusive ? getLastFixAtOrBefore(timePoint) : getLastFixBefore(timePoint);
-        FixType firstFix = inclusive ? getFirstFixAtOrAfter(timePoint) : getFirstFixAfter(timePoint);
-        return new Pair<FixType, FixType>(lastFix, firstFix);
+        FixType lastFixBefore = inclusive ? getLastFixAtOrBefore(timePoint) : getLastFixBefore(timePoint);
+        FixType firstFixAfter = inclusive ? getFirstFixAtOrAfter(timePoint) : getFirstFixAfter(timePoint);
+        return new Pair<FixType, FixType>(lastFixBefore, firstFixAfter);
     }
     
     @Override

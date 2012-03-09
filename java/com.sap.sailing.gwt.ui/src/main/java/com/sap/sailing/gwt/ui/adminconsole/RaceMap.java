@@ -353,7 +353,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     sailingService.getBoatPositions(race, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, getBoatsCallback);
                     sailingService.getMarkPositions(race, date, getMarksCallback);
                     sailingService.getQuickRanks(race, date, getQuickRanksCallback);
-//                    sailingService.getWindInfo(race, date, date, null, getWindCallback);
+//                    sailingService.getWindInfo(race, date, 0, 0, 0, null, getWindCallback);
                 }
             }
         }

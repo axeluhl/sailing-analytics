@@ -6,6 +6,16 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Util {
+    /**
+     * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
+     */
+    public static <T> Collection<T> addAll(Iterable<T> what, Collection<T> addTo) {
+        for (T t : what) {
+            addTo.add(t);
+        }
+        return addTo;
+    }
+    
     public static <T> int size(Iterable<T> i) {
         if (i instanceof Collection<?>) {
             return ((Collection<?>) i).size();

@@ -73,6 +73,7 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -443,6 +444,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             storedURI = rr.storedURI;
         }
         final RacesHandle raceHandle = getService().addTracTracRace(new URL(rr.paramURL), new URI(liveURI), new URI(storedURI),
+                new MillisecondsTimePoint(rr.trackingStartTime), new MillisecondsTimePoint(rr.trackingEndTime),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory), TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
             new Thread("Wind tracking starter for race "+rr.eventName+"/"+rr.name) {
@@ -544,12 +546,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             if (from != null && to != null) {
-                for (WindSource windSource : (windSources == null ? trackedRace.getWindSources() : Arrays.asList(windSources))) {
+                List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+                if (windSources != null) {
+                    windSourcesToDeliver.addAll(Arrays.asList(windSources));
+                } else {
+                    Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
+                    // TODO bug #375: add the combined wind; currently, CombinedWindTrackImpl just takes too long to return results...
+                    windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
+                }
+                for (WindSource windSource : windSourcesToDeliver) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
                     WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                    windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack
-                            .getMillisecondsOverWhichToAverageWind();
+                    windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack.getMillisecondsOverWhichToAverageWind();
                     Iterator<Wind> windIter = windTrack.getFixesIterator(from, /* inclusive */true);
                     while (windIter.hasNext()) {
                         Wind wind = windIter.next();
@@ -602,7 +611,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
-            for (WindSource windSource : trackedRace.getWindSources()) {
+            List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+            Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
+            // TODO bug #375: add the combined wind; currently, CombinedWindTrackImpl just takes too long to return results...
+            windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
+            for (WindSource windSource : windSourcesToDeliver) {
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
                     TimePoint fromTimePoint = new MillisecondsTimePoint(from);
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();

@@ -30,6 +30,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
@@ -66,14 +67,13 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
  * 
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
-implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
+implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener, RequiresResize {
     protected static final int LINE_WIDTH = 1;
     protected MultiCompetitorRaceDataDTO chartData;
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected Chart chart;
     private boolean compactChart;
-    private int chartHeight;
     protected final AbsolutePanel busyIndicatorPanel;
     protected final Label noCompetitorsSelectedLabel;
     protected final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
@@ -88,7 +88,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow, int chartHeight, boolean compactChart) {
+            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow, boolean compactChart) {
         this.stringMessages = stringMessages;
     	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
@@ -100,10 +100,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         this.dataToShow = dataToShow;
         chartData = null;
         this.compactChart = compactChart;
-        this.chartHeight = chartHeight;
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
+        setSize("100%", "100%");
 
         noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
@@ -116,7 +116,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                busyIndicatorPanel.setSize("100%", "400px");
+                busyIndicatorPanel.setSize("100%", "100%");
                 busyIndicatorPanel.add(busyIndicator, busyIndicatorPanel.getOffsetWidth() / 2, busyIndicatorPanel.getOffsetHeight() / 2);
             }
         });
@@ -141,7 +141,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setWidth100()
-                .setHeight(chartHeight)
+                .setHeight100()
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
@@ -157,7 +157,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         });
         
         final String unit = getUnit();
-        chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
+        if(!compactChart)
+            chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
+        else
+            chart.getYAxis().setAxisTitleText("["+unit+"]");
         chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis().setReversed((dataToShow == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || 
                                       dataToShow == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true : false);
@@ -182,11 +185,11 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         }));
         
         if (compactChart) {
-            chart.setSpacingBottom(4).setSpacingLeft(0).setSpacingRight(0).setSpacingTop(2)
+            chart.setSpacingBottom(4).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
                  .setLegend(new Legend().setMargin(2))
                  .setOption("title/margin", 5)
                  .setChartSubtitle(null)
-                 .getXAxis().setAxisTitle(null);
+                 .getXAxis().setAxisTitleText(null);
         }
         
         setChartData(null);
@@ -558,6 +561,13 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     && (newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
                 loadData(false);
             }
+        }
+    }
+
+    @Override
+    public void onResize() {
+        if(getChartData() != null) {
+            chart.setSizeToMatchContainer();
         }
     }
 }

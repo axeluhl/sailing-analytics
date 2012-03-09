@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -41,7 +43,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  * {@link #addEvent(URL, URI, URI, WindStore, long)} call will have no effect, even if a different
  * {@link WindStore} is requested.<p>
  * 
- * TODO When the tracking of a race/event is {@link #stopTracking(Event, RaceDefinition) stopped}, the next
+ * When the tracking of a race/event is {@link #stopTracking(Event, RaceDefinition) stopped}, the next
  * time it's started to be tracked, a new {@link TrackedRace} at least will be constructed. This also
  * means that when a {@link TrackedEvent} exists that still holds other {@link TrackedRace}s, the
  * no longer tracked {@link TrackedRace} will be removed from the {@link TrackedEvent}.
@@ -52,6 +54,10 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  *
  */
 public interface RacingEventService extends TrackedEventRegistry {
+    /**
+     * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
+     *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
+     */
     Iterable<Event> getAllEvents();
 
     Event getEventByName(String name);
@@ -111,6 +117,15 @@ public interface RacingEventService extends TrackedEventRegistry {
      *            that race is stopped; use -1 to wait forever
      */
     RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException;
+
+    /**
+     * Same as {@link #addTracTracRace(URL, URI, URI, WindStore, long)}, only that start and end of tracking are
+     * specified which may help reducing the amount of stored data (particularly mark positions) that needs to be
+     * loaded.
+     */
+    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, TimePoint trackingStartTime,
+            TimePoint trackingEndTime, WindStore windStore, long timeoutForReceivingRaceDefinitionInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException;
 
     /**

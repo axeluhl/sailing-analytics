@@ -44,7 +44,7 @@ public class RaceRecord {
         TimePoint tp = null;
         if (trackingstarttime != null) {
             try {
-                tp = new MillisecondsTimePoint(DateParser.parse(trackingstarttime).getTime());
+                tp = new MillisecondsTimePoint(DateParser.parseUTC(trackingstarttime).getTime());
             } catch (InvalidDateException e) {
                 logger.warning("Unable to parse trackingstarttime of race "+name+": "+trackingstarttime+". Leaving null.");
             }
@@ -53,7 +53,7 @@ public class RaceRecord {
         tp = null;
         if (trackingendtime != null) {
             try {
-                tp = new MillisecondsTimePoint(DateParser.parse(trackingendtime).getTime());
+                tp = new MillisecondsTimePoint(DateParser.parseUTC(trackingendtime).getTime());
             } catch (InvalidDateException e) {
                 logger.warning("Unable to parse trackingendtime of race "+name+": "+trackingendtime+". Leaving null.");
             }
@@ -62,7 +62,7 @@ public class RaceRecord {
         tp = null;
         if (racestarttime != null) {
             try {
-                tp = new MillisecondsTimePoint(DateParser.parse(racestarttime).getTime());
+                tp = new MillisecondsTimePoint(DateParser.parseUTC(racestarttime).getTime());
             } catch (InvalidDateException e) {
                 logger.warning("Unable to parse racestarttime of race "+name+": "+racestarttime+". Leaving null.");
             }
