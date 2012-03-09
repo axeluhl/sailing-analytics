@@ -109,7 +109,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             }
         }
         for (Receiver receiver : receivers) {
-            receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 5000l);
+            receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 60000l);
         }
         for (Receiver receiver : receivers) {
             receiver.join();
