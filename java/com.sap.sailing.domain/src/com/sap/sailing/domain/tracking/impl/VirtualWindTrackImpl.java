@@ -20,8 +20,8 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 public abstract class VirtualWindTrackImpl extends WindTrackImpl {
     private final TrackedRace trackedRace;
     
-    protected VirtualWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage) {
-        super(millisecondsOverWhichToAverage);
+    protected VirtualWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence) {
+        super(millisecondsOverWhichToAverage, baseConfidence);
         this.trackedRace = trackedRace;
     }
     

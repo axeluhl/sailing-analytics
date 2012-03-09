@@ -14,8 +14,8 @@ import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl.Es
 public class CombinedWindTrackImpl extends VirtualWindTrackImpl {
     private CombinedWindAsNavigableSet virtualInternalRawFixes;
     
-    public CombinedWindTrackImpl(TrackedRace trackedRace) {
-        super(trackedRace, /* millisecondsOverWhichToAverage not used, see overridden method */ -1);
+    public CombinedWindTrackImpl(TrackedRace trackedRace, double baseConfidence) {
+        super(trackedRace, /* millisecondsOverWhichToAverage not used, see overridden method */ -1, baseConfidence);
         virtualInternalRawFixes = new CombinedWindAsNavigableSet(this, trackedRace, /* resolutionInMilliseconds */ 10000l);
     }
 
