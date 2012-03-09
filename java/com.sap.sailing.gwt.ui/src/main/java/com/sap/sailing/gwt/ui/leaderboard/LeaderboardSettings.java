@@ -2,8 +2,9 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.List;
 
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 
 public class LeaderboardSettings {
     private final List<RaceInLeaderboardDTO> raceColumnsToShow;
@@ -14,9 +15,17 @@ public class LeaderboardSettings {
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final long delayInMilliseconds;
     
+    /**
+     * An optional sort column; if <code>null</code>, the leaderboard sorting won't be touched when updating the settings.
+     * Otherwise, the leaderboard will be sorted by this column (ascending if {@link #sortAscending}, descending otherwise.
+     */
+    private final SortableColumn<LeaderboardRowDTO, ?> sortByColumn;
+    private final boolean sortAscending;
+    
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
-            List<DetailType> raceDetailsToShow, List<RaceInLeaderboardDTO> raceColumnsToShow, boolean autoExpandFirstRace,
-            long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds) {
+            List<DetailType> raceDetailsToShow, List<RaceInLeaderboardDTO> raceColumnsToShow,
+            boolean autoExpandFirstRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
+            SortableColumn<LeaderboardRowDTO, ?> sortByColumn, boolean sortAscending) {
         this.legDetailsToShow = legDetailsToShow;
         this.raceDetailsToShow = raceDetailsToShow;
         this.raceColumnsToShow = raceColumnsToShow;
@@ -24,6 +33,8 @@ public class LeaderboardSettings {
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
         this.maneuverDetailsToShow = meneuverDetailsToShow;
+        this.sortByColumn = sortByColumn;
+        this.sortAscending = sortAscending;
     }
   
     public List<DetailType> getManeuverDetailsToShow() {
@@ -38,6 +49,10 @@ public class LeaderboardSettings {
         return raceDetailsToShow;
     }
     
+    /**
+     * If <code>null</code>, this is to mean that the race columns should not be modified by
+     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
+     */
     public List<RaceInLeaderboardDTO> getRaceColumnsToShow(){
         return raceColumnsToShow;
     }
@@ -53,4 +68,13 @@ public class LeaderboardSettings {
     public long getDelayInMilliseconds() {
         return delayInMilliseconds;
     }
+
+    public SortableColumn<LeaderboardRowDTO, ?> getSortByColumn() {
+        return sortByColumn;
+    }
+
+    public boolean isSortAscending() {
+        return sortAscending;
+    }
+
 }

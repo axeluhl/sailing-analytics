@@ -926,6 +926,9 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         }
     }
 
+    /**
+     * @return The last shown GPS fix for the given competitor
+     */
     protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO) {
         return fixes.get(competitorDTO).get(lastShownFix.get(competitorDTO));
     }
@@ -1139,21 +1142,23 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                 competitors = isZoomOnlyToSelectedCompetitors() ? selectedCompetitors : forMap.getCompetitorsToShow();
             }
             for (CompetitorDTO competitor : competitors) {
-                List<GPSFixDTO> competitorFixes = forMap.fixes.get(competitor);
-                Integer lastShownFixForCompetitor = forMap.lastShownFix.get(competitor);
-                GPSFixDTO competitorFix = competitorFixes != null && lastShownFixForCompetitor != null ? competitorFixes.get(lastShownFixForCompetitor) : null;
-                PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
-                LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
-                        competitorPosition.lngDeg) : null;
-                LatLngBounds bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng,
-                        competitorLatLng) : null;
-                if (bounds != null) {
-                    if (newBounds == null) {
-                        newBounds = bounds;
-                    } else {
-                        newBounds.extend(bounds.getNorthEast());
-                        newBounds.extend(bounds.getSouthWest());
+                try {
+                    GPSFixDTO competitorFix = forMap.getBoatFix(competitor);
+                    PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
+                    LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
+                            competitorPosition.lngDeg) : null;
+                    LatLngBounds bounds = competitorLatLng != null ? LatLngBounds.newInstance(competitorLatLng,
+                            competitorLatLng) : null;
+                    if (bounds != null) {
+                        if (newBounds == null) {
+                            newBounds = bounds;
+                        } else {
+                            newBounds.extend(bounds.getNorthEast());
+                            newBounds.extend(bounds.getSouthWest());
+                        }
                     }
+                } catch (IndexOutOfBoundsException e) {
+                    //Catch this in case the competitor has no GPS fixes at the current time (e.g. in race 'Finale 2' of STG)
                 }
             }
             return newBounds;
