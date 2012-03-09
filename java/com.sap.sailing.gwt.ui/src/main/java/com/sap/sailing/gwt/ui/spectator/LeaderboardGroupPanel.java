@@ -55,17 +55,19 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private ErrorReporter errorReporter;
     private LeaderboardGroupDTO group;
     private String root;
+    private String viewMode;
     
     private FlowPanel mainPanel;
     private Widget welcomeWidget = null;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
-            ErrorReporter errorReporter, final String groupName, String root) {
+            ErrorReporter errorReporter, final String groupName, String root, String viewMode) {
         super();
         this.sailingService = sailingService;
         this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
         this.root = root;
+        this.viewMode = viewMode;
         if (this.root == null || this.root.length() == 0) {
             this.root = "leaderboardGroupPanel";
         }
@@ -187,15 +189,21 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         String displayName = race.getRaceColumnName();
         if (race.getRaceColumnName().equals(stringConstants.overview())) {
             String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
-                    + "&leaderboardGroupName=" + group.name + "&root=" + root
-                    + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                    + "&leaderboardGroupName=" + group.name + "&root=" + root);
+            if(debugParam != null && !debugParam.isEmpty())
+                link += "&gwt.codesvr=" + debugParam;
+            if(viewMode != null && !viewMode.isEmpty())
+                link += "&viewMode=" + viewMode;
             b.append(ANCHORTEMPLATE.anchor(link, displayName, STYLE_NAME_PREFIX + "ActiveLeaderboard"));
         } else {
             if (race.getRaceIdentifier() != null) {
                 EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
                 String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + raceId.getRaceName()
-                        + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName=" + group.name + "&root=" + root
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                        + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName=" + group.name + "&root=" + root);
+                if(debugParam != null && !debugParam.isEmpty())
+                    link += "&gwt.codesvr=" + debugParam;
+                if(viewMode != null && !viewMode.isEmpty())
+                    link += "&viewMode=" + viewMode;
                 b.append(ANCHORTEMPLATE.anchor(link, displayName, STYLE_NAME_PREFIX + "ActiveRace"));
             } else {
                 b.append(TEXTTEMPLATE.textWithClass(race.getRaceColumnName(), STYLE_NAME_PREFIX + "InactiveRace"));
@@ -213,8 +221,11 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
                 String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
                         + "&raceName=" + raceId.getRaceName() + "&root=" + root + raceId.getRaceName() + "&eventName="
-                        + raceId.getEventName() + "&leaderboardGroupName=" + group.name
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                        + raceId.getEventName() + "&leaderboardGroupName=" + group.name);
+                if(debugParam != null && !debugParam.isEmpty())
+                    link += "&gwt.codesvr=" + debugParam;
+                if(viewMode != null && !viewMode.isEmpty())
+                    link += "&viewMode=" + viewMode;
                 b.append(ANCHORTEMPLATE.anchor(link, race.getRaceColumnName(), STYLE_NAME_PREFIX + "ActiveRace"));
             } else {
                 if (!first) {
