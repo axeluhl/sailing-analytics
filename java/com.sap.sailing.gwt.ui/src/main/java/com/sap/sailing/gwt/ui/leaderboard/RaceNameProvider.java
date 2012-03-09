@@ -14,5 +14,5 @@ package com.sap.sailing.gwt.ui.leaderboard;
  *
  */
 public interface RaceNameProvider {
-    String getRaceName();
+    String getRaceColumnName();
 }
