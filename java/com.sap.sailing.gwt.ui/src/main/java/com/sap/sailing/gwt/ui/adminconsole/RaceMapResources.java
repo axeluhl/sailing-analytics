@@ -57,6 +57,11 @@ public class RaceMapResources {
      */
     protected ImageTransformer boatIconHighlightedStarboardTransformer;
 
+    /**
+     * An arrow showing the combined wind depending on the wind direction 
+     */
+    protected ImageTransformer combinedWindIconTransformer;
+    
     protected Icon buoyIcon;
     
     protected Map<Pair<ManeuverType, Tack>, Icon> maneuverIconsForTypeAndTargetTack;
@@ -76,6 +81,7 @@ public class RaceMapResources {
         boatIconHighlightedPortTransformer = new ImageTransformer(resources.highlightedBoatIcon_Port());
         boatIconStarboardTransformer = new ImageTransformer(resources.lowlightedBoatIcon_Starboard());
         boatIconHighlightedStarboardTransformer = new ImageTransformer(resources.highlightedBoatIcon_Starboard());
+        combinedWindIconTransformer = new ImageTransformer(resources.windDirectionIcon());
     }
     
     /**
@@ -174,6 +180,10 @@ public class RaceMapResources {
         }
     }
 
+    public ImageTransformer getCombinedWindIconTransformer() {
+        return combinedWindIconTransformer;
+    }
+    
     public String getBoatImageURL(GPSFixDTO boatFix, boolean highlighted) {
         return getBoatImageURL(getBoatImageTransformer(boatFix, highlighted), boatFix);
     }

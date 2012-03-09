@@ -19,7 +19,10 @@ public class LeaderboardSettingsFactory {
         return instance;
     }
 
-    public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode) {
+    /**
+     * @param nameOfRaceToSort if <code>null</code>, don't sort any race column
+     */
+    public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort) {
         LeaderboardSettings settings = null;
         switch (playMode) {
             case Live:  
@@ -36,8 +39,8 @@ public class LeaderboardSettingsFactory {
                 raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails,
                         /* don't change raceColumns */ null, true,
-                        /* refresh interval */ 3000l, /* delay to live */ 5000l,
-                        /* sort by column */ null, /* ascending */ true);
+                        /* refresh interval */ null, /* delay to live */ null,
+                        /* name of race to sort*/ nameOfRaceToSort, /* ascending */ true);
                 break;
             case Replay:
                 settings = createNewDefaultSettings(true);
@@ -59,7 +62,7 @@ public class LeaderboardSettingsFactory {
         raceDetails.add(DetailType.DISPLAY_LEGS);
         ArrayList<RaceInLeaderboardDTO> raceColumns = new ArrayList<RaceInLeaderboardDTO>();
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, raceColumns, autoExpandFirstRace,
-                /* refresh interval */ 3000l, /* delay to live */ 5000l,
+                /* refresh interval */ null, /* delay to live */ null,
                 /* sort by column */ null, /* ascending */ true);
     }
 }
