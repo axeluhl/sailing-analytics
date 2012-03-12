@@ -95,14 +95,21 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         availableGroups = new ArrayList<LeaderboardGroupDTO>();
+        
+        LeaderboardGroupOverviewTableResources tableResources = GWT.create(LeaderboardGroupOverviewTableResources.class);
 
         FlowPanel mainPanel = new FlowPanel();
         this.setWidget(mainPanel);
         mainPanel.setSize("100%", "100%");
         
-        LeaderboardGroupOverviewTableResources tableResources = GWT.create(LeaderboardGroupOverviewTableResources.class);
+        mainPanel.add(createSearchGUI());
+        mainPanel.add(createGroupsGUI(tableResources));
+        mainPanel.add(createDetailsGUI(tableResources));
         
-        // Build search GUI
+        loadGroups();
+    }
+    
+    private CollapsablePanel createSearchGUI() {
         FlowPanel searchPanel = new FlowPanel();
         searchPanel.setWidth("100%");
         
@@ -111,7 +118,6 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         collapsableSearchPanel.setCollapsingEnabled(false);
         collapsableSearchPanel.setOpen(true);
         collapsableSearchPanel.setWidth("100%");
-        mainPanel.add(collapsableSearchPanel);
         
         Label locationLabel = new Label(this.stringMessages.location() + ":");
         locationLabel.setStyleName(STYLE_NAME_PREFIX + "searchLabel");
@@ -184,7 +190,10 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         });
         searchPanel.add(untilTextBox);
         
-        //Build group GUI
+        return collapsableSearchPanel;
+    }
+    
+    private CollapsablePanel createGroupsGUI(LeaderboardGroupOverviewTableResources tableResources) {
         FlowPanel groupPanel = new FlowPanel();
         groupPanel.setStyleName(STYLE_NAME_PREFIX + "groupPanel");
         
@@ -192,7 +201,6 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         collapsableGroupPanel.setContent(groupPanel);
         collapsableGroupPanel.setOpen(true);
         collapsableGroupPanel.setWidth("100%");
-        mainPanel.add(collapsableGroupPanel);
         
         TextColumn<LeaderboardGroupDTO> groupsLocationColumn = new TextColumn<LeaderboardGroupDTO>() {
             @Override
@@ -292,14 +300,16 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         });
         groupsTable.addColumnSortHandler(groupsListHandler);
         
-        //Build details GUI
+        return collapsableGroupPanel;
+    }
+
+    private CollapsablePanel createDetailsGUI(LeaderboardGroupOverviewTableResources tableResources) {
         FlowPanel detailsPanel = new FlowPanel();
         detailsPanel.setStyleName(STYLE_NAME_PREFIX + "detailsPanel");
         
         collapsableDetailsPanel = new CollapsablePanel(this.stringMessages.details(), false);
         collapsableDetailsPanel.setContent(detailsPanel);
         collapsableDetailsPanel.setWidth("100%");
-        mainPanel.add(collapsableDetailsPanel);
         
         noGroupSelectedLabel = new Label(this.stringMessages.noGroupSelected());
         detailsPanel.add(noGroupSelectedLabel);
@@ -443,8 +453,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         racesDataProvider = new ListDataProvider<RaceInLeaderboardDTO>();
         racesDataProvider.addDataDisplay(racesTable);
         
-        //Loading the data
-        loadGroups();
+        return collapsableDetailsPanel;
     }
 
     private void loadGroups() {
