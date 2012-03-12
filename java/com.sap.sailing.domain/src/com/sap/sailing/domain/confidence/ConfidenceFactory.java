@@ -15,7 +15,10 @@ public interface ConfidenceFactory {
      */
     <ValueType, BaseType, RelativeTo> ConfidenceBasedAverager<ValueType, BaseType, RelativeTo> createAverager(Weigher<RelativeTo> weigher);
     
+    <RelativeTo> ConfidenceBasedWindAverager<RelativeTo> createWindAverager(Weigher<RelativeTo> weigher);
+
     <RelativeTo> Weigher<RelativeTo> createConstantWeigher(double constantConfidence);
+
     /**
      * Creates a weigher for time points. With increasing time difference the weight/confidence decreases exponentially.
      * It is halved every <code>halfConfidenceAfterMilliseconds</code> milliseconds.

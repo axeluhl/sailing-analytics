@@ -14,7 +14,7 @@ public class WindWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Scalab
 
     @Override
     public ScalableWind getScalableValue() {
-        return new ScalableWind(getObject(), useSpeed, /* speedConfidenceSum */ useSpeed?1.0:0.0);
+        return new ScalableWind(getObject(), useSpeed);
     }
 
     @Override

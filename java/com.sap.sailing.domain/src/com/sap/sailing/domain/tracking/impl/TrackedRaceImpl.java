@@ -52,7 +52,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
+import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.Weigher;
@@ -571,8 +571,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 return weigher.getConfidence(fix.getB(), request.getB());
             }
         };
-        ConfidenceBasedAverager<ScalableWind, Wind, Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
-                .createAverager(timeWeigherThatPretendsToAlsoWeighPositions);
+        ConfidenceBasedWindAverager<Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
+                .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
         List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
         for (WindSource windSource : getWindSources()) {
             if (!Util.contains(windSourcesToExclude, windSource)) {
