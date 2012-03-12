@@ -117,13 +117,19 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         currentRace = null;
     }
     
+    private void showRaceBoard() {
+        setWidget(raceBoardPanel);
+        //Setting the size or the race board wouldn't be displayed
+        raceBoardPanel.setSize("100%", "100%");
+    }
+    
     @Override
     public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfo) {
         if (currentRace == null) {
             currentRace = getFirstStartedAndUnfinishedRace();
             if (currentRace != null) {
                 raceBoardPanel = createRaceBoardPanel(leaderboard.name, currentRace);
-                setWidget(raceBoardPanel);
+                showRaceBoard();
             } else {
                 showLeaderboard();
             }
