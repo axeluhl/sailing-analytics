@@ -2,7 +2,8 @@ package com.sap.sailing.gwt.ui.spectator;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
@@ -47,11 +48,11 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         rootPanel.add(logoAndTitlePanel);
         
-        FormPanel panelToDisplay = null;
+        Panel panelToDisplay = null;
         if (groupName == null) {
-            //TODO Enable code below, when the LeaderboardGroupOverviewPanel was styled
-//            panelToDisplay = new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages);
-            Window.alert("No leaderboard group name was given.");
+            panelToDisplay = new FlowPanel(); // outer div which centered page content
+            panelToDisplay.addStyleName("contentOuterPanel");
+            panelToDisplay.add(new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages));
         } else {
             panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root, viewModeParamValue);
             LeaderboardGroupPanel groupPanel = (LeaderboardGroupPanel) panelToDisplay;
@@ -62,9 +63,8 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
                             " the leader board displays information such as in-race ranking, average speeds, distance travelled, ETA" +
                             " (estimated time of arrival at the next mark rounding), gaps to leader, gains and losses per leg.\n\n" +
                             "Check out the results for yourself to see who triumphed - and how they did it."));
-            rootPanel.add(panelToDisplay);
         }
-//        rootPanel.add(panelToDisplay);
+        rootPanel.add(panelToDisplay);
 
         fillEvents();
     }
