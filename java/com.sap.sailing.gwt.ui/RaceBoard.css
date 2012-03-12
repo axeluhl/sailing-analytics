@@ -1,4 +1,5 @@
 @import url(fontface.css);
+@import url(CommonControls.css);
 
 /** Add css rules here for your application. */
 /*
@@ -183,7 +184,7 @@ input.magnifier {
 
 .raceBoardNavigation {
 	float: right;
-	margin: 26px 0 0 0;
+	margin:6px 0 0 0;
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
@@ -252,3 +253,4 @@ input.magnifier {
 .errorLabel {
 	color: #FF0000;
 }
+

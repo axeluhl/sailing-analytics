@@ -991,10 +991,10 @@ public class RaceMap extends FlowPanel implements TimeListener, CompetitorSelect
     }
 
     /**
-     * @return The last shown GPS fix for the given competitor
+     * @return The last shown GPS fix for the given competitor, or <code>null</code> if no fix is available
      */
     protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO) {
-        return fixes.get(competitorDTO).get(lastShownFix.get(competitorDTO));
+        return fixes.containsKey(competitorDTO) ? fixes.get(competitorDTO).get(lastShownFix.get(competitorDTO)) : null;
     }
 
     /**
