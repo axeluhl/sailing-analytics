@@ -23,7 +23,7 @@ public class EmptyWindStore implements WindStore {
             return new TrackBasedEstimationWindTrackImpl(trackedRace, millisecondsOverWhichToAverage,
                     WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence());
         default:
-            return new WindTrackImpl(millisecondsOverWhichToAverage);
+            return new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().useSpeed());
         }
     }
 

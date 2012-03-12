@@ -785,13 +785,20 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             Iterator<MarkPassing> iterator = markPassings.iterator();
                             long currentTimeToCheck = 0;
                             int enoughCompetitors = markPassingsCount / 2;
+                            int maxCompetitors = 0;
+                            long maxCompetitorsFirstPassingTime = 0;
                             int currentCompetitorsInTime = 0;
 
                             while (iterator.hasNext()) {
                                 MarkPassing currentMarkPassing = iterator.next();
                                 long diff = currentMarkPassing.getTimePoint().asMillis() - currentTimeToCheck;
                                 if (diff > maxTimeFrameInMs) {
-                                    // reset the check
+                                    // reset the check, but save the amount of competitors as a fallback solution
+                                    if(currentCompetitorsInTime > maxCompetitors)
+                                    {
+                                        maxCompetitors = currentCompetitorsInTime;
+                                        maxCompetitorsFirstPassingTime = currentTimeToCheck;
+                                    }
                                     currentCompetitorsInTime = 0;
                                     currentTimeToCheck = currentMarkPassing.getTimePoint().asMillis();
                                 } else {
@@ -807,6 +814,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                     }
                                 }
                             }
+                            // if we didn't find a start time we use the first passing time of the largest competitor group as fallback
+                            if(raceTimesInfo.startOfRace == null)
+                                raceTimesInfo.setStartOfRace(new Date(maxCompetitorsFirstPassingTime));
                         }
                     }
                 }

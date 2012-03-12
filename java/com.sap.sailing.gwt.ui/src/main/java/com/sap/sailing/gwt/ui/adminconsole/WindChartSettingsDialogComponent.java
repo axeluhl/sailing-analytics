@@ -11,15 +11,19 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class WindChartSettingsDialogComponent implements SettingsDialogComponent<WindChartSettings> {
     private final WindChartSettings initialSettings;
     private final Map<WindSourceType, CheckBox> checkboxes;
+    private final StringMessages stringMessages;
     
-    public WindChartSettingsDialogComponent(WindChartSettings initialSettings) {
+    public WindChartSettingsDialogComponent(WindChartSettings initialSettings, StringMessages stringMessages) {
         super();
+        this.stringMessages = stringMessages;
         this.initialSettings = initialSettings;
         checkboxes = new LinkedHashMap<WindSourceType, CheckBox>();
     }
@@ -28,7 +32,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
         for (WindSourceType windSourceType : WindSourceType.values()) {
-            CheckBox checkbox = dialog.createCheckbox(windSourceType.name());
+            CheckBox checkbox = dialog.createCheckbox(WindSourceTypeFormatter.format(windSourceType, stringMessages));
             checkboxes.put(windSourceType, checkbox);
             checkbox.setValue(initialSettings.getWindSourceTypesToDisplay().contains(windSourceType));
             vp.add(checkbox);

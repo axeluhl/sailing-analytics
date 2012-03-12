@@ -42,21 +42,26 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     private final double baseConfidence;
     
     private long millisecondsOverWhichToAverage;
+    
+    private final boolean useSpeed;
+    
     private final Set<WindListener> listeners;
 
-    public WindTrackImpl(long millisecondsOverWhichToAverage) {
-        this(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE);
+    public WindTrackImpl(long millisecondsOverWhichToAverage, boolean useSpeed) {
+        this(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, useSpeed);
     }
     
     /**
      * @param baseConfidence
      *            the confidence to attribute to the raw wind fixes in this track
+     * @param useSpeed TODO
      */
-    public WindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence) {
+    public WindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence, boolean useSpeed) {
         super(new ArrayListNavigableSet<Timed>(WindComparator.INSTANCE));
         this.baseConfidence = baseConfidence;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         listeners = new HashSet<WindListener>();
+        this.useSpeed = useSpeed;
     }
     
     @Override
@@ -213,7 +218,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
             SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, average == null ? null : average.getObject());
             return new WindWithConfidenceImpl<Pair<Position,TimePoint>>(new WindImpl(p, at, avgWindSpeed), average.getConfidence(),
-                    new Pair<Position, TimePoint>(p, at));
+                    new Pair<Position, TimePoint>(p, at), useSpeed);
         }
     }
 

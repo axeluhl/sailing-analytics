@@ -93,7 +93,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     @Override
     public WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage) {
-        WindTrack result = new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().getBaseConfidence());
+        WindTrack result = new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().getBaseConfidence(), windSource.getType().useSpeed());
         try {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.EVENT_NAME.name(), event.getName());
@@ -289,7 +289,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
                 WindTrack track = result.get(windSource);
                 if (track == null) {
-                    track = new WindTrackImpl(millisecondsOverWhichToAverageWind, windSource.getType().getBaseConfidence());
+                    track = new WindTrackImpl(millisecondsOverWhichToAverageWind, windSource.getType().getBaseConfidence(),
+                            windSource.getType().useSpeed());
                     result.put(windSource, track);
                 }
                 track.add(wind);

@@ -40,7 +40,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
-    private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000);
+    private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true);
     
     public WindTrack getWindTrack() {
         return windTrack;
