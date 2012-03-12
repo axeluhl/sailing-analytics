@@ -101,7 +101,8 @@ public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
     public Wind divide(double divisor) {
         // TODO this is ugly; if we need to keep the confidence sum for speed in the scalable object, we should also keep the confidence sum for all other values in the scalable value
         Bearing resultBearing = scalableSpeedWithBearing.divide(divisor).getBearing();
-        double resultSpeedInKnots = scalableSpeedWithBearing.divide(1.0).getKnots() / speedConfidenceSum;
+        // avoid NPE in case we've only averaged wind fixes that have useSpeed==false
+        double resultSpeedInKnots = scalableSpeedWithBearing.divide(1.0).getKnots() / (speedConfidenceSum==0.0?divisor:speedConfidenceSum);
         return new WindImpl(scalablePosition == null ? null : scalablePosition.divide(divisor), new MillisecondsTimePoint(
                 (long) (scaledTimePointSumInMilliseconds / divisor)),
                 new KnotSpeedWithBearingImpl(resultSpeedInKnots, resultBearing));
