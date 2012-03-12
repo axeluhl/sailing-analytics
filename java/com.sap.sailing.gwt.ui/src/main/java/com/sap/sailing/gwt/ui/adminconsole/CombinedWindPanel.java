@@ -4,40 +4,48 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
-public class CombinedWindPanel extends SimplePanel implements TimeListener, RaceSelectionChangeListener {
+public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSelectionChangeListener {
     private ImageTransformer transformer;
     private RaceMapResources imageResources;
     
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-
+    private final StringMessages stringMessages;
+    
     private final Timer timer;
 
     private List<String> windSourceTypeNames;
     
     private List<RaceIdentifier> selectedRaces;
 
-    private Image windSymbolImage;
+    private final Image windSymbolImage;
+    private final Label textLabel;
     
-    public CombinedWindPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer theTimer) {
-        this.setSize("32px", "32px");
+    public CombinedWindPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages, Timer theTimer) {
+        this.setSize("32px", "52px");
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        this.stringMessages = stringMessages;
         this.timer = theTimer;
         timer.addTimeListener(this);
 
@@ -49,7 +57,14 @@ public class CombinedWindPanel extends SimplePanel implements TimeListener, Race
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
         
         windSymbolImage = new Image();
-        setWidget(windSymbolImage);
+        add(windSymbolImage);
+        
+        textLabel = new Label("");
+        textLabel.setSize("32px", "12px");
+        textLabel.getElement().getStyle().setFontSize(12, Unit.PX);
+        textLabel.setWordWrap(false);
+        textLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        add(textLabel);
     }
 
     @Override
@@ -90,11 +105,14 @@ public class CombinedWindPanel extends SimplePanel implements TimeListener, Race
                     {
                         if(windTrackInfoDTO.windFixes.size() > 0) {
                             WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-                            // double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
+                            double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
                             double windFromDeg = windDTO.dampenedTrueWindFromDeg;
-
+                            NumberFormat numberFormat = NumberFormat.getFormat("0.0");
+                            
                             String transformedImageURL = transformer.getTransformedImageURL(windFromDeg, 1.0);
                             windSymbolImage.setUrl(transformedImageURL);
+                            windSymbolImage.setTitle(Math.round(windFromDeg) + " " + stringMessages.degreesShort());
+                            textLabel.setText(numberFormat.format(speedInKnots) + " kn");
                             
                             if(!isVisible())
                                 setVisible(true);
