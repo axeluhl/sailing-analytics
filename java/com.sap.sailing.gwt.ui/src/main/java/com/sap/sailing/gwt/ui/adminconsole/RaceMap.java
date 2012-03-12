@@ -40,7 +40,7 @@ import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -48,7 +48,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapZoomSettings.ZoomTypes;
@@ -71,13 +70,10 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
-import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
-import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class RaceMap extends FlowPanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
+public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
     protected MapWidget map;
 
@@ -115,10 +111,6 @@ public class RaceMap extends FlowPanel implements TimeListener, CompetitorSelect
 
     private final Map<MarkDTO, Marker> buoyMarkers;
 
-    private Marker combinedWindMarker;
-    
-    private int combinedWindMarkerPosX;
-    private int combinedWindMarkerPosY;
     /**
      * markers displayed in response to
      * {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
@@ -207,16 +199,13 @@ public class RaceMap extends FlowPanel implements TimeListener, CompetitorSelect
         fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         this.competitorSelection = competitorSelection;
         competitorSelection.addCompetitorSelectionChangeListener(this);
-        combinedWindMarkerPosX = 30;
-        combinedWindMarkerPosY = 30;
         settings = new RaceMapSettings();
         lastTimeChangeBeforeInitialization = null;
         dataInitialized = false;
         initializeData();
         
         windPanel = new CombinedWindPanel(sailingService, errorReporter, timer);
-//        windPanel.setVisible(false);
-        add(windPanel);
+        windPanel.setVisible(false);
     }
 
     public double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
@@ -244,7 +233,9 @@ public class RaceMap extends FlowPanel implements TimeListener, CompetitorSelect
                 // Add the map to the HTML host page
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
-                RaceMap.this.add(map);
+                RaceMap.this.add(map, 0, 0);
+                RaceMap.this.add(windPanel, 10, 10);
+
                 map.setSize("100%", "100%");
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
@@ -367,23 +358,6 @@ public class RaceMap extends FlowPanel implements TimeListener, CompetitorSelect
                     sailingService.getBoatPositions(race, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, getBoatsCallback);
                     sailingService.getMarkPositions(race, date, getMarksCallback);
                     sailingService.getQuickRanks(race, date, getQuickRanksCallback);
-
-                    // draw the wind into the map, get the combined wind
-//                    List<String> windSourceTypeNames = new ArrayList<String>();
-//                    windSourceTypeNames.add(WindSourceType.COMBINED.name());
-//                    windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
-//                    sailingService.getWindInfo(race, date, 1000L, 1, 0.0, 0.0, null,
-//                            new AsyncCallback<WindInfoForRaceDTO>() {
-//                                @Override
-//                                public void onFailure(Throwable caught) {
-//                                    errorReporter.reportError("Error obtaining wind: " + caught.getMessage());
-//                                }
-//
-//                                @Override
-//                                public void onSuccess(WindInfoForRaceDTO windInfoForRaceDTO) {
-//                                    showWindOnMap(windInfoForRaceDTO);
-//                                }
-//                            });
                 }
             }
         }
@@ -477,58 +451,6 @@ public class RaceMap extends FlowPanel implements TimeListener, CompetitorSelect
                 }
             }
         }
-    }
-
-    protected void showWindOnMap(WindInfoForRaceDTO windInfo) {
-        for(WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
-            WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
-            switch (windSource.getType()) {
-                    case COMBINED:
-                    {
-                        if(windTrackInfoDTO.windFixes.size() > 0) {
-                            WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-                            // double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
-                            double windFromDeg = windDTO.dampenedTrueWindFromDeg;
-
-                            if(combinedWindMarker == null)
-                                createCombinedWindMarker();
-                            
-                            if(map != null && combinedWindMarker != null) {
-                                LatLng windMarkerPositionLatLng = map.convertDivPixelToLatLng(Point.newInstance(combinedWindMarkerPosX, combinedWindMarkerPosY));
-                                combinedWindMarker.setLatLng(windMarkerPositionLatLng);
-
-                                ImageTransformer transformer = imageResources.getCombinedWindIconTransformer();
-                                String transformedImageURL = transformer.getTransformedImageURL(windFromDeg, 1.0);
-                                combinedWindMarker.setImage(transformedImageURL);
-                            }
-                        }
-                    }
-                    break;
-                    case EXPEDITION:
-                    {
-                    }
-                break;
-            }
-        }
-    }
-
-    protected Marker createCombinedWindMarker() {
-        if(map != null && combinedWindMarker == null) {
-            LatLng windMarkerPositionLatLng = map.convertDivPixelToLatLng(Point.newInstance(combinedWindMarkerPosX, combinedWindMarkerPosY));
-            Icon icon = Icon.newInstance();
-            icon.setImageURL(null);
-            icon.setShadowURL(null);
-            MarkerOptions options = MarkerOptions.newInstance(icon);
-            combinedWindMarker = new Marker(windMarkerPositionLatLng, options);
-            combinedWindMarker.addMarkerClickHandler(new MarkerClickHandler() {
-                @Override
-                public void onClick(MarkerClickEvent event) {
-                }
-            });
-
-            map.addOverlay(combinedWindMarker);
-        }
-        return combinedWindMarker;
     }
 
     protected void showMarksOnMap(List<MarkDTO> result) {

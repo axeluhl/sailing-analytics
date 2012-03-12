@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
-public class CombinedWindPanel extends AbsolutePanel implements TimeListener, RaceSelectionChangeListener {
+public class CombinedWindPanel extends SimplePanel implements TimeListener, RaceSelectionChangeListener {
     private ImageTransformer transformer;
     private RaceMapResources imageResources;
     
@@ -35,7 +35,7 @@ public class CombinedWindPanel extends AbsolutePanel implements TimeListener, Ra
     private Image windSymbolImage;
     
     public CombinedWindPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer theTimer) {
-        this.setSize("50px", "50px");
+        this.setSize("32px", "32px");
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.timer = theTimer;
@@ -49,7 +49,7 @@ public class CombinedWindPanel extends AbsolutePanel implements TimeListener, Ra
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
         
         windSymbolImage = new Image();
-        this.add(windSymbolImage);
+        setWidget(windSymbolImage);
     }
 
     @Override
@@ -95,6 +95,11 @@ public class CombinedWindPanel extends AbsolutePanel implements TimeListener, Ra
 
                             String transformedImageURL = transformer.getTransformedImageURL(windFromDeg, 1.0);
                             windSymbolImage.setUrl(transformedImageURL);
+                            
+                            if(!isVisible())
+                                setVisible(true);
+                        } else {
+                            setVisible(false);
                         }
                     }
                     break;
