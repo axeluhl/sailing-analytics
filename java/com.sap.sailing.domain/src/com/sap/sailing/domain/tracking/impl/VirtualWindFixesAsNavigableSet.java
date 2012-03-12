@@ -6,31 +6,32 @@ import java.util.NavigableSet;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl.DummyWind;
 import com.sap.sailing.util.impl.AbstractUnmodifiableNavigableSet;
 import com.sap.sailing.util.impl.DescendingNavigableSet;
 
 /**
- * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}, computed using
- * {@link TrackedRace#getEstimatedWindDirection(com.sap.sailing.domain.base.Position, TimePoint)}. If not constrained
- * by a {@link #from} and/or a {@link #to} time point, an equidistant time field is assumed, starting at
- * {@link TrackedRace#getStart()} and leading up to {@link TrackedRace#getTimePointOfNewestEvent()}. If
- * {@link TrackedRace#getStart()} returns <code>null</code>, {@link Long#MAX_VALUE} is used as the {@link #from}
- * time point, pushing the start to the more or less infinite future ("end of the universe"). If no event was
- * received yet and hence {@link TrackedRace#getTimePointOfNewestEvent()} returns <code>null</code>, the {@link #to}
- * end is assumed to be the beginning of the epoch (1970-01-01T00:00:00).
+ * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}. Subclasses have to specify a resolution and a
+ * way to compute a wind fix for a given time point. If not constrained by a {@link #from} and/or a {@link #to} time
+ * point, an equidistant time field is assumed, starting at {@link TrackedRace#getStart()} and leading up to
+ * {@link TrackedRace#getTimePointOfNewestEvent()}. If {@link TrackedRace#getStart()} returns <code>null</code>,
+ * {@link Long#MAX_VALUE} is used as the {@link #from} time point, pushing the start to the more or less infinite future
+ * ("end of the universe"). If no event was received yet and hence {@link TrackedRace#getTimePointOfNewestEvent()}
+ * returns <code>null</code>, the {@link #to} end is assumed to be the beginning of the epoch (1970-01-01T00:00:00).
  * 
  * @author Axel Uhl (d043530)
  * 
  */
-public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNavigableSet<Wind> {
+public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiableNavigableSet<Wind> {
     /**
      * The time resolution is one second.
      */
-    private static final long RESOLUTION_IN_MILLISECONDS = 1000l;
+    private final long resolutionInMilliseconds;
 
     private final TrackedRace trackedRace;
 
@@ -38,88 +39,97 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
 
     private final TimePoint to;
     
-    private final TrackBasedEstimationWindTrackImpl track;
+    private final WindTrack track;
 
-    public EstimatedWindFixesAsNavigableSet(TrackBasedEstimationWindTrackImpl track, TrackedRace trackedRace) {
-        this(track, trackedRace, null, null);
+    protected VirtualWindFixesAsNavigableSet(WindTrack track, TrackedRace trackedRace, long resolutionInMilliseconds) {
+        this(track, trackedRace, null, null, resolutionInMilliseconds);
     }
     
     public long getResolutionInMilliseconds() {
-        return RESOLUTION_IN_MILLISECONDS;
+        return resolutionInMilliseconds;
     }
 
     /**
-     * @param from expected to be an integer multiple of {@link #RESOLUTION_IN_MILLISECONDS} or <code>null</code>
-     * @param to expected to be an integer multiple of {@link #RESOLUTION_IN_MILLISECONDS} or <code>null</code>
+     * @param from expected to be an integer multiple of {@link #resolutionInMilliseconds} or <code>null</code>
+     * @param to expected to be an integer multiple of {@link #resolutionInMilliseconds} or <code>null</code>
      */
-    private EstimatedWindFixesAsNavigableSet(TrackBasedEstimationWindTrackImpl track, TrackedRace trackedRace,
-            TimePoint from, TimePoint to) {
+    protected VirtualWindFixesAsNavigableSet(WindTrack track, TrackedRace trackedRace,
+            TimePoint from, TimePoint to, long resolutionInMilliseconds) {
         this.track = track;
         this.trackedRace = trackedRace;
-        assert from == null || from.asMillis() % RESOLUTION_IN_MILLISECONDS == 0;
+        assert from == null || from.asMillis() % resolutionInMilliseconds == 0;
         this.from = from;
-        assert to == null || to.asMillis() % RESOLUTION_IN_MILLISECONDS == 0;
+        assert to == null || to.asMillis() % resolutionInMilliseconds == 0;
         this.to = to;
+        this.resolutionInMilliseconds = resolutionInMilliseconds;
+    }
+    
+    protected WindTrack getTrack() {
+        return track;
+    }
+    
+    protected TrackedRace getTrackedRace() {
+        return trackedRace;
     }
 
-    private TimePoint lowerToResolution(Wind w) {
+    protected TimePoint lowerToResolution(Wind w) {
         TimePoint result;
-        final TimePoint timePointOfLastEvent = trackedRace.getTimePointOfLastEvent();
+        final TimePoint timePointOfLastEvent = getTrackedRace().getTimePointOfLastEvent();
         if (timePointOfLastEvent == null) {
             // nothing received yet; "lowering" to end of time
-            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / RESOLUTION_IN_MILLISECONDS
-                    * RESOLUTION_IN_MILLISECONDS);
+            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / getResolutionInMilliseconds()
+                    * getResolutionInMilliseconds());
         } else if (w.getTimePoint().compareTo(timePointOfLastEvent) > 0) {
             result = lowerToResolution(new DummyWind(timePointOfLastEvent));
         } else {
-            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS
-                    * RESOLUTION_IN_MILLISECONDS);
+            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() - 1) / getResolutionInMilliseconds()
+                    * getResolutionInMilliseconds());
         }
         return result;
     }
 
-    private TimePoint floorToResolution(Wind w) {
+    protected TimePoint floorToResolution(Wind w) {
         TimePoint result;
-        final TimePoint timePointOfLastEvent = trackedRace.getTimePointOfLastEvent();
+        final TimePoint timePointOfLastEvent = getTrackedRace().getTimePointOfLastEvent();
         if (timePointOfLastEvent == null) {
             // nothing received yet; "lowering" to end of time
-            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / RESOLUTION_IN_MILLISECONDS
-                    * RESOLUTION_IN_MILLISECONDS);
+            result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / getResolutionInMilliseconds()
+                    * getResolutionInMilliseconds());
         } else if (w.getTimePoint().compareTo(timePointOfLastEvent) > 0) {
             result = floorToResolution(new DummyWind(timePointOfLastEvent));
         } else {
-            result = new MillisecondsTimePoint(w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS
-                    * RESOLUTION_IN_MILLISECONDS);
+            result = new MillisecondsTimePoint(w.getTimePoint().asMillis() / getResolutionInMilliseconds()
+                    * getResolutionInMilliseconds());
         }
         return result;
     }
 
-    private TimePoint ceilingToResolution(Wind w) {
+    protected TimePoint ceilingToResolution(Wind w) {
         TimePoint result;
-        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        final TimePoint startOfTracking = getTrackedRace().getStartOfTracking();
         if (startOfTracking == null) {
             // no start of tracking yet; "ceiling" to beginning of time
             result = new MillisecondsTimePoint(0);
         } else if (w.getTimePoint().compareTo(startOfTracking) < 0) {
             result = ceilingToResolution(new DummyWind(startOfTracking));
         } else {
-            result = new MillisecondsTimePoint(((w.getTimePoint().asMillis() - 1) / RESOLUTION_IN_MILLISECONDS + 1)
-                    * RESOLUTION_IN_MILLISECONDS);
+            result = new MillisecondsTimePoint(((w.getTimePoint().asMillis() - 1) / getResolutionInMilliseconds() + 1)
+                    * getResolutionInMilliseconds());
         }
         return result;
     }
 
-    private TimePoint higherToResolution(Wind w) {
+    protected TimePoint higherToResolution(Wind w) {
         TimePoint result;
-        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        final TimePoint startOfTracking = getTrackedRace().getStartOfTracking();
         if (startOfTracking == null) {
             // no start of tracking yet; "ceiling" to beginning of time
             result = new MillisecondsTimePoint(0);
         } else if (w.getTimePoint().compareTo(startOfTracking) < 0) {
             result = higherToResolution(new DummyWind(startOfTracking));
         } else {
-            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() / RESOLUTION_IN_MILLISECONDS + 1)
-                    * RESOLUTION_IN_MILLISECONDS);
+            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() / getResolutionInMilliseconds() + 1)
+                    * getResolutionInMilliseconds());
         }
         return result;
     }
@@ -131,9 +141,9 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
      * will be returned instead. If no valid start time can be obtained from the race, <code>Long.MAX_VALUE</code> is
      * returned instead.
      */
-    private TimePoint getFrom() {
-        return from == null ? trackedRace.getStart() == null ? new MillisecondsTimePoint(Long.MAX_VALUE)
-                : floorToResolution(new DummyWind(trackedRace.getStart())) : from;
+    protected TimePoint getFrom() {
+        return from == null ? getTrackedRace().getStart() == null ? new MillisecondsTimePoint(Long.MAX_VALUE)
+                : floorToResolution(new DummyWind(getTrackedRace().getStart())) : from;
     }
 
     /**
@@ -143,33 +153,38 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
      * {@link #ceilingToResolution(Wind) ceiled to the resolution of this set} will be returned instead. If no valid
      * time of a newest event can be obtained from the race, <code>MillisecondsTimePoint(1)</code> is returned instead.
      */
-    private TimePoint getTo() {
-        return to == null ? trackedRace.getTimePointOfNewestEvent() == null ? new MillisecondsTimePoint(1)
-                : ceilingToResolution(new DummyWind(trackedRace.getTimePointOfNewestEvent())) : to;
+    protected TimePoint getTo() {
+        return getToInternal() == null ? getTrackedRace().getTimePointOfNewestEvent() == null ? new MillisecondsTimePoint(1)
+                : ceilingToResolution(new DummyWind(getTrackedRace().getTimePointOfNewestEvent())) : getToInternal();
     }
 
     @Override
     public Wind lower(Wind w) {
         TimePoint timePoint = lowerToResolution(w);
-        return timePoint.compareTo(getFrom()) < 0 ? null : track.getEstimatedWindDirection(w.getPosition(), timePoint);
+        return timePoint.compareTo(getFrom()) < 0 ? null : getWind(w.getPosition(), timePoint);
     }
+
+    /**
+     * Compute the {@link Wind} fix for the specified position and time point to deliver in this virtual track.
+     */
+    abstract protected Wind getWind(Position p, TimePoint timePoint);
 
     @Override
     public Wind floor(Wind w) {
         TimePoint timePoint = floorToResolution(w);
-        return timePoint.compareTo(getFrom()) < 0 ? null : track.getEstimatedWindDirection(w.getPosition(), timePoint);
+        return timePoint.compareTo(getFrom()) < 0 ? null : getWind(w.getPosition(), timePoint);
     }
 
     @Override
     public Wind ceiling(Wind w) {
         TimePoint timePoint = ceilingToResolution(w);
-        return timePoint.compareTo(getTo()) > 0 ? null : track.getEstimatedWindDirection(w.getPosition(), timePoint);
+        return timePoint.compareTo(getTo()) > 0 ? null : getWind(w.getPosition(), timePoint);
     }
 
     @Override
     public Wind higher(Wind w) {
         TimePoint timePoint = higherToResolution(w);
-        return timePoint.compareTo(getTo()) > 0 ? null : track.getEstimatedWindDirection(w.getPosition(), timePoint);
+        return timePoint.compareTo(getTo()) > 0 ? null : getWind(w.getPosition(), timePoint);
     }
 
     @Override
@@ -185,7 +200,7 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
             @Override
             public Wind next() {
                 Wind result = floor(new DummyWind(timePoint));
-                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + RESOLUTION_IN_MILLISECONDS);
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() + getResolutionInMilliseconds());
                 return result;
             }
 
@@ -214,7 +229,7 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
             @Override
             public Wind next() {
                 Wind result = floor(new DummyWind(timePoint));
-                timePoint = new MillisecondsTimePoint(timePoint.asMillis() - RESOLUTION_IN_MILLISECONDS);
+                timePoint = new MillisecondsTimePoint(timePoint.asMillis() - getResolutionInMilliseconds());
                 return result;
             }
 
@@ -227,20 +242,25 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
 
     @Override
     public NavigableSet<Wind> subSet(Wind fromElement, boolean fromInclusive, Wind toElement, boolean toInclusive) {
-        return new EstimatedWindFixesAsNavigableSet(track, trackedRace, fromInclusive ? ceilingToResolution(fromElement)
+        return createSubset(track, getTrackedRace(), fromInclusive ? ceilingToResolution(fromElement)
                 : higherToResolution(fromElement), toInclusive ? floorToResolution(toElement)
                 : lowerToResolution(toElement));
     }
 
+    /**
+     * Create an instance of the same class as <code>this</code> object
+     */
+    abstract protected NavigableSet<Wind> createSubset(WindTrack track, TrackedRace trackedRace, TimePoint from, TimePoint to);
+
     @Override
     public NavigableSet<Wind> headSet(Wind toElement, boolean inclusive) {
-        return new EstimatedWindFixesAsNavigableSet(track, trackedRace, /* from */ null,
+        return createSubset(track, getTrackedRace(), /* from */ null,
                 inclusive ? ceilingToResolution(toElement) : lowerToResolution(toElement));
     }
 
     @Override
     public NavigableSet<Wind> tailSet(Wind fromElement, boolean inclusive) {
-        return new EstimatedWindFixesAsNavigableSet(track, trackedRace, inclusive ? floorToResolution(fromElement)
+        return createSubset(track, getTrackedRace(), inclusive ? floorToResolution(fromElement)
                 : higherToResolution(fromElement),
         /* to */ null);
     }
@@ -277,7 +297,7 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
 
     @Override
     public int size() {
-        return (int) ((getTo().asMillis() - getFrom().asMillis()) / RESOLUTION_IN_MILLISECONDS);
+        return (int) ((getTo().asMillis() - getFrom().asMillis()) / getResolutionInMilliseconds());
     }
 
     @Override
@@ -285,7 +305,7 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
         boolean result = false;
         if (o instanceof Wind) {
             Wind wind = (Wind) o;
-            result = wind.getTimePoint().asMillis() % RESOLUTION_IN_MILLISECONDS == 0
+            result = wind.getTimePoint().asMillis() % getResolutionInMilliseconds() == 0
                     && wind.getTimePoint().compareTo(getFrom()) >= 0 && wind.getTimePoint().compareTo(getTo()) < 0;
         }
         return result;
@@ -314,6 +334,10 @@ public class EstimatedWindFixesAsNavigableSet extends AbstractUnmodifiableNaviga
         @SuppressWarnings("unchecked")
         T[] tResult = (T[]) result;
         return tResult;
+    }
+
+    protected TimePoint getToInternal() {
+        return to;
     }
 }
 

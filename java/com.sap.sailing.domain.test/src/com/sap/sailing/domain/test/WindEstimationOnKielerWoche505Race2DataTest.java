@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -41,7 +42,7 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
         OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(), timePointForFixes);
         getTrackedRace().recordWind(
                 new WindImpl(/* position */null, timePointForFixes, new KnotSpeedWithBearingImpl(12,
-                        new DegreeBearingImpl(70))), getTrackedRace().getWindSources(WindSourceType.WEB).iterator().next());
+                        new DegreeBearingImpl(70))), new WindSourceImpl(WindSourceType.WEB));
     }
     
     /**
@@ -57,7 +58,7 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
         // hence have a direction change.
         TimePoint middle = new MillisecondsTimePoint(1308839492322l);
         TrackBasedEstimationWindTrackImpl estimatedWindTrack = new TrackBasedEstimationWindTrackImpl(getTrackedRace(),
-                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND);
+                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence());
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
         Wind estimationBasedOnTrack = estimatedWindTrack.getAveragedWind(null, middle);

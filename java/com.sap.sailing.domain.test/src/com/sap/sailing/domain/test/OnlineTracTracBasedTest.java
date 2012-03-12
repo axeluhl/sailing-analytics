@@ -90,7 +90,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         for (Receiver r : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE,
-                new DynamicRaceDefinitionSet() {
+                /* startOfTracking */ null, /* endOfTracking */ null, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
@@ -109,7 +109,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             }
         }
         for (Receiver receiver : receivers) {
-            receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 5000l);
+            receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 60000l);
         }
         for (Receiver receiver : receivers) {
             receiver.join();

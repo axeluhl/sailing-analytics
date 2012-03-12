@@ -74,17 +74,19 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
                         new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
                             public void onSuccess(WindInfoForRaceDTO result) {
-                                WindSource bestWindSource = getBestWindSource(result, windIndicators.length);
-                                // expecting to find windIndicators.length fixes
-                                if (result == null || result.windTrackInfoByWindSource.get(bestWindSource).windFixes
-                                        .size() != windIndicators.length) {
-                                    clearWindDisplay();
-                                } else {
-                                    setSelectedWindSource(bestWindSource);
-                                    int i = 0;
-                                    for (WindDTO fix : result.windTrackInfoByWindSource.get(bestWindSource).windFixes) {
-                                        updateWindIndicator(i, fix);
-                                        i++;
+                                if (result != null) {
+                                    WindSource bestWindSource = getBestWindSource(result, windIndicators.length);
+                                    // expecting to find windIndicators.length fixes
+                                    if (result == null
+                                            || result.windTrackInfoByWindSource.get(bestWindSource).windFixes.size() != windIndicators.length) {
+                                        clearWindDisplay();
+                                    } else {
+                                        setSelectedWindSource(bestWindSource);
+                                        int i = 0;
+                                        for (WindDTO fix : result.windTrackInfoByWindSource.get(bestWindSource).windFixes) {
+                                            updateWindIndicator(i, fix);
+                                            i++;
+                                        }
                                     }
                                 }
                             }

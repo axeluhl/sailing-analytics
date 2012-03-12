@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.persistence.impl;
 
 import java.net.UnknownHostException;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.mongodb.DB;
 import com.mongodb.MongoException;
@@ -46,6 +48,17 @@ public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore
             result.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, mongoObjectFactory, db));
         } else {
             result = super.getWindTrack(trackedEvent, trackedRace, windSource, millisecondsOverWhichToAverage);
+        }
+        return result;
+    }
+
+    @Override
+    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(TrackedEvent trackedEvent,
+            TrackedRace trackedRace, long millisecondsOverWhichToAverageWind) {
+        Map<? extends WindSource, ? extends WindTrack> result = domainObjectFactory.loadWindTracks(
+                trackedEvent.getEvent(), trackedRace.getRace(), millisecondsOverWhichToAverageWind);
+        for (Entry<? extends WindSource, ? extends WindTrack> e : result.entrySet()) {
+            e.getValue().addListener(new MongoWindListener(trackedEvent, trackedRace, e.getKey(), mongoObjectFactory, db));
         }
         return result;
     }

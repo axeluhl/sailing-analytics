@@ -183,27 +183,25 @@ public interface TrackedRace {
 
     /**
      * Obtains estimated interpolated wind information for a given position and time point. The information is taken
-     * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, with preferences
-     * controlled by the {@link #getWindSource() current wind source} which can be selected using {@link #setWindSource},
-     * and by the order of the {@link WindSource} literals.
+     * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, using the confidences
+     * of the wind values provided by the various sources during averaging.
      */
     Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude);
 
     /**
-     * Retrieves the wind sources used by this race that have the specified <code>type</code> as their {@link WindSource#getType() type}.
-     * Always returns a non-<code>null</code> iterable which may be empty in case the race does not use any wind source of the
-     * specified type.
+     * Retrieves the wind sources used so far by this race that have the specified <code>type</code> as their
+     * {@link WindSource#getType() type}. Always returns a non-<code>null</code> iterable which may be empty in case the
+     * race does not use any wind source of the specified type (yet). Additional sources may be returned after
+     * 
      */
     Iterable<WindSource> getWindSources(WindSourceType type);
 
-    WindSource getOrCreateWindSource(WindSourceType type, String windSourceID);
-    
     /**
      * Retrieves all wind sources used by this race.
      */
     Iterable<WindSource> getWindSources();
 
-    WindTrack getWindTrack(WindSource windSource);
+    WindTrack getOrCreateWindTrack(WindSource windSource);
 
     /**
      * Waits until {@link #getUpdateCount()} is after <code>sinceUpdate</code>.
@@ -317,5 +315,12 @@ public interface TrackedRace {
 
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
-    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude);
+    /**
+     * Loops over this tracked race's wind sources and from each asks its averaged wind for the position <code>p</code>
+     * and time point <code>at</code>, using the particular wind source's averaging interval. The confidences delivered
+     * by each wind source are used during computing the averaged result across the wind sources. The result has the averaged
+     * confidence attached.
+     */
+    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+            Iterable<WindSource> windSourcesToExclude);
 }

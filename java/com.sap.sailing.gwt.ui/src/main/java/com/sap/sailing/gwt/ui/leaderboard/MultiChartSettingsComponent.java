@@ -20,7 +20,7 @@ public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<
     }
 
     @Override
-    public VerticalPanel getAdditionalWidget(DataEntryDialog<MultiChartSettings> dialog) {
+    public VerticalPanel getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel configPanel = super.getAdditionalWidget(dialog);
         configPanel.setSpacing(5);
         Label lblChart = new Label(getStringMessages().chooseChart());

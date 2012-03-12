@@ -37,11 +37,24 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
 public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     private final static Logger logger = Logger.getLogger(WindTrackImpl.class.getName());
     
+    private final static double DEFAULT_BASE_CONFIDENCE = 0.9;
+    
+    private final double baseConfidence;
+    
     private long millisecondsOverWhichToAverage;
     private final Set<WindListener> listeners;
 
     public WindTrackImpl(long millisecondsOverWhichToAverage) {
+        this(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE);
+    }
+    
+    /**
+     * @param baseConfidence
+     *            the confidence to attribute to the raw wind fixes in this track
+     */
+    public WindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence) {
         super(new ArrayListNavigableSet<Timed>(WindComparator.INSTANCE));
+        this.baseConfidence = baseConfidence;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         listeners = new HashSet<WindListener>();
     }
@@ -121,13 +134,13 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      */
     @Override
     public synchronized Wind getAveragedWind(Position p, TimePoint at) {
-        final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getEstimatedWindUnsynchronized(p, at);
+        final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getAveragedWindUnsynchronized(p, at);
         return estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
     }
     
     @Override
     public synchronized WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
-        return getEstimatedWindUnsynchronized(p, at);
+        return getAveragedWindUnsynchronized(p, at);
     }
 
     /**
@@ -136,16 +149,15 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      * may use this carefully if they can guarantee there are no concurrency issues with the internal fixes
      * while iterating over the result of {@link #getInternalFixes()}.
      */
-    protected WindWithConfidence<Pair<Position, TimePoint>> getEstimatedWindUnsynchronized(Position p, TimePoint at) {
-        // TODO aggregate confidences, using a weigher
+    protected WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
         DummyWind atTimed = new DummyWind(at);
         NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ false);
         NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
         Iterator<Wind> beforeIter = beforeSet.descendingIterator();
         Iterator<Wind> afterIter = afterSet.iterator();
         double knotSum = 0;
-        // TODO bug #345: also measure speed with confidence; return confidence
-        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind()/10);
+        // don't measure speed with separate confidence; return confidence obtained from averaging bearings
+        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind()/10);
         BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
         int count = 0;
         long beforeDistanceToAt = 0;
@@ -170,8 +182,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     beforeIntervalEnd = beforeWind.getTimePoint();
                 }
                 knotSum += beforeWind.getKnots();
-                // TODO bug #346: replace confidence with passed-through confidence of beforeWind fix's confidence
-                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(beforeWind.getBearing(), /* confidence */ 0.9, beforeWind.getTimePoint()));
+                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(beforeWind.getBearing(), getBaseConfidence(), beforeWind.getTimePoint()));
                 count++;
                 if (beforeIter.hasNext()) {
                     beforeWind = beforeIter.next();
@@ -185,8 +196,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     afterIntervalStart = afterWind.getTimePoint();
                 }
                 knotSum += afterWind.getKnots();
-                // TODO bug #346: replace confidence with passed-through confidence of beforeWind fix's confidence
-                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(afterWind.getBearing(), /* confidence */ 0.9, afterWind.getTimePoint()));
+                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(afterWind.getBearing(), getBaseConfidence(), afterWind.getTimePoint()));
                 count++;
                 if (afterIter.hasNext()) {
                     afterWind = afterIter.next();
@@ -200,12 +210,19 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         if (count == 0) {
             return null;
         } else {
-            // TODO bug #346: pass on confidence
             BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
             SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, average == null ? null : average.getObject());
-            return new WindWithConfidenceImpl<Pair<Position,TimePoint>>(new WindImpl(p, at, avgWindSpeed), /* TODO confidence */ 0.5,
+            return new WindWithConfidenceImpl<Pair<Position,TimePoint>>(new WindImpl(p, at, avgWindSpeed), average.getConfidence(),
                     new Pair<Position, TimePoint>(p, at));
         }
+    }
+
+    /**
+     * The base confidence attributed to this track. 1.0 would mean that the individual fixes stored by this track
+     * represent <em>the truth</em>. 0.0 means "no relevance at all."
+     */
+    private double getBaseConfidence() {
+        return baseConfidence;
     }
     
     @Override

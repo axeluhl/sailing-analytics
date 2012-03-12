@@ -18,12 +18,17 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -44,7 +49,7 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class WindChart implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener {
+public class WindChart extends SimplePanel implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener, RequiresResize {
     private static final int LINE_WIDTH = 1;
     private final StringMessages stringMessages;
     private final Set<WindSourceType> windSourceTypesToDisplay;
@@ -58,6 +63,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final Chart chart;
+    private boolean ignoreClickOnce;
     private final Timer timer;
     private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     
@@ -67,8 +73,6 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
     
     private final ColorMap<WindSource> colorMap;
 
-    private final SimplePanel mainPanel;
-
     /**
      * @param raceSelectionProvider
      *            if <code>null</code>, this chart won't update its contents automatically upon race selection change;
@@ -76,7 +80,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter) {
+            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter, boolean compactChart) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -90,6 +94,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setWidth100()
+                .setHeight100()
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
@@ -109,14 +114,46 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
                         numberFormat.format(toolTipData.getYAsDouble()) + unit;
             }
         }));
+        chart.setClickEventHandler(new ChartClickEventHandler() {
+            @Override
+            public boolean onClick(ChartClickEvent chartClickEvent) {
+                if (ignoreClickOnce) {
+                    ignoreClickOnce = false;
+                } else {
+                    WindChart.this.timer.setTime(chartClickEvent.getXAxisValueAsLong());
+                }
+                return true;
+            }
+        });
+        chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
+            @Override
+            public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
+                try {
+                    chartSelectionEvent.getXAxisMaxAsLong();
+                    chartSelectionEvent.getXAxisMinAsLong();
+                    ignoreClickOnce = true;
+                    return true;
+                } catch (Throwable t) {
+                    chart.redraw();
+                    return true;
+                }
+            }
+        });
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
             .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
+        if (compactChart) {
+            chart.setSpacingBottom(4).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
+                 .setLegend(new Legend().setMargin(2))
+                 .setOption("title/margin", 5)
+                 .setChartSubtitle(null)
+                 .getXAxis().setAxisTitle(null);
+        }
         
-        mainPanel = new SimplePanel();
-        mainPanel.setWidget(chart);
+        setWidget(chart);
+        setSize("100%", "100%");
         updateSettings(settings);
         if (raceSelectionProvider != null) {
             raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -133,7 +170,7 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
 
     @Override
     public Widget getEntryWidget() {
-        return mainPanel;
+        return this;
     }
 
     private void showVisibleSeries() {
@@ -221,7 +258,6 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             WindSource windSource = e.getKey();
             Series directionSeries = getOrCreateDirectionSeries(windSource);
             Series speedSeries = getOrCreateSpeedSeries(windSource);
-            // FIXME probably need to add the series to the chart...
             WindTrackInfoDTO windTrackInfo = e.getValue();
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
@@ -380,4 +416,10 @@ public class WindChart implements Component<WindChartSettings>, RaceSelectionCha
             }
         }
     }
+    
+    @Override
+    public void onResize() {
+        chart.setSizeToMatchContainer();
+    }
+
 }

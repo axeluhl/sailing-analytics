@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
@@ -64,7 +65,7 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
             }
         }
         getTrackedRace().recordWind(new WindImpl(/* position */ null, MillisecondsTimePoint.now(),
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(51))), getTrackedRace().getWindSources(WindSourceType.WEB).iterator().next());
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(51))), new WindSourceImpl(WindSourceType.WEB));
     }
     
     @Test

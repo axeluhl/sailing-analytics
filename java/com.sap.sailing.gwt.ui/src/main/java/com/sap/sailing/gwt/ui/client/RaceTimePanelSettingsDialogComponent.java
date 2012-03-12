@@ -12,7 +12,7 @@ public class RaceTimePanelSettingsDialogComponent extends TimePanelSettingsDialo
     }
 
     @Override
-    public Widget getAdditionalWidget(DataEntryDialog<RaceTimePanelSettings> dialog) {
+    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         Widget widget = super.getAdditionalWidget(dialog);
         HorizontalPanel labelAndTDelayForLiveBoxPanel = new HorizontalPanel();
         labelAndTDelayForLiveBoxPanel.setSpacing(5);

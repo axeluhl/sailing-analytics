@@ -17,6 +17,8 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 /**
@@ -49,11 +51,9 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * @author Axel Uhl (d043530)
  * 
  */
-public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements RaceChangeListener {
-    private final EstimatedWindFixesAsNavigableSet virtualInternalRawFixes;
+public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl implements RaceChangeListener {
+    private final VirtualWindFixesAsNavigableSet virtualInternalRawFixes;
 
-    private final TrackedRace trackedRace;
-    
     private final NavigableSet<TimePoint> timePointsWithCachedNullResult;
     
     /**
@@ -61,11 +61,10 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
      */
     private final HashSet<TimePoint> timePointsWithCachedNullResultFastContains;
 
-    public TrackBasedEstimationWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage) {
-        super(millisecondsOverWhichToAverage);
-        this.trackedRace = trackedRace;
+    public TrackBasedEstimationWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence) {
+        super(trackedRace, millisecondsOverWhichToAverage, baseConfidence);
+        virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
         trackedRace.addListener(this);
-        this.virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(this, trackedRace);
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(AbstractTimePoint.TIMEPOINT_COMPARATOR);
         this.timePointsWithCachedNullResultFastContains = new HashSet<TimePoint>();
     }
@@ -78,7 +77,12 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
      */
     @Override
     public long getMillisecondsOverWhichToAverageWind() {
-        return 2*virtualInternalRawFixes.getResolutionInMilliseconds()+2;
+        return 2*getInternalRawFixes().getResolutionInMilliseconds()+2;
+    }
+    
+    @Override
+    protected VirtualWindFixesAsNavigableSet getInternalRawFixes() {
+        return virtualInternalRawFixes;
     }
 
     private NavigableSet<Wind> getCachedFixes() {
@@ -148,7 +152,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
             NavigableSet<Wind> cache = getCachedFixes();
             Wind cachedFix = cache.floor(getDummyFix(timePoint));
             if (cachedFix == null || !cachedFix.getTimePoint().equals(timePoint)) {
-                result = trackedRace.getEstimatedWindDirection(p, timePoint);
+                result = getTrackedRace().getEstimatedWindDirection(p, timePoint);
                 cache(timePoint, result);
             } else {
                 result = cachedFix;
@@ -161,21 +165,6 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
         return timePointsWithCachedNullResultFastContains.contains(timePoint);
     }
 
-    @Override
-    protected NavigableSet<Wind> getInternalRawFixes() {
-        return virtualInternalRawFixes;
-    }
-
-    @Override
-    protected NavigableSet<Wind> getInternalFixes() {
-        return new PartialNavigableSetView<Wind>(getInternalRawFixes()) {
-            @Override
-            protected boolean isValid(Wind e) {
-                return e != null;
-            }
-        };
-    }
-
     /**
      * This redefinition avoids very long searches in case <code>at</code> is before the race start or after the race's
      * newest event. Should <code>at</code> be out of this range, it is set to the closest border of this range before
@@ -186,8 +175,8 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
     public Wind getAveragedWind(Position p, TimePoint at) {
         Wind result = null;
         TimePoint adjustedAt;
-        TimePoint raceStartTimePoint = trackedRace.getStart();
-        TimePoint timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent();
+        TimePoint raceStartTimePoint = getTrackedRace().getStart();
+        TimePoint timePointOfNewestEvent = getTrackedRace().getTimePointOfNewestEvent();
         if (raceStartTimePoint != null) {
             if (timePointOfNewestEvent != null) {
                 if (at.compareTo(raceStartTimePoint) < 0) {
@@ -210,7 +199,8 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
         if (adjustedAt != null) {
             // we can use the unsynchronized version here because our getInternalFixes() method operates
             // only on a virtual sequence of wind fixes where no concurrency issues have to be observed
-            result = getEstimatedWindUnsynchronized(p, adjustedAt).getObject();
+            final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getAveragedWindUnsynchronized(p, adjustedAt);
+            result = estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
         }
         return result;
     }
@@ -221,7 +211,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
     }
 
     private void invalidateForNewWind(Wind wind) {
-        long averagingInterval = trackedRace.getMillisecondsOverWhichToAverageWind();
+        long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
         Wind startOfInvalidation = getDummyFix(new MillisecondsTimePoint(wind.getTimePoint().asMillis()-averagingInterval));
         TimePoint endOfInvalidation = new MillisecondsTimePoint(wind.getTimePoint().asMillis()+averagingInterval);
         invalidateCache(startOfInvalidation, endOfInvalidation);
@@ -239,7 +229,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
 
     @Override
     public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
-        long averagingInterval = trackedRace.getMillisecondsOverWhichToAverageSpeed();
+        long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
         Wind startOfInvalidation = getDummyFix(new MillisecondsTimePoint(fix.getTimePoint().asMillis()-averagingInterval));
         TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis()+averagingInterval);
         invalidateCache(startOfInvalidation, endOfInvalidation);
@@ -247,7 +237,7 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
 
     @Override
     public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
-        long averagingInterval = trackedRace.getMillisecondsOverWhichToAverageSpeed();
+        long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
         Wind startOfInvalidation;
         TimePoint endOfInvalidation;
         if (oldMarkPassing == null) {
@@ -271,10 +261,51 @@ public class TrackBasedEstimationWindTrackImpl extends WindTrackImpl implements 
     public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
         // A buoy position change can mean a leg type change. The interval over which the wind estimation is affected
         // depends on how the GPS track computes the estimated buoy position. Ask it:
-        Pair<TimePoint, TimePoint> interval = trackedRace.getOrCreateTrack(buoy).getEstimatedPositionTimePeriodAffectedBy(fix);
+        Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(buoy).getEstimatedPositionTimePeriodAffectedBy(fix);
         Wind startOfInvalidation = interval.getA() == null ? null : getDummyFix(interval.getA());
         TimePoint endOfInvalidation = interval.getB();
         invalidateCache(startOfInvalidation, endOfInvalidation);
     }
 
+    /**
+     * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}, computed using
+     * {@link TrackedRace#getEstimatedWindDirection(com.sap.sailing.domain.base.Position, TimePoint)}. If not constrained
+     * by a {@link #from} and/or a {@link #to} time point, an equidistant time field is assumed, starting at
+     * {@link TrackedRace#getStart()} and leading up to {@link TrackedRace#getTimePointOfNewestEvent()}. If
+     * {@link TrackedRace#getStart()} returns <code>null</code>, {@link Long#MAX_VALUE} is used as the {@link #from}
+     * time point, pushing the start to the more or less infinite future ("end of the universe"). If no event was
+     * received yet and hence {@link TrackedRace#getTimePointOfNewestEvent()} returns <code>null</code>, the {@link #to}
+     * end is assumed to be the beginning of the epoch (1970-01-01T00:00:00).
+     * 
+     * @author Axel Uhl (d043530)
+     * 
+     */
+    public class EstimatedWindFixesAsNavigableSet extends VirtualWindFixesAsNavigableSet {
+        public EstimatedWindFixesAsNavigableSet(TrackedRace trackedRace) {
+            this(trackedRace, null, null);
+        }
+        
+        protected TrackBasedEstimationWindTrackImpl getTrack() {
+            return (TrackBasedEstimationWindTrackImpl) super.getTrack();
+        }
+        
+        /**
+         * @param from expected to be an integer multiple of {@link #getResolutionInMilliseconds()} or <code>null</code>
+         * @param to expected to be an integer multiple of {@link #getResolutionInMilliseconds()} or <code>null</code>
+         */
+        private EstimatedWindFixesAsNavigableSet(TrackedRace trackedRace,
+                TimePoint from, TimePoint to) {
+            super(TrackBasedEstimationWindTrackImpl.this, trackedRace, from, to, /* resolution in milliseconds */ 1000l);
+        }
+
+        protected Wind getWind(Position p, TimePoint timePoint) {
+            return getTrack().getEstimatedWindDirection(p, timePoint);
+        }
+
+        @Override
+        protected NavigableSet<Wind> createSubset(WindTrack track, TrackedRace trackedRace, TimePoint from, TimePoint to) {
+            return new EstimatedWindFixesAsNavigableSet(trackedRace, from, to);
+        }
+
+    }
 }

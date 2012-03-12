@@ -17,6 +17,8 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
@@ -28,6 +30,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
@@ -64,12 +67,13 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
  * 
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
-implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener {
+implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener, RequiresResize {
     protected static final int LINE_WIDTH = 1;
     protected MultiCompetitorRaceDataDTO chartData;
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected Chart chart;
+    private boolean compactChart;
     protected final AbsolutePanel busyIndicatorPanel;
     protected final Label noCompetitorsSelectedLabel;
     protected final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
@@ -84,7 +88,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow) {
+            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow, boolean compactChart) {
         this.stringMessages = stringMessages;
     	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
@@ -95,9 +99,11 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     	this.errorReporter = errorReporter;
         this.dataToShow = dataToShow;
         chartData = null;
+        this.compactChart = compactChart;
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
+        setSize("100%", "100%");
 
         noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
@@ -110,7 +116,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                busyIndicatorPanel.setSize("100%", "400px");
+                busyIndicatorPanel.setSize("100%", "100%");
                 busyIndicatorPanel.add(busyIndicator, busyIndicatorPanel.getOffsetWidth() / 2, busyIndicatorPanel.getOffsetHeight() / 2);
             }
         });
@@ -135,14 +141,26 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
                 .setWidth100()
+                .setHeight100()
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLegend(new Legend().setEnabled(true))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
         chart.setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)));
+        chart.setClickEventHandler(new ChartClickEventHandler() {
+            @Override
+            public boolean onClick(ChartClickEvent chartClickEvent) {
+                timer.setTime(chartClickEvent.getXAxisValueAsLong());
+                return true;
+            }
+        });
+        
         final String unit = getUnit();
-        chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
+        if(!compactChart)
+            chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
+        else
+            chart.getYAxis().setAxisTitleText("["+unit+"]");
         chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis().setReversed((dataToShow == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || 
                                       dataToShow == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true : false);
@@ -165,6 +183,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         numberFormat.format(toolTipData.getYAsDouble()) + unit;
             }
         }));
+        
+        if (compactChart) {
+            chart.setSpacingBottom(4).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
+                 .setLegend(new Legend().setMargin(2))
+                 .setOption("title/margin", 5)
+                 .setChartSubtitle(null)
+                 .getXAxis().setAxisTitleText(null);
+        }
         
         setChartData(null);
         dataSeriesByCompetitor.clear();
@@ -535,6 +561,13 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     && (newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
                 loadData(false);
             }
+        }
+    }
+
+    @Override
+    public void onResize() {
+        if(getChartData() != null) {
+            chart.setSizeToMatchContainer();
         }
     }
 }

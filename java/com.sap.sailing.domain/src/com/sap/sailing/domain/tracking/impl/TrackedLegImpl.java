@@ -132,24 +132,27 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
             throw new NoWindException("Need to know wind direction to determine whether leg "+getLeg()+
                     " is an upwind or downwind leg");
         }
-        // check for all combinations of start/end waypoint buoys and respond for the first that's within bounds
-        for (Buoy startBuoy : getLeg().getFrom().getBuoys()) {
-            Position startBuoyPos = getTrackedRace().getOrCreateTrack(startBuoy).getEstimatedPosition(at, false);
-            for (Buoy endBuoy : getLeg().getTo().getBuoys()) {
-                Position endBuoyPos = getTrackedRace().getOrCreateTrack(endBuoy).getEstimatedPosition(at, false);
-                Bearing legBearing = startBuoyPos.getBearingGreatCircle(endBuoyPos);
-                double deltaDeg = legBearing.getDifferenceTo(wind.getBearing()).getDegrees();
-                if (Math.abs(deltaDeg) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
-                    return LegType.DOWNWIND;
-                } else {
-                    double deltaDegOpposite = legBearing.getDifferenceTo(wind.getBearing().reverse()).getDegrees();
-                    if (Math.abs(deltaDegOpposite) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
-                        return LegType.UPWIND;
-                    }
+        Bearing legBearing = getLegBearing(at);
+        if (legBearing != null) {
+            double deltaDeg = legBearing.getDifferenceTo(wind.getBearing()).getDegrees();
+            if (Math.abs(deltaDeg) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
+                return LegType.DOWNWIND;
+            } else {
+                double deltaDegOpposite = legBearing.getDifferenceTo(wind.getBearing().reverse()).getDegrees();
+                if (Math.abs(deltaDegOpposite) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
+                    return LegType.UPWIND;
                 }
             }
         }
         return LegType.REACHING;
+    }
+
+    @Override
+    public Bearing getLegBearing(TimePoint at) {
+        Position startBuoyPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at);
+        Position endBuoyPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), at);
+        Bearing legBearing = (startBuoyPos != null && endBuoyPos != null) ? startBuoyPos.getBearingGreatCircle(endBuoyPos) : null;
+        return legBearing;
     }
 
     @Override
@@ -158,20 +161,22 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     private Wind getWindOnLeg(TimePoint at) {
+        Wind wind;
         Position approximateLegStartPosition = getTrackedRace().getOrCreateTrack(
                 getLeg().getFrom().getBuoys().iterator().next()).getEstimatedPosition(at, false);
         Position approximateLegEndPosition = getTrackedRace().getOrCreateTrack(
                 getLeg().getTo().getBuoys().iterator().next()).getEstimatedPosition(at, false);
         if (approximateLegStartPosition == null || approximateLegEndPosition == null) {
-            throw new RuntimeException("No mark positions received yet for leg "+getLeg()+
-                    ". Can't determine wind direction since position is not known.");
+            wind = null;
+        } else {
+            // exclude track-based estimation; it is itself based on the leg type which is based on the getWindOnLeg
+            // result which
+            // would therefore lead to an endless recursion without further tricks being applied
+            wind = getWind(approximateLegStartPosition.translateGreatCircle(
+                    approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition),
+                    approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at,
+                    getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         }
-        // exclude track-based estimation; it is itself based on the leg type which is based on the getWindOnLeg result which
-        // would therefore lead to an endless recursion without further tricks being applied
-        Wind wind = getWind(
-                approximateLegStartPosition.translateGreatCircle(approximateLegStartPosition.getBearingGreatCircle(approximateLegEndPosition),
-                        approximateLegStartPosition.getDistance(approximateLegEndPosition).scale(0.5)), at,
-                        getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         return wind;
     }
 
