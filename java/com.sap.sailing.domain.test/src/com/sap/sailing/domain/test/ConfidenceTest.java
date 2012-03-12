@@ -145,10 +145,12 @@ public class ConfidenceTest {
 
     @Test
     public void testAveragingWithTwoWinds() {
-        WindWithConfidence<TimePoint> d1 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0),
-                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))), /* confidence */ 0.5, /* relativeTo */ new MillisecondsTimePoint(0));
-        WindWithConfidence<TimePoint> d2 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0), new MillisecondsTimePoint(20),
-                new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(180))), /* confidence */ 0.5, /* relativeTo */ new MillisecondsTimePoint(20));
+        WindWithConfidence<TimePoint> d1 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(0, 0),
+                new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(0), /* useSpeed */ true);
+        WindWithConfidence<TimePoint> d2 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0),
+                new MillisecondsTimePoint(20), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(180))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(20), /* useSpeed */ true);
         ConfidenceBasedAverager<ScalableWind, Wind, TimePoint> averager = ConfidenceFactory.INSTANCE
                 .createAverager(ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000));
         List<WindWithConfidence<TimePoint>> list = Arrays.asList(d1, d2);

@@ -988,7 +988,8 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
      * @return The last shown GPS fix for the given competitor
      */
     protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO) {
-        return fixes.get(competitorDTO).get(lastShownFix.get(competitorDTO));
+        final List<GPSFixDTO> competitorFixes = fixes.get(competitorDTO);
+        return competitorFixes == null ? null : competitorFixes.get(lastShownFix.get(competitorDTO));
     }
 
     /**
