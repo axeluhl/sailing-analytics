@@ -204,7 +204,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         dataInitialized = false;
         initializeData();
         
-        windPanel = new CombinedWindPanel(sailingService, errorReporter, timer);
+        windPanel = new CombinedWindPanel(sailingService, errorReporter, stringMessages, timer);
         windPanel.setVisible(false);
     }
 
