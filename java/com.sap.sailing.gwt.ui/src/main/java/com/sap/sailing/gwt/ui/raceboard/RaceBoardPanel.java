@@ -268,8 +268,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer, final Component<?> component) {
         final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(), component.getLocalizedShortName());
         toggleButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        toggleButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        toggleButton.getElement().getStyle().setMargin(3, Style.Unit.PX);
         toggleButton.setDown(component.isVisible());
         
         toggleButton.addClickHandler(new ClickHandler() {
