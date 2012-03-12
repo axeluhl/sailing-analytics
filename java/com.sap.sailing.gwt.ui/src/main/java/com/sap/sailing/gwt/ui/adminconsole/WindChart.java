@@ -20,6 +20,8 @@ import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
@@ -61,6 +63,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final Chart chart;
+    private boolean ignoreClickOnce;
     private final Timer timer;
     private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     
@@ -114,8 +117,26 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         chart.setClickEventHandler(new ChartClickEventHandler() {
             @Override
             public boolean onClick(ChartClickEvent chartClickEvent) {
-                WindChart.this.timer.setTime(chartClickEvent.getXAxisValueAsLong());
+                if (ignoreClickOnce) {
+                    ignoreClickOnce = false;
+                } else {
+                    WindChart.this.timer.setTime(chartClickEvent.getXAxisValueAsLong());
+                }
                 return true;
+            }
+        });
+        chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
+            @Override
+            public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
+                try {
+                    chartSelectionEvent.getXAxisMaxAsLong();
+                    chartSelectionEvent.getXAxisMinAsLong();
+                    ignoreClickOnce = true;
+                    return true;
+                } catch (Throwable t) {
+                    chart.redraw();
+                    return true;
+                }
             }
         });
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds

@@ -57,7 +57,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     }
     
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName) {
-        LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(/* autoExpandFirstRace */ false); 
+        LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* autoExpandFirstRace */ false); 
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         Timer timer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
         timer.play();

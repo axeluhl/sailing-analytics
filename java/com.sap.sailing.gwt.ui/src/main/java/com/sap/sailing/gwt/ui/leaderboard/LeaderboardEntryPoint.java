@@ -59,7 +59,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             mainPanel.add(tvViewPanel);
         } else {
             LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService,
-                    LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(/* autoExpandFirstRace */ false),
+                    LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* autoExpandFirstRace */ false),
                     /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
                     new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                     leaderboardName, leaderboardGroupName,

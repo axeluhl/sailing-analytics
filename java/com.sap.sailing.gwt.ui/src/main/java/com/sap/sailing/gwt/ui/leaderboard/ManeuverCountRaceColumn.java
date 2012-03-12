@@ -170,7 +170,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     }
 
     private String getRaceName() {
-        return raceNameProvider.getRaceName();
+        return raceNameProvider.getRaceColumnName();
     }
 
     @Override
