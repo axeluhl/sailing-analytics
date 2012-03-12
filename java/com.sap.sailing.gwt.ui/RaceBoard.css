@@ -183,7 +183,7 @@ input.magnifier {
 
 .raceBoardNavigation {
 	float: right;
-	margin: 26px 0 0 0;
+	margin:6px 0 0 0;
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
@@ -251,4 +251,25 @@ input.magnifier {
 
 .errorLabel {
 	color: #FF0000;
+}
+
+.gwt-ToggleButton {
+	background: url(images/btn-cta-orangeleft.png) center top repeat-x;
+	padding: 8px;
+	margin: 0 11px 0 0;
+	border: 0;
+}
+
+.gwt-ToggleButton-down {
+	background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+	color: #fff;
+}
+
+.gwt-SplitLayoutPanel-HDragger {
+	width: 12px;
+}
+
+.gwt-ToggleButton-up-hovering {
+	background: url(images/btn-cta-orangeleft.png) center bottom repeat-x;
+	color: #fff;
 }
