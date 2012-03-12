@@ -40,16 +40,15 @@ import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapZoomSettings.ZoomTypes;
@@ -78,7 +77,7 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class RaceMap extends SimplePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
+public class RaceMap extends FlowPanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
     protected MapWidget map;
 
@@ -189,6 +188,8 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
      */
     private List<QuickRankDTO> quickRanks;
 
+    private final CombinedWindPanel windPanel;
+
     public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer,
             CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
         this.setSize("100%", "100%");
@@ -212,6 +213,10 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         lastTimeChangeBeforeInitialization = null;
         dataInitialized = false;
         initializeData();
+        
+        windPanel = new CombinedWindPanel(sailingService, errorReporter, timer);
+//        windPanel.setVisible(false);
+        add(windPanel);
     }
 
     public double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
@@ -291,6 +296,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         mapFirstZoomDone = false;
         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
         this.selectedRaces = selectedRaces;
+        windPanel.onRaceSelectionChange(selectedRaces);
     }
 
     @Override
@@ -363,21 +369,21 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     sailingService.getQuickRanks(race, date, getQuickRanksCallback);
 
                     // draw the wind into the map, get the combined wind
-                    List<String> windSourceTypeNames = new ArrayList<String>();
-                    windSourceTypeNames.add(WindSourceType.COMBINED.name());
-                    windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
-                    sailingService.getWindInfo(race, date, 1000L, 1, 0.0, 0.0, null,
-                            new AsyncCallback<WindInfoForRaceDTO>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining wind: " + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(WindInfoForRaceDTO windInfoForRaceDTO) {
-                                    showWindOnMap(windInfoForRaceDTO);
-                                }
-                            });
+//                    List<String> windSourceTypeNames = new ArrayList<String>();
+//                    windSourceTypeNames.add(WindSourceType.COMBINED.name());
+//                    windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
+//                    sailingService.getWindInfo(race, date, 1000L, 1, 0.0, 0.0, null,
+//                            new AsyncCallback<WindInfoForRaceDTO>() {
+//                                @Override
+//                                public void onFailure(Throwable caught) {
+//                                    errorReporter.reportError("Error obtaining wind: " + caught.getMessage());
+//                                }
+//
+//                                @Override
+//                                public void onSuccess(WindInfoForRaceDTO windInfoForRaceDTO) {
+//                                    showWindOnMap(windInfoForRaceDTO);
+//                                }
+//                            });
                 }
             }
         }
