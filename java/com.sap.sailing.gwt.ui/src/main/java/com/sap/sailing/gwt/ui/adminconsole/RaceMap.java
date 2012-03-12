@@ -917,7 +917,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO) {
         return fixes.containsKey(competitorDTO) ? fixes.get(competitorDTO).get(lastShownFix.get(competitorDTO)) : null;
-        return competitorFixes == null ? null : competitorFixes.get(lastShownFix.get(competitorDTO));
     }
 
     /**
