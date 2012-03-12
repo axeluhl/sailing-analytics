@@ -312,7 +312,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
 
     @Override
     public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent() {
-        return new WindChartSettingsDialogComponent(new WindChartSettings(windSourceTypesToDisplay));
+        return new WindChartSettingsDialogComponent(new WindChartSettings(windSourceTypesToDisplay), stringMessages);
     }
 
     /**

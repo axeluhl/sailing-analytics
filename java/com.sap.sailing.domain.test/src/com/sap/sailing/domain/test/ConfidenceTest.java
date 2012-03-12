@@ -144,6 +144,25 @@ public class ConfidenceTest {
     }
 
     @Test
+    public void testAveragingWithTwoWindsOneOfWhichHasUseSpeedFalse() {
+        WindWithConfidence<TimePoint> d1 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(0, 0),
+                new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(0), /* useSpeed */ true);
+        WindWithConfidence<TimePoint> d2 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0),
+                new MillisecondsTimePoint(20), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(180))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(20), /* useSpeed */ false);
+        ConfidenceBasedAverager<ScalableWind, Wind, TimePoint> averager = ConfidenceFactory.INSTANCE
+                .createAverager(ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000));
+        List<WindWithConfidence<TimePoint>> list = Arrays.asList(d1, d2);
+        HasConfidence<ScalableWind, Wind, TimePoint> average = averager.getAverage(list, new MillisecondsTimePoint(10));
+        assertEquals(0.5, average.getObject().getPosition().getLatDeg(), 0.00000001);
+        assertEquals(0.0, average.getObject().getPosition().getLngDeg(), 0.00000001);
+        assertEquals(10, average.getObject().getTimePoint().asMillis());
+        assertEquals(10, average.getObject().getKnots(), 0.00000001);
+        assertEquals(135, average.getObject().getBearing().getDegrees(), 0.00000001);
+    }
+
+    @Test
     public void testAveragingWithTwoWinds() {
         WindWithConfidence<TimePoint> d1 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(0, 0),
                 new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))), /* confidence */
