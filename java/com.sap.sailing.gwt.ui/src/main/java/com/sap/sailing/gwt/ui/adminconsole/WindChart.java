@@ -67,6 +67,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private final SailingServiceAsync sailingService;
     private final Chart chart;
     private Series timeLineSeries;
+    private final boolean allowTimeAdjust;
     private boolean ignoreClickOnce;
     private final Timer timer;
     private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
@@ -83,12 +84,14 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
      *            otherwise, whenever the selection changes, the wind data of the race selected now is loaded from the
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
      */
-    public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter, boolean compactChart) {
+    public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
+            WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter,
+            boolean compactChart, boolean allowTimeAdjust) {
         super();
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        this.allowTimeAdjust = allowTimeAdjust;
         this.windSourceDirectionSeries = new HashMap<WindSource, Series>();
         this.windSourceSpeedSeries = new HashMap<WindSource, Series>();
         this.colorMap = new ColorMap<WindSource>();
@@ -118,31 +121,35 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                         numberFormat.format(toolTipData.getYAsDouble()) + unit;
             }
         }));
-        chart.setClickEventHandler(new ChartClickEventHandler() {
-            @Override
-            public boolean onClick(ChartClickEvent chartClickEvent) {
-                if (ignoreClickOnce) {
-                    ignoreClickOnce = false;
-                } else {
-                    WindChart.this.timer.setTime(chartClickEvent.getXAxisValueAsLong());
-                }
-                return true;
-            }
-        });
-        chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
-            @Override
-            public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
-                try {
-                    chartSelectionEvent.getXAxisMaxAsLong();
-                    chartSelectionEvent.getXAxisMinAsLong();
-                    ignoreClickOnce = true;
-                    return true;
-                } catch (Throwable t) {
-                    chart.redraw();
+        
+        if (allowTimeAdjust) {
+            chart.setClickEventHandler(new ChartClickEventHandler() {
+                @Override
+                public boolean onClick(ChartClickEvent chartClickEvent) {
+                    if (ignoreClickOnce) {
+                        ignoreClickOnce = false;
+                    } else {
+                        WindChart.this.timer.setTime(chartClickEvent.getXAxisValueAsLong());
+                    }
                     return true;
                 }
-            }
-        });
+            });
+            chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
+                @Override
+                public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
+                    try {
+                        chartSelectionEvent.getXAxisMaxAsLong();
+                        chartSelectionEvent.getXAxisMinAsLong();
+                        ignoreClickOnce = true;
+                    } catch (Throwable t) {
+                        //Redrawing, or the chart wouldn't rezoom
+                        chart.redraw();
+                    }
+                    return true;
+                }
+            });
+        }
+        
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
@@ -438,7 +445,6 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
             }
         }
         updateTimeLine(date);
-        
     }
 
     /**
@@ -450,17 +456,19 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     }
     
     /**
-     * Updates the position of the time line for the given {@link Date}.<br />
+     * Updates the position of the time line for the given {@link Date}, if {@link #allowTimeAdjust} is <code>true</code>.<br />
      * @param date Defines the x-Value of the line points
      */
     private void updateTimeLine(Date date) {
-        Long x = date.getTime();
-        Extremes extremes= chart.getYAxis(0).getExtremes();
-        Point[] points = new Point[2];
-        points[0] = new Point(x, extremes.getDataMin());
-        points[1] = new Point(x, extremes.getDataMax());
-        timeLineSeries.setPoints(points);
-        ensureTimeLineIsVisible();
+        if (allowTimeAdjust) {
+            Long x = date.getTime();
+            Extremes extremes = chart.getYAxis(0).getExtremes();
+            Point[] points = new Point[2];
+            points[0] = new Point(x, extremes.getDataMin());
+            points[1] = new Point(x, extremes.getDataMax());
+            timeLineSeries.setPoints(points);
+            ensureTimeLineIsVisible();
+        }
     }
     
     /**
