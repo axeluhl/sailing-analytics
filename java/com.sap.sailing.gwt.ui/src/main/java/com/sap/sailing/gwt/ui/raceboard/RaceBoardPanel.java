@@ -164,7 +164,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         List<Component<?>> components = new ArrayList<Component<?>>();
 
         competitorChart = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
-                    timer, stringMessages, errorReporter, true);
+                    timer, stringMessages, errorReporter, true, true);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);
         competitorChart.setVisible(false);
@@ -253,7 +253,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 //                    competitorCharts, "auto", "400px", stringMessages);
 
             competitorChart = new MultiChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
-                    timer, stringMessages, errorReporter, false);
+                    timer, stringMessages, errorReporter, false, true);
             competitorChartViewer = new CollapsableComponentViewer<MultiChartSettings>(
                     competitorChart, "auto", "400px", stringMessages);
 
@@ -280,7 +280,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private WindChart createWindChart() {
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         return new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
-                stringMessages, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN);
+                stringMessages, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN, true);
     }
 
     private BreadcrumbPanel createBreadcrumbPanel(String leaderboardGroupName) {

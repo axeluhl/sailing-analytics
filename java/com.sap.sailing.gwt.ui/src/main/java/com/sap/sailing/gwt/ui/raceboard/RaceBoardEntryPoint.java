@@ -214,8 +214,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         
         Label raceBoardHeader = new Label(raceName);
         raceBoardHeader.addStyleName("RaceBoardHeader");
-        logoAndTitlePanel.add(raceBoardHeader);
+        
         logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
+        logoAndTitlePanel.add(raceBoardHeader);
         
         return logoAndTitlePanel;
     }
