@@ -280,7 +280,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private WindChart createWindChart() {
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         return new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
-                stringMessages, errorReporter, false);
+                stringMessages, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN);
     }
 
     private BreadcrumbPanel createBreadcrumbPanel(String leaderboardGroupName) {

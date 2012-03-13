@@ -127,6 +127,8 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         logoAndTitlePanel.add(raceBoardHeader);
         logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
         dockPanel.insertSouth(raceBoardPanel.getTimeWidget(), 140, dockPanel.getWidget(0));
+        
+//        raceBoardPanel.setWindChartVisible(true);
         setWidget(raceBoardPanel);
         //Setting the size or the race board wouldn't be displayed
         raceBoardPanel.setSize("100%", "100%");
@@ -138,13 +140,18 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             currentRace = getFirstStartedAndUnfinishedRace();
             if (currentRace != null) {
                 raceBoardPanel = createRaceBoardPanel(leaderboard.name, currentRace);
+                //TODO delete after testing
+                RaceTimesInfoDTO currentRaceTimes = raceTimesInfo.get(currentRace);
+                timer.setTime(currentRaceTimes.getStartOfRace().getTime());
+                //
                 showRaceBoard();
             } else {
                 showLeaderboard();
             }
         } else {
             RaceTimesInfoDTO currentRaceTimes = raceTimesInfo.get(currentRace);
-            if (currentRaceTimes.endOfRace != null) {
+            //TODO add check for live mode
+            if (currentRaceTimes.endOfRace != null && timer.getTime().after(currentRaceTimes.endOfRace)) {
                 showLeaderboard();
             }
         }
@@ -157,7 +164,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             RaceIdentifier raceIdentifier = race.getRaceIdentifier();
             RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
             if (raceIdentifier != null && raceTimes != null && raceTimes.startOfTracking != null
-                    && raceTimes.endOfRace == null) {
+                    /*&& raceTimes.endOfRace == null*/) { //TODO reset after testing
                 firstStartedAndUnfinishedRace = raceIdentifier;
                 break;
             }
