@@ -34,7 +34,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
@@ -86,7 +85,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final CompetitorSelectionModel competitorSelectionModel;
     private final RaceIdentifier selectedRaceIdentifier;
     
-    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser,
+    public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType,
             RaceBoardViewMode viewMode, RaceTimesInfoProvider raceTimesInfoProvider) {
@@ -104,7 +103,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         mainPanel.setSize("100%", "100%");
         setWidget(mainPanel);
 
-        timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */1000);
+        this.timer = timer;
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 

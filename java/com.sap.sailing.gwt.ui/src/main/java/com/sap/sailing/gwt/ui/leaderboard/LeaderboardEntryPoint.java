@@ -55,7 +55,9 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         
         String tvModeParam = Window.Location.getParameter("tvMode");
         if (tvModeParam != null) {
-            TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName, userAgentType, null);
+            Timer timer = new Timer(PlayModes.Replay, 1000l);
+            TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
+                    userAgentType, null, timer, logoAndTitlePanel, mainPanel);
             mainPanel.add(tvViewPanel);
         } else {
             LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService,

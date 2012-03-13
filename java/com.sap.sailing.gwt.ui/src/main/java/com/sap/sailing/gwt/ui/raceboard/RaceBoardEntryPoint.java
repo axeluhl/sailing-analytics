@@ -17,6 +17,8 @@ import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -127,7 +129,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, raceSelectionModel, leaderboardName, leaderboardGroupName,
+        Timer timer = new Timer(PlayModes.Replay, 1000l);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
                 RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, new RaceTimesInfoProvider(sailingService, this, singletonList, 1000l));
         raceBoardPanel.fillEvents(events);
 
