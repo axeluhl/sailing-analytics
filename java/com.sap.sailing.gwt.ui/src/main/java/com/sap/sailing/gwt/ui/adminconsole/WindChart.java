@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Extremes;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
@@ -64,6 +66,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final Chart chart;
+    private Series timeLineSeries;
     private boolean ignoreClickOnce;
     private final Timer timer;
     private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
@@ -152,6 +155,8 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                  .setChartSubtitle(null)
                  .getXAxis().setAxisTitle(null);
         }
+        
+        timeLineSeries = createTimeLineSeries();
         
         setWidget(chart);
         setSize("100%", "100%");
@@ -247,6 +252,15 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                         .setLineWidth(3).setHoverStateLineWidth(3)
                         .setColor(colorMap.getColorByID(windSource))); // show only the markers, not the connecting lines
         return newSeries;
+    }
+
+    private Series createTimeLineSeries() {
+        return chart
+                .createSeries()
+                .setType(Series.Type.LINE)
+                .setName("TIME_LINE")
+                .setYAxis(0)
+                .setPlotOptions(new LinePlotOptions().setEnableMouseTracking(false).setShowInLegend(false).setHoverStateEnabled(false).setLineWidth(2));
     }
 
     /**
@@ -421,6 +435,21 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 loadData(selectedRaceIdentifier, /* from */null, /* to */
                         new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */false); // replace old series
             }
+        }
+        updateTimeLine(date);
+        
+    }
+    
+    private void updateTimeLine(Date date) {
+        Long x = date.getTime();
+        Extremes extremes= chart.getYAxis(0).getExtremes();
+        Point[] points = new Point[2];
+        points[0] = new Point(x, extremes.getDataMin());
+        points[1] = new Point(x, extremes.getDataMax());
+        timeLineSeries.setPoints(points);
+        
+        if (!Arrays.asList(chart.getSeries()).contains(timeLineSeries)) {
+            chart.addSeries(timeLineSeries);
         }
     }
     
