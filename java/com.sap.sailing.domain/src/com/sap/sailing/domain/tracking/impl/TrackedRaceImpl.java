@@ -802,10 +802,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         int numberOfBoatsRelevantForEstimate = 0;
         BearingWithConfidence<TimePoint> resultBearing = null;
         if (bearings != null) {
-            logger.finest("UPWIND cluster size: "+bearings.get(LegType.UPWIND).size());
             BearingWithConfidenceCluster<TimePoint>[] bearingClustersUpwind = bearings.get(LegType.UPWIND).splitInTwo(
                     getMinimumAngleBetweenDifferentTacksUpwind(), timePoint);
-            logger.finest("UPWIND cluster split result sizes: "+bearingClustersUpwind[0].size()+"/"+bearingClustersUpwind[1].size());
             if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
                 BearingWithConfidence<TimePoint> average0 = bearingClustersUpwind[0].getAverage(timePoint);
                 BearingWithConfidence<TimePoint> average1 = bearingClustersUpwind[1].getAverage(timePoint);
@@ -818,10 +816,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             BearingWithConfidenceImpl<TimePoint> downwindAverage = null;
             int downwindNumberOfRelevantBoats = 0;
-            logger.finest("DOWNWIND cluster size: "+bearings.get(LegType.DOWNWIND).size());
             BearingWithConfidenceCluster<TimePoint>[] bearingClustersDownwind = bearings.get(LegType.DOWNWIND)
                     .splitInTwo(getMinimumAngleBetweenDifferentTacksDownwind(), timePoint);
-            logger.finest("DOWNWIND cluster split result sizes: "+bearingClustersDownwind[0].size()+"/"+bearingClustersDownwind[1].size());
             if (!bearingClustersDownwind[0].isEmpty() && !bearingClustersDownwind[1].isEmpty()) {
                 BearingWithConfidence<TimePoint> average0 = bearingClustersDownwind[0].getAverage(timePoint);
                 BearingWithConfidence<TimePoint> average1 = bearingClustersDownwind[1].getAverage(timePoint);
@@ -844,9 +840,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 resultCluster.add(downwindAverage);
             }
             resultBearing = resultCluster.getAverage(timePoint);
-            if (resultBearing == null) {
-                logger.finer("resultBearing == null");
-            }
         }
         return resultBearing == null ? null : new WindImpl(null, timePoint, new KnotSpeedWithBearingImpl(
                 /* speedInKnots */numberOfBoatsRelevantForEstimate, resultBearing.getObject()));
