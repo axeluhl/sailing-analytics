@@ -193,8 +193,8 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertTrue(cachedFixes.isEmpty());
         assertNotNull(estimatedWindDirectionCached);
         assertEquals(185., estimatedWindDirectionCached.getBearing().getDegrees(), 0.00000001);
-        // now add a GPS fix and make sure the cache is invalidated
-        now = MillisecondsTimePoint.now();
+        // now add a GPS fix and make sure the cache is invalidated by adding it inside the averaging interval
+        now = new MillisecondsTimePoint(checkTime.asMillis() + track.getMillisecondsOverWhichToAverageWind()/2);
         setBearingForCompetitor(competitors.get(0), now, 330);
         Wind estimatedWindDirectionNew = track.getAveragedWind(/* position */ null, checkTime);
         assertFalse(cachedFixes.isEmpty());
