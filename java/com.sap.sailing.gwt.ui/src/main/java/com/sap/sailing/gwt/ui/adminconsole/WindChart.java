@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Extremes;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
@@ -42,6 +44,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
@@ -63,6 +66,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private final ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
     private final Chart chart;
+    private Series timeLineSeries;
     private boolean ignoreClickOnce;
     private final Timer timer;
     private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
@@ -152,6 +156,8 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                  .getXAxis().setAxisTitle(null);
         }
         
+        timeLineSeries = createTimeLineSeries();
+        
         setWidget(chart);
         setSize("100%", "100%");
         updateSettings(settings);
@@ -226,7 +232,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         Series newSeries = chart
                 .createSeries()
                 .setType(Series.Type.LINE)
-                .setName(stringMessages.fromDeg()+" "+windSource.name())
+                .setName(stringMessages.fromDeg()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(0)
                 .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)));
         return newSeries;
@@ -240,12 +246,21 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         Series newSeries = chart
                 .createSeries()
                 .setType(Series.Type.LINE)
-                .setName(stringMessages.windSpeed()+" "+windSource.name())
+                .setName(stringMessages.windSpeed()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(1) // use the second Y-axis
                 .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.SHORT_DOT)
                         .setLineWidth(3).setHoverStateLineWidth(3)
                         .setColor(colorMap.getColorByID(windSource))); // show only the markers, not the connecting lines
         return newSeries;
+    }
+
+    private Series createTimeLineSeries() {
+        return chart
+                .createSeries()
+                .setType(Series.Type.LINE)
+                .setName("TIME_LINE")
+                .setYAxis(0)
+                .setPlotOptions(new LinePlotOptions().setEnableMouseTracking(false).setShowInLegend(false).setHoverStateEnabled(false).setLineWidth(2));
     }
 
     /**
@@ -257,7 +272,10 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
             WindSource windSource = e.getKey();
             Series directionSeries = getOrCreateDirectionSeries(windSource);
-            Series speedSeries = getOrCreateSpeedSeries(windSource);
+            Series speedSeries = null;
+            if (windSource.getType().useSpeed()) {
+                speedSeries = getOrCreateSpeedSeries(windSource);
+            }
             WindTrackInfoDTO windTrackInfo = e.getValue();
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
@@ -278,22 +296,26 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 speedPoints[i++] = newSpeedPoint;
             }
             Point[] newDirectionPoints;
-            Point[] newSpeedPoints;
+            Point[] newSpeedPoints = null;
             if (append) {
                 Point[] oldDirectionPoints = directionSeries.getPoints();
                 newDirectionPoints = new Point[oldDirectionPoints.length + directionPoints.length];
                 System.arraycopy(oldDirectionPoints, 0, newDirectionPoints, 0, oldDirectionPoints.length);
                 System.arraycopy(directionPoints, 0, newDirectionPoints, oldDirectionPoints.length, directionPoints.length);
-                Point[] oldSpeedPoints = speedSeries.getPoints();
-                newSpeedPoints = new Point[oldSpeedPoints.length + speedPoints.length];
-                System.arraycopy(oldSpeedPoints, 0, newSpeedPoints, 0, oldSpeedPoints.length);
-                System.arraycopy(speedPoints, 0, newSpeedPoints, oldSpeedPoints.length, speedPoints.length);
+                if (windSource.getType().useSpeed()) {
+                    Point[] oldSpeedPoints = speedSeries.getPoints();
+                    newSpeedPoints = new Point[oldSpeedPoints.length + speedPoints.length];
+                    System.arraycopy(oldSpeedPoints, 0, newSpeedPoints, 0, oldSpeedPoints.length);
+                    System.arraycopy(speedPoints, 0, newSpeedPoints, oldSpeedPoints.length, speedPoints.length);
+                }
             } else {
                 newDirectionPoints = directionPoints;
                 newSpeedPoints = speedPoints;
             }
             directionSeries.setPoints(newDirectionPoints);
-            speedSeries.setPoints(newSpeedPoints);
+            if (windSource.getType().useSpeed()) {
+                speedSeries.setPoints(newSpeedPoints);
+            }
         }
     }
 
@@ -304,7 +326,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
 
     @Override
     public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent() {
-        return new WindChartSettingsDialogComponent(new WindChartSettings(windSourceTypesToDisplay));
+        return new WindChartSettingsDialogComponent(new WindChartSettings(windSourceTypesToDisplay), stringMessages);
     }
 
     /**
@@ -319,13 +341,12 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
             if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
                 chart.addSeries(e.getValue());
+                if (windSourceSpeedSeries.containsKey(e.getKey()) && e.getKey().getType().useSpeed()) {
+                    chart.addSeries(windSourceSpeedSeries.get(e.getKey()));
+                }
             }
         }
-        for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
-            if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
-                chart.addSeries(e.getValue());
-            }
-        }
+        chart.redraw();
     }
 
     /**
@@ -414,6 +435,21 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 loadData(selectedRaceIdentifier, /* from */null, /* to */
                         new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */false); // replace old series
             }
+        }
+        updateTimeLine(date);
+        
+    }
+    
+    private void updateTimeLine(Date date) {
+        Long x = date.getTime();
+        Extremes extremes= chart.getYAxis(0).getExtremes();
+        Point[] points = new Point[2];
+        points[0] = new Point(x, extremes.getDataMin());
+        points[1] = new Point(x, extremes.getDataMax());
+        timeLineSeries.setPoints(points);
+        
+        if (!Arrays.asList(chart.getSeries()).contains(timeLineSeries)) {
+            chart.addSeries(timeLineSeries);
         }
     }
     

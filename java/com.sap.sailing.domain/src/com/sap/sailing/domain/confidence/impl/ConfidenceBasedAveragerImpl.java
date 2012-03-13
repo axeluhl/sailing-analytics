@@ -52,7 +52,7 @@ public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implem
             ScalableValue<ValueType, BaseType> numerator = null;
             double confidenceSum = 0;
             for (HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo> next : values) {
-                double relativeWeight = (weigher == null ? 1.0 : weigher.getConfidence(next.getRelativeTo(), at)) * next.getConfidence();
+                double relativeWeight = (getWeigher() == null ? 1.0 : getWeigher().getConfidence(next.getRelativeTo(), at)) * next.getConfidence();
                 ScalableValue<ValueType, BaseType> weightedNext = next.getScalableValue().multiply(relativeWeight);
                 if (numerator == null) {
                     numerator = weightedNext;
@@ -66,5 +66,9 @@ public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implem
             BaseType result = numerator.divide(confidenceSum);
             return new HasConfidenceImpl<ValueType, BaseType, RelativeTo>(result, newConfidence, at);
         }
+    }
+
+    protected Weigher<RelativeTo> getWeigher() {
+        return weigher;
     }
 }

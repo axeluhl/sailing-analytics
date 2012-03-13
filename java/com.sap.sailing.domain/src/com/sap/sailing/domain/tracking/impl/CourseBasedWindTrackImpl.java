@@ -4,6 +4,7 @@ import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
@@ -30,7 +31,8 @@ public class CourseBasedWindTrackImpl extends WindTrackImpl {
     private static final NavigableSet<Wind> empty = new UnmodifiableNavigableSet<Wind>(new ArrayListNavigableSet<Wind>(WindComparator.INSTANCE));
     
     public CourseBasedWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence) {
-        super(millisecondsOverWhichToAverage, baseConfidence);
+        super(millisecondsOverWhichToAverage, baseConfidence,
+                /* useSpeed: no usable wind speed information can be extracted from course */ WindSourceType.COURSE_BASED.useSpeed());
         this.trackedRace = trackedRace;
     }
 

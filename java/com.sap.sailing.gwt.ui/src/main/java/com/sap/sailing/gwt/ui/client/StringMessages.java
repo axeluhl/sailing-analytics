@@ -265,4 +265,9 @@ public interface StringMessages extends Messages {
     String notAvailable();
     String details();
     String noGroupSelected();
+    String combinedWindSourceTypeName();
+    String courseBasedWindSourceTypeName();
+    String trackBasedEstimationWindSourceTypeName();
+    String expeditionWindSourceTypeName();
+    String webWindSourceTypeName();
 }
