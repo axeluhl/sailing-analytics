@@ -55,6 +55,7 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
 
         windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
+        windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
         
         windSymbolImage = new Image();
         add(windSymbolImage);
@@ -75,7 +76,7 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
                 
                 if (race != null) {
                     // draw the wind into the map, get the combined wind
-                    sailingService.getWindInfo(race, date, 1000L, 1, 0.0, 0.0, null,
+                    sailingService.getWindInfo(race, date, 1000L, 1, windSourceTypeNames,
                             new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -101,29 +102,38 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
         for(WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
             WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
             switch (windSource.getType()) {
-                    case COMBINED:
-                    {
-                        if(windTrackInfoDTO.windFixes.size() > 0) {
-                            WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-                            double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
-                            double windFromDeg = windDTO.dampenedTrueWindFromDeg;
-                            NumberFormat numberFormat = NumberFormat.getFormat("0.0");
-                            
-                            double rotationDegOfWindSymbol = 180.0 + windFromDeg;
-                            if(rotationDegOfWindSymbol >= 360.0)
-                                rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
-                            String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
-                            windSymbolImage.setUrl(transformedImageURL);
-                            windSymbolImage.setTitle(Math.round(windFromDeg) + " " + stringMessages.degreesShort());
-                            textLabel.setText(numberFormat.format(speedInKnots) + " kn");
-                            
-                            if(!isVisible())
-                                setVisible(true);
-                        } else {
-                            setVisible(false);
-                        }
+                case COMBINED:
+                {
+                    if(windTrackInfoDTO.windFixes.size() > 0) {
+                        WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
+                        double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
+                        double windFromDeg = windDTO.dampenedTrueWindFromDeg;
+                        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
+                        
+                        double rotationDegOfWindSymbol = 180.0 + windFromDeg;
+                        if(rotationDegOfWindSymbol >= 360.0)
+                            rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
+                        String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
+                        windSymbolImage.setUrl(transformedImageURL);
+                        windSymbolImage.setTitle(Math.round(windFromDeg) + " " + stringMessages.degreesShort());
+                        textLabel.setText(numberFormat.format(speedInKnots) + " kn");
+                        
+                        if(!isVisible())
+                            setVisible(true);
+                    } else {
+                        setVisible(false);
                     }
-                    break;
+                }
+                break;
+                case EXPEDITION:
+                {
+//                    if(windTrackInfoDTO.windFixes.size() > 0) {
+//                        WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
+//                        double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
+//                        double windFromDeg = windDTO.dampenedTrueWindFromDeg;
+//                    }
+                }
+                break;
             }
         }
     }

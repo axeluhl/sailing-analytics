@@ -812,51 +812,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             int i = 1;
             for (TrackedLeg trackedLeg : trackedLegs) {
                 if (i == 1) {
-                    // try to calculate the point in time where all boats passed the start line in a small time frame
+                    // calculate the point in time where all boats passed the start line in a defined time frame
                     Waypoint from = trackedLeg.getLeg().getFrom();
                     Iterable<MarkPassing> markPassings = trackedRace.getMarkPassingsInOrder(from);
-                    synchronized (markPassings) {
-                        int markPassingsCount = Util.size(markPassings);
-                        // require more than half the boats registered for the race to have passed the start mark
-                        if (markPassings != null
-                                && markPassingsCount > Util.size(trackedRace.getRace().getCompetitors()) / 2) {
-                            long maxTimeFrameInMs = 60 * 1000; // = 1 minute
-                            Iterator<MarkPassing> iterator = markPassings.iterator();
-                            long currentTimeToCheck = 0;
-                            int enoughCompetitors = markPassingsCount / 2;
-                            int maxCompetitors = 0;
-                            long maxCompetitorsFirstPassingTime = 0;
-                            int currentCompetitorsInTime = 0;
-
-                            while (iterator.hasNext()) {
-                                MarkPassing currentMarkPassing = iterator.next();
-                                long diff = currentMarkPassing.getTimePoint().asMillis() - currentTimeToCheck;
-                                if (diff > maxTimeFrameInMs) {
-                                    // reset the check, but save the amount of competitors as a fallback solution
-                                    if(currentCompetitorsInTime > maxCompetitors)
-                                    {
-                                        maxCompetitors = currentCompetitorsInTime;
-                                        maxCompetitorsFirstPassingTime = currentTimeToCheck;
-                                    }
-                                    currentCompetitorsInTime = 0;
-                                    currentTimeToCheck = currentMarkPassing.getTimePoint().asMillis();
-                                } else {
-                                    currentCompetitorsInTime++;
-                                    if (currentCompetitorsInTime == enoughCompetitors) {
-                                        Date passingDate = currentMarkPassing.getTimePoint().asDate();
-                                        LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("S");
-                                        legTimepointDTO.firstPassingDate = passingDate;
-                                        legTimes.add(legTimepointDTO);
-                                        raceTimesInfo.setStartOfRace(passingDate);
-                                        lastLegPassingTime = passingDate;
-                                        break;
-                                    }
-                                }
-                            }
-                            // if we didn't find a start time we use the first passing time of the largest competitor group as fallback
-                            if(raceTimesInfo.startOfRace == null)
-                                raceTimesInfo.setStartOfRace(new Date(maxCompetitorsFirstPassingTime));
-                        }
+                    Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
+                    
+                    Date startOfRacePassingDate = calculateStartOfRaceFromMarkPassings(markPassings, competitors);
+                    if(startOfRacePassingDate != null) {
+                        LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("S");
+                        legTimepointDTO.firstPassingDate = startOfRacePassingDate;
+                        legTimes.add(legTimepointDTO);
+                        raceTimesInfo.setStartOfRace(startOfRacePassingDate);
+                        lastLegPassingTime = startOfRacePassingDate;
                     }
                 }
                 
@@ -887,6 +854,50 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return raceTimesInfo;
     }
 
+    private Date calculateStartOfRaceFromMarkPassings(Iterable<MarkPassing> markPassings, Iterable<Competitor> competitors) {
+        Date startOfRace = null;
+        
+        // try to calculate the point in time where all boats passed the start line in a small time frame
+        synchronized (markPassings) {
+            int markPassingsCount = Util.size(markPassings);
+            // require more than half the boats registered for the race to have passed the start mark
+            if (markPassings != null && markPassingsCount > Util.size(competitors) / 2) {
+                long maxTimeFrameInMs = 60 * 1000; // = 1 minute
+                Iterator<MarkPassing> iterator = markPassings.iterator();
+                long currentTimeToCheck = 0;
+                int enoughCompetitors = markPassingsCount / 2;
+                int maxCompetitors = 0;
+                long maxCompetitorsFirstPassingTime = 0;
+                int currentCompetitorsInTime = 0;
+
+                while (iterator.hasNext()) {
+                    MarkPassing currentMarkPassing = iterator.next();
+                    long diff = currentMarkPassing.getTimePoint().asMillis() - currentTimeToCheck;
+                    if (diff > maxTimeFrameInMs) {
+                        // reset the check, but save the amount of competitors for the fallback solution
+                        if(currentCompetitorsInTime > maxCompetitors)
+                        {
+                            maxCompetitors = currentCompetitorsInTime;
+                            maxCompetitorsFirstPassingTime = currentTimeToCheck;
+                        }
+                        currentCompetitorsInTime = 0;
+                        currentTimeToCheck = currentMarkPassing.getTimePoint().asMillis();
+                    } else {
+                        currentCompetitorsInTime++;
+                        if (currentCompetitorsInTime == enoughCompetitors) {
+                            startOfRace = currentMarkPassing.getTimePoint().asDate();
+                            break;
+                        }
+                    }
+                }
+                // if we didn't find a start time we use the first passing time of the largest competitor group as fallback
+                if(startOfRace == null)
+                    startOfRace = new Date(maxCompetitorsFirstPassingTime);
+            }
+        }
+        return startOfRace;
+    }
+    
     @Override
     public List<MarkDTO> getMarkPositions(RaceIdentifier raceIdentifier, Date date) {
         List<MarkDTO> result = new ArrayList<MarkDTO>();

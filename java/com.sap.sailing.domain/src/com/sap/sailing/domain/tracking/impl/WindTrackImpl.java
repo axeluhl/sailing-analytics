@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
@@ -195,7 +196,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         }
         do {
             if (beforeWind != null && (beforeDistanceToAt <= afterDistanceToAt || afterWind == null)) {
-                if (p == null) {
+                if (p == null && beforeWind.getPosition() != null) {
                     positionsToAverage.add(new PositionWithConfidenceImpl<TimePoint>(beforeWind.getPosition(), getBaseConfidence(), beforeWind.getTimePoint()));
                 }
                 if (beforeIntervalEnd == null) {
@@ -212,7 +213,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     beforeWind = null;
                 }
             } else if (afterWind != null) {
-                if (p == null) {
+                if (p == null && afterWind.getPosition() != null) {
                     positionsToAverage.add(new PositionWithConfidenceImpl<TimePoint>(afterWind.getPosition(), getBaseConfidence(), afterWind.getTimePoint()));
                 }
                 if (afterIntervalStart == null) {
@@ -234,7 +235,18 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             return null;
         } else {
             BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
-            Position resultPosition = p == null ? positionAverager.getAverage(positionsToAverage, at).getObject() : p;
+            
+            Position resultPosition;
+            if(p == null) {
+                HasConfidence<ScalablePosition, Position, TimePoint> averagePos = positionAverager.getAverage(positionsToAverage, at);
+                if(averagePos != null)
+                    resultPosition = averagePos.getObject();
+                else
+                    resultPosition = null;
+            } else {
+                resultPosition = p;
+            }
+//            Position resultPosition = p == null ? positionAverager.getAverage(positionsToAverage, at).getObject() : p;
             SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, average == null ? null : average.getObject());
             return new WindWithConfidenceImpl<Pair<Position,TimePoint>>(new WindImpl(resultPosition, at, avgWindSpeed), average.getConfidence(),
                     new Pair<Position, TimePoint>(p, at), useSpeed);
