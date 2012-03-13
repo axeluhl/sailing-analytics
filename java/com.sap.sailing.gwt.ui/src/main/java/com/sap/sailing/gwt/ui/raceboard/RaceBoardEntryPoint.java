@@ -34,7 +34,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private String raceName;
     private String leaderboardName;
     private String leaderboardGroupName;
-    private RaceBoardViewMode viewMode;
+    private RaceBoardViewModes viewMode;
 
     @Override
     public void onModuleLoad() {     
@@ -48,12 +48,12 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         if(viewModeParamValue != null && !viewModeParamValue.isEmpty()) {
             try {
                 
-                viewMode = RaceBoardViewMode.valueOf(viewModeParamValue);
+                viewMode = RaceBoardViewModes.valueOf(viewModeParamValue);
             } catch (IllegalArgumentException e) {
-                viewMode = RaceBoardViewMode.ONESCREEN;
+                viewMode = RaceBoardViewModes.ONESCREEN;
             }
         } else {
-            viewMode = RaceBoardViewMode.ONESCREEN;
+            viewMode = RaceBoardViewModes.ONESCREEN;
         }
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;

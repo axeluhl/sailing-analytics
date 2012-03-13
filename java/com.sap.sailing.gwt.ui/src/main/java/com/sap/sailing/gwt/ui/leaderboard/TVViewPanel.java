@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewMode;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewModes;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -106,7 +106,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         List<RaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, timer, raceSelectionModel, leaderboardName, null,
-                errorReporter, stringMessages, userAgentType, RaceBoardViewMode.ONESCREEN, raceTimesInfoProvider);
+                errorReporter, stringMessages, userAgentType, RaceBoardViewModes.ONESCREEN, raceTimesInfoProvider);
         return raceBoardPanel;
     }
     
