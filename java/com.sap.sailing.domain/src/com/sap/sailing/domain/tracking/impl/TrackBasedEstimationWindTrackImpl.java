@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.impl.AbstractTimePoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -62,7 +63,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     private final HashSet<TimePoint> timePointsWithCachedNullResultFastContains;
 
     public TrackBasedEstimationWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence) {
-        super(trackedRace, millisecondsOverWhichToAverage, baseConfidence);
+        super(trackedRace, millisecondsOverWhichToAverage, baseConfidence,
+                WindSourceType.TRACK_BASED_ESTIMATION.useSpeed());
         virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
         trackedRace.addListener(this);
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(AbstractTimePoint.TIMEPOINT_COMPARATOR);

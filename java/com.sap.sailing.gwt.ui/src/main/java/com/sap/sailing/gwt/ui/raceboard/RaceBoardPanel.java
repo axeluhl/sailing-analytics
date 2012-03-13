@@ -35,6 +35,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
+import com.sap.sailing.gwt.ui.leaderboard.AbstractChartPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
@@ -269,8 +270,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer, final Component<?> component) {
         final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(), component.getLocalizedShortName());
         toggleButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        toggleButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        toggleButton.getElement().getStyle().setMargin(3, Style.Unit.PX);
         toggleButton.setDown(component.isVisible());
         
         toggleButton.addClickHandler(new ClickHandler() {
@@ -282,6 +281,13 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             if (toggleButton.isDown()) {
                 component.setVisible(true);
                 componentViewer.forceLayout();
+                
+                //Forcing a chart time line update, or it wouldn't be displayed if the chart is set to visible
+                if (component instanceof WindChart) {
+                    ((WindChart) component).forceTimeLineUpdate();
+                } else if (component instanceof AbstractChartPanel) {
+                    ((AbstractChartPanel<?>) component).forceTimeLineUpdate();
+                }
             } else {
                 component.setVisible(false);
                 componentViewer.forceLayout();
