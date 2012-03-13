@@ -872,8 +872,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                     &&
                                     // Mark passings may be missing or far off. This can lead to boats apparently going
                                     // "backwards" regarding the leg's direction; ignore those
-                                    isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(), trackedLeg,
-                                            timePoint)) {
+                                    isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(), trackedLeg, timePoint)) {
                                 // additionally to generally excluding maneuvers, reduce confidence around mark passings:
                                 NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
                                 double markPassingProximityConfidenceReduction = 1.0;
