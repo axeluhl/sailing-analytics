@@ -265,17 +265,19 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     @Override
     protected WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
         TimePoint floorTimePoint = virtualInternalRawFixes.floorToResolution(at);
-        TimePoint ceilTimePoint = virtualInternalRawFixes.ceilingToResolution(at);
         TimePoint timePoint;
-        if (Math.abs(floorTimePoint.asMillis() - at.asMillis()) < Math.abs(ceilTimePoint.asMillis() - at.asMillis())) {
+        if (floorTimePoint.equals(at) ||
+                Math.abs(floorTimePoint.asMillis() - at.asMillis()) <
+                Math.abs(virtualInternalRawFixes.ceilingToResolution(at).asMillis() - at.asMillis())) {
             timePoint = floorTimePoint;
         } else {
-            timePoint = ceilTimePoint;
+            timePoint = virtualInternalRawFixes.ceilingToResolution(at);
         }
         WindWithConfidence<TimePoint> preResult = virtualInternalRawFixes.getWindWithConfidence(p, timePoint);
         // reduce confidence depending on how far *at* is away from the time point of the fix obtained
         double confidenceMultiplier = weigher.getConfidence(timePoint, at);
-        WindWithConfidenceImpl<Pair<Position, TimePoint>> result = new WindWithConfidenceImpl<Pair<Position, TimePoint>>(
+        WindWithConfidenceImpl<Pair<Position, TimePoint>> result = preResult == null ? null :
+            new WindWithConfidenceImpl<Pair<Position, TimePoint>>(
                 preResult.getObject(), confidenceMultiplier * preResult.getConfidence(),
                 /* relativeTo */ new Pair<Position, TimePoint>(p, at), preResult.useSpeed());
         return result;
