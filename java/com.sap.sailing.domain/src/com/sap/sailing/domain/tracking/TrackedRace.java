@@ -111,7 +111,11 @@ public interface TrackedRace {
      * If the competitor hasn't passed the start waypoint yet, <code>null</code> is
      * returned because the competitor was not yet on any leg at that point in time. If
      * the time point happens to be after the last fix received from that competitor,
-     * the last known leg for that competitor is returned. 
+     * the last known leg for that competitor is returned. If the time point is after the
+     * competitor's mark passing for the finish line, <code>null</code> is returned.
+     * For all legs except the last, if the time point equals a mark passing time point
+     * of the leg's starting waypoint, that leg is returned. For the time point of
+     * the mark passing for the finish line, the last leg is returned.
      */
     TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at);
     
