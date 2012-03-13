@@ -163,10 +163,12 @@ public class ConfidenceTest {
             clusterB.add(bearingWithConfidence);
         }
         BearingWithConfidenceCluster<TimePoint>[] splitResultB = clusterB.splitInTwo(45.0, timePoint);
-        assertEquals(11, splitResultA[0].size());
-        assertEquals(1, splitResultA[1].size());
-        assertEquals(11, splitResultB[0].size());
-        assertEquals(1, splitResultB[1].size());
+        assertEquals(11, Math.max(splitResultA[0].size(), splitResultA[1].size()));
+        assertEquals(1, Math.min(splitResultA[0].size(), splitResultA[1].size()));
+        assertEquals(11, Math.max(splitResultB[0].size(), splitResultB[1].size()));
+        assertEquals(1, Math.min(splitResultB[0].size(), splitResultB[1].size()));
+        assertEquals((splitResultA[0].size()<splitResultA[1].size()?splitResultA[0]:splitResultA[1]).getAverage(timePoint).getObject().getDegrees(),
+                (splitResultB[0].size()<splitResultB[1].size()?splitResultB[0]:splitResultB[1]).getAverage(timePoint).getObject().getDegrees(), 0.0000001);
     }
     
     private BearingWithConfidence<TimePoint> parseBearingWithConfidence(String a) {
