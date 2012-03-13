@@ -79,7 +79,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final Label noCompetitorsSelectedLabel;
     protected final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
     protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
-    protected Series timeLineSeries;
+    private Series timeLineSeries;
+    private boolean timeLineNeedsUpdate = true;
     protected final RaceSelectionProvider raceSelectionProvider;
     protected long stepSize = 5000;
     protected final StringMessages stringMessages;
@@ -87,7 +88,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     protected DetailType dataToShow;
     protected final CompetitorSelectionProvider competitorSelectionProvider;
-    private boolean initializeTimeLine = true;
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
@@ -147,7 +147,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 .setWidth100()
                 .setHeight100()
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setLegend(new Legend().setEnabled(true))
+                .setLegend(new Legend().setEnabled(true).setBorderWidth(0))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
@@ -189,7 +189,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         }));
         
         if (compactChart) {
-            chart.setSpacingBottom(4).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
+            chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
                  .setOption("legend/margin", 2)
                  .setOption("title/margin", 5)
                  .setChartSubtitle(null)
@@ -256,10 +256,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                                 }
                             }
                             drawChartData();
-                            if (initializeTimeLine ) {
-                                updateTimeLine(timer.getTime());
-                                initializeTimeLine = false;
-                            }
                             setWidget(chart);
                         }
                     });
@@ -279,6 +275,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
+        timeLineNeedsUpdate = true;
         loadData(true);
     }
     
@@ -300,7 +297,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     /**
      * Creates the series for all selected competitors if these aren't created yet.<br />
      * Fills the series for the selected competitors with the data in {@link AbstractChartPanel#chartData}.<br />
-     * Removes series of competitors, which aren't selected and adds series for competitors, which are newly selected.<br /><br />
+     * Removes series of competitors, which aren't selected and adds series for competitors, which are newly selected.<br />
+     * Also {@link #forceTimeLineUpdate() updates} the {@link #timeLineSeries} if {@link #timeLineNeedsUpdate} is <code>true</code>.<br /><br />
      * 
      * The data for all {@link #getVisibleCompetitors() visible competitors} needs to be filled before calling this method.
      */
@@ -359,6 +357,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                         chart.removeSeries(markSeries);
                     }
                 }
+            }
+            if (timeLineNeedsUpdate) {
+                forceTimeLineUpdate();
             }
         }
     }
@@ -526,6 +527,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
       setChartData(null);
       clearChart();
+      timeLineNeedsUpdate = true;
       loadData(true);
     }
 
@@ -568,7 +570,19 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         
         return new Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
     }
+
+    /**
+     * Forces the chart to {@link #updateTimeLine(Date) update} the position and to {@link #ensureTimeLineIsVisible()
+     * ensure}, that the time line is visible.
+     */
+    public void forceTimeLineUpdate() {
+        updateTimeLine(timer.getTime());
+    }
     
+    /**
+     * Updates the position of the time line for the given {@link Date}.<br />
+     * @param date Defines the x-Value of the line points
+     */
     private void updateTimeLine(Date date) {
         if (chart != null) {
             Long x = date.getTime();
@@ -577,9 +591,18 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             points[0] = new Point(x, extremes.getDataMin());
             points[1] = new Point(x, extremes.getDataMax());
             timeLineSeries.setPoints(points);
-            if (!Arrays.asList(chart.getSeries()).contains(timeLineSeries)) {
-                chart.addSeries(timeLineSeries);
-            }
+            ensureTimeLineIsVisible();
+            timeLineNeedsUpdate = false;
+        }
+    }
+    
+    /**
+     * Checks if the series of the chart contain the {@link #timeLineSeries}. If not, it is added to the chart.<br />
+     * Throws a NPE if the chart is <code>null</code>.
+     */
+    private void ensureTimeLineIsVisible() {
+        if (!Arrays.asList(chart.getSeries()).contains(timeLineSeries)) {
+            chart.addSeries(timeLineSeries);
         }
     }
 
@@ -587,12 +610,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     public void timeChanged(Date date) {
         if (getChartData() != null) {
             Date newestEvent = getChartData().getOldestDateOfNewestData();
+            updateTimeLine(date);
             if (hasVisibleCompetitors()
                     && (newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
                 loadData(false);
             }
         }
-        updateTimeLine(date);
     }
 
     @Override

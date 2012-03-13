@@ -844,7 +844,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         }
     }
-    
+
     protected Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
         for (GPSFixDTO fix : fixesForCompetitor) {
             if (!fix.extrapolated) {

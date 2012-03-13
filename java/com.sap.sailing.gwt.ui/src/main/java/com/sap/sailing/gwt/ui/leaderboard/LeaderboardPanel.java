@@ -154,7 +154,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * changes its playing state
      */
     private final Anchor playPause;
-
+    
     private final CompetitorSelectionProvider competitorSelectionProvider;
 
     /**
@@ -194,7 +194,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private boolean currentlyHandlingPlayStateChange;
 
     private PlayModes oldPlayMode;
-    
+
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
 
@@ -936,7 +936,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (LeaderboardPanel.this.timer.getPlayState() == PlayStates.Playing) {
                     LeaderboardPanel.this.timer.pause();
                 } else {
-                    LeaderboardPanel.this.timer.play();
+                    // playing the standalone leaderboard means putting it into live mode
+                    LeaderboardPanel.this.timer.setPlayMode(PlayModes.Live);
                 }
             }
         };
@@ -972,7 +973,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        if(!isEmbedded) {
+        if (!isEmbedded) {
             contentPanel.add(headerPanel);
             contentPanel.add(toolbarPanel);
         }
@@ -1018,10 +1019,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private SafeHtml getPlayPauseImgHtml(PlayStates playState) {
-        if (playState == PlayStates.Playing)
+        if (playState == PlayStates.Playing) {
             return AbstractImagePrototype.create(pauseIcon).getSafeHtml();
-        else
+        } else {
             return AbstractImagePrototype.create(playIcon).getSafeHtml();
+        }
     }
 
     private void setDelayInMilliseconds(long delayInMilliseconds) {
