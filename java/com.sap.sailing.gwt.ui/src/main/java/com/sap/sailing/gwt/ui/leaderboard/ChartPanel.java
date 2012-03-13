@@ -26,9 +26,9 @@ public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Com
 
     public ChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
             RaceSelectionProvider raceSelectionProvider, Timer timer, DetailType dataToShow, StringMessages stringMessages,
-            ErrorReporter errorReporter, boolean compactChart) {
+            ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
         super(sailingService, competitorSelectionProvider, raceSelectionProvider, timer, stringMessages, errorReporter,
-                dataToShow, compactChart);
+                dataToShow, compactChart, allowTimeAdjust);
     }
 
     @Override

@@ -130,3 +130,14 @@
 	background: url(images/btn-cta-orangeleft.png) center bottom repeat-x;
 	color: #fff;
 }
+
+.RaceBoardHeader {
+	position: relative;
+	margin: 0 auto;
+	width: 400px;
+	text-align: center;
+	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
+	font-size: 18px;
+	color: #fff;
+	margin-top: 22px;	
+}
