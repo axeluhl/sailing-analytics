@@ -147,7 +147,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 .setWidth100()
                 .setHeight100()
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setLegend(new Legend().setEnabled(true))
+                .setLegend(new Legend().setEnabled(true).setBorderWidth(0))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
