@@ -11,6 +11,7 @@ import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Extremes;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -78,6 +79,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final Label noCompetitorsSelectedLabel;
     protected final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
     protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
+    protected Series timeLineSeries;
     protected final RaceSelectionProvider raceSelectionProvider;
     protected long stepSize = 5000;
     protected final StringMessages stringMessages;
@@ -85,6 +87,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     protected DetailType dataToShow;
     protected final CompetitorSelectionProvider competitorSelectionProvider;
+    private boolean initializeTimeLine = true;
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
@@ -109,6 +112,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         
         chart = createChart(dataToShow);
+        timeLineSeries = createTimeLineSeries();
         
         busyIndicatorPanel = new AbsolutePanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator(/*busy*/ true, /*scale*/ 1);
@@ -186,7 +190,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         
         if (compactChart) {
             chart.setSpacingBottom(4).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
-                 .setLegend(new Legend().setMargin(2))
+                 .setOption("legend/margin", 2)
                  .setOption("title/margin", 5)
                  .setChartSubtitle(null)
                  .getXAxis().setAxisTitleText(null);
@@ -252,6 +256,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                                 }
                             }
                             drawChartData();
+                            if (initializeTimeLine ) {
+                                updateTimeLine(timer.getTime());
+                                initializeTimeLine = false;
+                            }
                             setWidget(chart);
                         }
                     });
@@ -384,6 +392,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             dataSeriesByCompetitor.put(competitor, result);
     	}
     	return result;
+    }
+
+    private Series createTimeLineSeries() {
+        return chart
+                .createSeries()
+                .setType(Series.Type.LINE)
+                .setName("TIME_LINE")
+                .setPlotOptions(new LinePlotOptions().setEnableMouseTracking(false).setShowInLegend(false).setHoverStateEnabled(false).setLineWidth(2));
     }
 
     private String getUnit() {
@@ -552,6 +568,20 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         
         return new Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
     }
+    
+    private void updateTimeLine(Date date) {
+        if (chart != null) {
+            Long x = date.getTime();
+            Extremes extremes = chart.getYAxis(0).getExtremes();
+            Point[] points = new Point[2];
+            points[0] = new Point(x, extremes.getDataMin());
+            points[1] = new Point(x, extremes.getDataMax());
+            timeLineSeries.setPoints(points);
+            if (!Arrays.asList(chart.getSeries()).contains(timeLineSeries)) {
+                chart.addSeries(timeLineSeries);
+            }
+        }
+    }
 
     @Override
     public void timeChanged(Date date) {
@@ -562,6 +592,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 loadData(false);
             }
         }
+        updateTimeLine(date);
     }
 
     @Override
