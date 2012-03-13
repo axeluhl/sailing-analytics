@@ -46,6 +46,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util;
@@ -844,7 +845,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         }
     }
-    
+
     protected Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
         for (GPSFixDTO fix : fixesForCompetitor) {
             if (!fix.extrapolated) {
