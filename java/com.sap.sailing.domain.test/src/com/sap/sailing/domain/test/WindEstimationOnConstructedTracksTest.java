@@ -103,15 +103,15 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 315);
-        setBearingForCompetitor(competitors.get(1), now, 50); // on the same tack, should give no read-out
+        setBearingForCompetitor(competitors.get(1), now, 45); // on the same tack, should give no read-out
         setBearingForCompetitor(competitors.get(2), now, 135);
-        setBearingForCompetitor(competitors.get(3), now, 220); // on the same tack, should give no read-out
+        setBearingForCompetitor(competitors.get(3), now, 225); // on the same tack, should give no read-out
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
         // less precision because downwind estimation has less confidence
-        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.2);
+        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
         CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace(), WindSourceType.COMBINED.getBaseConfidence());
         Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
-        assertEquals(180., combinedWindDirection.getBearing().getDegrees(), 0.2); // a bit less precise as course-based wind isn't exactly 180deg
+        assertEquals(180., combinedWindDirection.getBearing().getDegrees(), 0.00001);
     }
 
     /**
@@ -279,12 +279,11 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 315);
-        setBearingForCompetitor(competitors.get(1), now, 50); // on the same tack, should give no read-out
+        setBearingForCompetitor(competitors.get(1), now, 45); // on the same tack, should give no read-out
         setBearingForCompetitor(competitors.get(2), now, 135);
-        setBearingForCompetitor(competitors.get(3), now, 220); // on the same tack, should give no read-out
+        setBearingForCompetitor(competitors.get(3), now, 225); // on the same tack, should give no read-out
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
-        // not so exact because downwind estimations have lesser confidence
-        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.2);
+        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
     }
 
 }
