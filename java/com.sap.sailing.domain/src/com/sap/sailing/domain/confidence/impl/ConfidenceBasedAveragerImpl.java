@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.confidence.impl;
 
-import java.util.logging.Logger;
-
 import com.sap.sailing.domain.base.impl.HasConfidenceImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
@@ -34,8 +32,6 @@ import com.sap.sailing.domain.confidence.Weigher;
  * @author Axel Uhl (d043530)
  */
 public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implements ConfidenceBasedAverager<ValueType, BaseType, RelativeTo> {
-    private static final Logger logger = Logger.getLogger(ConfidenceBasedAverager.class.getName());
-    
     private final Weigher<RelativeTo> weigher;
     
     /**
@@ -51,9 +47,6 @@ public class ConfidenceBasedAveragerImpl<ValueType, BaseType, RelativeTo> implem
     public HasConfidence<ValueType, BaseType, RelativeTo> getAverage(
             Iterable<? extends HasConfidenceAndIsScalable<ValueType, BaseType, RelativeTo>> values, RelativeTo at) {
         if (values == null || Util.isEmpty(values)) {
-            logger.finest("empty collection to average: "+values);
-            // FIXME remove again when debugging is done
-            new RuntimeException("empty collection to average: "+values).printStackTrace();
             return null;
         } else {
             ScalableValue<ValueType, BaseType> numerator = null;

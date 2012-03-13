@@ -3,7 +3,6 @@ package com.sap.sailing.domain.tracking.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
@@ -28,7 +27,6 @@ import com.sap.sailing.domain.confidence.Weigher;
  *
  */
 public class BearingWithConfidenceCluster<RelativeTo> {
-    private final static Logger logger = Logger.getLogger(BearingWithConfidenceCluster.class.getName());
     private final List<BearingWithConfidence<RelativeTo>> bearings;
     private final Weigher<RelativeTo> weigher;
     
@@ -82,9 +80,6 @@ public class BearingWithConfidenceCluster<RelativeTo> {
                     }
                 }
             }
-            // FIXME remove once debugging is done
-            logger.finest("extremeBearings: "+extremeBearings);
-            logger.finest("result[0]: "+result[0]+", result[1]: "+result[1]);
         } else if (!bearings.isEmpty()) {
             // add the only bearing to the first of the two resulting clusters
             result[0].add(bearings.get(0));
