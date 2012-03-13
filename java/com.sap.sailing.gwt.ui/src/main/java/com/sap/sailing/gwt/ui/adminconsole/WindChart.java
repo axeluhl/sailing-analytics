@@ -101,7 +101,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 .setHeight100()
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setLegend(new Legend().setEnabled(true))
+                .setLegend(new Legend().setEnabled(true).setBorderWidth(0))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(
                         new Marker().setEnabled(false).setHoverState(
                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
@@ -148,9 +148,10 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
             .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
+        
         if (compactChart) {
-            chart.setSpacingBottom(4).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
-                 .setLegend(new Legend().setMargin(2))
+            chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
+                 .setOption("legend/margin", 2)
                  .setOption("title/margin", 5)
                  .setChartSubtitle(null)
                  .getXAxis().setAxisTitle(null);
@@ -439,7 +440,19 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         updateTimeLine(date);
         
     }
+
+    /**
+     * Forces the chart to {@link #updateTimeLine(Date) update} the position and to {@link #ensureTimeLineIsVisible()
+     * ensure}, that the time line is visible.
+     */
+    public void forceTimeLineUpdate() {
+        updateTimeLine(timer.getTime());
+    }
     
+    /**
+     * Updates the position of the time line for the given {@link Date}.<br />
+     * @param date Defines the x-Value of the line points
+     */
     private void updateTimeLine(Date date) {
         Long x = date.getTime();
         Extremes extremes= chart.getYAxis(0).getExtremes();
@@ -447,7 +460,13 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         points[0] = new Point(x, extremes.getDataMin());
         points[1] = new Point(x, extremes.getDataMax());
         timeLineSeries.setPoints(points);
-        
+        ensureTimeLineIsVisible();
+    }
+    
+    /**
+     * Checks if the series of the chart contain the {@link #timeLineSeries}. If not, it is added to the chart.
+     */
+    private void ensureTimeLineIsVisible() {
         if (!Arrays.asList(chart.getSeries()).contains(timeLineSeries)) {
             chart.addSeries(timeLineSeries);
         }
@@ -457,5 +476,5 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     public void onResize() {
         chart.setSizeToMatchContainer();
     }
-
+    
 }

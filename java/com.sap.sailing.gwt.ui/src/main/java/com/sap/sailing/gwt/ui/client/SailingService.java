@@ -162,4 +162,7 @@ public interface SailingService extends RemoteService {
             throws NoWindException;
 
     void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
+
+    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+            int numberOfFixes, Collection<String> windSourceTypeNames) throws NoWindException;
 }
