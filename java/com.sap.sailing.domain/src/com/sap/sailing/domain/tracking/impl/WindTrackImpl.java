@@ -235,18 +235,17 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
             return null;
         } else {
             BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
-            
             Position resultPosition;
-            if(p == null) {
+            if (p == null) {
                 HasConfidence<ScalablePosition, Position, TimePoint> averagePos = positionAverager.getAverage(positionsToAverage, at);
-                if(averagePos != null)
+                if (averagePos != null) {
                     resultPosition = averagePos.getObject();
-                else
+                } else {
                     resultPosition = null;
+                }
             } else {
                 resultPosition = p;
             }
-//            Position resultPosition = p == null ? positionAverager.getAverage(positionsToAverage, at).getObject() : p;
             SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, average == null ? null : average.getObject());
             return new WindWithConfidenceImpl<Pair<Position,TimePoint>>(new WindImpl(resultPosition, at, avgWindSpeed), average.getConfidence(),
                     new Pair<Position, TimePoint>(p, at), useSpeed);

@@ -20,6 +20,8 @@ import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
@@ -81,6 +83,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
     private Series timeLineSeries;
     private boolean timeLineNeedsUpdate = true;
+    private final boolean allowTimeAdjust;
+    private boolean ignoreTimeAdjustOnce;
     protected final RaceSelectionProvider raceSelectionProvider;
     protected long stepSize = 5000;
     protected final StringMessages stringMessages;
@@ -91,7 +95,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     public AbstractChartPanel(SailingServiceAsync sailingService,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow, boolean compactChart) {
+            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow,
+            boolean compactChart, boolean allowTimeAdjust) {
         this.stringMessages = stringMessages;
     	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
@@ -105,6 +110,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         this.compactChart = compactChart;
         this.sailingService = sailingService;
         this.raceSelectionProvider = raceSelectionProvider;
+        this.allowTimeAdjust = allowTimeAdjust;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         setSize("100%", "100%");
 
@@ -112,7 +118,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         
         chart = createChart(dataToShow);
-        timeLineSeries = createTimeLineSeries();
+        if (allowTimeAdjust) {
+            timeLineSeries = createTimeLineSeries();
+        }
         
         busyIndicatorPanel = new AbsolutePanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator(/*busy*/ true, /*scale*/ 1);
@@ -152,14 +160,34 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
         chart.setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)));
-        chart.setClickEventHandler(new ChartClickEventHandler() {
-            @Override
-            public boolean onClick(ChartClickEvent chartClickEvent) {
-                timer.setTime(chartClickEvent.getXAxisValueAsLong());
-                return true;
-            }
-        });
         
+        if (allowTimeAdjust) {
+            chart.setClickEventHandler(new ChartClickEventHandler() {
+                @Override
+                public boolean onClick(ChartClickEvent chartClickEvent) {
+                    if (ignoreTimeAdjustOnce) {
+                        ignoreTimeAdjustOnce = false;
+                    } else {
+                        timer.setTime(chartClickEvent.getXAxisValueAsLong());
+                    }
+                    return true;
+                }
+            });
+            chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
+                @Override
+                public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
+                    try {
+                        chartSelectionEvent.getXAxisMaxAsLong();
+                        chartSelectionEvent.getXAxisMinAsLong();
+                        ignoreTimeAdjustOnce = true;
+                    } catch (Throwable t) {
+                        // Redrawing, or the chart wouldn't rezoom
+                        AbstractChartPanel.this.chart.redraw();
+                    }
+                    return true;
+                }
+            });
+        }
         final String unit = getUnit();
         if(!compactChart)
             chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
@@ -525,10 +553,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
-      setChartData(null);
-      clearChart();
-      timeLineNeedsUpdate = true;
-      loadData(true);
+        setChartData(null);
+        clearChart();
+        timeLineNeedsUpdate = true;
+        loadData(true);
     }
 
     /**
@@ -580,11 +608,13 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     }
     
     /**
-     * Updates the position of the time line for the given {@link Date}.<br />
+     * Updates the position of the time line for the given {@link Date}, if {@link #allowTimeAdjust} is <code>true</code>.<br />
      * @param date Defines the x-Value of the line points
      */
     private void updateTimeLine(Date date) {
-        if (chart != null) {
+        if (allowTimeAdjust && chart != null) {
+            raceSelectionProvider.getSelectedRaces().get(0);
+            
             Long x = date.getTime();
             Extremes extremes = chart.getYAxis(0).getExtremes();
             Point[] points = new Point[2];
