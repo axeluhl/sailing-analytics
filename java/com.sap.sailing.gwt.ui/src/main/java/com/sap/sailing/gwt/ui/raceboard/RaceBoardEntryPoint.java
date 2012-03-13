@@ -7,6 +7,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
@@ -207,6 +208,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         
+        Label raceBoardHeader = new Label(raceName);
+        raceBoardHeader.addStyleName("RaceBoardHeader");
+        logoAndTitlePanel.add(raceBoardHeader);
         logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
         
         return logoAndTitlePanel;
