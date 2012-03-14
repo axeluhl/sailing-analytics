@@ -57,13 +57,21 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                 windSourceTypesToDisplay.add(e.getKey());
             }
         }
-        return new WindChartSettings(windSourceTypesToDisplay, resolutionInSecondsBox.getValue()*1000);
+        return new WindChartSettings(windSourceTypesToDisplay, resolutionInSecondsBox.getValue() == null ? -1 : resolutionInSecondsBox.getValue()*1000);
     }
 
     @Override
     public Validator<WindChartSettings> getValidator() {
-        // with checkboxes and one IntegerBox only, nothing can go wrong :-)
-        return null;
+        return new Validator<WindChartSettings>() {
+            @Override
+            public String getErrorMessage(WindChartSettings valueToValidate) {
+                String errorMessage = null;
+                if (valueToValidate.getResolutionInMilliseconds() < 1) {
+                    errorMessage = stringMessages.stepSizeMustBeGreaterThanNull();
+                }
+                return errorMessage;
+            }
+        };
     }
 
     @Override

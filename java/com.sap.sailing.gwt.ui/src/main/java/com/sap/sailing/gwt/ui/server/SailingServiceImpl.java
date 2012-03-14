@@ -663,6 +663,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
             windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
             for (WindSource windSource : windSourcesToDeliver) {
+                // TODO consider parallelizing
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
