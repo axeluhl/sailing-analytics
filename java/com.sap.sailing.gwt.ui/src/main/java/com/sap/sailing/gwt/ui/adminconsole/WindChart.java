@@ -25,6 +25,9 @@ import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
+import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
@@ -126,7 +129,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                     return "<b>" + seriesName + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                             + "</b><br/>" +  
                             dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
-                            numberFormat.format(toolTipData.getYAsDouble()) + stringMessages.degreesShort();
+                            numberFormat.format(toolTipData.getYAsDouble() % 360) + stringMessages.degreesShort();
                 } else {
                     return "<b>" + seriesName + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                             + "</b><br/>" +  
@@ -169,7 +172,13 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
-        chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false);
+        chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false)
+                .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
+                    @Override
+                    public String format(AxisLabelsData axisLabelsData) {
+                        return new Long(axisLabelsData.getValueAsLong() % 360).toString();
+                    }
+                }));
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
             .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         
