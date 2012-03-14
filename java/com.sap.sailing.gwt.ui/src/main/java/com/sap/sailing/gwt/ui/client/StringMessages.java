@@ -271,4 +271,5 @@ public interface StringMessages extends Messages {
     String trackBasedEstimationWindSourceTypeName();
     String expeditionWindSourceTypeName();
     String webWindSourceTypeName();
+    String position();
 }

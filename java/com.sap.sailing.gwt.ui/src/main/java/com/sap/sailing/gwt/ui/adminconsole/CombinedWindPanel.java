@@ -115,7 +115,7 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
                                 rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
                             String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
                             windSymbolImage.setUrl(transformedImageURL);
-                            windSymbolImage.setTitle(Math.round(windFromDeg) + " " + stringMessages.degreesShort());
+                            windSymbolImage.setTitle(stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " + stringMessages.degreesShort());
                             textLabel.setText(numberFormat.format(speedInKnots) + " " + stringMessages.averageSpeedInKnotsUnit());
                             
                             if(!isVisible())
