@@ -17,6 +17,9 @@ import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -31,7 +34,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private String raceName;
     private String leaderboardName;
     private String leaderboardGroupName;
-    private RaceBoardViewMode viewMode;
+    private RaceBoardViewModes viewMode;
 
     @Override
     public void onModuleLoad() {     
@@ -45,12 +48,12 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         if(viewModeParamValue != null && !viewModeParamValue.isEmpty()) {
             try {
                 
-                viewMode = RaceBoardViewMode.valueOf(viewModeParamValue);
+                viewMode = RaceBoardViewModes.valueOf(viewModeParamValue);
             } catch (IllegalArgumentException e) {
-                viewMode = RaceBoardViewMode.ONESCREEN;
+                viewMode = RaceBoardViewModes.ONESCREEN;
             }
         } else {
-            viewMode = RaceBoardViewMode.ONESCREEN;
+            viewMode = RaceBoardViewModes.ONESCREEN;
         }
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
@@ -127,8 +130,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, raceSelectionModel, leaderboardName, leaderboardGroupName,
-                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode);
+        Timer timer = new Timer(PlayModes.Replay, 1000l);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
+                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, new RaceTimesInfoProvider(sailingService, this, singletonList, 1000l));
         raceBoardPanel.fillEvents(events);
 
         switch (viewMode) {

@@ -128,6 +128,8 @@ public interface SailingServiceAsync {
             boolean extrapolate, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
 
     void getRaceTimesInfo(RaceIdentifier raceIdentifier, AsyncCallback<RaceTimesInfoDTO> callback);
+    
+    void getRaceTimesInfos(Collection<RaceIdentifier> raceIdentifiers, AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
     void getMarkPositions(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<MarkDTO>> asyncCallback);
 

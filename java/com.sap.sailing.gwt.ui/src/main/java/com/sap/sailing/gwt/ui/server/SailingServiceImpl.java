@@ -912,6 +912,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }        
         return raceTimesInfo;
     }
+    
+    @Override
+    public List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RaceIdentifier> raceIdentifiers) {
+        List<RaceTimesInfoDTO> raceTimesInfos = new ArrayList<RaceTimesInfoDTO>();
+        for (RaceIdentifier raceIdentifier : raceIdentifiers) {
+            RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
+            if (raceTimesInfo != null) {
+                raceTimesInfos.add(raceTimesInfo);
+            }
+        }
+        return raceTimesInfos;
+    }
 
     private Date calculateStartOfRaceFromMarkPassings(Iterable<MarkPassing> markPassings, Iterable<Competitor> competitors) {
         Date startOfRace = null;

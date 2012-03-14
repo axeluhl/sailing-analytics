@@ -3,9 +3,12 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
@@ -29,7 +32,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 leaderboardName = Window.Location.getParameter("name");
                 leaderboardGroupName = Window.Location.getParameter("leaderboardGroupName");
                 if (leaderboardNames.contains(leaderboardName)) {
-                    createLeaderboardPanel();
+                    createUI();
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
@@ -41,11 +44,36 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             }
         });
     }
-
-    private void createLeaderboardPanel() {
+    
+    private void createUI() {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        // create the breadcrumb navigation
+
+        DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+        RootLayoutPanel.get().add(mainPanel);
+        mainPanel.addNorth(logoAndTitlePanel, 68);
+        
+        String tvModeParam = Window.Location.getParameter("tvMode");
+        if (tvModeParam != null) {
+            Timer timer = new Timer(PlayModes.Replay, 1000l);
+            TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
+                    userAgentType, null, timer, logoAndTitlePanel, mainPanel);
+            mainPanel.add(tvViewPanel);
+        } else {
+            LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService,
+                    LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* autoExpandFirstRace */ false),
+                    /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
+                    new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
+                    leaderboardName, leaderboardGroupName,
+                    LeaderboardEntryPoint.this, stringMessages, userAgentType);
+            BreadcrumbPanel breadcrumbPanel = createBreadcrumbPanel();
+            
+            mainPanel.addNorth(breadcrumbPanel, 30);
+            mainPanel.add(leaderboardPanel);
+        }
+    }
+    
+    private BreadcrumbPanel createBreadcrumbPanel() {
         ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         if(leaderboardGroupName != null) {
@@ -58,15 +86,6 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
             breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
         }
-        BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, leaderboardName.toUpperCase());
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, LeaderboardSettingsFactory
-                .getInstance().createNewDefaultSettings(/* namesOfRacesToShow */null, /* namesOfRacesToShow */null, /* autoExpandFirstRace */
-                false),
-                /* preSelectedRace */null, new CompetitorSelectionModel(/* hasMultiSelection */true), new Timer(
-                PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l), leaderboardName,
-                leaderboardGroupName, LeaderboardEntryPoint.this, stringMessages, userAgentType);
-        RootPanel.get().add(logoAndTitlePanel);
-        RootPanel.get().add(breadcrumbPanel);
-        RootPanel.get().add(leaderboardPanel);
-    }    
+        return new BreadcrumbPanel(breadcrumbLinksData, leaderboardName.toUpperCase());
+    }
 }

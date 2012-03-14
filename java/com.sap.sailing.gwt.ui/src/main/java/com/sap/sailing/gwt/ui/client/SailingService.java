@@ -69,6 +69,8 @@ public interface SailingService extends RemoteService {
 
     RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier);
     
+    List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RaceIdentifier> raceIdentifiers);
+    
     List<MarkDTO> getMarkPositions(RaceIdentifier raceIdentifier, Date date);
 
     List<QuickRankDTO> getQuickRanks(RaceIdentifier raceIdentifier, Date date) throws NoWindException;
