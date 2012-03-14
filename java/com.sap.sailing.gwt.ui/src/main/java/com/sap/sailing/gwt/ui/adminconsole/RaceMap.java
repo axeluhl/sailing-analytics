@@ -1209,7 +1209,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public void onResize() {
-        map.checkResize();
-        zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
+        if (map != null) {
+            map.checkResize();
+            zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
+        }
     }
 }

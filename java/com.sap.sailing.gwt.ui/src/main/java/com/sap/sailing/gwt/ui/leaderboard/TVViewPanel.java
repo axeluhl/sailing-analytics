@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -93,13 +94,13 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);
                 TVViewPanel.this.leaderboard = leaderboard;
-                createOrUpdateRaceTimesInfoProvider();
+                updateRaceTimesInfoProvider();
             }
         };
         return leaderboardPanel;
     }
     
-    private void createOrUpdateRaceTimesInfoProvider() {
+    private void updateRaceTimesInfoProvider() {
         boolean providerChanged = false;
         for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
             RaceIdentifier raceIdentifier = race.getRaceIdentifier();
@@ -147,31 +148,39 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             currentRace = null;
             
             leaderboardIsWiget = true;
+            raceBoardIsWidget = false;
         }
     }
     
     private void showRaceBoard() {
         if (!raceBoardIsWidget) {
+            logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
             raceBoardHeader = new Label(currentRace.getRaceName());
             raceBoardHeader.addStyleName("RaceBoardHeader");
             logoAndTitlePanel.add(raceBoardHeader);
-            logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
             
             timePanel = createTimePanel();
             dockPanel.insertSouth(timePanel, 122, dockPanel.getWidget(0));
             
-            //TODO The code below causes exceptions, because the race board isn't completely rendered (RaceMap onResize() fails)
-            //        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            //            @Override
-            //            public void execute() {
-            //                raceBoardPanel.setWindChartVisible(true);
-            //            }
-            //        });
+            Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+                @Override
+                public boolean execute() {
+                    // Calling the setVisible method causes exceptions, if the race board isn't fully rendered, so
+                    // repeating this command until no exception was thrown
+                    try {
+                        raceBoardPanel.setWindChartVisible(true);
+                    } catch (Throwable e) {
+                        return true;
+                    }
+                    return false;
+                }
+            }, 1000);
             setWidget(raceBoardPanel);
             //Setting the size or the race board wouldn't be displayed
             raceBoardPanel.setSize("100%", "100%");
             
             raceBoardIsWidget = true;
+            leaderboardIsWiget = false;
         }
     }
 
@@ -229,7 +238,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             if (raceIdentifier != null && raceTimes != null && raceTimes.startOfTracking != null
                     /*&& raceTimes.endOfRace == null*/ && debugMode ) { //TODO reset after testing
                 firstStartedAndUnfinishedRace = raceIdentifier;
-                break;
+//                break; TODO enable after testing
             }
         }
         return firstStartedAndUnfinishedRace;
