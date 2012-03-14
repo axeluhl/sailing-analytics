@@ -11,9 +11,11 @@ public class ZoomTypeFormatter {
         case BOATS:
             return stringConstants.autoZoomToBoats();
         case TAILS:
-            return stringConstants.autoZoomTails();
+            return stringConstants.autoZoomToTails();
         case BUOYS:
             return stringConstants.autoZoomToBuoys();
+        case WINDSENSORS:
+            return stringConstants.autoZoomToWindSensors();
         }
         return null;
     }

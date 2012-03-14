@@ -63,7 +63,9 @@ public class RaceMapResources {
     protected ImageTransformer combinedWindIconTransformer;
     
     protected Icon buoyIcon;
-    
+
+    protected Icon windSensorIcon;
+
     protected Map<Pair<ManeuverType, Tack>, Icon> maneuverIconsForTypeAndTargetTack;
 
     private MapWidget map;
@@ -92,7 +94,10 @@ public class RaceMapResources {
         this.map = map;
         buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
         buoyIcon.setIconAnchor(Point.newInstance(4, 4));
-        
+
+        windSensorIcon = Icon.newInstance(resources.windSensorIcon().getSafeUri().asString());
+        buoyIcon.setIconAnchor(Point.newInstance(0, 0));
+
         Icon tackToStarboardIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
         tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));

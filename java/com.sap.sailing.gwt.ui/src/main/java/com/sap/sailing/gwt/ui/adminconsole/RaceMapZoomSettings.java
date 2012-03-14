@@ -14,8 +14,8 @@ public class RaceMapZoomSettings {
      *
      */
     public enum ZoomTypes {
-        NONE(null), BOATS(new RaceMap.BoatsBoundsCalculater()), TAILS(new RaceMap.TailsBoundsCalculater()), BUOYS(
-                new RaceMap.BuoysBoundsCalculater());
+        NONE(null), WINDSENSORS(new RaceMap.WindSensorsBoundsCalculater()), BOATS(new RaceMap.BoatsBoundsCalculater()), 
+        TAILS(new RaceMap.TailsBoundsCalculater()), BUOYS(new RaceMap.BuoysBoundsCalculater());
 
         private LatLngBoundsCalculator calculater;
 
@@ -40,6 +40,7 @@ public class RaceMapZoomSettings {
         typesToConsiderOnZoom.add(ZoomTypes.BOATS);
         typesToConsiderOnZoom.add(ZoomTypes.TAILS);
         typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
+        typesToConsiderOnZoom.add(ZoomTypes.WINDSENSORS);
         zoomToSelectedCompetitors = false;
     }
     
