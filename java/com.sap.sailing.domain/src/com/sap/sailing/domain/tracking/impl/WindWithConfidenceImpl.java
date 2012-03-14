@@ -14,11 +14,16 @@ public class WindWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Scalab
 
     @Override
     public ScalableWind getScalableValue() {
-        return new ScalableWind(getObject(), useSpeed);
+        return new ScalableWind(getObject(), useSpeed());
     }
 
     @Override
     public String toString() {
-        return (getObject() != null ? getObject().toString() : "null")+"@"+getConfidence()+", useSpeed="+useSpeed;
+        return (getObject() != null ? getObject().toString() : "null")+"@"+getConfidence()+", useSpeed="+useSpeed();
+    }
+
+    @Override
+    public boolean useSpeed() {
+        return useSpeed;
     }
 }

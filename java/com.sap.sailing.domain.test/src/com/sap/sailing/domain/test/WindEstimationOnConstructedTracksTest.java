@@ -38,16 +38,20 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest {
     private List<Competitor> competitors;
@@ -97,21 +101,54 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         competitorTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg))));
     }
-    
+
+    /**
+     * Uses competitors on upwind leg to cause a valid wind estimation. Additionally, for the same time point, adds a
+     * wind fix to the {@link WindSourceType#WEB} wind track that is slightly different from the expected estimation
+     * result. Then, asks the tracked race for the combined wind direction. The expected outcome is that the larger
+     * the minimal cluster size (boats on the same tack going upwind), the more confident the wind estimation is,
+     * and subsequently the more it is considered in averaging between the {@link WindSourceType#WEB} wind track
+     * and the estimation wind track.
+     */
+    @Test
+    public void testWindEstimationPreferringLargerClusters() throws NoWindException {
+        initRace(4, new int[] { 1, 1, 1, 1 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
+        MillisecondsTimePoint now = new MillisecondsTimePoint(new GregorianCalendar(2012, 03, 14).getTime());
+        getTrackedRace().recordWind(new WindImpl(null, now, new KnotSpeedWithBearingImpl(/* speedInKnots */ 12, new DegreeBearingImpl(180.))),
+                new WindSourceImpl(WindSourceType.WEB));
+        // produces estimated bearing of 170deg; result should be averaged between 107 (estimation) and 180 (web) deg
+        setBearingForCompetitor(competitors.get(0), now, 305);
+        setBearingForCompetitor(competitors.get(1), now, 35);
+        WindWithConfidence<Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeOne = getTrackedRace()
+                .getWindWithConfidence(/* position */null, now);
+        final double combinedDegreesMinClusterSizeOne = combinedWindDirectionMinClusterSizeOne.getObject().getBearing().getDegrees();
+        assertTrue(combinedDegreesMinClusterSizeOne > 170 && combinedDegreesMinClusterSizeOne < 180);
+        // now produce a minimum cluster size of 2, raising the estimation's confidence
+        setBearingForCompetitor(competitors.get(2), now, 305);
+        setBearingForCompetitor(competitors.get(3), now, 35);
+        WindWithConfidence<Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeTwo = getTrackedRace()
+                .getWindWithConfidence(/* position */null, now);
+        final double combinedDegreesNow = combinedWindDirectionMinClusterSizeTwo.getObject().getBearing().getDegrees();
+        assertTrue(combinedDegreesNow > 170 && combinedDegreesNow < 180);
+        // we expect the combined direction now to be closer to the estimation as compared to before because the estimation is more confident
+        // since the minimum cluster size is 2 instead of 1
+        assertTrue(combinedDegreesNow < combinedDegreesMinClusterSizeOne);
+    }
+
     @Test
     public void testCombinedWindTrack() throws NoWindException {
         initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 315);
-        setBearingForCompetitor(competitors.get(1), now, 50); // on the same tack, should give no read-out
+        setBearingForCompetitor(competitors.get(1), now, 45); // on the same tack, should give no read-out
         setBearingForCompetitor(competitors.get(2), now, 135);
-        setBearingForCompetitor(competitors.get(3), now, 220); // on the same tack, should give no read-out
+        setBearingForCompetitor(competitors.get(3), now, 225); // on the same tack, should give no read-out
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
         // less precision because downwind estimation has less confidence
-        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.2);
+        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
         CombinedWindTrackImpl combinedTrack = new CombinedWindTrackImpl(getTrackedRace(), WindSourceType.COMBINED.getBaseConfidence());
         Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
-        assertEquals(180., combinedWindDirection.getBearing().getDegrees(), 0.2); // a bit less precise as course-based wind isn't exactly 180deg
+        assertEquals(180., combinedWindDirection.getBearing().getDegrees(), 0.00001);
     }
 
     /**
@@ -130,11 +167,11 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(3), now, 230);
         TrackedLeg firstLeg = getTrackedRace().getTrackedLeg(getTrackedRace().getRace().getCourse().getLegs().iterator().next());
         assertEquals(LegType.UPWIND, firstLeg.getLegType(new MillisecondsTimePoint(MillisecondsTimePoint.now().asMillis())));
-        final Map<TimePoint, Wind> cachedFixes = new HashMap<TimePoint, Wind>();
+        final Map<TimePoint, WindWithConfidence<TimePoint>> cachedFixes = new HashMap<TimePoint, WindWithConfidence<TimePoint>>();
         TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence()) {
                     @Override
-                    protected void cache(TimePoint timePoint, Wind fix) {
+                    protected void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
                         super.cache(timePoint, fix);
                         if (fix != null) {
                             cachedFixes.put(timePoint, fix);
@@ -145,7 +182,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertNotNull(estimatedWindDirection);
         assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
         assertFalse(cachedFixes.isEmpty());
-        assertEquals(185., cachedFixes.values().iterator().next().getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., cachedFixes.values().iterator().next().getObject().getBearing().getDegrees(), 0.00000001);
         // now invert leg's type by moving the top mark along the wind from the leeward gate:
         Iterator<Waypoint> waypointsIter = getTrackedRace().getRace().getCourse().getWaypoints().iterator();
         Waypoint leewardMark = waypointsIter.next();
@@ -170,11 +207,11 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         TimePoint now = checkTime;
         setBearingForCompetitor(competitors.get(0), checkTime, 320);
         setBearingForCompetitor(competitors.get(1), checkTime, 50);
-        final Map<TimePoint, Wind> cachedFixes = new HashMap<TimePoint, Wind>();
+        final Map<TimePoint, WindWithConfidence<TimePoint>> cachedFixes = new HashMap<TimePoint, WindWithConfidence<TimePoint>>();
         TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence()) {
                     @Override
-                    protected void cache(TimePoint timePoint, Wind fix) {
+                    protected void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
                         super.cache(timePoint, fix);
                         if (fix != null) {
                             cachedFixes.put(timePoint, fix);
@@ -185,15 +222,15 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertNotNull(estimatedWindDirection);
         assertEquals(185., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
         assertFalse(cachedFixes.isEmpty());
-        assertEquals(185., cachedFixes.values().iterator().next().getBearing().getDegrees(), 0.00000001);
+        assertEquals(185., cachedFixes.values().iterator().next().getObject().getBearing().getDegrees(), 0.00000001);
         // now clear set of cached fixes, ask again and ensure nothing is cached again:
         cachedFixes.clear();
         Wind estimatedWindDirectionCached = track.getAveragedWind(/* position */ null, checkTime);
         assertTrue(cachedFixes.isEmpty());
         assertNotNull(estimatedWindDirectionCached);
         assertEquals(185., estimatedWindDirectionCached.getBearing().getDegrees(), 0.00000001);
-        // now add a GPS fix and make sure the cache is invalidated
-        now = MillisecondsTimePoint.now();
+        // now add a GPS fix and make sure the cache is invalidated by adding it inside the averaging interval
+        now = new MillisecondsTimePoint(checkTime.asMillis() + track.getMillisecondsOverWhichToAverageWind()/2);
         setBearingForCompetitor(competitors.get(0), now, 330);
         Wind estimatedWindDirectionNew = track.getAveragedWind(/* position */ null, checkTime);
         assertFalse(cachedFixes.isEmpty());
@@ -279,12 +316,11 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 315);
-        setBearingForCompetitor(competitors.get(1), now, 50); // on the same tack, should give no read-out
+        setBearingForCompetitor(competitors.get(1), now, 45); // on the same tack, should give no read-out
         setBearingForCompetitor(competitors.get(2), now, 135);
-        setBearingForCompetitor(competitors.get(3), now, 220); // on the same tack, should give no read-out
+        setBearingForCompetitor(competitors.get(3), now, 225); // on the same tack, should give no read-out
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, now);
-        // not so exact because downwind estimations have lesser confidence
-        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.2);
+        assertEquals(180., estimatedWindDirection.getBearing().getDegrees(), 0.00000001);
     }
 
 }
