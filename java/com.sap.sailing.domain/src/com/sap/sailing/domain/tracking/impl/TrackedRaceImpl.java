@@ -789,10 +789,16 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
+        WindWithConfidence<TimePoint> estimatedWindWithConfidence = getEstimatedWindDirectionWithConfidence(position, timePoint);
+        return estimatedWindWithConfidence == null ? null : estimatedWindWithConfidence.getObject();
+    }
+    
+    @Override
+    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint) {
         DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow = new DummyMarkPassingWithTimePointOnly(timePoint);
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
         // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-                getMillisecondsOverWhichToAverageSpeed());
+                getMillisecondsOverWhichToAverageSpeed(), /* minimum confidence */ 0.0000000001);
         Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = clusterBearingsByLegType(timePoint, position,
                 dummyMarkPassingForNow, weigher);
         // use the minimum confidence of the four "quadrants" as the result's confidence
@@ -807,12 +813,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (!bearingClustersUpwind[0].isEmpty() && !bearingClustersUpwind[1].isEmpty()) {
                 BearingWithConfidence<TimePoint> average0 = bearingClustersUpwind[0].getAverage(timePoint);
                 BearingWithConfidence<TimePoint> average1 = bearingClustersUpwind[1].getAverage(timePoint);
-                confidence = Math.min(average0.getConfidence(), average1.getConfidence())
-                        * getRace().getBoatClass().getUpwindWindEstimationConfidence();
-                reversedUpwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject()
-                        .middle(average1.getObject()).reverse(), confidence, timePoint);
                 upwindNumberOfRelevantBoats = Math
                         .min(bearingClustersUpwind[0].size(), bearingClustersUpwind[1].size());
+                confidence = Math.min(average0.getConfidence(), average1.getConfidence())
+                        * getRace().getBoatClass().getUpwindWindEstimationConfidence(upwindNumberOfRelevantBoats);
+                reversedUpwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject()
+                        .middle(average1.getObject()).reverse(), confidence, timePoint);
             }
             BearingWithConfidenceImpl<TimePoint> downwindAverage = null;
             int downwindNumberOfRelevantBoats = 0;
@@ -822,12 +828,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 BearingWithConfidence<TimePoint> average0 = bearingClustersDownwind[0].getAverage(timePoint);
                 BearingWithConfidence<TimePoint> average1 = bearingClustersDownwind[1].getAverage(timePoint);
                 double downwindConfidence = Math.min(average0.getConfidence(), average1.getConfidence());
-                confidence = Math.min(confidence, downwindConfidence)
-                        * getRace().getBoatClass().getDownwindWindEstimationConfidence();
-                downwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject().middle(
-                        average1.getObject()), downwindConfidence, timePoint);
                 downwindNumberOfRelevantBoats = Math.min(bearingClustersDownwind[0].size(),
                         bearingClustersDownwind[1].size());
+                confidence = Math.min(confidence, downwindConfidence)
+                        * getRace().getBoatClass().getDownwindWindEstimationConfidence(downwindNumberOfRelevantBoats);
+                downwindAverage = new BearingWithConfidenceImpl<TimePoint>(average0.getObject().middle(
+                        average1.getObject()), downwindConfidence, timePoint);
             }
             numberOfBoatsRelevantForEstimate = upwindNumberOfRelevantBoats + downwindNumberOfRelevantBoats;
             BearingWithConfidenceCluster<TimePoint> resultCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
@@ -841,8 +847,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             resultBearing = resultCluster.getAverage(timePoint);
         }
-        return resultBearing == null ? null : new WindImpl(null, timePoint, new KnotSpeedWithBearingImpl(
-                /* speedInKnots */numberOfBoatsRelevantForEstimate, resultBearing.getObject()));
+        return resultBearing == null ? null : new WindWithConfidenceImpl<TimePoint>(new WindImpl(null, timePoint, new KnotSpeedWithBearingImpl(
+                /* speedInKnots */numberOfBoatsRelevantForEstimate, resultBearing.getObject())), resultBearing.getConfidence(),
+                resultBearing.getRelativeTo(), /* useSpeed */ false);
     }
 
     // TODO confidences need to be computed not only based on timePoint but also on position: boats far away don't
@@ -872,8 +879,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                     &&
                                     // Mark passings may be missing or far off. This can lead to boats apparently going
                                     // "backwards" regarding the leg's direction; ignore those
-                                    isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(), trackedLeg,
-                                            timePoint)) {
+                                    isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(), trackedLeg, timePoint)) {
                                 // additionally to generally excluding maneuvers, reduce confidence around mark passings:
                                 NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
                                 double markPassingProximityConfidenceReduction = 1.0;

@@ -117,7 +117,7 @@ public class BearingWithConfidenceCluster<RelativeTo> {
 
     private double getConfidenceScaledDifference(BearingWithConfidence<RelativeTo> bearingWithConfidence1,
             BearingWithConfidence<RelativeTo> bearingWithConfidence2) {
-        return bearingWithConfidence1.getObject().getDifferenceTo(bearingWithConfidence2.getObject()).getDegrees() *
+        return Math.abs(bearingWithConfidence1.getObject().getDifferenceTo(bearingWithConfidence2.getObject()).getDegrees()) *
                 bearingWithConfidence1.getConfidence() * bearingWithConfidence2.getConfidence();
     }
 
