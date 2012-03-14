@@ -78,8 +78,8 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         raceSelectionModel.addRaceSelectionChangeListener(this);
         grid.setWidget(0, 0, raceListBox);
         PositionDTO pos = new PositionDTO();
-        if (!raceMap.boatMarkers.isEmpty()) {
-            LatLng latLng = raceMap.boatMarkers.values().iterator().next().getLatLng();
+        if (!raceMap.getBoatMarkers().isEmpty()) {
+            LatLng latLng = raceMap.getBoatMarkers().values().iterator().next().getLatLng();
             pos.latDeg = latLng.getLatitude();
             pos.lngDeg = latLng.getLongitude();
         }
