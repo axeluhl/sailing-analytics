@@ -115,12 +115,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     /**
      * Markers used as boat display on the map
      */
-    protected final Map<CompetitorDTO, Marker> boatMarkers;
+    private final Map<CompetitorDTO, Marker> boatMarkers;
 
     /**
      * Markers used to display wind sensors
      */
-    protected final Map<WindSource, Marker> windSensorMarkers;
+    private final Map<WindSource, Marker> windSensorMarkers;
+    
+    /**
+     * For each value in {@link #windSensorMarkers} holds the corresponding wind data displayed by the marker.
+     * This can then be used to dynamically produce a title / tooltip.
+     */
+    private final Map<Marker, WindDTO> windForMarkers;
 
     private final Map<MarkDTO, Marker> buoyMarkers;
 
@@ -210,6 +216,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         buoyMarkers = new HashMap<MarkDTO, Marker>();
         boatMarkers = new HashMap<CompetitorDTO, Marker>();
         windSensorMarkers = new HashMap<WindSource, Marker>();
+        windForMarkers = new HashMap<Marker, WindDTO>();
         fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         this.competitorSelection = competitorSelection;
         competitorSelection.addCompetitorSelectionChangeListener(this);
@@ -533,21 +540,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     windSensorMarkers.put(windSource, windSensorMarker);
                     map.addOverlay(windSensorMarker);
                 } else {
-                    double windFromDeg = windDTO.dampenedTrueWindFromDeg;
+                    double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
                     ImageTransformer transformer = imageResources.expeditionWindIconTransformer;
-
-                    double rotationDegOfWindSymbol = 180.0 + windFromDeg;
-                    if(rotationDegOfWindSymbol >= 360.0)
-                        rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
                     String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
                     windSensorMarker.setImage(transformedImageURL);
                     windSensorMarker.setLatLng(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
                     toRemoveWindSources.remove(windSource);
                 }
+                windForMarkers.put(windSensorMarker, windDTO);
             }
             for (WindSource toRemoveWindSource : toRemoveWindSources) {
                 Marker marker = windSensorMarkers.remove(toRemoveWindSource);
                 map.removeOverlay(marker);
+                windForMarkers.remove(marker);
             }
         }
     }
@@ -698,9 +703,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         Icon icon = Icon.newInstance(transformedImageURL);
         icon.setIconAnchor(Point.newInstance(7, 13));
         options.setIcon(icon);
-        String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " + stringMessages.degreesShort();
-        title += " (" + WindSourceTypeFormatter.format(windSource, stringMessages) + ")";
-        options.setTitle(title);
         final Marker windSensorMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);
         windSensorMarker.addMarkerClickHandler(new MarkerClickHandler() {
             @Override
@@ -712,11 +714,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         windSensorMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler() {
             @Override
             public void onMouseOver(MarkerMouseOverEvent event) {
+                WindDTO windForMarker = windForMarkers.get(windSensorMarker);
+                if (windForMarker != null) {
+                    String title = stringMessages.wind() + " ("
+                            + WindSourceTypeFormatter.format(windSource, stringMessages) + "): "
+                            + Math.round(windForMarker.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort();
+                    map.setTitle(title);
+                }
             }
         });
         windSensorMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
             @Override
             public void onMouseOut(MarkerMouseOutEvent event) {
+                map.setTitle("");
             }
         });
         return windSensorMarker;
@@ -1370,5 +1380,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             map.checkResize();
             zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
         }
+    }
+
+    public Map<CompetitorDTO, Marker> getBoatMarkers() {
+        return boatMarkers;
     }
 }
