@@ -532,6 +532,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     windSensorMarkers.put(windSource, windSensorMarker);
                     map.addOverlay(windSensorMarker);
                 } else {
+                    double windFromDeg = windDTO.dampenedTrueWindFromDeg;
+                    ImageTransformer transformer = imageResources.expeditionWindIconTransformer;
+
+                    double rotationDegOfWindSymbol = 180.0 + windFromDeg;
+                    if(rotationDegOfWindSymbol >= 360.0)
+                        rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
+                    String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
+                    windSensorMarker.setImage(transformedImageURL);
                     windSensorMarker.setLatLng(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
                     toRemoveWindSources.remove(windSource);
                 }
@@ -677,9 +685,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         double latDeg = windDTO.position.latDeg;
         double lngDeg = windDTO.position.lngDeg;
         MarkerOptions options = MarkerOptions.newInstance();
-        Icon icon = imageResources.windSensorIcon;
+
+        double windFromDeg = windDTO.dampenedTrueWindFromDeg;
+        ImageTransformer transformer = imageResources.expeditionWindIconTransformer;
+
+        double rotationDegOfWindSymbol = 180.0 + windFromDeg;
+        if(rotationDegOfWindSymbol >= 360.0)
+            rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
+        String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
+        
+        Icon icon = Icon.newInstance(transformedImageURL);
+        icon.setIconAnchor(Point.newInstance(7, 13));
         options.setIcon(icon);
-        options.setTitle("Expedition wind sensor");
+        options.setTitle(stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " + stringMessages.degreesShort());
         final Marker windSensorMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);
         windSensorMarker.addMarkerClickHandler(new MarkerClickHandler() {
             @Override
@@ -713,7 +731,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private String formatPosition(double lat, double lng) {
         NumberFormat numberFormat = NumberFormat.getFormat("0.0");
-        String result = "Position: " + numberFormat.format(lat) + " lat, " + numberFormat.format(lng) + " lng";
+        String result = stringMessages.position() + ": " + numberFormat.format(lat) + " lat, " + numberFormat.format(lng) + " lng";
         return result;
     }
     
@@ -730,9 +748,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private Widget getInfoWindowContent(WindDTO windDTO) {
+        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
         VerticalPanel result = new VerticalPanel();
-        NumberFormat numberFormat = NumberFormat.getFormat("0.000");
-        result.add(new Label("Wind: " + numberFormat.format(windDTO.dampenedTrueWindFromDeg) + " deg"));
+        result.add(new Label(stringMessages.windSource() + ": " + "Expedition"));
+        result.add(new Label(stringMessages.wind() + ": " +  Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
+        result.add(new Label(stringMessages.windSpeed() + ": " + numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
         result.add(new Label(formatPosition(windDTO.position.latDeg, windDTO.position.lngDeg)));
         return result;
     }
@@ -1343,7 +1363,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public void onResize() {
-        map.checkResize();
-        zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
+        if (map != null) {
+            map.checkResize();
+            zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
+        }
     }
 }

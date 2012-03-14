@@ -135,44 +135,6 @@ input.magnifier {
 	margin: 3px auto 0 auto !important;
 }
 
-.timeLinePanel {
-	width: 100%;
-	position: fixed;
-	bottom: 0;
-	height: 122px;
-	z-index: 9;
-	background: #DDDCDC;
-	box-shadow: 0 0 20px #858585;
-	-webkit-box-shadow: 0 0 20px #858585;
-	-moz-box-shadow: 0 0 20px #858585;
-}
-
-.timeLineInnerPanel {
-	/*height: 100%;*/
-	margin: 0 12px;
-	margin-top: 10px;
-	background: #dddcdc;
-	/*padding: 38px 24px 0 24px;*/
-}
-
-.timeLineInnerBgPanel {
-	background: url(images/timeslider-bg.png) 0 -2px repeat-x #f6f6f6;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
-	border-radius: 6px;
-	padding: 0px 10px 0;
-	border: 1px solid #a6a6a6;
-}
-
-.footerShadowPanel {
-	position: fixed;
-	height: 15px;
-	bottom: 0;
-	background: url(images/footer_shadow.png) left bottom repeat-x;
-	width: 100%;
-	z-index: 10;
-}
-
 .breadcrumbPanel {
 	height: 30px;
 	margin: 0 12px 13px 12px;
@@ -208,32 +170,9 @@ input.magnifier {
 	text-decoration: none;
 }
 
-.timePanel-controls {
-	margin: 15px 0 0 0;
-}
-
-.timePanel-controls-play {
-}
-
-.timePanel-controls-playSpeed {
-	vertical-align: middle;
-	padding: 5px;
-	line-height: 25px;
-}
-
-.timePanel-label {
-}
-
-.timePanel-controls-time {
-}
-
-.timePanel-controls-timeDelay {
-}
-
 .gwt-DialogBox {
 	z-index: 20;
 }
-
 
 .abstractChartPanel-importantMessageOfChart {
     font-family: 'UbuntuBold',Arial,Verdana,sans-serif;

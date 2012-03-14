@@ -72,7 +72,6 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
         if (date != null) {
             if (selectedRaces != null && !selectedRaces.isEmpty()) {
                 RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
-                
                 if (race != null) {
                     // draw the wind into the map, get the combined wind
                     sailingService.getWindInfo(race, date, 1000L, 1, windSourceTypeNames,
@@ -115,7 +114,7 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
                                 rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
                             String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
                             windSymbolImage.setUrl(transformedImageURL);
-                            windSymbolImage.setTitle(Math.round(windFromDeg) + " " + stringMessages.degreesShort());
+                            windSymbolImage.setTitle(stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " + stringMessages.degreesShort());
                             textLabel.setText(numberFormat.format(speedInKnots) + " " + stringMessages.averageSpeedInKnotsUnit());
                             
                             if(!isVisible())

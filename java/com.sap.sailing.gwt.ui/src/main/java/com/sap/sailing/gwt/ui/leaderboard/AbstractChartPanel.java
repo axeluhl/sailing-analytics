@@ -50,6 +50,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
@@ -168,6 +169,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     if (ignoreTimeAdjustOnce) {
                         ignoreTimeAdjustOnce = false;
                     } else {
+                        timer.setPlayMode(PlayModes.Replay);
                         timer.setTime(chartClickEvent.getXAxisValueAsLong());
                     }
                     return true;
@@ -209,10 +211,17 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
             public String format(ToolTipData toolTipData) {
-                return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
-                        + "</b><br/>" +  
-                        dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
-                        numberFormat.format(toolTipData.getYAsDouble()) + unit;
+                String seriesName = toolTipData.getSeriesName();
+                
+                if (seriesName.equals(stringMessages.time())) {
+                    return "<b>" + seriesName + ":</b> " + dateFormat.format(new Date(toolTipData.getXAsLong()))
+                            + "<br/>(" + stringMessages.clickChartToSetTime() + ")";
+                } else {
+                    return "<b>" + seriesName
+                            + (toolTipData.getPointName() != null ? " " + toolTipData.getPointName() : "")
+                            + "</b><br/>" + dateFormat.format(new Date(toolTipData.getXAsLong())) + ": "
+                            + numberFormat.format(toolTipData.getYAsDouble()) + unit;
+                }
             }
         }));
         
@@ -427,8 +436,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         return chart
                 .createSeries()
                 .setType(Series.Type.LINE)
-                .setName("TIME_LINE")
-                .setPlotOptions(new LinePlotOptions().setEnableMouseTracking(false).setShowInLegend(false).setHoverStateEnabled(false).setLineWidth(2));
+                .setName(stringMessages.time())
+                .setPlotOptions(new LinePlotOptions().setShowInLegend(false).setHoverStateEnabled(false).setLineWidth(2));
     }
 
     private String getUnit() {
