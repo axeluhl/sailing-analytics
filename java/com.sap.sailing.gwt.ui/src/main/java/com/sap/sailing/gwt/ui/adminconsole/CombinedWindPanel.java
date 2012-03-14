@@ -72,7 +72,6 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
         if (date != null) {
             if (selectedRaces != null && !selectedRaces.isEmpty()) {
                 RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
-                
                 if (race != null) {
                     // draw the wind into the map, get the combined wind
                     sailingService.getWindInfo(race, date, 1000L, 1, windSourceTypeNames,

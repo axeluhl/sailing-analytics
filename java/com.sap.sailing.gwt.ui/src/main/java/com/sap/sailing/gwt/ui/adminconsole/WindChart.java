@@ -395,8 +395,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private void loadData(final RaceIdentifier raceIdentifier, final Date from, final Date to, final boolean append) {
         sailingService.getWindInfo(raceIdentifier,
         // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
-                from, resolutionInMilliseconds,
-                (int) ((to.getTime()-from.getTime())/resolutionInMilliseconds+1), // use race start and time of newest event as default time period
+                from, to, resolutionInMilliseconds,  // use race start and time of newest event as default time period
                 null, // retrieve data on all wind sources
                 new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override

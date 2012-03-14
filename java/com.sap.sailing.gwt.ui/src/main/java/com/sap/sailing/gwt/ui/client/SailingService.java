@@ -58,6 +58,12 @@ public interface SailingService extends RemoteService {
 
     void setWind(RaceIdentifier raceIdentifier, WindDTO wind);
 
+    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+            int numberOfFixes, Collection<String> windSourceTypeNames) throws NoWindException;
+
+    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
+            Collection<String> windSourceTypeNames);
+
     Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
             Map<CompetitorDTO, Date> to, boolean extrapolate) throws NoWindException;
 
@@ -162,7 +168,4 @@ public interface SailingService extends RemoteService {
             throws NoWindException;
 
     void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
-
-    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, Collection<String> windSourceTypeNames) throws NoWindException;
 }
