@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
@@ -177,7 +179,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         });
         windSourceSelectionPanel.add(showConfigAnchor);
         grid.setWidget(1, 0, windSourceSelectionPanel);
-        windChart = new WindChart(sailingService, /* race selection provider */raceSelectionProvider, new Timer(
+        windChart = new WindChart(sailingService, raceSelectionProvider, new Timer(
                 PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, errorReporter, false, false);
         windChart.onResize();
         grid.setWidget(2, 0, windChart.getEntryWidget());
@@ -209,9 +211,9 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
                     @Override
                     public void onSuccess(WindInfoForRaceDTO result) {
                         if (result != null) {
+                            updateWindSourcesToExclude(result, raceIdentifier);
                             showWindForRace(result);
                             windSettingPanel.setEnabled(true);
-                            updateWindSourcesToExclude(result, raceIdentifier);
                         } else {
                             clearWindDisplay(); // no wind known for untracked race
                         }
@@ -233,6 +235,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         grid.setWidget(2, 0, null);
         windSettingPanel.setEnabled(false);
         windLists.clear();
+        final Set<WindSource> emptySet = Collections.emptySet();
+        windSourcesToExcludeSelector.update(null, emptySet, emptySet);
     }
 
     private void showWindForRace(WindInfoForRaceDTO result) {

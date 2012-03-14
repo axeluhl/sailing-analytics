@@ -607,7 +607,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         HasConfidence<ScalableWind, Wind, Pair<Position, TimePoint>> average = averager.getAverage(
                 windFixesWithConfidences, new Pair<Position, TimePoint>(p, at));
-        WindWithConfidence<Pair<Position, TimePoint>> result = new WindWithConfidenceImpl<Pair<Position, TimePoint>>(
+        WindWithConfidence<Pair<Position, TimePoint>> result = average == null ? null :
+            new WindWithConfidenceImpl<Pair<Position, TimePoint>>(
                 average.getObject(), average.getConfidence(), new Pair<Position, TimePoint>(p, at),
                 canUseSpeedOfAtLeastOneWindSource);
         return result;
