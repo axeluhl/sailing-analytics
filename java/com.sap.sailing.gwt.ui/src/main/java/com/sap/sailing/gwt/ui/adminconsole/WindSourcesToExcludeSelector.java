@@ -31,6 +31,7 @@ public class WindSourcesToExcludeSelector extends VerticalPanel {
     private final StringMessages stringMessages;
     private final SailingServiceAsync service;
     private final ErrorReporter errorReporter;
+    private RaceIdentifier raceIdentifier;
 
     public WindSourcesToExcludeSelector(SailingServiceAsync service,
             StringMessages stringMessages, ErrorReporter errorReporter) {
@@ -41,7 +42,8 @@ public class WindSourcesToExcludeSelector extends VerticalPanel {
         add(new Label(stringMessages.windSourcesUsed()));
     }
     
-    public void update(final RaceIdentifier raceIdentifier, Iterable<WindSource> allWindSources, Iterable<WindSource> windSourcesToExclude) {
+    public void update(RaceIdentifier raceIdentifier, Iterable<WindSource> allWindSources, Iterable<WindSource> windSourcesToExclude) {
+        this.raceIdentifier = raceIdentifier;
         Set<WindSource> windSourcesToRemove = new HashSet<WindSource>(checkboxesByWindSource.keySet());
         for (WindSource windSource : allWindSources) {
             windSourcesToRemove.remove(windSource);
@@ -51,12 +53,14 @@ public class WindSourcesToExcludeSelector extends VerticalPanel {
                 checkbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                     @Override
                     public void onValueChange(ValueChangeEvent<Boolean> selected) {
-                        onWindSourcesToExcludeChanged(raceIdentifier);
+                        onWindSourcesToExcludeChanged(WindSourcesToExcludeSelector.this.raceIdentifier);
                     }
                 });
                 checkboxesByWindSource.put(windSource, checkbox);
                 checkbox.setValue(true);
                 add(checkbox);
+            } else {
+                checkbox.setValue(true);
             }
         }
         for (WindSource windSourceToExclude : windSourcesToExclude) {
