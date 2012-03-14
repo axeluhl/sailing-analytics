@@ -380,26 +380,28 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining wind: " + caught.getMessage());
+                                    errorReporter.reportError("Error obtaining wind information: " + caught.getMessage());
                                 }
 
                                 @Override
                                 public void onSuccess(WindInfoForRaceDTO windInfo) {
-                                    List<Pair<WindSource, WindDTO>> wind = new ArrayList<Pair<WindSource, WindDTO>>();
-                                    for(WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
-                                        WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
-                                        switch (windSource.getType()) {
-                                            case EXPEDITION:
-                                            {
-                                                if(windTrackInfoDTO.windFixes.size() > 0) {
-                                                    WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-                                                    wind.add(new Pair<WindSource, WindDTO>(windSource, windDTO));
+                                    List<Pair<WindSource, WindDTO>> windSourcesToShow = new ArrayList<Pair<WindSource, WindDTO>>();
+                                    if(windInfo != null) {
+                                        for(WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
+                                            WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
+                                            switch (windSource.getType()) {
+                                                case EXPEDITION:
+                                                {
+                                                    if(windTrackInfoDTO.windFixes.size() > 0) {
+                                                        WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
+                                                        windSourcesToShow.add(new Pair<WindSource, WindDTO>(windSource, windDTO));
+                                                    }
                                                 }
+                                                break;
                                             }
-                                            break;
                                         }
                                     }
-                                    showWindSensorsOnMap(wind);
+                                    showWindSensorsOnMap(windSourcesToShow);
                                 }
                             });
                 }
