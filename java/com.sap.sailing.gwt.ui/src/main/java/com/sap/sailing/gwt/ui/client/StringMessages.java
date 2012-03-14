@@ -272,4 +272,5 @@ public interface StringMessages extends Messages {
     String expeditionWindSourceTypeName();
     String webWindSourceTypeName();
     String clickChartToSetTime();
+    String position();
 }

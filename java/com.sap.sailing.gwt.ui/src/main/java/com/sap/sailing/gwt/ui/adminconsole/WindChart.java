@@ -12,6 +12,7 @@ import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Extremes;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
@@ -44,8 +45,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -53,9 +54,12 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class WindChart extends SimplePanel implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener, RequiresResize {
+    public static final long DEFAULT_RESOLUTION_IN_MILLISECONDS = 5000;
+
     private static final int LINE_WIDTH = 1;
     private final StringMessages stringMessages;
     private final Set<WindSourceType> windSourceTypesToDisplay;
+    private long resolutionInMilliseconds;
     
     /**
      * Holds one series for each wind source for which data has been received.
@@ -131,6 +135,8 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 }
             }
         }));
+        
+        chart.setBackgroundColor(new Color("#ebebec"));
         
         if (allowTimeAdjust) {
             chart.setClickEventHandler(new ChartClickEventHandler() {
@@ -345,7 +351,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
 
     @Override
     public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent() {
-        return new WindChartSettingsDialogComponent(new WindChartSettings(windSourceTypesToDisplay), stringMessages);
+        return new WindChartSettingsDialogComponent(new WindChartSettings(windSourceTypesToDisplay, resolutionInMilliseconds), stringMessages);
     }
 
     /**
@@ -354,6 +360,10 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
      */
     @Override
     public void updateSettings(WindChartSettings newSettings) {
+        if (newSettings.getResolutionInMilliseconds() != resolutionInMilliseconds) {
+            resolutionInMilliseconds = newSettings.getResolutionInMilliseconds();
+            clearCacheAndReload();
+        }
         windSourceTypesToDisplay.clear();
         windSourceTypesToDisplay.addAll(newSettings.getWindSourceTypesToDisplay());
         chart.removeAllSeries(/* redraw */ false);
@@ -366,6 +376,13 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
             }
         }
         chart.redraw();
+    }
+
+    private void clearCacheAndReload() {
+        timeOfEarliestRequestInMillis = null;
+        timeOfLatestRequestInMillis = null;
+        loadData(selectedRaceIdentifier, /* from */null, /* to */
+                new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */false);
     }
 
     /**
@@ -390,28 +407,33 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
      *            of overwriting the existing series.
      */
     private void loadData(final RaceIdentifier raceIdentifier, final Date from, final Date to, final boolean append) {
-        sailingService.getWindInfo(raceIdentifier,
-        // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
-                from, to, // use race start and time of newest event as default time period
-                null, // retrieve data on all wind sources
-                new AsyncCallback<WindInfoForRaceDTO>() {
-                    @Override
-                    public void onSuccess(WindInfoForRaceDTO result) {
-                        if (result != null) {
-                            updateStripChartSeries(result, append);
-                        } else {
-                            if (!append) {
-                                clearChart(); // no wind known for untracked race
+        if (raceIdentifier == null) {
+            clearChart();
+        } else {
+            sailingService.getWindInfo(raceIdentifier,
+            // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
+            // Consider incremental updates for new data only.
+                    from, to, resolutionInMilliseconds, // use race start and time of newest event as default time period
+                    null, // retrieve data on all wind sources
+                    new AsyncCallback<WindInfoForRaceDTO>() {
+                        @Override
+                        public void onSuccess(WindInfoForRaceDTO result) {
+                            if (result != null) {
+                                updateStripChartSeries(result, append);
+                            } else {
+                                if (!append) {
+                                    clearChart(); // no wind known for untracked race
+                                }
                             }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace()+" " + raceIdentifier + ": "
-                                + caught.getMessage());
-                    }
-                });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace() + " "
+                                    + raceIdentifier + ": " + caught.getMessage());
+                        }
+                    });
+        }
     }
     
     private void clearChart() {
@@ -423,10 +445,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             // show wind of first selected race
             selectedRaceIdentifier = selectedRaces.iterator().next();
-            timeOfEarliestRequestInMillis = null;
-            timeOfLatestRequestInMillis = null;
-            loadData(selectedRaceIdentifier, /* from */null, /* to */
-                    new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */false);
+            clearCacheAndReload();
         } else {
             clearChart();
         }
@@ -473,12 +492,16 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private void updateTimeLine(Date date) {
         if (allowTimeAdjust) {
             Long x = date.getTime();
-            Extremes extremes = chart.getYAxis(0).getExtremes();
-            Point[] points = new Point[2];
-            points[0] = new Point(x, extremes.getDataMin());
-            points[1] = new Point(x, extremes.getDataMax());
-            timeLineSeries.setPoints(points);
-            ensureTimeLineIsVisible();
+            try {
+                Extremes extremes = chart.getYAxis(0).getExtremes();
+                Point[] points = new Point[2];
+                points[0] = new Point(x, extremes.getDataMin());
+                points[1] = new Point(x, extremes.getDataMax());
+                timeLineSeries.setPoints(points);
+                ensureTimeLineIsVisible();
+            } catch (NullPointerException e) {
+                // explicitly do nothing; it means that getExtremes() has thrown an exception, so we don't know how to set them
+            }
         }
     }
     

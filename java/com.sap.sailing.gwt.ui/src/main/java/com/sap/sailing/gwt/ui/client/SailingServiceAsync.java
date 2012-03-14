@@ -69,11 +69,15 @@ public interface SailingServiceAsync {
      */
     void removeAndUntrackRace(EventAndRaceIdentifier eventAndRaceidentifier, AsyncCallback<Void> callback);
 
-    /**
-     * @param windSources if <code>null</code>, information about all available wind sources will be provided
-     */
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources,
             AsyncCallback<WindInfoForRaceDTO> callback);
+
+    /**
+     * @param from if <code>null</code>, the tracked race's start of tracking is used
+     * @param to if <code>null</code>, the tracked race's time point of newest event is used
+     */
+    void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
+            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
      * @param windSourceTypeNames
@@ -83,6 +87,22 @@ public interface SailingServiceAsync {
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
             double latDeg, double lngDeg, Collection<String> windSourceTypeNames,
             AsyncCallback<WindInfoForRaceDTO> callback);
+
+    /**
+     * Same as {@link #getWindInfo(RaceIdentifier, Date, long, int, double, double, Collection, AsyncCallback)}, only
+     * that the wind is not requested for a specific position, but instead the wind sources associated with the tracked
+     * race identified by <code>raceIdentifier</code> are requested to deliver their original position. This will in
+     * particular preserve the positions of actual measurements and will deliver the averaged positions for averaged /
+     * combined wind read-outs.
+     * 
+     * @param from
+     *            must not be <code>null</code>
+     * @param numberOfFixes
+     *            no matter how great this value is chosen, never returns data beyond the newest event recorded in the
+     *            race
+     */
+    void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
+            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
     
@@ -286,12 +306,4 @@ public interface SailingServiceAsync {
     void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
             AsyncCallback<Void> callback);
 
-    /**
-     * Same as {@link #getWindInfo(RaceIdentifier, Date, long, int, double, double, Collection, AsyncCallback)}, only that the
-     * wind is not requested for a specific position, but instead the wind sources associated with the tracked race identified
-     * by <code>raceIdentifier</code> are requested to deliver their original position. This will in particular preserve the
-     * positions of actual measurements and will deliver the averaged positions for averaged / combined wind read-outs.
-     */
-    void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
-            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
 }

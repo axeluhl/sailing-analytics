@@ -65,6 +65,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
             if (trackedRace.getStart() == null || !trackedRace.getStart().equals(start)) {
                 trackedRace.setStartTimeReceived(start);
             }
+            // TODO forward race stop time, event.getB().getStopTime()
         } else {
             logger.warning("Couldn't find tracked race for race " + event.getA().getName()
                     + ". Dropping start/stop event " + event);
