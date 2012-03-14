@@ -7,17 +7,21 @@ import java.util.Set;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.IntegerBox;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
-import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class WindChartSettingsDialogComponent implements SettingsDialogComponent<WindChartSettings> {
     private final WindChartSettings initialSettings;
+    private IntegerBox resolutionInSecondsBox;
     private final Map<WindSourceType, CheckBox> checkboxes;
     private final StringMessages stringMessages;
     
@@ -31,6 +35,11 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
+        resolutionInSecondsBox = dialog.createIntegerBox((int) (initialSettings.getResolutionInMilliseconds()/1000), /* visibleLength */ 5);
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.add(new Label(stringMessages.stepSizeInSeconds()));
+        hp.add(resolutionInSecondsBox);
+        vp.add(hp);
         for (WindSourceType windSourceType : WindSourceType.values()) {
             CheckBox checkbox = dialog.createCheckbox(WindSourceTypeFormatter.format(windSourceType, stringMessages));
             checkboxes.put(windSourceType, checkbox);
@@ -48,18 +57,26 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                 windSourceTypesToDisplay.add(e.getKey());
             }
         }
-        return new WindChartSettings(windSourceTypesToDisplay);
+        return new WindChartSettings(windSourceTypesToDisplay, resolutionInSecondsBox.getValue() == null ? -1 : resolutionInSecondsBox.getValue()*1000);
     }
 
     @Override
     public Validator<WindChartSettings> getValidator() {
-        // with checkboxes only, nothing can go wrong :-)
-        return null;
+        return new Validator<WindChartSettings>() {
+            @Override
+            public String getErrorMessage(WindChartSettings valueToValidate) {
+                String errorMessage = null;
+                if (valueToValidate.getResolutionInMilliseconds() < 1) {
+                    errorMessage = stringMessages.stepSizeMustBeGreaterThanNull();
+                }
+                return errorMessage;
+            }
+        };
     }
 
     @Override
     public FocusWidget getFocusWidget() {
-        return checkboxes.values().iterator().next();
+        return resolutionInSecondsBox;
     }
 
 }

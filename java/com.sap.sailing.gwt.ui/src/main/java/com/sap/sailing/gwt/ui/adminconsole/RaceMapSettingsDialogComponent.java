@@ -162,7 +162,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 if (valueToValidate.getTailLengthInMilliseconds() < 0) {
                     errorMessage = stringMessages.tailLengthMustBeNonNegative();
                 }
-                
                 return errorMessage;
             }
         };

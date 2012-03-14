@@ -599,6 +599,33 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return windDTO;
     }
     
+    /**
+     * Uses <code>wind</code> for both, the non-dampened and dampened fields of the {@link WindDTO} object returned
+     */
+    protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, WindTrack windTrack) {
+        WindDTO windDTO = new WindDTO();
+        windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
+        windDTO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
+        windDTO.trueWindSpeedInKnots = wind.getKnots();
+        windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
+        windDTO.dampenedTrueWindBearingDeg = wind.getBearing().getDegrees();
+        windDTO.dampenedTrueWindFromDeg = wind.getBearing().reverse().getDegrees();
+        windDTO.dampenedTrueWindSpeedInKnots = wind.getKnots();
+        windDTO.dampenedTrueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
+        if (wind.getPosition() != null) {
+            windDTO.position = new PositionDTO(wind.getPosition().getLatDeg(), wind.getPosition()
+                    .getLngDeg());
+        }
+        if (wind.getTimePoint() != null) {
+            windDTO.timepoint = wind.getTimePoint().asMillis();
+        }
+        return windDTO;
+    }
+    
+    /**
+     * Fetches the {@link WindTrack#getAveragedWind(Position, TimePoint) average wind} from all wind tracks or those identified
+     * by <code>windSourceTypeNames</code>
+     */
     @Override
     public WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSourceTypeNames)
@@ -628,7 +655,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     for (int i = 0; i < numberOfFixes; i++) {
                         Wind wind = windTrack.getAveragedWind(position, timePoint);
                         if (wind != null) {
-                            WindDTO windDTO = createWindDTO(wind, windTrack);
+                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, windTrack);
                             windTrackInfoDTO.windFixes.add(windDTO);
                         }
                         timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
@@ -643,31 +670,39 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, Collection<String> windSourceTypeNames)
             throws NoWindException {
-        WindInfoForRaceDTO result = null;
+        assert from != null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        WindInfoForRaceDTO result = getWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
+                windSourceTypeNames, trackedRace);
+        return result;
+    }
+
+    private WindInfoForRaceDTO getWindInfo(TimePoint from, long millisecondsStepWidth, int numberOfFixes,
+            Collection<String> windSourceTypeNames, TrackedRace trackedRace) {
+        WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
+            TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
             Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
-            // TODO bug #375: add the combined wind; currently, CombinedWindTrackImpl just takes too long to return results...
             windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
             for (WindSource windSource : windSourcesToDeliver) {
+                // TODO consider parallelizing
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
-                    TimePoint fromTimePoint = new MillisecondsTimePoint(from);
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
                     WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
                     windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                     windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack
                             .getMillisecondsOverWhichToAverageWind();
-                    TimePoint timePoint = fromTimePoint;
-                    for (int i = 0; i < numberOfFixes; i++) {
+                    TimePoint timePoint = from;
+                    for (int i = 0; i < numberOfFixes && timePoint.compareTo(newestEvent) < 0; i++) {
                         Wind wind = windTrack.getAveragedWind(null, timePoint);
                         if (wind != null) {
-                            WindDTO windDTO = createWindDTO(wind, windTrack);
+                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, windTrack);
                             windTrackInfoDTO.windFixes.add(windDTO);
                         }
                         timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
@@ -678,6 +713,30 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
     
+    @Override
+    public WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to,
+            long resolutionInMilliseconds, Collection<String> windSourceTypeNames) {
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        WindInfoForRaceDTO result = null;
+        if (trackedRace != null) {
+            TimePoint fromTimePoint;
+            if (from == null) {
+                fromTimePoint = trackedRace.getStartOfTracking();
+            } else {
+                fromTimePoint = new MillisecondsTimePoint(from);
+            }
+            TimePoint toTimePoint;
+            if (to == null || to.getTime() > trackedRace.getTimePointOfNewestEvent().asMillis()) {
+                toTimePoint = trackedRace.getTimePointOfNewestEvent();
+            } else {
+                toTimePoint = new MillisecondsTimePoint(to);
+            }
+            int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
+            result = getWindInfo(fromTimePoint, resolutionInMilliseconds, numberOfFixes, windSourceTypeNames, trackedRace);
+        }
+        return result;
+    }
+
     @Override
     public void setWind(RaceIdentifier raceIdentifier, WindDTO windDTO) {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) getExistingTrackedRace(raceIdentifier);
@@ -852,6 +911,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
         }        
         return raceTimesInfo;
+    }
+    
+    @Override
+    public List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RaceIdentifier> raceIdentifiers) {
+        List<RaceTimesInfoDTO> raceTimesInfos = new ArrayList<RaceTimesInfoDTO>();
+        for (RaceIdentifier raceIdentifier : raceIdentifiers) {
+            RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
+            if (raceTimesInfo != null) {
+                raceTimesInfos.add(raceTimesInfo);
+            }
+        }
+        return raceTimesInfos;
     }
 
     private Date calculateStartOfRaceFromMarkPassings(Iterable<MarkPassing> markPassings, Iterable<Competitor> competitors) {
