@@ -12,6 +12,7 @@ import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Extremes;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
@@ -125,6 +126,8 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
             }
         }));
         
+        chart.setBackgroundColor(new Color("#ebebec"));
+        
         if (allowTimeAdjust) {
             chart.setClickEventHandler(new ChartClickEventHandler() {
                 @Override
@@ -132,6 +135,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                     if (ignoreClickOnce) {
                         ignoreClickOnce = false;
                     } else {
+                        WindChart.this.timer.setPlayMode(PlayModes.Replay);
                         WindChart.this.timer.setTime(chartClickEvent.getXAxisValueAsLong());
                     }
                     return true;
