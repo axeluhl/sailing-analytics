@@ -698,8 +698,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         Icon icon = Icon.newInstance(transformedImageURL);
         icon.setIconAnchor(Point.newInstance(7, 13));
         options.setIcon(icon);
-        String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " + stringMessages.degreesShort();
-        title += " (" + WindSourceTypeFormatter.format(windSource, stringMessages) + ")";
+        
+//      Due to a missing method to set the title of a marker after creation we can't set a dynamic value at the moment                
+//      String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " + stringMessages.degreesShort();
+        String title = WindSourceTypeFormatter.format(windSource, stringMessages);
         options.setTitle(title);
         final Marker windSensorMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);
         windSensorMarker.addMarkerClickHandler(new MarkerClickHandler() {
@@ -707,16 +709,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             public void onClick(MarkerClickEvent event) {
                 LatLng latlng = windSensorMarker.getLatLng();
                 showWindSensorInfoWindow(windSource, windDTO, latlng);
-            }
-        });
-        windSensorMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler() {
-            @Override
-            public void onMouseOver(MarkerMouseOverEvent event) {
-            }
-        });
-        windSensorMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
-            @Override
-            public void onMouseOut(MarkerMouseOutEvent event) {
             }
         });
         return windSensorMarker;
