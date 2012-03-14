@@ -4,7 +4,7 @@ body {
   font-family: 'UbuntuRegular';
   margin: 0;
   padding: 0;
-  background: url(images/splash-screen-compressed.png) center top no-repeat #ebebec;
+  background: url(images/splash-screen-compressed-02.png) center top no-repeat #ebebec;
   }
   
 
@@ -53,8 +53,8 @@ body {
 
 .chooseModule {
   margin: 0 auto;
-  width: 542px;
-  margin-top: 542px;
+  width: 580px;
+  margin-top: 600px;
 }
 
 .chooseModule ul {
@@ -68,7 +68,7 @@ body {
 
 .chooseModule a {
   background: url(images/btn-cta-orangeleft.png) center top repeat-x;
-  padding: 6px;
+  padding: 5px;
   color: #fff;
   -webkit-border-radius: 4px;
 -moz-border-radius: 4px;

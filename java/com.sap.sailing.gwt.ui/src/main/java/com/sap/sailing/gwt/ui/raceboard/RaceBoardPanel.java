@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
@@ -128,6 +129,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         this.viewMode = viewMode;
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");
+
         setWidget(mainPanel);
 
         this.timer = timer;
@@ -143,6 +145,8 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                 break;
             case ONESCREEN:
                 createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
+                getElement().getStyle().setMarginLeft(12, Unit.PX);
+                getElement().getStyle().setMarginRight(12, Unit.PX);
                 break;
         }
 

@@ -9,25 +9,18 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.CourseChange;
-import com.sap.sailing.domain.base.PositionWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.PositionWithConfidenceImpl;
-import com.sap.sailing.domain.base.impl.ScalablePosition;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
+import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.confidence.HasConfidence;
-import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -167,17 +160,15 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      */
     protected WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
         DummyWind atTimed = new DummyWind(at);
+        Pair<Position, TimePoint> relativeTo = new Pair<Position, TimePoint>(p, at);
         NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ false);
         NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
         Iterator<Wind> beforeIter = beforeSet.descendingIterator();
         Iterator<Wind> afterIter = afterSet.iterator();
-        double knotSum = 0;
         // don't measure speed with separate confidence; return confidence obtained from averaging bearings
-        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind()/10);
-        BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
-        ConfidenceBasedAverager<ScalablePosition, Position, TimePoint> positionAverager = ConfidenceFactory.INSTANCE.createAverager(weigher);
-        List<PositionWithConfidence<TimePoint>> positionsToAverage = new ArrayList<PositionWithConfidence<TimePoint>>();
-        int count = 0;
+        ConfidenceBasedWindAverager<Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE.createWindAverager(new PositionAndTimePointWeigher(
+                /* halfConfidenceAfterMilliseconds */ getMillisecondsOverWhichToAverageWind()/10));
+        List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAverage = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
         long beforeDistanceToAt = 0;
         long afterDistanceToAt = 0;
         TimePoint beforeIntervalEnd = null;
@@ -196,15 +187,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         }
         do {
             if (beforeWind != null && (beforeDistanceToAt <= afterDistanceToAt || afterWind == null)) {
-                if (p == null && beforeWind.getPosition() != null) {
-                    positionsToAverage.add(new PositionWithConfidenceImpl<TimePoint>(beforeWind.getPosition(), getBaseConfidence(), beforeWind.getTimePoint()));
-                }
+                windFixesToAverage.add(new WindWithConfidenceImpl<Pair<Position, TimePoint>>(beforeWind, getBaseConfidence(),
+                        new Pair<Position, TimePoint>(beforeWind.getPosition(), beforeWind.getTimePoint()), useSpeed));
                 if (beforeIntervalEnd == null) {
                     beforeIntervalEnd = beforeWind.getTimePoint();
                 }
-                knotSum += beforeWind.getKnots();
-                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(beforeWind.getBearing(), getBaseConfidence(), beforeWind.getTimePoint()));
-                count++;
                 if (beforeIter.hasNext()) {
                     beforeWind = beforeIter.next();
                     beforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
@@ -213,15 +200,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     beforeWind = null;
                 }
             } else if (afterWind != null) {
-                if (p == null && afterWind.getPosition() != null) {
-                    positionsToAverage.add(new PositionWithConfidenceImpl<TimePoint>(afterWind.getPosition(), getBaseConfidence(), afterWind.getTimePoint()));
-                }
+                windFixesToAverage.add(new WindWithConfidenceImpl<Pair<Position, TimePoint>>(afterWind, getBaseConfidence(),
+                        new Pair<Position, TimePoint>(afterWind.getPosition(), afterWind.getTimePoint()), useSpeed));
                 if (afterIntervalStart == null) {
                     afterIntervalStart = afterWind.getTimePoint();
                 }
-                knotSum += afterWind.getKnots();
-                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(afterWind.getBearing(), getBaseConfidence(), afterWind.getTimePoint()));
-                count++;
                 if (afterIter.hasNext()) {
                     afterWind = afterIter.next();
                     afterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
@@ -231,24 +214,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                 }
             }
         } while (beforeIntervalLength + afterIntervalLength < getMillisecondsOverWhichToAverageWind() && (beforeWind != null || afterWind != null));
-        if (count == 0) {
+        if (windFixesToAverage.isEmpty()) {
             return null;
         } else {
-            BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
-            Position resultPosition;
-            if (p == null) {
-                HasConfidence<ScalablePosition, Position, TimePoint> averagePos = positionAverager.getAverage(positionsToAverage, at);
-                if (averagePos != null) {
-                    resultPosition = averagePos.getObject();
-                } else {
-                    resultPosition = null;
-                }
-            } else {
-                resultPosition = p;
-            }
-            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, average == null ? null : average.getObject());
-            return new WindWithConfidenceImpl<Pair<Position,TimePoint>>(new WindImpl(resultPosition, at, avgWindSpeed), average.getConfidence(),
-                    new Pair<Position, TimePoint>(p, at), useSpeed);
+            WindWithConfidence<Pair<Position, TimePoint>> average = windAverager.getAverage(windFixesToAverage, relativeTo);
+            return average;
         }
     }
 

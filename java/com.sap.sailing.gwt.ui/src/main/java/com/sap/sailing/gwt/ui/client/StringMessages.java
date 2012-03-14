@@ -247,7 +247,8 @@ public interface StringMessages extends Messages {
     String autoZoomToBoats();
     String autoZoomToBuoys();
     String autoZoomOff();
-    String autoZoomTails();
+    String autoZoomToTails();
+    String autoZoomToWindSensors();
     String autoZoomSelectedCompetitors();
     String bearing();
     String zoom();

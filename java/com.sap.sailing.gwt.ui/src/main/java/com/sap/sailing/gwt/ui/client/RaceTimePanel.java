@@ -14,11 +14,13 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
     private RaceTimesInfoProvider raceTimesInfoProvider;
     private RaceIdentifier selectedRace;
+    private boolean autoAdjustPlayMode;
     
     public RaceTimePanel(Timer timer, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
         super(timer, stringMessages);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
+        autoAdjustPlayMode = true;
     }
     
     @Override
@@ -52,6 +54,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
                 setLiveGenerallyPossible(liveModeToBeMadePossible);
                 setJumpToLiveEnablement(liveModeToBeMadePossible && timer.getPlayMode() != PlayModes.Live);
+                if (autoAdjustPlayMode && liveModeToBeMadePossible) {
+                    timer.setPlayMode(PlayModes.Live);
+                }
+                
                 boolean timerAlreadyInitialized = getMin() != null && getMax() != null && sliderBar.getCurrentValue() != null;
                 initMinMax(raceTimesInfo);
                 if (!timerAlreadyInitialized) {
@@ -85,6 +91,19 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
                 raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
             }
+        }
+    }
+    
+    @Override
+    public void playStateChanged(PlayStates playState, PlayModes playMode) {
+        super.playStateChanged(playState, playMode);
+        
+        switch (playMode) {
+        case Replay:
+            autoAdjustPlayMode = false;
+            break;
+        case Live:
+            break;
         }
     }
 
