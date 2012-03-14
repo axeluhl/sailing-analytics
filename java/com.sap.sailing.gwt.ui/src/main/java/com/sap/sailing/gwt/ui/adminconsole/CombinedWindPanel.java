@@ -55,7 +55,6 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
 
         windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.COMBINED.name());
-        windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
         
         windSymbolImage = new Image();
         add(windSymbolImage);
@@ -116,22 +115,13 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
                         String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
                         windSymbolImage.setUrl(transformedImageURL);
                         windSymbolImage.setTitle(Math.round(windFromDeg) + " " + stringMessages.degreesShort());
-                        textLabel.setText(numberFormat.format(speedInKnots) + " kn");
+                        textLabel.setText(numberFormat.format(speedInKnots) + " " + stringMessages.averageSpeedInKnotsUnit());
                         
                         if(!isVisible())
                             setVisible(true);
                     } else {
                         setVisible(false);
                     }
-                }
-                break;
-                case EXPEDITION:
-                {
-//                    if(windTrackInfoDTO.windFixes.size() > 0) {
-//                        WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-//                        double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
-//                        double windFromDeg = windDTO.dampenedTrueWindFromDeg;
-//                    }
                 }
                 break;
             }
