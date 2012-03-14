@@ -67,6 +67,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
@@ -528,7 +529,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 WindDTO windDTO = windSourcePair.getB();
                 Marker windSensorMarker = windSensorMarkers.get(windSource);
                 if (windSensorMarker == null) {
-                    windSensorMarker = createWindSensorMarker(windDTO);
+                    windSensorMarker = createWindSensorMarker(windSource, windDTO);
                     windSensorMarkers.put(windSource, windSensorMarker);
                     map.addOverlay(windSensorMarker);
                 } else {
@@ -681,7 +682,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return boatMarker;
     }
 
-    protected Marker createWindSensorMarker(final WindDTO windDTO) {
+    protected Marker createWindSensorMarker(final WindSource windSource, final WindDTO windDTO) {
         double latDeg = windDTO.position.latDeg;
         double lngDeg = windDTO.position.lngDeg;
         MarkerOptions options = MarkerOptions.newInstance();
@@ -697,13 +698,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         Icon icon = Icon.newInstance(transformedImageURL);
         icon.setIconAnchor(Point.newInstance(7, 13));
         options.setIcon(icon);
-        options.setTitle(stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " + stringMessages.degreesShort());
+        String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " + stringMessages.degreesShort();
+        title += " (" + WindSourceTypeFormatter.format(windSource, stringMessages) + ")";
+        options.setTitle(title);
         final Marker windSensorMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);
         windSensorMarker.addMarkerClickHandler(new MarkerClickHandler() {
             @Override
             public void onClick(MarkerClickEvent event) {
                 LatLng latlng = windSensorMarker.getLatLng();
-                showWindSensorInfoWindow(windDTO, latlng);
+                showWindSensorInfoWindow(windSource, windDTO, latlng);
             }
         });
         windSensorMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler() {
@@ -735,9 +738,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return result;
     }
     
-    private void showWindSensorInfoWindow(final WindDTO windDTO, LatLng where) {
+    private void showWindSensorInfoWindow(final WindSource windSource, final WindDTO windDTO, LatLng where) {
         map.getInfoWindow().open(where,
-                new InfoWindowContent(getInfoWindowContent(windDTO)));
+                new InfoWindowContent(getInfoWindowContent(windSource, windDTO)));
     }
 
     private Widget getInfoWindowContent(MarkDTO markDTO) {
@@ -747,10 +750,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return result;
     }
 
-    private Widget getInfoWindowContent(WindDTO windDTO) {
+    private Widget getInfoWindowContent(WindSource windSource, WindDTO windDTO) {
         NumberFormat numberFormat = NumberFormat.getFormat("0.0");
         VerticalPanel result = new VerticalPanel();
-        result.add(new Label(stringMessages.windSource() + ": " + "Expedition"));
+        result.add(new Label(stringMessages.windSource() + ": " + WindSourceTypeFormatter.format(windSource, stringMessages)));
         result.add(new Label(stringMessages.wind() + ": " +  Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
         result.add(new Label(stringMessages.windSpeed() + ": " + numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
         result.add(new Label(formatPosition(windDTO.position.latDeg, windDTO.position.lngDeg)));
