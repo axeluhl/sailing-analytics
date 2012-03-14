@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -114,7 +115,9 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
                                 rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
                             String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
                             windSymbolImage.setUrl(transformedImageURL);
-                            windSymbolImage.setTitle(stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " + stringMessages.degreesShort());
+                            String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " 
+                                    + stringMessages.degreesShort() + " (" + WindSourceTypeFormatter.format(windSource, stringMessages) + ")"; 
+                            windSymbolImage.setTitle(title);
                             textLabel.setText(numberFormat.format(speedInKnots) + " " + stringMessages.averageSpeedInKnotsUnit());
                             
                             if(!isVisible())
