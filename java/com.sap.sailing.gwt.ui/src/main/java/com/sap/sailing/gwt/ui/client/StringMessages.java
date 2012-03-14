@@ -273,4 +273,6 @@ public interface StringMessages extends Messages {
     String webWindSourceTypeName();
     String clickChartToSetTime();
     String position();
+    String windSourcesUsed();
+    String errorTryingToUpdateWindSourcesToExclude(String raceName, String message);
 }
