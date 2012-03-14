@@ -84,6 +84,15 @@ public interface SailingServiceAsync {
             double latDeg, double lngDeg, Collection<String> windSourceTypeNames,
             AsyncCallback<WindInfoForRaceDTO> callback);
 
+    /**
+     * Same as {@link #getWindInfo(RaceIdentifier, Date, long, int, double, double, Collection, AsyncCallback)}, only that the
+     * wind is not requested for a specific position, but instead the wind sources associated with the tracked race identified
+     * by <code>raceIdentifier</code> are requested to deliver their original position. This will in particular preserve the
+     * positions of actual measurements and will deliver the averaged positions for averaged / combined wind read-outs.
+     */
+    void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
+            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
+
     void setWind(RaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
     
     void removeWind(RaceIdentifier raceIdentifier, WindDTO windDTO, AsyncCallback<Void> callback);
@@ -283,13 +292,4 @@ public interface SailingServiceAsync {
 
     void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
             AsyncCallback<Void> callback);
-
-    /**
-     * Same as {@link #getWindInfo(RaceIdentifier, Date, long, int, double, double, Collection, AsyncCallback)}, only that the
-     * wind is not requested for a specific position, but instead the wind sources associated with the tracked race identified
-     * by <code>raceIdentifier</code> are requested to deliver their original position. This will in particular preserve the
-     * positions of actual measurements and will deliver the averaged positions for averaged / combined wind read-outs.
-     */
-    void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
-            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
 }
