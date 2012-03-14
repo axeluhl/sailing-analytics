@@ -113,12 +113,22 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
             public String format(ToolTipData toolTipData) {
-                final String unit = toolTipData.getSeriesName().startsWith(stringMessages.fromDeg()+" ") ? stringMessages.degreesShort() :
-                    stringMessages.averageSpeedInKnotsUnit();
-                return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
-                        + "</b><br/>" +  
-                        dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
-                        numberFormat.format(toolTipData.getYAsDouble()) + unit;
+                String seriesName = toolTipData.getSeriesName();
+                
+                if (seriesName.equals(WindChart.this.stringMessages.time())) {
+                    return "<b>" + seriesName + ":</b> " + dateFormat.format(new Date(toolTipData.getXAsLong()))
+                            + "<br/>(" + stringMessages.clickChartToSetTime() + ")";
+                } else if (seriesName.startsWith(stringMessages.fromDeg()+" ")) {
+                    return "<b>" + seriesName + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
+                            + "</b><br/>" +  
+                            dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
+                            numberFormat.format(toolTipData.getYAsDouble()) + stringMessages.degreesShort();
+                } else {
+                    return "<b>" + seriesName + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
+                            + "</b><br/>" +  
+                            dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
+                            numberFormat.format(toolTipData.getYAsDouble()) + stringMessages.averageSpeedInKnotsUnit();
+                }
             }
         }));
         
@@ -267,9 +277,9 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         return chart
                 .createSeries()
                 .setType(Series.Type.LINE)
-                .setName("TIME_LINE")
+                .setName(stringMessages.time())
                 .setYAxis(0)
-                .setPlotOptions(new LinePlotOptions().setEnableMouseTracking(false).setShowInLegend(false).setHoverStateEnabled(false).setLineWidth(2));
+                .setPlotOptions(new LinePlotOptions().setShowInLegend(false).setHoverStateEnabled(false).setLineWidth(2));
     }
 
     /**
