@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -126,10 +128,11 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                     return "<b>" + seriesName + ":</b> " + dateFormat.format(new Date(toolTipData.getXAsLong()))
                             + "<br/>(" + stringMessages.clickChartToSetTime() + ")";
                 } else if (seriesName.startsWith(stringMessages.fromDeg()+" ")) {
+                    double value = toolTipData.getYAsDouble() % 360;
                     return "<b>" + seriesName + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                             + "</b><br/>" +  
                             dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
-                            numberFormat.format(toolTipData.getYAsDouble() % 360) + stringMessages.degreesShort();
+                            numberFormat.format(value < 0 ? value + 360 : value) + stringMessages.degreesShort();
                 } else {
                     return "<b>" + seriesName + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
                             + "</b><br/>" +  
@@ -176,7 +179,8 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
                     @Override
                     public String format(AxisLabelsData axisLabelsData) {
-                        return new Long(axisLabelsData.getValueAsLong() % 360).toString();
+                        long value = axisLabelsData.getValueAsLong() % 360;
+                        return new Long(value < 0 ? value + 360 : value).toString();
                     }
                 }));
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
@@ -325,7 +329,9 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 if (wind.dampenedTrueWindSpeedInKnots != null) {
                     newDirectionPoint.setName(numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+stringMessages.averageSpeedInKnotsUnit());
                 }
+                newDirectionPoint = recalculateDirectionPoint(directionSeries, newDirectionPoint);
                 directionPoints[i] = newDirectionPoint;
+
                 Point newSpeedPoint = new Point(wind.timepoint, wind.dampenedTrueWindSpeedInKnots);
                 speedPoints[i++] = newSpeedPoint;
             }
@@ -351,6 +357,43 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 speedSeries.setPoints(newSpeedPoints);
             }
         }
+    }
+    
+    private Point recalculateDirectionPoint(Series directionSeries, Point directionPoint) {
+        double y = directionPoint.getY().doubleValue();
+        boolean recalculated = false;
+        
+        List<Point> seriesPoints = Arrays.asList(directionSeries.getPoints());
+        if (!seriesPoints.isEmpty()) {
+            Collections.sort(seriesPoints, new Comparator<Point>() {
+                @Override
+                public int compare(Point p0, Point p1) {
+                    return new Double(p0.getY().doubleValue()).compareTo(p1.getY().doubleValue());
+                }
+            });
+            
+            double max = seriesPoints.get(seriesPoints.size() - 1).getY().doubleValue();
+            double min = seriesPoints.get(0).getY().doubleValue();
+            if (y <= min || max <= y) {
+                double deltaMin = Math.abs(min - y);
+                double deltaMax = Math.abs(max - y);
+                
+                double yDown = y - 360;
+                double deltaMinDown = Math.abs(min - Math.abs(yDown));
+                
+                double yUp = y + 360;
+                double deltaMaxUp = Math.abs(max - Math.abs(yUp));
+                
+
+                if (!(deltaMin <= deltaMinDown && deltaMin <= deltaMaxUp) &&
+                    !(deltaMax <= deltaMinDown && deltaMax <= deltaMaxUp)) {
+                    y = deltaMaxUp <= deltaMinDown ? yUp : yDown;
+                    recalculated = true;
+                }
+            }
+        }
+        
+        return recalculated ? new Point(directionPoint.getX(), y) : directionPoint;
     }
 
     @Override
