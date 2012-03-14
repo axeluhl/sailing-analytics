@@ -393,28 +393,33 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
      *            of overwriting the existing series.
      */
     private void loadData(final RaceIdentifier raceIdentifier, final Date from, final Date to, final boolean append) {
-        sailingService.getWindInfo(raceIdentifier,
-        // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
-                from, to, resolutionInMilliseconds,  // use race start and time of newest event as default time period
-                null, // retrieve data on all wind sources
-                new AsyncCallback<WindInfoForRaceDTO>() {
-                    @Override
-                    public void onSuccess(WindInfoForRaceDTO result) {
-                        if (result != null) {
-                            updateStripChartSeries(result, append);
-                        } else {
-                            if (!append) {
-                                clearChart(); // no wind known for untracked race
+        if (raceIdentifier == null) {
+            clearChart();
+        } else {
+            sailingService.getWindInfo(raceIdentifier,
+            // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
+            // Consider incremental updates for new data only.
+                    from, to, resolutionInMilliseconds, // use race start and time of newest event as default time period
+                    null, // retrieve data on all wind sources
+                    new AsyncCallback<WindInfoForRaceDTO>() {
+                        @Override
+                        public void onSuccess(WindInfoForRaceDTO result) {
+                            if (result != null) {
+                                updateStripChartSeries(result, append);
+                            } else {
+                                if (!append) {
+                                    clearChart(); // no wind known for untracked race
+                                }
                             }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace()+" " + raceIdentifier + ": "
-                                + caught.getMessage());
-                    }
-                });
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace() + " "
+                                    + raceIdentifier + ": " + caught.getMessage());
+                        }
+                    });
+        }
     }
     
     private void clearChart() {
@@ -473,12 +478,16 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private void updateTimeLine(Date date) {
         if (allowTimeAdjust) {
             Long x = date.getTime();
-            Extremes extremes = chart.getYAxis(0).getExtremes();
-            Point[] points = new Point[2];
-            points[0] = new Point(x, extremes.getDataMin());
-            points[1] = new Point(x, extremes.getDataMax());
-            timeLineSeries.setPoints(points);
-            ensureTimeLineIsVisible();
+            try {
+                Extremes extremes = chart.getYAxis(0).getExtremes();
+                Point[] points = new Point[2];
+                points[0] = new Point(x, extremes.getDataMin());
+                points[1] = new Point(x, extremes.getDataMax());
+                timeLineSeries.setPoints(points);
+                ensureTimeLineIsVisible();
+            } catch (NullPointerException e) {
+                // explicitly do nothing; it means that getExtremes() has thrown an exception, so we don't know how to set them
+            }
         }
     }
     
