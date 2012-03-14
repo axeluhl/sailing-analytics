@@ -57,6 +57,7 @@ import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.confidence.impl.HyperbolicTimeDifferenceWeigher;
+import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -560,17 +561,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
+    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+        Set<WindSource> emptyWindSourceSet = Collections.emptySet();
+        return getWindWithConfidence(p, at, emptyWindSourceSet);
+    }
+
+    @Override
     public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
-        final Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE
-                .createHyperbolicTimeDifferenceWeigher(/* halfConfidenceAfterMilliseconds */10000l);
-        Weigher<Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new Weigher<Util.Pair<Position, TimePoint>>() {
-            @Override
-            public double getConfidence(Pair<Position, TimePoint> fix, Pair<Position, TimePoint> request) {
-                return weigher.getConfidence(fix.getB(), request.getB());
-            }
-        };
+        Weigher<Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
+                /* halfConfidenceAfterMilliseconds */10000l);
         ConfidenceBasedWindAverager<Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
                 .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
         List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
@@ -581,14 +582,16 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         p, at);
                 if (windWithConfidence != null) {
                     windFixesWithConfidences.add(windWithConfidence);
-                    canUseSpeedOfAtLeastOneWindSource = canUseSpeedOfAtLeastOneWindSource || windSource.getType().useSpeed();
+                    canUseSpeedOfAtLeastOneWindSource = canUseSpeedOfAtLeastOneWindSource
+                            || windSource.getType().useSpeed();
                 }
             }
         }
         HasConfidence<ScalableWind, Wind, Pair<Position, TimePoint>> average = averager.getAverage(
                 windFixesWithConfidences, new Pair<Position, TimePoint>(p, at));
         WindWithConfidence<Pair<Position, TimePoint>> result = new WindWithConfidenceImpl<Pair<Position, TimePoint>>(
-                average.getObject(), average.getConfidence(), new Pair<Position, TimePoint>(p, at), canUseSpeedOfAtLeastOneWindSource);
+                average.getObject(), average.getConfidence(), new Pair<Position, TimePoint>(p, at),
+                canUseSpeedOfAtLeastOneWindSource);
         return result;
     }
 
@@ -789,16 +792,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getEstimatedWindDirection(Position position, TimePoint timePoint) {
-        WindWithConfidence<TimePoint> estimatedWindWithConfidence = getEstimatedWindDirectionWithConfidence(position, timePoint);
+        WindWithConfidence<TimePoint> estimatedWindWithConfidence = getEstimatedWindDirectionWithConfidence(position,
+                timePoint);
         return estimatedWindWithConfidence == null ? null : estimatedWindWithConfidence.getObject();
     }
-    
+
     @Override
     public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint) {
         DummyMarkPassingWithTimePointOnly dummyMarkPassingForNow = new DummyMarkPassingWithTimePointOnly(timePoint);
         Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
         // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-                getMillisecondsOverWhichToAverageSpeed(), /* minimum confidence */ 0.0000000001);
+                getMillisecondsOverWhichToAverageSpeed(), /* minimum confidence */0.0000000001);
         Map<LegType, BearingWithConfidenceCluster<TimePoint>> bearings = clusterBearingsByLegType(timePoint, position,
                 dummyMarkPassingForNow, weigher);
         // use the minimum confidence of the four "quadrants" as the result's confidence
@@ -847,9 +851,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             resultBearing = resultCluster.getAverage(timePoint);
         }
-        return resultBearing == null ? null : new WindWithConfidenceImpl<TimePoint>(new WindImpl(null, timePoint, new KnotSpeedWithBearingImpl(
-                /* speedInKnots */numberOfBoatsRelevantForEstimate, resultBearing.getObject())), resultBearing.getConfidence(),
-                resultBearing.getRelativeTo(), /* useSpeed */ false);
+        return resultBearing == null ? null : new WindWithConfidenceImpl<TimePoint>(new WindImpl(null, timePoint,
+                new KnotSpeedWithBearingImpl(
+                /* speedInKnots */numberOfBoatsRelevantForEstimate, resultBearing.getObject())),
+                resultBearing.getConfidence(), resultBearing.getRelativeTo(), /* useSpeed */false);
     }
 
     // TODO confidences need to be computed not only based on timePoint but also on position: boats far away don't
@@ -875,12 +880,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                             SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track
                                     .getEstimatedSpeed(timePoint, weigher);
                             if (estimatedSpeedWithConfidence != null
-                                    && estimatedSpeedWithConfidence.getObject() != null
-                                    &&
+                                    && estimatedSpeedWithConfidence.getObject() != null &&
                                     // Mark passings may be missing or far off. This can lead to boats apparently going
                                     // "backwards" regarding the leg's direction; ignore those
-                                    isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(), trackedLeg, timePoint)) {
-                                // additionally to generally excluding maneuvers, reduce confidence around mark passings:
+                                    isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(),
+                                            trackedLeg, timePoint)) {
+                                // additionally to generally excluding maneuvers, reduce confidence around mark
+                                // passings:
                                 NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
                                 double markPassingProximityConfidenceReduction = 1.0;
                                 synchronized (markPassings) {
@@ -890,13 +896,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                             dummyMarkPassingForNow, /* inclusive */true);
                                     if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
                                         markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                                1.0 - weigherForMarkPassingProximity.getConfidence(prevMarkPassing.last()
-                                                        .getTimePoint(), timePoint));
+                                                1.0 - weigherForMarkPassingProximity.getConfidence(prevMarkPassing
+                                                        .last().getTimePoint(), timePoint));
                                     }
                                     if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
                                         markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                                1.0 - weigherForMarkPassingProximity.getConfidence(nextMarkPassing.first()
-                                                        .getTimePoint(), timePoint));
+                                                1.0 - weigherForMarkPassingProximity.getConfidence(nextMarkPassing
+                                                        .first().getTimePoint(), timePoint));
                                     }
                                 }
                                 BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
@@ -905,7 +911,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                         markPassingProximityConfidenceReduction
                                                 * estimatedSpeedWithConfidence.getConfidence(),
                                         estimatedSpeedWithConfidence.getRelativeTo());
-                                BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings.get(legType);
+                                BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings
+                                        .get(legType);
                                 bearingClusterForLegType.add(bearing);
                             }
                         }
