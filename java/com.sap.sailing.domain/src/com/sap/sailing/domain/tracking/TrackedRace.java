@@ -318,6 +318,8 @@ public interface TrackedRace {
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    
+    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at);
 
     /**
      * Loops over this tracked race's wind sources and from each asks its averaged wind for the position <code>p</code>

@@ -283,6 +283,12 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         return result;
     }
     
+    @Override
+    public String toString() {
+        return "This is the " + this.getClass().getName() + " object from " + virtualInternalRawFixes.getFrom()
+                + " to " + virtualInternalRawFixes.getTo() + " for race " + getTrackedRace();
+    }
+    
     /**
      * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}, computed using
      * {@link TrackedRace#getEstimatedWindDirection(com.sap.sailing.domain.base.Position, TimePoint)}. If not constrained

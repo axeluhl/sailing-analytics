@@ -38,6 +38,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -49,6 +51,7 @@ import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest {
     private List<Competitor> competitors;
@@ -98,7 +101,40 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         competitorTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(bearingDeg))));
     }
-    
+
+    /**
+     * Uses competitors on upwind leg to cause a valid wind estimation. Additionally, for the same time point, adds a
+     * wind fix to the {@link WindSourceType#WEB} wind track that is slightly different from the expected estimation
+     * result. Then, asks the tracked race for the combined wind direction. The expected outcome is that the larger
+     * the minimal cluster size (boats on the same tack going upwind), the more confident the wind estimation is,
+     * and subsequently the more it is considered in averaging between the {@link WindSourceType#WEB} wind track
+     * and the estimation wind track.
+     */
+    @Test
+    public void testWindEstimationPreferringLargerClusters() throws NoWindException {
+        initRace(4, new int[] { 1, 1, 1, 1 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
+        MillisecondsTimePoint now = new MillisecondsTimePoint(new GregorianCalendar(2012, 03, 14).getTime());
+        getTrackedRace().recordWind(new WindImpl(null, now, new KnotSpeedWithBearingImpl(/* speedInKnots */ 12, new DegreeBearingImpl(180.))),
+                new WindSourceImpl(WindSourceType.WEB));
+        // produces estimated bearing of 170deg; result should be averaged between 107 (estimation) and 180 (web) deg
+        setBearingForCompetitor(competitors.get(0), now, 305);
+        setBearingForCompetitor(competitors.get(1), now, 35);
+        WindWithConfidence<Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeOne = getTrackedRace()
+                .getWindWithConfidence(/* position */null, now);
+        final double combinedDegreesMinClusterSizeOne = combinedWindDirectionMinClusterSizeOne.getObject().getBearing().getDegrees();
+        assertTrue(combinedDegreesMinClusterSizeOne > 170 && combinedDegreesMinClusterSizeOne < 180);
+        // now produce a minimum cluster size of 2, raising the estimation's confidence
+        setBearingForCompetitor(competitors.get(2), now, 305);
+        setBearingForCompetitor(competitors.get(3), now, 35);
+        WindWithConfidence<Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeTwo = getTrackedRace()
+                .getWindWithConfidence(/* position */null, now);
+        final double combinedDegreesNow = combinedWindDirectionMinClusterSizeTwo.getObject().getBearing().getDegrees();
+        assertTrue(combinedDegreesNow > 170 && combinedDegreesNow < 180);
+        // we expect the combined direction now to be closer to the estimation as compared to before because the estimation is more confident
+        // since the minimum cluster size is 2 instead of 1
+        assertTrue(combinedDegreesNow < combinedDegreesMinClusterSizeOne);
+    }
+
     @Test
     public void testCombinedWindTrack() throws NoWindException {
         initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
