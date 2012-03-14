@@ -132,6 +132,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                     if (ignoreClickOnce) {
                         ignoreClickOnce = false;
                     } else {
+                        WindChart.this.timer.setPlayMode(PlayModes.Replay);
                         WindChart.this.timer.setTime(chartClickEvent.getXAxisValueAsLong());
                     }
                     return true;
