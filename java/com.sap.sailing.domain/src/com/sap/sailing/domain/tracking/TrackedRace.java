@@ -319,7 +319,17 @@ public interface TrackedRace {
 
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
     
+    /**
+     * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
+     * {@link #getWindSourcesToExclude}.
+     */
     WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at);
+    
+    /**
+     * Lists those wind sources which by default are not considered in {@link #getWind(Position, TimePoint)} and
+     * {@link #getWindWithConfidence(Position, TimePoint)}.
+     */
+    Iterable<WindSource> getWindSourcesToExclude();
 
     /**
      * Loops over this tracked race's wind sources and from each asks its averaged wind for the position <code>p</code>
@@ -335,4 +345,9 @@ public interface TrackedRace {
      * estimation, relative to the <code>timePoint</code> for which the request is made, in the result.
      */
     WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint);
+
+    /**
+     * After the call returns, {@link #getWindSourcesToExclude()} returns an iterable that equals <code>windSourcesToExclude</code>
+     */
+    void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude);
 }

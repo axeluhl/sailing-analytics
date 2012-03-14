@@ -170,4 +170,6 @@ public interface SailingService extends RemoteService {
             throws NoWindException;
 
     void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
+
+    void setWindSourcesToExclude(RaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
 }

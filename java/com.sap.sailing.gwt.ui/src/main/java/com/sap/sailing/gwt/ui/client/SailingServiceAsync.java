@@ -306,4 +306,7 @@ public interface SailingServiceAsync {
     void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
             AsyncCallback<Void> callback);
 
+    void setWindSourcesToExclude(RaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude,
+            AsyncCallback<Void> callback);
+
 }

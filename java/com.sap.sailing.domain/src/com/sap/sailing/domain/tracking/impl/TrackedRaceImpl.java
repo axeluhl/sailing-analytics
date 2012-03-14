@@ -90,6 +90,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private final RaceDefinition race;
 
     private final TrackedEvent trackedEvent;
+    
+    /**
+     * By default, all wind sources are used, none are excluded. However, e.g., for performance reasons, particular wind sources
+     * such as the track-based estimation wind source, may be excluded by adding them to this set.
+     */
+    private final Set<WindSource> windSourcesToExclude;
 
     /**
      * Keeps the oldest timestamp that is fed into this tracked race, either from a boat fix, a buoy fix, a race
@@ -153,6 +159,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.updateCount = 0;
         this.race = race;
         this.windStore = windStore;
+        this.windSourcesToExclude = new HashSet<WindSource>();
         this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Wind>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
@@ -549,8 +556,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getWind(Position p, TimePoint at) {
-        List<WindSource> emptyWindSourcesList = Collections.emptyList();
-        return getWind(p, at, emptyWindSourcesList);
+        return getWind(p, at, getWindSourcesToExclude());
     }
 
     @Override
@@ -561,8 +567,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
-        Set<WindSource> emptyWindSourceSet = Collections.emptySet();
-        return getWindWithConfidence(p, at, emptyWindSourceSet);
+        return getWindWithConfidence(p, at, getWindSourcesToExclude());
+    }
+    
+    @Override
+    public Iterable<WindSource> getWindSourcesToExclude() {
+        return Collections.unmodifiableCollection(windSourcesToExclude);
+    }
+    
+    @Override
+    public void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude) {
+        this.windSourcesToExclude.clear();
+        for (WindSource windSourceToExclude : windSourcesToExclude) {
+            this.windSourcesToExclude.add(windSourceToExclude);
+        }
     }
 
     @Override
