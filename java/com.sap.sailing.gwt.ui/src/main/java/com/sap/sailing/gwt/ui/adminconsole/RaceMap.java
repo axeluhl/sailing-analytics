@@ -716,9 +716,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             public void onMouseOver(MarkerMouseOverEvent event) {
                 WindDTO windForMarker = windForMarkers.get(windSensorMarker);
                 if (windForMarker != null) {
-                    String title = stringMessages.wind() + " ("
-                            + WindSourceTypeFormatter.format(windSource, stringMessages) + "): "
-                            + Math.round(windForMarker.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort();
+                    String title = stringMessages.wind() + " "
+                            + Math.round(windForMarker.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ " ("
+                                    + WindSourceTypeFormatter.format(windSource, stringMessages) + ")";
                     map.setTitle(title);
                 }
             }

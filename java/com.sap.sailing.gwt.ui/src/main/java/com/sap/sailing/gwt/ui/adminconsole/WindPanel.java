@@ -153,7 +153,6 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         grid.setWidget(0, 1, windSettingPanel);
         HorizontalPanel windSourceSelectionPanel = new HorizontalPanel();
         windSourceSelectionPanel.setSpacing(10);
-        windSourceSelectionPanel.add(new Label(stringMessages.windSource()));
         windSourceSelectionPanel.add(windSourcesToExcludeSelector);
         raceIsKnownToStartUpwindBox = new CheckBox(stringMessages.raceIsKnownToStartUpwind());
         windSourceSelectionPanel.add(raceIsKnownToStartUpwindBox);
@@ -180,6 +179,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         grid.setWidget(1, 0, windSourceSelectionPanel);
         windChart = new WindChart(sailingService, /* race selection provider */raceSelectionProvider, new Timer(
                 PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, errorReporter, false, false);
+        windChart.onResize();
         grid.setWidget(2, 0, windChart.getEntryWidget());
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);
@@ -203,6 +203,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         sailingService.getWindInfo(raceIdentifier,
         // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
                 null, null, // use race start and time of newest event as default time period
+                WindChart.DEFAULT_RESOLUTION_IN_MILLISECONDS,
                 null, // retrieve data on all wind sources
                 new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override
@@ -240,6 +241,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         VerticalPanel windDisplay = new VerticalPanel();
         grid.setWidget(3, 0, windDisplay);
         windChart.updateStripChartSeries(result, /* append */ false);
+        windChart.onResize();
         // restrict tabular display to WEB sources; there, the REMOVE button is relevant; for all others, the chart has to do
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
             if (e.getKey().getType() == WindSourceType.WEB) {
