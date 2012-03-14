@@ -112,30 +112,27 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
      */
     @Test
     public void testWindEstimationPreferringLargerClusters() throws NoWindException {
-        initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
+        initRace(4, new int[] { 1, 1, 1, 1 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
         MillisecondsTimePoint now = new MillisecondsTimePoint(new GregorianCalendar(2012, 03, 14).getTime());
-        MillisecondsTimePoint past = new MillisecondsTimePoint(now.asMillis()-100000l);
-        getTrackedRace().recordWind(new WindImpl(null, past, new KnotSpeedWithBearingImpl(/* speedInKnots */ 12, new DegreeBearingImpl(180.))),
-                new WindSourceImpl(WindSourceType.WEB));
-        // produces estimated bearing of 170deg; result should be averaged between 107 (estimation) and 180 (web) deg
-        setBearingForCompetitor(competitors.get(0), past, 305);
-        setBearingForCompetitor(competitors.get(1), past, 35);
-        WindWithConfidence<Pair<Position, TimePoint>> combinedWindDirectionPast = getTrackedRace().getWindWithConfidence(/* position */ null, past);
-        final double combinedDegreesPast = combinedWindDirectionPast.getObject().getBearing().getDegrees();
-        assertTrue(combinedDegreesPast > 170 && combinedDegreesPast < 180);
         getTrackedRace().recordWind(new WindImpl(null, now, new KnotSpeedWithBearingImpl(/* speedInKnots */ 12, new DegreeBearingImpl(180.))),
                 new WindSourceImpl(WindSourceType.WEB));
-        // now produce a minimum cluster size of 2, raising the estimation's confidence
+        // produces estimated bearing of 170deg; result should be averaged between 107 (estimation) and 180 (web) deg
         setBearingForCompetitor(competitors.get(0), now, 305);
         setBearingForCompetitor(competitors.get(1), now, 35);
+        WindWithConfidence<Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeOne = getTrackedRace()
+                .getWindWithConfidence(/* position */null, now);
+        final double combinedDegreesMinClusterSizeOne = combinedWindDirectionMinClusterSizeOne.getObject().getBearing().getDegrees();
+        assertTrue(combinedDegreesMinClusterSizeOne > 170 && combinedDegreesMinClusterSizeOne < 180);
+        // now produce a minimum cluster size of 2, raising the estimation's confidence
         setBearingForCompetitor(competitors.get(2), now, 305);
         setBearingForCompetitor(competitors.get(3), now, 35);
-        WindWithConfidence<Pair<Position, TimePoint>> combinedWindDirectionNow = getTrackedRace().getWindWithConfidence(/* position */ null, now);
-        final double combinedDegreesNow = combinedWindDirectionNow.getObject().getBearing().getDegrees();
+        WindWithConfidence<Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeTwo = getTrackedRace()
+                .getWindWithConfidence(/* position */null, now);
+        final double combinedDegreesNow = combinedWindDirectionMinClusterSizeTwo.getObject().getBearing().getDegrees();
         assertTrue(combinedDegreesNow > 170 && combinedDegreesNow < 180);
         // we expect the combined direction now to be closer to the estimation as compared to before because the estimation is more confident
         // since the minimum cluster size is 2 instead of 1
-        assertTrue(combinedDegreesNow < combinedDegreesPast);
+        assertTrue(combinedDegreesNow < combinedDegreesMinClusterSizeOne);
     }
 
     @Test

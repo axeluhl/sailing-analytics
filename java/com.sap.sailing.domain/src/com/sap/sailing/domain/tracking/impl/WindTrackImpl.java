@@ -187,7 +187,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         }
         do {
             if (beforeWind != null && (beforeDistanceToAt <= afterDistanceToAt || afterWind == null)) {
-                windFixesToAverage.add(new WindWithConfidenceImpl<Pair<Position, TimePoint>>(beforeWind, getBaseConfidence(), relativeTo, useSpeed));
+                windFixesToAverage.add(new WindWithConfidenceImpl<Pair<Position, TimePoint>>(beforeWind, getBaseConfidence(),
+                        new Pair<Position, TimePoint>(beforeWind.getPosition(), beforeWind.getTimePoint()), useSpeed));
                 if (beforeIntervalEnd == null) {
                     beforeIntervalEnd = beforeWind.getTimePoint();
                 }
@@ -199,7 +200,8 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     beforeWind = null;
                 }
             } else if (afterWind != null) {
-                windFixesToAverage.add(new WindWithConfidenceImpl<Pair<Position, TimePoint>>(afterWind, getBaseConfidence(), relativeTo, useSpeed));
+                windFixesToAverage.add(new WindWithConfidenceImpl<Pair<Position, TimePoint>>(afterWind, getBaseConfidence(),
+                        new Pair<Position, TimePoint>(afterWind.getPosition(), afterWind.getTimePoint()), useSpeed));
                 if (afterIntervalStart == null) {
                     afterIntervalStart = afterWind.getTimePoint();
                 }
