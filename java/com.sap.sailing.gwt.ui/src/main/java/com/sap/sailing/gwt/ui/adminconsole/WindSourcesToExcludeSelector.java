@@ -9,8 +9,8 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
  * 
  * @author Axel Uhl (d043530)
  */
-public class WindSourcesToExcludeSelector extends FlowPanel {
+public class WindSourcesToExcludeSelector extends VerticalPanel {
     private final LinkedHashMap<WindSource, CheckBox> checkboxesByWindSource;
     private final StringMessages stringMessages;
     private final SailingServiceAsync service;
