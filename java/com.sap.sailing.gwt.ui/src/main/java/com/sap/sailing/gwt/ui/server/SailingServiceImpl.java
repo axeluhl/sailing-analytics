@@ -1468,12 +1468,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             ArrayList<Triple<String, Date, Double>> markPassingsData = new ArrayList<Triple<String, Date, Double>>();
             ArrayList<Pair<Date, Double>> raceData = new ArrayList<Pair<Date, Double>>();
             // Filling the mark passings
-            for (MarkPassing markPassing : race.getMarkPassings(competitor)) {
-                MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
-                markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
-                        .asDate(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
+            Set<MarkPassing> competitorMarkPassings = race.getMarkPassings(competitor);
+            if (competitorMarkPassings != null) {
+                for (MarkPassing markPassing : race.getMarkPassings(competitor)) {
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
+                    markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
+                            .asDate(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
+                }
             }
-            // Filling the race data
             for (long i = competitorQuery.getA().before(startTime.asDate()) ? startTime.asMillis() : competitorQuery.getA()
                     .getTime(); i <= endTime.asMillis(); i += stepSize) {
                 MillisecondsTimePoint time = new MillisecondsTimePoint(i);
