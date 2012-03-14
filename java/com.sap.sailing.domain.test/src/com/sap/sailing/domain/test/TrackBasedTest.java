@@ -46,6 +46,8 @@ public abstract class TrackBasedTest {
     /**
      * Creates a simple two-lap upwind-downwind course for a race/event with given name and boat class name with the
      * competitors specified. The marks are laid out such that the upwind/downwind leg detection should be alright.
+     * Wind is coming from the north. A single wind fix with bearing 180deg (from=0deg) is added to the {@link WindSourceType#WEB}
+     * wind track using <code>timePointForFixes</code> as time point.
      * 
      * @param timePointForFixes
      *            a wind fix will be inserted into the {@link WindSourceType#WEB} wind track which is aligned with the
