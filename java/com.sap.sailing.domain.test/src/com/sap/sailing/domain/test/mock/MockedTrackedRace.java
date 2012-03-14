@@ -495,4 +495,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public Iterable<WindSource> getWindSourcesToExclude() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
