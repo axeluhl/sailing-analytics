@@ -1,18 +1,24 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.AbstractTimePoint;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.confidence.ConfidenceFactory;
+import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -53,9 +59,15 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * 
  */
 public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl implements RaceChangeListener {
-    private final VirtualWindFixesAsNavigableSet virtualInternalRawFixes;
+    private static final SpeedWithBearing defaultSpeedWithBearing = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
+
+    private final EstimatedWindFixesAsNavigableSet virtualInternalRawFixes;
 
     private final NavigableSet<TimePoint> timePointsWithCachedNullResult;
+    
+    private final NavigableSet<WindWithConfidence<TimePoint>> cache;
+    
+    private final Weigher<TimePoint> weigher;
     
     /**
      * A copy of the {@link #timePointsWithCachedNullResult} contents offering fast contains checks.
@@ -65,7 +77,14 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     public TrackBasedEstimationWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence) {
         super(trackedRace, millisecondsOverWhichToAverage, baseConfidence,
                 WindSourceType.TRACK_BASED_ESTIMATION.useSpeed());
+        cache = new ArrayListNavigableSet<WindWithConfidence<TimePoint>>(new Comparator<WindWithConfidence<TimePoint>>() {
+            @Override
+            public int compare(WindWithConfidence<TimePoint> o1, WindWithConfidence<TimePoint> o2) {
+                return o1.getObject().getTimePoint().compareTo(o2.getObject().getTimePoint());
+            }
+        });
         virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
+        weigher = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind());
         trackedRace.addListener(this);
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(AbstractTimePoint.TIMEPOINT_COMPARATOR);
         this.timePointsWithCachedNullResultFastContains = new HashSet<TimePoint>();
@@ -87,15 +106,15 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         return virtualInternalRawFixes;
     }
 
-    private NavigableSet<Wind> getCachedFixes() {
-        return super.getInternalRawFixes();
+    private NavigableSet<WindWithConfidence<TimePoint>> getCachedFixes() {
+        return cache;
     }
     
     private NavigableSet<TimePoint> getTimePointsWithCachedNullResult() {
         return timePointsWithCachedNullResult;
     }
 
-    protected synchronized void cache(TimePoint timePoint, Wind fix) {
+    protected synchronized void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
         if (fix == null) {
             getTimePointsWithCachedNullResult().add(timePoint);
             timePointsWithCachedNullResultFastContains.add(timePoint);
@@ -109,19 +128,19 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         timePointsWithCachedNullResultFastContains.add(timePoint);
     }
     
-    private synchronized void invalidateCache(Wind startOfInvalidation, TimePoint endOfInvalidation) {
-        NavigableSet<Wind> cache = getCachedFixes();
-        Iterator<Wind> iter = (startOfInvalidation == null ? cache : cache.tailSet(startOfInvalidation, /* inclusive */ true)).iterator();
+    private synchronized void invalidateCache(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
+        Iterator<WindWithConfidence<TimePoint>> iter = (startOfInvalidation == null ? getCachedFixes()
+                : getCachedFixes().tailSet(startOfInvalidation, /* inclusive */true)).iterator();
         while (iter.hasNext()) {
-            Wind next = iter.next();
-            if (endOfInvalidation == null || next.getTimePoint().compareTo(endOfInvalidation) < 0) {
+            WindWithConfidence<TimePoint> next = iter.next();
+            if (endOfInvalidation == null || next.getObject().getTimePoint().compareTo(endOfInvalidation) < 0) {
                 iter.remove();
             } else {
                 break;
             }
         }
         Iterator<TimePoint> nullIter = (startOfInvalidation == null ? getTimePointsWithCachedNullResult()
-                : getTimePointsWithCachedNullResult().tailSet(startOfInvalidation.getTimePoint(), /* inclusive */
+                : getTimePointsWithCachedNullResult().tailSet(startOfInvalidation.getObject().getTimePoint(), /* inclusive */
                 true)).iterator();
         while (nullIter.hasNext()) {
             TimePoint next = nullIter.next();
@@ -146,15 +165,14 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * {@link TrackedRace#getEstimatedWindDirection(Position, TimePoint) wind estimation algorithm} is used to compute
      * it. The result will then be added to the cache.
      */
-    protected synchronized Wind getEstimatedWindDirection(Position p, TimePoint timePoint) {
-        Wind result;
+    private synchronized WindWithConfidence<TimePoint> getEstimatedWindDirection(Position p, TimePoint timePoint) {
+        WindWithConfidence<TimePoint> result;
         if (nullResultCacheContains(timePoint)) {
             result = null;
         } else {
-            NavigableSet<Wind> cache = getCachedFixes();
-            Wind cachedFix = cache.floor(getDummyFix(timePoint));
-            if (cachedFix == null || !cachedFix.getTimePoint().equals(timePoint)) {
-                result = getTrackedRace().getEstimatedWindDirection(p, timePoint);
+            WindWithConfidence<TimePoint> cachedFix = getCachedFixes().floor(getDummyFixWithConfidence(timePoint));
+            if (cachedFix == null || !cachedFix.getObject().getTimePoint().equals(timePoint)) {
+                result = getTrackedRace().getEstimatedWindDirectionWithConfidence(p, timePoint);
                 cache(timePoint, result);
             } else {
                 result = cachedFix;
@@ -163,48 +181,13 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         return result;
     }
 
-    private boolean nullResultCacheContains(TimePoint timePoint) {
-        return timePointsWithCachedNullResultFastContains.contains(timePoint);
+    private WindWithConfidence<TimePoint> getDummyFixWithConfidence(TimePoint timePoint) {
+        return new WindWithConfidenceImpl<TimePoint>(new WindImpl(null, timePoint, defaultSpeedWithBearing), 0,
+                timePoint, /* useSpeed */false);
     }
 
-    /**
-     * This redefinition avoids very long searches in case <code>at</code> is before the race start or after the race's
-     * newest event. Should <code>at</code> be out of this range, it is set to the closest border of this range before
-     * calling the base class's implementation. If either race start or time of newest event are not known, the known
-     * time point is used instead. If both time points are not known, <code>null</code> is returned immediately.
-     */
-    @Override
-    public Wind getAveragedWind(Position p, TimePoint at) {
-        Wind result = null;
-        TimePoint adjustedAt;
-        TimePoint raceStartTimePoint = getTrackedRace().getStart();
-        TimePoint timePointOfNewestEvent = getTrackedRace().getTimePointOfNewestEvent();
-        if (raceStartTimePoint != null) {
-            if (timePointOfNewestEvent != null) {
-                if (at.compareTo(raceStartTimePoint) < 0) {
-                    adjustedAt = raceStartTimePoint;
-                } else if (at.compareTo(timePointOfNewestEvent) > 0) {
-                    adjustedAt = timePointOfNewestEvent;
-                } else {
-                    adjustedAt = at;
-                }
-            } else {
-                adjustedAt = raceStartTimePoint;
-            }
-        } else {
-            if (timePointOfNewestEvent != null) {
-                adjustedAt = timePointOfNewestEvent;
-            } else {
-                adjustedAt = null;
-            }
-        }
-        if (adjustedAt != null) {
-            // we can use the unsynchronized version here because our getInternalFixes() method operates
-            // only on a virtual sequence of wind fixes where no concurrency issues have to be observed
-            final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getAveragedWindUnsynchronized(p, adjustedAt);
-            result = estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
-        }
-        return result;
+    private boolean nullResultCacheContains(TimePoint timePoint) {
+        return timePointsWithCachedNullResultFastContains.contains(timePoint);
     }
 
     @Override
@@ -214,8 +197,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
 
     private void invalidateForNewWind(Wind wind) {
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
-        Wind startOfInvalidation = getDummyFix(new MillisecondsTimePoint(wind.getTimePoint().asMillis()-averagingInterval));
-        TimePoint endOfInvalidation = new MillisecondsTimePoint(wind.getTimePoint().asMillis()+averagingInterval);
+        WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(wind
+                .getTimePoint().asMillis() - averagingInterval));
+        TimePoint endOfInvalidation = new MillisecondsTimePoint(wind.getTimePoint().asMillis() + averagingInterval);
         invalidateCache(startOfInvalidation, endOfInvalidation);
     }
 
@@ -232,23 +216,24 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     @Override
     public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
-        Wind startOfInvalidation = getDummyFix(new MillisecondsTimePoint(fix.getTimePoint().asMillis()-averagingInterval));
-        TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis()+averagingInterval);
+        WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(fix
+                .getTimePoint().asMillis() - averagingInterval));
+        TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis() + averagingInterval);
         invalidateCache(startOfInvalidation, endOfInvalidation);
     }
 
     @Override
     public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
-        Wind startOfInvalidation;
+        WindWithConfidence<TimePoint> startOfInvalidation;
         TimePoint endOfInvalidation;
         if (oldMarkPassing == null) {
-            startOfInvalidation = getDummyFix(new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()-averagingInterval));
+            startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()-averagingInterval));
             endOfInvalidation = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()+averagingInterval);
         } else {
             TimePoint[] interval = new TimePoint[] { oldMarkPassing.getTimePoint(), markPassing.getTimePoint() };
             Arrays.sort(interval);
-            startOfInvalidation = getDummyFix(new MillisecondsTimePoint(interval[0].asMillis()-averagingInterval));
+            startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(interval[0].asMillis()-averagingInterval));
             endOfInvalidation = new MillisecondsTimePoint(interval[1].asMillis()+averagingInterval);
         }
         invalidateCache(startOfInvalidation, endOfInvalidation);
@@ -264,11 +249,40 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         // A buoy position change can mean a leg type change. The interval over which the wind estimation is affected
         // depends on how the GPS track computes the estimated buoy position. Ask it:
         Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(buoy).getEstimatedPositionTimePeriodAffectedBy(fix);
-        Wind startOfInvalidation = interval.getA() == null ? null : getDummyFix(interval.getA());
+        WindWithConfidence<TimePoint> startOfInvalidation = interval.getA() == null ? null : getDummyFixWithConfidence(interval.getA());
         TimePoint endOfInvalidation = interval.getB();
         invalidateCache(startOfInvalidation, endOfInvalidation);
     }
 
+    /**
+     * As opposed to the superclass implementation, this variant checks if the {@link EstimatedWindFixesAsNavigableSet#floor(Wind)}
+     * or {@link EstimatedWindFixesAsNavigableSet#ceiling(Wind)} is closer to <code>at</code> and returns the wind fix with confidence
+     * from {@link #virtualInternalRawFixes} for the resolution-compliant time point closer to <code>at</code>.<p>
+     * 
+     * The current implementation doesn't consider the position <code>p</code> for the result's confidence, even though the
+     * result type suggests it.
+     */
+    @Override
+    protected WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
+        TimePoint floorTimePoint = virtualInternalRawFixes.floorToResolution(at);
+        TimePoint timePoint;
+        if (floorTimePoint.equals(at) ||
+                Math.abs(floorTimePoint.asMillis() - at.asMillis()) <
+                Math.abs(virtualInternalRawFixes.ceilingToResolution(at).asMillis() - at.asMillis())) {
+            timePoint = floorTimePoint;
+        } else {
+            timePoint = virtualInternalRawFixes.ceilingToResolution(at);
+        }
+        WindWithConfidence<TimePoint> preResult = virtualInternalRawFixes.getWindWithConfidence(p, timePoint);
+        // reduce confidence depending on how far *at* is away from the time point of the fix obtained
+        double confidenceMultiplier = weigher.getConfidence(timePoint, at);
+        WindWithConfidenceImpl<Pair<Position, TimePoint>> result = preResult == null ? null :
+            new WindWithConfidenceImpl<Pair<Position, TimePoint>>(
+                preResult.getObject(), confidenceMultiplier * preResult.getConfidence(),
+                /* relativeTo */ new Pair<Position, TimePoint>(p, at), preResult.useSpeed());
+        return result;
+    }
+    
     /**
      * Emulates a collection of {@link Wind} fixes for a {@link TrackedRace}, computed using
      * {@link TrackedRace#getEstimatedWindDirection(com.sap.sailing.domain.base.Position, TimePoint)}. If not constrained
@@ -301,6 +315,11 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         }
 
         protected Wind getWind(Position p, TimePoint timePoint) {
+            final WindWithConfidence<TimePoint> estimatedWindDirectionWithConfidence = getWindWithConfidence(p, timePoint);
+            return estimatedWindDirectionWithConfidence == null ? null : estimatedWindDirectionWithConfidence.getObject();
+        }
+        
+        protected WindWithConfidence<TimePoint> getWindWithConfidence(Position p, TimePoint timePoint) {
             return getTrack().getEstimatedWindDirection(p, timePoint);
         }
 

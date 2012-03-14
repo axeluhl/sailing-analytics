@@ -327,4 +327,10 @@ public interface TrackedRace {
      */
     WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude);
+
+    /**
+     * Same as {@link #getEstimatedWindDirection(Position, TimePoint)}, but propagates the confidence of the wind
+     * estimation, relative to the <code>timePoint</code> for which the request is made, in the result.
+     */
+    WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint);
 }

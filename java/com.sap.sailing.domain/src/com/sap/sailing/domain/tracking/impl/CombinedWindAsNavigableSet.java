@@ -8,7 +8,6 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.impl.WindTrackImpl.DummyWind;
 
 /**
  * Delivers what {@link TrackedRace#getWind(Position, TimePoint)} delivers, as a navigable set.
@@ -46,7 +45,7 @@ public class CombinedWindAsNavigableSet extends VirtualWindFixesAsNavigableSet {
      */
     protected TimePoint getTo() {
         return getToInternal() == null ? getTrackedRace().getAssumedEnd() == null ? new MillisecondsTimePoint(1)
-                : ceilingToResolution(new DummyWind(getTrackedRace().getAssumedEnd())) : getToInternal();
+                : ceilingToResolution(getTrackedRace().getAssumedEnd()) : getToInternal();
     }
 
 }
