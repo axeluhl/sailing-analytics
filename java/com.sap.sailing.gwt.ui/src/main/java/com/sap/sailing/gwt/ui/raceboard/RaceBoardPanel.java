@@ -332,7 +332,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     
     /**
      * Sets the collapsable panel for the leaderboard open or close, if in <code>CASCADE</code> view mode.<br />
-     * Displays or hides the leaderboard, if in <code>ONESCREEN</code> view mode.
+     * Displays or hides the leaderboard, if in <code>ONESCREEN</code> view mode.<br /><br />
+     * 
+     * The race board should be completely rendered before this method is called, or a few exceptions could be thrown.
      * 
      * @param visible <code>true</code> if the leaderboard shall be open/visible
      */
@@ -349,7 +351,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
     /**
      * Sets the collapsable panel for the wind chart open or close, if in <code>CASCADE</code> view mode.<br />
-     * Displays or hides the wind chart, if in <code>ONESCREEN</code> view mode.
+     * Displays or hides the wind chart, if in <code>ONESCREEN</code> view mode.<br /><br />
+     * 
+     * The race board should be completely rendered before this method is called, or a few exceptions could be thrown.
      * 
      * @param visible <code>true</code> if the wind chart shall be open/visible
      */
@@ -366,7 +370,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
     /**
      * Sets the collapsable panel for the competitor chart open or close, if in <code>CASCADE</code> view mode.<br />
-     * Displays or hides the competitor chart, if in <code>ONESCREEN</code> view mode.
+     * Displays or hides the competitor chart, if in <code>ONESCREEN</code> view mode.<br /><br />
+     * 
+     * The race board should be completely rendered before this method is called, or a few exceptions could be thrown.
      * 
      * @param visible <code>true</code> if the competitor chart shall be open/visible
      */

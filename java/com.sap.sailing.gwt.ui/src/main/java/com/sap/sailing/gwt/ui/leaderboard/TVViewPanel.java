@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -53,8 +52,6 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private FlowPanel timePanel;
     private RaceIdentifier currentRace;
     private boolean raceBoardIsWidget;
-    
-    private boolean debugMode = true; //TODO delete after testing
     
     public TVViewPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             String leaderboardName, UserAgentTypes userAgentType, UserDTO userDTO, Timer timer,
@@ -111,9 +108,6 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         }
         if (providerChanged) {
             raceTimesInfoProvider.forceTimesInfosUpdate();
-            //TODO delete after testing
-            debugMode = true;
-            //
         }
     }
     
@@ -138,6 +132,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
                         namesOfRaceColumnsToShow, null, false);
                 leaderboardPanel.updateSettings(settings);
             }
+            
             setWidget(leaderboardPanel);
             if (raceBoardPanel != null) {
                 logoAndTitlePanel.remove(raceBoardPanel.getNavigationWidget());
@@ -207,23 +202,14 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             if (currentRace != null) {
                 raceBoardPanel = createRaceBoardPanel(leaderboard.name, currentRace);
                 showRaceBoard();
-                //TODO delete after testing
-                final RaceTimesInfoDTO currentRaceTimes = raceTimesInfo.get(currentRace);
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        timer.setTime(currentRaceTimes.getStartOfRace().getTime());
-                        debugMode = false;
-                    }
-                });
-                //
             } else {
                 showLeaderboard();
             }
         } else {
             RaceTimesInfoDTO currentRaceTimes = raceTimesInfo.get(currentRace);
             //TODO add check for live mode
-            if (currentRaceTimes.endOfRace != null && timer.getTime().after(currentRaceTimes.endOfRace)) {
+            if (currentRaceTimes.endOfRace != null && timer.getTime().after(currentRaceTimes.endOfRace)
+                    && timer.getPlayMode() == PlayModes.Live) {
                 showLeaderboard();
             }
         }
@@ -236,9 +222,9 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             RaceIdentifier raceIdentifier = race.getRaceIdentifier();
             RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
             if (raceIdentifier != null && raceTimes != null && raceTimes.startOfTracking != null
-                    /*&& raceTimes.endOfRace == null*/ && debugMode ) { //TODO reset after testing
+                    && raceTimes.endOfRace == null) {
                 firstStartedAndUnfinishedRace = raceIdentifier;
-//                break; TODO enable after testing
+                break;
             }
         }
         return firstStartedAndUnfinishedRace;
