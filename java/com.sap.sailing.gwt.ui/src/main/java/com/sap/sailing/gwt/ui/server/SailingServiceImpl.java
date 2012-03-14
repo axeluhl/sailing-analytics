@@ -540,7 +540,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            result.windSourcesToExclude = trackedRace.getWindSourcesToExclude();
+            List<WindSource> windSourcesToExclude = new ArrayList<WindSource>();
+            for (WindSource windSourceToExclude : trackedRace.getWindSourcesToExclude()) {
+                windSourcesToExclude.add(windSourceToExclude);
+            }
+            result.windSourcesToExclude = windSourcesToExclude;
             TimePoint from = fromDate == null ? trackedRace.getStart() : new MillisecondsTimePoint(fromDate);
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             TimePoint to = (toDate == null || toDate.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(toDate);
@@ -637,7 +641,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            result.windSourcesToExclude = trackedRace.getWindSourcesToExclude();
+            List<WindSource> windSourcesToExclude = new ArrayList<WindSource>();
+            for (WindSource windSourceToExclude : trackedRace.getWindSourcesToExclude()) {
+                windSourcesToExclude.add(windSourceToExclude);
+            }
+            result.windSourcesToExclude = windSourcesToExclude;
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
@@ -686,7 +694,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             result = new WindInfoForRaceDTO();
             result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
-            result.windSourcesToExclude = trackedRace.getWindSourcesToExclude();
+            List<WindSource> windSourcesToExclude = new ArrayList<WindSource>();
+            for (WindSource windSourceToExclude : trackedRace.getWindSourcesToExclude()) {
+                windSourcesToExclude.add(windSourceToExclude);
+            }
+            result.windSourcesToExclude = windSourcesToExclude;
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
             List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
