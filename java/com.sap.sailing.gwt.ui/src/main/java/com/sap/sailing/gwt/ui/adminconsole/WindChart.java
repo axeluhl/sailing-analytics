@@ -54,7 +54,7 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class WindChart extends SimplePanel implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener, RequiresResize {
-    public static final long DEFAULT_RESOLUTION_IN_MILLISECONDS = 5000;
+    public static final long DEFAULT_RESOLUTION_IN_MILLISECONDS = 10000;
 
     private static final int LINE_WIDTH = 1;
     private final StringMessages stringMessages;
