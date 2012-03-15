@@ -157,6 +157,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     }
     
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
+        // create the breadcrumb navigation
+        breadcrumbPanel = createBreadcrumbPanel(leaderboardGroupName);
+        
         componentsNavigationPanel = new FlowPanel();
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
