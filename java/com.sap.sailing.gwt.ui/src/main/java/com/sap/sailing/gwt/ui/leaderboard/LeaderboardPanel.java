@@ -295,7 +295,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             expandableSortableColumn.toggleExpansion();
         }
         if (newSettings.getNameOfRaceToSort() != null) {
-            sort(getRaceColumnByRaceName(newSettings.getNameOfRaceToSort()), /* ascending */ true);
+            final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(newSettings.getNameOfRaceToSort());
+            if (raceColumnByRaceName != null) {
+                sort(raceColumnByRaceName, /* ascending */ true);
+            }
         }
     }
 
