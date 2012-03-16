@@ -741,8 +741,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 fromTimePoint = new MillisecondsTimePoint(from);
             }
             TimePoint toTimePoint;
-            if (to == null || to.getTime() > trackedRace.getAssumedEnd().asMillis()) {
-                toTimePoint = trackedRace.getAssumedEnd();
+            TimePoint assumedEnd = trackedRace.getAssumedEnd();
+            if (to == null || (assumedEnd != null && to.getTime() > assumedEnd.asMillis())) {
+                toTimePoint = assumedEnd;
             } else {
                 toTimePoint = new MillisecondsTimePoint(to);
             }
