@@ -169,3 +169,14 @@ body, table td, select, button {
     color: #7c7c7c;
 	background: url(images/important-message.png) left center no-repeat;	
 }
+
+.LeaderboardHeader {
+	position: relative;
+	margin: 0 auto;
+	width: 400px;
+	text-align: center;
+	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
+	font-size: 18px;
+	color: #fff;
+	margin-top: 22px;
+}

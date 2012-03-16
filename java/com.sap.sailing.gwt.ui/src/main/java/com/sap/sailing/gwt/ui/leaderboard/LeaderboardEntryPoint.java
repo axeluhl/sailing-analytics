@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -46,7 +47,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     }
     
     private void createUI() {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(leaderboardName, stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
@@ -66,10 +67,12 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                     leaderboardName, leaderboardGroupName,
                     LeaderboardEntryPoint.this, stringMessages, userAgentType);
+            ScrollPanel leaderboardScrollPanel = new ScrollPanel(leaderboardPanel);
+            
             BreadcrumbPanel breadcrumbPanel = createBreadcrumbPanel();
             
             mainPanel.addNorth(breadcrumbPanel, 30);
-            mainPanel.add(leaderboardPanel);
+            mainPanel.add(leaderboardScrollPanel);
         }
     }
     

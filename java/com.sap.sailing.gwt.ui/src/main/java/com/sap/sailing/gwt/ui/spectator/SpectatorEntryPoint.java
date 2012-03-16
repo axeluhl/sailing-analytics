@@ -43,7 +43,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         }
         RootPanel rootPanel = RootPanel.get();
         
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("", stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         rootPanel.add(logoAndTitlePanel);
         
