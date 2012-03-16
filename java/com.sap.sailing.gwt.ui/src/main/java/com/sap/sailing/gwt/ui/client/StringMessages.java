@@ -275,4 +275,5 @@ public interface StringMessages extends Messages {
     String position();
     String windSourcesUsed();
     String errorTryingToUpdateWindSourcesToExclude(String raceName, String message);
+    String feedback();
 }

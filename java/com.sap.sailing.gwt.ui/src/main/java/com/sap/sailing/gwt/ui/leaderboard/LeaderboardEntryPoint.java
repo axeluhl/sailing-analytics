@@ -47,11 +47,8 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     }
     
     private void createUI() {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(leaderboardName, stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        Label leaderboardHeaderLabel = new Label(leaderboardName);
-        leaderboardHeaderLabel.addStyleName("LeaderboardHeader");
-        logoAndTitlePanel.add(leaderboardHeaderLabel);
 
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
