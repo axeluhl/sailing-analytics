@@ -1162,6 +1162,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             do {
                 Pair<GPSFixMoving, CourseChange> currentFixAndCourseChange = iter.next();
                 if (!group.isEmpty()
+                        // TODO use different maneuver times for upwind / reaching / downwind / cross-leg (mark passing)
                         && currentFixAndCourseChange.getA().getTimePoint().asMillis()
                                 - group.get(group.size() - 1).getA().getTimePoint().asMillis() > getApproximateManeuverDurationInMilliseconds()
                         && currentFixAndCourseChange.getA().getPosition()
