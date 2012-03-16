@@ -198,8 +198,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     private Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
         if (getTrackedLeg().isUpOrDownwindLeg(at)) {
             Wind wind = getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
-            Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
-            return projectionToLineThroughPos2.getDistance(pos2);
+            if (wind == null) {
+                return pos1.getDistance(pos2);
+            } else {
+                Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
+                return projectionToLineThroughPos2.getDistance(pos2);
+            }
         } else {
             // cross leg, return true distance
             return pos1.getDistance(pos2);
@@ -371,30 +375,29 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         // time point; else, calculate the windward distance to the leader and divide by
         // the windward speed
         Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint);
-        if (windwardSpeed == null) {
-            return null;
-        } else {
-            // Has our competitor started the leg already? If not, we won't be able to compute a gap
-            if (hasStartedLeg(timePoint)) {
-                Iterable<MarkPassing> markPassingsInOrder = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
-                MarkPassing firstMarkPassing = null;
-                synchronized (markPassingsInOrder) {
-                    Iterator<MarkPassing> markPassingsForLegEnd = markPassingsInOrder.iterator();
-                    if (markPassingsForLegEnd.hasNext()) {
-                        firstMarkPassing = markPassingsForLegEnd.next();
-                    }
+        // Has our competitor started the leg already? If not, we won't be able to compute a gap
+        if (hasStartedLeg(timePoint)) {
+            Iterable<MarkPassing> markPassingsInOrder = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
+            MarkPassing firstMarkPassing = null;
+            synchronized (markPassingsInOrder) {
+                Iterator<MarkPassing> markPassingsForLegEnd = markPassingsInOrder.iterator();
+                if (markPassingsForLegEnd.hasNext()) {
+                    firstMarkPassing = markPassingsForLegEnd.next();
                 }
-                if (firstMarkPassing != null) {
-                    // someone has already finished the leg
-                    TimePoint whenLeaderFinishedLeg = firstMarkPassing.getTimePoint();
-                    // Was it before the requested timePoint?
-                    if (whenLeaderFinishedLeg.compareTo(timePoint) <= 0) {
-                        // Has our competitor also already finished this leg?
-                        if (hasFinishedLeg(timePoint)) {
-                            // Yes, so the gap is the time period between the time points at which the leader and
-                            // our competitor finished this leg.
-                            return (getMarkPassingForLegEnd().getTimePoint().asMillis() - whenLeaderFinishedLeg
-                                    .asMillis()) / 1000.;
+            }
+            if (firstMarkPassing != null) {
+                // someone has already finished the leg
+                TimePoint whenLeaderFinishedLeg = firstMarkPassing.getTimePoint();
+                // Was it before the requested timePoint?
+                if (whenLeaderFinishedLeg.compareTo(timePoint) <= 0) {
+                    // Has our competitor also already finished this leg?
+                    if (hasFinishedLeg(timePoint)) {
+                        // Yes, so the gap is the time period between the time points at which the leader and
+                        // our competitor finished this leg.
+                        return (getMarkPassingForLegEnd().getTimePoint().asMillis() - whenLeaderFinishedLeg.asMillis()) / 1000.;
+                    } else {
+                        if (windwardSpeed == null) {
+                            return null;
                         } else {
                             // leader has finished already; our competitor hasn't
                             Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
@@ -405,11 +408,15 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         }
                     }
                 }
-                // no-one has finished this leg yet at timePoint
-                Competitor leader = getTrackedLeg().getLeader(timePoint);
-                // Maybe our competitor is the leader. Check:
-                if (leader == getCompetitor()) {
-                    return 0.0; // the leader's gap to the leader
+            }
+            // no-one has finished this leg yet at timePoint
+            Competitor leader = getTrackedLeg().getLeader(timePoint);
+            // Maybe our competitor is the leader. Check:
+            if (leader == getCompetitor()) {
+                return 0.0; // the leader's gap to the leader
+            } else {
+                if (windwardSpeed == null) {
+                    return null;
                 } else {
                     // no, we're not the leader, so compute our windward distance and divide by our current VMG
                     Position ourEstimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(
@@ -424,11 +431,11 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
                     }
                 }
-            } else {
-                // our competitor hasn't started the leg yet, so we can't compute a gap since we don't
-                // have a speed estimate
-                return null;
             }
+        } else {
+            // our competitor hasn't started the leg yet, so we can't compute a gap since we don't
+            // have a speed estimate
+            return null;
         }
     }
 
