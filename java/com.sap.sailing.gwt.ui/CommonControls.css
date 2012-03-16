@@ -126,8 +126,8 @@
 	width: 12px;
 }
 
-.gwt-ToggleButton-up-hovering {
-	background: url(images/btn-cta-orangeleft.png) center bottom repeat-x;
+.gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
+	background: url(images/btn-cta-orangeleft-down.png) center top repeat-x;
 	color: #fff;
 }
 
