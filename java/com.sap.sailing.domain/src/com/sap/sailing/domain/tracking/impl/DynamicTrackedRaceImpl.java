@@ -43,14 +43,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     private boolean raceIsKnownToStartUpwind;
     
-    /**
-     * {@link #raceIsKnownToStartUpwind} (see also {@link #raceIsKnownToStartUpwind()}) is initialized based on the <code>race</code>'s
-     * {@link RaceDefinition#getBoatClass()} boat class's {@link BoatClass#typicallyStartsUpwind()} result. It can be changed
-     * using {@link #setRaceIsKnownToStartUpwind(boolean)}.
-     */
     public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
-            WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+            WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            long delayForCacheInvalidationOfWindEstimation) {
+        super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                delayForCacheInvalidationOfWindEstimation);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
@@ -60,6 +57,18 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (WindSource windSource : getWindSources()) {
             getOrCreateWindTrack(windSource).addListener(this);
         }
+    }
+    /**
+     * {@link #raceIsKnownToStartUpwind} (see also {@link #raceIsKnownToStartUpwind()}) is initialized based on the <code>race</code>'s
+     * {@link RaceDefinition#getBoatClass()} boat class's {@link BoatClass#typicallyStartsUpwind()} result. It can be changed
+     * using {@link #setRaceIsKnownToStartUpwind(boolean)}. Uses <code>millisecondsOverWhichToAverageWind/2</code> for the
+     * <code>delayForCacheInvalidationOfWindEstimation</code> argument of the constructor.
+     */
+    public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
+            WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+        this(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                millisecondsOverWhichToAverageWind/2);
     }
 
     @Override

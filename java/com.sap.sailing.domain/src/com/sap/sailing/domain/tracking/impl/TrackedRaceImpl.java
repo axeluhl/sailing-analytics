@@ -155,6 +155,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+        this(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                /* delay for wind estimation cache invalidation */ millisecondsOverWhichToAverageWind/2);
+    }
+    
+    public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            long delayForWindEstimationCacheInvalidation) {
         super();
         this.updateCount = 0;
         this.race = race;
@@ -205,10 +212,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         // for them.
         WindSource courseBasedWindSource = new WindSourceImpl(WindSourceType.COURSE_BASED);
         windTracks.put(courseBasedWindSource,
-                windStore.getWindTrack(trackedEvent, this, courseBasedWindSource, millisecondsOverWhichToAverageWind));
+                windStore.getWindTrack(trackedEvent, this, courseBasedWindSource, millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation));
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
         windTracks.put(trackBasedWindSource,
-                windStore.getWindTrack(trackedEvent, this, trackBasedWindSource, millisecondsOverWhichToAverageWind));
+                windStore.getWindTrack(trackedEvent, this, trackBasedWindSource, millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation));
         this.trackedEvent = trackedEvent;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
     }
@@ -551,7 +558,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * no other wind source exists yet.
      */
     protected WindTrack createWindTrack(WindSource windSource) {
-        return windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind);
+        return windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind, getMillisecondsOverWhichToAverageWind()/2);
     }
 
     @Override

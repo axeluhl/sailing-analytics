@@ -256,12 +256,16 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
 
     private void startSchedulerForInvalidation() {
         synchronized (scheduledInvalidationInterval) {
-            cacheInvalidationTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    invalidateCache();
-                }
-            }, delayForCacheInvalidationInMilliseconds);
+            if (delayForCacheInvalidationInMilliseconds == 0) {
+                invalidateCache();
+            } else {
+                cacheInvalidationTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        invalidateCache();
+                    }
+                }, delayForCacheInvalidationInMilliseconds);
+            }
         }
         
     }

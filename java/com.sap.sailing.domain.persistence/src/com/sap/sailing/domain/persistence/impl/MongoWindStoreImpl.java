@@ -40,14 +40,14 @@ public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore
      */
     @Override
     public WindTrack getWindTrack(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
-            long millisecondsOverWhichToAverage) {
+            long millisecondsOverWhichToAverage, long delayForWindEstimationCacheInvalidation) {
         WindTrack result;
         if (windSource.canBeStored()) {
             result = domainObjectFactory.loadWindTrack(trackedEvent.getEvent(), trackedRace.getRace(), windSource,
                     millisecondsOverWhichToAverage);
             result.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, mongoObjectFactory, db));
         } else {
-            result = super.getWindTrack(trackedEvent, trackedRace, windSource, millisecondsOverWhichToAverage);
+            result = super.getWindTrack(trackedEvent, trackedRace, windSource, millisecondsOverWhichToAverage, delayForWindEstimationCacheInvalidation);
         }
         return result;
     }
