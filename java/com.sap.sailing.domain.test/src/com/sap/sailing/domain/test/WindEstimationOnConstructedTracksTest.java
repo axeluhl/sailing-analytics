@@ -169,7 +169,8 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertEquals(LegType.UPWIND, firstLeg.getLegType(new MillisecondsTimePoint(MillisecondsTimePoint.now().asMillis())));
         final Map<TimePoint, WindWithConfidence<TimePoint>> cachedFixes = new HashMap<TimePoint, WindWithConfidence<TimePoint>>();
         TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
-                getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence()) {
+                getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence(),
+                /* delay for cache invalidation in milliseconds */ 0l) {
                     @Override
                     protected void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
                         super.cache(timePoint, fix);
@@ -209,7 +210,8 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         setBearingForCompetitor(competitors.get(1), checkTime, 50);
         final Map<TimePoint, WindWithConfidence<TimePoint>> cachedFixes = new HashMap<TimePoint, WindWithConfidence<TimePoint>>();
         TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
-                getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence()) {
+                getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence(),
+                /* delay for cache invalidation in milliseconds */ 0l) {
                     @Override
                     protected void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
                         super.cache(timePoint, fix);

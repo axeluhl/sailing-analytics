@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
  */
 public abstract class ExpandableSortableColumn<C> extends SortableColumn<LeaderboardRowDTO, C> {
     private boolean enableExpansion;
+    private boolean togglingInProcess;
     private boolean suppressSortingOnce;
     private final LeaderboardPanel leaderboardPanel;
     private final Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> detailColumnsMap;
@@ -146,12 +147,14 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
     public void toggleExpansion() {
         if (isExpansionEnabled()) {
             getLeaderboardPanel().getBusyIndicator().setBusy(true);
+            setTogglingInProcess(true);
             final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
             if (isExpanded()) {
                 for (SortableColumn<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
                     getLeaderboardPanel().removeColumn(column); // removes only the children currently displayed
                 }
-                getLeaderboardPanel().getBusyIndicator().setBusy(false);  
+                getLeaderboardPanel().getBusyIndicator().setBusy(false);
+                setTogglingInProcess(false);
                 // important: toggle expanded state after asking for all visible children
                 setExpanded(!isExpanded());
             } else {
@@ -170,7 +173,8 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
                             }
                             getLeaderboardPanel().getLeaderboardTable().redraw();
                         }
-                        getLeaderboardPanel().getBusyIndicator().setBusy(false);  
+                        getLeaderboardPanel().getBusyIndicator().setBusy(false);
+                        setTogglingInProcess(false);
                     }
                 });
             }
@@ -204,6 +208,14 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
 
     public boolean isExpansionEnabled() {
         return enableExpansion;
+    }
+    
+    public boolean isTogglingInProcess() {
+        return togglingInProcess;
+    }
+    
+    private void setTogglingInProcess(boolean togglingInProcess) {
+        this.togglingInProcess = togglingInProcess;
     }
 
     public void setEnableLegDrillDown(boolean enableLegDrillDown) {

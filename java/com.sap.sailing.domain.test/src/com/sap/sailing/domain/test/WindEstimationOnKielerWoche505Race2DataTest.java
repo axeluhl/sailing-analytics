@@ -58,7 +58,8 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
         // hence have a direction change.
         TimePoint middle = new MillisecondsTimePoint(1308839492322l);
         TrackBasedEstimationWindTrackImpl estimatedWindTrack = new TrackBasedEstimationWindTrackImpl(getTrackedRace(),
-                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence());
+                WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence(),
+                /* delay for cache invalidation in milliseconds */ 0l);
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(/* position */ null, middle);
         assertNotNull(estimatedWindDirection);
         Wind estimationBasedOnTrack = estimatedWindTrack.getAveragedWind(null, middle);

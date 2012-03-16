@@ -8,7 +8,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
@@ -164,7 +163,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     }
 
     private void createRaceBoardInCascadeMode(RaceBoardPanel raceBoardPanel) {
-
         FlowPanel breadcrumbPanel = createBreadcrumbPanel();
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
@@ -231,14 +229,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(raceName, stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        
-        Label raceBoardHeader = new Label(raceName);
-        raceBoardHeader.addStyleName("RaceBoardHeader");
-        
         logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
-        logoAndTitlePanel.add(raceBoardHeader);
         
         return logoAndTitlePanel;
     }

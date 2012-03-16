@@ -21,45 +21,50 @@ public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
 
     /**
      * Construct a new {@link ActionCell}.
-     *
-     * @param message the message to display on the button
-     * @param delegate the delegate that will handle events
+     * 
+     * @param message
+     *            the message to display on the button
+     * @param delegate
+     *            the delegate that will handle events
      */
     public ExpandCollapseButtonCell(ExpandableSortableColumn<?> column, Delegate<SafeHtml> delegate) {
-      super("click", "keydown");
-      this.column = column;
-      this.delegate = delegate;
-      
-      String src = column.isExpanded() ? RESOURCES.magnifierSlashedIcon().getSafeUri().asString() : RESOURCES.magnifierIcon().getSafeUri().asString();
-      this.html = new SafeHtmlBuilder().appendHtmlConstant(
-          "<input class=\"valignMiddle magnifier\" type=\"image\" src=\"" + src + "\" />").toSafeHtml();
+        super("click", "keydown");
+        this.column = column;
+        this.delegate = delegate;
+
+        String src = column.isExpanded() ? RESOURCES.magnifierSlashedIcon().getSafeUri().asString() : RESOURCES
+                .magnifierIcon().getSafeUri().asString();
+        this.html = new SafeHtmlBuilder().appendHtmlConstant(
+                "<input class=\"valignMiddle magnifier\" type=\"image\" src=\"" + src + "\" />").toSafeHtml();
     }
 
     @Override
-    public void onBrowserEvent(Context context, Element parent, SafeHtml value,
-        NativeEvent event, ValueUpdater<SafeHtml> valueUpdater) {
-      column.suppressSortingOnce();
-      super.onBrowserEvent(context, parent, value, event, valueUpdater);
-      if ("click".equals(event.getType())) {
-        EventTarget eventTarget = event.getEventTarget();
-        if (!Element.is(eventTarget)) {
-          return;
+    public void onBrowserEvent(Context context, Element parent, SafeHtml value, NativeEvent event,
+            ValueUpdater<SafeHtml> valueUpdater) {
+        column.suppressSortingOnce();
+        super.onBrowserEvent(context, parent, value, event, valueUpdater);
+        if ("click".equals(event.getType())) {
+            EventTarget eventTarget = event.getEventTarget();
+            if (!Element.is(eventTarget)) {
+                return;
+            }
+            if (parent.getFirstChildElement().isOrHasChild(Element.as(eventTarget))) {
+                if (!column.isTogglingInProcess()) {
+                    // Ignore clicks that occur outside of the main element.
+                    onEnterKeyDown(context, parent, value, event, valueUpdater);
+                }
+            }
         }
-        if (parent.getFirstChildElement().isOrHasChild(Element.as(eventTarget))) {
-          // Ignore clicks that occur outside of the main element.
-          onEnterKeyDown(context, parent, value, event, valueUpdater);
-        }
-      }
     }
 
     @Override
     public void render(Context context, SafeHtml value, SafeHtmlBuilder sb) {
-      sb.append(html);
+        sb.append(html);
     }
 
     @Override
-    protected void onEnterKeyDown(Context context, Element parent, SafeHtml value,
-        NativeEvent event, ValueUpdater<SafeHtml> valueUpdater) {
-      delegate.execute(value);
+    protected void onEnterKeyDown(Context context, Element parent, SafeHtml value, NativeEvent event,
+            ValueUpdater<SafeHtml> valueUpdater) {
+        delegate.execute(value);
     }
 }
