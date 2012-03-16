@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
@@ -26,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
+import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
@@ -162,7 +165,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
 
     private void createRaceBoardInCascadeMode(RaceBoardPanel raceBoardPanel) {
 
-        FlowPanel raceBoardHeaderPanel = createBoardHeaderPanel(raceBoardPanel);
+        FlowPanel breadcrumbPanel = createBreadcrumbPanel();
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
@@ -173,7 +176,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         //FlowPanel footerShadowPanel = new FlowPanel();
         // footerShadowPanel.addStyleName("footerShadowPanel");
         
-        RootPanel.get().add(raceBoardHeaderPanel);        
+        RootPanel.get().add(breadcrumbPanel);        
         RootPanel.get().add(contentOuterPanel);
         
         // Don't change this order because of the inner logic in html of "position fixed"-elements
@@ -183,12 +186,31 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceBoardPanel.setScrollOffset(logoAndTitlePanel.getOffsetHeight());
     }
     
-    private FlowPanel createBoardHeaderPanel(RaceBoardPanel raceBoardPanel)
-    {
+    private FlowPanel createBreadcrumbPanel() {
         FlowPanel raceBoardHeaderPanel = new FlowPanel();
         raceBoardHeaderPanel.addStyleName("RaceBoardHeaderPanel");
-        if(raceBoardPanel.getBreadcrumbWidget() != null)
-            raceBoardHeaderPanel.add(raceBoardPanel.getBreadcrumbWidget());
+        
+        List<Pair<String, String>> links = new ArrayList<Pair<String, String>>();
+        String debugParam = Window.Location.getParameter("gwt.codesvr");
+        String root = Window.Location.getParameter("root");
+        if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
+            if (root.equals("overview")) {
+                String link = "/gwt/Spectator.html"
+                        + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
+                links.add(new Pair<String, String>(link, stringMessages.home()));
+            }
+            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName
+                    + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
+            links.add(new Pair<String, String>(link, leaderboardGroupName));
+        }
+        if (leaderboardName != null && !leaderboardName.isEmpty()) {
+            String link = "/gwt/Leaderboard.html?name=" + leaderboardName + "&leaderboardGroupName=" + leaderboardGroupName
+                    + "&root=" + root + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
+            links.add(new Pair<String, String>(link, leaderboardName));
+        }
+        BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(links, raceName);
+        raceBoardHeaderPanel.add(breadcrumbPanel);
+        
         return raceBoardHeaderPanel;
     }
 
@@ -225,12 +247,12 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
         
-        FlowPanel raceBoardHeaderPanel = createBoardHeaderPanel(raceBoardPanel);
+        FlowPanel breadcrumbPanel = createBreadcrumbPanel();
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
         p.addNorth(logoAndTitlePanel, 68);        
-        p.addNorth(raceBoardHeaderPanel,30);
+        p.addNorth(breadcrumbPanel,30);
         p.addSouth(timePanel, 122);                     
         p.add(raceBoardPanel);
     }    

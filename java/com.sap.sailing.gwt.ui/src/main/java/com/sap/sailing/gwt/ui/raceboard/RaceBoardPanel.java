@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings;
 import com.sap.sailing.gwt.ui.adminconsole.WindChart;
@@ -50,7 +49,6 @@ import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
 /**
  * A panel showing a list of components visualizing a race from the events announced by calls to {@link #fillEvents(List)}.
@@ -80,7 +78,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
     private final List<ComponentViewer> componentViewers;
     private FlowPanel componentsNavigationPanel;
-    private BreadcrumbPanel breadcrumbPanel; 
     private RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
@@ -219,10 +216,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     }
     
     private void createCascadingView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
-        // create the breadcrumb navigation
-        breadcrumbPanel = createBreadcrumbPanel(leaderboardGroupName);
-        mainPanel.add(breadcrumbPanel);
-
         boolean showLeaderboard = true;
         boolean showMap = true;
         boolean showCompetitorCharts = true;
@@ -285,18 +278,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         return new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
                 stringMessages, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN, true);
-    }
-
-    private BreadcrumbPanel createBreadcrumbPanel(String leaderboardGroupName) {
-        ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
-        String debugParam = Window.Location.getParameter("gwt.codesvr");
-
-        if(leaderboardGroupName != null) {
-            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName +
-                    (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
-            breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
-        }
-        return new BreadcrumbPanel(breadcrumbLinksData, selectedRaceIdentifier.getRaceName());
     }
 
     private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer, final Component<?> component) {
@@ -402,10 +383,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
     public Widget getNavigationWidget() {
         return componentsNavigationPanel; 
-    }
-
-    public Widget getBreadcrumbWidget() {
-        return breadcrumbPanel; 
     }
 
     public Widget getTimeWidget() {
