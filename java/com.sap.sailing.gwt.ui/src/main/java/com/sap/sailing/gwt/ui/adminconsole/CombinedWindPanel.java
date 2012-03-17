@@ -14,6 +14,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -30,6 +32,7 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
     private RaceMapResources imageResources;
     
     private final SailingServiceAsync sailingService;
+    private final AsyncActionsExecutor asyncActionsExecutor;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     
@@ -42,9 +45,10 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
     private final Image windSymbolImage;
     private final Label textLabel;
     
-    public CombinedWindPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages, Timer theTimer) {
+    public CombinedWindPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, StringMessages stringMessages, Timer theTimer) {
         this.setSize("32px", "52px");
         this.sailingService = sailingService;
+        this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.timer = theTimer;
@@ -75,18 +79,20 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
                 RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
                 if (race != null) {
                     // draw the wind into the map, get the combined wind
-                    sailingService.getWindInfo(race, date, 1000L, 1, windSourceTypeNames,
-                            new AsyncCallback<WindInfoForRaceDTO>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining wind: " + caught.getMessage());
-                                }
+                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames);
+                    getWindInfoAction.setCallback(new AsyncCallback<WindInfoForRaceDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError("Error obtaining wind: " + caught.getMessage());
+                            }
 
-                                @Override
-                                public void onSuccess(WindInfoForRaceDTO windInfoForRaceDTO) {
-                                    updateWind(windInfoForRaceDTO);
-                                }
-                            });
+                            @Override
+                            public void onSuccess(WindInfoForRaceDTO windInfoForRaceDTO) {
+                                updateWind(windInfoForRaceDTO);
+                            }
+                        });
+                    
+                    asyncActionsExecutor.execute(getWindInfoAction);
                 }
             }
         }
