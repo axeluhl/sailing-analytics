@@ -1379,4 +1379,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public Map<CompetitorDTO, Marker> getBoatMarkers() {
         return boatMarkers;
     }
+
+    @Override
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        timeChanged(timer.getTime());
+    }
 }

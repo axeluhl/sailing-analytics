@@ -354,6 +354,7 @@ input.magnifier {
 	right: 0;
 	height: 127px;
 	width: 29px;
+	margin: 10px;
 }
 
 .feedbackPanel a {
