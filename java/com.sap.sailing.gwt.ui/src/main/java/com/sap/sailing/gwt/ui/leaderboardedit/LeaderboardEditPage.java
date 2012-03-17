@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 
@@ -20,7 +21,7 @@ public class LeaderboardEditPage extends AbstractEntryPoint {
                 if (leaderboardNames.contains(leaderboardName)) {
                     LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("", stringMessages);
                     logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-                    EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, leaderboardName, null,
+                    EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
                             LeaderboardEditPage.this, stringMessages, userAgentType);
                     RootPanel.get().add(logoAndTitlePanel);
                     RootPanel.get().add(leaderboardPanel);

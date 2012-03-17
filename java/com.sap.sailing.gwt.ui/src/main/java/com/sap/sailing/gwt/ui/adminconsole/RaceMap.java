@@ -205,11 +205,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private final AsyncActionsExecutor asyncActionsExecutor;
 
-    public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer,
+    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
             CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
         this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
+        this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
         timer.addTimeListener(this);
@@ -227,7 +228,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         settings = new RaceMapSettings();
         lastTimeChangeBeforeInitialization = null;
         dataInitialized = false;
-        asyncActionsExecutor = new AsyncActionsExecutor();
         initializeData();
         
         windPanel = new CombinedWindPanel(sailingService, asyncActionsExecutor, errorReporter, stringMessages, timer);

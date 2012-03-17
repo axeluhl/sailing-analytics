@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -61,7 +62,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     userAgentType, null, timer, logoAndTitlePanel, mainPanel);
             mainPanel.add(tvViewPanel);
         } else {
-            LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService,
+            LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
                     LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* autoExpandFirstRace */ false),
                     /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
                     new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),

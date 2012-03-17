@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
@@ -71,7 +72,7 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         AbsolutePanel mapPanel = new AbsolutePanel();
         mapPanel.setSize("100%", "100%");
         grid.setWidget(2, 1, mapPanel);
-        raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionProvider, stringMessages);
+        raceMap = new RaceMap(sailingService, new AsyncActionsExecutor(), errorReporter, timer, competitorSelectionProvider, stringMessages);
         mapPanel.add(raceMap);
         raceSelectionModel = new RaceSelectionModel();
         raceListBox = new RacesListBoxPanel(eventRefresher, raceSelectionModel, stringMessages);

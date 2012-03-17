@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
@@ -58,7 +59,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         tabPanel.add(raceMapPanel, stringMessages.map(), /* asHTML */ false);
         LeaderboardSettings defaultLeaderboardSettings = LeaderboardSettingsFactory.getInstance()
                 .createNewDefaultSettings(/* racesToShow */ null, /* namesOfRacesToShow */ null, /* autoExpandFirstRace */false);
-        final LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService,
+        final LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
                 defaultLeaderboardSettings,
                 /* preSelectedRace */null, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* leaderboard group name */null, this,
