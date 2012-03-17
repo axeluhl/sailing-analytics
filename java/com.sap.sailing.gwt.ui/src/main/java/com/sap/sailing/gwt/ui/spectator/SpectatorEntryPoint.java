@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.ui.spectator;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -41,11 +44,12 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         if (root != null) {
             root = (root.equals("leaderboardGroupPanel") || root.equals("overview")) ? root : null;
         }
-        RootPanel rootPanel = RootPanel.get();
+        
+        DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+        RootLayoutPanel.get().add(mainPanel);
         
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("", stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        rootPanel.add(logoAndTitlePanel);
         
         FormPanel panelToDisplay = null;
         if (groupName == null) {
@@ -62,9 +66,19 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
                             " the leader board displays information such as in-race ranking, average speeds, distance travelled, ETA" +
                             " (estimated time of arrival at the next mark rounding), gaps to leader, gains and losses per leg.\n\n" +
                             "Check out the results for yourself to see who triumphed - and how they did it."));
-            rootPanel.add(panelToDisplay);
+            
+
+            Anchor feedbackLink = new Anchor(stringMessages.feedback(), "mailto:axel.uhl%40sap.com?subject=[SAP Sailing] Feedback");
+            feedbackLink.addStyleName("feedback");
+
+            mainPanel.addNorth(logoAndTitlePanel, 68);
+            mainPanel.addEast(feedbackLink, 70);
+            mainPanel.add(panelToDisplay);
         }
-//        rootPanel.add(panelToDisplay);
+        
+//        mainPanel.addNorth(logoAndTitlePanel, 68);
+//        mainPanel.addEast(feedbackLink, 70);
+//        mainPanel.add(panelToDisplay);
 
         fillEvents();
     }

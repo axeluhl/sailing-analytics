@@ -202,7 +202,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             links.add(new Pair<String, String>(link, leaderboardGroupName));
         }
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
-            String link = "/gwt/Leaderboard.html?name=" + leaderboardName + "&leaderboardGroupName=" + leaderboardGroupName
+            String link = "/gwt/Leaderboard.html?name=" + leaderboardName
+                    + (leaderboardGroupName != null ? "&leaderboardGroupName=" + leaderboardGroupName : "")
                     + "&root=" + root + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
             links.add(new Pair<String, String>(link, leaderboardName));
         }

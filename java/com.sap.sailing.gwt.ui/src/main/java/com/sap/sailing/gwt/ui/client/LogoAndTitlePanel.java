@@ -21,10 +21,6 @@ public class LogoAndTitlePanel extends FlowPanel {
         sailingAnalyticsLabel.addStyleName("sailingAnalyticsLabel boldLabel");
         this.add(labelPanel);
         
-        Anchor feedbackLink = new Anchor(stringConstants.feedback(), "mailto:axel.uhl%40sap.com?subject=[SAP Sailing] Feedback");
-        feedbackLink.addStyleName("feedback");
-        this.add(feedbackLink);
-        
         Label titleLabel = new Label(title);
         titleLabel.addStyleName("titleLabel");
         this.add(titleLabel);
