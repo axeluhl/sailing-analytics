@@ -738,6 +738,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint fromTimePoint;
             if (from == null) {
                 fromTimePoint = trackedRace.getStartOfTracking();
+                if (fromTimePoint == null) {
+                    fromTimePoint = new MillisecondsTimePoint(from);
+                }
             } else {
                 fromTimePoint = new MillisecondsTimePoint(from);
             }

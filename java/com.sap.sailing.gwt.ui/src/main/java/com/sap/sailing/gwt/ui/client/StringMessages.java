@@ -276,4 +276,9 @@ public interface StringMessages extends Messages {
     String windSourcesUsed();
     String errorTryingToUpdateWindSourcesToExclude(String raceName, String message);
     String feedback();
+    String startStopPlaying();
+    String backToLive();
+    String slowPlaySpeedDown();
+    String speedPlaySpeedUp();
+    String showHideComponent(String localizedShortName);
 }
