@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.spectator;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -59,6 +60,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
             Window.alert("No leaderboard group name was given.");
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root, viewModeParamValue);
+            groupPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
             groupPanel.setWelcomeWidget(new SimpleWelcomeWidget( stringMessages.welcomeToSailingAnalytics(),
                             "Understanding what happens out on the race course isn't always easy. To help solve this challenge and" +
                             " bring the excitement of sailing to the fans, we have developed a leader board based on SAP analytics.\n" +
@@ -68,9 +70,10 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
                             "Check out the results for yourself to see who triumphed - and how they did it."));
 
             SimplePanel feedbackPanel = new SimplePanel();
+            feedbackPanel.getElement().getStyle().setProperty("clear", "right");
             feedbackPanel.addStyleName("feedbackPanel");
             Anchor feedbackLink = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                    "<img class=\"linkNoBorder\" src=\"/gwt/images/sap_66_transparent.png\"/>").toSafeHtml());//TODO set image
+                    "<img class=\"linkNoBorder\" src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());//TODO set image
             feedbackLink.setHref("mailto:axel.uhl%40sap.com?subject=[SAP Sailing] Feedback");
             feedbackLink.addStyleName("feedbackLink");
             feedbackPanel.add(feedbackLink);
