@@ -1,12 +1,11 @@
 package com.sap.sailing.gwt.ui.spectator;
 
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -45,20 +44,21 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
             root = (root.equals("leaderboardGroupPanel") || root.equals("overview")) ? root : null;
         }
         
-        DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
-        RootLayoutPanel.get().add(mainPanel);
+        RootPanel rootPanel = RootPanel.get();
+        FlowPanel groupAndFeedbackPanel = new FlowPanel();
         
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("", stringMessages);
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        
-        FormPanel panelToDisplay = null;
         if (groupName == null) {
             //TODO Enable code below, when the LeaderboardGroupOverviewPanel was styled
+//            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.overview(), stringMessages);
+//            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 //            panelToDisplay = new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages);
             Window.alert("No leaderboard group name was given.");
         } else {
-            panelToDisplay = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root, viewModeParamValue);
-            LeaderboardGroupPanel groupPanel = (LeaderboardGroupPanel) panelToDisplay;
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(groupName, stringMessages);
+            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+            rootPanel.add(logoAndTitlePanel);
+            
+            LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root, viewModeParamValue);
             groupPanel.setWelcomeWidget(new SimpleWelcomeWidget( stringMessages.welcomeToSailingAnalytics(),
                             "Understanding what happens out on the race course isn't always easy. To help solve this challenge and" +
                             " bring the excitement of sailing to the fans, we have developed a leader board based on SAP analytics.\n" +
@@ -66,14 +66,17 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
                             " the leader board displays information such as in-race ranking, average speeds, distance travelled, ETA" +
                             " (estimated time of arrival at the next mark rounding), gaps to leader, gains and losses per leg.\n\n" +
                             "Check out the results for yourself to see who triumphed - and how they did it."));
-            
 
+            SimplePanel feedbackPanel = new SimplePanel();
+            feedbackPanel.addStyleName("feedbackPanel");
             Anchor feedbackLink = new Anchor(stringMessages.feedback(), "mailto:axel.uhl%40sap.com?subject=[SAP Sailing] Feedback");
-            feedbackLink.addStyleName("feedback");
+            feedbackLink.addStyleName("feedbackLink");
+            feedbackPanel.add(feedbackLink);
 
-            mainPanel.addNorth(logoAndTitlePanel, 68);
-            mainPanel.addEast(feedbackLink, 70);
-            mainPanel.add(panelToDisplay);
+            groupAndFeedbackPanel.add(groupPanel);
+            groupAndFeedbackPanel.add(feedbackPanel);
+
+            rootPanel.add(groupAndFeedbackPanel);
         }
         
 //        mainPanel.addNorth(logoAndTitlePanel, 68);
