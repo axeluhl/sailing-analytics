@@ -1706,4 +1706,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         return selectedRows;
     }
+
+    @Override
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        timeChanged(timer.getTime());
+    }
 }
