@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -85,6 +87,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private static final double GEONAMES_RADIUS_CACLCULATION_FACTOR = 10.0;
 
+    // TODO make this variable
+    private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
+
     // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell
     // what changed
     private final RaceDefinition race;
@@ -152,6 +157,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     protected long millisecondsOverWhichToAverageWind;
 
     private final WindStore windStore;
+
+    private Timer cacheInvalidationTimer;
 
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
@@ -672,12 +679,26 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         notifyAll();
     }
 
+    /**
+     * Schedules the clearing of the caches. If a cache clearing is already scheduled, this is a no-op.
+     */
     private synchronized void clearAllCaches() {
-        synchronized (competitorRankings) {
-            competitorRankings.clear();
-        }
-        synchronized (maneuverCache) {
-            maneuverCache.clear();
+        if (cacheInvalidationTimer == null) {
+            cacheInvalidationTimer = new Timer("Cache invalidation timer for TrackedRaceImpl " + getRace().getName());
+            cacheInvalidationTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    synchronized (TrackedRaceImpl.this) {
+                        cacheInvalidationTimer = null;
+                        synchronized (competitorRankings) {
+                            competitorRankings.clear();
+                        }
+                        synchronized (maneuverCache) {
+                            maneuverCache.clear();
+                        }
+                    }
+                }
+            }, DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS);
         }
     }
 
