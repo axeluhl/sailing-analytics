@@ -347,3 +347,18 @@ input.magnifier {
 .errorLabel {
 	color: #FF0000;
 }
+
+.feedbackPanel {
+	position: fixed;
+	top: 300px;
+	right: 0;
+	height: 127px;
+	width: 29px;
+	margin: 10px;
+}
+
+.feedbackPanel a {
+	display: block;
+	height: 127px;
+	width: 29px;
+}

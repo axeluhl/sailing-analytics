@@ -1125,22 +1125,27 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private void loadCompleteLeaderboard(Date date) {
-        
-        GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService, getLeaderboardName(), date,
-                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces());
-        getLeaderboardByNameAction.setCallback(new AsyncCallback<LeaderboardDTO>() {
-            @Override
-            public void onSuccess(LeaderboardDTO result) {
-                updateLeaderboard(result);
-            }
+        if (needsDataLoading()) {
+            GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService, getLeaderboardName(), date,
+                    /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces());
+            getLeaderboardByNameAction.setCallback(new AsyncCallback<LeaderboardDTO>() {
+                @Override
+                public void onSuccess(LeaderboardDTO result) {
+                    updateLeaderboard(result);
+                }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                getErrorReporter().reportError("Error trying to obtain leaderboard contents: " + caught.getMessage());
-            }
-        });
-        
-        asyncActionsExecutor.execute(getLeaderboardByNameAction);
+                @Override
+                public void onFailure(Throwable caught) {
+                    getErrorReporter().reportError("Error trying to obtain leaderboard contents: " + caught.getMessage());
+                }
+            });
+            
+            asyncActionsExecutor.execute(getLeaderboardByNameAction);
+        }
+    }
+    
+    private boolean needsDataLoading() {
+        return isVisible();
     }
 
     /**
@@ -1714,5 +1719,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         }
         return selectedRows;
+    }
+
+    @Override
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        timeChanged(timer.getTime());
     }
 }

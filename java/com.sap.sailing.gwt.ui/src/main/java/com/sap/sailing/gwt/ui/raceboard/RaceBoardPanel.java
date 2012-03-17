@@ -13,8 +13,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
@@ -78,6 +80,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
     private final List<ComponentViewer> componentViewers;
     private FlowPanel componentsNavigationPanel;
+    private FlowPanel settingsPanel;
     private RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
@@ -182,21 +185,34 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             mainPanel.add(componentViewer.getViewerWidget());
         }
 
-        MenuBar mainMenu = new MenuBar();
-        mainMenu.setStyleName("raceBoardNavigation-navigationitem");
-        MenuBar settingsMenu = new MenuBar(true);
-        mainMenu.addItem("Settings", settingsMenu);
-        
-        addSettingsMenuItem(settingsMenu, leaderboardPanel);
-        addSettingsMenuItem(settingsMenu, raceMap);
-        addSettingsMenuItem(settingsMenu, windChart);
-        addSettingsMenuItem(settingsMenu, competitorChart);
+        //TODO binding of settings to the user agent
+//        MenuBar mainMenu = new MenuBar();
+//        mainMenu.setStyleName("raceBoardNavigation-navigationitem");
+//        MenuBar settingsMenu = new MenuBar(true);
+//        mainMenu.addItem("Settings", settingsMenu);
+//        
+//        addSettingsMenuItem(settingsMenu, leaderboardPanel);
+//        addSettingsMenuItem(settingsMenu, raceMap);
+//        addSettingsMenuItem(settingsMenu, windChart);
+//        addSettingsMenuItem(settingsMenu, competitorChart);
+//
+//        mainMenu.getElement().getStyle().setFloat(Style.Float.LEFT);
+//        mainMenu.getElement().getStyle().setPadding(3, Style.Unit.PX);
+//        mainMenu.getElement().getStyle().setMargin(3, Style.Unit.PX);
+//
+//        componentsNavigationPanel.add(mainMenu);
+        settingsPanel = new FlowPanel();
+        settingsPanel.addStyleName("raceBoardNavigation-settingsButtonPanel");
+        Label settingsLabel = new Label("Settings: ");
+        settingsLabel.addStyleName("raceBoardNavigation-settingsLabel");
+        settingsLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        settingsLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        settingsPanel.add(settingsLabel);
 
-        mainMenu.getElement().getStyle().setFloat(Style.Float.LEFT);
-        mainMenu.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        mainMenu.getElement().getStyle().setMargin(3, Style.Unit.PX);
-
-        componentsNavigationPanel.add(mainMenu);
+        addSettingsMenuButton(settingsPanel, leaderboardPanel);
+        addSettingsMenuButton(settingsPanel, raceMap);
+        addSettingsMenuButton(settingsPanel, windChart);
+        addSettingsMenuButton(settingsPanel, competitorChart);
 
         addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel);
         //addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, raceMap);
@@ -205,6 +221,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         
     }
 
+    @SuppressWarnings("unused")
     private <SettingsType> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
         if(component.hasSettings()) {
             settingsMenu.addItem(component.getLocalizedShortName(), new Command() {
@@ -212,6 +229,23 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                     new SettingsDialog<SettingsType>(component, stringMessages).show();
                   }
             });
+        }
+    }
+    
+    private <SettingsType> void addSettingsMenuButton(FlowPanel settingsPanel, final Component<SettingsType> component) {
+        if(component.hasSettings()) {
+            Button settingsButton = new Button(component.getLocalizedShortName());
+            settingsButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    new SettingsDialog<SettingsType>(component, stringMessages).show();
+                }
+            });
+            settingsButton.addStyleName("raceBoardNavigation-settingsButton");
+            settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+            settingsButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
+            
+            settingsPanel.add(settingsButton);
         }
     }
     
@@ -284,6 +318,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(), component.getLocalizedShortName());
         toggleButton.getElement().getStyle().setFloat(Style.Float.LEFT);
         toggleButton.setDown(component.isVisible());
+        toggleButton.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
         
         toggleButton.addClickHandler(new ClickHandler() {
           public void onClick(ClickEvent event) {
@@ -383,6 +418,10 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
 
     public Widget getNavigationWidget() {
         return componentsNavigationPanel; 
+    }
+    
+    public Widget getSettingsWidget() {
+        return settingsPanel;
     }
 
     public Widget getTimeWidget() {
