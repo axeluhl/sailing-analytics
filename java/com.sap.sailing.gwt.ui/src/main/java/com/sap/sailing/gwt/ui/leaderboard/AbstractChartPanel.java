@@ -671,4 +671,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
         timeChanged(timer.getTime());
     }
+    
+    public void triggerDataLoading() {
+        loadData(true);
+    }
 }
