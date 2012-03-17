@@ -109,9 +109,13 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             this.start = startOfInvalidation;
             this.end = endOfInvalidation;
         }
-        public void extend(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
-            // TODO Auto-generated method stub
-            
+        public synchronized void extend(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
+            if (startOfInvalidation.getObject().getTimePoint().compareTo(start.getObject().getTimePoint()) < 0) {
+                this.start = startOfInvalidation;
+            }
+            if (endOfInvalidation.compareTo(end) > 0) {
+                end = endOfInvalidation;
+            }
         }
     }
     
@@ -368,7 +372,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(buoy).getEstimatedPositionTimePeriodAffectedBy(fix);
         WindWithConfidence<TimePoint> startOfInvalidation = interval.getA() == null ? null : getDummyFixWithConfidence(interval.getA());
         TimePoint endOfInvalidation = interval.getB();
-        scheduleCacheInvalidation(startOfInvalidation, endOfInvalidation);
+        if (startOfInvalidation != null && endOfInvalidation != null) {
+            scheduleCacheInvalidation(startOfInvalidation, endOfInvalidation);
+        }
     }
 
     /**
