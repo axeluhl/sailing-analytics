@@ -34,7 +34,14 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
      * contained, it will be deselected.
      */
     public void add(CompetitorDTO competitor) {
-        allCompetitors.add(competitor);
+        add(competitor, true);
+    }
+    
+    private void add(CompetitorDTO competitor, boolean notifyListeners) {
+        boolean changed = allCompetitors.add(competitor);
+        if (notifyListeners && changed) {
+            fireListChanged(getAllCompetitors());
+        }
     }
     
     @Override
@@ -55,11 +62,17 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         }
         assert selectedCompetitors.isEmpty();
         allCompetitors.clear();
+        fireListChanged(getAllCompetitors());
     }
     
     public void addAll(Iterable<CompetitorDTO> competitors) {
+        boolean changed = false;
         for (CompetitorDTO competitor : competitors) {
-            add(competitor);
+            add(competitor, false);
+            changed = true;
+        }
+        if (changed) {
+            fireListChanged(getAllCompetitors());
         }
     }
 
@@ -71,7 +84,10 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         if (isSelected(competitor)) {
             setSelected(competitor, false);
         }
-        allCompetitors.remove(competitor);
+        boolean changed = allCompetitors.remove(competitor);
+        if (changed) {
+            fireListChanged(getAllCompetitors());
+        }
     }
     
     @Override
@@ -113,6 +129,14 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
             }
         }
     }
+    
+    private void fireListChanged(Iterable<CompetitorDTO> competitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
+        for (CompetitorSelectionChangeListener listener : listeners) {
+            if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
+                listener.competitorsListChanged(competitors);
+            }
+        }
+    }
 
     @Override
     public boolean isSelected(CompetitorDTO competitor) {
@@ -143,16 +167,24 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
 
     @Override
     public void setCompetitors(Iterable<CompetitorDTO> newCompetitors) {
+        boolean changed = false;
+        
         Set<CompetitorDTO> oldCompetitorsToRemove = new HashSet<CompetitorDTO>(allCompetitors);
         for (CompetitorDTO newCompetitor : newCompetitors) {
             if (allCompetitors.contains(newCompetitor)) {
                 oldCompetitorsToRemove.remove(newCompetitor);
             } else {
-                add(newCompetitor);
+                add(newCompetitor, false);
+                changed = true;
             }
         }
         for (CompetitorDTO oldCompetitorToRemove : oldCompetitorsToRemove) {
             remove(oldCompetitorToRemove);
+            changed = true;
+        }
+        
+        if (changed) {
+            fireListChanged(getAllCompetitors());
         }
     }
     

@@ -1,3 +1,4 @@
+
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -242,11 +244,16 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RootLayoutPanel.get().add(p);
         
         FlowPanel breadcrumbPanel = createBreadcrumbPanel();
+        //TODO Quickfix for touch devices
+        Widget settingsWidget = raceBoardPanel.getSettingsWidget();
+        
+        breadcrumbPanel.add(settingsWidget);
+        //
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
         p.addNorth(logoAndTitlePanel, 68);        
-        p.addNorth(breadcrumbPanel,30);
+        p.addNorth(breadcrumbPanel, 35);
         p.addSouth(timePanel, 122);                     
         p.add(raceBoardPanel);
     }    

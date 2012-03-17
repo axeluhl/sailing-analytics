@@ -461,7 +461,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private void loadData(final RaceIdentifier raceIdentifier, final Date from, final Date to, final boolean append) {
         if (raceIdentifier == null) {
             clearChart();
-        } else {
+        } else if (needsDataLoading()) {
             sailingService.getWindInfo(raceIdentifier,
             // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
             // Consider incremental updates for new data only.
@@ -569,6 +569,10 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     @Override
     public void onResize() {
         chart.setSizeToMatchContainer();
+    }
+    
+    private boolean needsDataLoading() {
+        return isVisible();
     }
     
 }

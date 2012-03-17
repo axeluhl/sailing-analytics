@@ -107,7 +107,7 @@ input.magnifier {
 
 .raceBoardNavigation {
 	float: right;
-	margin:6px 0 0 0;
+	margin:-23px 0 0 0;
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
@@ -152,5 +152,10 @@ input.magnifier {
 
 .errorLabel {
 	color: #FF0000;
+}
+
+.raceBoardNavigation-settingsButtonPanel {
+	float: right;
+	margin: -26px 0 0 0;
 }
 
