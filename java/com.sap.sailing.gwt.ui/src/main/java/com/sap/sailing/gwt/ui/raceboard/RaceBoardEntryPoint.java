@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -254,7 +253,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
         p.addNorth(logoAndTitlePanel, 68);        
-        p.addNorth(breadcrumbPanel,60);
+        p.addNorth(breadcrumbPanel, 35);
         p.addSouth(timePanel, 122);                     
         p.add(raceBoardPanel);
     }    
