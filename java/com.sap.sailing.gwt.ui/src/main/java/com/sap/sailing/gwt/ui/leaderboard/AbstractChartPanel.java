@@ -246,12 +246,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      * visible competitors} via
      * {@link SailingServiceAsync#getCompetitorsRaceData(RaceIdentifier, List, long, DetailType, AsyncCallback)}. After
      * loading is the method {@link #drawChartData()} called.<br />
-     * If no competitor is visible, is the {@link #noCompetitorsSelectedLabel} displayed.
+     * If no data needs to be {@link #needsDataLoading() loaded}, the no competitors selected label is displayed.
      * 
      * @param showBusyIndicator If <code>true</code> is the busy indicator shown while loading the data from the server.
      */
     protected void loadData(boolean showBusyIndicator) {
-        if (hasVisibleCompetitors()) {
+        if (needsDataLoading()) {
             if (showBusyIndicator) {
                 setWidget(busyIndicatorPanel);
             }
@@ -650,11 +650,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if (getChartData() != null) {
             Date newestEvent = getChartData().getOldestDateOfNewestData();
             updateTimeLine(date);
-            if (hasVisibleCompetitors()
-                    && (newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
+            if ((newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
                 loadData(false);
             }
         }
+    }
+    
+    private boolean needsDataLoading() {
+        return hasVisibleCompetitors() && isVisible();
     }
 
     @Override
@@ -662,5 +665,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if(getChartData() != null) {
             chart.setSizeToMatchContainer();
         }
+    }
+
+    @Override
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        timeChanged(timer.getTime());
     }
 }

@@ -1120,18 +1120,25 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private void loadCompleteLeaderboard(Date date) {
-        getSailingService().getLeaderboardByName(getLeaderboardName(), date,
-        /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), new AsyncCallback<LeaderboardDTO>() {
-            @Override
-            public void onSuccess(LeaderboardDTO result) {
-                updateLeaderboard(result);
-            }
+        if (needsDataLoading()) {
+            getSailingService().getLeaderboardByName(getLeaderboardName(), date,
+            /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), new AsyncCallback<LeaderboardDTO>() {
+                @Override
+                public void onSuccess(LeaderboardDTO result) {
+                    updateLeaderboard(result);
+                }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                getErrorReporter().reportError("Error trying to obtain leaderboard contents: " + caught.getMessage());
-            }
-        });
+                @Override
+                public void onFailure(Throwable caught) {
+                    getErrorReporter().reportError(
+                            "Error trying to obtain leaderboard contents: " + caught.getMessage());
+                }
+            });
+        }
+    }
+    
+    private boolean needsDataLoading() {
+        return isVisible();
     }
 
     /**
