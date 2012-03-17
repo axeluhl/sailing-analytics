@@ -54,6 +54,9 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
+import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -200,6 +203,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private final CombinedWindPanel windPanel;
 
+    private final AsyncActionsExecutor asyncActionsExecutor;
+
     public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer,
             CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
         this.setSize("100%", "100%");
@@ -222,9 +227,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         settings = new RaceMapSettings();
         lastTimeChangeBeforeInitialization = null;
         dataInitialized = false;
+        asyncActionsExecutor = new AsyncActionsExecutor();
         initializeData();
         
-        windPanel = new CombinedWindPanel(sailingService, errorReporter, stringMessages, timer);
+        windPanel = new CombinedWindPanel(sailingService, asyncActionsExecutor, errorReporter, stringMessages, timer);
         windPanel.setVisible(false);
     }
 
@@ -321,65 +327,69 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             computeFromAndTo(date, getCompetitorsToShow());
                     final int requestID = ++boatPositionRequestIDCounter;
 
-                    sailingService.getRaceMapData(race, date, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true,
-                            new AsyncCallback<RaceMapDataDTO>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining race map data: " + caught.getMessage());
-                                }
+                    GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, race, date, 
+                            fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true);
 
-                                @Override
-                                public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
-                                    quickRanks = raceMapDataDTO.quickRanks;
-                                    if (map != null) {
-                                        // process response only if not received out of order
-                                        if (startedProcessingRequestID < requestID) {
-                                            startedProcessingRequestID = requestID;
-                                            // Do boat specific actions
-                                            Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
-                                            Date from = new Date(date.getTime() - settings.getTailLengthInMilliseconds());
-                                            updateFixes(boatData, fromAndToAndOverlap.getC());
-                                            showBoatsOnMap(from, date, getCompetitorsToShow());
-                                            if (douglasMarkers != null) {
-                                                removeAllMarkDouglasPeuckerpoints();
-                                            }
-                                            if (maneuverMarkers != null) {
-                                                removeAllManeuverMarkers();
-                                            }
-                                            // Do mark specific actions
-                                            List<MarkDTO> markData = raceMapDataDTO.markPositions;
-                                            showMarksOnMap(markData);
-                                            // Rezoom the map
-                                            if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
-                                                zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
-                                                mapFirstZoomDone = true;
-                                            } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange) { // Zoom once to the boats
-                                                zoomMapToNewBounds(new BoatsBoundsCalculater().calculateNewBounds(RaceMap.this));
-                                                mapFirstZoomDone = true;
-                                            } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) { // Zoom once to the buoys
-                                                zoomMapToNewBounds(new BuoysBoundsCalculater().calculateNewBounds(RaceMap.this));
-                                                mapFirstZoomDone = true;
-                                                /*
-                                                 * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
-                                                 * the map was just zoomed to the bounds of the buoys, it was not a zoom or pan
-                                                 * triggered by the user. As a consequence the
-                                                 * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
-                                                 */
-                                                mapZoomedOrPannedSinceLastRaceSelectionChange = false;
-                                            }
-                                        }
-                                    } else {
-                                        lastTimeChangeBeforeInitialization = date;
+                    getRaceMapDataAction.setCallback(new AsyncCallback<RaceMapDataDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
+                            if (map != null && raceMapDataDTO != null) {
+                                quickRanks = raceMapDataDTO.quickRanks;
+                                // process response only if not received out of order
+                                if (startedProcessingRequestID < requestID) {
+                                    startedProcessingRequestID = requestID;
+                                    // Do boat specific actions
+                                    Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
+                                    Date from = new Date(date.getTime() - settings.getTailLengthInMilliseconds());
+                                    updateFixes(boatData, fromAndToAndOverlap.getC());
+                                    showBoatsOnMap(from, date, getCompetitorsToShow());
+                                    if (douglasMarkers != null) {
+                                        removeAllMarkDouglasPeuckerpoints();
+                                    }
+                                    if (maneuverMarkers != null) {
+                                        removeAllManeuverMarkers();
+                                    }
+                                    // Do mark specific actions
+                                    List<MarkDTO> markData = raceMapDataDTO.markPositions;
+                                    showMarksOnMap(markData);
+                                    // Rezoom the map
+                                    if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
+                                        zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
+                                        mapFirstZoomDone = true;
+                                    } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange) { // Zoom once to the boats
+                                        zoomMapToNewBounds(new BoatsBoundsCalculater().calculateNewBounds(RaceMap.this));
+                                        mapFirstZoomDone = true;
+                                    } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) { // Zoom once to the buoys
+                                        zoomMapToNewBounds(new BuoysBoundsCalculater().calculateNewBounds(RaceMap.this));
+                                        mapFirstZoomDone = true;
+                                        /*
+                                         * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
+                                         * the map was just zoomed to the bounds of the buoys, it was not a zoom or pan
+                                         * triggered by the user. As a consequence the
+                                         * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
+                                         */
+                                        mapZoomedOrPannedSinceLastRaceSelectionChange = false;
                                     }
                                 }
-                            });
+                            } else {
+                                lastTimeChangeBeforeInitialization = date;
+                            }
+                        }
+                    });
 
+                    asyncActionsExecutor.execute(getRaceMapDataAction);
                     
                     // draw the wind into the map, get the combined wind
                     List<String> windSourceTypeNames = new ArrayList<String>();
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
-                    sailingService.getWindInfo(race, date, 1000L, 1, windSourceTypeNames,
-                            new AsyncCallback<WindInfoForRaceDTO>() {
+                    
+                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames);
+                    getWindInfoAction.setCallback(new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     errorReporter.reportError("Error obtaining wind information: " + caught.getMessage());
@@ -406,6 +416,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     showWindSensorsOnMap(windSourcesToShow);
                                 }
                             });
+                    
+                    asyncActionsExecutor.execute(getWindInfoAction);
                 }
             }
         }

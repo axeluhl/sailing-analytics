@@ -314,30 +314,36 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                 stringMessages, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN, true);
     }
 
-    private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer, final Component<?> component) {
-        final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(), component.getLocalizedShortName());
+    private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,
+            final Component<?> component) {
+        final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(),
+                component.getLocalizedShortName());
         toggleButton.getElement().getStyle().setFloat(Style.Float.LEFT);
         toggleButton.setDown(component.isVisible());
         toggleButton.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
-        
-        toggleButton.addClickHandler(new ClickHandler() {
-          public void onClick(ClickEvent event) {
-            // make the map invisible is this is not supported yet due to problems with disabling the center element of a DockPanel
-            if(component instanceof RaceMap)
-                return;
-            
-            boolean visible = toggleButton.isDown();
-            setComponentVisible(componentViewer, component, visible);
 
-            //Forcing a chart time line update, or it wouldn't be displayed if the chart is set to visible
-            if (visible && component instanceof WindChart) {
-                ((WindChart) component).forceTimeLineUpdate();
-            } else if (visible && component instanceof AbstractChartPanel) {
-                ((AbstractChartPanel<?>) component).forceTimeLineUpdate();
+        toggleButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                // make the map invisible is this is not supported yet due to problems with disabling the center element
+                // of a DockPanel
+                if (component instanceof RaceMap)
+                    return;
+
+                boolean visible = toggleButton.isDown();
+                setComponentVisible(componentViewer, component, visible);
+
+                // Forcing a chart time line update and a load of the data, or it wouldn't be displayed if the chart is
+                // set to visible
+                if (visible && component instanceof WindChart) {
+                    windChart.timeChanged(timer.getTime());
+                } else if (visible && component instanceof AbstractChartPanel) {
+                    competitorChart.triggerDataLoading();
+                } else if (visible && component instanceof LeaderboardPanel) {
+                    leaderboardPanel.timeChanged(timer.getTime());
+                }
             }
-          }
         });
-        
+
         componentsNavigationPanel.add(toggleButton);
     }
     

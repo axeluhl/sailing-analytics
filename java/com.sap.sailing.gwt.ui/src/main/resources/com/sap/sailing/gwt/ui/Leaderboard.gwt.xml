@@ -36,4 +36,5 @@
   <source path='usermanagement'/>
   <source path='shared'/>
   <source path='common'/>
+  <source path='actions'/>
 </module>

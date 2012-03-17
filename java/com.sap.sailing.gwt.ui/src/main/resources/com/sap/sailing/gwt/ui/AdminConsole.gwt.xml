@@ -51,4 +51,5 @@
   <source path='usermanagement'/>
   <source path='shared'/>
   <source path='test'/>
+  <source path='actions'/>
 </module>

@@ -40,4 +40,5 @@
   <source path='adminconsole'/>
   <source path='usermanagement'/>
   <source path='test'/>
+  <source path='actions'/>
 </module>
