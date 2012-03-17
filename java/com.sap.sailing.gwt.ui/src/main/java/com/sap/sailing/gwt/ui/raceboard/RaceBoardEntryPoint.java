@@ -246,14 +246,13 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         FlowPanel breadcrumbPanel = createBreadcrumbPanel();
         //TODO Quickfix for touch devices
         Widget settingsWidget = raceBoardPanel.getSettingsWidget();
-        
         breadcrumbPanel.add(settingsWidget);
         //
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
         p.addNorth(logoAndTitlePanel, 68);        
-        p.addNorth(breadcrumbPanel, 35);
+        p.addNorth(breadcrumbPanel, 40);
         p.addSouth(timePanel, 122);                     
         p.add(raceBoardPanel);
     }    
