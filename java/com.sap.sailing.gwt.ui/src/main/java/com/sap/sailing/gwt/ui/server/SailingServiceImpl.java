@@ -123,6 +123,7 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
@@ -789,6 +790,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             trackedRace.recordWind(wind, trackedRace.getWindSources(WindSourceType.WEB).iterator().next());
         }
     }
+
+    @Override
+    public RaceMapDataDTO getRaceMapData(RaceIdentifier raceIdentifier, Date date,
+            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
+            boolean extrapolate) throws NoWindException {
+        RaceMapDataDTO raceMapDataDTO = new RaceMapDataDTO();
+        
+        raceMapDataDTO.boatPositions = getBoatPositions(raceIdentifier, from, to, extrapolate);
+        raceMapDataDTO.markPositions = getMarkPositions(raceIdentifier, date); 
+        raceMapDataDTO.quickRanks = getQuickRanks(raceIdentifier, date);
+        
+        return raceMapDataDTO;
+    }    
     
     @Override
     public Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RaceIdentifier raceIdentifier,
