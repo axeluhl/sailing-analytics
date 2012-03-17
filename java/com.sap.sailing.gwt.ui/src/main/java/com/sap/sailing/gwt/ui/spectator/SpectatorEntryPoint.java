@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.spectator;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -46,18 +47,17 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
         
         RootPanel rootPanel = RootPanel.get();
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
+
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(groupName != null ? groupName
+                : stringMessages.overview(), stringMessages);
+        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        rootPanel.add(logoAndTitlePanel);
         
         if (groupName == null) {
             //TODO Enable code below, when the LeaderboardGroupOverviewPanel was styled
-//            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.overview(), stringMessages);
-//            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 //            panelToDisplay = new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages);
             Window.alert("No leaderboard group name was given.");
         } else {
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(groupName, stringMessages);
-            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            rootPanel.add(logoAndTitlePanel);
-            
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root, viewModeParamValue);
             groupPanel.setWelcomeWidget(new SimpleWelcomeWidget( stringMessages.welcomeToSailingAnalytics(),
                             "Understanding what happens out on the race course isn't always easy. To help solve this challenge and" +
@@ -69,7 +69,9 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
 
             SimplePanel feedbackPanel = new SimplePanel();
             feedbackPanel.addStyleName("feedbackPanel");
-            Anchor feedbackLink = new Anchor(stringMessages.feedback(), "mailto:axel.uhl%40sap.com?subject=[SAP Sailing] Feedback");
+            Anchor feedbackLink = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                    "<img class=\"linkNoBorder\" src=\"/gwt/images/sap_66_transparent.png\"/>").toSafeHtml());//TODO set image
+            feedbackLink.setHref("mailto:axel.uhl%40sap.com?subject=[SAP Sailing] Feedback");
             feedbackLink.addStyleName("feedbackLink");
             feedbackPanel.add(feedbackLink);
 
@@ -79,10 +81,6 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
             rootPanel.add(groupAndFeedbackPanel);
         }
         
-//        mainPanel.addNorth(logoAndTitlePanel, 68);
-//        mainPanel.addEast(feedbackLink, 70);
-//        mainPanel.add(panelToDisplay);
-
         fillEvents();
     }
 
