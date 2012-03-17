@@ -158,6 +158,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         });
         playPauseImage.getElement().getStyle().setFloat(Style.Float.LEFT);
         playPauseImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        playPauseImage.setTitle(stringMessages.startStopPlaying());
         playControlPanel.add(playPauseImage);
 
         backToLivePlayButton = new Button(stringMessages.playModeLive());
@@ -170,6 +171,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         });
         backToLivePlayButton.getElement().getStyle().setFloat(Style.Float.LEFT);
         backToLivePlayButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        backToLivePlayButton.setTitle(stringMessages.backToLive());
         playControlPanel.add(backToLivePlayButton);
 
         // current date and time control
@@ -222,6 +224,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
                 TimePanel.this.timer.setPlaySpeedFactor(playSpeedBox.getValue());
             }
         });
+        slowDownButton.setTitle(stringMessages.slowPlaySpeedDown());
         playSpeedControlPanel.add(slowDownButton);
 
         speedUpButton = new Button("+1");
@@ -232,6 +235,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
                 TimePanel.this.timer.setPlaySpeedFactor(playSpeedBox.getValue());
             }
         });
+        speedUpButton.setTitle(stringMessages.speedPlaySpeedUp());
         playSpeedControlPanel.add(speedUpButton);
 
         playSpeedImage.getElement().getStyle().setFloat(Style.Float.LEFT);

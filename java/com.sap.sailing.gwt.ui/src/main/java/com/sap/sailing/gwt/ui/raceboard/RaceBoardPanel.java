@@ -318,6 +318,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(), component.getLocalizedShortName());
         toggleButton.getElement().getStyle().setFloat(Style.Float.LEFT);
         toggleButton.setDown(component.isVisible());
+        toggleButton.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
         
         toggleButton.addClickHandler(new ClickHandler() {
           public void onClick(ClickEvent event) {
