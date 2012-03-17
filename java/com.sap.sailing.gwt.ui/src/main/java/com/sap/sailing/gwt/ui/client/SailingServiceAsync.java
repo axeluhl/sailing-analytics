@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -308,5 +309,8 @@ public interface SailingServiceAsync {
 
     void setWindSourcesToExclude(RaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude,
             AsyncCallback<Void> callback);
+
+    void getRaceMapData(RaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
+            Map<CompetitorDTO, Date> to, boolean extrapolate, AsyncCallback<RaceMapDataDTO> callback);
 
 }
