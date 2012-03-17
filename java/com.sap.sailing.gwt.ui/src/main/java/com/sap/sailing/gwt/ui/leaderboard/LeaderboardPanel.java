@@ -46,6 +46,8 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -194,6 +196,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private boolean currentlyHandlingPlayStateChange;
 
     private PlayModes oldPlayMode;
+
+    private final AsyncActionsExecutor asyncActionsExecutor;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -877,6 +881,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
         setAutoExpandFirstRace(settings.isAutoExpandFirstRace());
 
+        asyncActionsExecutor = new AsyncActionsExecutor();
         this.timer = timer;
         timer.addPlayStateListener(this);
         timer.addTimeListener(this);
@@ -1120,8 +1125,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private void loadCompleteLeaderboard(Date date) {
-        getSailingService().getLeaderboardByName(getLeaderboardName(), date,
-        /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), new AsyncCallback<LeaderboardDTO>() {
+        
+        GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService, getLeaderboardName(), date,
+                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces());
+        getLeaderboardByNameAction.setCallback(new AsyncCallback<LeaderboardDTO>() {
             @Override
             public void onSuccess(LeaderboardDTO result) {
                 updateLeaderboard(result);
@@ -1132,6 +1139,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 getErrorReporter().reportError("Error trying to obtain leaderboard contents: " + caught.getMessage());
             }
         });
+        
+        asyncActionsExecutor.execute(getLeaderboardByNameAction);
     }
 
     /**

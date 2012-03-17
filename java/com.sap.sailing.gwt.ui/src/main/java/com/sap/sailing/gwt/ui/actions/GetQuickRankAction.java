@@ -1,0 +1,51 @@
+package com.sap.sailing.gwt.ui.actions;
+
+import java.util.Date;
+import java.util.List;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+
+public class GetQuickRankAction extends DefaultAsyncAction<List<QuickRankDTO>>
+{
+    private final SailingServiceAsync sailingService;
+    private final RaceIdentifier raceIdentifier;
+    private final Date date;
+    private List<QuickRankDTO> result;
+    
+    private AsyncCallback<List<QuickRankDTO>> callback;
+
+    public GetQuickRankAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date date) {
+        this.sailingService = sailingService;
+        this.raceIdentifier = raceIdentifier;
+        this.date = date;
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public void execute() {
+        sailingService.getQuickRanks(raceIdentifier, date, (AsyncCallback<List<QuickRankDTO>>) wrapperCallback);
+    }
+
+    @Override
+    public List<QuickRankDTO> getResult() {
+        return result;
+    }
+
+    @Override
+    public AsyncCallback<List<QuickRankDTO>> getCallback() {
+        return callback;
+    }
+
+    @Override
+    public void setCallback(AsyncCallback<List<QuickRankDTO>> callback) {
+        this.callback = callback;
+    }
+
+    @Override
+    public String getName() {
+        return GetQuickRankAction.class.getName();
+    }
+}
