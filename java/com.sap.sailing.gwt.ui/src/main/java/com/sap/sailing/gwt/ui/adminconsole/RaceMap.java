@@ -1188,12 +1188,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         } else {
             // "lowlight" currently selected competitor
             Marker highlightedMarker = boatMarkers.get(competitor);
-            Marker lowlightedMarker = createBoatMarker(competitor, displayHighlighted(competitor));
             if (highlightedMarker != null) {
-                map.removeOverlay(highlightedMarker);
+                Marker lowlightedMarker = createBoatMarker(competitor, displayHighlighted(competitor));
+                if (highlightedMarker != null) {
+                    map.removeOverlay(highlightedMarker);
+                }
+                map.addOverlay(lowlightedMarker);
+                boatMarkers.put(competitor, lowlightedMarker);
             }
-            map.addOverlay(lowlightedMarker);
-            boatMarkers.put(competitor, lowlightedMarker);
         }
     }
 
