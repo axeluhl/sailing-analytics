@@ -1,3 +1,4 @@
+
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
@@ -246,7 +247,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         FlowPanel breadcrumbPanel = createBreadcrumbPanel();
         //TODO Quickfix for touch devices
         Widget settingsWidget = raceBoardPanel.getSettingsWidget();
-        settingsWidget.getElement().getStyle().setFloat(Style.Float.LEFT);
+        
         breadcrumbPanel.add(settingsWidget);
         //
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
