@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -83,7 +84,8 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
                     getWindInfoAction.setCallback(new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error obtaining wind: " + caught.getMessage());
+                                if(timer.getPlayMode() != PlayModes.Live)
+                                    errorReporter.reportError("Error obtaining wind: " + caught.getMessage());
                             }
 
                             @Override
