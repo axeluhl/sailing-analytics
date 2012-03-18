@@ -19,7 +19,7 @@ public class LegEntryDTO implements IsSerializable {
     public Double currentSpeedOverGroundInKnots;
     public Double velocityMadeGoodInKnots;
     public Double windwardDistanceToGoInMeters;
-    public long timeInMilliseconds;
+    public Long timeInMilliseconds;
     public boolean started;
     public boolean finished;
     public Integer numberOfJibes;
