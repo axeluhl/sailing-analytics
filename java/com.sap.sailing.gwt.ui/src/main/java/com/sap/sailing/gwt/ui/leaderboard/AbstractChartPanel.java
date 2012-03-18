@@ -281,8 +281,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": "
-                                    + caught.toString());
+                            if(timer.getPlayMode() != PlayModes.Live)
+                                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": " + caught.toString());
                         }
 
                         @Override

@@ -454,8 +454,15 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Speed getVelocityMadeGood(TimePoint at) throws NoWindException {
         if (hasStartedLeg(at)) {
-            SpeedWithBearing speedOverGround = getSpeedOverGround(at);
-            return speedOverGround == null ? null : getWindwardSpeed(speedOverGround, at);
+            TimePoint timePoint;
+            if (hasFinishedLeg(at)) {
+                // use the leg finishing time point
+                timePoint = getMarkPassingForLegEnd().getTimePoint();
+            } else {
+                timePoint = at;
+            }
+            SpeedWithBearing speedOverGround = getSpeedOverGround(timePoint);
+            return speedOverGround == null ? null : getWindwardSpeed(speedOverGround, timePoint);
         } else {
             return null;
         }
@@ -464,7 +471,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public SpeedWithBearing getSpeedOverGround(TimePoint at) {
         if (hasStartedLeg(at)) {
-            return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(at);
+            TimePoint timePoint;
+            if (hasFinishedLeg(at)) {
+                // use the leg finishing time point
+                timePoint = getMarkPassingForLegEnd().getTimePoint();
+            } else {
+                timePoint = at;
+            }
+            return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint);
         } else {
             return null;
         }

@@ -67,6 +67,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
@@ -333,7 +334,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     getRaceMapDataAction.setCallback(new AsyncCallback<RaceMapDataDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage());
+                            if(timer.getPlayMode() != PlayModes.Live)
+                                errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage());
                         }
 
                         @Override
@@ -392,7 +394,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     getWindInfoAction.setCallback(new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining wind information: " + caught.getMessage());
+                                    if(timer.getPlayMode() != PlayModes.Live)
+                                        errorReporter.reportError("Error obtaining wind information: " + caught.getMessage());
                                 }
 
                                 @Override

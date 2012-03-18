@@ -7,7 +7,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class AsyncActionsExecutor {
-    private AsyncAction<?> lastRequestedAction;
+    private Map<String, AsyncAction<?>> lastRequestedActions;
     private int numPendingCalls;
     private final int maxPendingCalls;
     private final int maxPendingCallsPerType;
@@ -17,7 +17,7 @@ public class AsyncActionsExecutor {
         numPendingCalls = 0;
         maxPendingCalls = 6;
         maxPendingCallsPerType = 3;
-        lastRequestedAction = null;
+        lastRequestedActions = new HashMap<String, AsyncAction<?>>();
         actionsPerType = new HashMap<String, Integer>();
     }
 
@@ -27,8 +27,8 @@ public class AsyncActionsExecutor {
         if(numPendingCalls >= maxPendingCalls || (numActionsOfType != null && numActionsOfType > maxPendingCallsPerType)) {
             GWT.log("Drop action : " + action.getName());
 
-            // don't put the call into the execution queue, but save it as the last one
-            lastRequestedAction = action;
+            // don't put the call into the execution queue, but save it as the last one of each type
+            lastRequestedActions.put(action.getName(), action);
             return;
         }
 
@@ -45,7 +45,7 @@ public class AsyncActionsExecutor {
                 if(numActionsPerType != null && numActionsPerType > 0)
                     actionsPerType.put(actionName, numActionsPerType-1);
                 numPendingCalls--;
-                checkForEmptyCallQueue();
+                checkForEmptyCallQueue(actionName);
             }
 
             @SuppressWarnings("unchecked")
@@ -59,7 +59,7 @@ public class AsyncActionsExecutor {
                 if(numActionsPerType != null && numActionsPerType > 0)
                     actionsPerType.put(actionName, numActionsPerType-1);
                 numPendingCalls--;
-                checkForEmptyCallQueue();
+                checkForEmptyCallQueue(actionName);
             }
         };
         action.setWrapperCallback(wrapper);
@@ -74,8 +74,9 @@ public class AsyncActionsExecutor {
         GWT.log("Pending actions counter: " + numPendingCalls);
     }
 
-    private void checkForEmptyCallQueue() {
-        if(numPendingCalls == 0 && lastRequestedAction != null) {
+    private void checkForEmptyCallQueue(String actionName) {
+        if(numPendingCalls == 0 && lastRequestedActions.containsKey(actionName)) {
+            AsyncAction<?> lastRequestedAction = lastRequestedActions.get(actionName);
             GWT.log("Set back last action : " + lastRequestedAction.getName());
             execute(lastRequestedAction);
         }

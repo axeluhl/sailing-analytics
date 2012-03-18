@@ -305,11 +305,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result = null;
         } else {
             result = new LegEntryDTO();
-            Speed averageSpeedOverGround = trackedLeg.getAverageSpeedOverGround(timePoint);
+            final Speed averageSpeedOverGround = trackedLeg.getAverageSpeedOverGround(timePoint);
             result.averageSpeedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround
                     .getKnots();
-            SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(timePoint);
-            result.currentSpeedOverGroundInKnots = speedOverGround == null ? null : speedOverGround.getKnots();
+            Double speedOverGroundInKnots;
+            if (trackedLeg.hasFinishedLeg(timePoint))  {
+                speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
+            } else {
+                final SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(timePoint);
+                speedOverGroundInKnots = speedOverGround == null ? null : speedOverGround.getKnots();
+            }
+            result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
             result.estimatedTimeToNextWaypointInSeconds = trackedLeg.getEstimatedTimeToNextMarkInSeconds(timePoint);
@@ -318,7 +324,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.gapToLeaderInSeconds = trackedLeg.getGapToLeaderInSeconds(timePoint);
             result.rank = trackedLeg.getRank(timePoint);
             result.started = trackedLeg.hasStartedLeg(timePoint);
-            Speed velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint);
+            Speed velocityMadeGood;
+            if (trackedLeg.hasFinishedLeg(timePoint)) {
+                velocityMadeGood = trackedLeg.getAverageVelocityMadeGood(timePoint);
+            } else {
+                velocityMadeGood = trackedLeg.getVelocityMadeGood(timePoint);
+            }
             result.velocityMadeGoodInKnots = velocityMadeGood == null ? null : velocityMadeGood.getKnots();
             Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint);
             result.windwardDistanceToGoInMeters = windwardDistanceToGo == null ? null : windwardDistanceToGo

@@ -16,8 +16,21 @@ public class LegEntryDTO implements IsSerializable {
     public Integer rank;
     public Double gapToLeaderInSeconds;
     public Double estimatedTimeToNextWaypointInSeconds;
+
+    /**
+     * If the competitor has already finished the leg at the time point for which this entry was created, contains the
+     * <em>average</em> speed over ground, otherwise the current speed over ground. If the competitor hasn't started the
+     * leg yet, it's <code>null</code>.
+     */
     public Double currentSpeedOverGroundInKnots;
+    
+    /**
+     * If the competitor has already finished the leg at the time point for which this entry was created, contains the
+     * <em>average</em> VMG, otherwise the current VMG. If the competitor hasn't started the leg yet, it's
+     * <code>null</code>.
+     */
     public Double velocityMadeGoodInKnots;
+    
     public Double windwardDistanceToGoInMeters;
     public Long timeInMilliseconds;
     public boolean started;
