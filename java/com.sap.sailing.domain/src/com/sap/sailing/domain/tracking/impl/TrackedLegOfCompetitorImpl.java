@@ -58,7 +58,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public long getTimeInMilliSeconds(TimePoint timePoint) {
+    public Long getTimeInMilliSeconds(TimePoint timePoint) {
         long result = 0;
         MarkPassing passedStartWaypoint = getTrackedRace().getMarkPassing(getCompetitor(),
                 getTrackedLeg().getLeg().getFrom());
