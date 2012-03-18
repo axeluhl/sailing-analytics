@@ -12,13 +12,20 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO>
 {
     private final SailingServiceAsync sailingService;
     private final RaceIdentifier raceIdentifier;
-    private final Date from;
+    private Date from;
     private long millisecondsStepWidth;
     private int numberOfFixes;
     private Collection<String> windSourceTypeNames;
     
     private WindInfoForRaceDTO result;
+
+    private long resolutionInMilliseconds;
+    private Date fromDate;
+    private Date toDate;
     
+    private enum CallVariants { Variant1, Variant2 };
+    private final CallVariants callVariant;
+
     private AsyncCallback<WindInfoForRaceDTO> callback;
 
     public GetWindInfoAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
@@ -29,12 +36,33 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO>
         this.millisecondsStepWidth = millisecondsStepWidth;
         this.numberOfFixes = numberOfFixes;
         this.windSourceTypeNames = windSourceTypeNames;
+
+        callVariant = CallVariants.Variant1;
     }
-    
+
+    public GetWindInfoAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, 
+            Date fromDate, Date toDate, long resolutionInMilliseconds, Collection<String> windSourceTypeNames) {
+        this.sailingService = sailingService;
+        this.raceIdentifier = raceIdentifier;
+        this.fromDate = fromDate;
+        this.toDate = toDate;
+        this.resolutionInMilliseconds = resolutionInMilliseconds;
+        this.windSourceTypeNames = windSourceTypeNames;
+        
+        callVariant = CallVariants.Variant2;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void execute() {
-        sailingService.getWindInfo(raceIdentifier, from, millisecondsStepWidth, numberOfFixes, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) wrapperCallback);
+        switch (callVariant) {
+        case Variant1:
+            sailingService.getWindInfo(raceIdentifier, from, millisecondsStepWidth, numberOfFixes, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) wrapperCallback);
+            break;
+        case Variant2:
+            sailingService.getWindInfo(raceIdentifier, fromDate, toDate, resolutionInMilliseconds, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) wrapperCallback);
+            break;
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -24,10 +25,10 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
  */
 public class ChartPanel extends AbstractChartPanel<ChartSettings> implements Component<ChartSettings> {
 
-    public ChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
+    public ChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, CompetitorSelectionProvider competitorSelectionProvider,
             RaceSelectionProvider raceSelectionProvider, Timer timer, DetailType dataToShow, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
-        super(sailingService, competitorSelectionProvider, raceSelectionProvider, timer, stringMessages, errorReporter,
+        super(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer, stringMessages, errorReporter,
                 dataToShow, compactChart, allowTimeAdjust);
     }
 

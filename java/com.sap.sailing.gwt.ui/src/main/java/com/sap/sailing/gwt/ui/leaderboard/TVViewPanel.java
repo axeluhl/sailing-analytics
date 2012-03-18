@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -84,7 +85,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         Timer timer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
         timer.play();
-        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, settings,
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), settings,
         /* preSelectedRace */null, selectionModel, timer, leaderboardName, null, errorReporter, stringMessages,
                 userAgentType) {
             @Override
