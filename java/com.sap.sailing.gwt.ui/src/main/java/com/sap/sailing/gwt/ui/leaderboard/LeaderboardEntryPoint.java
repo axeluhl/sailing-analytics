@@ -55,12 +55,15 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         RootLayoutPanel.get().add(mainPanel);
         mainPanel.addNorth(logoAndTitlePanel, 68);
         
+        ScrollPanel contentScrollPanel = new ScrollPanel();
+        BreadcrumbPanel breadcrumbPanel = null;
+        
         String tvModeParam = Window.Location.getParameter("tvMode");
         if (tvModeParam != null) {
             Timer timer = new Timer(PlayModes.Replay, 1000l);
             TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
                     userAgentType, null, timer, logoAndTitlePanel, mainPanel);
-            mainPanel.add(tvViewPanel);
+            contentScrollPanel.setWidget(tvViewPanel);
         } else {
             LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
                     LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* autoExpandFirstRace */ false),
@@ -68,13 +71,15 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                     leaderboardName, leaderboardGroupName,
                     LeaderboardEntryPoint.this, stringMessages, userAgentType);
-            ScrollPanel leaderboardScrollPanel = new ScrollPanel(leaderboardPanel);
+            contentScrollPanel.setWidget(leaderboardPanel);
             
-            BreadcrumbPanel breadcrumbPanel = createBreadcrumbPanel();
-            
-            mainPanel.addNorth(breadcrumbPanel, 30);
-            mainPanel.add(leaderboardScrollPanel);
+            breadcrumbPanel = createBreadcrumbPanel();
         }
+        
+        if (breadcrumbPanel != null) {
+            mainPanel.addNorth(breadcrumbPanel, 30);
+        }
+        mainPanel.add(contentScrollPanel);
     }
     
     private BreadcrumbPanel createBreadcrumbPanel() {
