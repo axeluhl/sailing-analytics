@@ -53,7 +53,7 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public long getTimeInMilliSeconds(TimePoint timePoint) {
+    public Long getTimeInMilliSeconds(TimePoint timePoint) {
         return getMarkResults(timePoint).getLegtime();
     }
 
