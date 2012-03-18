@@ -18,11 +18,11 @@ public interface TrackedLegOfCompetitor {
 
     /**
      * How much time did the {@link #getCompetitor competitor} spend in this {@link #getLeg() leg} at
-     * <code>timePoint</code>? If the competitor hasn't started the leg yet at <code>timePoint</code>, 0 is returned. If the
-     * competitor has finished the leg already at <code>timePoint</code>, the time it took the competitor to
-     * complete the leg is returned. 
+     * <code>timePoint</code>? If the competitor hasn't started the leg yet at <code>timePoint</code>, <code>null</code>
+     * is returned. If the competitor has finished the leg already at <code>timePoint</code>, the time it took the
+     * competitor to complete the leg is returned.
      */
-    long getTimeInMilliSeconds(TimePoint timePoint);
+    Long getTimeInMilliSeconds(TimePoint timePoint);
 
     /**
      * The distance over ground traveled by the competitor in this leg up to <code>timePoint</code>. If

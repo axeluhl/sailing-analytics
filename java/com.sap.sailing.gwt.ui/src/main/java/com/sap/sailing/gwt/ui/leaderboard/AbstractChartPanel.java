@@ -40,6 +40,8 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -75,6 +77,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected static final int LINE_WIDTH = 1;
     protected MultiCompetitorRaceDataDTO chartData;
     protected final SailingServiceAsync sailingService;
+    protected final AsyncActionsExecutor asyncActionsExecutor;
     protected final ErrorReporter errorReporter;
     protected Chart chart;
     private boolean compactChart;
@@ -94,7 +97,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected DetailType dataToShow;
     protected final CompetitorSelectionProvider competitorSelectionProvider;
 
-    public AbstractChartPanel(SailingServiceAsync sailingService,
+    public AbstractChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow,
             boolean compactChart, boolean allowTimeAdjust) {
@@ -110,6 +113,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         chartData = null;
         this.compactChart = compactChart;
         this.sailingService = sailingService;
+        this.asyncActionsExecutor = asyncActionsExecutor;
         this.raceSelectionProvider = raceSelectionProvider;
         this.allowTimeAdjust = allowTimeAdjust;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -271,8 +275,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 }
             }
             
-            sailingService.getCompetitorsRaceData(getSelectedRace(), dataQuery, toDate, getStepSize(), getDataToShow(),
-                    new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+            GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
+                        getSelectedRace(), dataQuery, toDate, getStepSize(), getDataToShow());
+            getCompetitorsRaceDataAction.setCallback(new AsyncCallback<MultiCompetitorRaceDataDTO>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -296,6 +301,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                             setWidget(chart);
                         }
                     });
+                
+                    asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
         } else {
             setWidget(noCompetitorsSelectedLabel);
         }

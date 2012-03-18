@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -53,7 +54,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         raceSelectionProvider = new RaceSelectionModel();
         raceSelectionProvider.setAllRaces(races);
         
-        multiChartPanel = new MultiChartPanel(sailingService, competitorSelectionProvider, raceSelectionProvider,
+        multiChartPanel = new MultiChartPanel(sailingService, new AsyncActionsExecutor(), competitorSelectionProvider, raceSelectionProvider,
                 timer, stringConstants, errorReporter, false, false);
         multiChartPanel.setSize("100%", "100%");
         

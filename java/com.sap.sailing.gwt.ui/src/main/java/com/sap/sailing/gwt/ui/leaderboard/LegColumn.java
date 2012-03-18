@@ -50,6 +50,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
+    private class TimeTraveledInSeconds extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
+            return new Long(entry.timeInMilliseconds / 1000).doubleValue();
+        }
+    }
+    
     private class AverageSpeedOverGroundInKnots extends AbstractLegDetailField<Double> {
         @Override
         protected Double getFromNonNullEntry(LegEntryDTO entry) {
@@ -208,7 +215,8 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 DetailType.ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS,
                 DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, DetailType.GAP_TO_LEADER_IN_SECONDS,
                 DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS,
-                DetailType.NUMBER_OF_MANEUVERS };
+                DetailType.NUMBER_OF_MANEUVERS,
+                DetailType.TIME_TRAVELED};
     }
 
     @Override
@@ -246,6 +254,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         result.put(DetailType.NUMBER_OF_MANEUVERS, new ManeuverCountLegDetailsColumn(
                 stringConstants.numberOfManeuvers(), getLeaderboardPanel()
                                 .getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.TIME_TRAVELED, new FormattedDoubleLegDetailColumn(stringConstants.time(),
+                "[" + stringConstants.secondsUnit() + "]", new TimeTraveledInSeconds(), 0,
+                getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         return result;
     }
 

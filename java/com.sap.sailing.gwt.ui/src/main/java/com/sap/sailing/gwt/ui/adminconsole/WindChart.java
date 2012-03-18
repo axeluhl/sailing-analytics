@@ -42,6 +42,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
@@ -462,12 +463,13 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         if (raceIdentifier == null) {
             clearChart();
         } else if (needsDataLoading()) {
-            sailingService.getWindInfo(raceIdentifier,
-            // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
-            // Consider incremental updates for new data only.
+            GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, raceIdentifier,
+                    // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
+                    // Consider incremental updates for new data only.
                     from, to, resolutionInMilliseconds, // use race start and time of newest event as default time period
-                    null, // retrieve data on all wind sources
-                    new AsyncCallback<WindInfoForRaceDTO>() {
+                    null); // retrieve data on all wind sources
+            
+            getWindInfoAction.setCallback(new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {

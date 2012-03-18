@@ -74,7 +74,8 @@ public class RankPerLeg extends Action {
                             posGL = legRank - previousLeg.getTrackedLeg(competitor).getRank(time);
                         }
                         final Double gapToLeader = trackedLegOfCompetitor.getGapToLeaderInSeconds(time);
-                        final double legTime = 1. / 1000. * trackedLegOfCompetitor.getTimeInMilliSeconds(time);
+                        final Long timeInMilliSeconds = trackedLegOfCompetitor.getTimeInMilliSeconds(time);
+                        final double legTime = 1. / 1000. * (timeInMilliSeconds==null?0:timeInMilliSeconds);
                         final Speed avgSpeed = trackedLegOfCompetitor.getAverageSpeedOverGround(time);
                         final Distance distanceSailed = trackedLegOfCompetitor.getDistanceTraveled(time);
 

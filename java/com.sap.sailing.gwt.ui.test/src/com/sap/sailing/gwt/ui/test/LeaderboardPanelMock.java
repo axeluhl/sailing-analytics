@@ -17,7 +17,7 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     public LeaderboardPanelMock(SailingServiceAsync sailingService,
             String leaderboardName, ErrorReporter errorReporter,
             StringMessages stringConstants) {
-        super(sailingService, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
+        super(sailingService, null, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
         /* racesToShow */null, /* namesOfRacesToShow */ null, /* autoExpandFirstRace */false), new CompetitorSelectionModel(
                 /* hasMultiSelection */true), leaderboardName, null, errorReporter, stringConstants, null);
     }
