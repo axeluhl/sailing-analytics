@@ -22,11 +22,11 @@ public class AsyncActionsExecutor {
     }
 
     public <T> void execute(final AsyncAction<T> action) {
-        Integer numActionsOfType = actionsPerType.get(action.getName());
+        Integer numActionsOfType = actionsPerType.get(action.getType());
         if (numPendingCalls >= maxPendingCalls || (numActionsOfType != null && numActionsOfType > maxPendingCallsPerType)) {
-            GWT.log("Drop action : " + action.getName());
+            GWT.log("Drop action : " + action.getType());
             // don't put the call into the execution queue, but save it as the last one of each type
-            lastRequestedActions.put(action.getName(), action);
+            lastRequestedActions.put(action.getType(), action);
             return;
         }
 
@@ -34,12 +34,12 @@ public class AsyncActionsExecutor {
         AsyncCallback<T> wrapper = new AsyncCallback<T>() {
             @Override
             public void onFailure(Throwable caught) {
-                String actionName = action.getName();
+                String actionName = action.getType();
                 GWT.log("Execution failure for action of type: " + actionName);
                 AsyncCallback<T> callback = action.getCallback();
                 callback.onFailure(caught);
                 Integer numActionsPerType = actionsPerType.get(actionName);
-                if(numActionsPerType != null && numActionsPerType > 0) {
+                if (numActionsPerType != null && numActionsPerType > 0) {
                     actionsPerType.put(actionName, numActionsPerType-1);
                 }
                 numPendingCalls--;
@@ -48,12 +48,12 @@ public class AsyncActionsExecutor {
 
             @Override
             public void onSuccess(T result) {
-                String actionName = action.getName();
+                String actionName = action.getType();
                 GWT.log("Execution success for action of type: " + actionName);
                 AsyncCallback<T> callback = action.getCallback();
                 callback.onSuccess(result);
                 Integer numActionsPerType = actionsPerType.get(actionName);
-                if(numActionsPerType != null && numActionsPerType > 0) {
+                if (numActionsPerType != null && numActionsPerType > 0) {
                     actionsPerType.put(actionName, numActionsPerType-1);
                 }
                 numPendingCalls--;
@@ -63,19 +63,19 @@ public class AsyncActionsExecutor {
         action.setWrapperCallback(wrapper);
         action.execute();
 
-        if(numActionsOfType == null) {
+        if (numActionsOfType == null) {
             numActionsOfType = 0;
         }
-        actionsPerType.put(action.getName(), numActionsOfType+1);
+        actionsPerType.put(action.getType(), numActionsOfType+1);
         numPendingCalls++;
-        GWT.log("Execute action: " + action.getName());
+        GWT.log("Execute action: " + action.getType());
         GWT.log("Pending actions counter: " + numPendingCalls);
     }
 
     private void checkForEmptyCallQueue(String actionName) {
-        if(numPendingCalls == 0 && lastRequestedActions.containsKey(actionName)) {
+        if (numPendingCalls == 0 && lastRequestedActions.containsKey(actionName)) {
             AsyncAction<?> lastRequestedAction = lastRequestedActions.get(actionName);
-            GWT.log("Set back last action : " + lastRequestedAction.getName());
+            GWT.log("Set back last action : " + lastRequestedAction.getType());
             execute(lastRequestedAction);
         }
     }

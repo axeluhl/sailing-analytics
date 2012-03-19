@@ -21,7 +21,8 @@ public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<MultiCompet
     private final DetailType detailType;
     
     public GetCompetitorsRaceDataAction(SailingServiceAsync sailingService, RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitorsQuery,
-            Date toDate, long stepSize, DetailType detailType) {
+            Date toDate, long stepSize, DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback) {
+        super(callback);
         this.sailingService = sailingService;
         this.race = race;
         this.competitorsQuery = competitorsQuery;

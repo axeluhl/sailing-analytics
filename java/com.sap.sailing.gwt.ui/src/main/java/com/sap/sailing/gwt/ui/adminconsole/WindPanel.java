@@ -39,6 +39,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
@@ -84,8 +85,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final WindChart windChart;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            EventRefresher eventRefresher, final StringMessages stringMessages) {
+    public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            ErrorReporter errorReporter, EventRefresher eventRefresher, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -180,7 +181,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         windSourceSelectionPanel.add(showConfigAnchor);
         grid.setWidget(1, 0, windSourceSelectionPanel);
         windChart = new WindChart(sailingService, raceSelectionProvider, new Timer(
-                PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, errorReporter, false, false);
+                PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, asyncActionsExecutor, errorReporter, false, false);
         windChart.onResize();
         grid.setWidget(2, 0, windChart.getEntryWidget());
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);

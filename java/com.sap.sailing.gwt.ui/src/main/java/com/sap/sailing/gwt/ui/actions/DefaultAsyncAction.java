@@ -4,9 +4,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public abstract class DefaultAsyncAction<Result> implements AsyncAction<Result> {
     private AsyncCallback<Result> wrapperCallback;
-    private AsyncCallback<Result> callback;
+    private final AsyncCallback<Result> callback;
     private Result result;
 
+    protected DefaultAsyncAction(AsyncCallback<Result> callback) {
+        this.callback = callback;
+    }
+    
     public AsyncCallback<Result> getWrapperCallback() {
         return wrapperCallback;
     }
@@ -21,12 +25,7 @@ public abstract class DefaultAsyncAction<Result> implements AsyncAction<Result> 
     }
 
     @Override
-    public void setCallback(AsyncCallback<Result> callback) {
-        this.callback = callback;
-    }
-
-    @Override
-    public String getName() {
+    public String getType() {
         return getClass().getName();
     }
     

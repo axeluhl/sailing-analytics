@@ -18,7 +18,9 @@ public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO> {
     private final Date date;
    
     public GetRaceMapDataAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date date,
-            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, boolean extrapolate) {
+            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, boolean extrapolate,
+            AsyncCallback<RaceMapDataDTO> callback) {
+        super(callback);
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.date = date;

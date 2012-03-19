@@ -13,7 +13,9 @@ public class GetQuickRankAction extends DefaultAsyncAction<List<QuickRankDTO>> {
     private final RaceIdentifier raceIdentifier;
     private final Date date;
 
-    public GetQuickRankAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date date) {
+    public GetQuickRankAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date date,
+            AsyncCallback<List<QuickRankDTO>> callback) {
+        super(callback);
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.date = date;

@@ -42,6 +42,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -74,6 +75,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private final Map<WindSource, Series> windSourceSpeedSeries;
     
     private final ErrorReporter errorReporter;
+    private final AsyncActionsExecutor asyncActionsExecutor;
     private final SailingServiceAsync sailingService;
     private final Chart chart;
     private Series timeLineSeries;
@@ -93,12 +95,14 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
      *            if <code>null</code>, this chart won't update its contents automatically upon race selection change;
      *            otherwise, whenever the selection changes, the wind data of the race selected now is loaded from the
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
+     * @param asyncActionsExecutor TODO
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
-            WindChartSettings settings, final StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean compactChart, boolean allowTimeAdjust) {
+            WindChartSettings settings, final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor,
+            ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
         super();
         this.sailingService = sailingService;
+        this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.allowTimeAdjust = allowTimeAdjust;
@@ -467,9 +471,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                     // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
                     // Consider incremental updates for new data only.
                     from, to, resolutionInMilliseconds, // use race start and time of newest event as default time period
-                    null); // retrieve data on all wind sources
-            
-            getWindInfoAction.setCallback(new AsyncCallback<WindInfoForRaceDTO>() {
+                    null, new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {
@@ -488,6 +490,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                                     + raceIdentifier + ": " + caught.getMessage());
                         }
                     });
+            asyncActionsExecutor.execute(getWindInfoAction);
         }
     }
     

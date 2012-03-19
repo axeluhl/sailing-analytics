@@ -80,8 +80,8 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
                 RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
                 if (race != null) {
                     // draw the wind into the map, get the combined wind
-                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames);
-                    getWindInfoAction.setCallback(new AsyncCallback<WindInfoForRaceDTO>() {
+                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames,
+                        new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 if(timer.getPlayMode() != PlayModes.Live)

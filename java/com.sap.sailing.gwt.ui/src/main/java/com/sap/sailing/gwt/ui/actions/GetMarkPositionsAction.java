@@ -13,7 +13,9 @@ public class GetMarkPositionsAction extends DefaultAsyncAction<List<MarkDTO>> {
     private final RaceIdentifier raceIdentifier;
     private final Date date;
 
-    public GetMarkPositionsAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date date) {
+    public GetMarkPositionsAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date date,
+            AsyncCallback<List<MarkDTO>> callback) {
+        super(callback);
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.date = date;

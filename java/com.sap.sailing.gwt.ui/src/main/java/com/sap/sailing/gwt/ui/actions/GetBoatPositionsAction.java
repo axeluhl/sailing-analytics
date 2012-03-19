@@ -20,7 +20,9 @@ public class GetBoatPositionsAction extends DefaultAsyncAction<Map<CompetitorDTO
     
     
     public GetBoatPositionsAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier,
-            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, boolean extrapolate) {
+            Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to, boolean extrapolate,
+            AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback) {
+        super(callback);
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.from = from;

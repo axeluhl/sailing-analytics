@@ -9,11 +9,9 @@ public interface AsyncAction<Result> {
 
     AsyncCallback<Result> getCallback();
 
-    void setCallback(AsyncCallback<Result> callback);
-
     AsyncCallback<?> getWrapperCallback();
 
     void setWrapperCallback(AsyncCallback<Result> callback);
 
-    String getName(); 
+    String getType(); 
 }

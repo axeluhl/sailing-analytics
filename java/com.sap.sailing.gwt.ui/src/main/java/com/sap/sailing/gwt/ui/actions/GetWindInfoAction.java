@@ -24,7 +24,8 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO> {
     private final CallVariants callVariant;
 
     public GetWindInfoAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, Collection<String> windSourceTypeNames) {
+            int numberOfFixes, Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback) {
+        super(callback);
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.from = from;
@@ -34,8 +35,10 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO> {
         callVariant = CallVariants.Variant1;
     }
 
-    public GetWindInfoAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, 
-            Date fromDate, Date toDate, long resolutionInMilliseconds, Collection<String> windSourceTypeNames) {
+    public GetWindInfoAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date fromDate,
+            Date toDate, long resolutionInMilliseconds, Collection<String> windSourceTypeNames,
+            AsyncCallback<WindInfoForRaceDTO> callback) {
+        super(callback);
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.fromDate = fromDate;
