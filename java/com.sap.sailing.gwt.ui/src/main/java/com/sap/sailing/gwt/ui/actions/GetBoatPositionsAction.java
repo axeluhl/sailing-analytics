@@ -31,7 +31,6 @@ public class GetBoatPositionsAction extends DefaultAsyncAction<Map<CompetitorDTO
         this.extrapolate = extrapolate;
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         sailingService.getBoatPositions(raceIdentifier, from, to, extrapolate, (AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>>) wrapperCallback);

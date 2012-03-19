@@ -25,7 +25,6 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
         this.namesOfRacesForWhichToLoadLegDetails = namesOfRacesForWhichToLoadLegDetails;
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, (AsyncCallback<LeaderboardDTO>) wrapperCallback);

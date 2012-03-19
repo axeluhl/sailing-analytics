@@ -31,7 +31,6 @@ public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO>
         this.extrapolate = extrapolate;
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         sailingService.getRaceMapData(raceIdentifier, date, from, to, extrapolate, (AsyncCallback<RaceMapDataDTO>) wrapperCallback);

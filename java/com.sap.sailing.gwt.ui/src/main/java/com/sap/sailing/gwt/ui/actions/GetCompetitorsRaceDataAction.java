@@ -33,7 +33,6 @@ public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<MultiCompet
         this.detailType = detailType;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         sailingService.getCompetitorsRaceData(race, competitorsQuery, toDate, stepSize, detailType,

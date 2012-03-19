@@ -13,7 +13,7 @@ public interface AsyncAction<Result> {
 
     AsyncCallback<?> getWrapperCallback();
 
-    void setWrapperCallback(AsyncCallback<?> callback);
+    void setWrapperCallback(AsyncCallback<Result> callback);
 
     String getName(); 
 }

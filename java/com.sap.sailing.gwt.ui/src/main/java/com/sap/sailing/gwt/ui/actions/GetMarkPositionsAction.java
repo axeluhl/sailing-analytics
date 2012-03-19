@@ -23,7 +23,6 @@ public class GetMarkPositionsAction extends DefaultAsyncAction<List<MarkDTO>>
         this.date = date;
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         sailingService.getMarkPositions(raceIdentifier, date, (AsyncCallback<List<MarkDTO>>) wrapperCallback);
