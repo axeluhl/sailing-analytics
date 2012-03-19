@@ -30,7 +30,7 @@ public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO> {
     }
     
     @Override
-    public void execute() {
-        sailingService.getRaceMapData(raceIdentifier, date, from, to, extrapolate, (AsyncCallback<RaceMapDataDTO>) getWrapperCallback());
+    public void execute(AsyncActionsExecutor asyncActionsExecutor) {
+        sailingService.getRaceMapData(raceIdentifier, date, from, to, extrapolate, (AsyncCallback<RaceMapDataDTO>) getWrapperCallback(asyncActionsExecutor));
     }
 }
