@@ -8,16 +8,14 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 
-public class GetQuickRankAction extends DefaultAsyncAction<List<QuickRankDTO>>
-{
+public class GetQuickRankAction extends DefaultAsyncAction<List<QuickRankDTO>> {
     private final SailingServiceAsync sailingService;
     private final RaceIdentifier raceIdentifier;
     private final Date date;
-    private List<QuickRankDTO> result;
-    
-    private AsyncCallback<List<QuickRankDTO>> callback;
 
-    public GetQuickRankAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date date) {
+    public GetQuickRankAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date date,
+            AsyncCallback<List<QuickRankDTO>> callback) {
+        super(callback);
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.date = date;
@@ -25,26 +23,6 @@ public class GetQuickRankAction extends DefaultAsyncAction<List<QuickRankDTO>>
     
     @Override
     public void execute() {
-        sailingService.getQuickRanks(raceIdentifier, date, (AsyncCallback<List<QuickRankDTO>>) wrapperCallback);
-    }
-
-    @Override
-    public List<QuickRankDTO> getResult() {
-        return result;
-    }
-
-    @Override
-    public AsyncCallback<List<QuickRankDTO>> getCallback() {
-        return callback;
-    }
-
-    @Override
-    public void setCallback(AsyncCallback<List<QuickRankDTO>> callback) {
-        this.callback = callback;
-    }
-
-    @Override
-    public String getName() {
-        return GetQuickRankAction.class.getName();
+        sailingService.getQuickRanks(raceIdentifier, date, (AsyncCallback<List<QuickRankDTO>>) getWrapperCallback());
     }
 }

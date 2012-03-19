@@ -7,18 +7,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
-public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDTO>
-{
+public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDTO> {
     private final SailingServiceAsync sailingService;
     private final String leaderboardName;
     private final Date date;
     private final Collection<String> namesOfRacesForWhichToLoadLegDetails;
-    private LeaderboardDTO result;
     
-    private AsyncCallback<LeaderboardDTO> callback;
-
     public GetLeaderboardByNameAction(SailingServiceAsync sailingService, String leaderboardName, Date date,
-            final Collection<String> namesOfRacesForWhichToLoadLegDetails) {
+            final Collection<String> namesOfRacesForWhichToLoadLegDetails, AsyncCallback<LeaderboardDTO> callback) {
+        super(callback);
         this.sailingService = sailingService;
         this.leaderboardName = leaderboardName;
         this.date = date;
@@ -27,26 +24,7 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
     
     @Override
     public void execute() {
-        sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, (AsyncCallback<LeaderboardDTO>) wrapperCallback);
+        sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, (AsyncCallback<LeaderboardDTO>) getWrapperCallback());
     }
 
-    @Override
-    public LeaderboardDTO getResult() {
-        return result;
-    }
-
-    @Override
-    public AsyncCallback<LeaderboardDTO> getCallback() {
-        return callback;
-    }
-
-    @Override
-    public void setCallback(AsyncCallback<LeaderboardDTO> callback) {
-        this.callback = callback;
-    }
-
-    @Override
-    public String getName() {
-        return GetLeaderboardByNameAction.class.getName();
-    }
 }

@@ -177,7 +177,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         components.add(competitorChart);
         competitorChart.setVisible(false);
 
-        windChart = createWindChart();
+        windChart = createWindChart(asyncActionsExecutor);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.setVisible(false);
         components.add(windChart);
@@ -275,7 +275,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             componentViewers.add(raceMapViewer);
         }
 
-        windChart = createWindChart();
+        windChart = createWindChart(asyncActionsExecutor);
         windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
                 windChart, "auto", "400px", stringMessages);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
@@ -312,10 +312,10 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
                 userAgentType);
     }
 
-    private WindChart createWindChart() {
+    private WindChart createWindChart(AsyncActionsExecutor asyncActionsExecutor) {
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
         return new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
-                stringMessages, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN, true);
+                stringMessages, asyncActionsExecutor, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN, true);
     }
 
     private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,

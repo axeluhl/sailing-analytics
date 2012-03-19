@@ -276,8 +276,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             }
             
             GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
-                        getSelectedRace(), dataQuery, toDate, getStepSize(), getDataToShow());
-            getCompetitorsRaceDataAction.setCallback(new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+                        getSelectedRace(), dataQuery, toDate, getStepSize(), getDataToShow(),
+                    new AsyncCallback<MultiCompetitorRaceDataDTO>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
@@ -301,7 +301,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                             setWidget(chart);
                         }
                     });
-                
                     asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
         } else {
             setWidget(noCompetitorsSelectedLabel);

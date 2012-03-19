@@ -1127,8 +1127,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void loadCompleteLeaderboard(Date date) {
         if (needsDataLoading()) {
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService, getLeaderboardName(), date,
-                    /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces());
-            getLeaderboardByNameAction.setCallback(new AsyncCallback<LeaderboardDTO>() {
+                    /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), new AsyncCallback<LeaderboardDTO>() {
                 @Override
                 public void onSuccess(LeaderboardDTO result) {
                     updateLeaderboard(result);

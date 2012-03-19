@@ -20,11 +20,9 @@ public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<MultiCompet
     private final long stepSize;
     private final DetailType detailType;
     
-    private MultiCompetitorRaceDataDTO result;
-    private AsyncCallback<MultiCompetitorRaceDataDTO> callback;
-
     public GetCompetitorsRaceDataAction(SailingServiceAsync sailingService, RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitorsQuery,
-            Date toDate, long stepSize, DetailType detailType) {
+            Date toDate, long stepSize, DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback) {
+        super(callback);
         this.sailingService = sailingService;
         this.race = race;
         this.competitorsQuery = competitorsQuery;
@@ -36,26 +34,6 @@ public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<MultiCompet
     @Override
     public void execute() {
         sailingService.getCompetitorsRaceData(race, competitorsQuery, toDate, stepSize, detailType,
-                    (AsyncCallback<MultiCompetitorRaceDataDTO>) wrapperCallback);
-    }
-
-    @Override
-    public MultiCompetitorRaceDataDTO getResult() {
-        return result;
-    }
-
-    @Override
-    public AsyncCallback<MultiCompetitorRaceDataDTO> getCallback() {
-        return callback;
-    }
-
-    @Override
-    public void setCallback(AsyncCallback<MultiCompetitorRaceDataDTO> callback) {
-        this.callback = callback;
-    }
-
-    @Override
-    public String getName() {
-        return GetCompetitorsRaceDataAction.class.getName();
+                    (AsyncCallback<MultiCompetitorRaceDataDTO>) getWrapperCallback());
     }
 }
