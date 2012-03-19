@@ -485,9 +485,8 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            if(timer.getPlayMode() != PlayModes.Live)
                                 errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace() + " "
-                                    + raceIdentifier + ": " + caught.getMessage());
+                                    + raceIdentifier + ": " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
                         }
                     });
             asyncActionsExecutor.execute(getWindInfoAction);

@@ -332,8 +332,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, new AsyncCallback<RaceMapDataDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            if(timer.getPlayMode() != PlayModes.Live)
-                                errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage());
+                            errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
                         }
 
                         @Override
@@ -392,8 +391,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    if(timer.getPlayMode() != PlayModes.Live)
-                                        errorReporter.reportError("Error obtaining wind information: " + caught.getMessage());
+                                    errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
                                 }
 
                                 @Override
