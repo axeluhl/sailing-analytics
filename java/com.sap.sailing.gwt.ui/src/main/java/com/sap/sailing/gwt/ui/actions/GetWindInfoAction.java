@@ -17,16 +17,12 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO>
     private int numberOfFixes;
     private Collection<String> windSourceTypeNames;
     
-    private WindInfoForRaceDTO result;
-
     private long resolutionInMilliseconds;
     private Date fromDate;
     private Date toDate;
     
     private enum CallVariants { Variant1, Variant2 };
     private final CallVariants callVariant;
-
-    private AsyncCallback<WindInfoForRaceDTO> callback;
 
     public GetWindInfoAction(SailingServiceAsync sailingService, RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, Collection<String> windSourceTypeNames) {
@@ -60,25 +56,5 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO>
             sailingService.getWindInfo(raceIdentifier, fromDate, toDate, resolutionInMilliseconds, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) wrapperCallback);
             break;
         }
-    }
-
-    @Override
-    public WindInfoForRaceDTO getResult() {
-        return result;
-    }
-
-    @Override
-    public AsyncCallback<WindInfoForRaceDTO> getCallback() {
-        return callback;
-    }
-
-    @Override
-    public void setCallback(AsyncCallback<WindInfoForRaceDTO> callback) {
-        this.callback = callback;
-    }
-    
-    @Override
-    public String getName() {
-        return GetWindInfoAction.class.getName();
     }
 }

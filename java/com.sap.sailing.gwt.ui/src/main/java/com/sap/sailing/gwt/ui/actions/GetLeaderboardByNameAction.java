@@ -13,10 +13,7 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
     private final String leaderboardName;
     private final Date date;
     private final Collection<String> namesOfRacesForWhichToLoadLegDetails;
-    private LeaderboardDTO result;
     
-    private AsyncCallback<LeaderboardDTO> callback;
-
     public GetLeaderboardByNameAction(SailingServiceAsync sailingService, String leaderboardName, Date date,
             final Collection<String> namesOfRacesForWhichToLoadLegDetails) {
         this.sailingService = sailingService;
@@ -30,23 +27,4 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
         sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, (AsyncCallback<LeaderboardDTO>) wrapperCallback);
     }
 
-    @Override
-    public LeaderboardDTO getResult() {
-        return result;
-    }
-
-    @Override
-    public AsyncCallback<LeaderboardDTO> getCallback() {
-        return callback;
-    }
-
-    @Override
-    public void setCallback(AsyncCallback<LeaderboardDTO> callback) {
-        this.callback = callback;
-    }
-
-    @Override
-    public String getName() {
-        return GetLeaderboardByNameAction.class.getName();
-    }
 }
