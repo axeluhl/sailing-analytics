@@ -22,7 +22,7 @@ public class GetMarkPositionsAction extends DefaultAsyncAction<List<MarkDTO>> {
     }
     
     @Override
-    public void execute() {
-        sailingService.getMarkPositions(raceIdentifier, date, (AsyncCallback<List<MarkDTO>>) getWrapperCallback());
+    public void execute(AsyncActionsExecutor asyncActionsExecutor) {
+        sailingService.getMarkPositions(raceIdentifier, date, (AsyncCallback<List<MarkDTO>>) getWrapperCallback(asyncActionsExecutor));
     }
 }

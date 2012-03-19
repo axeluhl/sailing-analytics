@@ -32,8 +32,8 @@ public class GetCompetitorsRaceDataAction extends DefaultAsyncAction<MultiCompet
     }
 
     @Override
-    public void execute() {
+    public void execute(AsyncActionsExecutor asyncActionsExecutor) {
         sailingService.getCompetitorsRaceData(race, competitorsQuery, toDate, stepSize, detailType,
-                    (AsyncCallback<MultiCompetitorRaceDataDTO>) getWrapperCallback());
+                    (AsyncCallback<MultiCompetitorRaceDataDTO>) getWrapperCallback(asyncActionsExecutor));
     }
 }

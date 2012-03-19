@@ -23,8 +23,8 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
     }
     
     @Override
-    public void execute() {
-        sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, (AsyncCallback<LeaderboardDTO>) getWrapperCallback());
+    public void execute(AsyncActionsExecutor asyncActionsExecutor) {
+        sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, (AsyncCallback<LeaderboardDTO>) getWrapperCallback(asyncActionsExecutor));
     }
 
 }

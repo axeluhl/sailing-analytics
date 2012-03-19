@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class AsyncActionsExecutor {
     private Map<String, AsyncAction<?>> lastRequestedActions;
@@ -29,30 +28,7 @@ public class AsyncActionsExecutor {
             lastRequestedActions.put(action.getType(), action);
             return;
         }
-
-        // Wrap with action callback to hook into the call chain
-        AsyncCallback<T> wrapper = new AsyncCallback<T>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                String type = action.getType();
-                GWT.log("Execution failure for action of type: " + type);
-                AsyncCallback<T> callback = action.getCallback();
-                callback.onFailure(caught);
-                callCompleted(type);
-            }
-
-            @Override
-            public void onSuccess(T result) {
-                String type = action.getType();
-                GWT.log("Execution success for action of type: " + type);
-                AsyncCallback<T> callback = action.getCallback();
-                callback.onSuccess(result);
-                callCompleted(type);
-            }
-        };
-        action.setWrapperCallback(wrapper);
-        action.execute();
-
+        action.execute(this);
         if (numActionsOfType == null) {
             numActionsOfType = 0;
         }
@@ -62,7 +38,7 @@ public class AsyncActionsExecutor {
         GWT.log("Pending actions counter: " + numPendingCalls);
     }
 
-    private void callCompleted(String type) {
+    protected void callCompleted(String type) {
         Integer numActionsPerType = actionsPerType.get(type);
         if (numActionsPerType != null && numActionsPerType > 0) {
             actionsPerType.put(type, numActionsPerType-1);
