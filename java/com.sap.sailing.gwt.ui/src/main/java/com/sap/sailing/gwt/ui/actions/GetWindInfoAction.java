@@ -8,8 +8,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 
-public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO>
-{
+public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO> {
     private final SailingServiceAsync sailingService;
     private final RaceIdentifier raceIdentifier;
     private Date from;
@@ -50,10 +49,10 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO>
     public void execute() {
         switch (callVariant) {
         case Variant1:
-            sailingService.getWindInfo(raceIdentifier, from, millisecondsStepWidth, numberOfFixes, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) wrapperCallback);
+            sailingService.getWindInfo(raceIdentifier, from, millisecondsStepWidth, numberOfFixes, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) getWrapperCallback());
             break;
         case Variant2:
-            sailingService.getWindInfo(raceIdentifier, fromDate, toDate, resolutionInMilliseconds, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) wrapperCallback);
+            sailingService.getWindInfo(raceIdentifier, fromDate, toDate, resolutionInMilliseconds, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) getWrapperCallback());
             break;
         }
     }

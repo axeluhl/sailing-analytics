@@ -21,6 +21,6 @@ public class GetQuickRankAction extends DefaultAsyncAction<List<QuickRankDTO>> {
     
     @Override
     public void execute() {
-        sailingService.getQuickRanks(raceIdentifier, date, (AsyncCallback<List<QuickRankDTO>>) wrapperCallback);
+        sailingService.getQuickRanks(raceIdentifier, date, (AsyncCallback<List<QuickRankDTO>>) getWrapperCallback());
     }
 }

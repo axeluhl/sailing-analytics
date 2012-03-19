@@ -9,8 +9,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 
-public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO>
-{
+public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO> {
     private final SailingServiceAsync sailingService;
     private final RaceIdentifier raceIdentifier;
     private final Map<CompetitorDTO, Date> from;
@@ -30,6 +29,6 @@ public class GetRaceMapDataAction extends DefaultAsyncAction<RaceMapDataDTO>
     
     @Override
     public void execute() {
-        sailingService.getRaceMapData(raceIdentifier, date, from, to, extrapolate, (AsyncCallback<RaceMapDataDTO>) wrapperCallback);
+        sailingService.getRaceMapData(raceIdentifier, date, from, to, extrapolate, (AsyncCallback<RaceMapDataDTO>) getWrapperCallback());
     }
 }

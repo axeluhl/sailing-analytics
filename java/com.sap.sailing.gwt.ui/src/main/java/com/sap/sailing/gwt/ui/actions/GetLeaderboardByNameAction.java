@@ -7,8 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 
-public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDTO>
-{
+public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDTO> {
     private final SailingServiceAsync sailingService;
     private final String leaderboardName;
     private final Date date;
@@ -24,7 +23,7 @@ public class GetLeaderboardByNameAction extends DefaultAsyncAction<LeaderboardDT
     
     @Override
     public void execute() {
-        sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, (AsyncCallback<LeaderboardDTO>) wrapperCallback);
+        sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, (AsyncCallback<LeaderboardDTO>) getWrapperCallback());
     }
 
 }

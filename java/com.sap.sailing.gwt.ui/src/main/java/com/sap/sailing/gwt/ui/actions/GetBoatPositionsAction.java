@@ -30,7 +30,7 @@ public class GetBoatPositionsAction extends DefaultAsyncAction<Map<CompetitorDTO
     
     @Override
     public void execute() {
-        sailingService.getBoatPositions(raceIdentifier, from, to, extrapolate, (AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>>) wrapperCallback);
+        sailingService.getBoatPositions(raceIdentifier, from, to, extrapolate, (AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>>) getWrapperCallback());
     }
 
 }

@@ -21,6 +21,6 @@ public class GetMarkPositionsAction extends DefaultAsyncAction<List<MarkDTO>> {
     
     @Override
     public void execute() {
-        sailingService.getMarkPositions(raceIdentifier, date, (AsyncCallback<List<MarkDTO>>) wrapperCallback);
+        sailingService.getMarkPositions(raceIdentifier, date, (AsyncCallback<List<MarkDTO>>) getWrapperCallback());
     }
 }
