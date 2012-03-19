@@ -36,7 +36,6 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO>
         this.millisecondsStepWidth = millisecondsStepWidth;
         this.numberOfFixes = numberOfFixes;
         this.windSourceTypeNames = windSourceTypeNames;
-
         callVariant = CallVariants.Variant1;
     }
 
@@ -48,11 +47,9 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO>
         this.toDate = toDate;
         this.resolutionInMilliseconds = resolutionInMilliseconds;
         this.windSourceTypeNames = windSourceTypeNames;
-        
         callVariant = CallVariants.Variant2;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         switch (callVariant) {
