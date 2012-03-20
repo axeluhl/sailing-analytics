@@ -66,10 +66,14 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         errorDialogBox.center();
         dialogCloseButton.setFocus(true);
     }
-    
+
     @Override
-    public void reportWarning(String message) {
-        Window.setStatus(message);
+    public void reportError(String message, boolean silentMode) {
+        if(silentMode) {
+            Window.setStatus(message);
+        } else {
+            reportError(message);
+        }
     }
 
     public void createErrorPage(String message) {
