@@ -331,7 +331,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
-                            }
                         }
 
                         @Override
