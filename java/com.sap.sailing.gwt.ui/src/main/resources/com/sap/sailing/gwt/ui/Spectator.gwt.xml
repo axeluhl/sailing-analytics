@@ -36,7 +36,9 @@
   <source path='shared'/>
   <source path='spectator'/>
   <source path='leaderboard'/>
+  <source path='raceboard'/>
   <source path='adminconsole'/>
   <source path='usermanagement'/>
   <source path='test'/>
+  <source path='actions'/>
 </module>

@@ -35,15 +35,18 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/reddot.png")
     ImageResource reddotIcon();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/winddirection.png")
-    ImageResource windDirectionIcon();
-    
+    @Source("com/sap/sailing/gwt/ui/client/images/wind_combined.png")
+    ImageResource combinedWindIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/wind_expedition.png")
+    ImageResource expeditionWindIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_Port.png")
     ImageResource lowlightedBoatIcon_Port();
 
     @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_Starbord.png")
     ImageResource lowlightedBoatIcon_Starboard();
-
+ 
     @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_DW_Port.png")
     ImageResource lowlightedBoatIconDW_Port();
 

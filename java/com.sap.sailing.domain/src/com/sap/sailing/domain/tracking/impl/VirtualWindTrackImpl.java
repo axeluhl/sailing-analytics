@@ -20,8 +20,8 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 public abstract class VirtualWindTrackImpl extends WindTrackImpl {
     private final TrackedRace trackedRace;
     
-    protected VirtualWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence) {
-        super(millisecondsOverWhichToAverage, baseConfidence);
+    protected VirtualWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence, boolean useSpeed) {
+        super(millisecondsOverWhichToAverage, baseConfidence, useSpeed);
         this.trackedRace = trackedRace;
     }
     
@@ -47,10 +47,16 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
      */
     @Override
     public Wind getAveragedWind(Position p, TimePoint at) {
-        Wind result = null;
+        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getAveragedWindUnsynchronized(p, at);
+        return windWithConfidence == null ? null : windWithConfidence.getObject();
+    }
+    
+    @Override
+    public synchronized WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
+        WindWithConfidence<Pair<Position, TimePoint>> result = null;
         TimePoint adjustedAt;
-        TimePoint raceStartTimePoint = trackedRace.getStart();
-        TimePoint timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent();
+        TimePoint raceStartTimePoint = getTrackedRace().getStart();
+        TimePoint timePointOfNewestEvent = getTrackedRace().getTimePointOfNewestEvent();
         if (raceStartTimePoint != null) {
             if (timePointOfNewestEvent != null) {
                 if (at.compareTo(raceStartTimePoint) < 0) {
@@ -73,8 +79,7 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
         if (adjustedAt != null) {
             // we can use the unsynchronized version here because our getInternalFixes() method operates
             // only on a virtual sequence of wind fixes where no concurrency issues have to be observed
-            final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getAveragedWindUnsynchronized(p, adjustedAt);
-            result = estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
+            result = getAveragedWindUnsynchronized(p, adjustedAt);
         }
         return result;
     }

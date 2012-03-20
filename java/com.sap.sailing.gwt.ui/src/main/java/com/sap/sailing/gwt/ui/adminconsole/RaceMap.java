@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,9 +41,9 @@ import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -51,26 +52,31 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
+import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.adminconsole.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
-import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
@@ -78,7 +84,7 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class RaceMap extends SimplePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
+public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
     protected MapWidget map;
 
@@ -112,14 +118,21 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
     /**
      * Markers used as boat display on the map
      */
-    protected final Map<CompetitorDTO, Marker> boatMarkers;
+    private final Map<CompetitorDTO, Marker> boatMarkers;
+
+    /**
+     * Markers used to display wind sensors
+     */
+    private final Map<WindSource, Marker> windSensorMarkers;
+    
+    /**
+     * For each value in {@link #windSensorMarkers} holds the corresponding wind data displayed by the marker.
+     * This can then be used to dynamically produce a title / tooltip.
+     */
+    private final Map<Marker, WindDTO> windForMarkers;
 
     private final Map<MarkDTO, Marker> buoyMarkers;
 
-    private Marker combinedWindMarker;
-    
-    private int combinedWindMarkerPosX;
-    private int combinedWindMarkerPosY;
     /**
      * markers displayed in response to
      * {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
@@ -189,11 +202,16 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
      */
     private List<QuickRankDTO> quickRanks;
 
-    public RaceMap(SailingServiceAsync sailingService, ErrorReporter errorReporter, Timer timer,
+    private final CombinedWindPanel windPanel;
+
+    private final AsyncActionsExecutor asyncActionsExecutor;
+
+    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
             CompetitorSelectionProvider competitorSelection, StringMessages stringMessages) {
         this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
+        this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
         timer.addTimeListener(this);
@@ -203,15 +221,18 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
         buoyMarkers = new HashMap<MarkDTO, Marker>();
         boatMarkers = new HashMap<CompetitorDTO, Marker>();
+        windSensorMarkers = new HashMap<WindSource, Marker>();
+        windForMarkers = new HashMap<Marker, WindDTO>();
         fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
         this.competitorSelection = competitorSelection;
         competitorSelection.addCompetitorSelectionChangeListener(this);
-        combinedWindMarkerPosX = 30;
-        combinedWindMarkerPosY = 30;
         settings = new RaceMapSettings();
         lastTimeChangeBeforeInitialization = null;
         dataInitialized = false;
         initializeData();
+        
+        windPanel = new CombinedWindPanel(sailingService, asyncActionsExecutor, errorReporter, stringMessages, timer);
+        windPanel.setVisible(false);
     }
 
     public double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
@@ -239,7 +260,9 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                 // Add the map to the HTML host page
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
-                RaceMap.this.add(map);
+                RaceMap.this.add(map, 0, 0);
+                RaceMap.this.add(windPanel, 10, 10);
+
                 map.setSize("100%", "100%");
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
@@ -291,6 +314,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         mapFirstZoomDone = false;
         mapZoomedOrPannedSinceLastRaceSelectionChange = false;
         this.selectedRaces = selectedRaces;
+        windPanel.onRaceSelectionChange(selectedRaces);
     }
 
     @Override
@@ -303,20 +327,23 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                     final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
                             computeFromAndTo(date, getCompetitorsToShow());
                     final int requestID = ++boatPositionRequestIDCounter;
-                    
-                    final ParallelExecutionCallback<Map<CompetitorDTO, List<GPSFixDTO>>> getBoatsCallback = new ParallelExecutionCallback<Map<CompetitorDTO, List<GPSFixDTO>>>();
-                    final ParallelExecutionCallback<List<MarkDTO>> getMarksCallback = new ParallelExecutionCallback<List<MarkDTO>>();
-                    final ParallelExecutionCallback<List<QuickRankDTO>> getQuickRanksCallback = new ParallelExecutionCallback<List<QuickRankDTO>>();
-                        new ParallelExecutionHolder(getBoatsCallback, getMarksCallback, getQuickRanksCallback) {
+
+                    GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, race, date, 
+                            fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, new AsyncCallback<RaceMapDataDTO>() {
                         @Override
-                        protected void handleSuccess() {
-                            quickRanks = getQuickRanksCallback.getData();
-                            if (map != null) {
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
+                        }
+
+                        @Override
+                        public void onSuccess(RaceMapDataDTO raceMapDataDTO) {
+                            if (map != null && raceMapDataDTO != null) {
+                                quickRanks = raceMapDataDTO.quickRanks;
                                 // process response only if not received out of order
                                 if (startedProcessingRequestID < requestID) {
                                     startedProcessingRequestID = requestID;
                                     // Do boat specific actions
-                                    Map<CompetitorDTO, List<GPSFixDTO>> boatData = getBoatsCallback.getData();
+                                    Map<CompetitorDTO, List<GPSFixDTO>> boatData = raceMapDataDTO.boatPositions;
                                     Date from = new Date(date.getTime() - settings.getTailLengthInMilliseconds());
                                     updateFixes(boatData, fromAndToAndOverlap.getC());
                                     showBoatsOnMap(from, date, getCompetitorsToShow());
@@ -327,7 +354,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                                         removeAllManeuverMarkers();
                                     }
                                     // Do mark specific actions
-                                    List<MarkDTO> markData = getMarksCallback.getData();
+                                    List<MarkDTO> markData = raceMapDataDTO.markPositions;
                                     showMarksOnMap(markData);
                                     // Rezoom the map
                                     if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
@@ -352,32 +379,44 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                                 lastTimeChangeBeforeInitialization = date;
                             }
                         }
-                         
-                        @Override
-                        protected void handleFailure(Throwable t) {
-                            errorReporter.reportError("Error trying to obtain data for the map: " + t.getMessage());
-                        }
-                    };
-                    sailingService.getBoatPositions(race, fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, getBoatsCallback);
-                    sailingService.getMarkPositions(race, date, getMarksCallback);
-                    sailingService.getQuickRanks(race, date, getQuickRanksCallback);
+                    });
 
+                    asyncActionsExecutor.execute(getRaceMapDataAction);
+                    
                     // draw the wind into the map, get the combined wind
                     List<String> windSourceTypeNames = new ArrayList<String>();
-                    windSourceTypeNames.add(WindSourceType.COMBINED.name());
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
-                    sailingService.getWindInfo(race, date, 1000L, 1, 0.0, 0.0, null,
-                            new AsyncCallback<WindInfoForRaceDTO>() {
+                    
+                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames,
+                        new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining wind: " + caught.getMessage());
+                                    errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
                                 }
 
                                 @Override
-                                public void onSuccess(WindInfoForRaceDTO windInfoForRaceDTO) {
-                                    showWindOnMap(windInfoForRaceDTO);
+                                public void onSuccess(WindInfoForRaceDTO windInfo) {
+                                    List<Pair<WindSource, WindDTO>> windSourcesToShow = new ArrayList<Pair<WindSource, WindDTO>>();
+                                    if(windInfo != null) {
+                                        for(WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
+                                            WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
+                                            switch (windSource.getType()) {
+                                                case EXPEDITION:
+                                                {
+                                                    if(windTrackInfoDTO.windFixes.size() > 0) {
+                                                        WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
+                                                        windSourcesToShow.add(new Pair<WindSource, WindDTO>(windSource, windDTO));
+                                                    }
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    showWindSensorsOnMap(windSourcesToShow);
                                 }
                             });
+                    
+                    asyncActionsExecutor.execute(getWindInfoAction);
                 }
             }
         }
@@ -473,58 +512,6 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         }
     }
 
-    protected void showWindOnMap(WindInfoForRaceDTO windInfo) {
-        for(WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
-            WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
-            switch (windSource.getType()) {
-                    case COMBINED:
-                    {
-                        if(windTrackInfoDTO.windFixes.size() > 0) {
-                            WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-                            // double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
-                            double windFromDeg = windDTO.dampenedTrueWindFromDeg;
-
-                            if(combinedWindMarker == null)
-                                createCombinedWindMarker();
-                            
-                            if(map != null && combinedWindMarker != null) {
-                                LatLng windMarkerPositionLatLng = map.convertDivPixelToLatLng(Point.newInstance(combinedWindMarkerPosX, combinedWindMarkerPosY));
-                                combinedWindMarker.setLatLng(windMarkerPositionLatLng);
-
-                                ImageTransformer transformer = imageResources.getCombinedWindIconTransformer();
-                                String transformedImageURL = transformer.getTransformedImageURL(windFromDeg, 1.0);
-                                combinedWindMarker.setImage(transformedImageURL);
-                            }
-                        }
-                    }
-                    break;
-                    case EXPEDITION:
-                    {
-                    }
-                break;
-            }
-        }
-    }
-
-    protected Marker createCombinedWindMarker() {
-        if(map != null && combinedWindMarker == null) {
-            LatLng windMarkerPositionLatLng = map.convertDivPixelToLatLng(Point.newInstance(combinedWindMarkerPosX, combinedWindMarkerPosY));
-            Icon icon = Icon.newInstance();
-            icon.setImageURL(null);
-            icon.setShadowURL(null);
-            MarkerOptions options = MarkerOptions.newInstance(icon);
-            combinedWindMarker = new Marker(windMarkerPositionLatLng, options);
-            combinedWindMarker.addMarkerClickHandler(new MarkerClickHandler() {
-                @Override
-                public void onClick(MarkerClickEvent event) {
-                }
-            });
-
-            map.addOverlay(combinedWindMarker);
-        }
-        return combinedWindMarker;
-    }
-
     protected void showMarksOnMap(List<MarkDTO> result) {
         if (map != null) {
             Set<MarkDTO> toRemove = new HashSet<MarkDTO>(buoyMarkers.keySet());
@@ -542,6 +529,35 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             for (MarkDTO toRemoveMarkDTO : toRemove) {
                 Marker marker = buoyMarkers.remove(toRemoveMarkDTO);
                 map.removeOverlay(marker);
+            }
+        }
+    }
+
+    protected void showWindSensorsOnMap(List<Pair<WindSource, WindDTO>> windSensorsList) {
+        if (map != null) {
+            Set<WindSource> toRemoveWindSources = new HashSet<WindSource>(windSensorMarkers.keySet());
+            for (Pair<WindSource, WindDTO> windSourcePair : windSensorsList) {
+                WindSource windSource = windSourcePair.getA(); 
+                WindDTO windDTO = windSourcePair.getB();
+                Marker windSensorMarker = windSensorMarkers.get(windSource);
+                if (windSensorMarker == null) {
+                    windSensorMarker = createWindSensorMarker(windSource, windDTO);
+                    windSensorMarkers.put(windSource, windSensorMarker);
+                    map.addOverlay(windSensorMarker);
+                } else {
+                    double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
+                    ImageTransformer transformer = imageResources.expeditionWindIconTransformer;
+                    String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
+                    windSensorMarker.setImage(transformedImageURL);
+                    windSensorMarker.setLatLng(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
+                    toRemoveWindSources.remove(windSource);
+                }
+                windForMarkers.put(windSensorMarker, windDTO);
+            }
+            for (WindSource toRemoveWindSource : toRemoveWindSources) {
+                Marker marker = windSensorMarkers.remove(toRemoveWindSource);
+                map.removeOverlay(marker);
+                windForMarkers.remove(marker);
             }
         }
     }
@@ -676,6 +692,51 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         return boatMarker;
     }
 
+    protected Marker createWindSensorMarker(final WindSource windSource, final WindDTO windDTO) {
+        double latDeg = windDTO.position.latDeg;
+        double lngDeg = windDTO.position.lngDeg;
+        MarkerOptions options = MarkerOptions.newInstance();
+
+        double windFromDeg = windDTO.dampenedTrueWindFromDeg;
+        ImageTransformer transformer = imageResources.expeditionWindIconTransformer;
+
+        double rotationDegOfWindSymbol = 180.0 + windFromDeg;
+        if(rotationDegOfWindSymbol >= 360.0)
+            rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
+        String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
+        
+        Icon icon = Icon.newInstance(transformedImageURL);
+        icon.setIconAnchor(Point.newInstance(7, 13));
+        options.setIcon(icon);
+        final Marker windSensorMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);
+        windSensorMarker.addMarkerClickHandler(new MarkerClickHandler() {
+            @Override
+            public void onClick(MarkerClickEvent event) {
+                LatLng latlng = windSensorMarker.getLatLng();
+                showWindSensorInfoWindow(windSource, windDTO, latlng);
+            }
+        });
+        windSensorMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler() {
+            @Override
+            public void onMouseOver(MarkerMouseOverEvent event) {
+                WindDTO windForMarker = windForMarkers.get(windSensorMarker);
+                if (windForMarker != null) {
+                    String title = stringMessages.wind() + " "
+                            + Math.round(windForMarker.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ " ("
+                                    + WindSourceTypeFormatter.format(windSource, stringMessages) + ")";
+                    map.setTitle(title);
+                }
+            }
+        });
+        windSensorMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
+            @Override
+            public void onMouseOut(MarkerMouseOutEvent event) {
+                map.setTitle("");
+            }
+        });
+        return windSensorMarker;
+    }
+
     private void showMarkInfoWindow(MarkDTO markDTO, LatLng latlng) {
         map.getInfoWindow().open(latlng, new InfoWindowContent(getInfoWindowContent(markDTO)));
     }
@@ -686,10 +747,31 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
                 new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor)));
     }
 
+    private String formatPosition(double lat, double lng) {
+        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
+        String result = stringMessages.position() + ": " + numberFormat.format(lat) + " lat, " + numberFormat.format(lng) + " lng";
+        return result;
+    }
+    
+    private void showWindSensorInfoWindow(final WindSource windSource, final WindDTO windDTO, LatLng where) {
+        map.getInfoWindow().open(where,
+                new InfoWindowContent(getInfoWindowContent(windSource, windDTO)));
+    }
+
     private Widget getInfoWindowContent(MarkDTO markDTO) {
         VerticalPanel result = new VerticalPanel();
-        result.add(new Label("Mark " + markDTO.name));
-        result.add(new Label("" + markDTO.position));
+        result.add(new Label("Mark: " + markDTO.name));
+        result.add(new Label(formatPosition(markDTO.position.latDeg, markDTO.position.lngDeg)));
+        return result;
+    }
+
+    private Widget getInfoWindowContent(WindSource windSource, WindDTO windDTO) {
+        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
+        VerticalPanel result = new VerticalPanel();
+        result.add(new Label(stringMessages.windSource() + ": " + WindSourceTypeFormatter.format(windSource, stringMessages)));
+        result.add(new Label(stringMessages.wind() + ": " +  Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
+        result.add(new Label(stringMessages.windSpeed() + ": " + numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
+        result.add(new Label(formatPosition(windDTO.position.latDeg, windDTO.position.lngDeg)));
         return result;
     }
 
@@ -916,7 +998,7 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             }
         }
     }
-    
+
     protected Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
         for (GPSFixDTO fix : fixesForCompetitor) {
             if (!fix.extrapolated) {
@@ -985,10 +1067,10 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
     }
 
     /**
-     * @return The last shown GPS fix for the given competitor
+     * @return The last shown GPS fix for the given competitor, or <code>null</code> if no fix is available
      */
     protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO) {
-        return fixes.get(competitorDTO).get(lastShownFix.get(competitorDTO));
+        return fixes.containsKey(competitorDTO) ? fixes.get(competitorDTO).get(lastShownFix.get(competitorDTO)) : null;
     }
 
     /**
@@ -1117,12 +1199,14 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
         } else {
             // "lowlight" currently selected competitor
             Marker highlightedMarker = boatMarkers.get(competitor);
-            Marker lowlightedMarker = createBoatMarker(competitor, displayHighlighted(competitor));
             if (highlightedMarker != null) {
-                map.removeOverlay(highlightedMarker);
+                Marker lowlightedMarker = createBoatMarker(competitor, displayHighlighted(competitor));
+                if (highlightedMarker != null) {
+                    map.removeOverlay(highlightedMarker);
+                }
+                map.addOverlay(lowlightedMarker);
+                boatMarkers.put(competitor, lowlightedMarker);
             }
-            map.addOverlay(lowlightedMarker);
-            boatMarkers.put(competitor, lowlightedMarker);
         }
     }
 
@@ -1248,7 +1332,6 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
     }
     
     public static class BuoysBoundsCalculater implements LatLngBoundsCalculator {
-
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
             LatLngBounds newBounds = null;
@@ -1266,7 +1349,26 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
             }
             return newBounds;
         }
-        
+    }
+
+    public static class WindSensorsBoundsCalculater implements LatLngBoundsCalculator {
+        @Override
+        public LatLngBounds calculateNewBounds(RaceMap forMap) {
+            LatLngBounds newBounds = null;
+            Collection<Marker> marksToZoom = forMap.windSensorMarkers.values();
+            if (marksToZoom != null) {
+                for (Marker marker: marksToZoom) {
+                    LatLng markLatLng = marker.getLatLng();
+                    LatLngBounds bounds = LatLngBounds.newInstance(markLatLng, markLatLng);
+                    if (newBounds == null) {
+                        newBounds = bounds;
+                    } else {
+                        newBounds.extend(markLatLng);
+                    }
+                }
+            }
+            return newBounds;
+        }
     }
 
     @Override
@@ -1281,7 +1383,18 @@ public class RaceMap extends SimplePanel implements TimeListener, CompetitorSele
 
     @Override
     public void onResize() {
-        map.checkResize();
-        zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
+        if (map != null) {
+            map.checkResize();
+            zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
+        }
+    }
+
+    public Map<CompetitorDTO, Marker> getBoatMarkers() {
+        return boatMarkers;
+    }
+
+    @Override
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        timeChanged(timer.getTime());
     }
 }

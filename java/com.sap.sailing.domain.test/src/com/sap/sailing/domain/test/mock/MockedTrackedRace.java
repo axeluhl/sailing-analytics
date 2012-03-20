@@ -40,7 +40,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
-    private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000);
+    private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true);
     
     public WindTrack getWindTrack() {
         return windTrack;
@@ -481,6 +481,30 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             Iterable<WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Iterable<WindSource> getWindSourcesToExclude() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

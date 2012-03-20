@@ -14,7 +14,8 @@ import com.sap.sailing.domain.common.WindSource;
  *
  */
 public interface WindStore {
-    WindTrack getWindTrack(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource, long millisecondsOverWhichToAverage);
+    WindTrack getWindTrack(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
+            long millisecondsOverWhichToAverage, long delayForWindEstimationCacheInvalidation);
 
     /**
      * Loads all wind tracks known to this wind store that pertain to the tracked race / event specified.

@@ -72,63 +72,63 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
         return trackedRace;
     }
 
-    protected TimePoint lowerToResolution(Wind w) {
+    protected TimePoint lowerToResolution(TimePoint timePoint) {
         TimePoint result;
         final TimePoint timePointOfLastEvent = getTrackedRace().getTimePointOfLastEvent();
         if (timePointOfLastEvent == null) {
             // nothing received yet; "lowering" to end of time
             result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / getResolutionInMilliseconds()
                     * getResolutionInMilliseconds());
-        } else if (w.getTimePoint().compareTo(timePointOfLastEvent) > 0) {
-            result = lowerToResolution(new DummyWind(timePointOfLastEvent));
+        } else if (timePoint.compareTo(timePointOfLastEvent) > 0) {
+            result = lowerToResolution(timePointOfLastEvent);
         } else {
-            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() - 1) / getResolutionInMilliseconds()
+            result = new MillisecondsTimePoint((timePoint.asMillis() - 1) / getResolutionInMilliseconds()
                     * getResolutionInMilliseconds());
         }
         return result;
     }
 
-    protected TimePoint floorToResolution(Wind w) {
+    protected TimePoint floorToResolution(TimePoint timePoint) {
         TimePoint result;
         final TimePoint timePointOfLastEvent = getTrackedRace().getTimePointOfLastEvent();
         if (timePointOfLastEvent == null) {
             // nothing received yet; "lowering" to end of time
             result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / getResolutionInMilliseconds()
                     * getResolutionInMilliseconds());
-        } else if (w.getTimePoint().compareTo(timePointOfLastEvent) > 0) {
-            result = floorToResolution(new DummyWind(timePointOfLastEvent));
+        } else if (timePoint.compareTo(timePointOfLastEvent) > 0) {
+            result = floorToResolution(timePointOfLastEvent);
         } else {
-            result = new MillisecondsTimePoint(w.getTimePoint().asMillis() / getResolutionInMilliseconds()
+            result = new MillisecondsTimePoint(timePoint.asMillis() / getResolutionInMilliseconds()
                     * getResolutionInMilliseconds());
         }
         return result;
     }
 
-    protected TimePoint ceilingToResolution(Wind w) {
+    protected TimePoint ceilingToResolution(TimePoint timePoint) {
         TimePoint result;
         final TimePoint startOfTracking = getTrackedRace().getStartOfTracking();
         if (startOfTracking == null) {
             // no start of tracking yet; "ceiling" to beginning of time
             result = new MillisecondsTimePoint(0);
-        } else if (w.getTimePoint().compareTo(startOfTracking) < 0) {
-            result = ceilingToResolution(new DummyWind(startOfTracking));
+        } else if (timePoint.compareTo(startOfTracking) < 0) {
+            result = ceilingToResolution(startOfTracking);
         } else {
-            result = new MillisecondsTimePoint(((w.getTimePoint().asMillis() - 1) / getResolutionInMilliseconds() + 1)
+            result = new MillisecondsTimePoint(((timePoint.asMillis() - 1) / getResolutionInMilliseconds() + 1)
                     * getResolutionInMilliseconds());
         }
         return result;
     }
 
-    protected TimePoint higherToResolution(Wind w) {
+    protected TimePoint higherToResolution(TimePoint timePoint) {
         TimePoint result;
         final TimePoint startOfTracking = getTrackedRace().getStartOfTracking();
         if (startOfTracking == null) {
             // no start of tracking yet; "ceiling" to beginning of time
             result = new MillisecondsTimePoint(0);
-        } else if (w.getTimePoint().compareTo(startOfTracking) < 0) {
-            result = higherToResolution(new DummyWind(startOfTracking));
+        } else if (timePoint.compareTo(startOfTracking) < 0) {
+            result = higherToResolution(startOfTracking);
         } else {
-            result = new MillisecondsTimePoint((w.getTimePoint().asMillis() / getResolutionInMilliseconds() + 1)
+            result = new MillisecondsTimePoint((timePoint.asMillis() / getResolutionInMilliseconds() + 1)
                     * getResolutionInMilliseconds());
         }
         return result;
@@ -143,7 +143,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
      */
     protected TimePoint getFrom() {
         return from == null ? getTrackedRace().getStart() == null ? new MillisecondsTimePoint(Long.MAX_VALUE)
-                : floorToResolution(new DummyWind(getTrackedRace().getStart())) : from;
+                : floorToResolution(getTrackedRace().getStart()) : from;
     }
 
     /**
@@ -155,12 +155,12 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
      */
     protected TimePoint getTo() {
         return getToInternal() == null ? getTrackedRace().getTimePointOfNewestEvent() == null ? new MillisecondsTimePoint(1)
-                : ceilingToResolution(new DummyWind(getTrackedRace().getTimePointOfNewestEvent())) : getToInternal();
+                : ceilingToResolution(getTrackedRace().getTimePointOfNewestEvent()) : getToInternal();
     }
 
     @Override
     public Wind lower(Wind w) {
-        TimePoint timePoint = lowerToResolution(w);
+        TimePoint timePoint = lowerToResolution(w.getTimePoint());
         return timePoint.compareTo(getFrom()) < 0 ? null : getWind(w.getPosition(), timePoint);
     }
 
@@ -171,19 +171,19 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     @Override
     public Wind floor(Wind w) {
-        TimePoint timePoint = floorToResolution(w);
+        TimePoint timePoint = floorToResolution(w.getTimePoint());
         return timePoint.compareTo(getFrom()) < 0 ? null : getWind(w.getPosition(), timePoint);
     }
 
     @Override
     public Wind ceiling(Wind w) {
-        TimePoint timePoint = ceilingToResolution(w);
+        TimePoint timePoint = ceilingToResolution(w.getTimePoint());
         return timePoint.compareTo(getTo()) > 0 ? null : getWind(w.getPosition(), timePoint);
     }
 
     @Override
     public Wind higher(Wind w) {
-        TimePoint timePoint = higherToResolution(w);
+        TimePoint timePoint = higherToResolution(w.getTimePoint());
         return timePoint.compareTo(getTo()) > 0 ? null : getWind(w.getPosition(), timePoint);
     }
 
@@ -219,7 +219,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
     @Override
     public Iterator<Wind> descendingIterator() {
         return new Iterator<Wind>() {
-            private TimePoint timePoint = lowerToResolution(new DummyWind(getTo()));
+            private TimePoint timePoint = lowerToResolution(getTo());
 
             @Override
             public boolean hasNext() {
@@ -242,9 +242,9 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     @Override
     public NavigableSet<Wind> subSet(Wind fromElement, boolean fromInclusive, Wind toElement, boolean toInclusive) {
-        return createSubset(track, getTrackedRace(), fromInclusive ? ceilingToResolution(fromElement)
-                : higherToResolution(fromElement), toInclusive ? floorToResolution(toElement)
-                : lowerToResolution(toElement));
+        return createSubset(track, getTrackedRace(), fromInclusive ? ceilingToResolution(fromElement.getTimePoint())
+                : higherToResolution(fromElement.getTimePoint()), toInclusive ? floorToResolution(toElement.getTimePoint())
+                : lowerToResolution(toElement.getTimePoint()));
     }
 
     /**
@@ -255,13 +255,13 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
     @Override
     public NavigableSet<Wind> headSet(Wind toElement, boolean inclusive) {
         return createSubset(track, getTrackedRace(), /* from */ null,
-                inclusive ? ceilingToResolution(toElement) : lowerToResolution(toElement));
+                inclusive ? ceilingToResolution(toElement.getTimePoint()) : lowerToResolution(toElement.getTimePoint()));
     }
 
     @Override
     public NavigableSet<Wind> tailSet(Wind fromElement, boolean inclusive) {
-        return createSubset(track, getTrackedRace(), inclusive ? floorToResolution(fromElement)
-                : higherToResolution(fromElement),
+        return createSubset(track, getTrackedRace(), inclusive ? floorToResolution(fromElement.getTimePoint())
+                : higherToResolution(fromElement.getTimePoint()),
         /* to */ null);
     }
 

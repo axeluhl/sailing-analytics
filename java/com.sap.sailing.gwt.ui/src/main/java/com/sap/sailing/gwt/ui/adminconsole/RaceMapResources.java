@@ -61,9 +61,14 @@ public class RaceMapResources {
      * An arrow showing the combined wind depending on the wind direction 
      */
     protected ImageTransformer combinedWindIconTransformer;
-    
+
+    /**
+     * An arrow showing the wind provided by a wind sensor on a boat 
+     */
+    protected ImageTransformer expeditionWindIconTransformer;
+
     protected Icon buoyIcon;
-    
+
     protected Map<Pair<ManeuverType, Tack>, Icon> maneuverIconsForTypeAndTargetTack;
 
     private MapWidget map;
@@ -81,7 +86,8 @@ public class RaceMapResources {
         boatIconHighlightedPortTransformer = new ImageTransformer(resources.highlightedBoatIcon_Port());
         boatIconStarboardTransformer = new ImageTransformer(resources.lowlightedBoatIcon_Starboard());
         boatIconHighlightedStarboardTransformer = new ImageTransformer(resources.highlightedBoatIcon_Starboard());
-        combinedWindIconTransformer = new ImageTransformer(resources.windDirectionIcon());
+        combinedWindIconTransformer = new ImageTransformer(resources.combinedWindIcon());
+        expeditionWindIconTransformer = new ImageTransformer(resources.expeditionWindIcon());
     }
     
     /**
@@ -92,7 +98,7 @@ public class RaceMapResources {
         this.map = map;
         buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
         buoyIcon.setIconAnchor(Point.newInstance(4, 4));
-        
+
         Icon tackToStarboardIcon = Icon
                 .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
         tackToStarboardIcon.setIconAnchor(Point.newInstance(10, 33));

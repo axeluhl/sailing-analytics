@@ -2,10 +2,8 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
@@ -13,62 +11,22 @@ import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener {
-    private final SailingServiceAsync sailingService;
-    private final ErrorReporter errorReporter;
-
-    private RaceIdentifier raceIdentifier;
+public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
+    private RaceTimesInfoProvider raceTimesInfoProvider;
+    private RaceIdentifier selectedRace;
+    private boolean autoAdjustPlayMode;
     
-    private long refreshIntervalTimeInfos = 3000;
-    
-    private RaceTimesInfoDTO lastRaceTimesInfo;
-    
-    public RaceTimePanel(final SailingServiceAsync sailingService, Timer timer, ErrorReporter errorReporter, StringMessages stringMessages) {
+    public RaceTimePanel(Timer timer, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
         super(timer, stringMessages);
-        
-        this.sailingService = sailingService;
-        this.errorReporter = errorReporter;
-        
-        startAutoTimeInfoUpdate();
+        this.raceTimesInfoProvider = raceTimesInfoProvider;
+        selectedRace = null;
+        autoAdjustPlayMode = true;
     }
-
-    private void startAutoTimeInfoUpdate() {
-        RepeatingCommand command = new RepeatingCommand() {
-            @Override
-            public boolean execute() {
-                readRaceTimesInfo();
-                return true;
-//                if (!isTimeInfosComplete) {
-//                    readRaceTimesInfo();
-//                }
-//                return timer.getPlayState() == PlayStates.Playing ? true: false;
-            }
-        };
-        scheduleTimeInfoUpdateCommand(command);
-    }
-
-    private void scheduleTimeInfoUpdateCommand(RepeatingCommand command) {
-        Scheduler.get().scheduleFixedPeriod(command, (int) refreshIntervalTimeInfos);
-    }
-
-    @Override
-    public void playStateChanged(PlayStates playState, PlayModes playMode) {
-        super.playStateChanged(playState, playMode);
-        
-        switch(playState) {
-            case Playing:
-                startAutoTimeInfoUpdate();
-                break;
-            case Paused:
-            case Stopped:
-                break;
-        }
-    }    
     
     @Override
     public void updateSettings(RaceTimePanelSettings newSettings) {
         super.updateSettings(newSettings);
-        readRaceTimesInfo();
+        raceTimesInfoProvider.setRequestInterval(newSettings.getRefreshInterval());
     }
 
     @Override
@@ -76,7 +34,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         RaceTimePanelSettings result = new RaceTimePanelSettings();
         result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
         result.setRefreshInterval(timer.getRefreshInterval());
-        result.setRaceTimesInfo(lastRaceTimesInfo);
+        result.setRaceTimesInfo(raceTimesInfoProvider.getRaceTimesInfo(selectedRace));
         return result;
     }
 
@@ -86,7 +44,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
 
     private void updateTimeInfo(RaceTimesInfoDTO raceTimesInfo) {
-        lastRaceTimesInfo = raceTimesInfo;
         if (raceTimesInfo == null) { 
             // in case the race is not tracked anymore we reset the timer
             reset();
@@ -97,6 +54,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
                 setLiveGenerallyPossible(liveModeToBeMadePossible);
                 setJumpToLiveEnablement(liveModeToBeMadePossible && timer.getPlayMode() != PlayModes.Live);
+                if (autoAdjustPlayMode && liveModeToBeMadePossible) {
+                    timer.setPlayMode(PlayModes.Live);
+                }
+                
                 boolean timerAlreadyInitialized = getMin() != null && getMax() != null && sliderBar.getCurrentValue() != null;
                 initMinMax(raceTimesInfo);
                 if (!timerAlreadyInitialized) {
@@ -115,6 +76,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
         long eventTimeoutTolerance = 30 * 1000; // 30s 
         long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
+        RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
         return lastRaceTimesInfo != null &&
                 lastRaceTimesInfo.timePointOfNewestEvent != null &&
                 liveTimePointInMillis < lastRaceTimesInfo.timePointOfNewestEvent.getTime() + eventTimeoutTolerance &&
@@ -125,8 +87,23 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            raceIdentifier = selectedRaces.iterator().next();
-            readRaceTimesInfo();
+            selectedRace = selectedRaces.iterator().next();
+            if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
+                raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
+            }
+        }
+    }
+    
+    @Override
+    public void playStateChanged(PlayStates playState, PlayModes playMode) {
+        super.playStateChanged(playState, playMode);
+        
+        switch (playMode) {
+        case Replay:
+            autoAdjustPlayMode = false;
+            break;
+        case Live:
+            break;
         }
     }
 
@@ -242,20 +219,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         // isTimeInfoComplete = false;
     }
     
-    private void readRaceTimesInfo() {
-        if (raceIdentifier != null) {
-            sailingService.getRaceTimesInfo(raceIdentifier, new AsyncCallback<RaceTimesInfoDTO>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error reading race timepoints: " + caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(RaceTimesInfoDTO raceTimesInfo) {
-                    // raceTimesInfo can be null if the race is not tracked anymore
-                    updateTimeInfo(raceTimesInfo);
-                }
-            });
-        }
+    @Override
+    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+      // raceTimesInfo can be null if the race is not tracked anymore
+      updateTimeInfo(raceTimesInfos.get(selectedRace));
     }
 }

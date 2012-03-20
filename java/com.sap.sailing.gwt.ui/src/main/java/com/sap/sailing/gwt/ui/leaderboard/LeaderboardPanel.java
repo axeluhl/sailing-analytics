@@ -46,6 +46,8 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -154,7 +156,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * changes its playing state
      */
     private final Anchor playPause;
-
+    
     private final CompetitorSelectionProvider competitorSelectionProvider;
 
     /**
@@ -194,7 +196,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private boolean currentlyHandlingPlayStateChange;
 
     private PlayModes oldPlayMode;
-    
+
+    private final AsyncActionsExecutor asyncActionsExecutor;
+
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
 
@@ -295,7 +299,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             expandableSortableColumn.toggleExpansion();
         }
         if (newSettings.getNameOfRaceToSort() != null) {
-            sort(getRaceColumnByRaceName(newSettings.getNameOfRaceToSort()), /* ascending */ true);
+            final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(newSettings.getNameOfRaceToSort());
+            if (raceColumnByRaceName != null) {
+                sort(raceColumnByRaceName, /* ascending */ true);
+            }
         }
     }
 
@@ -839,25 +846,26 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings,
+    public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentTypes userAgentType) {
-        this(sailingService, settings, /* preSelectedRace */null, competitorSelectionProvider, leaderboardName,
+        this(sailingService, asyncActionsExecutor, settings, /* preSelectedRace */null, competitorSelectionProvider, leaderboardName,
                 leaderboardGroupName, errorReporter, stringMessages, userAgentType);
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
+    public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentTypes userAgentType) {
-        this(sailingService, settings, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
+        this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                 leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
+    public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentTypes userAgentType) {
         this.sailingService = sailingService;
+        this.asyncActionsExecutor = asyncActionsExecutor;
         this.preSelectedRace = preSelectedRace;
         this.competitorSelectionProvider = competitorSelectionProvider;
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
@@ -936,7 +944,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (LeaderboardPanel.this.timer.getPlayState() == PlayStates.Playing) {
                     LeaderboardPanel.this.timer.pause();
                 } else {
-                    LeaderboardPanel.this.timer.play();
+                    // playing the standalone leaderboard means putting it into live mode
+                    LeaderboardPanel.this.timer.setPlayMode(PlayModes.Live);
                 }
             }
         };
@@ -972,7 +981,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        if(!isEmbedded) {
+        if (!isEmbedded) {
             contentPanel.add(headerPanel);
             contentPanel.add(toolbarPanel);
         }
@@ -1018,10 +1027,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private SafeHtml getPlayPauseImgHtml(PlayStates playState) {
-        if (playState == PlayStates.Playing)
+        if (playState == PlayStates.Playing) {
             return AbstractImagePrototype.create(pauseIcon).getSafeHtml();
-        else
+        } else {
             return AbstractImagePrototype.create(playIcon).getSafeHtml();
+        }
     }
 
     private void setDelayInMilliseconds(long delayInMilliseconds) {
@@ -1115,18 +1125,25 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     private void loadCompleteLeaderboard(Date date) {
-        getSailingService().getLeaderboardByName(getLeaderboardName(), date,
-        /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), new AsyncCallback<LeaderboardDTO>() {
-            @Override
-            public void onSuccess(LeaderboardDTO result) {
-                updateLeaderboard(result);
-            }
+        if (needsDataLoading()) {
+            GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService, getLeaderboardName(), date,
+                    /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), new AsyncCallback<LeaderboardDTO>() {
+                @Override
+                public void onSuccess(LeaderboardDTO result) {
+                    updateLeaderboard(result);
+                }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                getErrorReporter().reportError("Error trying to obtain leaderboard contents: " + caught.getMessage());
-            }
-        });
+                @Override
+                public void onFailure(Throwable caught) {
+                    getErrorReporter().reportError("Error trying to obtain leaderboard contents: " + caught.getMessage(), timer.getPlayMode() != PlayModes.Live);
+                }
+            });
+            asyncActionsExecutor.execute(getLeaderboardByNameAction);
+        }
+    }
+    
+    private boolean needsDataLoading() {
+        return isVisible();
     }
 
     /**
@@ -1256,7 +1273,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         return rankColumn;
     }
 
-    private void setLeaderboard(LeaderboardDTO leaderboard) {
+    protected void setLeaderboard(LeaderboardDTO leaderboard) {
         this.leaderboard = leaderboard;
     }
 
@@ -1700,5 +1717,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         }
         return selectedRows;
+    }
+
+    @Override
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        timeChanged(timer.getTime());
     }
 }

@@ -84,7 +84,8 @@ public class ImageTransformer {
         String result = getUntransformedImageURL();
         if (canvas != null) {
             if (imageElement != null) {
-                scale(scaleFactor);
+                if(scaleFactor != 1.0)
+                    scale(scaleFactor);
                 double angleInRadians = angleInDegrees/180.*Math.PI;
                 context.clearRect(0, 0, 2*canvasRadius, 2*canvasRadius);
                 context.save();

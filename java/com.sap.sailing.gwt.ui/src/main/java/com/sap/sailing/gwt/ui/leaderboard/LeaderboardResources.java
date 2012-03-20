@@ -22,4 +22,11 @@ interface LeaderboardResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/magnifier_slashed.png")
     ImageResource magnifierSlashedIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/jump_forward_button_enabled.png")
+    ImageResource jumpForwardButtonEnabled();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/jump_forward_button_disabled.png")
+    ImageResource jumpForwardButtonDisabled();
+
 }

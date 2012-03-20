@@ -15,15 +15,15 @@ public class EmptyWindStore implements WindStore {
     
     @Override
     public WindTrack getWindTrack(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
-            long millisecondsOverWhichToAverage) {
+            long millisecondsOverWhichToAverage, long delayForWindEstimationCacheInvalidation) {
         switch (windSource.getType()) {
         case COURSE_BASED:
             return new CourseBasedWindTrackImpl(trackedRace, millisecondsOverWhichToAverage, WindSourceType.COURSE_BASED.getBaseConfidence());
         case TRACK_BASED_ESTIMATION:
             return new TrackBasedEstimationWindTrackImpl(trackedRace, millisecondsOverWhichToAverage,
-                    WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence());
+                    WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence(), delayForWindEstimationCacheInvalidation);
         default:
-            return new WindTrackImpl(millisecondsOverWhichToAverage);
+            return new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().useSpeed());
         }
     }
 

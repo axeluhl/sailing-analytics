@@ -1,5 +1,7 @@
+
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,19 +11,25 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
+import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
@@ -30,7 +38,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private String raceName;
     private String leaderboardName;
     private String leaderboardGroupName;
-    private RaceBoardViewMode viewMode;
+    private RaceBoardViewModes viewMode;
 
     @Override
     public void onModuleLoad() {     
@@ -44,12 +52,12 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         if(viewModeParamValue != null && !viewModeParamValue.isEmpty()) {
             try {
                 
-                viewMode = RaceBoardViewMode.valueOf(viewModeParamValue);
+                viewMode = RaceBoardViewModes.valueOf(viewModeParamValue);
             } catch (IllegalArgumentException e) {
-                viewMode = RaceBoardViewMode.CASCADE;
+                viewMode = RaceBoardViewModes.ONESCREEN;
             }
         } else {
-            viewMode = RaceBoardViewMode.CASCADE;
+            viewMode = RaceBoardViewModes.ONESCREEN;
         }
         if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
@@ -126,8 +134,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
         List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
-        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, raceSelectionModel, leaderboardName, leaderboardGroupName,
-                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode);
+        Timer timer = new Timer(PlayModes.Replay, 1000l);
+        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
+                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, new RaceTimesInfoProvider(sailingService, this, singletonList, 1000l));
         raceBoardPanel.fillEvents(events);
 
         switch (viewMode) {
@@ -156,8 +165,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     }
 
     private void createRaceBoardInCascadeMode(RaceBoardPanel raceBoardPanel) {
-
-        FlowPanel raceBoardHeaderPanel = createBoardHeaderPanel(raceBoardPanel);
+        FlowPanel breadcrumbPanel = createBreadcrumbPanel();
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
@@ -168,7 +176,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         //FlowPanel footerShadowPanel = new FlowPanel();
         // footerShadowPanel.addStyleName("footerShadowPanel");
         
-        RootPanel.get().add(raceBoardHeaderPanel);        
+        RootPanel.get().add(breadcrumbPanel);        
         RootPanel.get().add(contentOuterPanel);
         
         // Don't change this order because of the inner logic in html of "position fixed"-elements
@@ -178,12 +186,32 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceBoardPanel.setScrollOffset(logoAndTitlePanel.getOffsetHeight());
     }
     
-    private FlowPanel createBoardHeaderPanel(RaceBoardPanel raceBoardPanel)
-    {
+    private FlowPanel createBreadcrumbPanel() {
         FlowPanel raceBoardHeaderPanel = new FlowPanel();
         raceBoardHeaderPanel.addStyleName("RaceBoardHeaderPanel");
-        if(raceBoardPanel.getBreadcrumbWidget() != null)
-            raceBoardHeaderPanel.add(raceBoardPanel.getBreadcrumbWidget());
+        
+        List<Pair<String, String>> links = new ArrayList<Pair<String, String>>();
+        String debugParam = Window.Location.getParameter("gwt.codesvr");
+        String root = Window.Location.getParameter("root");
+        if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
+            if (root.equals("overview")) {
+                String link = "/gwt/Spectator.html"
+                        + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
+                links.add(new Pair<String, String>(link, stringMessages.home()));
+            }
+            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName
+                    + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
+            links.add(new Pair<String, String>(link, leaderboardGroupName));
+        }
+        if (leaderboardName != null && !leaderboardName.isEmpty()) {
+            String link = "/gwt/Leaderboard.html?name=" + leaderboardName
+                    + (leaderboardGroupName != null ? "&leaderboardGroupName=" + leaderboardGroupName : "")
+                    + "&root=" + root + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
+            links.add(new Pair<String, String>(link, leaderboardName));
+        }
+        BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(links, raceName);
+        raceBoardHeaderPanel.add(breadcrumbPanel);
+        
         return raceBoardHeaderPanel;
     }
 
@@ -204,9 +232,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(raceName, stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        
         logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
         
         return logoAndTitlePanel;
@@ -216,13 +243,17 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
         
-        FlowPanel raceBoardHeaderPanel = createBoardHeaderPanel(raceBoardPanel);
+        FlowPanel breadcrumbPanel = createBreadcrumbPanel();
+        //TODO Quickfix for touch devices
+        Widget settingsWidget = raceBoardPanel.getSettingsWidget();
+        breadcrumbPanel.add(settingsWidget);
+        //
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
         p.addNorth(logoAndTitlePanel, 68);        
-        p.addNorth(raceBoardHeaderPanel,30);
-        p.addSouth(timePanel, 140);                     
+        p.addNorth(breadcrumbPanel, 40);
+        p.addSouth(timePanel, 122);                     
         p.add(raceBoardPanel);
     }    
 }

@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -58,10 +59,21 @@ public interface SailingService extends RemoteService {
 
     void setWind(RaceIdentifier raceIdentifier, WindDTO wind);
 
+    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+            int numberOfFixes, Collection<String> windSourceTypeNames) throws NoWindException;
+
+    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
+            Collection<String> windSourceTypeNames);
+
+    RaceMapDataDTO getRaceMapData(RaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
+            boolean extrapolate) throws NoWindException;
+    
     Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositions(RaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
             Map<CompetitorDTO, Date> to, boolean extrapolate) throws NoWindException;
 
     RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier);
+    
+    List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RaceIdentifier> raceIdentifiers);
     
     List<MarkDTO> getMarkPositions(RaceIdentifier raceIdentifier, Date date);
 
@@ -162,4 +174,6 @@ public interface SailingService extends RemoteService {
             throws NoWindException;
 
     void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
+
+    void setWindSourcesToExclude(RaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
 }

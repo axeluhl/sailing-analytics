@@ -119,4 +119,9 @@ public class QuickRanksListBoxComposite extends Composite implements CompetitorS
         }
     }
 
+    @Override
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        //TODO what to do here
+    }
+
 }

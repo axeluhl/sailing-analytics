@@ -165,7 +165,7 @@ First, check out the branch you want to re-build:
 
  - ensure that there is an ssh tunnel to localhost that 
 
- - "mvn clean install"
+ - rm -rf com.sap.sailing.gwt.ui/com.sap.sailing.gwt.ui.*; mvn -fae clean install 2>&1 | tee log
 
 This will compile the sources, bundle them up in to OSGi bundle JAR
 files, run all tests which required online access to the TracTrac

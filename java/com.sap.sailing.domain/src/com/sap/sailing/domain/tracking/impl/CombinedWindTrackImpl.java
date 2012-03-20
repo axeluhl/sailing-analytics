@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl.EstimatedWindFixesAsNavigableSet;
 
@@ -15,7 +16,8 @@ public class CombinedWindTrackImpl extends VirtualWindTrackImpl {
     private CombinedWindAsNavigableSet virtualInternalRawFixes;
     
     public CombinedWindTrackImpl(TrackedRace trackedRace, double baseConfidence) {
-        super(trackedRace, /* millisecondsOverWhichToAverage not used, see overridden method */ -1, baseConfidence);
+        super(trackedRace, /* millisecondsOverWhichToAverage not used, see overridden method */ -1, baseConfidence,
+                /* useSpeed */ WindSourceType.COMBINED.useSpeed());
         virtualInternalRawFixes = new CombinedWindAsNavigableSet(this, trackedRace, /* resolutionInMilliseconds */ 10000l);
     }
 

@@ -14,6 +14,7 @@ import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -250,9 +251,9 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
 
-    public EditableLeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, String leaderboardGroupName,
+    public EditableLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, StringMessages stringConstants, UserAgentTypes userAgentType) {
-        super(sailingService, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
+        super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                 /* racesToShow */ null, /* namesOfRacesToShow */ null, /* autoExpandFirstRace */false),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, leaderboardGroupName, errorReporter, stringConstants, userAgentType);

@@ -11,7 +11,9 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.PositionWithConfidence;
+import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PositionWithConfidenceImpl;
@@ -23,6 +25,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.domain.confidence.ConfidenceBasedAverager;
+import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.HasConfidence;
 import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
@@ -31,6 +34,7 @@ import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.confidence.impl.ScalableDoubleWithConfidence;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.tracking.impl.ScalableWind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
@@ -115,6 +119,66 @@ public class ConfidenceTest {
     }
     
     @Test
+    public void testBearingClusterSplittingWithDifferentBearingsOrdering() {
+        TimePoint timePoint = new MillisecondsTimePoint(1308839544250l);
+        BearingWithConfidenceCluster<TimePoint> clusterA = new BearingWithConfidenceCluster<TimePoint>(ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+        // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+                /* milliseconds over which to average */ 30000l, /* minimum confidence */ 0.0000000001));
+        for (String a : new String[] {
+                "87.0@0.3561978879735175",
+                "286.8716453147824@0.7507926558478147",
+                "282.55627120464703@0.7643492902545556",
+                "286.8605698949788@0.7483842322506868",
+                "291.5836361697427@0.7491852169449421",
+                "297.0631828865192@0.7488453128197485",
+                "283.6400613098378@0.7488453128197485",
+                "279.95201024864554@0.7298408190555351",
+                "279.77216720379766@0.7283443881177472",
+                "283.75770067567913@0.7491852169449421",
+                "284.30394138063696@0.7488453128197485",
+                "285.5253164529858@0.7491852169449421"
+        }) {
+            BearingWithConfidence<TimePoint> bearingWithConfidence = parseBearingWithConfidence(a);
+            clusterA.add(bearingWithConfidence);
+        }
+        BearingWithConfidenceCluster<TimePoint>[] splitResultA = clusterA.splitInTwo(45.0, timePoint);
+        BearingWithConfidenceCluster<TimePoint> clusterB = new BearingWithConfidenceCluster<TimePoint>(ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+        // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+                /* milliseconds over which to average */ 30000l, /* minimum confidence */ 0.0000000001));
+        for (String b : new String[] {
+                "282.55627120464703@0.7643492902545556",
+                "286.8716453147824@0.7507926558478147",
+                "286.8605698949788@0.7483842322506868",
+                "285.5253164529858@0.7491852169449421",
+                "283.75770067567913@0.7491852169449421",
+                "283.6400613098378@0.7488453128197485",
+                "279.95201024864554@0.7298408190555351",
+                "291.5836361697427@0.7491852169449421",
+                "297.0631828865192@0.7488453128197485",
+                "279.77216720379766@0.7283443881177472",
+                "284.30394138063696@0.7488453128197485",
+                "87.0@0.3561978879735175"
+        }) {
+            BearingWithConfidence<TimePoint> bearingWithConfidence = parseBearingWithConfidence(b);
+            clusterB.add(bearingWithConfidence);
+        }
+        BearingWithConfidenceCluster<TimePoint>[] splitResultB = clusterB.splitInTwo(45.0, timePoint);
+        assertEquals(11, Math.max(splitResultA[0].size(), splitResultA[1].size()));
+        assertEquals(1, Math.min(splitResultA[0].size(), splitResultA[1].size()));
+        assertEquals(11, Math.max(splitResultB[0].size(), splitResultB[1].size()));
+        assertEquals(1, Math.min(splitResultB[0].size(), splitResultB[1].size()));
+        assertEquals((splitResultA[0].size()<splitResultA[1].size()?splitResultA[0]:splitResultA[1]).getAverage(timePoint).getObject().getDegrees(),
+                (splitResultB[0].size()<splitResultB[1].size()?splitResultB[0]:splitResultB[1]).getAverage(timePoint).getObject().getDegrees(), 0.0000001);
+    }
+    
+    private BearingWithConfidence<TimePoint> parseBearingWithConfidence(String a) {
+        String[] bearingAndConfidence = a.split("@");
+        double degBearing = Double.valueOf(bearingAndConfidence[0]);
+        double confidence = Double.valueOf(bearingAndConfidence[1]);
+        return new BearingWithConfidenceImpl<TimePoint>(new DegreeBearingImpl(degBearing), confidence, new MillisecondsTimePoint(1308839544250l));
+    }
+
+    @Test
     public void testLinearWeigherHalfTime() {
         Weigher<TimePoint> w = ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000);
         double confidence = w.getConfidence(new MillisecondsTimePoint(1000), new MillisecondsTimePoint(0));
@@ -144,13 +208,75 @@ public class ConfidenceTest {
     }
 
     @Test
+    public void testAveragingWithTwoWindsOneOfWhichHasUseSpeedFalse() {
+        WindWithConfidence<TimePoint> d1 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(0, 0),
+                new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(0), /* useSpeed */ true);
+        WindWithConfidence<TimePoint> d2 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0),
+                new MillisecondsTimePoint(20), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(180))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(20), /* useSpeed */ false);
+        ConfidenceBasedWindAverager<TimePoint> averager = ConfidenceFactory.INSTANCE
+                .createWindAverager(ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000));
+        List<WindWithConfidence<TimePoint>> list = Arrays.asList(d1, d2);
+        HasConfidence<ScalableWind, Wind, TimePoint> average = averager.getAverage(list, new MillisecondsTimePoint(10));
+        assertEquals(0.5, average.getObject().getPosition().getLatDeg(), 0.00000001);
+        assertEquals(0.0, average.getObject().getPosition().getLngDeg(), 0.00000001);
+        assertEquals(10, average.getObject().getTimePoint().asMillis());
+        assertEquals(10, average.getObject().getKnots(), 0.00000001);
+        assertEquals(135, average.getObject().getBearing().getDegrees(), 0.00000001);
+    }
+
+    @Test
+    public void testAveragingOneWindWithUseSpeedFalse() {
+        WindWithConfidence<TimePoint> d1 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0),
+                new MillisecondsTimePoint(20), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(180))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(20), /* useSpeed */ false);
+        ConfidenceBasedWindAverager<TimePoint> averager = ConfidenceFactory.INSTANCE
+                .createWindAverager(ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000));
+        List<WindWithConfidence<TimePoint>> list = Arrays.asList(d1);
+        HasConfidence<ScalableWind, Wind, TimePoint> average = averager.getAverage(list, new MillisecondsTimePoint(20));
+        assertEquals(1.0, average.getObject().getPosition().getLatDeg(), 0.00000001);
+        assertEquals(0.0, average.getObject().getPosition().getLngDeg(), 0.00000001);
+        assertEquals(20, average.getObject().getTimePoint().asMillis());
+        assertEquals(10, average.getObject().getKnots(), 0.00000001);
+        assertEquals(180, average.getObject().getBearing().getDegrees(), 0.00000001);
+    }
+
+    @Test
+    public void testAveragingWithFourWindsTwoOfWhichHaveUseSpeedFalse() {
+        WindWithConfidence<TimePoint> d1 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0),
+                new MillisecondsTimePoint(20), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(180))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(20), /* useSpeed */ true);
+        WindWithConfidence<TimePoint> d2 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0),
+                new MillisecondsTimePoint(20), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(180))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(20), /* useSpeed */ true);
+        WindWithConfidence<TimePoint> d3 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0),
+                new MillisecondsTimePoint(20), new KnotSpeedWithBearingImpl(30, new DegreeBearingImpl(180))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(20), /* useSpeed */ false);
+        WindWithConfidence<TimePoint> d4 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0),
+                new MillisecondsTimePoint(20), new KnotSpeedWithBearingImpl(40, new DegreeBearingImpl(180))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(20), /* useSpeed */ false);
+        ConfidenceBasedWindAverager<TimePoint> averager = ConfidenceFactory.INSTANCE
+                .createWindAverager(ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000));
+        List<WindWithConfidence<TimePoint>> list = Arrays.asList(d1, d2, d3, d4);
+        HasConfidence<ScalableWind, Wind, TimePoint> average = averager.getAverage(list, new MillisecondsTimePoint(20));
+        assertEquals(1.0, average.getObject().getPosition().getLatDeg(), 0.00000001);
+        assertEquals(0.0, average.getObject().getPosition().getLngDeg(), 0.00000001);
+        assertEquals(20, average.getObject().getTimePoint().asMillis());
+        assertEquals(15, average.getObject().getKnots(), 0.00000001);
+        assertEquals(180, average.getObject().getBearing().getDegrees(), 0.00000001);
+    }
+
+    @Test
     public void testAveragingWithTwoWinds() {
-        WindWithConfidence<TimePoint> d1 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0),
-                new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))), /* confidence */ 0.5, /* relativeTo */ new MillisecondsTimePoint(0));
-        WindWithConfidence<TimePoint> d2 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0), new MillisecondsTimePoint(20),
-                new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(180))), /* confidence */ 0.5, /* relativeTo */ new MillisecondsTimePoint(20));
-        ConfidenceBasedAverager<ScalableWind, Wind, TimePoint> averager = ConfidenceFactory.INSTANCE
-                .createAverager(ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000));
+        WindWithConfidence<TimePoint> d1 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(0, 0),
+                new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(0), /* useSpeed */ true);
+        WindWithConfidence<TimePoint> d2 = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(1, 0),
+                new MillisecondsTimePoint(20), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(180))), /* confidence */
+                0.5, /* relativeTo */new MillisecondsTimePoint(20), /* useSpeed */ true);
+        ConfidenceBasedWindAverager<TimePoint> averager = ConfidenceFactory.INSTANCE
+                .createWindAverager(ConfidenceFactory.INSTANCE.createHyperbolicTimeDifferenceWeigher(1000));
         List<WindWithConfidence<TimePoint>> list = Arrays.asList(d1, d2);
         HasConfidence<ScalableWind, Wind, TimePoint> average = averager.getAverage(list, new MillisecondsTimePoint(10));
         assertEquals(0.5, average.getObject().getPosition().getLatDeg(), 0.00000001);

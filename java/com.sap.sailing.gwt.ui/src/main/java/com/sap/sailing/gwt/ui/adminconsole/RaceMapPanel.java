@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -20,6 +21,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
@@ -27,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.SmallWindHistoryPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -69,15 +72,15 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         AbsolutePanel mapPanel = new AbsolutePanel();
         mapPanel.setSize("100%", "100%");
         grid.setWidget(2, 1, mapPanel);
-        raceMap = new RaceMap(sailingService, errorReporter, timer, competitorSelectionProvider, stringMessages);
+        raceMap = new RaceMap(sailingService, new AsyncActionsExecutor(), errorReporter, timer, competitorSelectionProvider, stringMessages);
         mapPanel.add(raceMap);
         raceSelectionModel = new RaceSelectionModel();
         raceListBox = new RacesListBoxPanel(eventRefresher, raceSelectionModel, stringMessages);
         raceSelectionModel.addRaceSelectionChangeListener(this);
         grid.setWidget(0, 0, raceListBox);
         PositionDTO pos = new PositionDTO();
-        if (!raceMap.boatMarkers.isEmpty()) {
-            LatLng latLng = raceMap.boatMarkers.values().iterator().next().getLatLng();
+        if (!raceMap.getBoatMarkers().isEmpty()) {
+            LatLng latLng = raceMap.getBoatMarkers().values().iterator().next().getLatLng();
             pos.latDeg = latLng.getLatitude();
             pos.lngDeg = latLng.getLongitude();
         }
@@ -108,7 +111,10 @@ public class RaceMapPanel extends FormPanel implements EventDisplayer, TimeListe
         horizontalRanksVerticalAndCheckboxesManeuversPanel.add(verticalPanelRadioAndCheckboxes);
         grid.setWidget(2, 0, horizontalRanksVerticalAndCheckboxesManeuversPanel);
 
-        timePanel = new RaceTimePanel(sailingService, timer, errorReporter, stringMessages);
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter,
+                new HashSet<RaceIdentifier>(), timer.getRefreshInterval());
+        timePanel = new RaceTimePanel(timer, stringMessages, raceTimesInfoProvider);
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionModel.addRaceSelectionChangeListener(timePanel);
         timePanel.onRaceSelectionChange(raceSelectionModel.getSelectedRaces());
 

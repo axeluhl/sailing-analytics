@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Label;
 
 public class LogoAndTitlePanel extends FlowPanel {
 
-    public LogoAndTitlePanel(StringMessages stringConstants) {
+    public LogoAndTitlePanel(String title, StringMessages stringConstants) {
         Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/gwt/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");
@@ -18,9 +18,12 @@ public class LogoAndTitlePanel extends FlowPanel {
         Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
         labelPanel.add(sailingAnalyticsLabel);
         labelPanel.addStyleName("sailingAnalyticsLabelPanel");
-        
-        this.add(labelPanel);
         sailingAnalyticsLabel.addStyleName("sailingAnalyticsLabel boldLabel");
+        this.add(labelPanel);
+        
+        Label titleLabel = new Label(title);
+        titleLabel.addStyleName("titleLabel");
+        this.add(titleLabel);
     }
 
 }

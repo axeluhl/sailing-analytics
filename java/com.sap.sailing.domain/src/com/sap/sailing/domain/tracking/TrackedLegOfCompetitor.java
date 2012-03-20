@@ -18,11 +18,11 @@ public interface TrackedLegOfCompetitor {
 
     /**
      * How much time did the {@link #getCompetitor competitor} spend in this {@link #getLeg() leg} at
-     * <code>timePoint</code>? If the competitor hasn't started the leg yet at <code>timePoint</code>, 0 is returned. If the
-     * competitor has finished the leg already at <code>timePoint</code>, the time it took the competitor to
-     * complete the leg is returned. 
+     * <code>timePoint</code>? If the competitor hasn't started the leg yet at <code>timePoint</code>, <code>null</code>
+     * is returned. If the competitor has finished the leg already at <code>timePoint</code>, the time it took the
+     * competitor to complete the leg is returned.
      */
-    long getTimeInMilliSeconds(TimePoint timePoint);
+    Long getTimeInMilliSeconds(TimePoint timePoint);
 
     /**
      * The distance over ground traveled by the competitor in this leg up to <code>timePoint</code>. If
@@ -44,6 +44,16 @@ public interface TrackedLegOfCompetitor {
      */
     Distance getWindwardDistanceToGo(TimePoint timePoint) throws NoWindException;
 
+    /**
+     * Computes an approximation for the average velocity made good (windward / leeward speed) of this leg's competitor at
+     * <code>timePoint</code>. If the competitor hasn't started the leg yet, <code>null</code> is returned. If the competitor
+     * has already finished the leg, the average over the whole leg is computed, otherwise the average for the time interval
+     * from the start of the leg up to <code>timePoint</code>.<p>
+     * 
+     * The approximation uses the wind direction of <code>timePoint</code> at the middle between start and end waypoint or of
+     * the time point when the competitor completed the leg if that was before <code>timePoint</code>. Note that this does not
+     * account for changing winds during the leg.
+     */
     Speed getAverageVelocityMadeGood(TimePoint timePoint) throws NoWindException;
 
     /**
@@ -108,7 +118,9 @@ public interface TrackedLegOfCompetitor {
     boolean hasFinishedLeg(TimePoint timePoint);
 
     /**
-     * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet.
+     * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
+     * <code>timePoint</code>, returns the VMG value for this time point. If the competitor has already finished the
+     * leg, the VMG at the time when the competitor finished the leg is returned.
      */
     Speed getVelocityMadeGood(TimePoint timePoint) throws NoWindException;
 
@@ -117,6 +129,11 @@ public interface TrackedLegOfCompetitor {
      */
     Double getEstimatedTimeToNextMarkInSeconds(TimePoint timePoint) throws NoWindException;
 
+    /**
+     * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
+     * <code>timePoint</code>, returns the current speed over ground for this time point. If the competitor has already
+     * finished the leg, the speed over ground at the time the competitor finished the leg is returned.
+     */
     SpeedWithBearing getSpeedOverGround(TimePoint at);
 
     /**

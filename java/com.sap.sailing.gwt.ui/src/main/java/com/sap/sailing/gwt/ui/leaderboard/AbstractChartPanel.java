@@ -11,6 +11,7 @@ import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Extremes;
 import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -19,6 +20,8 @@ import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
@@ -37,6 +40,8 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -47,6 +52,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
@@ -71,6 +77,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected static final int LINE_WIDTH = 1;
     protected MultiCompetitorRaceDataDTO chartData;
     protected final SailingServiceAsync sailingService;
+    protected final AsyncActionsExecutor asyncActionsExecutor;
     protected final ErrorReporter errorReporter;
     protected Chart chart;
     private boolean compactChart;
@@ -78,6 +85,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final Label noCompetitorsSelectedLabel;
     protected final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
     protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
+    private Series timeLineSeries;
+    private boolean timeLineNeedsUpdate = true;
+    private final boolean allowTimeAdjust;
+    private boolean ignoreTimeAdjustOnce;
     protected final RaceSelectionProvider raceSelectionProvider;
     protected long stepSize = 5000;
     protected final StringMessages stringMessages;
@@ -86,9 +97,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected DetailType dataToShow;
     protected final CompetitorSelectionProvider competitorSelectionProvider;
 
-    public AbstractChartPanel(SailingServiceAsync sailingService,
+    public AbstractChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
-            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow, boolean compactChart) {
+            Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow,
+            boolean compactChart, boolean allowTimeAdjust) {
         this.stringMessages = stringMessages;
     	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
@@ -101,7 +113,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         chartData = null;
         this.compactChart = compactChart;
         this.sailingService = sailingService;
+        this.asyncActionsExecutor = asyncActionsExecutor;
         this.raceSelectionProvider = raceSelectionProvider;
+        this.allowTimeAdjust = allowTimeAdjust;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         setSize("100%", "100%");
 
@@ -109,6 +123,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         
         chart = createChart(dataToShow);
+        if (allowTimeAdjust) {
+            timeLineSeries = createTimeLineSeries();
+        }
         
         busyIndicatorPanel = new AbsolutePanel();
         final BusyIndicator busyIndicator = new SimpleBusyIndicator(/*busy*/ true, /*scale*/ 1);
@@ -143,19 +160,40 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 .setWidth100()
                 .setHeight100()
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setLegend(new Legend().setEnabled(true))
+                .setLegend(new Legend().setEnabled(true).setBorderWidth(0))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
         chart.setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)));
-        chart.setClickEventHandler(new ChartClickEventHandler() {
-            @Override
-            public boolean onClick(ChartClickEvent chartClickEvent) {
-                timer.setTime(chartClickEvent.getXAxisValueAsLong());
-                return true;
-            }
-        });
         
+        if (allowTimeAdjust) {
+            chart.setClickEventHandler(new ChartClickEventHandler() {
+                @Override
+                public boolean onClick(ChartClickEvent chartClickEvent) {
+                    if (ignoreTimeAdjustOnce) {
+                        ignoreTimeAdjustOnce = false;
+                    } else {
+                        timer.setPlayMode(PlayModes.Replay);
+                        timer.setTime(chartClickEvent.getXAxisValueAsLong());
+                    }
+                    return true;
+                }
+            });
+            chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
+                @Override
+                public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
+                    try {
+                        chartSelectionEvent.getXAxisMaxAsLong();
+                        chartSelectionEvent.getXAxisMinAsLong();
+                        ignoreTimeAdjustOnce = true;
+                    } catch (Throwable t) {
+                        // Redrawing, or the chart wouldn't rezoom
+                        AbstractChartPanel.this.chart.redraw();
+                    }
+                    return true;
+                }
+            });
+        }
         final String unit = getUnit();
         if(!compactChart)
             chart.getYAxis().setAxisTitleText(DetailTypeFormatter.format(dataToShow, stringMessages) + " ["+unit+"]");
@@ -177,16 +215,23 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
             public String format(ToolTipData toolTipData) {
-                return "<b>" + toolTipData.getSeriesName() + (toolTipData.getPointName() != null ? " "+toolTipData.getPointName() : "")
-                        + "</b><br/>" +  
-                        dateFormat.format(new Date(toolTipData.getXAsLong())) + ": " +
-                        numberFormat.format(toolTipData.getYAsDouble()) + unit;
+                String seriesName = toolTipData.getSeriesName();
+                
+                if (seriesName.equals(stringMessages.time())) {
+                    return "<b>" + seriesName + ":</b> " + dateFormat.format(new Date(toolTipData.getXAsLong()))
+                            + "<br/>(" + stringMessages.clickChartToSetTime() + ")";
+                } else {
+                    return "<b>" + seriesName
+                            + (toolTipData.getPointName() != null ? " " + toolTipData.getPointName() : "")
+                            + "</b><br/>" + dateFormat.format(new Date(toolTipData.getXAsLong())) + ": "
+                            + numberFormat.format(toolTipData.getYAsDouble()) + unit;
+                }
             }
         }));
         
         if (compactChart) {
-            chart.setSpacingBottom(4).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
-                 .setLegend(new Legend().setMargin(2))
+            chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
+                 .setOption("legend/margin", 2)
                  .setOption("title/margin", 5)
                  .setChartSubtitle(null)
                  .getXAxis().setAxisTitleText(null);
@@ -205,12 +250,12 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      * visible competitors} via
      * {@link SailingServiceAsync#getCompetitorsRaceData(RaceIdentifier, List, long, DetailType, AsyncCallback)}. After
      * loading is the method {@link #drawChartData()} called.<br />
-     * If no competitor is visible, is the {@link #noCompetitorsSelectedLabel} displayed.
+     * If no data needs to be {@link #needsDataLoading() loaded}, the no competitors selected label is displayed.
      * 
      * @param showBusyIndicator If <code>true</code> is the busy indicator shown while loading the data from the server.
      */
     protected void loadData(boolean showBusyIndicator) {
-        if (hasVisibleCompetitors()) {
+        if (needsDataLoading()) {
             if (showBusyIndicator) {
                 setWidget(busyIndicatorPanel);
             }
@@ -230,13 +275,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 }
             }
             
-            sailingService.getCompetitorsRaceData(getSelectedRace(), dataQuery, toDate, getStepSize(), getDataToShow(),
+            GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
+                        getSelectedRace(), dataQuery, toDate, getStepSize(), getDataToShow(),
                     new AsyncCallback<MultiCompetitorRaceDataDTO>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": "
-                                    + caught.toString());
+                                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": " + caught.toString(),
+                                        timer.getPlayMode() == PlayModes.Live);
                         }
 
                         @Override
@@ -255,6 +301,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                             setWidget(chart);
                         }
                     });
+                    asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
         } else {
             setWidget(noCompetitorsSelectedLabel);
         }
@@ -271,6 +318,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
+        timeLineNeedsUpdate = true;
         loadData(true);
     }
     
@@ -292,7 +340,8 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     /**
      * Creates the series for all selected competitors if these aren't created yet.<br />
      * Fills the series for the selected competitors with the data in {@link AbstractChartPanel#chartData}.<br />
-     * Removes series of competitors, which aren't selected and adds series for competitors, which are newly selected.<br /><br />
+     * Removes series of competitors, which aren't selected and adds series for competitors, which are newly selected.<br />
+     * Also {@link #forceTimeLineUpdate() updates} the {@link #timeLineSeries} if {@link #timeLineNeedsUpdate} is <code>true</code>.<br /><br />
      * 
      * The data for all {@link #getVisibleCompetitors() visible competitors} needs to be filled before calling this method.
      */
@@ -352,6 +401,9 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     }
                 }
             }
+            if (timeLineNeedsUpdate) {
+                forceTimeLineUpdate();
+            }
         }
     }
 
@@ -384,6 +436,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             dataSeriesByCompetitor.put(competitor, result);
     	}
     	return result;
+    }
+
+    private Series createTimeLineSeries() {
+        return chart
+                .createSeries()
+                .setType(Series.Type.LINE)
+                .setName(stringMessages.time())
+                .setPlotOptions(new LinePlotOptions().setShowInLegend(false).setHoverStateEnabled(false).setLineWidth(2));
     }
 
     private String getUnit() {
@@ -508,9 +568,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
-      setChartData(null);
-      clearChart();
-      loadData(true);
+        setChartData(null);
+        clearChart();
+        timeLineNeedsUpdate = true;
+        loadData(true);
     }
 
     /**
@@ -553,15 +614,56 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         return new Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
     }
 
+    /**
+     * Forces the chart to {@link #updateTimeLine(Date) update} the position and to {@link #ensureTimeLineIsVisible()
+     * ensure}, that the time line is visible.
+     */
+    public void forceTimeLineUpdate() {
+        updateTimeLine(timer.getTime());
+    }
+    
+    /**
+     * Updates the position of the time line for the given {@link Date}, if {@link #allowTimeAdjust} is <code>true</code>.<br />
+     * @param date Defines the x-Value of the line points
+     */
+    private void updateTimeLine(Date date) {
+        if (allowTimeAdjust && chart != null) {
+            raceSelectionProvider.getSelectedRaces().get(0);
+            
+            Long x = date.getTime();
+            Extremes extremes = chart.getYAxis(0).getExtremes();
+            Point[] points = new Point[2];
+            points[0] = new Point(x, extremes.getDataMin());
+            points[1] = new Point(x, extremes.getDataMax());
+            timeLineSeries.setPoints(points);
+            ensureTimeLineIsVisible();
+            timeLineNeedsUpdate = false;
+        }
+    }
+    
+    /**
+     * Checks if the series of the chart contain the {@link #timeLineSeries}. If not, it is added to the chart.<br />
+     * Throws a NPE if the chart is <code>null</code>.
+     */
+    private void ensureTimeLineIsVisible() {
+        if (!Arrays.asList(chart.getSeries()).contains(timeLineSeries)) {
+            chart.addSeries(timeLineSeries);
+        }
+    }
+
     @Override
     public void timeChanged(Date date) {
         if (getChartData() != null) {
             Date newestEvent = getChartData().getOldestDateOfNewestData();
-            if (hasVisibleCompetitors()
-                    && (newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
+            updateTimeLine(date);
+            if ((newestEvent == null || (newestEvent.before(date) && (date.getTime() - newestEvent.getTime()) >= getStepSize()))) {
                 loadData(false);
             }
         }
+    }
+    
+    private boolean needsDataLoading() {
+        return hasVisibleCompetitors() && isVisible();
     }
 
     @Override
@@ -569,5 +671,14 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         if(getChartData() != null) {
             chart.setSizeToMatchContainer();
         }
+    }
+
+    @Override
+    public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
+        timeChanged(timer.getTime());
+    }
+    
+    public void triggerDataLoading() {
+        loadData(true);
     }
 }

@@ -111,7 +111,11 @@ public interface TrackedRace {
      * If the competitor hasn't passed the start waypoint yet, <code>null</code> is
      * returned because the competitor was not yet on any leg at that point in time. If
      * the time point happens to be after the last fix received from that competitor,
-     * the last known leg for that competitor is returned. 
+     * the last known leg for that competitor is returned. If the time point is after the
+     * competitor's mark passing for the finish line, <code>null</code> is returned.
+     * For all legs except the last, if the time point equals a mark passing time point
+     * of the leg's starting waypoint, that leg is returned. For the time point of
+     * the mark passing for the finish line, the last leg is returned.
      */
     TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at);
     
@@ -314,6 +318,18 @@ public interface TrackedRace {
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
+     * {@link #getWindSourcesToExclude}.
+     */
+    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at);
+    
+    /**
+     * Lists those wind sources which by default are not considered in {@link #getWind(Position, TimePoint)} and
+     * {@link #getWindWithConfidence(Position, TimePoint)}.
+     */
+    Iterable<WindSource> getWindSourcesToExclude();
 
     /**
      * Loops over this tracked race's wind sources and from each asks its averaged wind for the position <code>p</code>
@@ -323,4 +339,15 @@ public interface TrackedRace {
      */
     WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
             Iterable<WindSource> windSourcesToExclude);
+
+    /**
+     * Same as {@link #getEstimatedWindDirection(Position, TimePoint)}, but propagates the confidence of the wind
+     * estimation, relative to the <code>timePoint</code> for which the request is made, in the result.
+     */
+    WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint);
+
+    /**
+     * After the call returns, {@link #getWindSourcesToExclude()} returns an iterable that equals <code>windSourcesToExclude</code>
+     */
+    void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude);
 }
