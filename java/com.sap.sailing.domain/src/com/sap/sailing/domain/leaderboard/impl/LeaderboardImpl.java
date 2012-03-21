@@ -177,9 +177,9 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public Competitor getCompetitorByID(Object id) {
+    public Competitor getCompetitorByIdAsString(String idAsString) {
         for (Competitor competitor : getCompetitors()) {
-            if (competitor.getId().equals(id)) {
+            if (competitor.getId().toString().equals(idAsString)) {
                 return competitor;
             }
         }
