@@ -97,6 +97,8 @@ public interface Placemark extends Serializable {
     public class ByPopulationDistanceRatio implements Comparator<Placemark> {
         
         private Position position;
+        private double populationFactor = 1.0;
+        private double distanceFactor = 1.0;
 
         public ByPopulationDistanceRatio(Position position) {
             this.position = position;
@@ -104,8 +106,8 @@ public interface Placemark extends Serializable {
 
         @Override
         public int compare(Placemark p1, Placemark p2) {
-            double r1 = p1.getPopulation() / p1.distanceFrom(position).getKilometers();
-            double r2 = p2.getPopulation() / p2.distanceFrom(position).getKilometers();
+            double r1 = (p1.getPopulation() * populationFactor) / (p1.distanceFrom(position).getKilometers() * distanceFactor);
+            double r2 = (p2.getPopulation() * populationFactor) / (p2.distanceFrom(position).getKilometers() * distanceFactor);
 
             return r1 > r2 ? 1 : r1 < r2 ? -1 : 0;
         }
