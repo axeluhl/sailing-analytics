@@ -230,5 +230,5 @@ public interface Leaderboard extends Named {
     
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
 
-    Competitor getCompetitorByID(Object id);
+    Competitor getCompetitorByIdAsString(String idAsString);
 }

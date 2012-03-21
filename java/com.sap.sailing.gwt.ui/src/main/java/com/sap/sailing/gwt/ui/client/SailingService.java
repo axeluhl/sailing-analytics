@@ -119,18 +119,18 @@ public interface SailingService extends RemoteService {
     
     Pair<String, String> getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName);
 
-    void updateLeaderboardCarryValue(String leaderboardName, String competitorID, Integer carriedPoints);
+    void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Integer carriedPoints);
 
     /**
      * @return the new net points in {@link Pair#getA()} and the new total points in {@link Pair#getB()}
      */
-    Pair<Integer, Integer> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorID,
+    Pair<Integer, Integer> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString,
             String raceColumnName, String maxPointsReasonAsString, Date date) throws NoWindException;
 
-    Pair<Integer, Integer> updateLeaderboardScoreCorrection(String leaderboardName, String competitorID,
+    Pair<Integer, Integer> updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString,
             String raceName, Integer correctedScore, Date date) throws NoWindException;
 
-    void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorID, String displayName);
+    void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorIdAsString, String displayName);
     
     void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace);
 
