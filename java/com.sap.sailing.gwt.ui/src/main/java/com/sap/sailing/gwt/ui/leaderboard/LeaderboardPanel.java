@@ -1135,11 +1135,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    if (timer.getPlayMode() != PlayModes.Live) {
-                        getErrorReporter().reportError("Error trying to obtain leaderboard contents: " + caught.getMessage());
-                    } else {
-                        getErrorReporter().reportWarning("Error trying to obtain leaderboard contents: " + caught.getMessage());
-                    }
+                    getErrorReporter().reportError("Error trying to obtain leaderboard contents: " + caught.getMessage(), timer.getPlayMode() != PlayModes.Live);
                 }
             });
             asyncActionsExecutor.execute(getLeaderboardByNameAction);

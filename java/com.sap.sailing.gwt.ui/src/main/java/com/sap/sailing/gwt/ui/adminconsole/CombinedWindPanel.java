@@ -84,8 +84,7 @@ public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSe
                         new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                if(timer.getPlayMode() != PlayModes.Live)
-                                    errorReporter.reportError("Error obtaining wind: " + caught.getMessage());
+                                errorReporter.reportError("Error obtaining wind info: " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
                             }
 
                             @Override
