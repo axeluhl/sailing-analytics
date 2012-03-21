@@ -42,7 +42,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.name,
+                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.id,
                             value == null || value.length() == 0 ? null : Integer.valueOf(value.trim()),
                             new AsyncCallback<Void>() {
                                 @Override
@@ -75,7 +75,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                    getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.name,
+                    getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.id,
                             value == null || value.length() == 0 ? null : value.trim(),
                             new AsyncCallback<Void>() {
                                 @Override
@@ -159,7 +159,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
-                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.name,
+                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id,
                             raceName, value == null || value.trim().length() == 0 ? null : value.trim(),
                             getLeaderboardDisplayDate(), new AsyncCallback<Pair<Integer, Integer>>() {
                                 @Override
@@ -217,7 +217,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
-                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.name, raceName,
+                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.id, raceName,
                             value == null || value.trim().length() == 0 ? null : Integer.valueOf(value.trim()), getLeaderboardDisplayDate(),
                     new AsyncCallback<Pair<Integer, Integer>>() {
                         @Override

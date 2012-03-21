@@ -229,4 +229,6 @@ public interface Leaderboard extends Named {
     void updateIsMedalRace(String raceName, boolean isMedalRace);
     
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
+
+    Competitor getCompetitorByID(Object id);
 }
