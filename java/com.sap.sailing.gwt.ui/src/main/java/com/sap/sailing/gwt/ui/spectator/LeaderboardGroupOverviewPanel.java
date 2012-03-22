@@ -319,7 +319,6 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         groupDetailsPanel.setVisible(false);
         groupDetailsPanel.setSize("100%", "100%");
         groupDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "groupDetailsPanel");
-        groupDetailsPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
         detailsPanel.add(groupDetailsPanel);
         
         groupDescriptionHTML = new HTML();
