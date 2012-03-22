@@ -232,6 +232,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      */
     private void invalidateCache() {
         synchronized (scheduledInvalidationInterval) {
+            // FIXME see bug 452: synchronize also on the cached fixes
             Iterator<WindWithConfidence<TimePoint>> iter = (scheduledInvalidationInterval.getStart() == null ? getCachedFixes()
                     : getCachedFixes().tailSet(scheduledInvalidationInterval.getStart(), /* inclusive */true)).iterator();
             while (iter.hasNext()) {

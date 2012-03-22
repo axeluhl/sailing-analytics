@@ -6,7 +6,10 @@ import com.sap.sailing.domain.common.Bearing;
 
 public class DegreeBearingImpl extends AbstractBearing implements Bearing {
     private final double bearingDeg;
-    
+    /**
+     * 
+     * @param bearingDeg if a mount degrees over 360, then it will be mod 360 degrees
+     */
     public DegreeBearingImpl(double bearingDeg) {
         super();
         this.bearingDeg = bearingDeg - 360*(int) (bearingDeg/360.);
