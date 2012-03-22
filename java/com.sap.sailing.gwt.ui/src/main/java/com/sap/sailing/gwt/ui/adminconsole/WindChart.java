@@ -129,8 +129,12 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 .setSeriesPlotOptions(new SeriesPlotOptions().setSeriesCheckboxClickEventHandler(new SeriesCheckboxClickEventHandler() {
                     @Override
                     public boolean onClick(SeriesCheckboxClickEvent seriesCheckboxClickEvent) {
-                        // TODO Auto-generated method stub
-                        return false;
+                        if (seriesCheckboxClickEvent.isChecked()) {
+                            chart.getSeries(seriesCheckboxClickEvent.getSeriesId()).show();
+                        } else {
+                            chart.getSeries(seriesCheckboxClickEvent.getSeriesId()).hide();
+                        }
+                        return false; // don't toggle the select state of the series
                     }
                 }).setShowCheckbox(true));
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
@@ -242,6 +246,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
             if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
                 if (!visible.contains(e.getValue())) {
                     chart.addSeries(e.getValue());
+                    e.getValue().select(true); // ensures that the checkbox will be ticked
                 } else {
                     visible.remove(e.getValue());
                 }
@@ -251,6 +256,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
             if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
                 if (!visible.contains(e.getValue())) {
                     chart.addSeries(e.getValue());
+                    e.getValue().select(true); // ensures that the checkbox will be ticked
                 } else {
                     visible.remove(e.getValue());
                 }
@@ -437,8 +443,10 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
             if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
                 chart.addSeries(e.getValue());
+                e.getValue().select(true); // ensures that the checkbox will be ticked
                 if (windSourceSpeedSeries.containsKey(e.getKey()) && e.getKey().getType().useSpeed()) {
                     chart.addSeries(windSourceSpeedSeries.get(e.getKey()));
+                    windSourceSpeedSeries.get(e.getKey()).select(true); // ensures that the checkbox will be ticked
                 }
             }
         }
