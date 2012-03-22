@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -325,6 +326,10 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         groupDescriptionHTML.setStyleName(STYLE_NAME_PREFIX + "groupDescription");
         groupDetailsPanel.add(groupDescriptionHTML);
         
+        Label groupDetailsLabel = new Label(stringMessages.leaderboardsInGroup()+ ": ");
+        groupDetailsLabel.getElement().getStyle().setPadding(5, Unit.PX);
+        groupDetailsPanel.add(groupDetailsLabel);
+        
         TextColumn<LeaderboardDTO> leaderboardsLocationColumn = new TextColumn<LeaderboardDTO>() {
             @Override
             public String getValue(LeaderboardDTO leaderboard) {
@@ -395,11 +400,15 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
 
         //Build leaderboard details GUI
         leaderboardDetailsPanel = new FlowPanel();
-        leaderboardDetailsPanel.setSize("50%", "100%");
+        leaderboardDetailsPanel.setSize("100%", "100%");
         leaderboardDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "leaderboardDetailsPanel");
         leaderboardDetailsPanel.setVisible(false);
         leaderboardDetailsPanel.getElement().setPropertyString("clear", "right");
         detailsPanel.add(leaderboardDetailsPanel);
+        
+        Label leaderboardDetailsLabel = new Label(stringMessages.racesInLeaderboard() + ":");
+        leaderboardDetailsLabel.getElement().getStyle().setPadding(5, Unit.PX);
+        leaderboardDetailsPanel.add(leaderboardDetailsLabel);
         
         TextColumn<RaceInLeaderboardDTO> racesLocationColumn = new TextColumn<RaceInLeaderboardDTO>() {
             @Override
@@ -510,7 +519,6 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     
     private void setLeaderboardDetailsVisible(boolean visible) {
         leaderboardDetailsPanel.setVisible(visible);
-        groupDetailsPanel.setWidth(visible ? "50%" : "100%");
     }
     
     private void fillLeaderboardDetails(LeaderboardDTO leaderboard) {
