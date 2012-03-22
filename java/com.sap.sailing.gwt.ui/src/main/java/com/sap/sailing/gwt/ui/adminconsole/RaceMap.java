@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -156,11 +157,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private List<RaceIdentifier> selectedRaces;
 
     /**
-     * If the user explicitly zoomed or panned the map, don't adjust zoom/pan unless a new race is selected
-     */
-    private boolean mapZoomedOrPannedSinceLastRaceSelectionChange = false;
-
-    /**
      * Used to check if the first initial zoom to the buoy markers was already done.
      */
     private boolean mapFirstZoomDone = false;
@@ -268,7 +264,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
                         map.checkResizeAndCenter();
-                        mapZoomedOrPannedSinceLastRaceSelectionChange = true;
+                        final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
+                        getSettings().getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                         Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatMarkers.keySet());
                         for (CompetitorDTO competitorDTO : getCompetitorsToShow()) {
                                 boolean usedExistingMarker = updateBoatMarkerForCompetitor(competitorDTO);
@@ -284,7 +281,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 map.addMapDragEndHandler(new MapDragEndHandler() {
                     @Override
                     public void onDragEnd(MapDragEndEvent event) {
-                        mapZoomedOrPannedSinceLastRaceSelectionChange = true;
+                        final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
+                        getSettings().getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                     }
                 });
                 map.addMapMouseMoveHandler(new MapMouseMoveHandler() {
@@ -312,7 +310,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     @Override
     public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
         mapFirstZoomDone = false;
-        mapZoomedOrPannedSinceLastRaceSelectionChange = false;
+        // TODO bug 494: reset zoom settings to user preferences
         this.selectedRaces = selectedRaces;
         windPanel.onRaceSelectionChange(selectedRaces);
     }
@@ -357,13 +355,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     List<MarkDTO> markData = raceMapDataDTO.markPositions;
                                     showMarksOnMap(markData);
                                     // Rezoom the map
+                                    // TODO make this a loop across the LatLongBoundsCalculators, pulling them from a collection updated in updateSettings
                                     if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
                                         zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
                                         mapFirstZoomDone = true;
-                                    } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange) { // Zoom once to the boats
-                                        zoomMapToNewBounds(new BoatsBoundsCalculater().calculateNewBounds(RaceMap.this));
-                                        mapFirstZoomDone = true;
-                                    } else if (!mapZoomedOrPannedSinceLastRaceSelectionChange && !mapFirstZoomDone) { // Zoom once to the buoys
+                                    } else if (!mapFirstZoomDone) { // Zoom once to the buoys
                                         zoomMapToNewBounds(new BuoysBoundsCalculater().calculateNewBounds(RaceMap.this));
                                         mapFirstZoomDone = true;
                                         /*
@@ -372,7 +368,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                          * triggered by the user. As a consequence the
                                          * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
                                          */
-                                        mapZoomedOrPannedSinceLastRaceSelectionChange = false;
+                                        // TODO bug 494: consider initial user-specific zoom settings
                                     }
                                 }
                             } else {
@@ -380,13 +376,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             }
                         }
                     });
-
                     asyncActionsExecutor.execute(getRaceMapDataAction);
-                    
                     // draw the wind into the map, get the combined wind
                     List<String> windSourceTypeNames = new ArrayList<String>();
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
-                    
                     GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames,
                         new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
@@ -599,10 +592,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
-            boolean oldMapZoomedOrPannedSinceLastRaceSelectionChange = mapZoomedOrPannedSinceLastRaceSelectionChange;
+            List<ZoomTypes> oldZoomSettings = getSettings().getZoomSettings().getTypesToConsiderOnZoom();
             map.setCenter(newBounds.getCenter());
             map.setZoomLevel(map.getBoundsZoomLevel(newBounds));
-            mapZoomedOrPannedSinceLastRaceSelectionChange = oldMapZoomedOrPannedSinceLastRaceSelectionChange;
+            getSettings().getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
         }
     }
     
@@ -1300,7 +1293,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         }
                     }
                 } catch (IndexOutOfBoundsException e) {
-                    //Catch this in case the competitor has no GPS fixes at the current time (e.g. in race 'Finale 2' of STG)
+                    // TODO can't this be predicted and the exception be avoided in the first place?
+                    // Catch this in case the competitor has no GPS fixes at the current time (e.g. in race 'Finale 2' of STG)
                 }
             }
             return newBounds;

@@ -175,6 +175,16 @@ public class LeaderboardImpl implements Named, Leaderboard {
         }
         return null;
     }
+    
+    @Override
+    public Competitor getCompetitorByIdAsString(String idAsString) {
+        for (Competitor competitor : getCompetitors()) {
+            if (competitor.getId().toString().equals(idAsString)) {
+                return competitor;
+            }
+        }
+        return null;
+    }
 
     @Override
     public SettableScoreCorrection getScoreCorrection() {
