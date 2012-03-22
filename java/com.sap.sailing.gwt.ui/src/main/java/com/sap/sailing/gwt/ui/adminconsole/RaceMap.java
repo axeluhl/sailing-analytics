@@ -52,6 +52,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -735,7 +736,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private void showCompetitorInfoWindow(final CompetitorDTO competitorDTO, LatLng where) {
-        GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO);
+        GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO); 
+        //TODO find closed fixed where the mouse was (where) BUG 470
         map.getInfoWindow().open(where,
                 new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor)));
     }
@@ -786,6 +788,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         result.add(new Label(stringMessages.speed() + ": "
                 + NumberFormat.getDecimalFormat().format(lastFix.speedWithBearing.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()));
         result.add(new Label(stringMessages.bearing() + ": "+ (int) lastFix.speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
+        if (lastFix.wind != null) {
+            result.add(new Label(stringMessages.degreesBoatToTheWind() + ": " +  NumberFormat.getDecimalFormat().format(Math.abs(
+                    new DegreeBearingImpl(lastFix.speedWithBearing.bearingInDegrees).getDifferenceTo(
+                    new DegreeBearingImpl(lastFix.wind.dampenedTrueWindFromDeg)).getDegrees())) + " "+stringMessages.degreesShort() ));
+        }
         //TODO Introduce user role dependent view (Spectator, Admin). Comments underneath are necessary for other views
 //      result.add(new Label("" + lastFix.position));
 //      result.add(new Label("Tack: " + lastFix.tack.name()));
@@ -978,7 +985,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         String speedChange = stringMessages.speedChange() + ": " 
                                 + NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+" ("
                                 + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+" -> "
-                                + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit();
+                                + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+")";
                         
                         options.setTitle(timeAndManeuver + "; " + directionChange + "; " + speedChange);
                         options.setIcon(imageResources.maneuverIconsForTypeAndTargetTack
