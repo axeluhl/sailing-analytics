@@ -27,11 +27,14 @@ import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -122,7 +125,14 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(
                         new Marker().setEnabled(false).setHoverState(
                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
-                                    .setHoverStateLineWidth(LINE_WIDTH));
+                                    .setHoverStateLineWidth(LINE_WIDTH))
+                .setSeriesPlotOptions(new SeriesPlotOptions().setSeriesCheckboxClickEventHandler(new SeriesCheckboxClickEventHandler() {
+                    @Override
+                    public boolean onClick(SeriesCheckboxClickEvent seriesCheckboxClickEvent) {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
+                }).setShowCheckbox(true));
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
@@ -275,7 +285,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         Series newSeries = chart
                 .createSeries()
                 .setType(Series.Type.LINE)
-                .setName(stringMessages.fromDeg()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
+                .setName(stringMessages.fromDeg()+" "+WindSourceTypeFormatter.format(windSource, stringMessages)+"       ")
                 .setYAxis(0)
                 .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)));
         return newSeries;
@@ -289,7 +299,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         Series newSeries = chart
                 .createSeries()
                 .setType(Series.Type.LINE)
-                .setName(stringMessages.windSpeed()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
+                .setName(stringMessages.windSpeed()+" "+WindSourceTypeFormatter.format(windSource, stringMessages)+"       ")
                 .setYAxis(1) // use the second Y-axis
                 .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.SHORT_DOT)
                         .setLineWidth(3).setHoverStateLineWidth(3)
