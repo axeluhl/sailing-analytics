@@ -532,7 +532,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             
             fromTextBox.setText(today);
             fromTextBox.setEnabled(false);
-            untilTextBox.setText(today);
+            untilTextBox.setText("");
             untilTextBox.setEnabled(false);
         } else {
             fromTextBox.setText("");
@@ -580,7 +580,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         if (result && name != null && !name.equals("")) {
             result = textContainsStringsToCheck(forGroup.name, name.split("\\s"));
         }
-        if (result) {
+        if (result && onlyLiveCheckBox.getValue()) {
+            result = forGroup.containsLiveRace();
+        }else if (result) {
             Date startDate = forGroup.getGroupStartDate();
             if (startDate != null) {
                 if (from != null && until != null) {
