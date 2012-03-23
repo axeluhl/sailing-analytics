@@ -297,6 +297,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public void setStartTimeReceived(TimePoint start) {
         super.setStartTimeReceived(start);
     }
+    
+    @Override
+    public void setStartOfTracking(TimePoint startOfTracking) {
+        super.setStartOfTracking(startOfTracking);
+    }
 
     /**
      * In addition to calling the super class implementation, adds this tracked race as a listener for the wind track.
@@ -321,11 +326,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void gpsFixReceived(GPSFix fix, Competitor competitor) {
-        TimePoint start = getStart();
-        if (start == null || start.compareTo(fix.getTimePoint())>0) {
-            // infer race start time from fix; earliest fix received defines start if earlier than assumed start so far
-            setStartTimeReceived(fix.getTimePoint());
-        }
         updated(fix.getTimePoint());
         notifyListeners(fix, competitor);
     }

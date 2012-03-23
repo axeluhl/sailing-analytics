@@ -52,8 +52,9 @@ public interface TrackedRace {
     Pair<Placemark, Placemark> getStartFinishPlacemarks();
     
     /**
-     * Computes the estimated start time for this race. When there are no {@link MarkPassing}s for the first mark, the
-     * start time received from the tracking infrastructure is used. This is also used if there are mark passings for
+     * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time point
+     * which is expected to be before the race start time). When there are no {@link MarkPassing}s for the first mark, the
+     * start of tracking is used, assuming that we missed the start. This is also used if there are mark passings for
      * the first mark and the start time is less than
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark passing for the
      * first mark. Otherwise, the first mark passing for the first mark minus

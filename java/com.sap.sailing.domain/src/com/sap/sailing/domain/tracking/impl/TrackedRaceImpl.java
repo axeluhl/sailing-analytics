@@ -671,14 +671,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (timePointOfNewestEvent == null || timePointOfNewestEvent.compareTo(timeOfEvent) < 0) {
                 timePointOfNewestEvent = timeOfEvent;
             }
-            if (startOfTracking == null || startOfTracking.compareTo(timeOfEvent) > 0) {
-                startOfTracking = timeOfEvent;
+            if (getStartOfTracking() == null || getStartOfTracking().compareTo(timeOfEvent) > 0) {
+                setStartOfTracking(timeOfEvent);
             }
             timePointOfLastEvent = timeOfEvent;
         }
         notifyAll();
     }
 
+    protected void setStartOfTracking(TimePoint startOfTracking) {
+        this.startOfTracking = startOfTracking;
+    }
+    
     /**
      * Schedules the clearing of the caches. If a cache clearing is already scheduled, this is a no-op.
      */
