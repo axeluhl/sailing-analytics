@@ -282,4 +282,6 @@ public interface StringMessages extends Messages {
     String speedPlaySpeedUp();
     String showHideComponent(String localizedShortName);
     String degreesBoatToTheWind();
+    String racesInLeaderboard();
+    String leaderboardsInGroup();
 }
