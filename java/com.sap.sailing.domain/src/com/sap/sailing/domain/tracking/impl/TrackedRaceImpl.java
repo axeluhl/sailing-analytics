@@ -240,10 +240,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
         return markPassingsForCompetitor.get(competitor);
     }
+    
+    protected NavigableSet<MarkPassing> getMarkPassingsInOrderAsNavigableSet(Waypoint waypoint) {
+        return markPassingsForWaypoint.get(waypoint);
+    }
 
     @Override
-    public NavigableSet<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
-        return markPassingsForWaypoint.get(waypoint);
+    public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
+        return getMarkPassingsInOrderAsNavigableSet(waypoint);
     }
 
     @Override
@@ -270,7 +274,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }
             }
         } else {
-            result = calculateStartOfRaceFromMarkPassings(getMarkPassingsInOrder(getRace().getCourse().getFirstWaypoint()), getRace().getCompetitors());
+            result = calculateStartOfRaceFromMarkPassings(getMarkPassingsInOrderAsNavigableSet(getRace().getCourse()
+                    .getFirstWaypoint()), getRace().getCompetitors());
         }
         return result;
     }

@@ -257,7 +257,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 synchronized (markPassingsForCompetitor) {
                     markPassingsForCompetitor.add(markPassing);
                 }
-                Collection<MarkPassing> markPassingsInOrderForWaypoint = getMarkPassingsInOrder(markPassing.getWaypoint());
+                Collection<MarkPassing> markPassingsInOrderForWaypoint = getMarkPassingsInOrderAsNavigableSet(markPassing.getWaypoint());
                 synchronized (markPassingsInOrderForWaypoint) {
                     markPassingsInOrderForWaypoint.add(markPassing);
                 }
@@ -274,8 +274,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public Collection<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
-        return (Collection<MarkPassing>) super.getMarkPassingsInOrder(waypoint);
+    public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
+        return (NavigableSet<MarkPassing>) super.getMarkPassingsInOrder(waypoint);
     }
 
     private void clearMarkPassings(Competitor competitor) {
@@ -285,7 +285,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             while (mpIter.hasNext()) {
                 MarkPassing mp = mpIter.next();
                 mpIter.remove();
-                Collection<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(mp.getWaypoint());
+                Collection<MarkPassing> markPassingsInOrder = getMarkPassingsInOrderAsNavigableSet(mp.getWaypoint());
                 synchronized (markPassingsInOrder) {
                     markPassingsInOrder.remove(mp);
                 }
