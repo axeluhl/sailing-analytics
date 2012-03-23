@@ -338,7 +338,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         }
                     }
                 }
-                startOfRace = startOfLargestGroupSoFar.getTimePoint();
+                startOfRace = startOfLargestGroupSoFar == null ? null : startOfLargestGroupSoFar.getTimePoint();
             }
         }
         return startOfRace;
