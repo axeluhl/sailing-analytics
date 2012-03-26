@@ -1926,9 +1926,17 @@ public abstract class BaseChart<T> extends Widget {
         for (Series series : seriesList) {
             series.clearInternalPointsList();
             series.setRendered(true);
+            nativeAdjustCheckboxPosition(get(series.getId()));
         }
 
     }
+
+    private static native JavaScriptObject nativeAdjustCheckboxPosition(JavaScriptObject series) /*-{
+        if (series.legendItem && series.checkbox) {
+            series.legendItem.translate(-15, 0);
+            series.checkbox.style.marginLeft = '-12px';
+        }
+    }-*/;
 
     /**
      * To be overridden in a sub class to return the JS type name of the chart instance that
