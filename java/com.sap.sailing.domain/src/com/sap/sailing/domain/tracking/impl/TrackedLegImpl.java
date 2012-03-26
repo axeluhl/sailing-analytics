@@ -30,7 +30,7 @@ import com.sap.sailing.domain.tracking.Wind;
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
     
-    private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 40; // TracTrac does 22.5, Marcus Baur suggest 40
+    private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 60; // TracTrac does 22.5, Marcus Baur suggest 40; Nils Schröder suggests 60
 
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;

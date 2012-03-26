@@ -58,6 +58,4 @@ public class CourseBasedWindTrackImpl extends WindTrackImpl {
         }
         return result;
     }
-    
-    
 }

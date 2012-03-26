@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +14,6 @@ import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Extremes;
-import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -37,7 +34,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
@@ -60,7 +56,7 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class WindChart extends SimplePanel implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener, RequiresResize {
+public class WindChart extends SimpleChartPanel implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener, RequiresResize {
     public static final long DEFAULT_RESOLUTION_IN_MILLISECONDS = 10000;
 
     private static final int LINE_WIDTH = 1;
@@ -95,7 +91,6 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
      *            if <code>null</code>, this chart won't update its contents automatically upon race selection change;
      *            otherwise, whenever the selection changes, the wind data of the race selected now is loaded from the
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
-     * @param asyncActionsExecutor TODO
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
             WindChartSettings settings, final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor,
@@ -118,11 +113,11 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 .setHeight100()
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setLegend(new Legend().setEnabled(true).setBorderWidth(0))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(
                         new Marker().setEnabled(false).setHoverState(
                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                     .setHoverStateLineWidth(LINE_WIDTH));
+        useCheckboxesToShowAndHide(chart);
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
@@ -232,6 +227,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
             if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
                 if (!visible.contains(e.getValue())) {
                     chart.addSeries(e.getValue());
+                    e.getValue().select(true); // ensures that the checkbox will be ticked
                 } else {
                     visible.remove(e.getValue());
                 }
@@ -241,6 +237,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
             if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
                 if (!visible.contains(e.getValue())) {
                     chart.addSeries(e.getValue());
+                    e.getValue().select(true); // ensures that the checkbox will be ticked
                 } else {
                     visible.remove(e.getValue());
                 }
@@ -277,7 +274,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 .setType(Series.Type.LINE)
                 .setName(stringMessages.fromDeg()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(0)
-                .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)));
+                .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)).setSelected(true));
         return newSeries;
     }
 
@@ -293,7 +290,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 .setYAxis(1) // use the second Y-axis
                 .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.SHORT_DOT)
                         .setLineWidth(3).setHoverStateLineWidth(3)
-                        .setColor(colorMap.getColorByID(windSource))); // show only the markers, not the connecting lines
+                        .setColor(colorMap.getColorByID(windSource)).setSelected(true)); // show only the markers, not the connecting lines
         return newSeries;
     }
 
@@ -320,6 +317,8 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 speedSeries = getOrCreateSpeedSeries(windSource);
             }
             WindTrackInfoDTO windTrackInfo = e.getValue();
+            Double directionMin = null;
+            Double directionMax = null;
             Point[] directionPoints = new Point[windTrackInfo.windFixes.size()];
             Point[] speedPoints = new Point[windTrackInfo.windFixes.size()];
             int i=0;
@@ -330,11 +329,18 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 if (timeOfLatestRequestInMillis == null || wind.timepoint>timeOfLatestRequestInMillis) {
                     timeOfLatestRequestInMillis = wind.timepoint;
                 }
+                if (directionMax == null || wind.dampenedTrueWindFromDeg > directionMax) {
+                    directionMax = wind.dampenedTrueWindFromDeg;
+                }
+                if (directionMin == null || wind.dampenedTrueWindFromDeg < directionMin) {
+                    directionMin = wind.dampenedTrueWindFromDeg;
+                }
+                
                 Point newDirectionPoint = new Point(wind.timepoint, wind.dampenedTrueWindFromDeg);
                 if (wind.dampenedTrueWindSpeedInKnots != null) {
                     newDirectionPoint.setName(numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+stringMessages.averageSpeedInKnotsUnit());
                 }
-                newDirectionPoint = recalculateDirectionPoint(directionSeries, newDirectionPoint);
+                newDirectionPoint = recalculateDirectionPoint(directionMax, directionMin, newDirectionPoint);
                 directionPoints[i] = newDirectionPoint;
 
                 Point newSpeedPoint = new Point(wind.timepoint, wind.dampenedTrueWindSpeedInKnots);
@@ -364,37 +370,24 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         }
     }
     
-    private Point recalculateDirectionPoint(Series directionSeries, Point directionPoint) {
+    private Point recalculateDirectionPoint(Double yMax, Double yMin, Point directionPoint) {
         double y = directionPoint.getY().doubleValue();
         boolean recalculated = false;
-        
-        List<Point> seriesPoints = Arrays.asList(directionSeries.getPoints());
-        if (!seriesPoints.isEmpty()) {
-            Collections.sort(seriesPoints, new Comparator<Point>() {
-                @Override
-                public int compare(Point p0, Point p1) {
-                    return new Double(p0.getY().doubleValue()).compareTo(p1.getY().doubleValue());
-                }
-            });
-            
-            double max = seriesPoints.get(seriesPoints.size() - 1).getY().doubleValue();
-            double min = seriesPoints.get(0).getY().doubleValue();
-            if (y <= min || max <= y) {
-                double deltaMin = Math.abs(min - y);
-                double deltaMax = Math.abs(max - y);
-                
-                double yDown = y - 360;
-                double deltaMinDown = Math.abs(min - Math.abs(yDown));
-                
-                double yUp = y + 360;
-                double deltaMaxUp = Math.abs(max - Math.abs(yUp));
-                
 
-                if (!(deltaMin <= deltaMinDown && deltaMin <= deltaMaxUp) &&
-                    !(deltaMax <= deltaMinDown && deltaMax <= deltaMaxUp)) {
-                    y = deltaMaxUp <= deltaMinDown ? yUp : yDown;
-                    recalculated = true;
-                }
+        if (yMax != null && yMin != null && (y <= yMin || yMax <= y)) {
+            double deltaMin = Math.abs(yMin - y);
+            double deltaMax = Math.abs(yMax - y);
+
+            double yDown = y - 360;
+            double deltaMinDown = Math.abs(yMin - Math.abs(yDown));
+
+            double yUp = y + 360;
+            double deltaMaxUp = Math.abs(yMax - Math.abs(yUp));
+
+            if (!(deltaMin <= deltaMinDown && deltaMin <= deltaMaxUp)
+                    && !(deltaMax <= deltaMinDown && deltaMax <= deltaMaxUp)) {
+                y = deltaMaxUp <= deltaMinDown ? yUp : yDown;
+                recalculated = true;
             }
         }
         
@@ -427,8 +420,10 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
             if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
                 chart.addSeries(e.getValue());
+                e.getValue().select(true); // ensures that the checkbox will be ticked
                 if (windSourceSpeedSeries.containsKey(e.getKey()) && e.getKey().getType().useSpeed()) {
                     chart.addSeries(windSourceSpeedSeries.get(e.getKey()));
+                    windSourceSpeedSeries.get(e.getKey()).select(true); // ensures that the checkbox will be ticked
                 }
             }
         }
@@ -579,5 +574,5 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private boolean needsDataLoading() {
         return isVisible();
     }
-    
+
 }

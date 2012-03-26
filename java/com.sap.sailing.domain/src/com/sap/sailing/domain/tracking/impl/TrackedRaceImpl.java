@@ -240,10 +240,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
         return markPassingsForCompetitor.get(competitor);
     }
+    
+    protected NavigableSet<MarkPassing> getMarkPassingsInOrderAsNavigableSet(Waypoint waypoint) {
+        return markPassingsForWaypoint.get(waypoint);
+    }
 
     @Override
     public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
-        return markPassingsForWaypoint.get(waypoint);
+        return getMarkPassingsInOrderAsNavigableSet(waypoint);
     }
 
     @Override
@@ -253,18 +257,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public TimePoint getStart() {
-        TimePoint result;
-        Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getFirstWaypoint());
-        MarkPassing firstMarkPassingFirstMark = null;
-        synchronized (markPassingsInOrder) {
-            Iterator<MarkPassing> markPassingsFirstMarkIter = markPassingsInOrder.iterator();
-            if (markPassingsFirstMarkIter.hasNext()) {
-                firstMarkPassingFirstMark = markPassingsFirstMarkIter.next();
-            }
-        }
-        if (firstMarkPassingFirstMark != null) {
-            TimePoint timeOfFirstMarkPassingFirstMark = firstMarkPassingFirstMark.getTimePoint();
-            if (startTimeReceived != null) {
+        TimePoint result = startTimeReceived;
+        // If not null, check if the first mark passing for the start line is too much after the startTimeReceived;
+        // if so, return an adjusted, later start time.
+        // If no official start time was received, try to estimate the start time using the mark passings for the start line.
+        if (startTimeReceived != null) {
+            TimePoint timeOfFirstMarkPassingFirstMark = getFirstStartPassingTime();
+            if (timeOfFirstMarkPassingFirstMark != null) {
                 long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassingFirstMark.asMillis()
                         - startTimeReceived.asMillis();
                 if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
@@ -273,15 +272,78 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 } else {
                     result = startTimeReceived;
                 }
-            } else {
-                result = timeOfFirstMarkPassingFirstMark;
             }
         } else {
-            result = startTimeReceived;
+            result = calculateStartOfRaceFromMarkPassings(getMarkPassingsInOrderAsNavigableSet(getRace().getCourse()
+                    .getFirstWaypoint()), getRace().getCompetitors());
         }
         return result;
     }
 
+    private TimePoint getFirstStartPassingTime() {
+        Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getFirstWaypoint());
+        MarkPassing firstMarkPassingFirstMark = null;
+        synchronized (markPassingsInOrder) {
+            Iterator<MarkPassing> markPassingsFirstMarkIter = markPassingsInOrder.iterator();
+            if (markPassingsFirstMarkIter.hasNext()) {
+                firstMarkPassingFirstMark = markPassingsFirstMarkIter.next();
+            }
+        }
+        TimePoint timeOfFirstMarkPassingFirstMark = null;
+        if (firstMarkPassingFirstMark != null) {
+            timeOfFirstMarkPassingFirstMark = firstMarkPassingFirstMark.getTimePoint();
+        }
+        return timeOfFirstMarkPassingFirstMark;
+    }
+    
+    private TimePoint calculateStartOfRaceFromMarkPassings(NavigableSet<MarkPassing> markPassings, Iterable<Competitor> competitors) {
+        TimePoint startOfRace = null;
+        // Find the first mark passing within the largest cluster crossing the line within one minute.
+        final long ONE_MINUTE_IN_MILLIS = 60 * 1000;
+        synchronized (markPassings) {
+            if (markPassings != null) {
+                int largestStartGroupWithinOneMinuteSize = 0;
+                MarkPassing startOfLargestGroupSoFar = null;
+                int candiateGroupSize = 0;
+                MarkPassing candidateForStartOfLargestGroupSoFar = null;
+                Iterator<MarkPassing> iterator = markPassings.iterator();
+                // sweep over all start mark passings and for each element find the number of competitors that passed the start up to one minute later;
+                // pick the start mark passing of the competitor leading the largest such group
+                while (iterator.hasNext()) {
+                    MarkPassing currentMarkPassing = iterator.next();
+                    if (candidateForStartOfLargestGroupSoFar == null) {
+                        // first start mark passing
+                        candidateForStartOfLargestGroupSoFar = currentMarkPassing;
+                        candiateGroupSize = 1;
+                        startOfLargestGroupSoFar = currentMarkPassing;
+                        largestStartGroupWithinOneMinuteSize = 1;
+                    } else {
+                        if (currentMarkPassing.getTimePoint().asMillis() - candidateForStartOfLargestGroupSoFar.getTimePoint().asMillis() <= ONE_MINUTE_IN_MILLIS) {
+                            // currentMarkPassing is within one minute of candidateForStartOfLargestGroupSoFar; extend candidate group...
+                            candiateGroupSize++;
+                            if (candiateGroupSize > largestStartGroupWithinOneMinuteSize) {
+                                // ...and remember as best fit if greater than largest group so far
+                                startOfLargestGroupSoFar = candidateForStartOfLargestGroupSoFar;
+                                largestStartGroupWithinOneMinuteSize = candiateGroupSize;
+                            }
+                        } else {
+                            // currentMarkPassing is more than a minute after candidateForStartOfLargestGroupSoFar; advance
+                            // candidateForStartOfLargestGroupSoFar and reduce group size counter, until candidateForStartOfLargestGroupSoFar
+                            // is again within the one-minute interval; may catch up all the way to currentMarkPassing if that was
+                            // more than a minute after its predecessor
+                            while (currentMarkPassing.getTimePoint().asMillis() - candidateForStartOfLargestGroupSoFar.getTimePoint().asMillis() > ONE_MINUTE_IN_MILLIS) {
+                                candidateForStartOfLargestGroupSoFar = markPassings.higher(candidateForStartOfLargestGroupSoFar);
+                                candiateGroupSize--;
+                            }
+                        }
+                    }
+                }
+                startOfRace = startOfLargestGroupSoFar == null ? null : startOfLargestGroupSoFar.getTimePoint();
+            }
+        }
+        return startOfRace;
+    }
+    
     @Override
     public TimePoint getAssumedEnd() {
         TimePoint result = null;
@@ -671,14 +733,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (timePointOfNewestEvent == null || timePointOfNewestEvent.compareTo(timeOfEvent) < 0) {
                 timePointOfNewestEvent = timeOfEvent;
             }
-            if (startOfTracking == null || startOfTracking.compareTo(timeOfEvent) > 0) {
-                startOfTracking = timeOfEvent;
+            if (getStartOfTracking() == null || getStartOfTracking().compareTo(timeOfEvent) > 0) {
+                setStartOfTracking(timeOfEvent);
             }
             timePointOfLastEvent = timeOfEvent;
         }
         notifyAll();
     }
 
+    protected void setStartOfTracking(TimePoint startOfTracking) {
+        this.startOfTracking = startOfTracking;
+    }
+    
     /**
      * Schedules the clearing of the caches. If a cache clearing is already scheduled, this is a no-op.
      */

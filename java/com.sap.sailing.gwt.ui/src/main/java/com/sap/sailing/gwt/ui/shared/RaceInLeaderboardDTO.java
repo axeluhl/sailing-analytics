@@ -80,6 +80,17 @@ public class RaceInLeaderboardDTO implements IsSerializable {
         }
         return places;
     }
+    
+    /**
+     * @return <code>true</code> if the startOfTracking is after the current date and there's no end of the race
+     */
+    public boolean isLive() {
+        if (trackedRaceIdentifier != null && race != null) {
+            return race.endOfRace == null && (race.startOfTracking != null ? new Date().after(race.startOfTracking) : false);
+        } else {
+            return false;
+        }
+    }
 
     @Override
     public int hashCode() {

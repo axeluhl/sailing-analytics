@@ -63,7 +63,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
         if (trackedRace != null) {
             MillisecondsTimePoint start = new MillisecondsTimePoint(event.getB().getStartTime());
             if (trackedRace.getStart() == null || !trackedRace.getStart().equals(start)) {
-                trackedRace.setStartTimeReceived(start);
+                trackedRace.setStartOfTracking(start);
             }
             // TODO forward race stop time, event.getB().getStopTime()
         } else {

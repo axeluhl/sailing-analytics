@@ -257,7 +257,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 synchronized (markPassingsForCompetitor) {
                     markPassingsForCompetitor.add(markPassing);
                 }
-                Collection<MarkPassing> markPassingsInOrderForWaypoint = getMarkPassingsInOrder(markPassing.getWaypoint());
+                Collection<MarkPassing> markPassingsInOrderForWaypoint = getMarkPassingsInOrderAsNavigableSet(markPassing.getWaypoint());
                 synchronized (markPassingsInOrderForWaypoint) {
                     markPassingsInOrderForWaypoint.add(markPassing);
                 }
@@ -274,8 +274,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public Collection<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
-        return (Collection<MarkPassing>) super.getMarkPassingsInOrder(waypoint);
+    public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
+        return (NavigableSet<MarkPassing>) super.getMarkPassingsInOrder(waypoint);
     }
 
     private void clearMarkPassings(Competitor competitor) {
@@ -285,7 +285,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             while (mpIter.hasNext()) {
                 MarkPassing mp = mpIter.next();
                 mpIter.remove();
-                Collection<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(mp.getWaypoint());
+                Collection<MarkPassing> markPassingsInOrder = getMarkPassingsInOrderAsNavigableSet(mp.getWaypoint());
                 synchronized (markPassingsInOrder) {
                     markPassingsInOrder.remove(mp);
                 }
@@ -296,6 +296,11 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void setStartTimeReceived(TimePoint start) {
         super.setStartTimeReceived(start);
+    }
+    
+    @Override
+    public void setStartOfTracking(TimePoint startOfTracking) {
+        super.setStartOfTracking(startOfTracking);
     }
 
     /**
@@ -321,11 +326,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void gpsFixReceived(GPSFix fix, Competitor competitor) {
-        TimePoint start = getStart();
-        if (start == null || start.compareTo(fix.getTimePoint())>0) {
-            // infer race start time from fix; earliest fix received defines start if earlier than assumed start so far
-            setStartTimeReceived(fix.getTimePoint());
-        }
         updated(fix.getTimePoint());
         notifyListeners(fix, competitor);
     }

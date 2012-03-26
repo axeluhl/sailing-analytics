@@ -12,7 +12,6 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Extremes;
-import org.moxieapps.gwt.highcharts.client.Legend;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
@@ -34,7 +33,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -42,6 +40,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
+import com.sap.sailing.gwt.ui.adminconsole.SimpleChartPanel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
@@ -72,7 +71,7 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
  * @author Benjamin Ebling (D056866), Axel Uhl (d043530)
  * 
  */
-public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimplePanel
+public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimpleChartPanel
 implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener, RequiresResize {
     protected static final int LINE_WIDTH = 1;
     protected MultiCompetitorRaceDataDTO chartData;
@@ -160,10 +159,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                 .setWidth100()
                 .setHeight100()
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setLegend(new Legend().setEnabled(true).setBorderWidth(0))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
                                 .setHoverStateLineWidth(LINE_WIDTH));
+        useCheckboxesToShowAndHide(chart);
         chart.setChartTitle(new ChartTitle().setText(DetailTypeFormatter.format(dataToShow, stringMessages)));
         
         if (allowTimeAdjust) {
@@ -432,7 +431,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
                     .setLineWidth(LINE_WIDTH)
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
                     .setShadow(false).setHoverStateLineWidth(LINE_WIDTH)
-                    .setColor(competitorSelectionProvider.getColor(competitor)));
+                    .setColor(competitorSelectionProvider.getColor(competitor)).setSelected(true));
             dataSeriesByCompetitor.put(competitor, result);
     	}
     	return result;
@@ -476,7 +475,7 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
         Series result = markPassingSeriesByCompetitor.get(competitor);
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.SCATTER).setName(stringMessages.markPassing()+" "+competitor.name);
-            result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor)));
+            result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor)).setSelected(true));
             markPassingSeriesByCompetitor.put(competitor, result);
         }
         return result;

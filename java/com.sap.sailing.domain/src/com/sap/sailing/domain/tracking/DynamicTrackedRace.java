@@ -38,6 +38,8 @@ public interface DynamicTrackedRace extends TrackedRace {
      * significantly off.
      */
     void setStartTimeReceived(TimePoint start);
+    
+    void setStartOfTracking(TimePoint startOfTracking);
 
     void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed);
 

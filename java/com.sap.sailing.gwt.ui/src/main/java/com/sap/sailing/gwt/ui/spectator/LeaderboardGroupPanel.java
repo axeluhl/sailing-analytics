@@ -214,7 +214,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     
     private SafeHtml leaderboardRacesToHtml(LeaderboardDTO leaderboard) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
-        boolean first = true;
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
             if (race.getRaceIdentifier() != null) {
@@ -228,12 +227,8 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     link += "&viewMode=" + viewMode;
                 b.append(ANCHORTEMPLATE.anchor(link, race.getRaceColumnName(), STYLE_NAME_PREFIX + "ActiveRace"));
             } else {
-                if (!first) {
-                    b.appendHtmlConstant(", ");
-                }
                 b.append(TEXTTEMPLATE.textWithClass(race.getRaceColumnName(), STYLE_NAME_PREFIX + "InactiveRace"));
             }
-            first = false;
         }
         return b.toSafeHtml();
     }

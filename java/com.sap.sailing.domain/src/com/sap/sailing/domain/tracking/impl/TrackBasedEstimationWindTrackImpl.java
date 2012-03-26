@@ -230,7 +230,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * {@link InvalidationInterval#clear() clears} the invalidation interval, indicating that currently no scheduler is
      * running.
      */
-    private void invalidateCache() {
+    private synchronized void invalidateCache() {
         synchronized (scheduledInvalidationInterval) {
             // FIXME see bug 452: synchronize also on the cached fixes
             Iterator<WindWithConfidence<TimePoint>> iter = (scheduledInvalidationInterval.getStart() == null ? getCachedFixes()

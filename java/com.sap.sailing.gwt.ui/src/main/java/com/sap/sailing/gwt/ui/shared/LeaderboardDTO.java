@@ -399,6 +399,18 @@ public class LeaderboardDTO implements IsSerializable {
         }
         return leaderboardPlaces;
     }
+    
+    /**
+     * @return <code>true</code> if the leaderboard contains a race which is live
+     */
+    public boolean containsLiveRace() {
+        for (RaceInLeaderboardDTO race : getRaceList()) {
+            if (race.isLive()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public int hashCode() {
