@@ -27,6 +27,8 @@ import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.SeriesLegendItemClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesLegendItemClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
@@ -96,7 +98,6 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
      *            if <code>null</code>, this chart won't update its contents automatically upon race selection change;
      *            otherwise, whenever the selection changes, the wind data of the race selected now is loaded from the
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
-     * @param asyncActionsExecutor TODO
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
             WindChartSettings settings, final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor,
@@ -119,7 +120,7 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                 .setHeight100()
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setLegend(new Legend().setEnabled(true).setBorderWidth(0))
+                .setLegend(new Legend().setEnabled(true).setBorderWidth(0).setSymbolPadding(20)) // make room for checkbox
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(
                         new Marker().setEnabled(false).setHoverState(
                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
@@ -134,7 +135,14 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
                         }
                         return false; // don't toggle the select state of the series
                     }
-                }).setShowCheckbox(true));
+                }).setShowCheckbox(true).
+                setSeriesLegendItemClickEventHandler(new SeriesLegendItemClickEventHandler() {
+                    @Override
+                    public boolean onClick(SeriesLegendItemClickEvent seriesLegendItemClickEvent) {
+                        // disable toggling visibility by clicking the legend item; force user to use checkbox instead
+                        return false;
+                    }
+                }));
         final NumberFormat numberFormat = NumberFormat.getFormat("0");
         chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
             @Override
@@ -289,9 +297,9 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         Series newSeries = chart
                 .createSeries()
                 .setType(Series.Type.LINE)
-                .setName(stringMessages.fromDeg()+" "+WindSourceTypeFormatter.format(windSource, stringMessages)+"       ")
+                .setName(stringMessages.fromDeg()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(0)
-                .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)));
+                .setPlotOptions(new LinePlotOptions().setColor(colorMap.getColorByID(windSource)).setSelected(true));
         return newSeries;
     }
 
@@ -303,11 +311,11 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
         Series newSeries = chart
                 .createSeries()
                 .setType(Series.Type.LINE)
-                .setName(stringMessages.windSpeed()+" "+WindSourceTypeFormatter.format(windSource, stringMessages)+"       ")
+                .setName(stringMessages.windSpeed()+" "+WindSourceTypeFormatter.format(windSource, stringMessages))
                 .setYAxis(1) // use the second Y-axis
                 .setPlotOptions(new LinePlotOptions().setDashStyle(PlotLine.DashStyle.SHORT_DOT)
                         .setLineWidth(3).setHoverStateLineWidth(3)
-                        .setColor(colorMap.getColorByID(windSource))); // show only the markers, not the connecting lines
+                        .setColor(colorMap.getColorByID(windSource)).setSelected(true)); // show only the markers, not the connecting lines
         return newSeries;
     }
 
@@ -591,5 +599,5 @@ public class WindChart extends SimplePanel implements Component<WindChartSetting
     private boolean needsDataLoading() {
         return isVisible();
     }
-    
+
 }

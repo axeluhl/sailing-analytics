@@ -1490,6 +1490,7 @@ public abstract class BaseChart<T> extends Widget {
 
             // Once we're rendered, we're maintaining the point state in the DOM, so we can dump our internal list to save memory
             series.clearInternalPointsList();
+            nativeAdjustCheckboxPosition(get(series.getId()));
         }
 
         return returnThis();
@@ -1931,10 +1932,19 @@ public abstract class BaseChart<T> extends Widget {
 
     }
 
+    /**
+     * Fixing a bug currently in the base Highcharts implementation regarding the placement of the checkbox in the legend.
+     * Requires the symbol padding (see {@link Legend#setSymbolPadding(Number)}) to be set to <code>20</code>. Invoked
+     * whenever a series is added / displayed in a rendered chart.<p>
+     * 
+     * The implementation moves the legend item text 15px to the left, using the space made by setting the symbol
+     * padding to 20px; the checkbox is moved 18px to the left with the top margin set to 0px.
+     */
     private static native JavaScriptObject nativeAdjustCheckboxPosition(JavaScriptObject series) /*-{
         if (series.legendItem && series.checkbox) {
             series.legendItem.translate(-15, 0);
-            series.checkbox.style.marginLeft = '-12px';
+            series.checkbox.style.marginLeft = '-18px'
+            series.checkbox.style.marginTop = '0px'
         }
     }-*/;
 
