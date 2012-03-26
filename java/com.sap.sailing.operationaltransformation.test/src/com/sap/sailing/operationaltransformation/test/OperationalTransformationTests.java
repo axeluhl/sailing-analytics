@@ -1,19 +1,23 @@
-package com.sap.runlet.operationaltransformation.test;
+package com.sap.sailing.operationaltransformation.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 import java.util.UUID;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-import com.sap.runlet.operationaltransformation.AbstractOperation;
-import com.sap.runlet.operationaltransformation.ClientServerOperationPair;
-import com.sap.runlet.operationaltransformation.Peer;
-import com.sap.runlet.operationaltransformation.PeerImpl;
-import com.sap.runlet.operationaltransformation.Transformer;
-import com.sap.runlet.operationaltransformation.Peer.Role;
-import com.sap.runlet.operationaltransformation.test.util.Base64;
+import com.sap.sailing.operationaltransformation.AbstractOperation;
+import com.sap.sailing.operationaltransformation.ClientServerOperationPair;
+import com.sap.sailing.operationaltransformation.Peer;
+import com.sap.sailing.operationaltransformation.Peer.Role;
+import com.sap.sailing.operationaltransformation.PeerImpl;
+import com.sap.sailing.operationaltransformation.Transformer;
+import com.sap.sailing.operationaltransformation.test.util.Base64;
 
-public class OperationalTransformationTests extends TestCase {
+public class OperationalTransformationTests {
     private Peer<StringInsertOperation, StringState> server;
     private Peer<StringInsertOperation, StringState> client1, client2;
     
@@ -109,6 +113,7 @@ public class OperationalTransformationTests extends TestCase {
 	}
     }
     
+    @Before
     public void setUp() {
 	server = new PeerImpl<StringInsertOperation, StringState>(
 		"Server", new StringInsertTransformer(), new StringState(""), Role.SERVER);
@@ -116,6 +121,7 @@ public class OperationalTransformationTests extends TestCase {
 	client2 = new PeerImpl<StringInsertOperation, StringState>("Client2", new StringInsertTransformer(), server);
     }
     
+    @Test
     public void testBasicTransformation() {
 	client1.apply(new StringInsertOperation(0, "abc"));
 	client2.apply(new StringInsertOperation(0, "def"));
@@ -128,6 +134,7 @@ public class OperationalTransformationTests extends TestCase {
 	assertTrue(server.getCurrentState().getState().equals("abcdef") || server.getCurrentState().getState().equals("defabc"));
     }
 
+    @Test
     public void testTwoMassInserts() {
 	final int COUNT = 100;
 	for (int i = 0; i < COUNT; i++) {
@@ -146,6 +153,7 @@ public class OperationalTransformationTests extends TestCase {
      * Randomizes the number of changes applied to each client per iteration,
      * the insert position and the string to be inserted.
      */
+    @Test
     public void testRandomInserts() {
 	final int COUNT = 100;
 	Random r = new Random();
@@ -176,6 +184,7 @@ public class OperationalTransformationTests extends TestCase {
 	assertEquals(totalLength, server.getCurrentState().getState().length());
     }
 
+    @Test
     public void testTwoMassInsertsWithServerReplica() {
 	Peer<StringInsertOperation, StringState> server2 = new PeerImpl<StringInsertOperation, StringState>("Server2",
 		new StringInsertTransformer(), server);
