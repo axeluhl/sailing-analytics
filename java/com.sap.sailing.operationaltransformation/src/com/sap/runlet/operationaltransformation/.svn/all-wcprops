@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/monet/!svn/ver/7755/trunk/ngpm/com.sap.runlet.operationaltransformation/src/com/sap/runlet/operationaltransformation
+END
+UnmergedOperationsQueue.java
+K 25
+svn:wc:ra_dav:version-url
+V 150
+/svn/monet/!svn/ver/7651/trunk/ngpm/com.sap.runlet.operationaltransformation/src/com/sap/runlet/operationaltransformation/UnmergedOperationsQueue.java
+END
+package.html
+K 25
+svn:wc:ra_dav:version-url
+V 134
+/svn/monet/!svn/ver/7651/trunk/ngpm/com.sap.runlet.operationaltransformation/src/com/sap/runlet/operationaltransformation/package.html
+END
+Transformer.java
+K 25
+svn:wc:ra_dav:version-url
+V 138
+/svn/monet/!svn/ver/7651/trunk/ngpm/com.sap.runlet.operationaltransformation/src/com/sap/runlet/operationaltransformation/Transformer.java
+END
+Operation.java
+K 25
+svn:wc:ra_dav:version-url
+V 136
+/svn/monet/!svn/ver/7651/trunk/ngpm/com.sap.runlet.operationaltransformation/src/com/sap/runlet/operationaltransformation/Operation.java
+END
+AbstractOperation.java
+K 25
+svn:wc:ra_dav:version-url
+V 144
+/svn/monet/!svn/ver/7651/trunk/ngpm/com.sap.runlet.operationaltransformation/src/com/sap/runlet/operationaltransformation/AbstractOperation.java
+END
+ClientServerOperationPair.java
+K 25
+svn:wc:ra_dav:version-url
+V 152
+/svn/monet/!svn/ver/7651/trunk/ngpm/com.sap.runlet.operationaltransformation/src/com/sap/runlet/operationaltransformation/ClientServerOperationPair.java
+END
+Peer.java
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/monet/!svn/ver/7755/trunk/ngpm/com.sap.runlet.operationaltransformation/src/com/sap/runlet/operationaltransformation/Peer.java
+END
+PeerImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 135
+/svn/monet/!svn/ver/7755/trunk/ngpm/com.sap.runlet.operationaltransformation/src/com/sap/runlet/operationaltransformation/PeerImpl.java
+END
+StatesAndOperations.java
+K 25
+svn:wc:ra_dav:version-url
+V 146
+/svn/monet/!svn/ver/7651/trunk/ngpm/com.sap.runlet.operationaltransformation/src/com/sap/runlet/operationaltransformation/StatesAndOperations.java
+END
