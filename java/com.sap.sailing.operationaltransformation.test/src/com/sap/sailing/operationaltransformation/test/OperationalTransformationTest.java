@@ -17,7 +17,7 @@ import com.sap.sailing.operationaltransformation.PeerImpl;
 import com.sap.sailing.operationaltransformation.Transformer;
 import com.sap.sailing.operationaltransformation.test.util.Base64;
 
-public class OperationalTransformationTests {
+public class OperationalTransformationTest {
     private Peer<StringInsertOperation, StringState> server;
     private Peer<StringInsertOperation, StringState> client1, client2;
     
