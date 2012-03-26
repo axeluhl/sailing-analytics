@@ -1,4 +1,4 @@
-package com.sap.runlet.operationaltransformation;
+package com.sap.sailing.operationaltransformation;
 
 public abstract class AbstractOperation<S> implements Operation<S> {
     @SuppressWarnings("unchecked")

@@ -1,4 +1,4 @@
-package com.sap.runlet.operationaltransformation;
+package com.sap.sailing.operationaltransformation;
 
 /**
  * A change operation can be applied to some start state of some

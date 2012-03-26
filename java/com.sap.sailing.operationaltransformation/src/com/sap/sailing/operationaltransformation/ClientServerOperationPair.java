@@ -1,4 +1,4 @@
-package com.sap.runlet.operationaltransformation;
+package com.sap.sailing.operationaltransformation;
 
 public class ClientServerOperationPair<O extends Operation<?>> {
     private O clientOp;

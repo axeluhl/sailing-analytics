@@ -1,4 +1,4 @@
-package com.sap.runlet.operationaltransformation;
+package com.sap.sailing.operationaltransformation;
 
 public interface Transformer<O extends Operation<?>> {
     /**

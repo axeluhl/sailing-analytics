@@ -1,4 +1,4 @@
-package com.sap.runlet.operationaltransformation;
+package com.sap.sailing.operationaltransformation;
 
 /**
  * Accepts change operations from clients and maintains a shared state. If new
