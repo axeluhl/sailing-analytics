@@ -1167,6 +1167,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 timeChanged(timer.getTime());
             }
         }
+        //Trigger auto-zoom if needed
+        RaceMapZoomSettings zoomSettings = getSettings().getZoomSettings();
+        if (!zoomSettings.contains(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
+            zoomMapToNewBounds(zoomSettings.getNewBounds(this));
+        }
     }
     
     /**
@@ -1207,6 +1212,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 map.addOverlay(lowlightedMarker);
                 boatMarkers.put(competitor, lowlightedMarker);
             }
+        }
+        //Trigger auto-zoom if needed
+        RaceMapZoomSettings zoomSettings = getSettings().getZoomSettings();
+        if (!zoomSettings.contains(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
+            zoomMapToNewBounds(zoomSettings.getNewBounds(this));
         }
     }
 
