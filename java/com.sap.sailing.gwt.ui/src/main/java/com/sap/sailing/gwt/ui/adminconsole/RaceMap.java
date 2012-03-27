@@ -1291,7 +1291,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (selectedCompetitors == null || !selectedCompetitors.iterator().hasNext()) {
                 competitors = forMap.getCompetitorsToShow();
             } else {
-                competitors = isZoomOnlyToSelectedCompetitors() ? selectedCompetitors : forMap.getCompetitorsToShow();
+                competitors = isZoomOnlyToSelectedCompetitors(forMap) ? selectedCompetitors : forMap.getCompetitorsToShow();
             }
             for (CompetitorDTO competitor : competitors) {
                 try {
@@ -1324,7 +1324,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
             LatLngBounds newBounds = null;
-            Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors() ? forMap.competitorSelection.getSelectedCompetitors() : forMap.getCompetitorsToShow();
+            Iterable<CompetitorDTO> competitors = isZoomOnlyToSelectedCompetitors(forMap) ? forMap.competitorSelection.getSelectedCompetitors() : forMap.getCompetitorsToShow();
             for (CompetitorDTO competitor : competitors) {
                 Polyline tail = forMap.tails.get(competitor);
                 LatLngBounds bounds = tail != null ? tail.getBounds() : null;
