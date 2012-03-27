@@ -21,6 +21,6 @@ public class WindSourceTypeFormatter {
     }
     
     public static String format(WindSource windSource, StringMessages stringMessages) {
-        return format(windSource.getType(), stringMessages)+(windSource.getId() == null ? "" : windSource.getId().toString());
+        return format(windSource.getType(), stringMessages)+(windSource.getId() == null ? "" : (" "+windSource.getId().toString()));
     }
 }

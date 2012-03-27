@@ -215,11 +215,19 @@ public interface TrackedRace {
 
     TimePoint getStartOfTracking();
 
+    TimePoint getEndOfTracking();
+
     /**
      * Regardless of the order in which events were received, this method returns the latest time point contained by any of
      * the events received and processed.
      */
     TimePoint getTimePointOfNewestEvent();
+
+    /**
+     * Regardless of the order in which events were received, this method returns the oldest time point contained by any of
+     * the events received and processed.
+     */
+    TimePoint getTimePointOfOldestEvent();
 
     /**
      * @return the mark passings for <code>competitor</code> in this race received so far; the mark passing objects are
