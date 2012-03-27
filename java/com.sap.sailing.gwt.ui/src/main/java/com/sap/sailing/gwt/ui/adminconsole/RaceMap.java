@@ -533,20 +533,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             for (Pair<WindSource, WindDTO> windSourcePair : windSensorsList) {
                 WindSource windSource = windSourcePair.getA(); 
                 WindDTO windDTO = windSourcePair.getB();
-                Marker windSensorMarker = windSensorMarkers.get(windSource);
-                if (windSensorMarker == null) {
-                    windSensorMarker = createWindSensorMarker(windSource, windDTO);
-                    windSensorMarkers.put(windSource, windSensorMarker);
-                    map.addOverlay(windSensorMarker);
-                } else {
-                    double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
-                    ImageTransformer transformer = imageResources.expeditionWindIconTransformer;
-                    String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
-                    windSensorMarker.setImage(transformedImageURL);
-                    windSensorMarker.setLatLng(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
-                    toRemoveWindSources.remove(windSource);
+                PositionDTO sensorPosition = windDTO.position;
+                // Attention: sometimes there is no valid position for the windsource available -> ignore the wind in this case
+                if (sensorPosition != null) {
+                    Marker windSensorMarker = windSensorMarkers.get(windSource);
+                    if (windSensorMarker == null) {
+                        windSensorMarker = createWindSensorMarker(windSource, windDTO);
+                        windSensorMarkers.put(windSource, windSensorMarker);
+                        map.addOverlay(windSensorMarker);
+                    } else {
+                        double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
+                        ImageTransformer transformer = imageResources.expeditionWindIconTransformer;
+                        String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
+                        windSensorMarker.setImage(transformedImageURL);
+                        windSensorMarker.setLatLng(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
+                        toRemoveWindSources.remove(windSource);
+                    }
+                    windForMarkers.put(windSensorMarker, windDTO);
                 }
-                windForMarkers.put(windSensorMarker, windDTO);
             }
             for (WindSource toRemoveWindSource : toRemoveWindSources) {
                 Marker marker = windSensorMarkers.remove(toRemoveWindSource);
