@@ -299,8 +299,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public void setStartOfTracking(TimePoint startOfTracking) {
-        super.setStartOfTracking(startOfTracking);
+    public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived) {
+        super.setStartOfTrackingReceived(startOfTrackingReceived);
+    }
+
+    @Override
+    public void setEndOfTrackingReceived(TimePoint endOfTrackingReceived) {
+        super.setEndOfTrackingReceived(endOfTrackingReceived);
     }
 
     /**

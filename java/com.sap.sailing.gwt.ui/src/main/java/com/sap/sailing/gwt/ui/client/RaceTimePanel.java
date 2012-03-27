@@ -132,9 +132,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             }
             break;
         case Replay:
-            //TODO Merge with Franks branch for better end of race calculation
-            Date tempEndOfRace = newRaceTimesInfo.getLastLegTimes() != null ? newRaceTimesInfo.getLastLegTimes().firstPassingDate : newRaceTimesInfo.endOfRace;
-            long extensionTime = calculateRaceExtensionTime(newRaceTimesInfo.startOfRace, tempEndOfRace);
+            long extensionTime = calculateRaceExtensionTime(newRaceTimesInfo.startOfRace, newRaceTimesInfo.endOfRace);
             
             if (newRaceTimesInfo.startOfRace != null) {
                 min = new Date(newRaceTimesInfo.startOfRace.getTime() - extensionTime);
@@ -143,7 +141,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             }
             
             if (newRaceTimesInfo.endOfRace != null) {
-                max = new Date(tempEndOfRace.getTime() + extensionTime);
+                max = new Date(newRaceTimesInfo.endOfRace.getTime() + extensionTime);
             } else if (newRaceTimesInfo.timePointOfNewestEvent != null) {
                 max = newRaceTimesInfo.timePointOfNewestEvent;
             }
@@ -213,10 +211,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             }
             sliderBar.redraw();
         }
-        // the marker information is complete if we have a time for the start, the end, and all legs
-        // TODO: Implement this later on
-        // TODO (from Axel Uhl) I think the above may not be correct. The data may change at all times, even after the race. isTimeInfoComplete removed. Frank, please review.
-        // isTimeInfoComplete = false;
     }
     
     @Override

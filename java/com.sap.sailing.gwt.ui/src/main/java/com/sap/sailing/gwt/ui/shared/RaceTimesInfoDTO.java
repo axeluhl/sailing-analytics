@@ -14,6 +14,7 @@ public class RaceTimesInfoDTO implements IsSerializable {
     
     public Date startOfRace;
     public Date startOfTracking;
+    public Date endOfTracking;
     public Date endOfRace;
 
     public Date timePointOfLastEvent;
