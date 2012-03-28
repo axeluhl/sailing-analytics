@@ -8,8 +8,9 @@ public class OperationalTransformer implements Transformer<RacingEventServiceOpe
     @Override
     public ClientServerOperationPair<RacingEventServiceOperation> transform(RacingEventServiceOperation clientOp,
             RacingEventServiceOperation serverOp) {
-        // TODO Auto-generated method stub
-        return null;
+        ClientServerOperationPair<RacingEventServiceOperation> result = new ClientServerOperationPair<RacingEventServiceOperation>(
+                clientOp.transformClientOp(serverOp), serverOp.transformServerOp(clientOp));
+        return result;
     }
 
 }

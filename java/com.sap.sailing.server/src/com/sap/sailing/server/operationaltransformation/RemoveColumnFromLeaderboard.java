@@ -1,27 +1,51 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import com.sap.sailing.operationaltransformation.ClientServerOperationPair;
 import com.sap.sailing.server.RacingEventService;
 
-public class RemoveColumnFromLeaderboard implements RacingEventServiceOperation {
-    private final String columnName;
-    private final String leaderboardName;
+public class RemoveColumnFromLeaderboard extends AbstractLeaderboardColumnOperation {
     
     
     public RemoveColumnFromLeaderboard(String columnName, String leaderboardName) {
-        super();
-        this.columnName = columnName;
-        this.leaderboardName = leaderboardName;
+        super(leaderboardName, columnName);
     }
 
     @Override
     public RacingEventService applyTo(RacingEventService toState) {
-        toState.removeLeaderboardColumn(leaderboardName, columnName);
+        toState.removeLeaderboardColumn(getLeaderboardName(), getColumnName());
         return toState;
     }
 
     @Override
-    public RacingEventServiceOperation transformFor(RacingEventServiceOperation peerOp) {
-        // TODO Auto-generated method stub
-        return null;
+    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+        return serverOp.transformClientRemoveColumnFromLeaderboard(this);
     }
+
+    @Override
+    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+        return clientOp.transformServerRemoveColumnFromLeaderboard(this);
+    }
+
+    @Override
+    public RacingEventServiceOperation transformServerRemoveColumnFromLeaderboard(
+            RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp) {
+        if (affectsSameColumn(removeColumnFromLeaderboardServerOp)) {
+            // skip server's remove and hence only apply the client's remove operation
+            return ClientServerOperationPair.getNoOp();
+        } else {
+            return removeColumnFromLeaderboardServerOp;
+        }
+    }
+
+    @Override
+    public RacingEventServiceOperation transformClientRemoveColumnFromLeaderboard(
+            RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp) {
+        if (affectsSameColumn(removeColumnFromLeaderboardClientOp)) {
+            // skip client's remove and hence only apply the server's remove operation
+            return ClientServerOperationPair.getNoOp();
+        } else {
+            return removeColumnFromLeaderboardClientOp;
+        }
+    }
+
 }

@@ -17,4 +17,5 @@ public interface Operation<S> extends Cloneable {
      * @return the state produced by applying this operation to <tt>toState</tt>
      */
     S applyTo(S toState);
+    
 }

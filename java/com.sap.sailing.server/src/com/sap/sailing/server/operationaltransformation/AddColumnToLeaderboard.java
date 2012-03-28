@@ -2,27 +2,35 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.server.RacingEventService;
 
-public class AddColumnToLeaderboard implements RacingEventServiceOperation {
-    private final String columnName;
-    private final String leaderboardName;
+/**
+ * Doesn't transform for the {@link RemoveColumnFromLeaderboard} because only existing leaderboards can be removed,
+ * and adding is only possible for non-existing names.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation {
     private final boolean medalRace;
     
-    
     public AddColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
-        super();
-        this.columnName = columnName;
-        this.leaderboardName = leaderboardName;
+        super(leaderboardName, columnName);
         this.medalRace = medalRace;
     }
 
     @Override
     public RacingEventService applyTo(RacingEventService toState) {
-        toState.addColumnToLeaderboard(columnName, leaderboardName, medalRace);
+        toState.addColumnToLeaderboard(getColumnName(), getLeaderboardName(), medalRace);
         return toState;
     }
 
     @Override
-    public RacingEventServiceOperation transformFor(RacingEventServiceOperation peerOp) {
+    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
