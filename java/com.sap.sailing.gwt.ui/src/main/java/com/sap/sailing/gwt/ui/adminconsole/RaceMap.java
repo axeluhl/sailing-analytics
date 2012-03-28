@@ -545,7 +545,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 WindSource windSource = windSourcePair.getA(); 
                 WindDTO windDTO = windSourcePair.getB();
                 PositionDTO sensorPosition = windDTO.position;
-                // Attention: sometimes there is no valid position for the windsource available -> ignore the wind in this case
+                // Attention: sometimes there is no valid position for the wind source available -> ignore the wind in this case
                 if (sensorPosition != null) {
                     Marker windSensorMarker = windSensorMarkers.get(windSource);
                     if (windSensorMarker == null) {
@@ -753,12 +753,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         double lngDeg = windDTO.position.lngDeg;
         MarkerOptions options = MarkerOptions.newInstance();
 
-        double windFromDeg = windDTO.dampenedTrueWindFromDeg;
         ImageTransformer transformer = imageResources.expeditionWindIconTransformer;
-
-        double rotationDegOfWindSymbol = 180.0 + windFromDeg;
-        if(rotationDegOfWindSymbol >= 360.0)
-            rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
+        double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
         String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
         
         Icon icon = Icon.newInstance(transformedImageURL);
