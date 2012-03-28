@@ -14,11 +14,11 @@ import java.util.List;
  * 
  */
 public class StatesAndOperations<O extends Operation<S>, S> {
-    private List<S> states = new LinkedList<S>();
+    private S currentState;
     private List<O> operations = new LinkedList<O>();
 
     public StatesAndOperations(S initialState) {
-	states.add(initialState);
+	currentState = initialState;
     }
 
     /**
@@ -31,12 +31,12 @@ public class StatesAndOperations<O extends Operation<S>, S> {
      */
     public synchronized void apply(O operation) {
 	S result = operation.applyTo(getCurrentState());
-	states.add(result);
+	currentState = result;
 	operations.add(operation);
     }
     
     public S getCurrentState() {
-	return states.get(states.size() - 1);
+	return currentState;
     }
 
 }
