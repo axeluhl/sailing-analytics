@@ -8,25 +8,20 @@ public class MoveLeaderboardColumnDown extends AbstractLeaderboardColumnOperatio
         super(leaderboardName, columnName);
     }
 
-
     @Override
     public RacingEventService applyTo(RacingEventService toState) {
         toState.moveLeaderboardColumnDown(getLeaderboardName(), getColumnName());
         return toState;
     }
 
-
     @Override
     public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
-        // TODO Auto-generated method stub
-        return null;
+        return serverOp.transformMoveLeaderboardColumnDownClientOp(this);
     }
-
 
     @Override
     public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
-        // TODO Auto-generated method stub
-        return null;
+        return clientOp.transformMoveLeaderboardColumnDownServerOp(this);
     }
 
 }

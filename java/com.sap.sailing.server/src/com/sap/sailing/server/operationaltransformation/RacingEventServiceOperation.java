@@ -48,4 +48,12 @@ public interface RacingEventServiceOperation extends Operation<RacingEventServic
     RacingEventServiceOperation transformAddColumnToLeaderboardClientOp(AddColumnToLeaderboard addColumnToLeaderboard);
 
     RacingEventServiceOperation transformAddColumnToLeaderboardServerOp(AddColumnToLeaderboard addColumnToLeaderboard);
+
+    RacingEventServiceOperation transformMoveLeaderboardColumnDownClientOp(MoveLeaderboardColumnDown moveLeaderboardColumnDown);
+
+    RacingEventServiceOperation transformMoveLeaderboardColumnDownServerOp(MoveLeaderboardColumnDown moveLeaderboardColumnDown);
+
+    RacingEventServiceOperation transformMoveLeaderboardColumnUpClientOp(MoveLeaderboardColumnUp moveLeaderboardColumnUp);
+
+    RacingEventServiceOperation transformMoveLeaderboardColumnUpServerOp(MoveLeaderboardColumnUp moveLeaderboardColumnUp);
 }

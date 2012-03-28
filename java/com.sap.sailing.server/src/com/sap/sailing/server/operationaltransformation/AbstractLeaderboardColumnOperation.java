@@ -18,26 +18,4 @@ public abstract class AbstractLeaderboardColumnOperation extends AbstractLeaderb
         return affectsSameLeaderboard(other) && getColumnName().equals(other.getColumnName());
     }
 
-
-    @Override
-    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(
-            RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp) {
-        if (affectsSameColumn(removeColumnFromLeaderboardServerOp)) {
-            // skip server's remove and hence only apply the client's remove operation
-            return AbstractRacingEventServiceOperation.getNoOp();
-        } else {
-            return this;
-        }
-    }
-
-    @Override
-    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(
-            RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp) {
-        if (affectsSameColumn(removeColumnFromLeaderboardClientOp)) {
-            // skip client's remove and hence only apply the server's remove operation
-            return AbstractRacingEventServiceOperation.getNoOp();
-        } else {
-            return this;
-        }
-    }
 }
