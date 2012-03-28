@@ -3,6 +3,7 @@ package com.sap.sailing.operationaltransformation;
 import java.util.LinkedList;
 import java.util.List;
 
+
 /**
  * Maintains a list of states and the operations that transformed the i-th into
  * the i+1st, starting with an initial state. Using {@link #apply(Operation)},
@@ -28,11 +29,10 @@ public class StatesAndOperations<O extends Operation<S>, S> {
      *         <tt>operation</tt> to the state that was current when the
      *         operation was invoked.
      */
-    public synchronized S apply(O operation) {
+    public synchronized void apply(O operation) {
 	S result = operation.applyTo(getCurrentState());
 	states.add(result);
 	operations.add(operation);
-	return result;
     }
     
     public S getCurrentState() {

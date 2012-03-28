@@ -12,8 +12,8 @@ import org.junit.Test;
 import com.sap.sailing.operationaltransformation.AbstractOperation;
 import com.sap.sailing.operationaltransformation.ClientServerOperationPair;
 import com.sap.sailing.operationaltransformation.Peer;
-import com.sap.sailing.operationaltransformation.Peer.Role;
 import com.sap.sailing.operationaltransformation.PeerImpl;
+import com.sap.sailing.operationaltransformation.Peer.Role;
 import com.sap.sailing.operationaltransformation.Transformer;
 import com.sap.sailing.operationaltransformation.test.util.Base64;
 

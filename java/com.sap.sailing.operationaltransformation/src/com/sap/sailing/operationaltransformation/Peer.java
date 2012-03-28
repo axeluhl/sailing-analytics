@@ -32,10 +32,10 @@ public interface Peer<O extends Operation<S>, S> {
 
     /**
      * Registers a peer with this peer for replication. From this point on, this
-     * peer will remember which operations it has forwarded to that peer for
-     * later transformation jobs for operations coming in from that client.<p>
+     * peer will remember which operations it has forwarded to that <code>peer</code> for
+     * later transformation jobs for operations coming in from that <code>peer</code>.<p>
      * 
-     * The <tt>peer</tt> is expected to set the state returned by this operation
+     * The <code>peer</code> is expected to set the state returned by this operation
      * as its initial state. 
      * 
      * @return the current server state; the calling client can use this as its

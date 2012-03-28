@@ -3,6 +3,7 @@ package com.sap.sailing.operationaltransformation;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class UnmergedOperationsQueue<O extends Operation<S>, S> {
     /**
      * As the {@link #unmergedOperationsForPeer} queues are cleaned up whenever merge
