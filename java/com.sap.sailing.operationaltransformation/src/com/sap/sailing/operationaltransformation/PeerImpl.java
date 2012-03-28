@@ -169,12 +169,10 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     }
 
     /**
-     * Propagates the changes described by <tt>operation</tt> to all registered
-     * peers (except the peer identified by <tt>except</tt> if not <tt>null</tt>
-     * ). For each peer, the operation is sent along to that peer's
-     * {@link #apply(Peer, Operation, int)} method together with the
-     * {@link #numberOfMergedOperations number of operations currently merged
-     * from that peer}.
+     * Propagates the changes described by <tt>operation</tt> to all registered peers (except the peer identified by
+     * <tt>except</tt> if not <tt>null</tt>). For each peer, the operation is sent along to that peer's
+     * {@link #apply(Peer, Operation, int)} method together with the {@link #numberOfMergedOperations number of
+     * operations currently merged from that peer}.
      */
     private synchronized void updatePeers(final O operation, Peer<O, S> except) {
 	for (final Peer<O, S> peer : getPeers()) {
@@ -222,8 +220,11 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	taskStarted();
 	merger.execute(new Runnable() {
 	    public void run() {
-		runnable.run();
-		taskFinished();
+	        try {
+	            runnable.run();
+	        } finally {
+	            taskFinished();
+	        }
 	    }
 	});
     }
