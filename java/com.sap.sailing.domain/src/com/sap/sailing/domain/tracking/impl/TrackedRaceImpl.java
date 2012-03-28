@@ -104,7 +104,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     /**
      * Keeps the oldest timestamp that is fed into this tracked race, either from a boat fix, a buoy fix, a race
-     * start/finish or a coarse definition.
+     * start/finish or a course definition.
      */
     private TimePoint timePointOfOldestEvent;
 
