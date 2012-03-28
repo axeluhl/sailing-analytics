@@ -22,7 +22,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     
     private String name;
     
-    private StatesAndOperations<O, S> statesAndOperations;
+    private S currentState;
     
     /**
      * Tells if this peer acts in the server or client role. This is used to determine in which
@@ -59,7 +59,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 
     public PeerImpl(Transformer<O> transformer, S initialState, Role role) {
 	this.transformer = transformer;
-	statesAndOperations = new StatesAndOperations<O, S>(initialState);
+	currentState = initialState;
 	this.role = role;
 	this.merger = Executors.newSingleThreadExecutor();
     }
@@ -77,7 +77,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     public PeerImpl(Transformer<O> transformer, Peer<O, S> server) {
 	this.transformer = transformer;
 	S initialState = server.addPeer(this);
-	statesAndOperations = new StatesAndOperations<O, S>(initialState);
+        currentState = initialState;
 	this.role = Role.CLIENT;
 	this.merger = Executors.newSingleThreadExecutor();
 	addPeer(server);
@@ -117,13 +117,13 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     }
     
     public S getCurrentState() {
-	return statesAndOperations.getCurrentState();
+	return currentState;
     }
     
     @Override
     public synchronized void apply(O operation) {
 	taskStarted();
-	statesAndOperations.apply(operation);
+	currentState = operation.applyTo(currentState);
 	updatePeers(operation, /* except */ null);
 	taskFinished();
     }
@@ -153,7 +153,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	    }
 	    localOpNumber++;
 	}
-	statesAndOperations.apply(transformedOp); // produce a new current state
+	currentState = transformedOp.applyTo(currentState); // produce a new current state
 	final int numberOfMergedOperationsFromSource = numberOfMergedOperations.get(source)+1;
 	numberOfMergedOperations.put(source, numberOfMergedOperationsFromSource);
 	// It's important that the following call to confirm is synchronized with the
