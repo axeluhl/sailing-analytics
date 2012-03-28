@@ -54,12 +54,6 @@ public class RaceMapZoomSettings {
         LatLngBounds newBounds = null;
         if (typesToConsiderOnZoom != null) {
             for (ZoomTypes type : typesToConsiderOnZoom) {
-                //Set the forSelected attribute for the corresponding calculaters
-                if (type.calculater instanceof LatLngBoundsCalculaterForSelected) {
-                    ((LatLngBoundsCalculaterForSelected) type.calculater)
-                            .setZoomOnlyToSelectedCompetitors(zoomToSelectedCompetitors);
-                }
-
                 //Calculate the new bounds and extend the result
                 LatLngBounds calculatedBounds = type.calculateNewBounds(forMap);
                 if (calculatedBounds != null) {

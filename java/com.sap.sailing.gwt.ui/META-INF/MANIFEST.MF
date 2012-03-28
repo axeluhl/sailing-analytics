@@ -33,6 +33,5 @@ Import-Package: org.osgi.framework,
  org.json.simple.parser
 Web-ContextPath: /gwt
 Bundle-ClassPath: WEB-INF/classes/,
- WEB-INF/lib/gflot-1.0.1.jar,
  WEB-INF/lib/gwt-maps.jar,
  WEB-INF/lib/gwt-servlet.jar

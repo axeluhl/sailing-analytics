@@ -106,7 +106,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * Keeps the oldest timestamp that is fed into this tracked race, either from a boat fix, a buoy fix, a race
      * start/finish or a coarse definition.
      */
-    private TimePoint startOfTracking;
+    private TimePoint timePointOfOldestEvent;
+
+    /**
+     * The start of tracking time as announced by the tracking infrastructure.
+     */
+    private TimePoint startOfTrackingReceived;
+
+    /**
+     * The end of tracking time as announced by the tracking infrastructure.
+     */
+    private TimePoint endOfTrackingReceived;
 
     /**
      * Race start time as announced by the tracking infrastructure
@@ -252,7 +262,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public TimePoint getStartOfTracking() {
-        return startOfTracking;
+        return startOfTrackingReceived;
+    }
+
+    @Override
+    public TimePoint getEndOfTracking() {
+        return endOfTrackingReceived;
     }
 
     @Override
@@ -713,6 +728,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
+    public TimePoint getTimePointOfOldestEvent() {
+        return timePointOfOldestEvent;
+    }
+
+    @Override
     public TimePoint getTimePointOfNewestEvent() {
         return timePointOfNewestEvent;
     }
@@ -733,18 +753,22 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (timePointOfNewestEvent == null || timePointOfNewestEvent.compareTo(timeOfEvent) < 0) {
                 timePointOfNewestEvent = timeOfEvent;
             }
-            if (getStartOfTracking() == null || getStartOfTracking().compareTo(timeOfEvent) > 0) {
-                setStartOfTracking(timeOfEvent);
+            if (timePointOfOldestEvent == null || timePointOfOldestEvent.compareTo(timeOfEvent) > 0) {
+                timePointOfOldestEvent = timeOfEvent;
             }
             timePointOfLastEvent = timeOfEvent;
         }
         notifyAll();
     }
 
-    protected void setStartOfTracking(TimePoint startOfTracking) {
-        this.startOfTracking = startOfTracking;
+    protected void setStartOfTrackingReceived(TimePoint startOfTracking) {
+        this.startOfTrackingReceived = startOfTracking;
     }
-    
+
+    protected void setEndOfTrackingReceived(TimePoint endOfTracking) {
+        this.endOfTrackingReceived = endOfTracking;
+    }
+
     /**
      * Schedules the clearing of the caches. If a cache clearing is already scheduled, this is a no-op.
      */

@@ -329,12 +329,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                 if (timeOfLatestRequestInMillis == null || wind.timepoint>timeOfLatestRequestInMillis) {
                     timeOfLatestRequestInMillis = wind.timepoint;
                 }
-                if (directionMax == null || wind.dampenedTrueWindFromDeg > directionMax) {
-                    directionMax = wind.dampenedTrueWindFromDeg;
-                }
-                if (directionMin == null || wind.dampenedTrueWindFromDeg < directionMin) {
-                    directionMin = wind.dampenedTrueWindFromDeg;
-                }
                 
                 Point newDirectionPoint = new Point(wind.timepoint, wind.dampenedTrueWindFromDeg);
                 if (wind.dampenedTrueWindSpeedInKnots != null) {
@@ -342,6 +336,14 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                 }
                 newDirectionPoint = recalculateDirectionPoint(directionMax, directionMin, newDirectionPoint);
                 directionPoints[i] = newDirectionPoint;
+
+                double direction = newDirectionPoint.getY().doubleValue();
+                if (directionMax == null || direction > directionMax) {
+                    directionMax = direction;
+                }
+                if (directionMin == null || direction < directionMin) {
+                    directionMin = direction;
+                }
 
                 Point newSpeedPoint = new Point(wind.timepoint, wind.dampenedTrueWindSpeedInKnots);
                 speedPoints[i++] = newSpeedPoint;
@@ -374,7 +376,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         double y = directionPoint.getY().doubleValue();
         boolean recalculated = false;
 
-        if (yMax != null && yMin != null && (y <= yMin || yMax <= y)) {
+        if (yMax != null && yMin != null && (y < yMin || yMax < y)) {
             double deltaMin = Math.abs(yMin - y);
             double deltaMax = Math.abs(yMax - y);
 
