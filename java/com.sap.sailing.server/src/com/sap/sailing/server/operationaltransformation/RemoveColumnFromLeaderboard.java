@@ -1,9 +1,8 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.RacingEventService;
 
-public class RemoveColumnFromLeaderboard implements Operation<RacingEventService> {
+public class RemoveColumnFromLeaderboard implements RacingEventServiceOperation {
     private final String columnName;
     private final String leaderboardName;
     
@@ -18,5 +17,11 @@ public class RemoveColumnFromLeaderboard implements Operation<RacingEventService
     public RacingEventService applyTo(RacingEventService toState) {
         toState.removeLeaderboardColumn(leaderboardName, columnName);
         return toState;
+    }
+
+    @Override
+    public RacingEventServiceOperation transformFor(RacingEventServiceOperation peerOp) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

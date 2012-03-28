@@ -1,9 +1,8 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.RacingEventService;
 
-public class AddColumnToLeaderboard implements Operation<RacingEventService> {
+public class AddColumnToLeaderboard implements RacingEventServiceOperation {
     private final String columnName;
     private final String leaderboardName;
     private final boolean medalRace;
@@ -20,5 +19,11 @@ public class AddColumnToLeaderboard implements Operation<RacingEventService> {
     public RacingEventService applyTo(RacingEventService toState) {
         toState.addColumnToLeaderboard(columnName, leaderboardName, medalRace);
         return toState;
+    }
+
+    @Override
+    public RacingEventServiceOperation transformFor(RacingEventServiceOperation peerOp) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
