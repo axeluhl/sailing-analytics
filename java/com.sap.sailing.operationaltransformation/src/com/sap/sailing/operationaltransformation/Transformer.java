@@ -9,8 +9,8 @@ public interface Transformer<O extends Operation<?>> {
      * again.<p>
      * 
      * If a resulting operation is supposed to not have any effects, return the
-     * {@link ClientServerOperationPair#getNoOp()} operation, but never <code>null</code>
+     * {@link AbstractRacingEventServiceOperation#getNoOp()} operation, but never <code>null</code>
      * as any of the operations in the resulting pair.
      */
-    ClientServerOperationPair<O> transform(O clientOp, O serverOp);
+    ClientServerOperationPair<O> transform(O transformedOp, O unconfirmedOperation);
 }

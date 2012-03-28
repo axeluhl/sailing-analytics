@@ -1,18 +1,13 @@
 package com.sap.sailing.server.operationaltransformation;
 
 
-public abstract class AbstractLeaderboardColumnOperation extends AbstractRacingEventServiceOperation {
-    private final String leaderboardName;
+
+public abstract class AbstractLeaderboardColumnOperation extends AbstractLeaderboardOperation {
     private final String columnName;
     
     public AbstractLeaderboardColumnOperation(String leaderboardName, String columnName) {
-        super();
-        this.leaderboardName = leaderboardName;
+        super(leaderboardName);
         this.columnName = columnName;
-    }
-
-    public String getLeaderboardName() {
-        return leaderboardName;
     }
 
     public String getColumnName() {
@@ -20,6 +15,29 @@ public abstract class AbstractLeaderboardColumnOperation extends AbstractRacingE
     }
     
     protected boolean affectsSameColumn(AbstractLeaderboardColumnOperation other) {
-        return getLeaderboardName().equals(other.getLeaderboardName()) && getColumnName().equals(other.getColumnName());
+        return affectsSameLeaderboard(other) && getColumnName().equals(other.getColumnName());
+    }
+
+
+    @Override
+    public RacingEventServiceOperation transformServerRemoveColumnFromLeaderboard(
+            RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp) {
+        if (affectsSameColumn(removeColumnFromLeaderboardServerOp)) {
+            // skip server's remove and hence only apply the client's remove operation
+            return AbstractRacingEventServiceOperation.getNoOp();
+        } else {
+            return this;
+        }
+    }
+
+    @Override
+    public RacingEventServiceOperation transformClientRemoveColumnFromLeaderboard(
+            RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp) {
+        if (affectsSameColumn(removeColumnFromLeaderboardClientOp)) {
+            // skip client's remove and hence only apply the server's remove operation
+            return AbstractRacingEventServiceOperation.getNoOp();
+        } else {
+            return this;
+        }
     }
 }

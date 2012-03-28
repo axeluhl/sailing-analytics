@@ -45,7 +45,7 @@ public class OperationalTransformationTest {
     }
    
     public static class StringInsertTransformer implements Transformer<StringInsertOperation> {
-	@Override
+        @Override
 	public ClientServerOperationPair<StringInsertOperation> transform(StringInsertOperation clientOp, StringInsertOperation serverOp) {
 	    StringInsertOperation resultClientOp;
 	    StringInsertOperation resultServerOp;

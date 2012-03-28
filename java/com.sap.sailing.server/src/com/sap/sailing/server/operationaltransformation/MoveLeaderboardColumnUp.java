@@ -1,6 +1,5 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.operationaltransformation.ClientServerOperationPair;
 import com.sap.sailing.server.RacingEventService;
 
 public class MoveLeaderboardColumnUp extends AbstractLeaderboardColumnOperation {
@@ -28,28 +27,6 @@ public class MoveLeaderboardColumnUp extends AbstractLeaderboardColumnOperation 
     public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
         // TODO Auto-generated method stub
         return null;
-    }
-
-
-    @Override
-    public RacingEventServiceOperation transformServerRemoveColumnFromLeaderboard(
-            RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp) {
-        if (affectsSameColumn(removeColumnFromLeaderboardServerOp)) {
-            return ClientServerOperationPair.getNoOp();
-        } else {
-            return removeColumnFromLeaderboardServerOp;
-        }
-    }
-
-
-    @Override
-    public RacingEventServiceOperation transformClientRemoveColumnFromLeaderboard(
-            RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp) {
-        if (affectsSameColumn(removeColumnFromLeaderboardClientOp)) {
-            return ClientServerOperationPair.getNoOp();
-        } else {
-            return removeColumnFromLeaderboardClientOp;
-        }
     }
 
 }

@@ -1,0 +1,26 @@
+package com.sap.sailing.server.operationaltransformation;
+
+import com.sap.sailing.server.RacingEventService;
+
+public class RemoveLeaderboard extends AbstractLeaderboardOperation {
+    public RemoveLeaderboard(String leaderboardName) {
+        super(leaderboardName);
+    }
+
+    @Override
+    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+        return serverOp.transformRemoveLeaderboardClientOp(this);
+    }
+
+    @Override
+    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+        return clientOp.transformRemoveLeaderboardServerOp(this);
+    }
+
+    @Override
+    public RacingEventService applyTo(RacingEventService toState) {
+        toState.removeLeaderboard(getLeaderboardName());
+        return toState;
+    }
+
+}

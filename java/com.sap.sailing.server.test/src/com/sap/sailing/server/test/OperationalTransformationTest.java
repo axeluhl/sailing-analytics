@@ -17,9 +17,11 @@ import com.sap.sailing.operationaltransformation.Peer.Role;
 import com.sap.sailing.operationaltransformation.PeerImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddLeaderboard;
 import com.sap.sailing.server.operationaltransformation.OperationalTransformer;
 import com.sap.sailing.server.operationaltransformation.RacingEventServiceOperation;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 
 public class OperationalTransformationTest {
     private static final String LEADERBOARDNAME = "TESTBOARD";
@@ -48,9 +50,24 @@ public class OperationalTransformationTest {
         RacingEventServiceOperation addLeaderboardOp = new AddLeaderboard(LEADERBOARDNAME, new int[] { 5 });
         server.apply(addLeaderboardOp);
         server.waitForNotRunning();
+        replica.waitForNotRunning();
         Map<String, Leaderboard> replicaLeaderboards = racingEventServiceReplica.getLeaderboards();
         assertEquals(2, replicaLeaderboards.size()); // expected to include the default leaderboard
         assertEquals(new HashSet<String>(Arrays.asList(new String[] { DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, LEADERBOARDNAME })),
                 replicaLeaderboards.keySet());
+        assertEquals(racingEventServiceServer.getLeaderboards().keySet(), replicaLeaderboards.keySet());
+    }
+
+    @Test
+    public void testAddColumnToLeaderboardOnClientAndRemoveLeaderboardOnServer() {
+        RacingEventServiceOperation addLeaderboardColumn = new AddColumnToLeaderboard(
+                "newColumn", DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
+        server.apply(addLeaderboardColumn);
+        RacingEventServiceOperation removeDefaultLeaderboard = new RemoveLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
+        replica.apply(removeDefaultLeaderboard);
+        server.waitForNotRunning();
+        replica.waitForNotRunning();
+        assertEquals(0, racingEventServiceReplica.getLeaderboards().size());
+        assertEquals(0, racingEventServiceServer.getLeaderboards().size());
     }
 }
