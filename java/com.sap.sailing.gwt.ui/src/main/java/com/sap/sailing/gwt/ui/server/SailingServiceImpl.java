@@ -1212,35 +1212,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            leaderboard.addRaceColumn(columnName, medalRace);
-            getService().updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
-        }
+        getService().addColumnToLeaderboard(columnName, leaderboardName, medalRace);
     }
 
     @Override
     public void removeLeaderboardColumn(String leaderboardName, String columnName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            leaderboard.removeRaceColumn(columnName);
-            getService().updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
-        }
+        getService().removeLeaderboardColumn(leaderboardName, columnName);
     }
 
     @Override
     public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            leaderboard.getRaceColumnByName(oldColumnName).setName(newColumnName);
-            getService().updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
-        }
+        getService().renameLeaderboardColumn(leaderboardName, oldColumnName, newColumnName);
     }
 
     @Override
@@ -1389,25 +1371,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void moveLeaderboardColumnUp(String leaderboardName, String columnName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            leaderboard.moveRaceColumnUp(columnName);
-            getService().updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
-        }
-
+        getService().moveLeaderboardColumnUp(leaderboardName, columnName);
     }
 
     @Override
     public void moveLeaderboardColumnDown(String leaderboardName, String columnName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            leaderboard.moveRaceColumnDown(columnName);
-            getService().updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
-        }
+        getService().moveLeaderboardColumnDown(leaderboardName, columnName);
     }
 
     @Override

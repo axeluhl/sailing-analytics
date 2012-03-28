@@ -9,11 +9,11 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.operationaltransformation.AbstractOperation;
 import com.sap.sailing.operationaltransformation.ClientServerOperationPair;
+import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.operationaltransformation.Peer;
-import com.sap.sailing.operationaltransformation.PeerImpl;
 import com.sap.sailing.operationaltransformation.Peer.Role;
+import com.sap.sailing.operationaltransformation.PeerImpl;
 import com.sap.sailing.operationaltransformation.Transformer;
 import com.sap.sailing.operationaltransformation.test.util.Base64;
 
@@ -21,15 +21,12 @@ public class OperationalTransformationTest {
     private Peer<StringInsertOperation, StringState> server;
     private Peer<StringInsertOperation, StringState> client1, client2;
     
-    public static class StringInsertOperation extends AbstractOperation<StringState> {
+    public static class StringInsertOperation implements Operation<StringState> {
 	private int pos;
 	private String s;
 	public StringInsertOperation(int pos, String s) {
 	    this.pos = pos;
 	    this.s = s;
-	}
-	public StringInsertOperation clone() {
-	    return (StringInsertOperation) super.clone();
 	}
 	public int getPos() {
 	    return pos;
