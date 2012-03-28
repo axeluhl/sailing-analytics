@@ -73,6 +73,7 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -99,6 +100,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final Map<CompetitorDTO, Polyline> tails;
 
     /**
+     * Polyline for the start line (connecting two buoys forming the start gate).
+     */
+    private Polyline startLine;
+
+    /**
+     * Polyline for the finish line (connecting two buoys forming the finish gate).
+     */
+    private Polyline finishLine;
+
+    /**
      * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the first fix shown
      * in {@link #tails} is .
      */
@@ -108,7 +119,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the last fix shown in
      * {@link #tails} is .
      */
-    private  final Map<CompetitorDTO, Integer> lastShownFix;
+    private final Map<CompetitorDTO, Integer> lastShownFix;
 
     /**
      * Fixes of each competitors tail. If a list is contained for a competitor, the list contains a timely "contiguous"
@@ -353,8 +364,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                         removeAllManeuverMarkers();
                                     }
                                     // Do mark specific actions
-                                    List<MarkDTO> markData = raceMapDataDTO.markPositions;
-                                    showMarksOnMap(markData);
+                                    showMarksOnMap(raceMapDataDTO.coursePositions);
+                                    showHelpLines(raceMapDataDTO.coursePositions);
                                     // Rezoom the map
                                     // TODO make this a loop across the LatLongBoundsCalculators, pulling them from a collection updated in updateSettings
                                     if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
@@ -506,10 +517,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    protected void showMarksOnMap(List<MarkDTO> result) {
-        if (map != null) {
+    protected void showMarksOnMap(CourseDTO courseDTO) {
+        if (map != null && courseDTO != null) {
             Set<MarkDTO> toRemove = new HashSet<MarkDTO>(buoyMarkers.keySet());
-            for (MarkDTO markDTO : result) {
+            for (MarkDTO markDTO : courseDTO.buoys) {
                 Marker buoyMarker = buoyMarkers.get(markDTO);
                 if (buoyMarker == null) {
                     buoyMarker = createBuoyMarker(markDTO);
@@ -533,20 +544,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             for (Pair<WindSource, WindDTO> windSourcePair : windSensorsList) {
                 WindSource windSource = windSourcePair.getA(); 
                 WindDTO windDTO = windSourcePair.getB();
-                Marker windSensorMarker = windSensorMarkers.get(windSource);
-                if (windSensorMarker == null) {
-                    windSensorMarker = createWindSensorMarker(windSource, windDTO);
-                    windSensorMarkers.put(windSource, windSensorMarker);
-                    map.addOverlay(windSensorMarker);
-                } else {
-                    double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
-                    ImageTransformer transformer = imageResources.expeditionWindIconTransformer;
-                    String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
-                    windSensorMarker.setImage(transformedImageURL);
-                    windSensorMarker.setLatLng(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
-                    toRemoveWindSources.remove(windSource);
+                PositionDTO sensorPosition = windDTO.position;
+                // Attention: sometimes there is no valid position for the windsource available -> ignore the wind in this case
+                if (sensorPosition != null) {
+                    Marker windSensorMarker = windSensorMarkers.get(windSource);
+                    if (windSensorMarker == null) {
+                        windSensorMarker = createWindSensorMarker(windSource, windDTO);
+                        windSensorMarkers.put(windSource, windSensorMarker);
+                        map.addOverlay(windSensorMarker);
+                    } else {
+                        double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
+                        ImageTransformer transformer = imageResources.expeditionWindIconTransformer;
+                        String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
+                        windSensorMarker.setImage(transformedImageURL);
+                        windSensorMarker.setLatLng(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
+                        toRemoveWindSources.remove(windSource);
+                    }
+                    windForMarkers.put(windSensorMarker, windDTO);
                 }
-                windForMarkers.put(windSensorMarker, windDTO);
             }
             for (WindSource toRemoveWindSource : toRemoveWindSources) {
                 Marker marker = windSensorMarkers.remove(toRemoveWindSource);
@@ -591,6 +606,53 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
+    private void showHelpLines(CourseDTO courseDTO) {
+        if(map != null && courseDTO != null) {
+            if(courseDTO.startGate != null) {
+                LatLng[] startGatePoints = new LatLng[2];
+                startGatePoints[0] = LatLng.newInstance(courseDTO.startGate.getA().position.latDeg, courseDTO.startGate.getA().position.lngDeg); 
+                startGatePoints[1] = LatLng.newInstance(courseDTO.startGate.getB().position.latDeg, courseDTO.startGate.getB().position.lngDeg); 
+                if(startLine == null) {
+                    PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
+                    startLine = new Polyline(startGatePoints, /* color */ "#ff00ff", /* width */ 1, /* opacity */0.5, options);
+                    map.addOverlay(startLine);
+                } else {
+                    startLine.deleteVertex(1);
+                    startLine.deleteVertex(0);
+                    startLine.insertVertex(0, startGatePoints[0]);
+                    startLine.insertVertex(1, startGatePoints[1]);
+                }
+            }
+            else {
+                if(startLine != null) {
+                    startLine.deleteVertex(1);
+                    startLine.deleteVertex(0);
+                }
+            }
+            if(courseDTO.finishGate != null) {
+                LatLng[] finishGatePoints = new LatLng[2];
+                finishGatePoints[0] = LatLng.newInstance(courseDTO.finishGate.getA().position.latDeg, courseDTO.finishGate.getA().position.lngDeg); 
+                finishGatePoints[1] = LatLng.newInstance(courseDTO.finishGate.getB().position.latDeg, courseDTO.finishGate.getB().position.lngDeg); 
+                if(finishLine == null) {
+                    PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
+                    finishLine = new Polyline(finishGatePoints, /* color */ "#ff0000", /* width */ 1, /* opacity */0.5, options);
+                    map.addOverlay(finishLine);
+                } else {
+                    finishLine.deleteVertex(1);
+                    finishLine.deleteVertex(0);
+                    finishLine.insertVertex(0, finishGatePoints[0]);
+                    finishLine.insertVertex(1, finishGatePoints[1]);
+                }
+            }
+            else {
+                if(finishLine != null) {
+                    finishLine.deleteVertex(1);
+                    finishLine.deleteVertex(0);
+                }
+            }
+        }
+    }
+    
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
             List<ZoomTypes> oldZoomSettings = getSettings().getZoomSettings().getTypesToConsiderOnZoom();
