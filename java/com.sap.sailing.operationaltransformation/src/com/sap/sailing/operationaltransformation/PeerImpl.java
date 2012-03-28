@@ -33,7 +33,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     /**
      * Tells if this peer is currently actively running, with a certain number of pending / running requests
      */
-    private int running = 0;
+    private int scheduledOrRunning = 0;
 
     /**
      * Queues operations sent out to a peer in {@link #updatePeers(Operation, Peer)} and whose
@@ -122,16 +122,19 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     
     @Override
     public synchronized void apply(O operation) {
-	taskStarted();
-	currentState = operation.applyTo(currentState);
-	updatePeers(operation, /* except */ null);
-	taskFinished();
+	taskScheduled();
+        try {
+            currentState = operation.applyTo(currentState);
+            updatePeers(operation, /* except */null);
+        } finally {
+            taskFinished();
+        }
     }
 
     @Override
     public synchronized void apply(final Peer<O, S> source, O operation,
 	    final int numberOfOperationsSourceHasMergedFromThis) {
-	taskStarted();
+	taskScheduled();
 	if (!getPeers().contains(source)) {
 	    throw new RuntimeException("Peer "+source+" not registered with peer "+this);
 	}
@@ -183,7 +186,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 		scheduleTask(new Runnable() {
 		    public void run() {
 			/* 
-			 * Thoughts on locking: The peer runs the folling apply(...) call synchronized.
+			 * Thoughts on locking: The peer runs the following apply(...) call synchronized.
 			 * Therefore, it can't take other apply calls (local or from other peers) during
 			 * that time. It may, though, have pending tasks in its updatePeers that can
 			 * continue to run. This may include updates for this peer which would be received
@@ -210,14 +213,14 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     }
 
     /**
-     * Records that a new task is scheduled by incrementing {@link #running} by one, then
+     * Records that a new task is scheduled by incrementing {@link #scheduledOrRunning} by one, then
      * schedules the <tt>runnable</tt> with the {@link #merger} executor service. The
      * <tt>runnable</tt> is wrapped such that when its execution has finished,
-     * {@link #taskFinished()} will be called such that {@link #running} is decremented
+     * {@link #taskFinished()} will be called such that {@link #scheduledOrRunning} is decremented
      * properly again and waiting clients in {@link #waitForNotRunning()} can be unblocked.
      */
     private void scheduleTask(final Runnable runnable) {
-	taskStarted();
+	taskScheduled();
 	merger.execute(new Runnable() {
 	    public void run() {
 	        try {
@@ -229,8 +232,8 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	});
     }
 
-    private void taskStarted() {
-	running++;
+    private void taskScheduled() {
+	scheduledOrRunning++;
     }
 
     /**
@@ -238,15 +241,15 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      * Unblocks {@link #waitForNotRunning()} if the merger's queue got empty by this.
      */
     private synchronized void taskFinished() {
-	running--;
-	if (running == 0) {
+	scheduledOrRunning--;
+	if (scheduledOrRunning == 0) {
 	    notifyAll();
 	}
     }
 
     @Override
     public synchronized void waitForNotRunning() {
-	while (running > 0) {
+	while (scheduledOrRunning > 0) {
 	    try {
 		wait();
 	    } catch (InterruptedException e) {

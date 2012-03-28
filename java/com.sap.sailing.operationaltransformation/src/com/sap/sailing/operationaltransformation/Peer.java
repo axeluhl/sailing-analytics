@@ -70,7 +70,8 @@ public interface Peer<O extends Operation<S>, S> {
     void apply(Peer<O, S> source, O operation, int numberOfOperationsSourceHasMergedFromThis);
     
     /**
-     * Applies a change operation locally to the current peer's state.
+     * Applies a change operation locally to the current peer's state and update all known
+     * peers by sending them the operation.
      */
     void apply(O operation);
     
