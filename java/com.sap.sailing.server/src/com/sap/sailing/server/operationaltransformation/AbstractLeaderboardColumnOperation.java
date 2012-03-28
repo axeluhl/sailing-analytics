@@ -20,7 +20,7 @@ public abstract class AbstractLeaderboardColumnOperation extends AbstractLeaderb
 
 
     @Override
-    public RacingEventServiceOperation transformServerRemoveColumnFromLeaderboard(
+    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(
             RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp) {
         if (affectsSameColumn(removeColumnFromLeaderboardServerOp)) {
             // skip server's remove and hence only apply the client's remove operation
@@ -31,7 +31,7 @@ public abstract class AbstractLeaderboardColumnOperation extends AbstractLeaderb
     }
 
     @Override
-    public RacingEventServiceOperation transformClientRemoveColumnFromLeaderboard(
+    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(
             RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp) {
         if (affectsSameColumn(removeColumnFromLeaderboardClientOp)) {
             // skip client's remove and hence only apply the server's remove operation

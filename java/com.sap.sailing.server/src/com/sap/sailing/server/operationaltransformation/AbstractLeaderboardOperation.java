@@ -18,23 +18,4 @@ public abstract class AbstractLeaderboardOperation extends AbstractRacingEventSe
         return getLeaderboardName().equals(other.getLeaderboardName());
     }
 
-    @Override
-    public RacingEventServiceOperation transformRemoveLeaderboardClientOp(RemoveLeaderboard removeLeaderboard) {
-        if (affectsSameLeaderboard(removeLeaderboard)) {
-            return AbstractRacingEventServiceOperation.getNoOp();
-        } else {
-            return this;
-        }
-    }
-
-
-    @Override
-    public RacingEventServiceOperation transformRemoveLeaderboardServerOp(RemoveLeaderboard removeLeaderboard) {
-        if (affectsSameLeaderboard(removeLeaderboard)) {
-            return AbstractRacingEventServiceOperation.getNoOp();
-        } else {
-            return this;
-        }
-    }
-    
 }

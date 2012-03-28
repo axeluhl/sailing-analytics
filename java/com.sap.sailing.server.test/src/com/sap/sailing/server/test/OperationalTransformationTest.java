@@ -59,14 +59,14 @@ public class OperationalTransformationTest {
     }
 
     @Test
-    public void testAddColumnToLeaderboardOnClientAndRemoveLeaderboardOnServer() {
+    public void testAddColumnToLeaderboardOnClientAndRemoveLeaderboardOnServer() throws InterruptedException {
         RacingEventServiceOperation addLeaderboardColumn = new AddColumnToLeaderboard(
                 "newColumn", DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
         server.apply(addLeaderboardColumn);
         RacingEventServiceOperation removeDefaultLeaderboard = new RemoveLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
         replica.apply(removeDefaultLeaderboard);
-        server.waitForNotRunning();
         replica.waitForNotRunning();
+        server.waitForNotRunning();
         assertEquals(0, racingEventServiceReplica.getLeaderboards().size());
         assertEquals(0, racingEventServiceServer.getLeaderboards().size());
     }

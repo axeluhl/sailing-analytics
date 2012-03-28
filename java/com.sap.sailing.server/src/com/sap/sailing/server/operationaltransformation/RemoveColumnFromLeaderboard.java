@@ -17,12 +17,12 @@ public class RemoveColumnFromLeaderboard extends AbstractLeaderboardColumnOperat
 
     @Override
     public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
-        return serverOp.transformClientRemoveColumnFromLeaderboard(this);
+        return serverOp.transformRemoveColumnFromLeaderboardClientOp(this);
     }
 
     @Override
     public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
-        return clientOp.transformServerRemoveColumnFromLeaderboard(this);
+        return clientOp.transformRemoveColumnFromLeaderboardServerOp(this);
     }
 
 }

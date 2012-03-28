@@ -25,13 +25,11 @@ public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation {
 
     @Override
     public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
-        // TODO Auto-generated method stub
-        return null;
+        return serverOp.transformAddColumnToLeaderboardClientOp(this);
     }
 
     @Override
     public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
-        // TODO Auto-generated method stub
-        return null;
+        return clientOp.transformAddColumnToLeaderboardServerOp(this);
     }
 }

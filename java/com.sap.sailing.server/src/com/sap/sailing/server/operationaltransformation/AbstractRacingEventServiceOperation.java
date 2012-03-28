@@ -33,27 +33,39 @@ public abstract class AbstractRacingEventServiceOperation implements RacingEvent
     }
 
     @Override
-    public RacingEventServiceOperation transformClientRenameLeaderboardColumnOp(
+    public RacingEventServiceOperation transformRenameLeaderboardColumnClientOp(
             RenameLeaderboardColumn renameLeaderboardColumnClientOp) {
         return renameLeaderboardColumnClientOp;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerRenameLeaderboardColumnOp(
+    public RacingEventServiceOperation transformRenameLeaderboardColumnServerOp(
             RenameLeaderboardColumn renameLeaderboardColumnServerOp) {
         return renameLeaderboardColumnServerOp;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerRemoveColumnFromLeaderboard(RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp) {
+    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp) {
         return removeColumnFromLeaderboardServerOp;
     }
 
     @Override
-    public RacingEventServiceOperation transformClientRemoveColumnFromLeaderboard(RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp) {
+    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp) {
         return removeColumnFromLeaderboardClientOp;
     }
     
+    @Override
+    public RacingEventServiceOperation transformAddColumnToLeaderboardClientOp(
+            AddColumnToLeaderboard addColumnToLeaderboard) {
+        return addColumnToLeaderboard;
+    }
+
+    @Override
+    public RacingEventServiceOperation transformAddColumnToLeaderboardServerOp(
+            AddColumnToLeaderboard addColumnToLeaderboard) {
+        return addColumnToLeaderboard;
+    }
+
     public static RacingEventServiceOperation getNoOp() {
         return new AbstractRacingEventServiceOperation() {
             @Override
@@ -63,12 +75,17 @@ public abstract class AbstractRacingEventServiceOperation implements RacingEvent
 
             @Override
             public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
-                return serverOp;
+                return this;
             }
 
             @Override
             public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
-                return clientOp;
+                return this;
+            }
+            
+            @Override
+            public String toString() {
+                return "noop";
             }
         };
     }

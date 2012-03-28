@@ -29,13 +29,13 @@ public interface RacingEventServiceOperation extends Operation<RacingEventServic
      * operation deals with the leaderboard column being removed by <code>removeColumnFromLeaderboardClientOp</code>,
      * the result will be <code>null</code>, meaning that this operation cannot be applied after the column has been removed.
      */
-    RacingEventServiceOperation transformClientRemoveColumnFromLeaderboard(RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp);
+    RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp);
 
-    RacingEventServiceOperation transformServerRemoveColumnFromLeaderboard(RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp);
+    RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp);
 
-    RacingEventServiceOperation transformClientRenameLeaderboardColumnOp(RenameLeaderboardColumn renameLeaderboardColumnClientOp);
+    RacingEventServiceOperation transformRenameLeaderboardColumnClientOp(RenameLeaderboardColumn renameLeaderboardColumnClientOp);
 
-    RacingEventServiceOperation transformServerRenameLeaderboardColumnOp(RenameLeaderboardColumn renameLeaderboardColumnServerOp);
+    RacingEventServiceOperation transformRenameLeaderboardColumnServerOp(RenameLeaderboardColumn renameLeaderboardColumnServerOp);
 
     RacingEventServiceOperation transformAddLeaderboardClientOp(AddLeaderboard addLeaderboard);
 
@@ -44,4 +44,8 @@ public interface RacingEventServiceOperation extends Operation<RacingEventServic
     RacingEventServiceOperation transformRemoveLeaderboardClientOp(RemoveLeaderboard removeLeaderboard);
 
     RacingEventServiceOperation transformRemoveLeaderboardServerOp(RemoveLeaderboard removeLeaderboard);
+
+    RacingEventServiceOperation transformAddColumnToLeaderboardClientOp(AddColumnToLeaderboard addColumnToLeaderboard);
+
+    RacingEventServiceOperation transformAddColumnToLeaderboardServerOp(AddColumnToLeaderboard addColumnToLeaderboard);
 }
