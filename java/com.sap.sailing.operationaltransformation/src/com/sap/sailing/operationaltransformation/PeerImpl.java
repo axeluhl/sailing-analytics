@@ -104,7 +104,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     
     @Override
     public S addPeer(Peer<O, S> peer) {
-	if ( role == Role.CLIENT && getPeers().size() > 0) {
+	if (role == Role.CLIENT && getPeers().size() > 0) {
 	    throw new RuntimeException("A client must be connected to at most one server");
 	}
 	unmergedOperationsForPeer.put(peer, new UnmergedOperationsQueue<O, S>());
@@ -193,6 +193,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 			 * by this peer's apply(...) method.
 			 */
 			peer.apply(PeerImpl.this, operation, numberOfMergedOpsForPeer);
+			// TODO what to do if apply throws a RuntimeException?
 		    }
 		});
 	    }

@@ -30,5 +30,6 @@ Export-Package: com.sap.sailing.server,
   x-friends:="com.sap.sailing.mongodb.test,
    com.sap.sailing.server.test,
    com.sap.sailing.domain.swisstimingadapter.test,
-   com.sap.sailing.gwt.ui.test"
+   com.sap.sailing.gwt.ui.test",
+ com.sap.sailing.server.operationaltransformation
 Web-ContextPath: /sailingserver
