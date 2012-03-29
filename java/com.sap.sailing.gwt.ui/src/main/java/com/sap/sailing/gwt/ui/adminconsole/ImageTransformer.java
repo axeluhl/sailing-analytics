@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
@@ -99,4 +100,26 @@ public class ImageTransformer {
         }
         return result;
     }
+    
+    public ImageData getTransformedImageData(double angleInDegrees, double scaleFactor) {
+        ImageData result = null;
+        if (canvas != null) {
+            if (imageElement != null) {
+                if(scaleFactor != 1.0)
+                    scale(scaleFactor);
+                double angleInRadians = angleInDegrees/180.*Math.PI;
+                context.clearRect(0, 0, 2*canvasRadius, 2*canvasRadius);
+                context.save();
+                context.translate(canvasRadius, canvasRadius);
+                context.rotate(angleInRadians);
+                context.scale(scaleFactor, scaleFactor);
+                context.drawImage(imageElement, (-imageWidth/2), (-imageHeight/2));
+                
+                result = context.getImageData(0, 0, 2*canvasRadius, 2*canvasRadius);
+                context.restore();
+            }
+        }
+        return result;
+    }
+    
 }
