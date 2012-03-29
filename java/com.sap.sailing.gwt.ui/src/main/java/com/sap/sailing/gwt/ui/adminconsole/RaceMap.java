@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -25,6 +27,7 @@ import com.google.gwt.maps.client.control.LargeMapControl3D;
 import com.google.gwt.maps.client.control.MenuMapTypeControl;
 import com.google.gwt.maps.client.control.ScaleControl;
 import com.google.gwt.maps.client.event.MapDragEndHandler;
+import com.google.gwt.maps.client.event.MapDragHandler;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
 import com.google.gwt.maps.client.event.MarkerClickHandler;
@@ -129,13 +132,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final Map<CompetitorDTO, List<GPSFixDTO>> fixes;
 
     /**
-     * Markers used as boat display on the map
+     * html5 canvases used as boat display on the map
      */
-//    private final Map<CompetitorDTO, Marker> boatMarkers;
-
-    private final Map<CompetitorDTO, BoatCanvas> boatImages;
-    
-    
+    private final Map<CompetitorDTO, BoatOnMapCanvas> boatImages;
+        
     /**
      * Markers used to display wind sensors
      */
@@ -204,7 +204,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final StringMessages stringMessages;
     
     private boolean dataInitialized;
-    
+
     private Date lastTimeChangeBeforeInitialization;
 
     /**
@@ -231,8 +231,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         firstShownFix = new HashMap<CompetitorDTO, Integer>();
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
         buoyMarkers = new HashMap<MarkDTO, Marker>();
-//        boatMarkers = new HashMap<CompetitorDTO, Marker>();
-        boatImages = new HashMap<CompetitorDTO, BoatCanvas>();
+        boatImages = new HashMap<CompetitorDTO, BoatOnMapCanvas>();
         windSensorMarkers = new HashMap<WindSource, Marker>();
         windForMarkers = new HashMap<Marker, WindDTO>();
         fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
@@ -245,20 +244,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         
         windPanel = new CombinedWindPanel(sailingService, asyncActionsExecutor, errorReporter, stringMessages, timer);
         windPanel.setVisible(false);
-    }
-
-    public double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
-        // the calculation is based on the Haversine formula
-        double earthRadius = 6371; // in km
-        double dLat = Math.toRadians(lat2-lat1);
-        double dLng = Math.toRadians(lng2-lng1);
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                   Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                   Math.sin(dLng/2) * Math.sin(dLng/2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        double dist = earthRadius * c;
-
-        return dist;
     }
     
     private void loadMapsAPI() {
@@ -290,17 +275,31 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                 }
                         }
                         for (CompetitorDTO unusedMarkerCompetitorDTO : competitorDTOsOfUnusedMarkers) {
-                            BoatCanvas boatCanvas = boatImages.get(unusedMarkerCompetitorDTO);
+                            BoatOnMapCanvas boatCanvas = boatImages.get(unusedMarkerCompetitorDTO);
                             RaceMap.this.remove(boatCanvas.getCanvas());
                             boatImages.remove(unusedMarkerCompetitorDTO);
                         }
                     }
                 });
+                
+                map.addMapDragHandler(new MapDragHandler() {
+                    @Override
+                    public void onDrag(MapDragEvent event) {
+                        for(BoatOnMapCanvas boatCanvas: RaceMap.this.boatImages.values()) {
+                            boatCanvas.draw();
+                        }
+                    }
+                });
+
                 map.addMapDragEndHandler(new MapDragEndHandler() {
                     @Override
                     public void onDragEnd(MapDragEndEvent event) {
                         final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                         getSettings().getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+
+                        for(BoatOnMapCanvas boatCanvas: RaceMap.this.boatImages.values()) {
+                            boatCanvas.draw();
+                        }
                     }
                 });
                 map.addMapMouseMoveHandler(new MapMouseMoveHandler() {
@@ -321,6 +320,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         });
     }
 
+    
+    
     public void redraw() {
         timeChanged(timer.getTime());
     }
@@ -604,7 +605,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             }
             for (CompetitorDTO unusedMarkerCompetitorDTO : competitorDTOsOfUnusedMarkers) {
-                BoatCanvas boatCanvas = boatImages.get(unusedMarkerCompetitorDTO);
+                BoatOnMapCanvas boatCanvas = boatImages.get(unusedMarkerCompetitorDTO);
                 this.remove(boatCanvas.getCanvas());
                 boatImages.remove(unusedMarkerCompetitorDTO);
             }
@@ -670,53 +671,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-//    private boolean updateBoatMarkerForCompetitor(CompetitorDTO competitorDTO) {
-//        boolean usedExistingMarker = false;
-//        if (lastShownFix.containsKey(competitorDTO) && lastShownFix.get(competitorDTO) != -1) {
-//            GPSFixDTO lastPos = getBoatFix(competitorDTO);
-//            Marker boatMarker = boatMarkers.get(competitorDTO);
-//            if (boatMarker == null) {
-//                boatMarker = createBoatMarker(competitorDTO, displayHighlighted(competitorDTO));
-//                map.addOverlay(boatMarker);
-//                boatMarkers.put(competitorDTO, boatMarker);
-//            } else {
-//                usedExistingMarker = true;
-//                // check if anchors match; re-use marker with setImage only if anchors match
-//                ImageTransformer transformer = imageResources.getBoatImageTransformer(lastPos,
-//                        competitorSelection.isSelected(competitorDTO));
-//                Point newAnchor = transformer.getAnchor(imageResources.getRealBoatSizeScaleFactor(transformer.getImageSize()));
-//                Point oldAnchor = boatMarker.getIcon().getIconAnchor();
-//                if (oldAnchor.getX() == newAnchor.getX() && oldAnchor.getY() == newAnchor.getY()) {
-//                    boatMarker.setLatLng(LatLng.newInstance(lastPos.position.latDeg,
-//                            lastPos.position.lngDeg));
-//                    boatMarker.setImage(imageResources.getBoatImageURL(lastPos,
-//                            displayHighlighted(competitorDTO)));
-//                } else {
-//                    // anchors don't match; replace marker
-//                    map.removeOverlay(boatMarker);
-//                    boatMarker = createBoatMarker(competitorDTO, displayHighlighted(competitorDTO));
-//                    map.addOverlay(boatMarker);
-//                    boatMarkers.put(competitorDTO, boatMarker);
-//                }
-//            }
-//        }
-//        return usedExistingMarker;
-//    }
-
     private boolean updateBoatCanvasForCompetitor(CompetitorDTO competitorDTO) {
         boolean usedExistingCanvas = false;
         if (lastShownFix.containsKey(competitorDTO) && lastShownFix.get(competitorDTO) != -1) {
-            GPSFixDTO lastPos = getBoatFix(competitorDTO);
-            BoatCanvas boatCanvas = boatImages.get(competitorDTO);
+            GPSFixDTO lastBoatFix = getBoatFix(competitorDTO);
+            BoatOnMapCanvas boatCanvas = boatImages.get(competitorDTO);
             if (boatCanvas == null) {
                 boatCanvas = createBoatCanvas(competitorDTO, displayHighlighted(competitorDTO));
                 this.add(boatCanvas.getCanvas());
                 boatImages.put(competitorDTO, boatCanvas);
                 
-                boatCanvas.updateBoat(lastPos, displayHighlighted(competitorDTO));
+                boatCanvas.setSelected(displayHighlighted(competitorDTO));
+                boatCanvas.setBoatFix(lastBoatFix);
+                boatCanvas.draw();
             } else {
                 usedExistingCanvas = true;
-                boatCanvas.updateBoat(lastPos, displayHighlighted(competitorDTO));
+                boatCanvas.setSelected(displayHighlighted(competitorDTO));
+                boatCanvas.setBoatFix(lastBoatFix);
+                boatCanvas.draw();
             }
         }
         return usedExistingCanvas;
@@ -744,66 +716,20 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return buoyMarker;
     }
 
-//    protected Marker createBoatMarker(final CompetitorDTO competitorDTO, boolean highlighted) {
-//        GPSFixDTO boatFix = getBoatFix(competitorDTO);
-//        double latDeg = boatFix.position.latDeg;
-//        double lngDeg = boatFix.position.lngDeg;
-//        MarkerOptions options = MarkerOptions.newInstance();
-//        Icon icon = imageResources.getBoatImageIcon(boatFix, highlighted);
-//        options.setIcon(icon);
-//        options.setTitle(competitorDTO.name);
-//        final Marker boatMarker = new Marker(LatLng.newInstance(latDeg, lngDeg), options);
-//        boatMarker.addMarkerClickHandler(new MarkerClickHandler() {
-//            @Override
-//            public void onClick(MarkerClickEvent event) {
-//                LatLng latlng = boatMarker.getLatLng();
-//                showCompetitorInfoWindow(competitorDTO, latlng);
-//            }
-//        });
-//        boatMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler() {
-//            @Override
-//            public void onMouseOver(MarkerMouseOverEvent event) {
-//                map.setTitle(competitorDTO.name);
-//            }
-//        });
-//        boatMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
-//            @Override
-//            public void onMouseOut(MarkerMouseOutEvent event) {
-//                map.setTitle("");
-//            }
-//        });
-//        return boatMarker;
-//    }
-
-    protected BoatCanvas createBoatCanvas(final CompetitorDTO competitorDTO, boolean highlighted) {
-        GPSFixDTO boatFix = getBoatFix(competitorDTO);
-        double latDeg = boatFix.position.latDeg;
-        double lngDeg = boatFix.position.lngDeg;
-//        MarkerOptions options = MarkerOptions.newInstance();
-//        Icon icon = imageResources.getBoatImageIcon(boatFix, highlighted);
-//        options.setIcon(icon);
-//        options.setTitle(competitorDTO.name);
-        BoatCanvas boatCanvas = new BoatCanvas(competitorDTO, imageResources);
+    protected BoatOnMapCanvas createBoatCanvas(final CompetitorDTO competitorDTO, boolean highlighted) {
+        final BoatOnMapCanvas boatCanvas = new BoatOnMapCanvas(competitorDTO, imageResources, map);
+        boatCanvas.setSelected(highlighted);
+        boatCanvas.getCanvas().setTitle(competitorDTO.name);
         
-//        boatMarker.addMarkerClickHandler(new MarkerClickHandler() {
-//            @Override
-//            public void onClick(MarkerClickEvent event) {
-//                LatLng latlng = boatMarker.getLatLng();
-//                showCompetitorInfoWindow(competitorDTO, latlng);
-//            }
-//        });
-//        boatMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler() {
-//            @Override
-//            public void onMouseOver(MarkerMouseOverEvent event) {
-//                map.setTitle(competitorDTO.name);
-//            }
-//        });
-//        boatMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
-//            @Override
-//            public void onMouseOut(MarkerMouseOutEvent event) {
-//                map.setTitle("");
-//            }
-//        });
+        boatCanvas.getCanvas().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO);
+                LatLng where = LatLng.newInstance(latestFixForCompetitor.position.latDeg, latestFixForCompetitor.position.lngDeg);
+                map.getInfoWindow().open(where,
+                        new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor)));
+            }
+        });
         return boatCanvas;
     }
 
@@ -1256,11 +1182,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (getSettings().isShowOnlySelectedCompetitors()) {
             if (Util.size(competitorSelection.getSelectedCompetitors()) == 1) {
                 // first competitors selected; remove all others from map
-                Iterator<Map.Entry<CompetitorDTO, BoatCanvas>> i = boatImages.entrySet().iterator();
+                Iterator<Map.Entry<CompetitorDTO, BoatOnMapCanvas>> i = boatImages.entrySet().iterator();
                 while (i.hasNext()) {
-                    Entry<CompetitorDTO, BoatCanvas> next = i.next();
+                    Entry<CompetitorDTO, BoatOnMapCanvas> next = i.next();
                     if (!next.getKey().equals(competitor)) {
-                        BoatCanvas value = next.getValue();
+                        BoatOnMapCanvas value = next.getValue();
                         this.remove(value.getCanvas());
                         removeTail(next.getKey());
                         i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
@@ -1272,12 +1198,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         } else {
             // only change highlighting
-            BoatCanvas lowlightedMarker = boatImages.get(competitor);
-            if (lowlightedMarker != null) {
-                BoatCanvas highlightedMarker = createBoatCanvas(competitor, displayHighlighted(competitor));
-                this.remove(lowlightedMarker.getCanvas());
-                this.add(highlightedMarker.getCanvas());
-                boatImages.put(competitor, highlightedMarker);
+            BoatOnMapCanvas boatCanvas = boatImages.get(competitor);
+            if (boatCanvas != null) {
+                boatCanvas.setSelected(displayHighlighted(competitor));
+                boatCanvas.draw();
             } else {
                 // seems like an internal error not to find the lowlighted marker; but maybe the
                 // competitor was added late to the race;
@@ -1313,7 +1237,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 timeChanged(timer.getTime());
             } else {
                 // otherwise remove only deselected competitor's boat images and tail
-                BoatCanvas removed = boatImages.remove(competitor);
+                BoatOnMapCanvas removed = boatImages.remove(competitor);
                 if (removed != null) {
                     this.remove(removed.getCanvas());
                 }
@@ -1321,14 +1245,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         } else {
             // "lowlight" currently selected competitor
-            BoatCanvas highlightedMarker = boatImages.get(competitor);
-            if (highlightedMarker != null) {
-                BoatCanvas lowlightedMarker = createBoatCanvas(competitor, displayHighlighted(competitor));
-                if (highlightedMarker != null) {
-                    this.remove(highlightedMarker.getCanvas());
-                }
-                this.add(lowlightedMarker.getCanvas());
-                boatImages.put(competitor, lowlightedMarker);
+            BoatOnMapCanvas boatCanvas = boatImages.get(competitor);
+            if (boatCanvas != null) {
+                boatCanvas.setSelected(displayHighlighted(competitor));
+                boatCanvas.draw();
             }
         }
         //Trigger auto-zoom if needed
@@ -1516,14 +1436,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             map.checkResize();
             zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
         }
-    }
-
-//    public Map<CompetitorDTO, Marker> getBoatMarkers() {
-//        return boatMarkers;
-//    }
-
-    public Map<CompetitorDTO, BoatCanvas> getBoatImages() {
-        return boatImages;
     }
 
     @Override
