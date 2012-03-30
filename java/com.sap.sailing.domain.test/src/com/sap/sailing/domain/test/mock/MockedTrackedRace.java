@@ -12,7 +12,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -419,12 +418,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind) {
         // TODO Auto-generated method stub
-    }
-
-    @Override
-    public Pair<Placemark, Placemark> getStartFinishPlacemarks() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
