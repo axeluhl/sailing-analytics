@@ -46,12 +46,6 @@ public interface TrackedRace {
     RaceIdentifier getRaceIdentifier();
     
     /**
-     * @return A pair of placemarks, where A is the start placemark and B is the finish placemark.<br />
-     *         The returning pair is never <code>null</code>, but A and/or B can be <code>null</code>.
-     */
-    Pair<Placemark, Placemark> getStartFinishPlacemarks();
-    
-    /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time point
      * which is expected to be before the race start time). When there are no {@link MarkPassing}s for the first mark, <code>null</code>
      * is returned. If there are mark passings for
