@@ -35,18 +35,16 @@ public class MongoDBServiceImpl implements MongoDBService {
         return configuration;
     }
 
-    public void setConfiguration(MongoDBConfiguration configuration)
-    {
+    public void setConfiguration(MongoDBConfiguration configuration) {
         this.configuration = configuration;
         logger.info("Used Mongo configuration: host:port/DBName: "+configuration.getHostName()+":"+configuration.getPort()+"/"+configuration.getDatabaseName());
     }
 
     public DB getDB() {
-        if(configuration == null) {
+        if (configuration == null) {
             configuration = MongoDBConfiguration.getDefaultTestConfiguration();
             logger.info("Used default Mongo configuration: host:port/DBName: "+configuration.getHostName()+":"+configuration.getPort()+"/"+configuration.getDatabaseName());
         }
-        
         try {
             return getDB(configuration);
         } catch (UnknownHostException e) {

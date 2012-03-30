@@ -1,6 +1,5 @@
 package com.sap.sailing.server.impl;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -55,6 +54,7 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterP
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -168,6 +168,61 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         return result;
     }
     
+    @Override
+    public void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.addRaceColumn(columnName, medalRace);
+            updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+        }
+    }
+
+    @Override
+    public void moveLeaderboardColumnUp(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.moveRaceColumnUp(columnName);
+            updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+        }
+    }
+
+    @Override
+    public void moveLeaderboardColumnDown(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.moveRaceColumnDown(columnName);
+            updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+        }
+    }
+
+    @Override
+    public void removeLeaderboardColumn(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.removeRaceColumn(columnName);
+            updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+    }
+
+    @Override
+    public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.getRaceColumnByName(oldColumnName).setName(newColumnName);
+            updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+    }
+
     @Override
     public void renameLeaderboard(String oldName, String newName) {
         synchronized (leaderboardsByName) {
@@ -301,7 +356,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public synchronized Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
+    public synchronized Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
         Event event = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
@@ -336,62 +391,28 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public synchronized RacesHandle addSwissTimingRace(String raceID, String hostname, int port, boolean canSendRequests,
-            WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException {
-        Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
-        RaceTracker tracker = raceTrackersByID.get(key);
-        if (tracker == null) {
-            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, canSendRequests,
-                    windStore, swissTimingAdapterPersistence, swissTimingDomainFactory, this);
-            raceTrackersByID.put(tracker.getID(), tracker);
-            Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
-            if (trackers == null) {
-                trackers = new HashSet<RaceTracker>();
-                raceTrackersByEvent.put(tracker.getEvent(), trackers);
-            }
-            trackers.add(tracker);
-            // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
-            String eventName = tracker.getEvent().getName();
-            Event eventWithName = eventsByName.get(eventName);
-            // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
-            if (eventWithName != null) {
-                if (eventWithName != tracker.getEvent()) {
-                    throw new RuntimeException("Internal error. Two Event objects with equal name "+eventName);
-                }
-            } else {
-                eventsByName.put(eventName, tracker.getEvent());
-            }
-        } else {
-            WindStore existingTrackersWindStore = tracker.getWindStore();
-            if (!existingTrackersWindStore.equals(windStore)) {
-                logger.warning("Wind store mismatch. Requested wind store: "+windStore+
-                        ". Wind store in use by existing tracker: "+existingTrackersWindStore);
-            }
-        }
-        DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
-        ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEvent);
-        if (timeoutInMilliseconds != -1) {
-            scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
-        }
-        return tracker.getRacesHandle();
+    public synchronized RacesHandle addSwissTimingRace(String raceID, String hostname, int port,
+            boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) throws Exception {
+        return addRace(
+                swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port, raceID, canSendRequests,
+                        swissTimingFactory, swissTimingDomainFactory, windStore, swissTimingAdapterPersistence),
+                windStore, timeoutInMilliseconds);
     }
 
     @Override
     public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
-            long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        return addTracTracRace(paramURL, liveURI, storedURI, /* startOfTracking */ null,
-                /* endOfTracking */ null, windStore, timeoutInMilliseconds);
+            long timeoutInMilliseconds) throws Exception {
+        return addRace(getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, /* startOfTracking */ null,
+                /* endOfTracking */ null, windStore), windStore, timeoutInMilliseconds);
     }
     
     @Override
-    public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
-            long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        Triple<URL, URI, URI> key = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
-        RaceTracker tracker = raceTrackersByID.get(key);
+    public synchronized RacesHandle addRace(RaceTrackingConnectivityParameters params, WindStore windStore,
+            long timeoutInMilliseconds) throws Exception {
+        RaceTracker tracker = raceTrackersByID.get(params.getTrackerID());
         if (tracker == null) {
-            tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, startOfTracking, endOfTracking, windStore, this);
-            raceTrackersByID.put(tracker.getID(), tracker);
+            tracker = params.createRaceTracker(this);
+            raceTrackersByID.put(params.getTrackerID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {
                 trackers = new HashSet<RaceTracker>();
@@ -427,6 +448,14 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
         }
         return tracker.getRacesHandle();
+    }
+    
+    @Override
+    public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI,
+            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            long timeoutInMilliseconds) throws Exception {
+        return addRace(getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
+                endOfTracking, windStore), windStore, timeoutInMilliseconds);
     }
 
     private void ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedEvent trackedEvent) {

@@ -12,7 +12,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -422,12 +421,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Pair<Placemark, Placemark> getStartFinishPlacemarks() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public RaceIdentifier getRaceIdentifier() {
         // TODO Auto-generated method stub
         return null;
@@ -508,7 +501,25 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void setStartOfTracking(TimePoint startOfTracking) {
+    public TimePoint getEndOfTracking() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public TimePoint getTimePointOfOldestEvent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setEndOfTrackingReceived(TimePoint endOfTrackingReceived) {
         // TODO Auto-generated method stub
         
     }

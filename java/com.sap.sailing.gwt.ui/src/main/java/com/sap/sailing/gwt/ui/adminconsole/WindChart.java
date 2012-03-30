@@ -77,7 +77,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     private Series timeLineSeries;
     private final boolean allowTimeAdjust;
     private boolean ignoreClickOnce;
-    private final Timer timer;
     private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     
     private Long timeOfEarliestRequestInMillis;
@@ -95,7 +94,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
             WindChartSettings settings, final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
-        super();
+        super(timer);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
@@ -105,7 +104,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         this.windSourceSpeedSeries = new HashMap<WindSource, Series>();
         this.colorMap = new ColorMap<WindSource>();
         this.windSourceTypesToDisplay = new HashSet<WindSourceType>();
-        this.timer = timer;
         chart = new Chart()
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)
@@ -329,12 +327,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                 if (timeOfLatestRequestInMillis == null || wind.timepoint>timeOfLatestRequestInMillis) {
                     timeOfLatestRequestInMillis = wind.timepoint;
                 }
-                if (directionMax == null || wind.dampenedTrueWindFromDeg > directionMax) {
-                    directionMax = wind.dampenedTrueWindFromDeg;
-                }
-                if (directionMin == null || wind.dampenedTrueWindFromDeg < directionMin) {
-                    directionMin = wind.dampenedTrueWindFromDeg;
-                }
                 
                 Point newDirectionPoint = new Point(wind.timepoint, wind.dampenedTrueWindFromDeg);
                 if (wind.dampenedTrueWindSpeedInKnots != null) {
@@ -342,6 +334,14 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                 }
                 newDirectionPoint = recalculateDirectionPoint(directionMax, directionMin, newDirectionPoint);
                 directionPoints[i] = newDirectionPoint;
+
+                double direction = newDirectionPoint.getY().doubleValue();
+                if (directionMax == null || direction > directionMax) {
+                    directionMax = direction;
+                }
+                if (directionMin == null || direction < directionMin) {
+                    directionMin = direction;
+                }
 
                 Point newSpeedPoint = new Point(wind.timepoint, wind.dampenedTrueWindSpeedInKnots);
                 speedPoints[i++] = newSpeedPoint;
@@ -374,7 +374,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         double y = directionPoint.getY().doubleValue();
         boolean recalculated = false;
 
-        if (yMax != null && yMin != null && (y <= yMin || yMax <= y)) {
+        if (yMax != null && yMin != null && (y < yMin || yMax < y)) {
             double deltaMin = Math.abs(yMin - y);
             double deltaMax = Math.abs(yMax - y);
 

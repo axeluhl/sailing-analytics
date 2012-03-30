@@ -17,8 +17,7 @@
   <!-- Google Maps API -->
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
-  <!-- Flot-Gwt API -->
-  <inherits name='ca.nanometrics.gflot.GFlot'/>
+  <!-- Highcharts API -->
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
   
   <!-- Other module inherits                                      -->

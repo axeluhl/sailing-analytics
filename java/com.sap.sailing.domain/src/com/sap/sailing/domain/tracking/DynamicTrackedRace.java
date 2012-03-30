@@ -39,7 +39,17 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     void setStartTimeReceived(TimePoint start);
     
-    void setStartOfTracking(TimePoint startOfTracking);
+    /** Sets the start of tracking as received from the tracking infrastructure.
+     * This isn't necessarily what {@link #getStartOfTracking()} will deliver because we might consider other values to
+     * calculate the start of tracking.
+     */
+    void setStartOfTrackingReceived(TimePoint startOfTrackingReceived);
+
+    /** Sets the end of tracking as received from the tracking infrastructure.
+     * This isn't necessarily what {@link #getEndOfTracking()} will deliver because we might consider other values to
+     * calculate the end of tracking.
+     */
+    void setEndOfTrackingReceived(TimePoint endOfTrackingReceived);
 
     void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed);
 

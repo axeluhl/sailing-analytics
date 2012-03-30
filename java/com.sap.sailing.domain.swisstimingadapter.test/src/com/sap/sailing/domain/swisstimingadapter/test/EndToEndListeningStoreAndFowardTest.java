@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -100,7 +99,7 @@ public class EndToEndListeningStoreAndFowardTest {
     }
 
      @Test
-    public void testEndToEndScenarioWithInitMessages() throws IOException, InterruptedException, ParseException {
+    public void testEndToEndScenarioWithInitMessages() throws Exception {
         String[] racesToTrack = new String[] { "4711", "4712" };
         String scriptName = "/InitMessagesScript.txt";
         setUpUsingScript(racesToTrack, scriptName);
@@ -128,7 +127,7 @@ public class EndToEndListeningStoreAndFowardTest {
     }
 
     @Test
-    public void testLongRaceLog() throws IOException, InterruptedException, ParseException {
+    public void testLongRaceLog() throws Exception {
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
@@ -180,7 +179,7 @@ public class EndToEndListeningStoreAndFowardTest {
     }
     
     @Test
-    public void testLongLogRaceNewConfig() throws UnknownHostException, InterruptedException, IOException, ParseException {
+    public void testLongLogRaceNewConfig() throws Exception {
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
@@ -232,7 +231,7 @@ public class EndToEndListeningStoreAndFowardTest {
     }
 
     @Test
-    public void testDuplicateCCGMessageAndWaypointUniqueness() throws IOException, InterruptedException, ParseException {
+    public void testDuplicateCCGMessageAndWaypointUniqueness() throws Exception {
         String[] racesToTrack = new String[] { "W4702" };
         setUpUsingScript(racesToTrack, "/DuplicateCCG.txt");
 
@@ -255,7 +254,7 @@ public class EndToEndListeningStoreAndFowardTest {
     }
     
     @Test
-    public void testRongRaceLogRACZero() throws UnknownHostException, InterruptedException, IOException, ParseException{
+    public void testRongRaceLogRACZero() throws Exception{
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName2 = "/SailMasterDataInterfaceRACZero.txt";
         setUpUsingScript(racesToTrack, scriptName2);
@@ -272,7 +271,7 @@ public class EndToEndListeningStoreAndFowardTest {
     }
 
     @Test
-    public void testEndToEndWithSwissTimingData() throws IOException, InterruptedException, ParseException {
+    public void testEndToEndWithSwissTimingData() throws Exception {
         String[] racesToTrack = new String[] { "W4702" };
         String scriptName1 = "/SailMasterDataInterfaceRACandSTL.txt";
         String scriptName2 = "/SailMasterDataInterface-ExampleAsText.txt";
@@ -289,8 +288,7 @@ public class EndToEndListeningStoreAndFowardTest {
         }
     }
 
-    private void setUpUsingScript(String[] racesToTrack, String... scriptNames) throws InterruptedException,
-            UnknownHostException, IOException, ParseException {
+    private void setUpUsingScript(String[] racesToTrack, String... scriptNames) throws Exception {
         for (String raceToTrack : racesToTrack) {
             RacesHandle raceHandle = racingEventService.addSwissTimingRace(raceToTrack, "localhost", CLIENT_PORT, /* canSendRequests */
                     false, emptyWindStore, -1);

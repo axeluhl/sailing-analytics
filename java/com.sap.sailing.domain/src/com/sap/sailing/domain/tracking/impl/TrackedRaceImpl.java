@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,8 +16,6 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.BoatClass;
@@ -43,7 +40,6 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -74,18 +70,11 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.geocoding.ReverseGeocoder;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
 
     private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 320;
-
-    /**
-     * Used in {@link #getStartFinishPlacemarks()} to calculate the radius for the
-     * {@link ReverseGeocoder#getPlacemarksNear(Position, double) GetPlacemarksNear-Service}.
-     */
-    private static final double GEONAMES_RADIUS_CACLCULATION_FACTOR = 10.0;
 
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
@@ -104,9 +93,19 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     /**
      * Keeps the oldest timestamp that is fed into this tracked race, either from a boat fix, a buoy fix, a race
-     * start/finish or a coarse definition.
+     * start/finish or a course definition.
      */
-    private TimePoint startOfTracking;
+    private TimePoint timePointOfOldestEvent;
+
+    /**
+     * The start of tracking time as announced by the tracking infrastructure.
+     */
+    private TimePoint startOfTrackingReceived;
+
+    /**
+     * The end of tracking time as announced by the tracking infrastructure.
+     */
+    private TimePoint endOfTrackingReceived;
 
     /**
      * Race start time as announced by the tracking infrastructure
@@ -252,7 +251,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public TimePoint getStartOfTracking() {
-        return startOfTracking;
+        return startOfTrackingReceived;
+    }
+
+    @Override
+    public TimePoint getEndOfTracking() {
+        return endOfTrackingReceived;
     }
 
     @Override
@@ -713,6 +717,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
+    public TimePoint getTimePointOfOldestEvent() {
+        return timePointOfOldestEvent;
+    }
+
+    @Override
     public TimePoint getTimePointOfNewestEvent() {
         return timePointOfNewestEvent;
     }
@@ -733,18 +742,22 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (timePointOfNewestEvent == null || timePointOfNewestEvent.compareTo(timeOfEvent) < 0) {
                 timePointOfNewestEvent = timeOfEvent;
             }
-            if (getStartOfTracking() == null || getStartOfTracking().compareTo(timeOfEvent) > 0) {
-                setStartOfTracking(timeOfEvent);
+            if (timePointOfOldestEvent == null || timePointOfOldestEvent.compareTo(timeOfEvent) > 0) {
+                timePointOfOldestEvent = timeOfEvent;
             }
             timePointOfLastEvent = timeOfEvent;
         }
         notifyAll();
     }
 
-    protected void setStartOfTracking(TimePoint startOfTracking) {
-        this.startOfTracking = startOfTracking;
+    protected void setStartOfTrackingReceived(TimePoint startOfTracking) {
+        this.startOfTrackingReceived = startOfTracking;
     }
-    
+
+    protected void setEndOfTrackingReceived(TimePoint endOfTracking) {
+        this.endOfTrackingReceived = endOfTracking;
+    }
+
     /**
      * Schedules the clearing of the caches. If a cache clearing is already scheduled, this is a no-op.
      */
@@ -1405,69 +1418,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         @Override
         public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         }
-    }
-
-    @Override
-    public Pair<Placemark, Placemark> getStartFinishPlacemarks() {
-        Pair<Placemark, Placemark> placemarks = new Pair<Placemark, Placemark>(null, null);
-        Placemark startBest = null;
-        Placemark finishBest = null;
-
-        // Get start postition
-        Iterator<Buoy> startBuoys = getRace().getCourse().getFirstWaypoint().getBuoys().iterator();
-        GPSFix startBuoyFix = startBuoys.hasNext() ? getOrCreateTrack(startBuoys.next()).getLastRawFix() : null;
-        Position startPosition = startBuoyFix != null ? startBuoyFix.getPosition() : null;
-        if (startPosition != null) {
-            try {
-                // Get distance to nearest placemark and calculate the search radius
-                Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
-                if (startNearest != null) {
-                    Distance startNearestDistance = startNearest.distanceFrom(startPosition);
-                    double startRadius = startNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
-
-                    // Get the estimated best start place
-                    startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
-                            new Placemark.ByPopulationDistanceRatio(startPosition));
-                }
-            } catch (IOException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            } catch (ParseException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            }
-        }
-
-        // Get finish position
-        Iterator<Buoy> finishBuoys = getRace().getCourse().getFirstWaypoint().getBuoys().iterator();
-        GPSFix finishBuoyFix = finishBuoys.hasNext() ? getOrCreateTrack(finishBuoys.next()).getLastRawFix() : null;
-        Position finishPosition = finishBuoyFix != null ? finishBuoyFix.getPosition() : null;
-        if (startPosition != null && finishPosition != null) {
-            if (startPosition.getDistance(finishPosition).getKilometers() <= ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
-                finishBest = startBest;
-            } else {
-                try {
-                    // Get distance to nearest placemark and calculate the search radius
-                    Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
-                    Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
-                    double finishRadius = finishNearestDistance.getKilometers() * GEONAMES_RADIUS_CACLCULATION_FACTOR;
-
-                    // Get the estimated best finish place
-                    finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
-                            new Placemark.ByPopulationDistanceRatio(finishPosition));
-                } catch (IOException e) {
-                    logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-                } catch (ParseException e) {
-                    logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-                }
-            }
-        }
-
-        if (startBest != null) {
-            placemarks.setA(startBest);
-        }
-        if (finishBest != null) {
-            placemarks.setB(finishBest);
-        }
-        return placemarks;
     }
 
     @Override

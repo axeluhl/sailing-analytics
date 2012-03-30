@@ -49,6 +49,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -473,6 +474,12 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) {
         return new TracTracConfigurationImpl(name, jsonURL, liveDataURI, storedDataURI);
+    }
+
+    @Override
+    public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI,
+            URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore) {
+        return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, startOfTracking, endOfTracking, windStore, this);
     }
 
 }

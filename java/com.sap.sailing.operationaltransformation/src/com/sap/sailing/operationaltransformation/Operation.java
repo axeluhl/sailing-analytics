@@ -9,8 +9,6 @@ package com.sap.sailing.operationaltransformation;
  * @param <S> the class that models the state, on instances of which operations perform changes
  */
 public interface Operation<S> extends Cloneable {
-    public Operation<S> clone();
-    
     /**
      * Applies this operation to the state <tt>toState</tt>, producing a new target state
      * which is returned.
@@ -19,4 +17,5 @@ public interface Operation<S> extends Cloneable {
      * @return the state produced by applying this operation to <tt>toState</tt>
      */
     S applyTo(S toState);
+    
 }

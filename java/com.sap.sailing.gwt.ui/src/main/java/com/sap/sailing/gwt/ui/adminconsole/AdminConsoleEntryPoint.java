@@ -53,11 +53,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         eventDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
         tabPanel.add(windPanel, stringMessages.wind(), /* asHTML */ false);
-        final RaceMapPanel raceMapPanel = new RaceMapPanel(sailingService, new CompetitorSelectionModel(
-                /* hasMultiSelection */true), this, this, stringMessages);
-        eventDisplayers.add(raceMapPanel);
-        raceMapPanel.setSize("90%", "90%");
-        tabPanel.add(raceMapPanel, stringMessages.map(), /* asHTML */ false);
         LeaderboardSettings defaultLeaderboardSettings = LeaderboardSettingsFactory.getInstance()
                 .createNewDefaultSettings(/* racesToShow */ null, /* namesOfRacesToShow */ null, /* autoExpandFirstRace */false);
         final LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
@@ -80,9 +75,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
 			@Override
 			public void onSelection(SelectionEvent<Integer> event) {
-				if(raceMapPanel.isVisible()) {
-					raceMapPanel.onResize();
-				}
 				if (leaderboardConfigPanel.isVisible()) {
 				    leaderboardConfigPanel.loadAndRefreshAllData();
 				}

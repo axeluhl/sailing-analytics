@@ -21,7 +21,16 @@ public class MarkPassingByTimeComparator implements Comparator<MarkPassing> {
         int result = o1 == null ? o2 == null ? 0 : -1 : o2 == null ? 1 : o1.getTimePoint().compareTo(o2.getTimePoint());
         if (result == 0 && o1 != null) {
             assert o2 != null;
-            result = o1.getCompetitor().getId().toString().compareTo(o2.getCompetitor().getId().toString());
+            Object c1ID = o1.getCompetitor().getId();
+            Object c2ID = o2.getCompetitor().getId();
+            // shortcut comparison and don't use expensive toString() in case IDs are comparable by nature 
+            if (c1ID instanceof Comparable<?> && c1ID.getClass() == c2ID.getClass()) {
+                @SuppressWarnings("unchecked")
+                final Comparable<Object> c1OID = (Comparable<Object>) c1ID;
+                result = c1OID.compareTo(o2.getCompetitor().getId());
+            } else {
+                result = o1.getCompetitor().getId().toString().compareTo(o2.getCompetitor().getId().toString());
+            }
         }
         return result;
     }
