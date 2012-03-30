@@ -242,7 +242,8 @@ public interface RacingEventService extends TrackedEventRegistry {
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
     RacesHandle addSwissTimingRace(String raceID, String hostname, int port, boolean canSendRequests,
-            WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException;
+            WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException,
+            IOException, ParseException, Exception;
 
     SwissTimingFactory getSwissTimingFactory();
     

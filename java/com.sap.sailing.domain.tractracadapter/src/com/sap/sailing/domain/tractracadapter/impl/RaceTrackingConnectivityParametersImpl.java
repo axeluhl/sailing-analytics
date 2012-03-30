@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
@@ -43,9 +44,8 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     }
 
     @Override
-    public Object getTrackerID() {
-        // TODO Auto-generated method stub
-        return null;
+    public Util.Triple<URL, URI, URI> getTrackerID() {
+        return TracTracRaceTrackerImpl.createID(paramURL, liveURI, storedURI);
     }
 
 }

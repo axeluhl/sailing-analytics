@@ -108,7 +108,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             TrackedEventRegistry trackedEventRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException {
         super();
-        urls = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
+        urls = createID(paramURL, liveURI, storedURI);
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
         this.domainFactory = domainFactory;
@@ -143,6 +143,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             }
         }
         addListenersForStoredDataAndStartController(typeControllers);
+    }
+
+    static Triple<URL, URI, URI> createID(URL paramURL, URI liveURI, URI storedURI) {
+        return new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
     }
     
     /**

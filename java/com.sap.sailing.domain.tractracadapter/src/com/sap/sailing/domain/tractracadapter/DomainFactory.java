@@ -233,5 +233,5 @@ public interface DomainFactory {
      * will have to create a new one.
      */
     void removeRace(Event tractracEvent, Race tractracRace, TrackedEventRegistry trackedEventRegistry);
-
+    
 }

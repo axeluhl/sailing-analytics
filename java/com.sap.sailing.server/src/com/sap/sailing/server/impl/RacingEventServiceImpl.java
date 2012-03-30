@@ -391,44 +391,12 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public synchronized RacesHandle addSwissTimingRace(String raceID, String hostname, int port, boolean canSendRequests,
-            WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException, IOException, ParseException {
-        Triple<String, String, Integer> key = new Triple<String, String, Integer>(raceID, hostname, port);
-        RaceTracker tracker = raceTrackersByID.get(key);
-        if (tracker == null) {
-            tracker = getSwissTimingFactory().createRaceTracker(raceID, hostname, port, canSendRequests,
-                    windStore, swissTimingAdapterPersistence, swissTimingDomainFactory, this);
-            raceTrackersByID.put(tracker.getID(), tracker);
-            Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
-            if (trackers == null) {
-                trackers = new HashSet<RaceTracker>();
-                raceTrackersByEvent.put(tracker.getEvent(), trackers);
-            }
-            trackers.add(tracker);
-            // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
-            String eventName = tracker.getEvent().getName();
-            Event eventWithName = eventsByName.get(eventName);
-            // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
-            if (eventWithName != null) {
-                if (eventWithName != tracker.getEvent()) {
-                    throw new RuntimeException("Internal error. Two Event objects with equal name "+eventName);
-                }
-            } else {
-                eventsByName.put(eventName, tracker.getEvent());
-            }
-        } else {
-            WindStore existingTrackersWindStore = tracker.getWindStore();
-            if (!existingTrackersWindStore.equals(windStore)) {
-                logger.warning("Wind store mismatch. Requested wind store: "+windStore+
-                        ". Wind store in use by existing tracker: "+existingTrackersWindStore);
-            }
-        }
-        DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
-        ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEvent);
-        if (timeoutInMilliseconds != -1) {
-            scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
-        }
-        return tracker.getRacesHandle();
+    public synchronized RacesHandle addSwissTimingRace(String raceID, String hostname, int port,
+            boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) throws Exception {
+        return addRace(
+                swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port, raceID, canSendRequests,
+                        swissTimingFactory, swissTimingDomainFactory, windStore, swissTimingAdapterPersistence),
+                windStore, timeoutInMilliseconds);
     }
 
     @Override
