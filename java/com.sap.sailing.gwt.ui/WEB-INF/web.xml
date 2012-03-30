@@ -15,6 +15,16 @@
 	</servlet-mapping>
 
 	<servlet>
+		<display-name>Simulator Service</display-name>
+	    <servlet-name>SimulatorService</servlet-name>
+    	<servlet-class>com.sap.sailing.gwt.ui.server.SimulatorServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SimulatorService</servlet-name>
+		<url-pattern>com.sap.sailing.gwt.ui.Simulator/simulator</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<display-name>User Management Service</display-name>
 	    <servlet-name>UserManagementService</servlet-name>
     	<servlet-class>com.sap.sailing.gwt.ui.server.UserManagementServiceImpl</servlet-class>

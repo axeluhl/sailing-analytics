@@ -1,0 +1,250 @@
+@import url(fontface.css);
+
+/** Add css rules here for your application. */
+/*
+    body #calendar:after
+      content: " ";
+      display: block;
+      height: 0;
+      clear: both;
+      visibility: hidden;
+*/
+.clear {
+	clear: both;
+	font-size: 1px;
+	height: 0px;
+	line-height: 0px;
+	margin: -1px 0 0;
+	width: 100%;
+}
+
+.cover {
+	left: -1000px;
+	overflow: hidden;
+	position: absolute;
+	top: -1000px;
+}
+
+body {
+	background: #ebebeb;
+	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
+	line-height: 1;
+	font-size: 14px;
+	font-weight: 400;
+	padding: 80px 0 160px 0;
+	margin: 0;
+  color: #3b3b3b;
+}
+
+table td,select,button {
+	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
+	line-height: 1;
+	font-size: 14px;
+}
+
+.contentOuterPanel {
+	background: #dddcdc;
+	margin: 0 12px 0 12px;
+	padding: 12px;
+}
+
+/** Example rules used by the template application (remove for your app) */
+h1 {
+	font-size: 2em;
+	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
+	color: #777777;
+	margin: 40px 0px 70px;
+	text-align: center;
+}
+
+table {
+	border-collapse: separate;
+}
+
+.LogoAndTitlePanel {
+	height: 68px;
+	font-family: Arial, Verdana, sans-serif;
+	position: fixed;
+	width: 100%;
+	top: 0;
+	background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
+	background-position: center top, 0 0;
+	background-repeat: no-repeat, repeat-x;
+	box-shadow: 0 0 20px #858585;
+	-moz-box-shadow: 0 0 20px #858585;
+	-webkit-box-shadow: 0 0 20px #858585;
+}
+
+.LogoAndTitlePanel:after {
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+.RaceBoardHeaderPanel {
+	margin: 0 12px 14px 12px;
+}
+
+.sapLogo {
+	float: left;
+	margin: 13px 0 0 12px;
+}
+
+.sailingAnalyticsLabelPanel {
+	margin: 10px 0 0 0;
+}
+
+.sailingAnalyticsLabel {
+	float: left;
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+	margin: 15px 0 0 0;
+}
+
+.leaderboardLabel {
+	border-bottom: 2px solid #007dc0;
+	padding: 0 0 6px 0;
+	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
+}
+
+.refreshAndSettings {
+	background: #f2f2f2;
+	border-bottom: 2px solid #fff;
+	border-top: 2px solid #fff;
+	height: 30px;
+}
+
+.refreshAndSettings table td {
+	padding: 0 10px 0 0;
+}
+
+.refreshAndSettings table table td {
+	padding: 0 0 0 0;
+}
+
+.race-name {	
+	line-height: 1.0;
+}
+
+input.magnifier {
+	display: block;
+	margin: 3px auto 0 auto !important;
+}
+
+.timeLinePanel {
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	height: 140px;
+	z-index: 9;
+	background: #DDDCDC;
+	box-shadow: 0 0 20px #858585;
+	-webkit-box-shadow: 0 0 20px #858585;
+	-moz-box-shadow: 0 0 20px #858585;
+}
+
+.timeLineInnerPanel {
+	/*height: 100%;*/
+	margin: 0 12px;
+	margin-top: 20px;
+	background: #dddcdc;
+	/*padding: 38px 24px 0 24px;*/
+}
+
+.timeLineInnerBgPanel {
+	background: url(images/timeslider-bg.png) 0 0 repeat-x #f6f6f6;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	padding: 6px 10px 0;
+	border: 1px solid #a6a6a6;
+}
+
+.footerShadowPanel {
+	position: fixed;
+	height: 15px;
+	bottom: 0;
+	background: url(images/footer_shadow.png) left bottom repeat-x;
+	width: 100%;
+	z-index: 10;
+}
+
+.breadcrumbPanel {
+	height: 30px;
+	margin: 0 12px 13px 12px;
+}
+
+.mainPanel {
+	width: 100%;
+}
+
+.raceBoardNavigation {
+	float: right;
+	margin: 26px 0 0 0;
+	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
+}
+
+.raceBoardNavigation-navigationitem {
+	color: #dddcdc;
+	text-transform: uppercase;
+	font-weight: 500;
+	margin: 0 12px 0 0;
+	padding: 0 0 5px 0;
+}
+
+.raceBoardNavigation-navigationitem:hover {
+	border-bottom: 4px solid #f0ab00;
+	color: #dddcdc;
+	text-decoration: none;
+}
+
+.raceBoardNavigation-navigationitem:active {
+	border-bottom: 4px solid #f0ab00;
+	color: #dddcdc;
+	text-decoration: none;
+}
+
+.timePanel-controls {
+	margin: 9px 0 0 0;
+}
+
+.timePanel-controls-play {
+}
+
+.timePanel-controls-playSpeed {
+	vertical-align: middle;
+	padding: 5px;
+	line-height: 25px;
+}
+
+.timePanel-label {
+}
+
+.timePanel-controls-time {
+}
+
+.timePanel-controls-timeDelay {
+}
+
+.gwt-DialogBox {
+	z-index: 20;
+}
+
+
+.abstractChartPanel-importantMessageOfChart {
+    font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+    font-size: 20px;
+    height: 70px;
+    margin: 0 auto;
+    padding: 49px 0 0 80px;
+    width: 300px;
+    color: #7c7c7c;
+	background: url(images/important-message.png) left center no-repeat;	
+}
+
+.breadcrumbPanel-NextArrow {
+	display: none;
+}
