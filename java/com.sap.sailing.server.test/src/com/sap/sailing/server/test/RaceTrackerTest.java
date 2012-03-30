@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -54,7 +53,7 @@ public class RaceTrackerTest {
     }
     
     @Before
-    public void setUp() throws MalformedURLException, FileNotFoundException, URISyntaxException, InterruptedException {
+    public void setUp() throws Exception {
         service = new RacingEventServiceImpl();
         raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
         raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Event
@@ -96,7 +95,7 @@ public class RaceTrackerTest {
     }
     
     @Test
-    public void testStopTracking() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+    public void testStopTracking() throws Exception {
         TrackedEvent oldTrackedEvent = raceHandle.getTrackedEvent();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
         RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
@@ -117,9 +116,10 @@ public class RaceTrackerTest {
     /**
      * This test asserts that tracking the same race twice doesn't create another tracker and in particular no
      * new tracked event / tracked race.
+     * @throws Exception 
      */
     @Test
-    public void testTrackingSameRaceWithoutStopping() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+    public void testTrackingSameRaceWithoutStopping() throws Exception {
         TrackedEvent oldTrackedEvent = raceHandle.getTrackedEvent();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);

@@ -25,11 +25,13 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
@@ -92,7 +94,7 @@ public interface RacingEventService extends TrackedEventRegistry {
      */
     Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, ParseException,
-            org.json.simple.parser.ParseException;
+            org.json.simple.parser.ParseException, Exception;
 
     /**
      * If not already tracking the URL/URI/URI combination, adds a single race tracker and starts tracking the race,
@@ -117,7 +119,7 @@ public interface RacingEventService extends TrackedEventRegistry {
      *            that race is stopped; use -1 to wait forever
      */
     RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
-            throws MalformedURLException, FileNotFoundException, URISyntaxException;
+            throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
      * Same as {@link #addTracTracRace(URL, URI, URI, WindStore, long)}, only that start and end of tracking are
@@ -126,7 +128,7 @@ public interface RacingEventService extends TrackedEventRegistry {
      */
     RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, WindStore windStore, long timeoutForReceivingRaceDefinitionInMilliseconds)
-            throws MalformedURLException, FileNotFoundException, URISyntaxException;
+            throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
      * Stops tracking all races of the event specified. This will also stop tracking wind for all races of this event.
@@ -302,5 +304,11 @@ public interface RacingEventService extends TrackedEventRegistry {
     void addExpeditionListener(ExpeditionListener listener, boolean validMessagesOnly) throws SocketException;
 
     void removeExpeditionListener(ExpeditionListener listener);
+
+    /**
+     * @param windStore must not be <code>null</code>, but can, e.g., be an {@link EmptyWindStore}
+     */
+    RacesHandle addRace(RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
 }

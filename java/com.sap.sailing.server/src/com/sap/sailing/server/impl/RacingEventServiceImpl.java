@@ -1,6 +1,5 @@
 package com.sap.sailing.server.impl;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -55,6 +54,7 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterP
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -356,7 +356,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
-    public synchronized Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws URISyntaxException, IOException, ParseException, org.json.simple.parser.ParseException {
+    public synchronized Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
         Event event = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
@@ -433,20 +433,18 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
 
     @Override
     public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
-            long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        return addTracTracRace(paramURL, liveURI, storedURI, /* startOfTracking */ null,
-                /* endOfTracking */ null, windStore, timeoutInMilliseconds);
+            long timeoutInMilliseconds) throws Exception {
+        return addRace(getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, /* startOfTracking */ null,
+                /* endOfTracking */ null, windStore), windStore, timeoutInMilliseconds);
     }
     
     @Override
-    public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
-            long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        Triple<URL, URI, URI> key = new Triple<URL, URI, URI>(paramURL, liveURI, storedURI);
-        RaceTracker tracker = raceTrackersByID.get(key);
+    public synchronized RacesHandle addRace(RaceTrackingConnectivityParameters params, WindStore windStore,
+            long timeoutInMilliseconds) throws Exception {
+        RaceTracker tracker = raceTrackersByID.get(params.getTrackerID());
         if (tracker == null) {
-            tracker = getDomainFactory().createRaceTracker(paramURL, liveURI, storedURI, startOfTracking, endOfTracking, windStore, this);
-            raceTrackersByID.put(tracker.getID(), tracker);
+            tracker = params.createRaceTracker(this);
+            raceTrackersByID.put(params.getTrackerID(), tracker);
             Set<RaceTracker> trackers = raceTrackersByEvent.get(tracker.getEvent());
             if (trackers == null) {
                 trackers = new HashSet<RaceTracker>();
@@ -482,6 +480,14 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
         }
         return tracker.getRacesHandle();
+    }
+    
+    @Override
+    public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI,
+            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            long timeoutInMilliseconds) throws Exception {
+        return addRace(getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
+                endOfTracking, windStore), windStore, timeoutInMilliseconds);
     }
 
     private void ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedEvent trackedEvent) {
