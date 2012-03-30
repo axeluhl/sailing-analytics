@@ -37,7 +37,9 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -106,6 +108,7 @@ import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -812,7 +815,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         RaceMapDataDTO raceMapDataDTO = new RaceMapDataDTO();
         
         raceMapDataDTO.boatPositions = getBoatPositions(raceIdentifier, from, to, extrapolate);
-        raceMapDataDTO.markPositions = getMarkPositions(raceIdentifier, date); 
+        raceMapDataDTO.coursePositions = getCoursePositions(raceIdentifier, date); 
         raceMapDataDTO.quickRanks = getQuickRanks(raceIdentifier, date);
         
         return raceMapDataDTO;
@@ -979,14 +982,16 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<MarkDTO> getMarkPositions(RaceIdentifier raceIdentifier, Date date) {
-        List<MarkDTO> result = new ArrayList<MarkDTO>();
+    public CourseDTO getCoursePositions(RaceIdentifier raceIdentifier, Date date) {
+        CourseDTO result = new CourseDTO();
         if (date != null) {
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
             TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {
+                result.buoys = new ArrayList<MarkDTO>();
                 Set<Buoy> buoys = new HashSet<Buoy>();
-                for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
+                Course course = trackedRace.getRace().getCourse();
+                for (Waypoint waypoint : course.getWaypoints()) {
                     for (Buoy b : waypoint.getBuoys()) {
                         buoys.add(b);
                     }
@@ -997,9 +1002,45 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     if (positionAtDate != null) {
                         MarkDTO markDTO = new MarkDTO(buoy.getName(), positionAtDate.getLatDeg(),
                                 positionAtDate.getLngDeg());
-                        result.add(markDTO);
+                        result.buoys.add(markDTO);
                     }
                 }
+                
+                // set the buoys of the start and finish gate
+                Waypoint firstWaypoint = course.getFirstWaypoint();
+                if(firstWaypoint != null && firstWaypoint.getControlPoint() instanceof Gate) {
+                    Gate startGate = (Gate) firstWaypoint.getControlPoint();
+                    MarkDTO leftMark = null;
+                    MarkDTO rightMark = null;
+                    for(MarkDTO mark: result.buoys) {
+                        if(mark.name.equals(startGate.getLeft().getName())) {
+                            leftMark = mark;
+                        }
+                        if(mark.name.equals(startGate.getRight().getName())) {
+                            rightMark = mark;
+                        }
+                    }
+                    if(leftMark != null && rightMark != null) {
+                        result.startGate = new Pair<MarkDTO, MarkDTO>(leftMark, rightMark);
+                    }
+                }                    
+                Waypoint lastWaypoint = course.getLastWaypoint();
+                if(lastWaypoint != null && lastWaypoint.getControlPoint() instanceof Gate) {
+                    Gate finishGate = (Gate) lastWaypoint.getControlPoint();
+                    MarkDTO leftMark = null;
+                    MarkDTO rightMark = null;
+                    for(MarkDTO mark: result.buoys) {
+                        if(mark.name.equals(finishGate.getLeft().getName())) {
+                            leftMark = mark;
+                        }
+                        if(mark.name.equals(finishGate.getRight().getName())) {
+                            rightMark = mark;
+                        }
+                    }
+                    if(leftMark != null && rightMark != null) {
+                        result.finishGate = new Pair<MarkDTO, MarkDTO>(leftMark, rightMark);
+                    }
+                }                    
             }
         }
         return result;
@@ -1220,35 +1261,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            leaderboard.addRaceColumn(columnName, medalRace);
-            getService().updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
-        }
+        getService().addColumnToLeaderboard(columnName, leaderboardName, medalRace);
     }
 
     @Override
     public void removeLeaderboardColumn(String leaderboardName, String columnName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            leaderboard.removeRaceColumn(columnName);
-            getService().updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
-        }
+        getService().removeLeaderboardColumn(leaderboardName, columnName);
     }
 
     @Override
     public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            leaderboard.getRaceColumnByName(oldColumnName).setName(newColumnName);
-            getService().updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
-        }
+        getService().renameLeaderboardColumn(leaderboardName, oldColumnName, newColumnName);
     }
 
     @Override
@@ -1397,25 +1420,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void moveLeaderboardColumnUp(String leaderboardName, String columnName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            leaderboard.moveRaceColumnUp(columnName);
-            getService().updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
-        }
-
+        getService().moveLeaderboardColumnUp(leaderboardName, columnName);
     }
 
     @Override
     public void moveLeaderboardColumnDown(String leaderboardName, String columnName) {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            leaderboard.moveRaceColumnDown(columnName);
-            getService().updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
-        }
+        getService().moveLeaderboardColumnDown(leaderboardName, columnName);
     }
 
     @Override

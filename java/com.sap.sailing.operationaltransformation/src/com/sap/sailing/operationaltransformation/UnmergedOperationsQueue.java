@@ -3,6 +3,7 @@ package com.sap.sailing.operationaltransformation;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class UnmergedOperationsQueue<O extends Operation<S>, S> {
     /**
      * As the {@link #unmergedOperationsForPeer} queues are cleaned up whenever merge
@@ -47,8 +48,8 @@ public class UnmergedOperationsQueue<O extends Operation<S>, S> {
      * 
      * @param localOperationNumber starts with 0
      */
-    public synchronized void updateWithTransformed(int localOperationNumber, O transformedOperation) {
-	unmergedOperations.set(localOperationNumber-numberOfFirstInList, transformedOperation);
+    public synchronized void updateWithTransformed(int localOperationNumber, O operation) {
+	unmergedOperations.set(localOperationNumber-numberOfFirstInList, operation);
     }
 
     /**
@@ -75,7 +76,7 @@ public class UnmergedOperationsQueue<O extends Operation<S>, S> {
 	StringBuilder result = new StringBuilder();
 	result.append('[');
 	boolean first = true;
-	for (O op : unmergedOperations) {
+	for (Operation<S> op : unmergedOperations) {
 	    if (!first) {
 		result.append(", ");
 	    } else {

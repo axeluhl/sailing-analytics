@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
+
 
 /**
  * A very simple peer implementation for operational transformations that starts
@@ -18,10 +20,11 @@ import java.util.concurrent.Executors;
  * @param <S> type of state managed by this server to which the operations can be applied
  */
 public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
+    private static final Logger logger = Logger.getLogger(PeerImpl.class.getName());
     
     private String name;
     
-    private StatesAndOperations<O, S> statesAndOperations;
+    private S currentState;
     
     /**
      * Tells if this peer acts in the server or client role. This is used to determine in which
@@ -32,7 +35,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     /**
      * Tells if this peer is currently actively running, with a certain number of pending / running requests
      */
-    private int running = 0;
+    private int scheduledOrRunning = 0;
 
     /**
      * Queues operations sent out to a peer in {@link #updatePeers(Operation, Peer)} and whose
@@ -41,24 +44,24 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      * confirmed, the first operation from the queue is removed because operations sent
      * from this peer to the remote peer are processed in order.
      */
-    private Map<Peer<O, S>, UnmergedOperationsQueue<O, S>> unmergedOperationsForPeer = new HashMap<Peer<O, S>, UnmergedOperationsQueue<O, S>>();
+    private final Map<Peer<O, S>, UnmergedOperationsQueue<O, S>> unmergedOperationsForPeer = new HashMap<Peer<O, S>, UnmergedOperationsQueue<O, S>>();
     
     /**
      * Remembers per peer how many of that peer's operations this peer has already
      * applied locally.
      */
-    private Map<Peer<O, S>, Integer> numberOfMergedOperations = new HashMap<Peer<O, S>, Integer>();
+    private final Map<Peer<O, S>, Integer> numberOfMergedOperations = new HashMap<Peer<O, S>, Integer>();
 
-    private Transformer<O> transformer;
+    private final Transformer<O> transformer;
     
     /**
      * The background task handler which sends out the asynchronous updates to the peers.
      */
-    private ExecutorService merger;
+    private final ExecutorService merger;
 
     public PeerImpl(Transformer<O> transformer, S initialState, Role role) {
 	this.transformer = transformer;
-	statesAndOperations = new StatesAndOperations<O, S>(initialState);
+	currentState = initialState;
 	this.role = role;
 	this.merger = Executors.newSingleThreadExecutor();
     }
@@ -76,7 +79,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     public PeerImpl(Transformer<O> transformer, Peer<O, S> server) {
 	this.transformer = transformer;
 	S initialState = server.addPeer(this);
-	statesAndOperations = new StatesAndOperations<O, S>(initialState);
+        currentState = initialState;
 	this.role = Role.CLIENT;
 	this.merger = Executors.newSingleThreadExecutor();
 	addPeer(server);
@@ -103,7 +106,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     
     @Override
     public S addPeer(Peer<O, S> peer) {
-	if ( role == Role.CLIENT && getPeers().size() > 0) {
+	if (role == Role.CLIENT && getPeers().size() > 0) {
 	    throw new RuntimeException("A client must be connected to at most one server");
 	}
 	unmergedOperationsForPeer.put(peer, new UnmergedOperationsQueue<O, S>());
@@ -116,21 +119,24 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     }
     
     public S getCurrentState() {
-	return statesAndOperations.getCurrentState();
+	return currentState;
     }
     
     @Override
     public synchronized void apply(O operation) {
-	taskStarted();
-	statesAndOperations.apply(operation);
-	updatePeers(operation, /* except */ null);
-	taskFinished();
+	taskScheduled();
+        try {
+            currentState = operation.applyTo(currentState);
+            updatePeers(operation, /* except */null);
+        } finally {
+            taskFinished();
+        }
     }
 
     @Override
     public synchronized void apply(final Peer<O, S> source, O operation,
 	    final int numberOfOperationsSourceHasMergedFromThis) {
-	taskStarted();
+	taskScheduled();
 	if (!getPeers().contains(source)) {
 	    throw new RuntimeException("Peer "+source+" not registered with peer "+this);
 	}
@@ -152,7 +158,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	    }
 	    localOpNumber++;
 	}
-	statesAndOperations.apply(transformedOp); // produce a new current state
+	currentState = transformedOp.applyTo(currentState); // produce a new current state
 	final int numberOfMergedOperationsFromSource = numberOfMergedOperations.get(source)+1;
 	numberOfMergedOperations.put(source, numberOfMergedOperationsFromSource);
 	// It's important that the following call to confirm is synchronized with the
@@ -168,12 +174,10 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     }
 
     /**
-     * Propagates the changes described by <tt>operation</tt> to all registered
-     * peers (except the peer identified by <tt>except</tt> if not <tt>null</tt>
-     * ). For each peer, the operation is sent along to that peer's
-     * {@link #apply(Peer, Operation, int)} method together with the
-     * {@link #numberOfMergedOperations number of operations currently merged
-     * from that peer}.
+     * Propagates the changes described by <tt>operation</tt> to all registered peers (except the peer identified by
+     * <tt>except</tt> if not <tt>null</tt>). For each peer, the operation is sent along to that peer's
+     * {@link #apply(Peer, Operation, int)} method together with the {@link #numberOfMergedOperations number of
+     * operations currently merged from that peer}.
      */
     private synchronized void updatePeers(final O operation, Peer<O, S> except) {
 	for (final Peer<O, S> peer : getPeers()) {
@@ -184,13 +188,14 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 		scheduleTask(new Runnable() {
 		    public void run() {
 			/* 
-			 * Thoughts on locking: The peer runs the folling apply(...) call synchronized.
+			 * Thoughts on locking: The peer runs the following apply(...) call synchronized.
 			 * Therefore, it can't take other apply calls (local or from other peers) during
 			 * that time. It may, though, have pending tasks in its updatePeers that can
 			 * continue to run. This may include updates for this peer which would be received
 			 * by this peer's apply(...) method.
 			 */
 			peer.apply(PeerImpl.this, operation, numberOfMergedOpsForPeer);
+			// TODO what to do if apply throws a RuntimeException?
 		    }
 		});
 	    }
@@ -211,24 +216,28 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
     }
 
     /**
-     * Records that a new task is scheduled by incrementing {@link #running} by one, then
+     * Records that a new task is scheduled by incrementing {@link #scheduledOrRunning} by one, then
      * schedules the <tt>runnable</tt> with the {@link #merger} executor service. The
      * <tt>runnable</tt> is wrapped such that when its execution has finished,
-     * {@link #taskFinished()} will be called such that {@link #running} is decremented
+     * {@link #taskFinished()} will be called such that {@link #scheduledOrRunning} is decremented
      * properly again and waiting clients in {@link #waitForNotRunning()} can be unblocked.
      */
     private void scheduleTask(final Runnable runnable) {
-	taskStarted();
+	taskScheduled();
 	merger.execute(new Runnable() {
 	    public void run() {
-		runnable.run();
-		taskFinished();
+	        try {
+	            runnable.run();
+	        } finally {
+	            taskFinished();
+	        }
 	    }
 	});
     }
 
-    private void taskStarted() {
-	running++;
+    private void taskScheduled() {
+        logger.fine(""+this+" taskScheduled incrementing scheduleOrRunning from "+scheduledOrRunning+" to "+(scheduledOrRunning+1)); 
+	scheduledOrRunning++;
     }
 
     /**
@@ -236,17 +245,20 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
      * Unblocks {@link #waitForNotRunning()} if the merger's queue got empty by this.
      */
     private synchronized void taskFinished() {
-	running--;
-	if (running == 0) {
+        logger.fine(""+this+" taskFinished decrementing scheduleOrRunning from "+scheduledOrRunning+" to "+(scheduledOrRunning-1)); 
+	scheduledOrRunning--;
+	if (scheduledOrRunning == 0) {
+	    logger.fine(""+this+" taskFinished notifying waiters"); 
 	    notifyAll();
 	}
     }
 
     @Override
     public synchronized void waitForNotRunning() {
-	while (running > 0) {
+	while (scheduledOrRunning > 0) {
 	    try {
 		wait();
+		logger.fine(""+this+" waitForNotRunning scheduleOrRunning: "+scheduledOrRunning);
 	    } catch (InterruptedException e) {
 		// ignore interruption, try again
 	    }

@@ -224,6 +224,16 @@ public interface RacingEventService extends TrackedEventRegistry {
      */
     void renameLeaderboard(String oldName, String newName);
 
+    void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
+
+    void moveLeaderboardColumnUp(String leaderboardName, String columnName);
+
+    void moveLeaderboardColumnDown(String leaderboardName, String columnName);
+
+    void removeLeaderboardColumn(String leaderboardName, String columnName);
+
+    void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName);
+
     /**
      * Updates the leaderboard data in the persistent store
      */

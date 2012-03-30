@@ -213,8 +213,16 @@ public interface TrackedRace {
      */
     void waitForNextUpdate(int sinceUpdate) throws InterruptedException;
 
+    /**
+     * Time stamp of the start of the actual tracking.
+     * The value can be null (e.g. if we have not received any signal from the tracking infrastructure) 
+     */
     TimePoint getStartOfTracking();
 
+    /**
+     * Time stamp of the end of the actual tracking.
+     * The value can be null (e.g. if we have not received any signal from the tracking infrastructure) 
+     */
     TimePoint getEndOfTracking();
 
     /**

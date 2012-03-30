@@ -169,6 +169,61 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
     
     @Override
+    public void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.addRaceColumn(columnName, medalRace);
+            updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+        }
+    }
+
+    @Override
+    public void moveLeaderboardColumnUp(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.moveRaceColumnUp(columnName);
+            updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+        }
+    }
+
+    @Override
+    public void moveLeaderboardColumnDown(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.moveRaceColumnDown(columnName);
+            updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
+        }
+    }
+
+    @Override
+    public void removeLeaderboardColumn(String leaderboardName, String columnName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.removeRaceColumn(columnName);
+            updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+    }
+
+    @Override
+    public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
+        Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            leaderboard.getRaceColumnByName(oldColumnName).setName(newColumnName);
+            updateStoredLeaderboard(leaderboard);
+        } else {
+            throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
+        }
+    }
+
+    @Override
     public void renameLeaderboard(String oldName, String newName) {
         synchronized (leaderboardsByName) {
             if (!leaderboardsByName.containsKey(oldName)) {
