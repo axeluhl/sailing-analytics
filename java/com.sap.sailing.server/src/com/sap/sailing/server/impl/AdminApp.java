@@ -448,8 +448,7 @@ public class AdminApp extends Servlet {
         }
     }
 
-    private void addEvent(HttpServletRequest req, HttpServletResponse resp) throws URISyntaxException, IOException,
-            ParseException, org.json.simple.parser.ParseException {
+    private void addEvent(HttpServletRequest req, HttpServletResponse resp) throws MongoException, Exception {
         URL jsonURL = new URL(req.getParameter(PARAM_NAME_EVENT_JSON_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));
@@ -471,8 +470,7 @@ public class AdminApp extends Servlet {
         return EmptyWindStore.INSTANCE;
     }
 
-    private void addRace(HttpServletRequest req, HttpServletResponse resp) throws URISyntaxException, IOException,
-            ParseException, org.json.simple.parser.ParseException {
+    private void addRace(HttpServletRequest req, HttpServletResponse resp) throws MongoException, Exception {
         URL paramURL = new URL(req.getParameter(PARAM_NAME_PARAM_URL));
         URI liveURI = new URI(req.getParameter(PARAM_NAME_LIVE_URI));
         URI storedURI = new URI(req.getParameter(PARAM_NAME_STORED_URI));

@@ -10,8 +10,16 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.gwt.ui.client.Timer;
 
 public abstract class SimpleChartPanel extends SimplePanel {
+    
+    protected final Timer timer;
+    
+    public SimpleChartPanel(Timer timer) {
+        this.timer = timer;
+    }
+    
     /**
      * When using this method to enable the use of checkboxes only for hiding / showing a series, callers need to ensure
      * that all series have {@link PlotOptions#setSelected(boolean)} set to <code>true</code> for all series that are

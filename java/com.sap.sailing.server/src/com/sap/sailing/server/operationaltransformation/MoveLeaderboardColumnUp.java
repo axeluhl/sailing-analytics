@@ -8,7 +8,6 @@ public class MoveLeaderboardColumnUp extends AbstractLeaderboardColumnOperation 
         super(leaderboardName, columnName);
     }
 
-
     @Override
     public RacingEventService applyTo(RacingEventService toState) {
         toState.moveLeaderboardColumnUp(getLeaderboardName(), getColumnName());
@@ -18,15 +17,12 @@ public class MoveLeaderboardColumnUp extends AbstractLeaderboardColumnOperation 
 
     @Override
     public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
-        // TODO Auto-generated method stub
-        return null;
+        return serverOp.transformMoveLeaderboardColumnUpClientOp(this);
     }
-
 
     @Override
     public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
-        // TODO Auto-generated method stub
-        return null;
+        return clientOp.transformMoveLeaderboardColumnUpServerOp(this);
     }
 
 }

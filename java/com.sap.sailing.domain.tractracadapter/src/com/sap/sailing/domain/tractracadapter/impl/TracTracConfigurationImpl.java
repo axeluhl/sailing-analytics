@@ -43,4 +43,5 @@ public class TracTracConfigurationImpl implements TracTracConfiguration {
             return "<Exception during TracTracConfiguration.toString(): "+e.getMessage()+">";
         }
     }
+
 }

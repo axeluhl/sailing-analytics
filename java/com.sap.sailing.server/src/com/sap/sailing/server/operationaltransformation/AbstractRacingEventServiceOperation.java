@@ -66,6 +66,30 @@ public abstract class AbstractRacingEventServiceOperation implements RacingEvent
         return addColumnToLeaderboard;
     }
 
+    @Override
+    public RacingEventServiceOperation transformMoveLeaderboardColumnDownClientOp(
+            MoveLeaderboardColumnDown moveLeaderboardColumnDown) {
+        return moveLeaderboardColumnDown;
+    }
+
+    @Override
+    public RacingEventServiceOperation transformMoveLeaderboardColumnDownServerOp(
+            MoveLeaderboardColumnDown moveLeaderboardColumnDown) {
+        return moveLeaderboardColumnDown;
+    }
+
+    @Override
+    public RacingEventServiceOperation transformMoveLeaderboardColumnUpClientOp(
+            MoveLeaderboardColumnUp moveLeaderboardColumnUp) {
+        return moveLeaderboardColumnUp;
+    }
+
+    @Override
+    public RacingEventServiceOperation transformMoveLeaderboardColumnUpServerOp(
+            MoveLeaderboardColumnUp moveLeaderboardColumnUp) {
+        return moveLeaderboardColumnUp;
+    }
+
     public static RacingEventServiceOperation getNoOp() {
         return new AbstractRacingEventServiceOperation() {
             @Override

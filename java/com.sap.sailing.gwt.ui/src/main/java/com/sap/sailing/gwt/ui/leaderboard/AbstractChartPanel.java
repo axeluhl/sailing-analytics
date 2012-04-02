@@ -91,7 +91,6 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
     protected final RaceSelectionProvider raceSelectionProvider;
     protected long stepSize = 5000;
     protected final StringMessages stringMessages;
-    protected final Timer timer;
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     protected DetailType dataToShow;
     protected final CompetitorSelectionProvider competitorSelectionProvider;
@@ -100,10 +99,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
             Timer timer, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow,
             boolean compactChart, boolean allowTimeAdjust) {
+        super(timer);
         this.stringMessages = stringMessages;
     	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
         markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
-    	this.timer = timer;
     	this.timer.addTimeListener(this);
     	this.competitorSelectionProvider = competitorSelectionProvider;
     	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);

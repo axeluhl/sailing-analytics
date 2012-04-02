@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -44,12 +43,6 @@ public interface TrackedRace {
     RaceDefinition getRace();
     
     RaceIdentifier getRaceIdentifier();
-    
-    /**
-     * @return A pair of placemarks, where A is the start placemark and B is the finish placemark.<br />
-     *         The returning pair is never <code>null</code>, but A and/or B can be <code>null</code>.
-     */
-    Pair<Placemark, Placemark> getStartFinishPlacemarks();
     
     /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time point

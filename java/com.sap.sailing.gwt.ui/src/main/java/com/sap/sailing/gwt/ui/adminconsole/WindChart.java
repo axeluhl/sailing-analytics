@@ -77,7 +77,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     private Series timeLineSeries;
     private final boolean allowTimeAdjust;
     private boolean ignoreClickOnce;
-    private final Timer timer;
     private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     
     private Long timeOfEarliestRequestInMillis;
@@ -95,7 +94,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
             WindChartSettings settings, final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
-        super();
+        super(timer);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
@@ -105,7 +104,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         this.windSourceSpeedSeries = new HashMap<WindSource, Series>();
         this.colorMap = new ColorMap<WindSource>();
         this.windSourceTypesToDisplay = new HashSet<WindSourceType>();
-        this.timer = timer;
         chart = new Chart()
                 .setZoomType(Chart.ZoomType.X)
                 .setSpacingRight(20)

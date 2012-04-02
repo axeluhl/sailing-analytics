@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tractracadapter;
 
+
 /**
  * Configuration parameters that can be used to connect to a TracTrac event / race.
  * 

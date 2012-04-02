@@ -35,9 +35,13 @@ import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.MessageType;
 import com.sap.sailing.domain.swisstimingadapter.Race;
+import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
+import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
 import difflib.PatchFailedException;
@@ -248,6 +252,14 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Nationality getOrCreateNationality(String nationalityName) {
         return baseDomainFactory.getOrCreateNationality(nationalityName);
+    }
+
+    @Override
+    public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, boolean canSendRequests,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore,
+            RaceSpecificMessageLoader messageLoader) {
+        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, canSendRequests,
+                swissTimingFactory, domainFactory, windStore, messageLoader);
     }
 
 }
