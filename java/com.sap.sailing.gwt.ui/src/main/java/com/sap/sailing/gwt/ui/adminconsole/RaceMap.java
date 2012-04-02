@@ -372,7 +372,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                         zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(RaceMap.this));
                                         mapFirstZoomDone = true;
                                     } else if (!mapFirstZoomDone) { // Zoom once to the buoys
-                                        zoomMapToNewBounds(new BuoysBoundsCalculater().calculateNewBounds(RaceMap.this));
+                                        zoomMapToNewBounds(new BuoysBoundsCalculator().calculateNewBounds(RaceMap.this));
                                         mapFirstZoomDone = true;
                                         /*
                                          * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
@@ -1339,7 +1339,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    public static class BoatsBoundsCalculater extends LatLngBoundsCalculaterForSelected {
+    public static class BoatsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
 
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
@@ -1377,7 +1377,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         
     }
     
-    public static class TailsBoundsCalculater extends LatLngBoundsCalculaterForSelected {
+    public static class TailsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
 
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
@@ -1400,7 +1400,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         
     }
     
-    public static class BuoysBoundsCalculater implements LatLngBoundsCalculator {
+    public static class BuoysBoundsCalculator implements LatLngBoundsCalculator {
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
             LatLngBounds newBounds = null;
@@ -1420,7 +1420,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    public static class WindSensorsBoundsCalculater implements LatLngBoundsCalculator {
+    public static class WindSensorsBoundsCalculator implements LatLngBoundsCalculator {
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
             LatLngBounds newBounds = null;
