@@ -1,8 +1,7 @@
-package com.sap.sailing.gwt.ui.simulator;
+package com.sap.sailing.gwt.ui.shared;
 
 import java.io.Serializable;
 
-import com.sap.sailing.gwt.ui.shared.PositionDTO;
 
 public class WindLatticeGenParamsDTO implements Serializable {
 

@@ -9,8 +9,8 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.simulator.WindLatticeDTO;
-import com.sap.sailing.gwt.ui.simulator.WindLatticeGenParamsDTO;
+import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
+import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet  implements SimulatorService {
 
