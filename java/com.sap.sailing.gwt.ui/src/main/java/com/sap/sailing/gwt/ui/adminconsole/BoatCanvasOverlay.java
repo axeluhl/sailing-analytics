@@ -1,29 +1,56 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.ImageData;
+import com.google.gwt.maps.client.MapPane;
+import com.google.gwt.maps.client.MapPaneType;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.geom.Projection;
 import com.google.gwt.maps.client.geom.Size;
+import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
-public class BoatOnMapCanvas extends BoatCanvas {
+public class BoatCanvasOverlay extends Overlay {
+
+    private final CompetitorDTO competitorDTO;
+
+    private final RaceMapResources raceMapResources;
+    
+    private final Canvas canvas;
+
+    private boolean isSelected;
 
     private MapWidget map;
     
-    private LatLng latLngPosition;
+    private MapPane pane;
 
     private GPSFixDTO boatFix;
     
-    public BoatOnMapCanvas(CompetitorDTO competitorDTO, RaceMapResources raceMapResources, MapWidget map) {
-        super(competitorDTO, raceMapResources);
-        
-        this.map = map;
+    public BoatCanvasOverlay(CompetitorDTO competitorDTO, RaceMapResources raceMapResources) {
+        this.competitorDTO = competitorDTO;
+        this.raceMapResources = raceMapResources;
+        canvas = Canvas.createIfSupported();
+    }
+    
+    @Override
+    protected Overlay copy() {
+      return new BoatCanvasOverlay(competitorDTO, raceMapResources);
     }
 
-    public void draw() {
+    @Override
+    protected void initialize(MapWidget map) {
+      this.map = map;
+      pane = map.getPane(MapPaneType.MAP_PANE);
+      pane.add(canvas);
+    }
+
+    @Override
+    protected void redraw(boolean force) {
+      // Only set the rectangle's size if the map's size has changed
+      if (boatFix != null) {
         ImageTransformer boatImageTransformer = raceMapResources.getBoatImageTransformer(boatFix, isSelected);
         double realBoatSizeScaleFactor = raceMapResources.getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());        
         ImageData imageData = boatImageTransformer.getTransformedImageData(boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
@@ -35,7 +62,7 @@ public class BoatOnMapCanvas extends BoatCanvas {
         canvas.setCoordinateSpaceWidth(imageWidth);
         canvas.setCoordinateSpaceHeight(imageHeigth);
         
-        latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
+        LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
         
         Point distanceInPx = calculateLocationDistanceInPx(map.getCenter(), latLngPosition);
         Size size = map.getSize();
@@ -43,12 +70,18 @@ public class BoatOnMapCanvas extends BoatCanvas {
         int x = size.getWidth() / 2 - distanceInPx.getX() - imageWidth / 2;
         int y = size.getHeight() / 2 - distanceInPx.getY() - imageHeigth / 2;
         
-        setPosition(x, y);
+        pane.setWidgetPosition(canvas, x, y);
 
         canvas.getContext2d().putImageData(imageData, 0, 0);
+      }
     }
 
-    protected Point calculateLocationDistanceInPx(LatLng location1, LatLng location2) {
+    @Override
+    protected void remove() {
+        canvas.removeFromParent();
+    }
+
+    private Point calculateLocationDistanceInPx(LatLng location1, LatLng location2) {
         int zoomLevel = map.getZoomLevel();
         Projection projection = map.getCurrentMapType().getProjection();
         Point latLngToPixel1 = projection.fromLatLngToPixel(location1, zoomLevel);
@@ -66,4 +99,27 @@ public class BoatOnMapCanvas extends BoatCanvas {
         this.boatFix = boatFix;
     }
 
+    public Canvas getCanvas() {
+        return canvas;
+    }
+
+    public boolean isVisible() {
+        if(canvas == null)
+            return false;
+        
+        return canvas.isVisible();
+    }
+
+    public void setVisible(boolean isVisible) {
+        if(canvas != null)
+            canvas.setVisible(isVisible);
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean isSelected) {
+        this.isSelected = isSelected;
+    }
 }
