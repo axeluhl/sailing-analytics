@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.simulator.WindLatticeDTO;
-import com.sap.sailing.gwt.ui.simulator.WindLatticeGenParamsDTO;
+import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
+import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
 
 public interface SimulatorServiceAsync {
 

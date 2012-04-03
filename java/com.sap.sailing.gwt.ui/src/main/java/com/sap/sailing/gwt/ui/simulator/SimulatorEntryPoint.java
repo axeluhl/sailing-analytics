@@ -20,6 +20,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
+import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
 
 public class SimulatorEntryPoint implements EntryPoint {
 	private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
