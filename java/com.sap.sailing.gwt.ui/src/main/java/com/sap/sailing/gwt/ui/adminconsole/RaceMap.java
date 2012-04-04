@@ -212,8 +212,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private List<QuickRankDTO> quickRanks;
 
-    private final CombinedWindPanel windPanel;
-
+    private final CombinedWindPanel combinedWindPanel;
+//    private CombinedWindOverlay combinedWindOverlay;
+    
     private final AsyncActionsExecutor asyncActionsExecutor;
 
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, Timer timer,
@@ -241,8 +242,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         dataInitialized = false;
         initializeData();
         
-        windPanel = new CombinedWindPanel(sailingService, asyncActionsExecutor, errorReporter, stringMessages, timer);
-        windPanel.setVisible(false);
+//        combinedWindOverlay = new CombinedWindOverlay(imageResources, stringMessages);
+        combinedWindPanel = new CombinedWindPanel(imageResources, stringMessages);
+        combinedWindPanel.setVisible(false);
     }
     
     private void loadMapsAPI() {
@@ -257,7 +259,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
                 RaceMap.this.add(map, 0, 0);
-                RaceMap.this.add(windPanel, 10, 10);
+                RaceMap.this.add(combinedWindPanel, 10, 10);
 
                 map.setSize("100%", "100%");
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
@@ -317,7 +319,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
         this.selectedRaces = selectedRaces;
-        windPanel.onRaceSelectionChange(selectedRaces);
     }
 
     @Override
@@ -386,7 +387,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // draw the wind into the map, get the combined wind
                     List<String> windSourceTypeNames = new ArrayList<String>();
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
-                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames,
+                    windSourceTypeNames.add(WindSourceType.COMBINED.name());
+                  GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames,
                         new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -408,11 +410,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                                     }
                                                 }
                                                 break;
+                                                case COMBINED:
+                                                {
+                                                    showCombinedWindOnMap(windSource, windTrackInfoDTO);
+                                                }
+                                                break;
                                             }
                                         }
                                     }
                                     showWindSensorsOnMap(windSourcesToShow);
                                 }
+
                             });
                     
                     asyncActionsExecutor.execute(getWindInfoAction);
@@ -532,6 +540,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
+    protected void showCombinedWindOnMap(WindSource windSource, WindTrackInfoDTO windTrackInfoDTO) {
+        if (map != null) {
+            combinedWindPanel.setWindInfo(windTrackInfoDTO, windSource);
+            combinedWindPanel.redraw();
+        }
+    }
+
     protected void showWindSensorsOnMap(List<Pair<WindSource, WindDTO>> windSensorsList) {
         if (map != null) {
             Set<WindSource> toRemoveWindSources = new HashSet<WindSource>(windSensorMarkers.keySet());
@@ -594,7 +609,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             for (CompetitorDTO unusedMarkerCompetitorDTO : competitorDTOsOfUnusedMarkers) {
                 BoatCanvasOverlay boatCanvas = boatCanvasOverlays.get(unusedMarkerCompetitorDTO);
                 map.removeOverlay(boatCanvas);
-                //this.remove(boatCanvas.getCanvas());
                 boatCanvasOverlays.remove(unusedMarkerCompetitorDTO);
             }
             for (CompetitorDTO unusedTailCompetitorDTO : competitorDTOsOfUnusedTails) {
@@ -667,7 +681,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (boatCanvas == null) {
                 boatCanvas = createBoatCanvas(competitorDTO, displayHighlighted(competitorDTO));
                 map.addOverlay(boatCanvas);
-//                this.add(boatCanvas.getCanvas());
                 boatCanvasOverlays.put(competitorDTO, boatCanvas);
                 
                 boatCanvas.setSelected(displayHighlighted(competitorDTO));

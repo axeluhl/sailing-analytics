@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.overlay.Overlay;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.WindSource;
@@ -13,27 +13,30 @@ import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
-public class CombinedWindPanel extends FlowPanel {
-    private final ImageTransformer transformer;
-    private final StringMessages stringMessages;
-    
+public class CombinedWindOverlay extends CanvasOverlay {
+
     private final RaceMapResources raceMapResources;
-    private final Label textLabel;
 
     private WindTrackInfoDTO windTrackInfoDTO;
+
     private WindSource windSource;
+
+    private final Label textLabel;
     
-    private Canvas canvas;
+    private final StringMessages stringMessages;
+    
+    private final ImageTransformer transformer;
 
-    public CombinedWindPanel(RaceMapResources theRaceMapResources, StringMessages stringMessages) {
+    private int canvasWidth;
+    private int canvasHeight;
+
+    public CombinedWindOverlay(RaceMapResources raceMapResources, StringMessages stringMessages) {
+        super();
+        this.raceMapResources = raceMapResources;
         this.stringMessages = stringMessages;
-        this.raceMapResources = theRaceMapResources;
-        int canvasWidth = 44;
-        int canvasHeight = 44;
-        int labelHeight = 12;
-        this.setSize(canvasWidth + "px", canvasHeight + labelHeight +"px");
+        canvasWidth = 44;
+        canvasHeight = 44;
 
-        canvas = Canvas.createIfSupported();
         if(canvas != null) {
             canvas.setWidth(String.valueOf(canvasWidth));
             canvas.setHeight(String.valueOf(canvasHeight));
@@ -42,16 +45,34 @@ public class CombinedWindPanel extends FlowPanel {
         }
         transformer = raceMapResources.getCombinedWindIconTransformer();
 
-        textLabel = new Label("");
+        textLabel = new Label();
         textLabel.setSize("44px", "12px");
         textLabel.getElement().getStyle().setFontSize(12, Unit.PX);
         textLabel.setWordWrap(false);
         textLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        add(canvas);
-        add(textLabel);
+    }
+    
+    @Override
+    protected Overlay copy() {
+      return new CombinedWindOverlay(raceMapResources, stringMessages);
     }
 
-    protected void redraw() {
+    @Override
+   protected void initialize(MapWidget map) {
+        super.initialize(map);
+        pane.add(textLabel);
+        pane.setWidgetPosition(canvas, 10, 10);
+        pane.setWidgetPosition(textLabel, 10, 10 + canvasHeight);
+   }
+
+   @Override
+   protected void remove() {
+       super.remove();
+       textLabel.removeFromParent();
+   }
+
+    @Override
+    protected void redraw(boolean force) {
         if(windTrackInfoDTO != null) {
             if(windTrackInfoDTO.windFixes.size() > 0) {
                 WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
@@ -75,7 +96,7 @@ public class CombinedWindPanel extends FlowPanel {
             }
         }
     }
-    
+
     public WindTrackInfoDTO getWindTrackInfoDTO() {
         return windTrackInfoDTO;
     }
@@ -88,5 +109,4 @@ public class CombinedWindPanel extends FlowPanel {
     public WindSource getWindSource() {
         return windSource;
     }
-
 }
