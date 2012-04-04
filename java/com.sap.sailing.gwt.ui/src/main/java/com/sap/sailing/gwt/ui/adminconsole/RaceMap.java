@@ -281,24 +281,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     }
                 });
                 
-//                map.addMapDragHandler(new MapDragHandler() {
-//                    @Override
-//                    public void onDrag(MapDragEvent event) {
-//                        for(BoatOnMapCanvas boatCanvas: RaceMap.this.boatImages.values()) {
-//                            boatCanvas.draw();
-//                        }
-//                    }
-//                });
-//
                 map.addMapDragEndHandler(new MapDragEndHandler() {
                     @Override
                     public void onDragEnd(MapDragEndEvent event) {
                         final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
                         getSettings().getZoomSettings().setTypesToConsiderOnZoom(emptyList);
-
-//                        for(BoatOnMapCanvas boatCanvas: RaceMap.this.boatImages.values()) {
-//                            boatCanvas.draw();
-//                        }
                     }
                 });
                 map.addMapMouseMoveHandler(new MapMouseMoveHandler() {
