@@ -189,14 +189,9 @@ public class RaceMapResources {
     public ImageTransformer getCombinedWindIconTransformer() {
         return combinedWindIconTransformer;
     }
-    
-    public String getBoatImageURL(GPSFixDTO boatFix, boolean highlighted) {
-        return getBoatImageURL(getBoatImageTransformer(boatFix, highlighted), boatFix);
-    }
 
-    public String getBoatImageURL(ImageTransformer boatImageTransformer, GPSFixDTO boatFix) {
-        double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());
-        return boatImageTransformer.getTransformedImageURL(boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
+    public ImageTransformer getExpeditionWindIconTransformer() {
+        return expeditionWindIconTransformer;
     }
 
     public double getRealBoatSizeScaleFactor(Size imageSize) {
@@ -230,12 +225,5 @@ public class RaceMapResources {
             }
         }
         return realBoatSizeScaleFactor;
-    }
-
-    public Icon getBoatImageIcon(GPSFixDTO boatFix, boolean highlighted) {
-        ImageTransformer boatImageTransformer = getBoatImageTransformer(boatFix, highlighted);
-        Icon icon = Icon.newInstance(getBoatImageURL(boatImageTransformer, boatFix));
-        icon.setIconAnchor(boatImageTransformer.getAnchor(getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize())));
-        return icon;
     }
 }

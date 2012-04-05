@@ -33,11 +33,11 @@ public class ImageTransformer {
 
     private Context2d context;
     
-    public ImageTransformer(ImageResource untransformedImage) {
-        this.untransformedImageURL = untransformedImage.getSafeUri().asString();
+    public ImageTransformer(ImageResource imageResource) {
+        this.untransformedImageURL = imageResource.getSafeUri().asString();
         canvas = Canvas.createIfSupported();
-        imageWidth = untransformedImage.getWidth();
-        imageHeight = untransformedImage.getHeight();
+        imageWidth = imageResource.getWidth();
+        imageHeight = imageResource.getHeight();
         scale(1.0);
         final Image image = new Image(untransformedImageURL.toString());
         imageElement = (ImageElement) image.getElement().cast();
@@ -73,34 +73,6 @@ public class ImageTransformer {
         return Point.newInstance(canvasRadius, canvasRadius);
     }
 
-    private String getUntransformedImageURL() {
-        return untransformedImageURL;
-    }
-    
-    /**
-     * If the platform supports the {@link Canvas} element, returns a view rotated by <code>degrees</code> degrees. Otherwise,
-     * the {@link #getUntransformedImageURL() untransformed image's URL} is returned.
-     */
-    public String getTransformedImageURL(double angleInDegrees, double scaleFactor) {
-        String result = getUntransformedImageURL();
-        if (canvas != null) {
-            if (imageElement != null) {
-                if(scaleFactor != 1.0)
-                    scale(scaleFactor);
-                double angleInRadians = angleInDegrees/180.*Math.PI;
-                context.clearRect(0, 0, 2*canvasRadius, 2*canvasRadius);
-                context.save();
-                context.translate(canvasRadius, canvasRadius);
-                context.rotate(angleInRadians);
-                context.scale(scaleFactor, scaleFactor);
-                context.drawImage(imageElement, (-imageWidth/2), (-imageHeight/2));
-                result = canvas.toDataUrl("image/png");
-                context.restore();
-            }
-        }
-        return result;
-    }
-    
     public ImageData getTransformedImageData(double angleInDegrees, double scaleFactor) {
         ImageData result = null;
         if (canvas != null) {

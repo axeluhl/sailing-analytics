@@ -4,6 +4,7 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.maps.client.MapPane;
 import com.google.gwt.maps.client.MapPaneType;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.overlay.Overlay;
 
 public abstract class CanvasOverlay extends Overlay {
@@ -16,6 +17,8 @@ public abstract class CanvasOverlay extends Overlay {
     
     protected MapPane pane;
 
+    protected LatLng latLngPosition;
+    
     public CanvasOverlay() {
         canvas = Canvas.createIfSupported();
     }
@@ -54,5 +57,9 @@ public abstract class CanvasOverlay extends Overlay {
 
     public void setSelected(boolean isSelected) {
         this.isSelected = isSelected;
+    }
+
+    public LatLng getLatLngPosition() {
+        return latLngPosition;
     }
 }
