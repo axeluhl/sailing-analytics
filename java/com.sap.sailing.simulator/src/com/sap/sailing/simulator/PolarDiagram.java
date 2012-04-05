@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Bearing;
 
 public interface PolarDiagram {
+	
 	Wind getWind();
 	
 	void setWind(Wind newWind);
