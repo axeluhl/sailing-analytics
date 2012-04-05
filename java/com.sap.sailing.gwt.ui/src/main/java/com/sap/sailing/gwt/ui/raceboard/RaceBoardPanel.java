@@ -23,8 +23,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
-import com.sap.sailing.gwt.ui.adminconsole.RaceMap;
-import com.sap.sailing.gwt.ui.adminconsole.RaceMapSettings;
 import com.sap.sailing.gwt.ui.adminconsole.WindChart;
 import com.sap.sailing.gwt.ui.adminconsole.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -52,6 +50,8 @@ import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceMapSettings;
 
 /**
  * A panel showing a list of components visualizing a race from the events announced by calls to {@link #fillEvents(List)}.

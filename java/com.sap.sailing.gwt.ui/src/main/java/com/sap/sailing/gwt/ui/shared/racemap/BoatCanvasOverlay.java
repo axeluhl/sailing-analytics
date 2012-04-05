@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.maps.client.geom.LatLng;
@@ -11,26 +11,26 @@ public class BoatCanvasOverlay extends CanvasOverlay {
 
     private final CompetitorDTO competitorDTO;
 
-    private final RaceMapResources raceMapResources;
+    private final RaceMapImageManager raceMapImageManager;
 
     private GPSFixDTO boatFix;
     
-    public BoatCanvasOverlay(CompetitorDTO competitorDTO, RaceMapResources raceMapResources) {
+    public BoatCanvasOverlay(CompetitorDTO competitorDTO, RaceMapImageManager raceMapImageManager) {
         super();
         this.competitorDTO = competitorDTO;
-        this.raceMapResources = raceMapResources;
+        this.raceMapImageManager = raceMapImageManager;
     }
     
     @Override
     protected Overlay copy() {
-      return new BoatCanvasOverlay(competitorDTO, raceMapResources);
+      return new BoatCanvasOverlay(competitorDTO, raceMapImageManager);
     }
 
     @Override
     protected void redraw(boolean force) {
       if (boatFix != null) {
-        ImageTransformer boatImageTransformer = raceMapResources.getBoatImageTransformer(boatFix, isSelected);
-        double realBoatSizeScaleFactor = raceMapResources.getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());        
+        ImageTransformer boatImageTransformer = raceMapImageManager.getBoatImageTransformer(boatFix, isSelected);
+        double realBoatSizeScaleFactor = raceMapImageManager.getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());        
         ImageData imageData = boatImageTransformer.getTransformedImageData(boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
         
         int imageWidth = imageData.getWidth();

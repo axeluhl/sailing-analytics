@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.ImageData;
@@ -17,7 +17,7 @@ public class CombinedWindPanel extends FlowPanel {
     private final ImageTransformer transformer;
     private final StringMessages stringMessages;
     
-    private final RaceMapResources raceMapResources;
+    private final RaceMapImageManager raceMapResources;
     private final Label textLabel;
 
     private WindTrackInfoDTO windTrackInfoDTO;
@@ -25,7 +25,7 @@ public class CombinedWindPanel extends FlowPanel {
     
     private Canvas canvas;
 
-    public CombinedWindPanel(RaceMapResources theRaceMapResources, StringMessages stringMessages) {
+    public CombinedWindPanel(RaceMapImageManager theRaceMapResources, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.raceMapResources = theRaceMapResources;
         int canvasWidth = 44;

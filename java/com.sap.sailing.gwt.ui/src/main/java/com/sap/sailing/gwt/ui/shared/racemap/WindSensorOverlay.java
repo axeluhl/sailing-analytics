@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.maps.client.geom.LatLng;
@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
 public class WindSensorOverlay extends CanvasOverlay {
 
-    private final RaceMapResources raceMapResources;
+    private final RaceMapImageManager raceMapImageManager;
 
     private WindTrackInfoDTO windTrackInfoDTO;
 
@@ -25,9 +25,9 @@ public class WindSensorOverlay extends CanvasOverlay {
     private int canvasWidth;
     private int canvasHeight;
 
-    public WindSensorOverlay(RaceMapResources raceMapResources, StringMessages stringMessages) {
+    public WindSensorOverlay(RaceMapImageManager raceMapImageManager, StringMessages stringMessages) {
         super();
-        this.raceMapResources = raceMapResources;
+        this.raceMapImageManager = raceMapImageManager;
         this.stringMessages = stringMessages;
         canvasWidth = 28;
         canvasHeight = 28;
@@ -38,12 +38,12 @@ public class WindSensorOverlay extends CanvasOverlay {
             canvas.setCoordinateSpaceWidth(canvasWidth);
             canvas.setCoordinateSpaceHeight(canvasHeight);
         }
-        transformer = raceMapResources.getExpeditionWindIconTransformer();
+        transformer = raceMapImageManager.getExpeditionWindIconTransformer();
     }
     
     @Override
     protected Overlay copy() {
-      return new WindSensorOverlay(raceMapResources, stringMessages);
+      return new WindSensorOverlay(raceMapImageManager, stringMessages);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.maps.client.MapPane;
 import com.google.gwt.maps.client.MapPaneType;

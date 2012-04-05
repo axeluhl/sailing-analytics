@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
-public class RaceMapResources {
+public class RaceMapImageManager {
     /**
      * Two sails on downwind leg, wind from port (sails on starboard); no highlighting
      */
@@ -73,9 +73,9 @@ public class RaceMapResources {
 
     private MapWidget map;
     
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+    private static RaceMapResources resources = GWT.create(RaceMapResources.class);
 
-    public RaceMapResources() {
+    public RaceMapImageManager() {
         maneuverIconsForTypeAndTargetTack = new HashMap<Pair<ManeuverType, Tack>, Icon>();
         boatIconDownwindPortTransformer = new ImageTransformer(resources.lowlightedBoatIconDW_Port());
         boatIconHighlightedDownwindPortTransformer = new ImageTransformer(resources.highlightedBoatIconDW_Port());

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,7 +57,6 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetRaceMapDataAction;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
-import com.sap.sailing.gwt.ui.adminconsole.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -84,6 +83,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
@@ -186,7 +186,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private int startedProcessingRequestID;
 
-    private RaceMapResources imageResources; 
+    private RaceMapImageManager raceMapImageManager; 
 
     private final RaceMapSettings settings;
     
@@ -215,7 +215,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.errorReporter = errorReporter;
         this.timer = timer;
         timer.addTimeListener(this);
-        imageResources = new RaceMapResources();
+        raceMapImageManager = new RaceMapImageManager();
         tails = new HashMap<CompetitorDTO, Polyline>();
         firstShownFix = new HashMap<CompetitorDTO, Integer>();
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
@@ -230,7 +230,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         dataInitialized = false;
         initializeData();
         
-        combinedWindPanel = new CombinedWindPanel(imageResources, stringMessages);
+        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, stringMessages);
         combinedWindPanel.setVisible(false);
     }
     
@@ -238,7 +238,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         Maps.loadMapsApi(mapsAPIKey, "2", false, new Runnable() {
             public void run() {
                 map = new MapWidget();
-                imageResources.setMap(map);
+                raceMapImageManager.setMap(map);
                 map.addControl(new LargeMapControl3D(), new ControlPosition(ControlAnchor.TOP_RIGHT, /* offsetX */ 0, /* offsetY */ 30));
                 map.addControl(new MenuMapTypeControl());
                 map.addControl(new ScaleControl(), new ControlPosition(ControlAnchor.BOTTOM_RIGHT, /* offsetX */ 10, /* offsetY */ 20));
@@ -674,8 +674,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected Marker createBuoyMarker(final MarkDTO markDTO) {
         MarkerOptions options = MarkerOptions.newInstance();
-        if (imageResources.buoyIcon != null) {
-            options.setIcon(imageResources.buoyIcon);
+        if (raceMapImageManager.buoyIcon != null) {
+            options.setIcon(raceMapImageManager.buoyIcon);
         }
         options.setTitle(markDTO.name);
         final Marker buoyMarker = new Marker(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg),
@@ -691,7 +691,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     protected BoatCanvasOverlay createBoatCanvas(final CompetitorDTO competitorDTO, boolean highlighted) {
-        final BoatCanvasOverlay boatCanvas = new BoatCanvasOverlay(competitorDTO, imageResources);
+        final BoatCanvasOverlay boatCanvas = new BoatCanvasOverlay(competitorDTO, raceMapImageManager);
         boatCanvas.setSelected(highlighted);
         boatCanvas.getCanvas().setTitle(competitorDTO.name);
         
@@ -708,7 +708,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     protected WindSensorOverlay createWindSensorOverlay(final WindSource windSource, final WindTrackInfoDTO windTrackInfoDTO) {
-        final WindSensorOverlay windSensorOverlay = new WindSensorOverlay(imageResources, stringMessages);
+        final WindSensorOverlay windSensorOverlay = new WindSensorOverlay(raceMapImageManager, stringMessages);
         windSensorOverlay.setWindInfo(windTrackInfoDTO, windSource);
         windSensorOverlay.getCanvas().addClickHandler(new ClickHandler() {
             @Override
@@ -980,7 +980,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                 + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()+")";
                         
                         options.setTitle(timeAndManeuver + "; " + directionChange + "; " + speedChange);
-                        options.setIcon(imageResources.maneuverIconsForTypeAndTargetTack
+                        options.setIcon(raceMapImageManager.maneuverIconsForTypeAndTargetTack
                                 .get(new Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack)));
                         Marker marker = new Marker(latLng, options);
                         maneuverMarkers.add(marker);
