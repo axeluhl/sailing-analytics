@@ -1,141 +1,92 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
-import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
-import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
-import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
-public class CombinedWindPanel extends FlowPanel implements TimeListener, RaceSelectionChangeListener {
-    private ImageTransformer transformer;
-    private RaceMapResources imageResources;
-    
-    private final SailingServiceAsync sailingService;
-    private final AsyncActionsExecutor asyncActionsExecutor;
-    private final ErrorReporter errorReporter;
+public class CombinedWindPanel extends FlowPanel {
+    private final ImageTransformer transformer;
     private final StringMessages stringMessages;
     
-    private final Timer timer;
-
-    private List<String> windSourceTypeNames;
-    
-    private List<RaceIdentifier> selectedRaces;
-
-    private final Image windSymbolImage;
+    private final RaceMapResources raceMapResources;
     private final Label textLabel;
+
+    private WindTrackInfoDTO windTrackInfoDTO;
+    private WindSource windSource;
     
-    public CombinedWindPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, StringMessages stringMessages, Timer theTimer) {
-        this.setSize("32px", "52px");
-        this.sailingService = sailingService;
-        this.asyncActionsExecutor = asyncActionsExecutor;
-        this.errorReporter = errorReporter;
+    private Canvas canvas;
+
+    public CombinedWindPanel(RaceMapResources theRaceMapResources, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        this.timer = theTimer;
-        timer.addTimeListener(this);
+        this.raceMapResources = theRaceMapResources;
+        int canvasWidth = 44;
+        int canvasHeight = 44;
+        int labelHeight = 12;
+        this.setSize(canvasWidth + "px", canvasHeight + labelHeight +"px");
 
-        imageResources = new RaceMapResources();
-        
-        transformer = imageResources.getCombinedWindIconTransformer();
+        canvas = Canvas.createIfSupported();
+        if(canvas != null) {
+            canvas.setWidth(String.valueOf(canvasWidth));
+            canvas.setHeight(String.valueOf(canvasHeight));
+            canvas.setCoordinateSpaceWidth(canvasWidth);
+            canvas.setCoordinateSpaceHeight(canvasHeight);
+        }
+        transformer = raceMapResources.getCombinedWindIconTransformer();
 
-        windSourceTypeNames = new ArrayList<String>();
-        windSourceTypeNames.add(WindSourceType.COMBINED.name());
-        
-        windSymbolImage = new Image();
-        add(windSymbolImage);
-        
         textLabel = new Label("");
-        textLabel.setSize("32px", "12px");
+        textLabel.setSize("44px", "12px");
         textLabel.getElement().getStyle().setFontSize(12, Unit.PX);
         textLabel.setWordWrap(false);
         textLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        add(canvas);
         add(textLabel);
     }
 
-    @Override
-    public void timeChanged(Date date) {
-        if (date != null) {
-            if (selectedRaces != null && !selectedRaces.isEmpty()) {
-                RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
-                if (race != null) {
-                    // draw the wind into the map, get the combined wind
-                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames,
-                        new AsyncCallback<WindInfoForRaceDTO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error obtaining wind info: " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
-                            }
+    protected void redraw() {
+        if(windTrackInfoDTO != null) {
+            if(windTrackInfoDTO.windFixes.size() > 0) {
+                WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
+                double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
+                double windFromDeg = windDTO.dampenedTrueWindFromDeg;
+                NumberFormat numberFormat = NumberFormat.getFormat("0.0");
+                double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
+                
+                ImageData imageData = transformer.getTransformedImageData(rotationDegOfWindSymbol, 1.0);
+                canvas.getContext2d().putImageData(imageData, 0, 0);
 
-                            @Override
-                            public void onSuccess(WindInfoForRaceDTO windInfoForRaceDTO) {
-                                updateWind(windInfoForRaceDTO);
-                            }
-                        });
-                    
-                    asyncActionsExecutor.execute(getWindInfoAction);
-                }
+                String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " 
+                        + stringMessages.degreesShort() + " (" + WindSourceTypeFormatter.format(windSource, stringMessages) + ")"; 
+                canvas.setTitle(title);
+                textLabel.setText(numberFormat.format(speedInKnots) + " " + stringMessages.averageSpeedInKnotsUnit());
+                
+                if(!isVisible())
+                    setVisible(true);
+            } else {
+                setVisible(false);
             }
         }
     }
-
-    @Override
-    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
-        this.selectedRaces = selectedRaces;
+    
+    public WindTrackInfoDTO getWindTrackInfoDTO() {
+        return windTrackInfoDTO;
     }
 
-    protected void updateWind(WindInfoForRaceDTO windInfo) {
-        if(windInfo != null) {
-            for(WindSource windSource: windInfo.windTrackInfoByWindSource.keySet()) {
-                WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
-                switch (windSource.getType()) {
-                    case COMBINED:
-                    {
-                        if(windTrackInfoDTO.windFixes.size() > 0) {
-                            WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
-                            double speedInKnots = windDTO.dampenedTrueWindSpeedInKnots;
-                            double windFromDeg = windDTO.dampenedTrueWindFromDeg;
-                            NumberFormat numberFormat = NumberFormat.getFormat("0.0");
-                            
-                            double rotationDegOfWindSymbol = 180.0 + windFromDeg;
-                            if(rotationDegOfWindSymbol >= 360.0)
-                                rotationDegOfWindSymbol = rotationDegOfWindSymbol - 360; 
-                            String transformedImageURL = transformer.getTransformedImageURL(rotationDegOfWindSymbol, 1.0);
-                            windSymbolImage.setUrl(transformedImageURL);
-                            String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " 
-                                    + stringMessages.degreesShort() + " (" + WindSourceTypeFormatter.format(windSource, stringMessages) + ")"; 
-                            windSymbolImage.setTitle(title);
-                            textLabel.setText(numberFormat.format(speedInKnots) + " " + stringMessages.averageSpeedInKnotsUnit());
-                            
-                            if(!isVisible())
-                                setVisible(true);
-                        } else {
-                            setVisible(false);
-                        }
-                    }
-                    break;
-                }
-            }
-        }
+    public void setWindInfo(WindTrackInfoDTO windTrackInfoDTO, WindSource windSource) {
+        this.windTrackInfoDTO = windTrackInfoDTO;
+        this.windSource = windSource;
     }
+
+    public WindSource getWindSource() {
+        return windSource;
+    }
+
 }
