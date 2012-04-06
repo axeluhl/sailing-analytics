@@ -64,6 +64,10 @@ public class ImageTransformer {
         }
     }
     
+    public int getRadius() {
+        return canvasRadius;
+    }
+    
     public Size getImageSize() {
         return Size.newInstance(imageWidth, imageHeight);
     }
@@ -77,8 +81,10 @@ public class ImageTransformer {
         ImageData result = null;
         if (canvas != null) {
             if (imageElement != null) {
-                if(scaleFactor != 1.0)
+                // scale 1.0 already done in constructor
+                if (scaleFactor != 1.0) {
                     scale(scaleFactor);
+                }
                 double angleInRadians = angleInDegrees/180.*Math.PI;
                 context.clearRect(0, 0, 2*canvasRadius, 2*canvasRadius);
                 context.save();
@@ -86,12 +92,30 @@ public class ImageTransformer {
                 context.rotate(angleInRadians);
                 context.scale(scaleFactor, scaleFactor);
                 context.drawImage(imageElement, (-imageWidth/2), (-imageHeight/2));
-                
                 result = context.getImageData(0, 0, 2*canvasRadius, 2*canvasRadius);
                 context.restore();
             }
         }
         return result;
+    }
+    
+    public void drawTransformedImageData(Context2d toContext, double angleInDegrees, double scaleFactor) {
+        if (canvas != null) {
+            if (imageElement != null) {
+                // scale 1.0 already done in constructor
+                if (scaleFactor != 1.0) {
+                    scale(scaleFactor);
+                }
+                double angleInRadians = angleInDegrees/180.*Math.PI;
+                toContext.clearRect(0, 0, 2*canvasRadius, 2*canvasRadius);
+                toContext.save();
+                toContext.translate(canvasRadius, canvasRadius);
+                toContext.rotate(angleInRadians);
+                toContext.scale(scaleFactor, scaleFactor);
+                toContext.drawImage(imageElement, (-imageWidth/2), (-imageHeight/2));
+                toContext.restore();
+            }
+        }
     }
     
 }
