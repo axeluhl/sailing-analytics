@@ -32,11 +32,11 @@ public class WindSensorOverlay extends CanvasOverlay {
         canvasWidth = 28;
         canvasHeight = 28;
 
-        if(canvas != null) {
-            canvas.setWidth(String.valueOf(canvasWidth));
-            canvas.setHeight(String.valueOf(canvasHeight));
-            canvas.setCoordinateSpaceWidth(canvasWidth);
-            canvas.setCoordinateSpaceHeight(canvasHeight);
+        if(getCanvas() != null) {
+            getCanvas().setWidth(String.valueOf(canvasWidth));
+            getCanvas().setHeight(String.valueOf(canvasHeight));
+            getCanvas().setCoordinateSpaceWidth(canvasWidth);
+            getCanvas().setCoordinateSpaceHeight(canvasHeight);
         }
         transformer = raceMapImageManager.getExpeditionWindIconTransformer();
     }
@@ -49,35 +49,28 @@ public class WindSensorOverlay extends CanvasOverlay {
     @Override
     protected void redraw(boolean force) {
         boolean hasValidWind = false;
-        if(windTrackInfoDTO != null && windTrackInfoDTO.windFixes.size() > 0) {
+        if (windTrackInfoDTO != null && windTrackInfoDTO.windFixes.size() > 0) {
             WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
             PositionDTO position = windDTO.position;
             // Attention: sometimes there is no valid position for the wind source available -> ignore the wind in this case
-            if(position != null) {
+            if (position != null) {
                 double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
-                
                 ImageData imageData = transformer.getTransformedImageData(rotationDegOfWindSymbol, 1.0);
-                latLngPosition = LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg);
-                
-                Point sensorPositionInPx = map.convertLatLngToDivPixel(latLngPosition);
-                
-                pane.setWidgetPosition(canvas, sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);
-
+                setLatLngPosition(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
+                Point sensorPositionInPx = getMap().convertLatLngToDivPixel(getLatLngPosition());
+                getPane().setWidgetPosition(getCanvas(), sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);
                 String title = stringMessages.wind() + " "
                         + Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ " ("
                                 + WindSourceTypeFormatter.format(windSource, stringMessages) + ")";
-                canvas.setTitle(title);
-
-                canvas.getContext2d().putImageData(imageData, 0, 0);
+                getCanvas().setTitle(title);
+                getCanvas().getContext2d().putImageData(imageData, 0, 0);
                 hasValidWind = true;
             }
         }
-        
-        if(!hasValidWind) {
-            latLngPosition = null;
+        if (!hasValidWind) {
+            setLatLngPosition(null);
         }
-        
-        canvas.setVisible(hasValidWind);
+        getCanvas().setVisible(hasValidWind);
     }
 
     public WindTrackInfoDTO getWindTrackInfoDTO() {

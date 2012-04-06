@@ -14,40 +14,38 @@ public class BoatCanvasOverlay extends CanvasOverlay {
     private final RaceMapImageManager raceMapImageManager;
 
     private GPSFixDTO boatFix;
-    
+
     public BoatCanvasOverlay(CompetitorDTO competitorDTO, RaceMapImageManager raceMapImageManager) {
         super();
         this.competitorDTO = competitorDTO;
         this.raceMapImageManager = raceMapImageManager;
     }
-    
+
     @Override
     protected Overlay copy() {
-      return new BoatCanvasOverlay(competitorDTO, raceMapImageManager);
+        return new BoatCanvasOverlay(competitorDTO, raceMapImageManager);
     }
 
     @Override
     protected void redraw(boolean force) {
-      if (boatFix != null) {
-        ImageTransformer boatImageTransformer = raceMapImageManager.getBoatImageTransformer(boatFix, isSelected);
-        double realBoatSizeScaleFactor = raceMapImageManager.getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());        
-        ImageData imageData = boatImageTransformer.getTransformedImageData(boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
-        
-        int imageWidth = imageData.getWidth();
-        int imageHeigth = imageData.getHeight();
-        canvas.setWidth(String.valueOf(imageWidth));
-        canvas.setHeight(String.valueOf(imageHeigth));
-        canvas.setCoordinateSpaceWidth(imageWidth);
-        canvas.setCoordinateSpaceHeight(imageHeigth);
-        
-        LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
-      
-        Point boatPositionInPx = map.convertLatLngToDivPixel(latLngPosition);
-        
-        pane.setWidgetPosition(canvas, boatPositionInPx.getX() - imageWidth / 2, boatPositionInPx.getY() - imageHeigth / 2);
-
-        canvas.getContext2d().putImageData(imageData, 0, 0);
-      }
+        if (boatFix != null) {
+            ImageTransformer boatImageTransformer = raceMapImageManager.getBoatImageTransformer(boatFix, isSelected());
+            double realBoatSizeScaleFactor = raceMapImageManager.getRealBoatSizeScaleFactor(boatImageTransformer
+                    .getImageSize());
+            ImageData imageData = boatImageTransformer.getTransformedImageData(
+                    boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
+            int imageWidth = imageData.getWidth();
+            int imageHeigth = imageData.getHeight();
+            getCanvas().setWidth(String.valueOf(imageWidth));
+            getCanvas().setHeight(String.valueOf(imageHeigth));
+            getCanvas().setCoordinateSpaceWidth(imageWidth);
+            getCanvas().setCoordinateSpaceHeight(imageHeigth);
+            LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
+            Point boatPositionInPx = getMap().convertLatLngToDivPixel(latLngPosition);
+            getPane().setWidgetPosition(getCanvas(), boatPositionInPx.getX() - imageWidth / 2, boatPositionInPx.getY()
+                    - imageHeigth / 2);
+            getCanvas().getContext2d().putImageData(imageData, 0, 0);
+        }
     }
 
     public GPSFixDTO getBoatFix() {

@@ -9,30 +9,30 @@ import com.google.gwt.maps.client.overlay.Overlay;
 
 public abstract class CanvasOverlay extends Overlay {
 
-    protected final Canvas canvas;
+    private final Canvas canvas;
 
-    protected boolean isSelected;
+    private boolean isSelected;
 
-    protected MapWidget map;
-    
-    protected MapPane pane;
+    private MapWidget map;
 
-    protected LatLng latLngPosition;
-    
+    private MapPane pane;
+
+    private LatLng latLngPosition;
+
     public CanvasOverlay() {
         canvas = Canvas.createIfSupported();
     }
-    
-     @Override
+
+    @Override
     protected void initialize(MapWidget map) {
-      this.map = map;
-      pane = map.getPane(MapPaneType.MAP_PANE);
-      pane.add(canvas);
+        this.map = map;
+        this.pane = map.getPane(MapPaneType.MAP_PANE);
+        getPane().add(getCanvas());
     }
 
     @Override
     protected void remove() {
-        canvas.removeFromParent();
+        getCanvas().removeFromParent();
     }
 
     public Canvas getCanvas() {
@@ -40,15 +40,13 @@ public abstract class CanvasOverlay extends Overlay {
     }
 
     public boolean isVisible() {
-        if(canvas == null)
-            return false;
-        
-        return canvas.isVisible();
+        return getCanvas() != null && getCanvas().isVisible();
     }
 
     public void setVisible(boolean isVisible) {
-        if(canvas != null)
-            canvas.setVisible(isVisible);
+        if (getCanvas() != null) {
+            getCanvas().setVisible(isVisible);
+        }
     }
 
     public boolean isSelected() {
@@ -62,4 +60,17 @@ public abstract class CanvasOverlay extends Overlay {
     public LatLng getLatLngPosition() {
         return latLngPosition;
     }
+
+    protected void setLatLngPosition(LatLng latLngPosition) {
+        this.latLngPosition = latLngPosition;
+    }
+
+    protected MapWidget getMap() {
+        return map;
+    }
+
+    protected MapPane getPane() {
+        return pane;
+    }
+
 }
