@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
@@ -55,7 +54,7 @@ public class WindSensorOverlay extends CanvasOverlay {
             // Attention: sometimes there is no valid position for the wind source available -> ignore the wind in this case
             if (position != null) {
                 double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
-                ImageData imageData = transformer.getTransformedImageData(rotationDegOfWindSymbol, 1.0);
+                transformer.drawToCanvas(getCanvas(), rotationDegOfWindSymbol, 1.0);
                 setLatLngPosition(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
                 Point sensorPositionInPx = getMap().convertLatLngToDivPixel(getLatLngPosition());
                 getPane().setWidgetPosition(getCanvas(), sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);
@@ -63,7 +62,6 @@ public class WindSensorOverlay extends CanvasOverlay {
                         + Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ " ("
                                 + WindSourceTypeFormatter.format(windSource, stringMessages) + ")";
                 getCanvas().setTitle(title);
-                getCanvas().getContext2d().putImageData(imageData, 0, 0);
                 hasValidWind = true;
             }
         }
