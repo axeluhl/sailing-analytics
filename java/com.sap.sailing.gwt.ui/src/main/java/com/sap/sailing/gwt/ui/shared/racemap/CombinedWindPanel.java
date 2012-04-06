@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -32,18 +31,10 @@ public class CombinedWindPanel extends FlowPanel {
     public CombinedWindPanel(RaceMapImageManager theRaceMapResources, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
         this.raceMapResources = theRaceMapResources;
-        canvas = Canvas.createIfSupported();
         transformer = raceMapResources.getCombinedWindIconTransformer();
-        final int canvasSize = 2*transformer.getRadius();
-        this.setSize(canvasSize + "px", canvasSize + LABEL_HEIGHT +"px");
-        if (canvas != null) {
-            canvas.setWidth(String.valueOf(canvasSize));
-            canvas.setHeight(String.valueOf(canvasSize));
-            canvas.setCoordinateSpaceWidth(canvasSize);
-            canvas.setCoordinateSpaceHeight(canvasSize);
-        }
+        canvas = transformer.getCanvas();
         textLabel = new Label("");
-        textLabel.setSize(""+canvasSize+"px", ""+LABEL_HEIGHT+"px");
+        textLabel.setSize(""+2*transformer.getRadius()+"px", ""+LABEL_HEIGHT+"px");
         textLabel.getElement().getStyle().setFontSize(LABEL_HEIGHT, Unit.PX);
         textLabel.setWordWrap(false);
         textLabel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -59,8 +50,7 @@ public class CombinedWindPanel extends FlowPanel {
                 double windFromDeg = windDTO.dampenedTrueWindFromDeg;
                 NumberFormat numberFormat = NumberFormat.getFormat("0.0");
                 double rotationDegOfWindSymbol = windDTO.dampenedTrueWindBearingDeg;
-                ImageData imageData = transformer.getTransformedImageData(rotationDegOfWindSymbol, 1.0);
-                canvas.getContext2d().putImageData(imageData, 0, 0);
+                transformer.drawTransformedImage(rotationDegOfWindSymbol, 1.0);
                 String title = stringMessages.wind() + ": " +  Math.round(windFromDeg) + " " 
                         + stringMessages.degreesShort() + " (" + WindSourceTypeFormatter.format(windSource, stringMessages) + ")"; 
                 canvas.setTitle(title);

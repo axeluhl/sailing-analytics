@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
@@ -32,19 +31,11 @@ public class BoatCanvasOverlay extends CanvasOverlay {
             ImageTransformer boatImageTransformer = raceMapImageManager.getBoatImageTransformer(boatFix, isSelected());
             double realBoatSizeScaleFactor = raceMapImageManager.getRealBoatSizeScaleFactor(boatImageTransformer
                     .getImageSize());
-            ImageData imageData = boatImageTransformer.getTransformedImageData(
-                    boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
-            int imageWidth = imageData.getWidth();
-            int imageHeigth = imageData.getHeight();
-            getCanvas().setWidth(String.valueOf(imageWidth));
-            getCanvas().setHeight(String.valueOf(imageHeigth));
-            getCanvas().setCoordinateSpaceWidth(imageWidth);
-            getCanvas().setCoordinateSpaceHeight(imageHeigth);
+            boatImageTransformer.drawToCanvas(getCanvas(), boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
             LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
             Point boatPositionInPx = getMap().convertLatLngToDivPixel(latLngPosition);
-            getPane().setWidgetPosition(getCanvas(), boatPositionInPx.getX() - imageWidth / 2, boatPositionInPx.getY()
-                    - imageHeigth / 2);
-            getCanvas().getContext2d().putImageData(imageData, 0, 0);
+            getPane().setWidgetPosition(getCanvas(), boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2, boatPositionInPx.getY()
+                    - getCanvas().getCoordinateSpaceHeight() / 2);
         }
     }
 
