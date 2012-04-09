@@ -5,7 +5,10 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.text.ParseException;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -15,7 +18,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class SimpleDeclinationTest extends AbstractDeclinationTest {
     @Test
-    public void testSimpleCorrection() throws IOException, ParseException {
+    public void testSimpleCorrection() throws IOException, ParseException, ParserConfigurationException, SAXException {
         Declination record = importer.importRecord(new DegreePosition(53, 3),
                 new MillisecondsTimePoint(simpleDateFormat.parse("1920-05-27").getTime()));
         assertEquals(-12.-41./60., record.getBearing().getDegrees(), 0.000000001);
@@ -26,7 +29,7 @@ public class SimpleDeclinationTest extends AbstractDeclinationTest {
     }
 
     @Test
-    public void testBackwardCorrection() throws IOException, ParseException {
+    public void testBackwardCorrection() throws IOException, ParseException, ParserConfigurationException, SAXException {
         Declination record = importer.importRecord(new DegreePosition(53, 3),
                 new MillisecondsTimePoint(simpleDateFormat.parse("1920-05-27").getTime()));
         assertEquals(-12.-41./60., record.getBearing().getDegrees(), 0.000000001);

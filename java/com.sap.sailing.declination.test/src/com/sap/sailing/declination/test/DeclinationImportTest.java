@@ -8,7 +8,10 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.regex.Matcher;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -34,7 +37,7 @@ public class DeclinationImportTest extends AbstractDeclinationTest {
     }
     
     @Test
-    public void importSimpleDeclination() throws IOException, ParseException {
+    public void importSimpleDeclination() throws IOException, ParseException, ParserConfigurationException, SAXException {
         Declination record = importer.importRecord(new DegreePosition(53, 3),
                 new MillisecondsTimePoint(simpleDateFormat.parse("1920-05-27").getTime()));
         assertEquals(-12.-41./60., record.getBearing().getDegrees(), 0.000000001);
@@ -42,13 +45,13 @@ public class DeclinationImportTest extends AbstractDeclinationTest {
     }
 
     @Test
-    public void importSouthernHemisphereDeclination() throws IOException, ParseException {
+    public void importSouthernHemisphereDeclination() throws IOException, ParseException, ParserConfigurationException, SAXException {
         long start = System.currentTimeMillis();
         Declination record = importer.importRecord(new DegreePosition(-10, 3),
                 new MillisecondsTimePoint(simpleDateFormat.parse("2011-05-27").getTime()));
         System.out.println("took "+(System.currentTimeMillis()-start)+"ms");
-        assertEquals(-9.-32./60., record.getBearing().getDegrees(), 0.000000001);
-        assertEquals(0.+10./60., record.getAnnualChange().getDegrees(), 0.000000001);
+        assertEquals(-9.54538, record.getBearing().getDegrees(), 0.0001);
+        assertEquals(0.17543, record.getAnnualChange().getDegrees(), 0.0001);
     }
     
     @Test
