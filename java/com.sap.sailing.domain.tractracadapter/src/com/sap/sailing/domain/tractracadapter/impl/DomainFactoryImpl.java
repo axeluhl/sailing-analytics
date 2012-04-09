@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
@@ -63,6 +62,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sailing.util.WeakIdentityHashMap;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -99,7 +99,7 @@ public class DomainFactoryImpl implements DomainFactory {
      * class needs to be determined for an event. Synchronization for additions / removals is tied to the
      * synchronization for {@link #eventCache}.
      */
-    private final WeakHashMap<com.tractrac.clientmodule.Event, Event> weakEventCache = new WeakHashMap<>();
+    private final WeakIdentityHashMap<com.tractrac.clientmodule.Event, Event> weakEventCache = new WeakIdentityHashMap<>();
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
 
