@@ -40,8 +40,8 @@ public class DeclinationImportTest extends AbstractDeclinationTest {
     public void importSimpleDeclination() throws IOException, ParseException, ParserConfigurationException, SAXException {
         Declination record = importer.importRecord(new DegreePosition(53, 3),
                 new MillisecondsTimePoint(simpleDateFormat.parse("1920-05-27").getTime()));
-        assertEquals(-12.-41./60., record.getBearing().getDegrees(), 0.000000001);
-        assertEquals(0.+11./60., record.getAnnualChange().getDegrees(), 0.000000001);
+        assertEquals(-12.68941, record.getBearing().getDegrees(), 0.0001);
+        assertEquals(0.1863178, record.getAnnualChange().getDegrees(), 0.0001);
     }
 
     @Test

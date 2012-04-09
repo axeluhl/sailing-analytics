@@ -38,8 +38,8 @@ public class DeclinationServiceTest extends AbstractDeclinationTest {
         Declination result = service.getDeclination(new MillisecondsTimePoint(simpleDateFormat.parse("2010-02-03").getTime()),
                 new DegreePosition(51, -5), /* timeoutForOnlineFetchInMilliseconds */ 30000);
         assertNotNull(result);
-        assertEquals(-3.-27./60., result.getBearing().getDegrees(), 0.0000001);
-        assertEquals(0.+09./60., result.getAnnualChange().getDegrees(), 0.0000001);
+        assertEquals(-3.45941, result.getBearing().getDegrees(), 0.0001);
+        assertEquals(0.1553643, result.getAnnualChange().getDegrees(), 0.0001);
     }
 
     @Test
