@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +14,8 @@ public class RaceMapZoomSettings {
      *
      */
     public enum ZoomTypes {
-        NONE(null), WINDSENSORS(new RaceMap.WindSensorsBoundsCalculater()), BOATS(new RaceMap.BoatsBoundsCalculater()), 
-        TAILS(new RaceMap.TailsBoundsCalculater()), BUOYS(new RaceMap.BuoysBoundsCalculater());
+        NONE(null), WINDSENSORS(new RaceMap.WindSensorsBoundsCalculator()), BOATS(new RaceMap.BoatsBoundsCalculator()), 
+        TAILS(new RaceMap.TailsBoundsCalculator()), BUOYS(new RaceMap.BuoysBoundsCalculator());
 
         private LatLngBoundsCalculator calculater;
 

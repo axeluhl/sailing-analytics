@@ -970,49 +970,49 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * Draw the markers.
      */
     private void drawMarkers() {
-        if (!isAttached() || !isMinMaxInitialized())
-            return;
-
-        int numMarkers = markers.size();
-        // Draw the markers
-        int lineWidth = lineElement.getOffsetWidth();
-        if (numMarkers > 0) {
-            // Create the markers or make them visible
-            for (int i = 0; i < numMarkers; i++) {
-                Marker marker = markers.get(i);
-                Element markerElem = null;
-                if (i < markerElements.size()) {
-                    markerElem = markerElements.get(i);
-                } else { // Create the new markes
-                    markerElem = DOM.createDiv();
-                    DOM.setStyleAttribute(markerElem, "position", "absolute");
-                    DOM.setStyleAttribute(markerElem, "display", "none");
-                    DOM.appendChild(getElement(), markerElem);
-                    markerElements.add(markerElem);
+        if (isAttached() && isMinMaxInitialized()) {
+            int numMarkers = markers.size();
+            // Draw the markers
+            int lineWidth = lineElement.getOffsetWidth();
+            if (numMarkers > 0) {
+                // Create the markers or make them visible
+                for (int i = 0; i < numMarkers; i++) {
+                    Marker marker = markers.get(i);
+                    Element markerElem = null;
+                    if (i < markerElements.size()) {
+                        markerElem = markerElements.get(i);
+                    } else { // Create the new markes
+                        markerElem = DOM.createDiv();
+                        DOM.setStyleAttribute(markerElem, "position", "absolute");
+                        DOM.setStyleAttribute(markerElem, "display", "none");
+                        DOM.appendChild(getElement(), markerElem);
+                        markerElements.add(markerElem);
+                    }
+                    if (enabled) {
+                        DOM.setElementProperty(markerElem, "className", "gwt-SliderBar-mark");
+                    } else {
+                        DOM.setElementProperty(markerElem, "className",
+                                "gwt-SliderBar-mark gwt-SliderBar-mark-disabled");
+                    }
+                    // Position the marker and make it visible
+                    DOM.setStyleAttribute(markerElem, "visibility", "hidden");
+                    DOM.setStyleAttribute(markerElem, "display", "");
+                    double markerLinePosition = (marker.position - minValue) * lineWidth / getTotalRange();
+                    int markerWidth = markerElem.getOffsetWidth();
+                    int markerLeftOffset = lineLeftOffset + (int) markerLinePosition - (markerWidth / 2);
+                    markerLeftOffset = Math.min(markerLeftOffset, lineLeftOffset + lineWidth - markerWidth);
+                    DOM.setStyleAttribute(markerElem, "left", markerLeftOffset + "px");
+                    DOM.setStyleAttribute(markerElem, "visibility", "visible");
                 }
-                if (enabled) {
-                    DOM.setElementProperty(markerElem, "className", "gwt-SliderBar-mark");
-                } else {
-                    DOM.setElementProperty(markerElem, "className", "gwt-SliderBar-mark gwt-SliderBar-mark-disabled");
-                }
-                // Position the marker and make it visible
-                DOM.setStyleAttribute(markerElem, "visibility", "hidden");
-                DOM.setStyleAttribute(markerElem, "display", "");
-                double markerLinePosition = (marker.position - minValue) * lineWidth / getTotalRange();
-                int markerWidth = markerElem.getOffsetWidth();
-                int markerLeftOffset = lineLeftOffset + (int) markerLinePosition - (markerWidth / 2);
-                markerLeftOffset = Math.min(markerLeftOffset, lineLeftOffset + lineWidth - markerWidth);
-                DOM.setStyleAttribute(markerElem, "left", markerLeftOffset + "px");
-                DOM.setStyleAttribute(markerElem, "visibility", "visible");
-            }
 
-            // Hide unused markers
-            for (int i = (numMarkers + 1); i < markerElements.size(); i++) {
-                DOM.setStyleAttribute(tickElements.get(i), "display", "none");
-            }
-        } else { // Hide all markers
-            for (Element elem : markerElements) {
-                DOM.setStyleAttribute(elem, "display", "none");
+                // Hide unused markers
+                for (int i = (numMarkers + 1); i < markerElements.size(); i++) {
+                    DOM.setStyleAttribute(tickElements.get(i), "display", "none");
+                }
+            } else { // Hide all markers
+                for (Element elem : markerElements) {
+                    DOM.setStyleAttribute(elem, "display", "none");
+                }
             }
         }
     }

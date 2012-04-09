@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
-public class RaceMapResources {
+public class RaceMapImageManager {
     /**
      * Two sails on downwind leg, wind from port (sails on starboard); no highlighting
      */
@@ -73,9 +73,9 @@ public class RaceMapResources {
 
     private MapWidget map;
     
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+    private static RaceMapResources resources = GWT.create(RaceMapResources.class);
 
-    public RaceMapResources() {
+    public RaceMapImageManager() {
         maneuverIconsForTypeAndTargetTack = new HashMap<Pair<ManeuverType, Tack>, Icon>();
         boatIconDownwindPortTransformer = new ImageTransformer(resources.lowlightedBoatIconDW_Port());
         boatIconHighlightedDownwindPortTransformer = new ImageTransformer(resources.highlightedBoatIconDW_Port());
@@ -189,14 +189,9 @@ public class RaceMapResources {
     public ImageTransformer getCombinedWindIconTransformer() {
         return combinedWindIconTransformer;
     }
-    
-    public String getBoatImageURL(GPSFixDTO boatFix, boolean highlighted) {
-        return getBoatImageURL(getBoatImageTransformer(boatFix, highlighted), boatFix);
-    }
 
-    public String getBoatImageURL(ImageTransformer boatImageTransformer, GPSFixDTO boatFix) {
-        double realBoatSizeScaleFactor = getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize());
-        return boatImageTransformer.getTransformedImageURL(boatFix.speedWithBearing.bearingInDegrees, realBoatSizeScaleFactor);
+    public ImageTransformer getExpeditionWindIconTransformer() {
+        return expeditionWindIconTransformer;
     }
 
     public double getRealBoatSizeScaleFactor(Size imageSize) {
@@ -230,12 +225,5 @@ public class RaceMapResources {
             }
         }
         return realBoatSizeScaleFactor;
-    }
-
-    public Icon getBoatImageIcon(GPSFixDTO boatFix, boolean highlighted) {
-        ImageTransformer boatImageTransformer = getBoatImageTransformer(boatFix, highlighted);
-        Icon icon = Icon.newInstance(getBoatImageURL(boatImageTransformer, boatFix));
-        icon.setIconAnchor(boatImageTransformer.getAnchor(getRealBoatSizeScaleFactor(boatImageTransformer.getImageSize())));
-        return icon;
     }
 }

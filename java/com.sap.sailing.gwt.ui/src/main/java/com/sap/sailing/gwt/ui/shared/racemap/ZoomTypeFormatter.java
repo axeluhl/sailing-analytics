@@ -1,7 +1,7 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
-import com.sap.sailing.gwt.ui.adminconsole.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 
 public class ZoomTypeFormatter {
     public static String format(ZoomTypes zoomType, StringMessages stringConstants) {

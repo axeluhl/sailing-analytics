@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +16,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.adminconsole.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
     //Initializing the lists to prevent a null pointer exception in the first validation call

@@ -1,6 +1,7 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.racemap;
 
-public abstract class LatLngBoundsCalculaterForSelected implements LatLngBoundsCalculator {
+
+public abstract class LatLngBoundsCalculatorForSelected implements LatLngBoundsCalculator {
 
     public boolean isZoomOnlyToSelectedCompetitors(RaceMap forMap) {
         return forMap.getSettings().getZoomSettings().isZoomToSelectedCompetitors();
