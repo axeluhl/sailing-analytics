@@ -14,6 +14,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
@@ -102,7 +106,7 @@ public class DeclinationStore {
             try {
                 declination = importer.importRecord(position, timePoint);
                 break;
-            } catch (IOException ioe) {
+            } catch (IOException | ParserConfigurationException | SAXException ioe) {
                 ioe.printStackTrace();
                 if (i<2) {
                     System.out.println("re-trying");
