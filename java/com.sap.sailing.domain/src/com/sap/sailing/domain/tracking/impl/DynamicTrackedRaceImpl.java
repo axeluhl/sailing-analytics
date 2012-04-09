@@ -147,96 +147,110 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     private void notifyListeners(GPSFix fix, Buoy buoy) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.buoyPositionChanged(fix, buoy);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.buoyPositionChanged(fix, buoy);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
             }
         }
     }
 
     private void notifyListeners(GPSFix fix, Competitor competitor) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.competitorPositionChanged(fix, competitor);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.competitorPositionChanged(fix, competitor);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
             }
         }
     }
 
     private void notifyListeners(Wind wind) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.windDataReceived(wind);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(Wind)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.windDataReceived(wind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(Wind)", t);
             }
         }
     }
 
     private void notifyListenersSpeedAveragingChanged(long oldMillisecondsOverWhichToAverageSpeed, long newMillisecondsOverWhichToAverageSpeed) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.speedAveragingChanged(oldMillisecondsOverWhichToAverageSpeed,
-                            newMillisecondsOverWhichToAverageSpeed);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(),
-                            "notifyListenersSpeedAveragingChanged(long, long)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.speedAveragingChanged(oldMillisecondsOverWhichToAverageSpeed,
+                        newMillisecondsOverWhichToAverageSpeed);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(),
+                        "notifyListenersSpeedAveragingChanged(long, long)", t);
             }
         }
     }
 
     private void notifyListenersWindAveragingChanged(long oldMillisecondsOverWhichToAverageWind, long newMillisecondsOverWhichToAverageWind) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.windAveragingChanged(oldMillisecondsOverWhichToAverageWind,
-                            newMillisecondsOverWhichToAverageWind);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(),
-                            "notifyListenersWindAveragingChanged(long, long)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.windAveragingChanged(oldMillisecondsOverWhichToAverageWind,
+                        newMillisecondsOverWhichToAverageWind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(),
+                        "notifyListenersWindAveragingChanged(long, long)", t);
             }
         }
     }
 
     private void notifyListenersWindRemoved(Wind wind) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.windDataRemoved(wind);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindRemoved(Wind)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.windDataRemoved(wind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindRemoved(Wind)", t);
             }
         }
     }
 
     private void notifyListeners(MarkPassing oldMarkPassing, MarkPassing markPassing) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.markPassingReceived(oldMarkPassing, markPassing);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(MarkPassing)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.markPassingReceived(oldMarkPassing, markPassing);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(MarkPassing)", t);
             }
         }
     }

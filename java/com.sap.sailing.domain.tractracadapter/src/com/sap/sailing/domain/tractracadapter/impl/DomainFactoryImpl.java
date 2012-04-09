@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
@@ -91,6 +92,14 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     private final Map<Pair<String, String>, com.sap.sailing.domain.base.Event> eventCache =
             new HashMap<Pair<String, String>, com.sap.sailing.domain.base.Event>();
+    
+    /**
+     * A cache based on weak references to the TracTrac event, allowing for quick Event lookup as long as the
+     * TracTrac event remains referenced. This is intended to reduce the number of times the dominant boat
+     * class needs to be determined for an event. Synchronization for additions / removals is tied to the
+     * synchronization for {@link #eventCache}.
+     */
+    private final WeakHashMap<com.tractrac.clientmodule.Event, Event> weakEventCache = new WeakHashMap<>();
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
 
@@ -254,16 +263,24 @@ public class DomainFactoryImpl implements DomainFactory {
             // This means that currently it is permissible to assume that we'll get at most one
             // boat class per TracTrac event. Generally, however, we have to assume that
             // one TracTrac event may map to multiple domain Event objects with one BoatClass each
-            Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
-            for (com.tractrac.clientmodule.Competitor c : event.getCompetitorList()) {
-                competitorClassList.add(c.getCompetitorClass());
-            }
-            BoatClass boatClass = getDominantBoatClass(competitorClassList);
-            Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass==null?null:boatClass.getName());
-            Event result = eventCache.get(key);
+            
+            // try a quick look-up in the weak cache using the TracTrac event as key; only if that delivers no result,
+            // compute the dominant boat class which requires a lot more effort
+            Event result = weakEventCache.get(event);
             if (result == null) {
-                result = new EventImpl(event.getName(), boatClass);
-                eventCache.put(key, result);
+                Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
+                for (com.tractrac.clientmodule.Competitor c : event.getCompetitorList()) {
+                    competitorClassList.add(c.getCompetitorClass());
+                }
+                BoatClass boatClass = getDominantBoatClass(competitorClassList);
+                Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass == null ? null
+                        : boatClass.getName());
+                result = eventCache.get(key);
+                if (result == null) {
+                    result = new EventImpl(event.getName(), boatClass);
+                    eventCache.put(key, result);
+                    weakEventCache.put(event, result);
+                }
             }
             return result;
         }
@@ -338,6 +355,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     event.removeRace(raceDefinition);
                     if (oldSize > 0 && Util.size(event.getAllRaces()) == 0) {
                         eventCache.remove(key);
+                        weakEventCache.remove(tractracEvent);
                     }
                     TrackedEvent trackedEvent = trackedEventRegistry.getTrackedEvent(event);
                     if (trackedEvent != null) {
