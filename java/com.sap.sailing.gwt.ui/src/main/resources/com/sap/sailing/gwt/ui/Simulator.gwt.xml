@@ -31,4 +31,16 @@
 	<source path='shared'/>
 	<source path='client'/>
 	<source path='simulator'/>
+	
+	<inherits name='com.google.gwt.logging.Logging'/>
+  	<set-property name="gwt.logging.enabled" value="TRUE"/>
+  	<!-- Set logging level to INFO -->
+  	<set-property name="gwt.logging.logLevel" value="INFO"/>
+  	<set-property name="gwt.logging.simpleRemoteHandler" value="ENABLED" />
+  	<set-property name="gwt.logging.consoleHandler" value="ENABLED" />
+  	<!-- Add compiler.stackMode to get a readable stacktrace from JavaScript 
+       It generates a set of files in WEB-INF/deploy; those files need to
+       be placed on the server
+    	-->
+  	<set-property name="compiler.stackMode" value="emulated" />
 </module>
