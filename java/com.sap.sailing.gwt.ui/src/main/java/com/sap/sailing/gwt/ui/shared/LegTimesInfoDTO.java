@@ -12,12 +12,13 @@ public class LegTimesInfoDTO extends NamedDTO implements IsSerializable {
      */
     public Date firstPassingDate;
 
-    public Date lastPassingDate;
+//    public Date lastPassingDate;
 
+    public int legNumber;
+    
     public LegTimesInfoDTO() {}
 
-    public LegTimesInfoDTO(String name) {
-        super(name);
+    public LegTimesInfoDTO(int legNumber) {
+        this.legNumber = legNumber;
     }
-    
 }

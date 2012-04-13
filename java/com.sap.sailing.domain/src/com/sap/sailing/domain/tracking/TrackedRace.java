@@ -47,8 +47,7 @@ public interface TrackedRace {
     /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time point
      * which is expected to be before the race start time). When there are no {@link MarkPassing}s for the first mark, <code>null</code>
-     * is returned. If there are mark passings for
-     * the first mark and the start time is less than
+     * is returned. If there are mark passings for the first mark and the start time is less than
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark passing for the
      * first mark. Otherwise, the first mark passing for the first mark minus
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.
@@ -63,7 +62,14 @@ public interface TrackedRace {
      * no boat passed the finish line yet.
      */
     TimePoint getAssumedEnd();
-    
+
+    /**
+     * Returns a list of the start times of all legs as far as we know them
+     * The leg time of the first leg is equal to #{@link #getStart()}
+     * All other leg times are equal to the first mark passing of the leg 
+     */
+    Iterable<TimePoint> getStartTimesOfTrackedLegs();
+
     /**
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
      */

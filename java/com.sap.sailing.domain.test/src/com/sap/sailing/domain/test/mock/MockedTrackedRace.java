@@ -524,4 +524,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         
     }
 
+    @Override
+    public Iterable<TimePoint> getStartTimesOfTrackedLegs() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

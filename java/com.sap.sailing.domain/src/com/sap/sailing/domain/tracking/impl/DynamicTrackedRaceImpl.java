@@ -281,6 +281,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             }
             updated(timePointOfLatestEvent);
         }
+        // update the race times like start, end and the leg times
+        updateTimes();
+        
         // notify *after* all mark passings have been re-established; should avoid flicker
         for (MarkPassing markPassing : markPassings) {
             notifyListeners(oldMarkPassings.get(markPassing.getWaypoint()), markPassing);

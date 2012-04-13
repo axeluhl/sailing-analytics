@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -112,8 +113,32 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private TimePoint startTimeReceived;
 
+    /** 
+     * The calculated race start time 
+     */
+    private TimePoint startTime;
+
+    /** 
+     * The calculated race end time 
+     */
+    private TimePoint endTime;
+
+    /** 
+     * The calculated start times of the legs
+     */
+    private final List<TimePoint> startTimesOfLegs;
+
+    /**
+     * The latest time point contained by any of the events received and processed
+     */
     private TimePoint timePointOfNewestEvent;
+    
+    /**
+     * Time stamp that the event received last from the underlying push service carried on it
+     */
     private TimePoint timePointOfLastEvent;
+    
+    
     private long updateCount;
 
     private final Map<TimePoint, List<Competitor>> competitorRankings;
@@ -211,6 +236,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(
                     MarkPassingByTimeComparator.INSTANCE));
         }
+        startTimesOfLegs = new ArrayList<TimePoint>();
         windTracks = new HashMap<WindSource, WindTrack>();
         windTracks.putAll(windStore.loadWindTracks(trackedEvent, this, millisecondsOverWhichToAverageWind));
         // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
@@ -261,43 +287,113 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public TimePoint getStart() {
-        TimePoint result = startTimeReceived;
+        return startTime;
+    }
+
+    @Override
+    public TimePoint getAssumedEnd() {
+        return endTime;
+    }
+
+    /**
+     * Updates all time calculations (start race, end race and leg times)
+     */
+    protected void updateTimes() {
+        updateStartTime();
+        updateEndTime();
+        updateLegTimes();
+    }
+
+    /**
+     * Calculates the start time of the race from various sources
+     */
+    private void updateStartTime() {
+        startTime = startTimeReceived;
         // If not null, check if the first mark passing for the start line is too much after the startTimeReceived;
         // if so, return an adjusted, later start time.
         // If no official start time was received, try to estimate the start time using the mark passings for the start line.
         if (startTimeReceived != null) {
-            TimePoint timeOfFirstMarkPassingFirstMark = getFirstStartPassingTime();
-            if (timeOfFirstMarkPassingFirstMark != null) {
-                long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassingFirstMark.asMillis()
+            TimePoint timeOfFirstMarkPassing = getFirstPassingTime(getRace().getCourse().getFirstWaypoint());
+            if (timeOfFirstMarkPassing != null) {
+                long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
                         - startTimeReceived.asMillis();
                 if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
-                    result = new MillisecondsTimePoint(timeOfFirstMarkPassingFirstMark.asMillis()
+                    startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
                             - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
                 } else {
-                    result = startTimeReceived;
+                    startTime = startTimeReceived;
                 }
             }
         } else {
-            result = calculateStartOfRaceFromMarkPassings(getMarkPassingsInOrderAsNavigableSet(getRace().getCourse()
+            startTime = calculateStartOfRaceFromMarkPassings(getMarkPassingsInOrderAsNavigableSet(getRace().getCourse()
                     .getFirstWaypoint()), getRace().getCompetitors());
         }
-        return result;
     }
 
-    private TimePoint getFirstStartPassingTime() {
-        Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getFirstWaypoint());
-        MarkPassing firstMarkPassingFirstMark = null;
+    /**
+     * Calculates the end time of the race from the mark passings of the last course waypoint
+     */
+    private void updateEndTime() {
+        endTime = null;
+        Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint());
         synchronized (markPassingsInOrder) {
-            Iterator<MarkPassing> markPassingsFirstMarkIter = markPassingsInOrder.iterator();
-            if (markPassingsFirstMarkIter.hasNext()) {
-                firstMarkPassingFirstMark = markPassingsFirstMarkIter.next();
+            for (MarkPassing passingFinishLine : markPassingsInOrder) {
+                endTime = passingFinishLine.getTimePoint();
             }
         }
-        TimePoint timeOfFirstMarkPassingFirstMark = null;
-        if (firstMarkPassingFirstMark != null) {
-            timeOfFirstMarkPassingFirstMark = firstMarkPassingFirstMark.getTimePoint();
+    }
+
+    /**
+     * Calculates the start and end times of the legs from the mark passings
+     */
+    private void updateLegTimes() {
+        startTimesOfLegs.clear();
+        int legNumber = 1;
+        // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time order of the leg times   
+        Date previousLegPassingTime = null;
+        for (TrackedLeg trackedLeg : trackedLegs.values()) {
+            if (legNumber == 1) {
+                // For the first leg the use of "firstPassingDate" is not correct,
+                // because boats can pass the start line before the actual start;
+                // therefore we are using the calculated start time here
+                if (startTime != null) {
+                    startTimesOfLegs.add(startTime);
+                }
+            }
+            Waypoint to = trackedLeg.getLeg().getTo();
+            NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(to);
+            if (markPassings != null && !markPassings.isEmpty()) {
+                // ensure the leg times are in the right time order; there may perhaps be left-overs for marks to be reached later that
+                // claim it has been passed in the past which may have been an accidental tracker read-out;
+                // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point ordering
+                synchronized (markPassings) {
+                    for (MarkPassing currentMarkPassing : markPassings) {
+                        Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
+                        if(previousLegPassingTime == null || currentPassingDate.after(previousLegPassingTime)) {
+                            startTimesOfLegs.add(currentMarkPassing.getTimePoint());
+                            previousLegPassingTime = currentPassingDate;
+                            break;
+                        }
+                    }
+                }
+            }
+            legNumber++;
         }
-        return timeOfFirstMarkPassingFirstMark;
+    }
+    
+    private TimePoint getFirstPassingTime(Waypoint waypoint) {
+        NavigableSet<MarkPassing> markPassingsInOrder = getMarkPassingsInOrderAsNavigableSet(waypoint);
+        MarkPassing firstMarkPassing = null;
+        synchronized (markPassingsInOrder) {
+            if(!markPassingsInOrder.isEmpty()) {
+                firstMarkPassing = markPassingsInOrder.first();
+            }
+        }
+        TimePoint timeOfFirstMarkPassing = null;
+        if (firstMarkPassing != null) {
+            timeOfFirstMarkPassing = firstMarkPassing.getTimePoint();
+        }
+        return timeOfFirstMarkPassing;
     }
     
     private TimePoint calculateStartOfRaceFromMarkPassings(NavigableSet<MarkPassing> markPassings, Iterable<Competitor> competitors) {
@@ -349,24 +445,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     @Override
-    public TimePoint getAssumedEnd() {
-        TimePoint result = null;
-        Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint());
-        synchronized (markPassingsInOrder) {
-            for (MarkPassing passingFinishLine : markPassingsInOrder) {
-                result = passingFinishLine.getTimePoint();
-            }
-        }
-        return result;
-    }
-
-    @Override
     public boolean hasStarted(TimePoint at) {
         return getStart() != null && getStart().compareTo(at) <= 0;
     }
 
     protected void setStartTimeReceived(TimePoint start) {
         this.startTimeReceived = start;
+        updateStartTime();
+        updateLegTimes();
     }
 
     @Override
@@ -377,6 +463,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public Iterable<TrackedLeg> getTrackedLegs() {
         return trackedLegs.values();
+    }
+
+    @Override
+    public Iterable<TimePoint> getStartTimesOfTrackedLegs() {
+        return startTimesOfLegs;
     }
 
     @Override
