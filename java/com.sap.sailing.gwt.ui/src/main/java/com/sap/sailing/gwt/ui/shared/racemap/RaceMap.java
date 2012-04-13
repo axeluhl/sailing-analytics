@@ -87,7 +87,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
         Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
-    protected MapWidget map;
+    private MapWidget map;
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -98,15 +98,22 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private final Map<CompetitorDTO, Polyline> tails;
 
     /**
-     * Polyline for the start line (connecting two buoys forming the start gate).
+     * Polyline for the start line (connecting two buoys representing the start gate).
      */
     private Polyline startLine;
 
     /**
-     * Polyline for the finish line (connecting two buoys forming the finish gate).
+     * Polyline for the finish line (connecting two buoys representing the finish gate).
      */
     private Polyline finishLine;
 
+    /**
+     * Polyline for the advantage line (the leading line for the boats, orthogonal to the wind direction; touching the leading boat).
+     */
+    private Polyline advantageLine;
+
+    private WindTrackInfoDTO lastCombinedWindTrackInfoDTO;
+    
     /**
      * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the first fix shown
      * in {@link #tails} is .
@@ -148,11 +155,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * markers displayed in response to
      * {@link SailingServiceAsync#getDouglasPoints(String, String, Map, Map, double, AsyncCallback)}
      */
-    protected Set<Marker> maneuverMarkers;
+    private Set<Marker> maneuverMarkers;
 
-    protected Map<CompetitorDTO, List<ManeuverDTO>> lastManeuverResult;
+    private Map<CompetitorDTO, List<ManeuverDTO>> lastManeuverResult;
 
-    protected Map<CompetitorDTO, List<GPSFixDTO>> lastDouglasPeuckerResult;
+    private Map<CompetitorDTO, List<GPSFixDTO>> lastDouglasPeuckerResult;
     
     private LatLng lastMousePosition;
 
@@ -238,7 +245,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         Maps.loadMapsApi(mapsAPIKey, "2", false, new Runnable() {
             public void run() {
                 map = new MapWidget();
-                raceMapImageManager.setMap(map);
                 map.addControl(new LargeMapControl3D(), new ControlPosition(ControlAnchor.TOP_RIGHT, /* offsetX */ 0, /* offsetY */ 30));
                 map.addControl(new MenuMapTypeControl());
                 map.addControl(new ScaleControl(), new ControlPosition(ControlAnchor.BOTTOM_RIGHT, /* offsetX */ 10, /* offsetY */ 20));
@@ -247,7 +253,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 map.setContinuousZoom(true);
                 RaceMap.this.add(map, 0, 0);
                 RaceMap.this.add(combinedWindPanel, 10, 10);
-
+                RaceMap.this.raceMapImageManager.loadMapIcons(map);
                 map.setSize("100%", "100%");
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
@@ -344,11 +350,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     if (maneuverMarkers != null) {
                                         removeAllManeuverMarkers();
                                     }
+                                    
                                     // Do mark specific actions
                                     showMarksOnMap(raceMapDataDTO.coursePositions);
-                                    showHelpLines(raceMapDataDTO.coursePositions);
+                                    showStartAndFinishLines(raceMapDataDTO.coursePositions);
+                                    showAdvantageLine();
                                     // Rezoom the map
-                                    // TODO make this a loop across the LatLongBoundsCalculators, pulling them from a collection updated in updateSettings
+                                    // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
                                     if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
                                         LatLngBounds bounds = getSettings().getZoomSettings().getNewBounds(RaceMap.this);
                                         zoomMapToNewBounds(bounds);
@@ -394,6 +402,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                                     break;
                                                 case COMBINED:
                                                     showCombinedWindOnMap(windSource, windTrackInfoDTO);
+                                                    if(windTrackInfoDTO != null) {
+                                                        lastCombinedWindTrackInfoDTO = windTrackInfoDTO; 
+                                                    }
                                                     break;
                                             }
                                         }
@@ -589,7 +600,70 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
-    private void showHelpLines(CourseDTO courseDTO) {
+    /*
+     * This algorithm is limited to distances such that dlon < pi/2, i.e those that extend around less than one quarter of the circumference 
+     * of the earth in longitude. A completely general, but more complicated algorithm is necessary if greater distances are allowed. 
+     */
+    public LatLng calculatePositionAlongRhumbline(LatLng position, double bearingDeg, double distanceInKm) {
+        double distianceRad = distanceInKm / 6371.0;  // r = 6371 means earth's radius in km 
+        double lat1 = position.getLatitudeRadians();
+        double lon1 = position.getLongitudeRadians();
+        double bearingRad = bearingDeg / 180. * Math.PI;
+
+        double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distianceRad) + 
+                        Math.cos(lat1) * Math.sin(distianceRad) * Math.cos(bearingRad));
+        double lon2 = lon1 + Math.atan2(Math.sin(bearingRad)*Math.sin(distianceRad)*Math.cos(lat1), 
+                       Math.cos(distianceRad)-Math.sin(lat1)*Math.sin(lat2));
+        lon2 = (lon2+3*Math.PI) % (2*Math.PI) - Math.PI;  // normalize to -180..+180º
+        
+        return LatLng.newInstance(lat2 / Math.PI * 180., lon2  / Math.PI * 180.);
+    }
+
+    private void showAdvantageLine() {
+        if(map != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null && lastCombinedWindTrackInfoDTO.windFixes.size() > 0) {
+            final CompetitorDTO leadingCompetitorDTO = quickRanks.get(0).competitor; 
+            if (leadingCompetitorDTO != null && lastShownFix.containsKey(leadingCompetitorDTO) && lastShownFix.get(leadingCompetitorDTO) != -1) {
+                GPSFixDTO lastBoatFix = getBoatFix(leadingCompetitorDTO);
+
+                double advantageLineLengthInKm = 1.0;
+                // implement and use Position.translateRhumb()
+                double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
+                LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
+                LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg, 0.05);
+                double bearingOfCombinedWindInDeg = lastCombinedWindTrackInfoDTO.windFixes.get(0).trueWindBearingDeg; 
+                double rotatedBearingDeg = bearingOfCombinedWindInDeg + 90.0;
+                if(rotatedBearingDeg >= 360.0)
+                    rotatedBearingDeg -= 360.0;
+                LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg, advantageLineLengthInKm / 2.0);
+                rotatedBearingDeg = bearingOfCombinedWindInDeg - 90.0;
+                if(rotatedBearingDeg < 0.0)
+                    rotatedBearingDeg += 360.0;
+                LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg, advantageLineLengthInKm / 2.0);
+                
+                LatLng[] advantageLinePoints = new LatLng[2];
+                advantageLinePoints[0] = LatLng.newInstance(advantageLinePos1.getLatitude(), advantageLinePos1.getLongitude());
+                advantageLinePoints[1] = LatLng.newInstance(advantageLinePos2.getLatitude(), advantageLinePos2.getLongitude());; 
+                if(advantageLine == null) {
+                    PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
+                    advantageLine = new Polyline(advantageLinePoints, /* color */ "#000000", /* width */ 1, /* opacity */0.5, options);
+                    map.addOverlay(advantageLine);
+                } else {
+                    advantageLine.deleteVertex(1);
+                    advantageLine.deleteVertex(0);
+                    advantageLine.insertVertex(0, advantageLinePoints[0]);
+                    advantageLine.insertVertex(1, advantageLinePoints[1]);
+                }
+            }
+            else {
+                if(advantageLine != null) {
+                    advantageLine.deleteVertex(1);
+                    advantageLine.deleteVertex(0);
+                }
+            }
+        }
+    }
+    
+    private void showStartAndFinishLines(final CourseDTO courseDTO) {
         if(map != null && courseDTO != null) {
             if(courseDTO.startGate != null) {
                 LatLng[] startGatePoints = new LatLng[2];
