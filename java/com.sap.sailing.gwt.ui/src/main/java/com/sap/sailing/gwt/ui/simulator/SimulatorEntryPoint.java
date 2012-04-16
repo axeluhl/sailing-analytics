@@ -39,7 +39,6 @@ public class SimulatorEntryPoint implements EntryPoint {
 	private static Logger logger = Logger.getLogger("com.sap.sailing");
 	@Override
 	public void onModuleLoad() {
-		Window.alert("In onModuleLoad");
 		logger.fine("In onModuleLoad");
 		/*
 		 * Asynchronously loads the Maps API.
@@ -191,22 +190,31 @@ public class SimulatorEntryPoint implements EntryPoint {
 		for( Polyline pl : newWindLattice ) {
 			this.mapw.addOverlay(pl);
 		}
-		
+		generateWindDirection(wl);
+	}
+	
+	private void generateWindDirection(WindLatticeDTO wl) {
+		logger.fine("In generateWindDirection");
+		PositionDTO [][] matrix = wl.getMatrix();
+		int numRows = matrix.length;
+		int numCols = matrix[0].length;
 		//addArrow(matrix[0][0], matrix[1][1]);
-		LatLng start = LatLng.newInstance(matrix[0][0].latDeg, matrix[0][0].lngDeg);
-		LatLng end = LatLng.newInstance(matrix[1][1].latDeg, matrix[1][1].lngDeg);
-		Point sPoint = mapw.convertLatLngToContainerPixel(start);
-		Point ePoint = mapw.convertLatLngToContainerPixel(end);
-		double dx = ePoint.getX() - sPoint.getX();
-		double dy = ePoint.getY() - ePoint.getY();
-		double distance = Math.sqrt((dx*dx) + (dy*dy));
-		logger.fine("Distance : " + distance);
-		double theta = Math.PI - Math.PI/4; //Math.atan2(-dy,dx);
-		for(int i = 1; i < numRows; ++i) {
-			for (int j = 1; j < numCols; ++j) {
-				addArrow(matrix[i][j], theta, distance);
-			}
+		if (numRows > 0 && numCols > 0) {
+			LatLng start = LatLng.newInstance(matrix[0][0].latDeg, matrix[0][0].lngDeg);
+			LatLng end = LatLng.newInstance(matrix[1][1].latDeg, matrix[1][1].lngDeg);
+			Point sPoint = mapw.convertLatLngToContainerPixel(start);
+			Point ePoint = mapw.convertLatLngToContainerPixel(end);
+			double dx = ePoint.getX() - sPoint.getX();
+			double dy = ePoint.getY() - ePoint.getY();
+			double distance = Math.sqrt((dx*dx) + (dy*dy));
+			logger.fine("Distance : " + distance);
+			double theta = Math.PI - Math.PI/4; //Math.atan2(-dy,dx);
+			for(int i = 1; i < numRows; ++i) {
+				for (int j = 1; j < numCols; ++j) {
+					addArrow(matrix[i][j], theta, distance, (int) (0.5 + i*0.5));
+				}
 			
+			}
 		}
 	}
 	
@@ -218,12 +226,12 @@ public class SimulatorEntryPoint implements EntryPoint {
 		Polyline arrow = new Polyline(arrowPoints, "Green", 1);
 		this.mapw.addOverlay(arrow);
 		double theta = Math.PI/4;
-		addHead(arrowPoints[1], theta, 1);
+		addHead(arrowPoints[1], theta, 1, 1);
 		logger.info("In addArrow(start, end) arrowPoints[0]" + arrowPoints[0]);
 		logger.info("In addArrow(start, end) arrowPoints[1]" + arrowPoints[1]);
 	}
 	
-	private void addArrow(PositionDTO start, double angle, double length) {
+	private void addArrow(PositionDTO start, double angle, double length, int weight) {
 		logger.fine("In addArrow(start, angle, length)");
 		LatLng[] arrowPoints = new LatLng[2];
 		arrowPoints[0] = LatLng.newInstance(start.latDeg, start.lngDeg);
@@ -233,17 +241,17 @@ public class SimulatorEntryPoint implements EntryPoint {
 		LatLng end = mapw.convertContainerPixelToLatLng(Point.newInstance((int)x1, (int)y1));
 		
 		arrowPoints[1] = LatLng.newInstance(end.getLatitude(), end.getLongitude());
-		Polyline arrow = new Polyline(arrowPoints, "Green", 1);
+		Polyline arrow = new Polyline(arrowPoints, "Green", weight);
 		this.mapw.addOverlay(arrow);
 		logger.fine("In addArrow(start, angle, length) arrowPoints[0]" + arrowPoints[0]);
 		logger.fine("In addArrow(start, angle, length) arrowPoints[1]" + arrowPoints[1]);
 		double dx = x1 - point.getX();
 	    double dy = y1 - point.getY();
 	    double theta = Math.atan2(-dy,dx);
-		addHead(arrowPoints[1], theta, 1);
+		addHead(arrowPoints[1], theta, length/20, weight);
 	}
 	
-	private void addHead(LatLng point, double theta, double headLength) {
+	private void addHead(LatLng point, double theta, double headLength, int weight) {
 		logger.fine("In addHead");
 		//add an arrow head at the specified point
 	    double t = theta + (Math.PI/4) ;
@@ -264,7 +272,7 @@ public class SimulatorEntryPoint implements EntryPoint {
 	    pts[1] = mapw.convertContainerPixelToLatLng(Point.newInstance(x, y));
 	    pts[2] = mapw.convertContainerPixelToLatLng(Point.newInstance(x2, y2));
 	    
-	    Polyline polyline = new Polyline(pts, "Red", 1);
+	    Polyline polyline = new Polyline(pts, "Red", weight);
 	    mapw.addOverlay(polyline);
 	}
 }
