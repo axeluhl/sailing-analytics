@@ -294,7 +294,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     protected void invalidateLegTimes() {
         startTimesOfLegs.clear();
-        ;
     }
 
     /**
