@@ -85,10 +85,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private final RaceDefinition race;
 
     private final TrackedEvent trackedEvent;
-    
+
     /**
-     * By default, all wind sources are used, none are excluded. However, e.g., for performance reasons, particular wind sources
-     * such as the track-based estimation wind source, may be excluded by adding them to this set.
+     * By default, all wind sources are used, none are excluded. However, e.g., for performance reasons, particular wind
+     * sources such as the track-based estimation wind source, may be excluded by adding them to this set.
      */
     private final Set<WindSource> windSourcesToExclude;
 
@@ -113,17 +113,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private TimePoint startTimeReceived;
 
-    /** 
-     * The calculated race start time 
+    /**
+     * The calculated race start time
      */
     private TimePoint startTime;
 
-    /** 
-     * The calculated race end time 
+    /**
+     * The calculated race end time
      */
     private TimePoint endTime;
 
-    /** 
+    /**
      * The calculated start times of the legs
      */
     private final List<TimePoint> startTimesOfLegs;
@@ -132,13 +132,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * The latest time point contained by any of the events received and processed
      */
     private TimePoint timePointOfNewestEvent;
-    
+
     /**
      * Time stamp that the event received last from the underlying push service carried on it
      */
     private TimePoint timePointOfLastEvent;
-    
-    
+
     private long updateCount;
 
     private final Map<TimePoint, List<Competitor>> competitorRankings;
@@ -187,9 +186,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         this(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                /* delay for wind estimation cache invalidation */ millisecondsOverWhichToAverageWind/2);
+        /* delay for wind estimation cache invalidation */millisecondsOverWhichToAverageWind / 2);
     }
-    
+
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
@@ -243,11 +242,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received
         // for them.
         WindSource courseBasedWindSource = new WindSourceImpl(WindSourceType.COURSE_BASED);
-        windTracks.put(courseBasedWindSource,
-                windStore.getWindTrack(trackedEvent, this, courseBasedWindSource, millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation));
+        windTracks.put(courseBasedWindSource, windStore.getWindTrack(trackedEvent, this, courseBasedWindSource,
+                millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation));
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
-        windTracks.put(trackBasedWindSource,
-                windStore.getWindTrack(trackedEvent, this, trackBasedWindSource, millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation));
+        windTracks.put(trackBasedWindSource, windStore.getWindTrack(trackedEvent, this, trackBasedWindSource,
+                millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation));
         this.trackedEvent = trackedEvent;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
     }
@@ -265,7 +264,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
         return markPassingsForCompetitor.get(competitor);
     }
-    
+
     protected NavigableSet<MarkPassing> getMarkPassingsInOrderAsNavigableSet(Waypoint waypoint) {
         return markPassingsForWaypoint.get(waypoint);
     }
@@ -285,107 +284,71 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return endOfTrackingReceived;
     }
 
-    @Override
-    public TimePoint getStart() {
-        return startTime;
+    protected void invalidateStartTime() {
+        startTime = null;
     }
 
-    @Override
-    public TimePoint getAssumedEnd() {
-        return endTime;
+    protected void invalidateEndTime() {
+        endTime = null;
     }
 
-    /**
-     * Updates all time calculations (start race, end race and leg times)
-     */
-    protected void updateTimes() {
-        updateStartTime();
-        updateEndTime();
-        updateLegTimes();
+    protected void invalidateLegTimes() {
+        startTimesOfLegs.clear();
+        ;
     }
 
     /**
      * Calculates the start time of the race from various sources
      */
-    private void updateStartTime() {
-        startTime = startTimeReceived;
-        // If not null, check if the first mark passing for the start line is too much after the startTimeReceived;
-        // if so, return an adjusted, later start time.
-        // If no official start time was received, try to estimate the start time using the mark passings for the start line.
-        if (startTimeReceived != null) {
-            TimePoint timeOfFirstMarkPassing = getFirstPassingTime(getRace().getCourse().getFirstWaypoint());
-            if (timeOfFirstMarkPassing != null) {
-                long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
-                        - startTimeReceived.asMillis();
-                if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
-                    startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
-                            - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
-                } else {
-                    startTime = startTimeReceived;
+    @Override
+    public TimePoint getStart() {
+        if (startTime == null) {
+            startTime = startTimeReceived;
+            // If not null, check if the first mark passing for the start line is too much after the startTimeReceived;
+            // if so, return an adjusted, later start time.
+            // If no official start time was received, try to estimate the start time using the mark passings for the
+            // start line.
+            if (startTimeReceived != null) {
+                TimePoint timeOfFirstMarkPassing = getFirstPassingTime(getRace().getCourse().getFirstWaypoint());
+                if (timeOfFirstMarkPassing != null) {
+                    long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
+                            - startTimeReceived.asMillis();
+                    if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
+                        startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
+                                - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
+                    } else {
+                        startTime = startTimeReceived;
+                    }
                 }
+            } else {
+                startTime = calculateStartOfRaceFromMarkPassings(getMarkPassingsInOrderAsNavigableSet(getRace()
+                        .getCourse().getFirstWaypoint()), getRace().getCompetitors());
             }
-        } else {
-            startTime = calculateStartOfRaceFromMarkPassings(getMarkPassingsInOrderAsNavigableSet(getRace().getCourse()
-                    .getFirstWaypoint()), getRace().getCompetitors());
         }
+        return startTime;
     }
 
     /**
      * Calculates the end time of the race from the mark passings of the last course waypoint
      */
-    private void updateEndTime() {
-        endTime = null;
-        Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint());
-        synchronized (markPassingsInOrder) {
-            for (MarkPassing passingFinishLine : markPassingsInOrder) {
-                endTime = passingFinishLine.getTimePoint();
+    @Override
+    public TimePoint getAssumedEnd() {
+        if (endTime == null) {
+            Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint());
+            synchronized (markPassingsInOrder) {
+                for (MarkPassing passingFinishLine : markPassingsInOrder) {
+                    endTime = passingFinishLine.getTimePoint();
+                }
             }
         }
+        return endTime;
     }
 
-    /**
-     * Calculates the start and end times of the legs from the mark passings
-     */
-    private void updateLegTimes() {
-        startTimesOfLegs.clear();
-        int legNumber = 1;
-        // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time order of the leg times   
-        Date previousLegPassingTime = null;
-        for (TrackedLeg trackedLeg : trackedLegs.values()) {
-            if (legNumber == 1) {
-                // For the first leg the use of "firstPassingDate" is not correct,
-                // because boats can pass the start line before the actual start;
-                // therefore we are using the calculated start time here
-                if (startTime != null) {
-                    startTimesOfLegs.add(startTime);
-                }
-            }
-            Waypoint to = trackedLeg.getLeg().getTo();
-            NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(to);
-            if (markPassings != null && !markPassings.isEmpty()) {
-                // ensure the leg times are in the right time order; there may perhaps be left-overs for marks to be reached later that
-                // claim it has been passed in the past which may have been an accidental tracker read-out;
-                // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point ordering
-                synchronized (markPassings) {
-                    for (MarkPassing currentMarkPassing : markPassings) {
-                        Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
-                        if(previousLegPassingTime == null || currentPassingDate.after(previousLegPassingTime)) {
-                            startTimesOfLegs.add(currentMarkPassing.getTimePoint());
-                            previousLegPassingTime = currentPassingDate;
-                            break;
-                        }
-                    }
-                }
-            }
-            legNumber++;
-        }
-    }
-    
     private TimePoint getFirstPassingTime(Waypoint waypoint) {
         NavigableSet<MarkPassing> markPassingsInOrder = getMarkPassingsInOrderAsNavigableSet(waypoint);
         MarkPassing firstMarkPassing = null;
         synchronized (markPassingsInOrder) {
-            if(!markPassingsInOrder.isEmpty()) {
+            if (!markPassingsInOrder.isEmpty()) {
                 firstMarkPassing = markPassingsInOrder.first();
             }
         }
@@ -395,8 +358,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         return timeOfFirstMarkPassing;
     }
-    
-    private TimePoint calculateStartOfRaceFromMarkPassings(NavigableSet<MarkPassing> markPassings, Iterable<Competitor> competitors) {
+
+    private TimePoint calculateStartOfRaceFromMarkPassings(NavigableSet<MarkPassing> markPassings,
+            Iterable<Competitor> competitors) {
         TimePoint startOfRace = null;
         // Find the first mark passing within the largest cluster crossing the line within one minute.
         final long ONE_MINUTE_IN_MILLIS = 60 * 1000;
@@ -407,7 +371,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 int candiateGroupSize = 0;
                 MarkPassing candidateForStartOfLargestGroupSoFar = null;
                 Iterator<MarkPassing> iterator = markPassings.iterator();
-                // sweep over all start mark passings and for each element find the number of competitors that passed the start up to one minute later;
+                // sweep over all start mark passings and for each element find the number of competitors that passed
+                // the start up to one minute later;
                 // pick the start mark passing of the competitor leading the largest such group
                 while (iterator.hasNext()) {
                     MarkPassing currentMarkPassing = iterator.next();
@@ -418,8 +383,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         startOfLargestGroupSoFar = currentMarkPassing;
                         largestStartGroupWithinOneMinuteSize = 1;
                     } else {
-                        if (currentMarkPassing.getTimePoint().asMillis() - candidateForStartOfLargestGroupSoFar.getTimePoint().asMillis() <= ONE_MINUTE_IN_MILLIS) {
-                            // currentMarkPassing is within one minute of candidateForStartOfLargestGroupSoFar; extend candidate group...
+                        if (currentMarkPassing.getTimePoint().asMillis()
+                                - candidateForStartOfLargestGroupSoFar.getTimePoint().asMillis() <= ONE_MINUTE_IN_MILLIS) {
+                            // currentMarkPassing is within one minute of candidateForStartOfLargestGroupSoFar; extend
+                            // candidate group...
                             candiateGroupSize++;
                             if (candiateGroupSize > largestStartGroupWithinOneMinuteSize) {
                                 // ...and remember as best fit if greater than largest group so far
@@ -427,12 +394,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                 largestStartGroupWithinOneMinuteSize = candiateGroupSize;
                             }
                         } else {
-                            // currentMarkPassing is more than a minute after candidateForStartOfLargestGroupSoFar; advance
-                            // candidateForStartOfLargestGroupSoFar and reduce group size counter, until candidateForStartOfLargestGroupSoFar
-                            // is again within the one-minute interval; may catch up all the way to currentMarkPassing if that was
+                            // currentMarkPassing is more than a minute after candidateForStartOfLargestGroupSoFar;
+                            // advance
+                            // candidateForStartOfLargestGroupSoFar and reduce group size counter, until
+                            // candidateForStartOfLargestGroupSoFar
+                            // is again within the one-minute interval; may catch up all the way to currentMarkPassing
+                            // if that was
                             // more than a minute after its predecessor
-                            while (currentMarkPassing.getTimePoint().asMillis() - candidateForStartOfLargestGroupSoFar.getTimePoint().asMillis() > ONE_MINUTE_IN_MILLIS) {
-                                candidateForStartOfLargestGroupSoFar = markPassings.higher(candidateForStartOfLargestGroupSoFar);
+                            while (currentMarkPassing.getTimePoint().asMillis()
+                                    - candidateForStartOfLargestGroupSoFar.getTimePoint().asMillis() > ONE_MINUTE_IN_MILLIS) {
+                                candidateForStartOfLargestGroupSoFar = markPassings
+                                        .higher(candidateForStartOfLargestGroupSoFar);
                                 candiateGroupSize--;
                             }
                         }
@@ -443,7 +415,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         return startOfRace;
     }
-    
+
     @Override
     public boolean hasStarted(TimePoint at) {
         return getStart() != null && getStart().compareTo(at) <= 0;
@@ -451,8 +423,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     protected void setStartTimeReceived(TimePoint start) {
         this.startTimeReceived = start;
-        updateStartTime();
-        updateLegTimes();
+        invalidateStartTime();
+        invalidateLegTimes();
     }
 
     @Override
@@ -467,6 +439,43 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Iterable<TimePoint> getStartTimesOfTrackedLegs() {
+        if (startTimesOfLegs.isEmpty()) {
+            int legNumber = 1;
+            // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time order
+            // of the leg times
+            Date previousLegPassingTime = null;
+            for (TrackedLeg trackedLeg : trackedLegs.values()) {
+                if (legNumber == 1) {
+                    // For the first leg the use of "firstPassingDate" is not correct,
+                    // because boats can pass the start line before the actual start;
+                    // therefore we are using the calculated start time here
+                    TimePoint startOfRace = getStart();
+                    if (startOfRace != null) {
+                        startTimesOfLegs.add(startOfRace);
+                    }
+                }
+                Waypoint to = trackedLeg.getLeg().getTo();
+                NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(to);
+                if (markPassings != null && !markPassings.isEmpty()) {
+                    // ensure the leg times are in the right time order; there may perhaps be left-overs for marks to be
+                    // reached later that
+                    // claim it has been passed in the past which may have been an accidental tracker read-out;
+                    // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point ordering
+                    synchronized (markPassings) {
+                        for (MarkPassing currentMarkPassing : markPassings) {
+                            Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
+                            if (previousLegPassingTime == null || currentPassingDate.after(previousLegPassingTime)) {
+                                startTimesOfLegs.add(currentMarkPassing.getTimePoint());
+                                previousLegPassingTime = currentPassingDate;
+                                break;
+                            }
+                        }
+                    }
+                }
+                legNumber++;
+            }
+        }
+
         return startTimesOfLegs;
     }
 
@@ -722,7 +731,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * no other wind source exists yet.
      */
     protected WindTrack createWindTrack(WindSource windSource) {
-        return windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind, getMillisecondsOverWhichToAverageWind()/2);
+        return windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind,
+                getMillisecondsOverWhichToAverageWind() / 2);
     }
 
     @Override
@@ -732,7 +742,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude) {
-        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getWindWithConfidence(p, at, windSourcesToExclude);
+        final WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = getWindWithConfidence(p, at,
+                windSourcesToExclude);
         return windWithConfidence == null ? null : windWithConfidence.getObject();
     }
 
@@ -740,12 +751,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
         return getWindWithConfidence(p, at, getWindSourcesToExclude());
     }
-    
+
     @Override
     public Iterable<WindSource> getWindSourcesToExclude() {
         return Collections.unmodifiableCollection(windSourcesToExclude);
     }
-    
+
     @Override
     public void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude) {
         this.windSourcesToExclude.clear();
@@ -759,7 +770,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             Iterable<WindSource> windSourcesToExclude) {
         boolean canUseSpeedOfAtLeastOneWindSource = false;
         Weigher<Pair<Position, TimePoint>> timeWeigherThatPretendsToAlsoWeighPositions = new PositionAndTimePointWeigher(
-                /* halfConfidenceAfterMilliseconds */10000l);
+        /* halfConfidenceAfterMilliseconds */10000l);
         ConfidenceBasedWindAverager<Pair<Position, TimePoint>> averager = ConfidenceFactory.INSTANCE
                 .createWindAverager(timeWeigherThatPretendsToAlsoWeighPositions);
         List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesWithConfidences = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
@@ -778,10 +789,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         HasConfidence<ScalableWind, Wind, Pair<Position, TimePoint>> average = averager.getAverage(
                 windFixesWithConfidences, new Pair<Position, TimePoint>(p, at));
-        WindWithConfidence<Pair<Position, TimePoint>> result = average == null ? null :
-            new WindWithConfidenceImpl<Pair<Position, TimePoint>>(
-                average.getObject(), average.getConfidence(), new Pair<Position, TimePoint>(p, at),
-                canUseSpeedOfAtLeastOneWindSource);
+        WindWithConfidence<Pair<Position, TimePoint>> result = average == null ? null
+                : new WindWithConfidenceImpl<Pair<Position, TimePoint>>(average.getObject(), average.getConfidence(),
+                        new Pair<Position, TimePoint>(p, at), canUseSpeedOfAtLeastOneWindSource);
         return result;
     }
 
