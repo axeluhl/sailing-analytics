@@ -95,7 +95,7 @@ public class DomainFactoryImpl implements DomainFactory {
     public Event getOrCreateEvent(String raceID) {
         Event result = raceIDToEventCache.get(raceID);
         if (result == null) {
-            result = new EventImpl(raceID, null);
+            result = new EventImpl(raceID, getOrCreateBoatClassFromRaceID(raceID));
             raceIDToEventCache.put(raceID, result);
         }
         return result;
