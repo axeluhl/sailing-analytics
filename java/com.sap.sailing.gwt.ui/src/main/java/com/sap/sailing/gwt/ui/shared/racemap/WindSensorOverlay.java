@@ -10,12 +10,22 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 
+/**
+ * A google map overlay based on a HTML5 canvas for drawing a wind sensor (as an rotating arrow)
+ * The wind sensor symbol will be rotated according to the wind data.
+ */
 public class WindSensorOverlay extends CanvasOverlay {
 
     private final RaceMapImageManager raceMapImageManager;
 
+    /**
+     * The current wind track used to draw the wind sensor.
+     */
     private WindTrackInfoDTO windTrackInfoDTO;
 
+    /**
+     * The current wind source used to draw the wind sensor.
+     */
     private WindSource windSource;
 
     private final ImageTransformer transformer;
