@@ -3,6 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 
 public abstract class AbstractLeaderboardColumnOperation extends AbstractLeaderboardOperation {
+    private static final long serialVersionUID = 8577267743945864388L;
     private final String columnName;
     
     public AbstractLeaderboardColumnOperation(String leaderboardName, String columnName) {

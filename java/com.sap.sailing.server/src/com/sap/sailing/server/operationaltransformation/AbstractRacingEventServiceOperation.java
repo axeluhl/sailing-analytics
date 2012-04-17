@@ -12,6 +12,8 @@ import com.sap.sailing.server.RacingEventService;
  * 
  */
 public abstract class AbstractRacingEventServiceOperation implements RacingEventServiceOperation {
+    private static final long serialVersionUID = 3888231857034991271L;
+
     @Override
     public RacingEventServiceOperation transformRemoveLeaderboardClientOp(RemoveLeaderboard removeLeaderboard) {
         return removeLeaderboard;
@@ -92,6 +94,8 @@ public abstract class AbstractRacingEventServiceOperation implements RacingEvent
 
     public static RacingEventServiceOperation getNoOp() {
         return new AbstractRacingEventServiceOperation() {
+            private static final long serialVersionUID = -7203280393485688834L;
+
             @Override
             public RacingEventService applyTo(RacingEventService toState) {
                 return toState;

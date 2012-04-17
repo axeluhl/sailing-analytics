@@ -15,6 +15,7 @@ import java.util.Map;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
@@ -311,5 +312,8 @@ public interface RacingEventService extends TrackedEventRegistry {
      */
     RacesHandle addRace(RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
+
+    TrackedRace createTrackedRace(EventAndRaceIdentifier raceIdentifier, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
 }

@@ -3,6 +3,8 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.server.RacingEventService;
 
 public class RemoveLeaderboard extends AbstractLeaderboardOperation {
+    private static final long serialVersionUID = -6491003416450255268L;
+
     public RemoveLeaderboard(String leaderboardName) {
         super(leaderboardName);
     }

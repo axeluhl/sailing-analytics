@@ -451,6 +451,15 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
     
     @Override
+    public synchronized TrackedRace createTrackedRace(EventAndRaceIdentifier raceIdentifier, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+        DynamicTrackedEvent trackedEvent = getTrackedEvent(getEvent(raceIdentifier));
+        RaceDefinition race = getRace(raceIdentifier);
+        return trackedEvent.createTrackedRace(race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                /* raceDefinitionSetToUpdate */ null);
+    }
+    
+    @Override
     public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI,
             TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
             long timeoutInMilliseconds) throws Exception {
