@@ -276,9 +276,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
             for (MarkPassing markPassing : markPassings) {
                 // try to find corresponding old start mark passing
-                if(oldStartMarkPassing != null && markPassing.getWaypoint().getName().equals(oldStartMarkPassing.getWaypoint().getName())) {
-                    if(markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null &&
-                       markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
+                if (oldStartMarkPassing != null && markPassing.getWaypoint().getName().equals(oldStartMarkPassing.getWaypoint().getName())) {
+                    if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null &&
+                        markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
                         requiresStartTimeUpdate = false;
                     }
                 }
@@ -296,7 +296,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             updated(timePointOfLatestEvent);
         }
         // update the race times like start, end and the leg times
-        if(requiresStartTimeUpdate) {
+        if (requiresStartTimeUpdate) {
             invalidateStartTime();
         }
         invalidateLegTimes();
