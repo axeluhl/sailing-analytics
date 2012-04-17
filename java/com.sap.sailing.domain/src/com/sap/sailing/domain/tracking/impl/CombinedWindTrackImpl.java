@@ -13,6 +13,7 @@ import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl.Es
  * 
  */
 public class CombinedWindTrackImpl extends VirtualWindTrackImpl {
+    private static final long serialVersionUID = -5019721956924343447L;
     private CombinedWindAsNavigableSet virtualInternalRawFixes;
     
     public CombinedWindTrackImpl(TrackedRace trackedRace, double baseConfidence) {

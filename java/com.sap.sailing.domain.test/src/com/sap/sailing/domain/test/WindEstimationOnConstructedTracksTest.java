@@ -171,6 +171,8 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence(),
                 /* delay for cache invalidation in milliseconds */ 0l) {
+                    private static final long serialVersionUID = -4540785297605915273L;
+
                     @Override
                     protected void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
                         super.cache(timePoint, fix);
@@ -212,6 +214,8 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         TrackBasedEstimationWindTrackImpl track = new TrackBasedEstimationWindTrackImpl(
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence(),
                 /* delay for cache invalidation in milliseconds */ 0l) {
+                    private static final long serialVersionUID = -2264781053554744932L;
+
                     @Override
                     protected void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
                         super.cache(timePoint, fix);

@@ -21,6 +21,8 @@ import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
  * 
  */
 public class CourseBasedWindTrackImpl extends WindTrackImpl {
+    private static final long serialVersionUID = -729439204216641791L;
+
     /**
      * The first leg's direction will be measured this many milliseconds before the estimated race start time,
      * at estimated race start time and this many milliseconds after estimated race start time.

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
@@ -21,7 +23,7 @@ import com.sap.sailing.domain.common.TimePoint;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface TrackedEvent {
+public interface TrackedEvent extends Serializable {
     Event getEvent();
 
     Iterable<TrackedRace> getTrackedRaces();

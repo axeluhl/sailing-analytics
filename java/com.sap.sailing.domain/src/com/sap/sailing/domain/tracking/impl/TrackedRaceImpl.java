@@ -72,6 +72,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
+    private static final long serialVersionUID = -4825546964220003507L;
+
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
 
     private static final double PENALTY_CIRCLE_DEGREES_THRESHOLD = 320;

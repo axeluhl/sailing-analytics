@@ -9,6 +9,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public class DynamicTrackedEventImpl extends TrackedEventImpl implements DynamicTrackedEvent {
+    private static final long serialVersionUID = -90155868534737120L;
 
     public DynamicTrackedEventImpl(Event event) {
         super(event);

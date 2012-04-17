@@ -37,6 +37,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, WindListener, GPSTrackListener<Competitor> {
+    private static final long serialVersionUID = 1092726918239676958L;
+
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceImpl.class.getName());
     
     private Set<RaceChangeListener> listeners;

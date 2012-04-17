@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
@@ -37,7 +38,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace {
+public interface TrackedRace extends Serializable {
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
     
     RaceDefinition getRace();

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import com.sap.sailing.domain.base.Timed;
@@ -16,7 +17,7 @@ import com.sap.sailing.domain.common.TimePoint;
  * 
  * @author Axel Uhl (d043530)
  */
-public interface Track<FixType extends Timed> {
+public interface Track<FixType extends Timed> extends Serializable {
     /**
      * Callers must synchronize on this object before iterating the result if they have to expect concurrent
      * modifications.

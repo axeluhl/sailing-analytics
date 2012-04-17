@@ -61,6 +61,8 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * 
  */
 public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl implements RaceChangeListener {
+    private static final long serialVersionUID = -4397496421917807499L;
+
     private static final SpeedWithBearing defaultSpeedWithBearing = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
 
     private final EstimatedWindFixesAsNavigableSet virtualInternalRawFixes;

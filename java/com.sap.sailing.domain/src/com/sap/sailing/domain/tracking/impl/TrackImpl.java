@@ -11,6 +11,7 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
 
 public abstract class TrackImpl<FixType extends Timed> implements Track<FixType> {
+    private static final long serialVersionUID = -4075853657857657528L;
     /**
      * The fixes, ordered by their time points
      */

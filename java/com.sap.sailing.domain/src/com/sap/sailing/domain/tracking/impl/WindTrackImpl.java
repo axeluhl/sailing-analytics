@@ -35,6 +35,8 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  *
  */
 public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
+    private static final long serialVersionUID = 6882509533928049084L;
+
     private final static Logger logger = Logger.getLogger(WindTrackImpl.class.getName());
     
     private final static double DEFAULT_BASE_CONFIDENCE = 0.9;

@@ -18,6 +18,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
  * 
  */
 public abstract class VirtualWindTrackImpl extends WindTrackImpl {
+    private static final long serialVersionUID = 6317321456089655749L;
     private final TrackedRace trackedRace;
     
     protected VirtualWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence, boolean useSpeed) {
