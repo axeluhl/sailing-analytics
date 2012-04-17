@@ -7,6 +7,8 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.event.MapClickHandler;
@@ -15,6 +17,7 @@ import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -29,14 +32,16 @@ public class SimulatorEntryPoint implements EntryPoint {
 	private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
 
 	private final VerticalPanel 	panel			= new VerticalPanel();
-	private final ListBox 			raceSelector	= new ListBox();
-	
+	private final ListBox 		       raceSelector	= new ListBox();
+	private final CheckBox checkBox = new CheckBox("Show Grid");
+	private LatLng currentPoint;
 	private MapWidget mapw;
 	
 	private Polyline []	windlattice					= new Polyline[0];
 	private List<PositionDTO> locations				= new ArrayList<PositionDTO>();
 	
 	private static Logger logger = Logger.getLogger("com.sap.sailing");
+	
 	@Override
 	public void onModuleLoad() {
 		logger.fine("In onModuleLoad");
@@ -55,11 +60,13 @@ public class SimulatorEntryPoint implements EntryPoint {
 	}
 
 	private void buildUi() {
+		logger.severe("Logger Name : " + logger.getName() + " Logging level " + logger.getLevel());
 		logger.fine("In buildUi");
 		loadRaceLocations();
 		
 		initMap();
 		initRaceSelector();
+		initDisplayOptions();
 		initPanel();
 
 		// Add the map to the HTML host page
@@ -76,7 +83,8 @@ public class SimulatorEntryPoint implements EntryPoint {
 		mapw.addMapClickHandler(new MapClickHandler() {
 			@Override
 			public void onClick(MapClickEvent event) {
-				generateWindLattice(event.getLatLng());
+			        currentPoint = event.getLatLng();                        
+				generateWindLattice(currentPoint);
 			}
 		});
 	}
@@ -123,6 +131,7 @@ public class SimulatorEntryPoint implements EntryPoint {
 	private void initPanel() {
 		logger.fine("In initPanel");
 		panel.add(raceSelector);
+		panel.add(checkBox);
 		panel.add(mapw);
 		panel.setSize("100%", "100%");
 	}
@@ -163,32 +172,34 @@ public class SimulatorEntryPoint implements EntryPoint {
 	private void refreshWindLattice(WindLatticeDTO wl) {
 		logger.fine("In refereshWindLattice");
 		PositionDTO [][] matrix = wl.getMatrix();
-		int numRows = matrix.length;
-		int numCols = matrix[0].length;
-		logger.fine("Numrows : " + numRows + " Numcols : " + numCols);
-		int line = 0;
+		mapw.clearOverlays();
+		if (checkBox.getValue()) {
+		    int numRows = matrix.length;
+		    
+		    int numCols = matrix[0].length;
+		    logger.fine("Numrows : " + numRows + " Numcols : " + numCols);
+		    int line = 0;
 		
-		Polyline [] newWindLattice = new Polyline[numRows + numCols];
+		    Polyline [] newWindLattice = new Polyline[numRows + numCols];
 		
-		for( int i = 0; i < numRows; i++ ) {
+		    for( int i = 0; i < numRows; i++ ) {
 			LatLng [] points = new LatLng[numCols];
 			for( int j = 0; j < numCols; j++ ) {
 				points[j] = LatLng.newInstance(matrix[i][j].latDeg, matrix[i][j].lngDeg);
 			}
 			newWindLattice[line++] = new Polyline(points, "#000000", 1);
-		}
+		    }
 
-		for( int i = 0; i < numCols; i++ ) {
+		    for( int i = 0; i < numCols; i++ ) {
 			LatLng [] points = new LatLng[numRows];
 			for( int j = 0; j < numRows; j++ ) {
 				points[j] = LatLng.newInstance(matrix[j][i].latDeg, matrix[j][i].lngDeg);
 			}
 			newWindLattice[line++] = new Polyline(points, "#000000", 1);
-		}
-
-		mapw.clearOverlays();
-		for( Polyline pl : newWindLattice ) {
+		    } 
+		    for( Polyline pl : newWindLattice ) {
 			this.mapw.addOverlay(pl);
+		    }
 		}
 		generateWindDirection(wl);
 	}
@@ -274,5 +285,22 @@ public class SimulatorEntryPoint implements EntryPoint {
 	    
 	    Polyline polyline = new Polyline(pts, "Red", weight);
 	    mapw.addOverlay(polyline);
+	}
+	
+    private void initDisplayOptions() {
+		logger.fine("In initDisplayOptions");
+		checkBox.setSize("100%", "20px");
+		checkBox.setTitle("Grid Selector");
+		checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+		    @Override
+		    public void onValueChange(ValueChangeEvent<Boolean> event) {
+		        generateWindLattice(currentPoint);
+		    }
+		});
+		/*if (checkBox.length > 1) {
+			checkBox[0].setText("Grid");
+			checkBox[1].setText("Wind Direction");
+		}*/
 	}
 }
