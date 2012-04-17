@@ -316,4 +316,14 @@ public interface RacingEventService extends TrackedEventRegistry {
     TrackedRace createTrackedRace(EventAndRaceIdentifier raceIdentifier, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
+    void createEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
+
+    /**
+     * Adds <code>raceDefinition</code> to the {@link Event} such that it will appear in {@link Event#getAllRaces()}
+     * and {@link Event#getRaceByName(String)}.
+     * 
+     * @param addToEvent identifier of an event that must exist already
+     */
+    void addRace(EventIdentifier addToEvent, RaceDefinition raceDefinition);
+
 }

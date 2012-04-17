@@ -152,6 +152,7 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
     }
 
     private class DummyGPSFixMoving extends DummyTimed implements GPSFixMoving {
+        private static final long serialVersionUID = 7135346050999824024L;
         public DummyGPSFixMoving(TimePoint timePoint) {
             super(timePoint);
         }

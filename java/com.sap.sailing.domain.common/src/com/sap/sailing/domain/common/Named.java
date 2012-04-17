@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
-public interface Named {
+import java.io.Serializable;
+
+public interface Named extends Serializable {
     String getName();
 }

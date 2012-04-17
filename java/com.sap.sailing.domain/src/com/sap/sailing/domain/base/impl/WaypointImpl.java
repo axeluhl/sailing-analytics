@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Waypoint;
 
 public class WaypointImpl implements Waypoint {
+    private static final long serialVersionUID = 1600863368078653897L;
     private final ControlPoint controlPoint;
     private static int idCounter = 1;
     private final int id;
@@ -34,9 +35,6 @@ public class WaypointImpl implements Waypoint {
         return getControlPoint().getBuoys();
     }
 
-    /**
-     * Note that a waypoint is not compared by its identity but by the control point it represents.
-     */
     @Override
     public Integer getId() {
         return id;

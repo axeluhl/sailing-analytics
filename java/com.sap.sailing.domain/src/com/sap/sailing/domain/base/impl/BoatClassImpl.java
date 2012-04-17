@@ -5,6 +5,8 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class BoatClassImpl extends NamedImpl implements BoatClass {
+    private static final long serialVersionUID = 7194912853476256420L;
+
     /**
      * If the averaged courses over ground differ by at least this degree angle, a maneuver will
      * be assumed. Note that this should be much less than the tack angle because averaging may
@@ -30,7 +32,7 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     
     private final long approximateManeuverDurationInMilliseconds;
 
-    private final  boolean typicallyStartsUpwind;
+    private final boolean typicallyStartsUpwind;
 
     private final Distance hullLength;
 

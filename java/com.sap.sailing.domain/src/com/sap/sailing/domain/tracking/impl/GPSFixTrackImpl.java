@@ -81,6 +81,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     private class DummyGPSFix extends DummyTimed implements GPSFix {
+        private static final long serialVersionUID = -6258506654181816698L;
+
         public DummyGPSFix(TimePoint timePoint) {
             super(timePoint);
         }

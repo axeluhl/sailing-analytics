@@ -274,6 +274,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             @Override
             public Event getEvent() {
                 return new Event() {
+                    private static final long serialVersionUID = -4908774269425170811L;
+
                     @Override
                     public String getName() {
                         return "A Mocked Test Event";

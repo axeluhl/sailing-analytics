@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 public class DeclinationRecordImpl implements Declination {
+    private static final long serialVersionUID = 6918630656182340186L;
     private final Position position;
     private final TimePoint timePoint;
     private final Bearing bearing;

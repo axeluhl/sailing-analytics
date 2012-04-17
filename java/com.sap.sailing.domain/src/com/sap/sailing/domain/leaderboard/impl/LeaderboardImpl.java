@@ -23,6 +23,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class LeaderboardImpl implements Named, Leaderboard {
+    private static final long serialVersionUID = -328091952760083438L;
     private final List<RaceInLeaderboard> races;
     private final SettableScoreCorrection scoreCorrection;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;

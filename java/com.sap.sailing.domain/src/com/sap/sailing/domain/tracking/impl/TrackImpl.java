@@ -17,6 +17,7 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     private final NavigableSet<Timed> fixes;
     
     protected static class DummyTimed implements Timed {
+        private static final long serialVersionUID = 6047311973718918856L;
         private final TimePoint timePoint;
         public DummyTimed(TimePoint timePoint) {
             super();

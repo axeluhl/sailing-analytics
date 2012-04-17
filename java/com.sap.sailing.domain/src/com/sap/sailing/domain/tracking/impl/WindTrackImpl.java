@@ -273,6 +273,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
 
     protected static class DummyWind extends DummyTimed implements Wind {
+        private static final long serialVersionUID = -311172509910032149L;
         public DummyWind(TimePoint timePoint) {
             super(timePoint);
         }

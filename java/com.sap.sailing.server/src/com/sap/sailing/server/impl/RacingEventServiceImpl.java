@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventFetcher;
@@ -367,6 +368,13 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
+    public void createEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
+        Event event = new EventImpl(eventName, com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(
+                boatClassName, boatClassTypicallyStartsUpwind));
+        eventsByName.put(eventName, event);
+    }
+
+    @Override
     public Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
         return new Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
@@ -406,6 +414,12 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
                 /* endOfTracking */ null, windStore), windStore, timeoutInMilliseconds);
     }
     
+    @Override
+    public void addRace(EventIdentifier addToEvent, RaceDefinition raceDefinition) {
+        Event event = getEvent(addToEvent);
+        event.addRace(raceDefinition);
+    }
+
     @Override
     public synchronized RacesHandle addRace(RaceTrackingConnectivityParameters params, WindStore windStore,
             long timeoutInMilliseconds) throws Exception {
