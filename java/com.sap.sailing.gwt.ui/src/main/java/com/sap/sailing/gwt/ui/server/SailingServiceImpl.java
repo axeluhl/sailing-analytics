@@ -1740,10 +1740,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public TrackedRace getExistingTrackedRace(RaceIdentifier eventNameAndRaceName) {
-        Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
-        RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
-        TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
-        return trackedRace;
+        return getService().getExistingTrackedRace(eventNameAndRaceName);
     }
     
     @Override
