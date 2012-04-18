@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
@@ -40,6 +42,13 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     
     protected TrackImpl(NavigableSet<Timed> fixes) {
         this.fixes = fixes;
+    }
+    
+    /**
+     * Synchronize the serialization such that no fixes are added while serializing
+     */
+    private synchronized void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
     }
 
     /**

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -164,7 +165,14 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         this.timePointsWithCachedNullResultFastContains = new HashSet<TimePoint>();
     }
     
-    private final void readObject(final ObjectInputStream s) throws ClassNotFoundException, IOException {
+    /**
+     * Synchronizes serialization on this object to avoid the cache being updated while being written.
+     */
+    private synchronized void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+    }
+    
+    private void readObject(final ObjectInputStream s) throws ClassNotFoundException, IOException {
         s.defaultReadObject();
         cacheInvalidationTimer = new Timer("TrackBasedEstimationWindTrackImpl cache invalidation timer for race "+getTrackedRace().getRace());
     }
@@ -245,7 +253,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      */
     private synchronized void invalidateCache() {
         synchronized (scheduledInvalidationInterval) {
-            // FIXME see bug 452: synchronize also on the cached fixes
             Iterator<WindWithConfidence<TimePoint>> iter = (scheduledInvalidationInterval.getStart() == null ? getCachedFixes()
                     : getCachedFixes().tailSet(scheduledInvalidationInterval.getStart(), /* inclusive */true)).iterator();
             while (iter.hasNext()) {
