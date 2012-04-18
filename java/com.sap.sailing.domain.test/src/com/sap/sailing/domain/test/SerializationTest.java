@@ -71,7 +71,7 @@ public class SerializationTest extends OnlineTracTracBasedTest {
                 }
             }
         }.start();
-        ObjectInputStream dis = new ObjectInputStreamWithConfigurableClassLoader(pis, getClass().getClassLoader());
+        ObjectInputStream dis = new ObjectInputStreamWithConfigurableClassLoader(pis);
         @SuppressWarnings("unchecked")
         T result = (T) dis.readObject();
         dis.close();

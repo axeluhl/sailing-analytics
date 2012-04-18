@@ -7,20 +7,13 @@ import java.io.ObjectStreamClass;
 import java.io.StreamCorruptedException;
 
 public class ObjectInputStreamWithConfigurableClassLoader extends ObjectInputStream {
-    private final ClassLoader loader;
-
-    public ObjectInputStreamWithConfigurableClassLoader(InputStream in, ClassLoader loader) throws IOException, StreamCorruptedException {
+    public ObjectInputStreamWithConfigurableClassLoader(InputStream in) throws IOException, StreamCorruptedException {
         super(in);
-        assert loader != null;
-        if (loader == null) {
-            throw new IllegalArgumentException("Illegal null argument to ObjectInputStreamWithLoader");
-        }
-        this.loader = loader;
     }
 
     @Override
     protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
         String className = classDesc.getName();
-        return loader.loadClass(className);
+        return Thread.currentThread().getContextClassLoader().loadClass(className);
     }
 }
