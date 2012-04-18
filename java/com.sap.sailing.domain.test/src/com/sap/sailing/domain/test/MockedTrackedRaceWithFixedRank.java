@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 
 public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
+    private static final long serialVersionUID = -8587203762630194172L;
     private final int rank;
     private final boolean started;
     private final RaceDefinition raceDefinition;

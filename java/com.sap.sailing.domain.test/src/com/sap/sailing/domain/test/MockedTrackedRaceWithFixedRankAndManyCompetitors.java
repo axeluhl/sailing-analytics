@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 
 public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrackedRaceWithFixedRank {
+    private static final long serialVersionUID = -6189437610363552577L;
     private final Set<Competitor> competitors;
     private final RaceDefinition raceDefinition;
     

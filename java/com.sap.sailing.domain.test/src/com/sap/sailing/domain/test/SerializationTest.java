@@ -29,6 +29,7 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sailing.util.ObjectInputStreamWithConfigurableClassLoader;
 
 public class SerializationTest extends OnlineTracTracBasedTest {
     public SerializationTest() throws MalformedURLException, URISyntaxException {
@@ -70,7 +71,7 @@ public class SerializationTest extends OnlineTracTracBasedTest {
                 }
             }
         }.start();
-        ObjectInputStream dis = new ObjectInputStream(pis);
+        ObjectInputStream dis = new ObjectInputStreamWithConfigurableClassLoader(pis, getClass().getClassLoader());
         @SuppressWarnings("unchecked")
         T result = (T) dis.readObject();
         dis.close();
