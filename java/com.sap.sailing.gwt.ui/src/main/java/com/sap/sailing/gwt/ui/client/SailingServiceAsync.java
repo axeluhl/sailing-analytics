@@ -289,9 +289,9 @@ public interface SailingServiceAsync {
      * @param oldName The old name of the group
      * @param newName The new name of the group
      * @param description The new description of the group
-     * @param leaderboards The new leaderboards of the group
+     * @param leaderboardNames The list of names of the new leaderboards of the group
      */
-    void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards, AsyncCallback<Void> callback);
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames, AsyncCallback<Void> callback);
 
     /**
      * Returns the mark passings and the data for the given {@link DetailType} of all competitors in

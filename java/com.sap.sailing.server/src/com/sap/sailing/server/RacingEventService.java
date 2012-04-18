@@ -326,4 +326,6 @@ public interface RacingEventService extends TrackedEventRegistry {
      */
     void addRace(EventIdentifier addToEvent, RaceDefinition raceDefinition);
 
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames);
+
 }

@@ -167,7 +167,7 @@ public interface SailingService extends RemoteService {
     
     LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description);
     
-    void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards);
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames);
 
     MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitors,
             Date toDate, long stepSize, DetailType detailType) 

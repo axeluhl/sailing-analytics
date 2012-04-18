@@ -2,10 +2,10 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.server.RacingEventService;
 
-public class RemoveColumnFromLeaderboard extends AbstractLeaderboardColumnOperation {
+public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation {
     private static final long serialVersionUID = 5425526859417359535L;
 
-    public RemoveColumnFromLeaderboard(String columnName, String leaderboardName) {
+    public RemoveLeaderboardColumn(String columnName, String leaderboardName) {
         super(leaderboardName, columnName);
     }
 
@@ -47,7 +47,7 @@ public class RemoveColumnFromLeaderboard extends AbstractLeaderboardColumnOperat
 
     @Override
     public RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(
-            RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp) {
+            RemoveLeaderboardColumn removeColumnFromLeaderboardServerOp) {
         if (affectsSameColumn(removeColumnFromLeaderboardServerOp)) {
             return AbstractRacingEventServiceOperation.getNoOp();
         } else {
@@ -57,7 +57,7 @@ public class RemoveColumnFromLeaderboard extends AbstractLeaderboardColumnOperat
 
     @Override
     public RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(
-            RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp) {
+            RemoveLeaderboardColumn removeColumnFromLeaderboardClientOp) {
         if (affectsSameColumn(removeColumnFromLeaderboardClientOp)) {
             return AbstractRacingEventServiceOperation.getNoOp();
         } else {

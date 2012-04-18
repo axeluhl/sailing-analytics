@@ -31,17 +31,17 @@ public interface RacingEventServiceOperation extends Operation<RacingEventServic
      * operation deals with the leaderboard column being removed by <code>removeColumnFromLeaderboardClientOp</code>,
      * the result will be <code>null</code>, meaning that this operation cannot be applied after the column has been removed.
      */
-    RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp);
+    RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(RemoveLeaderboardColumn removeColumnFromLeaderboardClientOp);
 
-    RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp);
+    RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(RemoveLeaderboardColumn removeColumnFromLeaderboardServerOp);
 
     RacingEventServiceOperation transformRenameLeaderboardColumnClientOp(RenameLeaderboardColumn renameLeaderboardColumnClientOp);
 
     RacingEventServiceOperation transformRenameLeaderboardColumnServerOp(RenameLeaderboardColumn renameLeaderboardColumnServerOp);
 
-    RacingEventServiceOperation transformAddLeaderboardClientOp(AddLeaderboard addLeaderboard);
+    RacingEventServiceOperation transformAddLeaderboardClientOp(CreateLeaderboard addLeaderboard);
 
-    RacingEventServiceOperation transformAddLeaderboardServerOp(AddLeaderboard addLeaderboard);
+    RacingEventServiceOperation transformAddLeaderboardServerOp(CreateLeaderboard addLeaderboard);
 
     RacingEventServiceOperation transformRemoveLeaderboardClientOp(RemoveLeaderboard removeLeaderboard);
 

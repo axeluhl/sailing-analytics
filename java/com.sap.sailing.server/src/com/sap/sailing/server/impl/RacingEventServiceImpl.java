@@ -860,6 +860,25 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
+    public void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames) {
+        if (!oldName.equals(newName)) {
+            renameLeaderboardGroup(oldName, newName);
+        }
+        LeaderboardGroup group = getLeaderboardGroupByName(newName);
+        if (!description.equals(group.getDescription())) {
+            group.setDescriptiom(description);
+        }
+        group.clearLeaderboards();
+        for (String leaderboardName : leaderboardNames) {
+            Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
+            if (leaderboard != null) {
+                group.addLeaderboard(leaderboard);
+            }
+        }
+        mongoObjectFactory.storeLeaderboardGroup(group);
+    }
+
+    @Override
     public void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup) {
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
     }

@@ -522,9 +522,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void removeAndUntrackRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception{
         Event event = getEvent(eventAndRaceidentifier);
-        if(event!= null) {
+        if (event!= null) {
             RaceDefinition race = getRace(eventAndRaceidentifier);
-            if(race != null) {
+            if (race != null) {
                 getService().removeRace(event, race);
             }
         }
@@ -1823,22 +1823,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards) {
-        if (!oldName.equals(newName)) {
-            getService().renameLeaderboardGroup(oldName, newName);
-        }
-        LeaderboardGroup group = getService().getLeaderboardGroupByName(newName);
-        if (!description.equals(group.getDescription())) {
-            group.setDescriptiom(description);
-        }
-        group.clearLeaderboards();
-        for (LeaderboardDTO leaderboardDTO : leaderboards) {
-            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardDTO.name);
-            if (leaderboard != null) {
-                group.addLeaderboard(leaderboard);
-            }
-        }
-        getService().updateStoredLeaderboardGroup(group);
+    public void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames) {
+        getService().updateLeaderboardGroup(oldName, newName, description, leaderboardNames);
     }
 
 }
