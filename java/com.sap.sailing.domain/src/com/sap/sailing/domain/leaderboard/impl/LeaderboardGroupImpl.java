@@ -8,6 +8,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
 public class LeaderboardGroupImpl implements LeaderboardGroup {
     
+    private static final long serialVersionUID = 2035927369446736934L;
     private String name;
     private String description;
     private List<Leaderboard> leaderboards;

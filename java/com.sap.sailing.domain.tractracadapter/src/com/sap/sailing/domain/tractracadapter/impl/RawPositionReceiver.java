@@ -19,6 +19,8 @@ import com.tractrac.clientmodule.data.ICallbackData;
 public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetitor, CompetitorPositionRawData, Boolean> {
     private static final Logger logger = Logger.getLogger(RawPositionReceiver.class.getName());
 
+    private int received;
+
     public RawPositionReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
         super(domainFactory, tractracEvent, trackedEvent);
     }
@@ -46,7 +48,12 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
 
     @Override
     protected void handleEvent(Triple<RaceCompetitor, CompetitorPositionRawData, Boolean> event) {
-        System.out.print("P");
+        if (received++ % 1000 == 0) {
+            System.out.print("P");
+            if ((received / 1000 + 1) % 80 == 0) {
+                System.out.println();
+            }
+        }
         Race race = event.getA().getRace();
         DynamicTrackedRace trackedRace = getTrackedRace(race);
         if (trackedRace != null) {

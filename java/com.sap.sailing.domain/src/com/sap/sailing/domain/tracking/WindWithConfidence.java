@@ -15,4 +15,5 @@ import com.sap.sailing.domain.tracking.impl.ScalableWind;
  *            <code>Pair&lt;TimePoint, Position&gt;</code>
  */
 public interface WindWithConfidence<RelativeTo> extends HasConfidenceAndIsScalable<ScalableWind, Wind, RelativeTo> {
+    boolean useSpeed();
 }

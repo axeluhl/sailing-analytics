@@ -1,17 +1,17 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -34,12 +34,12 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
@@ -56,6 +56,14 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 
+/**
+ * Displays a {@link WindChart} and a table of currently tracked races. The user can configure whether a race
+ * is assumed to start with an upwind leg, show the wind data for the race selected in a chart, and exclude specific
+ * wind sources from the overall (combined) wind computation, e.g., for performance reasons.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class WindPanel extends FormPanel implements EventDisplayer, WindShower, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -71,26 +79,20 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final TextColumn<WindDTO> dampenedWindDirectionInDegColumn;
     private final TrackedEventsComposite trackedEventsComposite;
     private final RaceSelectionProvider raceSelectionProvider;
-    private final ListBox windSourceSelection;
+    private final WindSourcesToExcludeSelector windSourcesToExcludeSelector;
     private final Map<WindSource, ListDataProvider<WindDTO>> windLists;
     private final CheckBox raceIsKnownToStartUpwindBox;
     private final WindChart windChart;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    public WindPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            EventRefresher eventRefresher, final StringMessages stringMessages) {
+    public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            ErrorReporter errorReporter, EventRefresher eventRefresher, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.raceSelectionProvider = new RaceSelectionModel();
         windLists = new HashMap<WindSource, ListDataProvider<WindDTO>>();
-        windSourceSelection = new ListBox();
-        windSourceSelection.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                setRaceIsKnownToStartUpwind(/* runOnSuccess */ null);
-            }
-        });
+        windSourcesToExcludeSelector = new WindSourcesToExcludeSelector(sailingService, stringMessages, errorReporter);
         removeColumn = new IdentityColumn<WindDTO>(new ActionCell<WindDTO>(stringMessages.remove(), new Delegate<WindDTO>() {
             @Override
             public void execute(final WindDTO wind) {
@@ -154,8 +156,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         grid.setWidget(0, 1, windSettingPanel);
         HorizontalPanel windSourceSelectionPanel = new HorizontalPanel();
         windSourceSelectionPanel.setSpacing(10);
-        windSourceSelectionPanel.add(new Label(stringMessages.windSource()));
-        windSourceSelectionPanel.add(windSourceSelection);
+        windSourceSelectionPanel.add(windSourcesToExcludeSelector);
         raceIsKnownToStartUpwindBox = new CheckBox(stringMessages.raceIsKnownToStartUpwind());
         windSourceSelectionPanel.add(raceIsKnownToStartUpwindBox);
         raceIsKnownToStartUpwindBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -179,8 +180,9 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         });
         windSourceSelectionPanel.add(showConfigAnchor);
         grid.setWidget(1, 0, windSourceSelectionPanel);
-        windChart = new WindChart(sailingService, /* race selection provider */ raceSelectionProvider,
-                new Timer(PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, errorReporter, 400, false);
+        windChart = new WindChart(sailingService, raceSelectionProvider, new Timer(
+                PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, asyncActionsExecutor, errorReporter, false, false);
+        windChart.onResize();
         grid.setWidget(2, 0, windChart.getEntryWidget());
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);
@@ -204,14 +206,15 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         sailingService.getWindInfo(raceIdentifier,
         // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
                 null, null, // use race start and time of newest event as default time period
+                WindChart.DEFAULT_RESOLUTION_IN_MILLISECONDS,
                 null, // retrieve data on all wind sources
                 new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override
                     public void onSuccess(WindInfoForRaceDTO result) {
                         if (result != null) {
+                            updateWindSourcesToExclude(result, raceIdentifier);
                             showWindForRace(result);
                             windSettingPanel.setEnabled(true);
-                            updateWindSources(result);
                         } else {
                             clearWindDisplay(); // no wind known for untracked race
                         }
@@ -225,27 +228,16 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
                 });
     }
     
-    private void updateWindSources(WindInfoForRaceDTO result) {
-        for (WindSource windSource : result.windTrackInfoByWindSource.keySet()) {
-            boolean found = false;
-            int i=0;
-            while (!found && i<windSourceSelection.getItemCount()) {
-                if (windSource.name().equals(windSourceSelection.getItemText(i))) {
-                    found = true;
-                } else {
-                    i++;
-                }
-            }
-            if (!found) {
-                windSourceSelection.addItem(windSource.name());
-            }
-        }
+    private void updateWindSourcesToExclude(WindInfoForRaceDTO result, RaceIdentifier raceIdentifier) {
+        windSourcesToExcludeSelector.update(raceIdentifier, result.windTrackInfoByWindSource.keySet(), result.windSourcesToExclude);
     }
 
     private void clearWindDisplay() {
         grid.setWidget(2, 0, null);
         windSettingPanel.setEnabled(false);
         windLists.clear();
+        final Set<WindSource> emptySet = Collections.emptySet();
+        windSourcesToExcludeSelector.update(null, emptySet, emptySet);
     }
 
     private void showWindForRace(WindInfoForRaceDTO result) {
@@ -254,47 +246,53 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         VerticalPanel windDisplay = new VerticalPanel();
         grid.setWidget(3, 0, windDisplay);
         windChart.updateStripChartSeries(result, /* append */ false);
+        windChart.onResize();
+        // restrict tabular display to WEB sources; there, the REMOVE button is relevant; for all others, the chart has to do
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
-            Label windSourceLabel = new Label(stringMessages.windSource()+": "+e.getKey()+
-                    ", "+stringMessages.dampeningInterval()+" "+e.getValue().dampeningIntervalInMilliseconds+"ms");
-            windDisplay.add(windSourceLabel);
-            timeColumn.setSortable(true);
-            speedInKnotsColumn.setSortable(true);
-            windDirectionInDegColumn.setSortable(true);
-            dampenedSpeedInKnotsColumn.setSortable(true);
-            dampenedWindDirectionInDegColumn.setSortable(true);
-            CellTable<WindDTO> windTable = new CellTable<WindDTO>(/* pageSize */ 10000);
             if (e.getKey().getType() == WindSourceType.WEB) {
-                // only the WEB wind source is editable, hence has a "Remove" column
-                windTable.addColumn(removeColumn, "Remove");
-            }
-            windTable.addColumn(timeColumn, "Time");
-            windTable.addColumn(speedInKnotsColumn, "Speed (kn)");
-            windTable.addColumn(windDirectionInDegColumn, "From (deg)");
-            windTable.addColumn(dampenedSpeedInKnotsColumn, "Avg Speed (kn)");
-            windTable.addColumn(dampenedWindDirectionInDegColumn, "Avg From (deg)");
-            ListDataProvider<WindDTO> windList = new ListDataProvider<WindDTO>(e.getValue().windFixes);
-            windLists.put(e.getKey(), windList);
-            windList.addDataDisplay(windTable);
-            Handler columnSortHandler = getWindTableColumnSortHandler(windList.getList(), timeColumn,
-                    speedInKnotsColumn, windDirectionInDegColumn, dampenedSpeedInKnotsColumn, dampenedWindDirectionInDegColumn);
-            windTable.addColumnSortHandler(columnSortHandler);
-            List<ColumnSortInfo> sortedColumnList = new ArrayList<ColumnSortInfo>();
-            if (columnSortList != null) {
-                for (int i=0; i<columnSortList.size(); i++) {
-                    sortedColumnList.add(columnSortList.get(i));
+                Label windSourceLabel = new Label(stringMessages.windSource() + ": " + e.getKey() + ", "
+                        + stringMessages.dampeningInterval() + " " + e.getValue().dampeningIntervalInMilliseconds
+                        + "ms");
+                windDisplay.add(windSourceLabel);
+                timeColumn.setSortable(true);
+                speedInKnotsColumn.setSortable(true);
+                windDirectionInDegColumn.setSortable(true);
+                dampenedSpeedInKnotsColumn.setSortable(true);
+                dampenedWindDirectionInDegColumn.setSortable(true);
+                CellTable<WindDTO> windTable = new CellTable<WindDTO>(/* pageSize */10000);
+                if (e.getKey().getType() == WindSourceType.WEB) {
+                    // only the WEB wind source is editable, hence has a "Remove" column
+                    windTable.addColumn(removeColumn, "Remove");
                 }
-            }
-            columnSortList = windTable.getColumnSortList();
-            if (sortedColumnList.isEmpty()) {
-                columnSortList.push(timeColumn);
-            } else {
-                for (ColumnSortInfo sortInfo : sortedColumnList) {
-                    columnSortList.push(sortInfo);
+                windTable.addColumn(timeColumn, "Time");
+                windTable.addColumn(speedInKnotsColumn, "Speed (kn)");
+                windTable.addColumn(windDirectionInDegColumn, "From (deg)");
+                windTable.addColumn(dampenedSpeedInKnotsColumn, "Avg Speed (kn)");
+                windTable.addColumn(dampenedWindDirectionInDegColumn, "Avg From (deg)");
+                ListDataProvider<WindDTO> windList = new ListDataProvider<WindDTO>(e.getValue().windFixes);
+                windLists.put(e.getKey(), windList);
+                windList.addDataDisplay(windTable);
+                Handler columnSortHandler = getWindTableColumnSortHandler(windList.getList(), timeColumn,
+                        speedInKnotsColumn, windDirectionInDegColumn, dampenedSpeedInKnotsColumn,
+                        dampenedWindDirectionInDegColumn);
+                windTable.addColumnSortHandler(columnSortHandler);
+                List<ColumnSortInfo> sortedColumnList = new ArrayList<ColumnSortInfo>();
+                if (columnSortList != null) {
+                    for (int i = 0; i < columnSortList.size(); i++) {
+                        sortedColumnList.add(columnSortList.get(i));
+                    }
                 }
-                ColumnSortEvent.fire(windTable, columnSortList);
+                columnSortList = windTable.getColumnSortList();
+                if (sortedColumnList.isEmpty()) {
+                    columnSortList.push(timeColumn);
+                } else {
+                    for (ColumnSortInfo sortInfo : sortedColumnList) {
+                        columnSortList.push(sortInfo);
+                    }
+                    ColumnSortEvent.fire(windTable, columnSortList);
+                }
+                windDisplay.add(windTable);
             }
-            windDisplay.add(windTable);
         }
     }
     
@@ -343,14 +341,12 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         List<RaceIdentifier> selection = raceSelectionProvider.getSelectedRaces();
         if (selection != null && !selection.isEmpty()) {
             final RaceIdentifier selectedRace = selection.get(0);
-            final String windSourceName = windSourceSelection.getItemText(windSourceSelection.getSelectedIndex());
             sailingService.setRaceIsKnownToStartUpwind(selectedRace,
                     raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(WindPanel.this.stringMessages.errorWhileTryingToSetWindSourceForRace()+
-                                    " "+selectedRace+" "+WindPanel.this.stringMessages.to()+" "+
-                                    windSourceName+": "+caught.getMessage());
+                                    " "+selectedRace+": "+caught.getMessage());
                         }
                         @Override
                         public void onSuccess(Void result) {

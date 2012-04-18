@@ -13,17 +13,18 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -69,11 +70,15 @@ public interface SailingServiceAsync {
      */
     void removeAndUntrackRace(EventAndRaceIdentifier eventAndRaceidentifier, AsyncCallback<Void> callback);
 
-    /**
-     * @param windSources if <code>null</code>, information about all available wind sources will be provided
-     */
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources,
             AsyncCallback<WindInfoForRaceDTO> callback);
+
+    /**
+     * @param from if <code>null</code>, the tracked race's start of tracking is used
+     * @param to if <code>null</code>, the tracked race's time point of newest event is used
+     */
+    void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
+            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
      * @param windSourceTypeNames
@@ -83,6 +88,22 @@ public interface SailingServiceAsync {
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
             double latDeg, double lngDeg, Collection<String> windSourceTypeNames,
             AsyncCallback<WindInfoForRaceDTO> callback);
+
+    /**
+     * Same as {@link #getWindInfo(RaceIdentifier, Date, long, int, double, double, Collection, AsyncCallback)}, only
+     * that the wind is not requested for a specific position, but instead the wind sources associated with the tracked
+     * race identified by <code>raceIdentifier</code> are requested to deliver their original position. This will in
+     * particular preserve the positions of actual measurements and will deliver the averaged positions for averaged /
+     * combined wind read-outs.
+     * 
+     * @param from
+     *            must not be <code>null</code>
+     * @param numberOfFixes
+     *            no matter how great this value is chosen, never returns data beyond the newest event recorded in the
+     *            race
+     */
+    void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
+            Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
     
@@ -108,8 +129,10 @@ public interface SailingServiceAsync {
             boolean extrapolate, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
 
     void getRaceTimesInfo(RaceIdentifier raceIdentifier, AsyncCallback<RaceTimesInfoDTO> callback);
+    
+    void getRaceTimesInfos(Collection<RaceIdentifier> raceIdentifiers, AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
-    void getMarkPositions(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<MarkDTO>> asyncCallback);
+    void getCoursePositions(RaceIdentifier raceIdentifier, Date date, AsyncCallback<CourseDTO> asyncCallback);
 
     void getQuickRanks(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<QuickRankDTO>> callback);
 
@@ -123,7 +146,7 @@ public interface SailingServiceAsync {
      *            result ({@link LeaderboardEntryDTO#legDetails} will be <code>null</code> for all
      *            {@link LeaderboardEntryDTO} objects contained). Otherwise, the {@link LeaderboardEntryDTO#legDetails}
      *            list will contain one entry per leg of the race {@link Course} for those race columns whose
-     *            {@link RaceInLeaderboard#getName() name} is contained in
+     *            {@link RaceInLeaderboard#getType() name} is contained in
      *            <code>namesOfRacesForWhichToLoadLegDetails</code>. For all other columns,
      *            {@link LeaderboardEntryDTO#legDetails} is <code>null</code>.
      */
@@ -183,15 +206,15 @@ public interface SailingServiceAsync {
     void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName,
             AsyncCallback<Void> callback);
 
-    void updateLeaderboardCarryValue(String leaderboardName, String competitorName, Integer carriedPoints, AsyncCallback<Void> callback);
+    void updateLeaderboardCarryValue(String leaderboardName, String competitorID, Integer carriedPoints, AsyncCallback<Void> callback);
 
-    void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorName, String raceColumnName,
+    void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorID, String raceColumnName,
             String maxPointsReasonAsString, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
 
-    void updateLeaderboardScoreCorrection(String leaderboardName, String competitorName, String raceName,
+    void updateLeaderboardScoreCorrection(String leaderboardName, String competitorID, String raceName,
             Integer correctedScore, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
 
-    void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorName, String displayName,
+    void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorID, String displayName,
             AsyncCallback<Void> callback);
 
 	void moveLeaderboardColumnUp(String leaderboardName, String columnName,
@@ -283,4 +306,11 @@ public interface SailingServiceAsync {
 
     void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
             AsyncCallback<Void> callback);
+
+    void setWindSourcesToExclude(RaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude,
+            AsyncCallback<Void> callback);
+
+    void getRaceMapData(RaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
+            Map<CompetitorDTO, Date> to, boolean extrapolate, AsyncCallback<RaceMapDataDTO> callback);
+
 }

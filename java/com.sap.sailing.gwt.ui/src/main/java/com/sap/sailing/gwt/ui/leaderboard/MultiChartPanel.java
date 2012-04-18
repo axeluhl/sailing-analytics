@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -23,11 +24,11 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
  * 
  */
 public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> implements Component<MultiChartSettings> {
-    public MultiChartPanel(SailingServiceAsync sailingService, CompetitorSelectionProvider competitorSelectionProvider,
+    public MultiChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, CompetitorSelectionProvider competitorSelectionProvider,
             RaceSelectionProvider raceSelectionProvider, Timer timer, final StringMessages stringMessages, 
-            ErrorReporter errorReporter, int chartHeight, boolean compactChart) {
-        super(sailingService, competitorSelectionProvider, raceSelectionProvider, timer, stringMessages, errorReporter,
-                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, chartHeight, compactChart);
+            ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
+        super(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer, stringMessages, errorReporter,
+                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, compactChart, allowTimeAdjust);
     }
 
     @Override

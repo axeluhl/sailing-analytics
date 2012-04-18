@@ -46,6 +46,8 @@ public abstract class TrackBasedTest {
     /**
      * Creates a simple two-lap upwind-downwind course for a race/event with given name and boat class name with the
      * competitors specified. The marks are laid out such that the upwind/downwind leg detection should be alright.
+     * Wind is coming from the north. A single wind fix with bearing 180deg (from=0deg) is added to the {@link WindSourceType#WEB}
+     * wind track using <code>timePointForFixes</code> as time point.
      * 
      * @param timePointForFixes
      *            a wind fix will be inserted into the {@link WindSourceType#WEB} wind track which is aligned with the
@@ -73,7 +75,8 @@ public abstract class TrackBasedTest {
         Course course = new CourseImpl(raceName, waypoints);
         RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitors);
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(trackedEvent, race, EmptyWindStore.INSTANCE,
-                /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000);
+                /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
+                /* delay for wind estimation cache invalidation */ 0);
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
         DegreePosition topPosition = new DegreePosition(54.48, 10.24);
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.234451), new MillisecondsTimePoint(0)));
@@ -82,9 +85,8 @@ public abstract class TrackBasedTest {
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.234451), MillisecondsTimePoint.now()));
         trackedRace.getOrCreateTrack(right).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.24), MillisecondsTimePoint.now()));
         trackedRace.getOrCreateTrack(windwardMark).addGPSFix(new GPSFixImpl(topPosition, MillisecondsTimePoint.now()));
-        trackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.WEB)).add(
-                new WindImpl(topPosition, timePointForFixes,
-                        new KnotSpeedWithBearingImpl(/* speedInKnots */14.7, new DegreeBearingImpl(180))));
+        trackedRace.recordWind(new WindImpl(topPosition, timePointForFixes, new KnotSpeedWithBearingImpl(
+                /* speedInKnots */14.7, new DegreeBearingImpl(180))), new WindSourceImpl(WindSourceType.WEB));
         return trackedRace;
     }
 

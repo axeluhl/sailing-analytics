@@ -34,12 +34,11 @@ public class DateParser {
         }
     }
 
-    private static Calendar getCalendar(String isodate)
+    private static Calendar getCalendar(Calendar calendar, String isodate)
             throws InvalidDateException {
         // YYYY-MM-DD[ T]hh:mm:ss.sTZD
         StringTokenizer st = new StringTokenizer(isodate, "-T:.,+Z ", true);
 
-        Calendar calendar = new GregorianCalendar();
         calendar.clear();
         try {
             // Year
@@ -174,6 +173,23 @@ public class DateParser {
     /**
      * Parse the given string in ISO 8601 format and build a Date object.
      * 
+     * @param calendar
+     *            the calendar providing particularly the time zone relative to which to parse if no time zone is
+     *            provided in the <code>isodate</code> string
+     * @param isodate
+     *            the date in ISO 8601 format
+     * @return a Date instance
+     * @exception InvalidDateException
+     *                if the date is not valid
+     */
+    public static Date parse(Calendar calendar, String isodate) throws InvalidDateException {
+        Calendar resultCalendar = getCalendar(calendar, isodate);
+        return resultCalendar.getTime();
+    }
+    
+    /**
+     * Parse the given string in ISO 8601 format and build a Date object.
+     * 
      * @param isodate
      *            the date in ISO 8601 format
      * @return a Date instance
@@ -181,7 +197,12 @@ public class DateParser {
      *                if the date is not valid
      */
     public static Date parse(String isodate) throws InvalidDateException {
-        Calendar calendar = getCalendar(isodate);
+        Calendar calendar = getCalendar(new GregorianCalendar(), isodate);
+        return calendar.getTime();
+    }
+    
+    public static Date parseUTC(String isodate) throws InvalidDateException {
+        Calendar calendar = getCalendar(new GregorianCalendar(TimeZone.getTimeZone("UTC")), isodate);
         return calendar.getTime();
     }
 

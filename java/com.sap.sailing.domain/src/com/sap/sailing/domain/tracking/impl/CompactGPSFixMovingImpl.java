@@ -20,6 +20,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
  *
  */
 public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFixMoving {
+    private static final long serialVersionUID = 761582024504236533L;
     private final double knotSpeed;
     private final double degBearing;
     

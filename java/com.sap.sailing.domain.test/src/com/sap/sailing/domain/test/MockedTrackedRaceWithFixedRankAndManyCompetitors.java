@@ -17,6 +17,7 @@ public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrac
         competitors = new HashSet<Competitor>();
         competitors.add(competitor);
         this.raceDefinition = new RaceDefinition() {
+            private static final long serialVersionUID = 8878878939443845646L;
             @Override
             public String getName() {
                 return null;

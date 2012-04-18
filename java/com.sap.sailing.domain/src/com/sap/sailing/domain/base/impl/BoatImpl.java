@@ -5,6 +5,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class BoatImpl extends NamedImpl implements Boat {
+    private static final long serialVersionUID = 3489730487528955788L;
     private final BoatClass boatClass;
     private final String sailID;
     

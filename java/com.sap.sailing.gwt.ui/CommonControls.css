@@ -88,6 +88,8 @@
 	display: none;
 }
 
+
+
 .breadcrumbPanel-ActiveBreadcrumb {
 	font-size: 18px;
 	font-family: 'UbuntuLight',Arial,Verdana,sans-serif;
@@ -105,3 +107,190 @@
 	.breadcrumbPanel-ActiveBreadcrumb, .breadcrumbPanel-InactiveBreadcrumb, .breadcrumbPanel-NextArrow {
 	color:#A1A1A1;
 	}
+
+.gwt-SplitLayoutPanel-HDragger {
+	width: 20px;
+}
+
+.gwt-ToggleButton {
+	background: url(images/btn-cta-orangeleft.png) center top repeat-x;
+	padding: 8px;
+	margin: 0 11px 0 0;
+	border: 0;
+}
+
+.gwt-ToggleButton-down {
+	background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+	color: #fff;
+}
+
+.gwt-SplitLayoutPanel-HDragger {
+	width: 12px;
+}
+
+.gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
+	background: url(images/btn-cta-orangeleft-down.png) center top repeat-x;
+	color: #fff;
+}
+
+.titleLabel {
+	position: relative;
+	margin: 0 auto;
+	width: 400px;
+	text-align: center;
+	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
+	font-size: 18px;
+	color: #fff;
+	margin-top: 22px;	
+}
+
+
+.gwt-MenuBarPopup .menuPopupTopLeft {
+    background: none !important;
+}
+
+.gwt-MenuBarPopup .menuPopupTopCenter {
+    background: none !important;
+}
+
+.gwt-MenuBarPopup .menuPopupTopCenter {
+    background: none !important;
+}
+
+.gwt-MenuBarPopup .menuPopupTopRight {
+    background: none !important;
+}
+
+.gwt-MenuBarPopup .menuPopupMiddleLeft {
+    background: none !important;
+}
+
+.gwt-MenuBarPopup .menuPopupMiddleRight {
+    background: none !important;
+}
+
+.gwt-MenuBarPopup .menuPopupMiddleRight {
+    background: none !important;
+}
+
+.gwt-MenuBarPopup .menuPopupBottomCenter {
+    background: none !important;
+}
+
+.gwt-MenuBarPopup .menuPopupBottomRight {
+    background: none !important;
+}
+
+.gwt-MenuBarPopup .menuPopupBottomLeft {
+    background: none !important;
+}
+
+.gwt-MenuBar-vertical .gwt-MenuItem {
+    padding: 10px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+.gwt-MenuBar .gwt-MenuItem-selected {
+    background: none repeat scroll 0 0 #efaa00;
+}
+
+.timeLinePanel {
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	height: 122px;
+	z-index: 9;
+	background: #DDDCDC;
+	box-shadow: 0 0 20px #858585;
+	-webkit-box-shadow: 0 0 20px #858585;
+	-moz-box-shadow: 0 0 20px #858585;
+}
+
+.timeLineInnerPanel {
+	/*height: 100%;*/
+	margin: 0 12px;
+	margin-top: 10px;
+	background: #dddcdc;
+	/*padding: 38px 24px 0 24px;*/
+}
+
+.timeLineInnerBgPanel {
+	background: url(images/timeslider-bg.png) 0 -2px repeat-x #f6f6f6;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	padding: 0px 10px 0;
+	border: 1px solid #a6a6a6;
+}
+
+.footerShadowPanel {
+	position: fixed;
+	height: 15px;
+	bottom: 0;
+	background: url(images/footer_shadow.png) left bottom repeat-x;
+	width: 100%;
+	z-index: 10;
+}
+
+.timePanel-controls {
+	margin: 15px 0 0 0;
+}
+
+.timePanel-controls-play {
+}
+
+.timePanel-controls-playSpeed {
+	vertical-align: middle;
+	padding: 5px;
+	line-height: 25px;
+}
+
+.timePanel-label {
+}
+
+.timePanel-controls-time {
+}
+
+.timePanel-controls-timeDelay {
+
+}
+
+.LogoAndTitlePanel {
+	height: 68px;
+	font-family: Arial, Verdana, sans-serif;
+	position: fixed;
+	width: 100%;
+	top: 0;
+	background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
+	background-position: center top, 0 0;
+	background-repeat: no-repeat, repeat-x;
+	box-shadow: 0 0 20px #858585;
+	-moz-box-shadow: 0 0 20px #858585;
+	-webkit-box-shadow: 0 0 20px #858585;
+}
+
+.LogoAndTitlePanel:after {
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+.sapLogo {
+	float: left;
+	margin: 13px 0 0 12px;
+}
+
+.sailingAnalyticsLabelPanel {
+	margin: 10px 0 0 0;
+}
+
+.sailingAnalyticsLabel {
+	float: left;
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+	margin: 15px 0 0 0;
+}

@@ -1,26 +1,26 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.BearingWithConfidence;
 import com.sap.sailing.domain.base.CourseChange;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
-import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
-import com.sap.sailing.domain.confidence.Weigher;
+import com.sap.sailing.domain.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -35,15 +35,35 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  *
  */
 public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
+    private static final long serialVersionUID = 6882509533928049084L;
+
     private final static Logger logger = Logger.getLogger(WindTrackImpl.class.getName());
     
+    private final static double DEFAULT_BASE_CONFIDENCE = 0.9;
+    
+    private final double baseConfidence;
+    
     private long millisecondsOverWhichToAverage;
+    
+    private final boolean useSpeed;
+    
     private final Set<WindListener> listeners;
 
-    public WindTrackImpl(long millisecondsOverWhichToAverage) {
+    public WindTrackImpl(long millisecondsOverWhichToAverage, boolean useSpeed) {
+        this(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, useSpeed);
+    }
+    
+    /**
+     * @param baseConfidence
+     *            the confidence to attribute to the raw wind fixes in this track
+     * @param useSpeed TODO
+     */
+    public WindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence, boolean useSpeed) {
         super(new ArrayListNavigableSet<Timed>(WindComparator.INSTANCE));
+        this.baseConfidence = baseConfidence;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         listeners = new HashSet<WindListener>();
+        this.useSpeed = useSpeed;
     }
     
     @Override
@@ -121,33 +141,36 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      */
     @Override
     public synchronized Wind getAveragedWind(Position p, TimePoint at) {
-        final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getEstimatedWindUnsynchronized(p, at);
+        final WindWithConfidence<Pair<Position, TimePoint>> estimatedWindUnsynchronized = getAveragedWindUnsynchronized(p, at);
         return estimatedWindUnsynchronized == null ? null : estimatedWindUnsynchronized.getObject();
     }
     
     @Override
     public synchronized WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
-        return getEstimatedWindUnsynchronized(p, at);
+        return getAveragedWindUnsynchronized(p, at);
     }
 
     /**
-     * This method implements the functionality of the {@link #getAveragedWind(Position, TimePoint)} interface
-     * method. However, not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses
-     * may use this carefully if they can guarantee there are no concurrency issues with the internal fixes
-     * while iterating over the result of {@link #getInternalFixes()}.
+     * This method implements the functionality of the {@link #getAveragedWind(Position, TimePoint)} interface method.
+     * However, not being <code>synchronized</code>, it does not obtain this object's monitor. Subclasses may use this
+     * carefully if they can guarantee there are no concurrency issues with the internal fixes while iterating over the
+     * result of {@link #getInternalFixes()}.
+     * 
+     * @param p
+     *            if <code>null</code>, the averaged position of the original wind fixes is returned; otherwise,
+     *            <code>p</code> is used as the result's position and may be used for confidence determination.
      */
-    protected WindWithConfidence<Pair<Position, TimePoint>> getEstimatedWindUnsynchronized(Position p, TimePoint at) {
-        // TODO aggregate confidences, using a weigher
+    protected WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
         DummyWind atTimed = new DummyWind(at);
+        Pair<Position, TimePoint> relativeTo = new Pair<Position, TimePoint>(p, at);
         NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */ false);
         NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */ true);
         Iterator<Wind> beforeIter = beforeSet.descendingIterator();
         Iterator<Wind> afterIter = afterSet.iterator();
-        double knotSum = 0;
-        // TODO bug #345: also measure speed with confidence; return confidence
-        Weigher<TimePoint> weigher = ConfidenceFactory.INSTANCE.createLinearTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind()/10);
-        BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
-        int count = 0;
+        // don't measure speed with separate confidence; return confidence obtained from averaging bearings
+        ConfidenceBasedWindAverager<Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE.createWindAverager(new PositionAndTimePointWeigher(
+                /* halfConfidenceAfterMilliseconds */ getMillisecondsOverWhichToAverageWind()/10));
+        List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAverage = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
         long beforeDistanceToAt = 0;
         long afterDistanceToAt = 0;
         TimePoint beforeIntervalEnd = null;
@@ -166,13 +189,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         }
         do {
             if (beforeWind != null && (beforeDistanceToAt <= afterDistanceToAt || afterWind == null)) {
+                windFixesToAverage.add(new WindWithConfidenceImpl<Pair<Position, TimePoint>>(beforeWind, getBaseConfidence(),
+                        new Pair<Position, TimePoint>(beforeWind.getPosition(), beforeWind.getTimePoint()), useSpeed));
                 if (beforeIntervalEnd == null) {
                     beforeIntervalEnd = beforeWind.getTimePoint();
                 }
-                knotSum += beforeWind.getKnots();
-                // TODO bug #346: replace confidence with passed-through confidence of beforeWind fix's confidence
-                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(beforeWind.getBearing(), /* confidence */ 0.9, beforeWind.getTimePoint()));
-                count++;
                 if (beforeIter.hasNext()) {
                     beforeWind = beforeIter.next();
                     beforeDistanceToAt = at.asMillis() - beforeWind.getTimePoint().asMillis();
@@ -181,13 +202,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                     beforeWind = null;
                 }
             } else if (afterWind != null) {
+                windFixesToAverage.add(new WindWithConfidenceImpl<Pair<Position, TimePoint>>(afterWind, getBaseConfidence(),
+                        new Pair<Position, TimePoint>(afterWind.getPosition(), afterWind.getTimePoint()), useSpeed));
                 if (afterIntervalStart == null) {
                     afterIntervalStart = afterWind.getTimePoint();
                 }
-                knotSum += afterWind.getKnots();
-                // TODO bug #346: replace confidence with passed-through confidence of beforeWind fix's confidence
-                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(afterWind.getBearing(), /* confidence */ 0.9, afterWind.getTimePoint()));
-                count++;
                 if (afterIter.hasNext()) {
                     afterWind = afterIter.next();
                     afterDistanceToAt = afterWind.getTimePoint().asMillis() - at.asMillis();
@@ -197,15 +216,20 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                 }
             }
         } while (beforeIntervalLength + afterIntervalLength < getMillisecondsOverWhichToAverageWind() && (beforeWind != null || afterWind != null));
-        if (count == 0) {
+        if (windFixesToAverage.isEmpty()) {
             return null;
         } else {
-            // TODO bug #346: pass on confidence
-            BearingWithConfidence<TimePoint> average = bearingCluster.getAverage(at);
-            SpeedWithBearing avgWindSpeed = new KnotSpeedWithBearingImpl(knotSum / count, average == null ? null : average.getObject());
-            return new WindWithConfidenceImpl<Pair<Position,TimePoint>>(new WindImpl(p, at, avgWindSpeed), /* TODO confidence */ 0.5,
-                    new Pair<Position, TimePoint>(p, at));
+            WindWithConfidence<Pair<Position, TimePoint>> average = windAverager.getAverage(windFixesToAverage, relativeTo);
+            return average;
         }
+    }
+
+    /**
+     * The base confidence attributed to this track. 1.0 would mean that the individual fixes stored by this track
+     * represent <em>the truth</em>. 0.0 means "no relevance at all."
+     */
+    private double getBaseConfidence() {
+        return baseConfidence;
     }
     
     @Override
@@ -251,6 +275,7 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
 
     protected static class DummyWind extends DummyTimed implements Wind {
+        private static final long serialVersionUID = -311172509910032149L;
         public DummyWind(TimePoint timePoint) {
             super(timePoint);
         }

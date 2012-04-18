@@ -17,8 +17,7 @@
   <!-- Google Maps API -->
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
-  <!-- Flot-Gwt API -->
-  <inherits name='ca.nanometrics.gflot.GFlot'/>
+  <!-- Highcharts API -->
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
   
   <!-- Other module inherits                                      -->
@@ -30,8 +29,11 @@
   <!-- Specify the paths for translatable code                    -->
   <extend-property name="locale" values="de"/>
   <source path='client'/>
+  <source path='adminconsole'/>
   <source path='leaderboard'/>
+  <source path='raceboard'/>
   <source path='leaderboardedit'/>
   <source path='usermanagement'/>
   <source path='shared'/>
+  <source path='actions'/>
 </module>

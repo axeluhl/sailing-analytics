@@ -247,7 +247,8 @@ public interface StringMessages extends Messages {
     String autoZoomToBoats();
     String autoZoomToBuoys();
     String autoZoomOff();
-    String autoZoomTails();
+    String autoZoomToTails();
+    String autoZoomToWindSensors();
     String autoZoomSelectedCompetitors();
     String bearing();
     String zoom();
@@ -265,4 +266,22 @@ public interface StringMessages extends Messages {
     String notAvailable();
     String details();
     String noGroupSelected();
+    String combinedWindSourceTypeName();
+    String courseBasedWindSourceTypeName();
+    String trackBasedEstimationWindSourceTypeName();
+    String expeditionWindSourceTypeName();
+    String webWindSourceTypeName();
+    String clickChartToSetTime();
+    String position();
+    String windSourcesUsed();
+    String errorTryingToUpdateWindSourcesToExclude(String raceName, String message);
+    String feedback();
+    String startStopPlaying();
+    String backToLive();
+    String slowPlaySpeedDown();
+    String speedPlaySpeedUp();
+    String showHideComponent(String localizedShortName);
+    String degreesBoatToTheWind();
+    String racesInLeaderboard();
+    String leaderboardsInGroup();
 }

@@ -19,6 +19,7 @@ import com.tractrac.ResultAPI.PerLegResult;
 import com.tractrac.ResultAPI.ResultGenerator;
 
 public class TracTracTrackedRaceImpl extends DynamicTrackedRaceImpl implements DynamicTrackedRace {
+    private static final long serialVersionUID = 4406299109870965123L;
 
     /**
      * Note, that a result generator may cover multiple regattas in multiple classes. When results are

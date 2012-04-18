@@ -7,6 +7,8 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 
 public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
         GPSFixTrackImpl<ItemType, FixType> implements DynamicGPSFixTrack<ItemType, FixType> {
+    private static final long serialVersionUID = 917778209274148097L;
+
     public DynamicTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         super(trackedItem, millisecondsOverWhichToAverage);
     }

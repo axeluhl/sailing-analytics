@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Maneuver;
 
 public class ManeuverImpl extends AbstractGPSFixImpl implements Maneuver {
+    private static final long serialVersionUID = -5317959066507472580L;
     private final ManeuverType type;
     private final Tack newTack;
     private final Position position;

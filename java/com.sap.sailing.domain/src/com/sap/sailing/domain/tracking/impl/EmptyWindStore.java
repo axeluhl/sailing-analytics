@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -14,14 +15,15 @@ public class EmptyWindStore implements WindStore {
     
     @Override
     public WindTrack getWindTrack(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
-            long millisecondsOverWhichToAverage) {
+            long millisecondsOverWhichToAverage, long delayForWindEstimationCacheInvalidation) {
         switch (windSource.getType()) {
         case COURSE_BASED:
-            return new CourseBasedWindTrackImpl(trackedRace, millisecondsOverWhichToAverage);
+            return new CourseBasedWindTrackImpl(trackedRace, millisecondsOverWhichToAverage, WindSourceType.COURSE_BASED.getBaseConfidence());
         case TRACK_BASED_ESTIMATION:
-            return new TrackBasedEstimationWindTrackImpl(trackedRace, millisecondsOverWhichToAverage);
+            return new TrackBasedEstimationWindTrackImpl(trackedRace, millisecondsOverWhichToAverage,
+                    WindSourceType.TRACK_BASED_ESTIMATION.getBaseConfidence(), delayForWindEstimationCacheInvalidation);
         default:
-            return new WindTrackImpl(millisecondsOverWhichToAverage);
+            return new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().useSpeed());
         }
     }
 

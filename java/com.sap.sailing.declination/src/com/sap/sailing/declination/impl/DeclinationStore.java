@@ -14,6 +14,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
@@ -102,7 +106,7 @@ public class DeclinationStore {
             try {
                 declination = importer.importRecord(position, timePoint);
                 break;
-            } catch (IOException ioe) {
+            } catch (IOException | ParserConfigurationException | SAXException ioe) {
                 ioe.printStackTrace();
                 if (i<2) {
                     System.out.println("re-trying");
@@ -128,6 +132,9 @@ public class DeclinationStore {
                 NOAAImporter importer = new NOAAImporter();
                 for (int year = fromYear; year <= toYear; year++) {
                     QuadTree<Declination> storedDeclinations = getStoredDeclinations(year);
+                    if (storedDeclinations == null) {
+                        storedDeclinations = new QuadTree<>();
+                    }
                     // append if file already exists
                     File fileForYear = new File(getResourceForYear(year));
                     Writer out;
@@ -144,8 +151,10 @@ public class DeclinationStore {
                         for (double lng = 0; lng < 180; lng += grid) {
                             Position point = new DegreePosition(lat, lng);
                             Declination existingDeclinationRecord = storedDeclinations.get(point);
-                            if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
-                                    timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
+                            if (existingDeclinationRecord == null
+                                    || DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord
+                                            .getPosition().getDistance(point), timePoint, existingDeclinationRecord
+                                            .getTimePoint()) > 0.1) {
                                 // less than ~6 nautical miles and/or ~.6 months off
                                 fetchAndAppendDeclination(timePoint, point, importer, out);
                             }
@@ -153,8 +162,10 @@ public class DeclinationStore {
                         for (double lng = -grid; lng > -180; lng -= grid) {
                             Position point = new DegreePosition(lat, lng);
                             Declination existingDeclinationRecord = storedDeclinations.get(point);
-                            if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
-                                    timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
+                            if (existingDeclinationRecord == null
+                                    || DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord
+                                            .getPosition().getDistance(point), timePoint, existingDeclinationRecord
+                                            .getTimePoint()) > 0.1) {
                                 // less than ~6 nautical miles and/or ~.6 months off
                                 fetchAndAppendDeclination(timePoint, point, importer, out);
                             }

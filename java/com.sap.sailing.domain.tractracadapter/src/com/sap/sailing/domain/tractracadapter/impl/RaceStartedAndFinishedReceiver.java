@@ -61,9 +61,16 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
         System.out.print("StartStop");
         DynamicTrackedRace trackedRace = getTrackedRace(event.getA());
         if (trackedRace != null) {
-            MillisecondsTimePoint start = new MillisecondsTimePoint(event.getB().getStartTime());
-            if (trackedRace.getStart() == null || !trackedRace.getStart().equals(start)) {
-                trackedRace.setStartTimeReceived(start);
+            StartStopTimesData startStopTimesData = event.getB();
+            if(startStopTimesData != null) {
+                if(startStopTimesData.getStartTime() > 0) {
+                    MillisecondsTimePoint startOfTracking = new MillisecondsTimePoint(startStopTimesData.getStartTime());
+                    trackedRace.setStartOfTrackingReceived(startOfTracking);
+                }
+                if(startStopTimesData.getStopTime() > 0) {
+                    MillisecondsTimePoint endOfTracking = new MillisecondsTimePoint(startStopTimesData.getStopTime());
+                    trackedRace.setEndOfTrackingReceived(endOfTracking);
+                }
             }
         } else {
             logger.warning("Couldn't find tracked race for race " + event.getA().getName()

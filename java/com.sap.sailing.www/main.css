@@ -1,4 +1,90 @@
+@import url(fontface.css);
+
 body {
-  background: url(images/header_bg.png) 0 0 repeat-x;
-  font-family: Arial, Verdana, sans-serif;
-  margin-top: 0; }
+  font-family: 'UbuntuRegular';
+  margin: 0;
+  padding: 0;
+  background: url(images/splash-screen-compressed-02.png) center top no-repeat #ebebec;
+  }
+  
+
+.LogoAndTitlePanel {
+	height: 68px;
+	font-family: Arial, Verdana, sans-serif;
+	position: fixed;
+	width: 100%;
+	top: 0;
+	background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
+	background-position: center top, 0 0;
+	background-repeat: no-repeat, repeat-x;
+	box-shadow: 0 0 20px #858585;
+	-moz-box-shadow: 0 0 20px #858585;
+	-webkit-box-shadow: 0 0 20px #858585;
+}
+
+.LogoAndTitlePanel:after {
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+.RaceBoardHeaderPanel {
+	margin: 0 12px 14px 12px;
+}
+
+.sapLogo {
+	float: left;
+	margin: 13px 0 0 12px;
+}
+
+.sailingAnalyticsLabelPanel {
+	margin: 10px 0 0 0;
+}
+
+.sailingAnalyticsLabel {
+	float: left;
+	color: #fff;
+	font-size: 14px;
+	font-weight: bold;
+	margin: 15px 0 0 0;
+}
+
+.chooseModule {
+  margin: 0 auto;
+  width: 580px;
+  margin-top: 600px;
+}
+
+.chooseModule ul {
+  list-style: none;
+}
+
+.chooseModule ul li {
+  float: left;
+  margin: 0 10px 0 0;
+}
+
+.chooseModule a {
+  background: url(images/btn-cta-orangeleft.png) center top repeat-x;
+  padding: 5px;
+  color: #fff;
+  -webkit-border-radius: 4px;
+-moz-border-radius: 4px;
+border-radius: 4px;
+}
+
+.chooseModule a:hover {
+  background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+  color: #fff;
+}
+
+a {
+  color:#A1A1A1;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}

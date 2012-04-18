@@ -17,9 +17,8 @@
   <!-- Google Maps API -->
   <inherits name='com.google.gwt.maps.GoogleMaps' />
   
-  <!-- Flot-Gwt API -->
+  <!-- Highcharts API -->
   <inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
-  <inherits name='ca.nanometrics.gflot.GFlot'/>
   
   <inherits name="com.google.gwt.resources.Resources" />
     <inherits name="com.google.gwt.logging.Logging"/>
@@ -47,7 +46,9 @@
   <source path='components'/>
   <source path='adminconsole'/>
   <source path='leaderboard'/>
+  <source path='raceboard'/>
   <source path='usermanagement'/>
   <source path='shared'/>
   <source path='test'/>
+  <source path='actions'/>
 </module>

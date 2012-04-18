@@ -39,4 +39,16 @@ public interface BoatClass extends Named {
     boolean typicallyStartsUpwind();
     
     Distance getHullLength();
+
+    /**
+     * Downwind leg-based wind estimations are inherently less confident than upwind leg-based estimations because
+     * jibing angles vary more greatly from boat to boat than tacking angles.
+     * 
+     * @param numberOfBoatsInSmallestCluster the larger the number of boats, the more confident the estimate is considered to be
+     * ("wisdom of the crowds"). The minimum confidence for just one boat in the smallest cluster is still guaranteed to be
+     * greater than zero.
+     */
+    double getDownwindWindEstimationConfidence(int numberOfBoatsInSmallestCluster);
+
+    double getUpwindWindEstimationConfidence(int numberOfBoatsInSmallestCluster);
 }

@@ -18,6 +18,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
  *
  */
 public class CompactGPSFixImpl extends AbstractGPSFixImpl {
+    private static final long serialVersionUID = 8167588584536992501L;
     private final double latDeg;
     private final double lngDeg;
     private final long timePointAsMillis;
@@ -43,6 +44,8 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     }
     
     private class CompactTimePoint extends AbstractTimePoint implements TimePoint {
+        private static final long serialVersionUID = -2470922642359937437L;
+
         @Override
         public long asMillis() {
             return timePointAsMillis;

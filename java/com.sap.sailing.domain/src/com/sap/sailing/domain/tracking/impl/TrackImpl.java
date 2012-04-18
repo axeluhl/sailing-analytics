@@ -11,12 +11,14 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
 
 public abstract class TrackImpl<FixType extends Timed> implements Track<FixType> {
+    private static final long serialVersionUID = -4075853657857657528L;
     /**
      * The fixes, ordered by their time points
      */
     private final NavigableSet<Timed> fixes;
     
     protected static class DummyTimed implements Timed {
+        private static final long serialVersionUID = 6047311973718918856L;
         private final TimePoint timePoint;
         public DummyTimed(TimePoint timePoint) {
             super();

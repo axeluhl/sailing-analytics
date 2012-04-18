@@ -5,6 +5,8 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class BoatClassImpl extends NamedImpl implements BoatClass {
+    private static final long serialVersionUID = 7194912853476256420L;
+
     /**
      * If the averaged courses over ground differ by at least this degree angle, a maneuver will
      * be assumed. Note that this should be much less than the tack angle because averaging may
@@ -12,15 +14,25 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
      */
     private static final double MANEUVER_DEGREE_ANGLE_THRESHOLD = /* minimumDegreeDifference */ 30.;
 
-    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_UPWIND = 45.;
+    private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_UPWIND = 60.;
     
     private static final double MINIMUM_ANGLE_BETWEEN_DIFFERENT_TACKS_DOWNWIND = 25.;
 
     private static final Distance MAXIMUM_DISTANCE_FOR_COURSE_APPROXIMATION = new MeterDistance(3);
+
+    /**
+     * Upwind course-based wind estimations are pretty confident for most boat classes.
+     */
+    private static final double UPWIND_WIND_ESTIMATION_CONFIDENCE = .9;
+
+    /**
+     * Downwind estimations are less confident than upwind because jibing angles vary more.
+     */
+    private static final double DOWNWIND_WIND_ESTIMATION_CONFIDENCE = .5;
     
     private final long approximateManeuverDurationInMilliseconds;
 
-    private final  boolean typicallyStartsUpwind;
+    private final boolean typicallyStartsUpwind;
 
     private final Distance hullLength;
 
@@ -64,5 +76,27 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     @Override
     public Distance getHullLength() {
         return hullLength;
+    }
+
+    @Override
+    public double getDownwindWindEstimationConfidence(int numberOfBoatsInSmallestCluster) {
+        // Even for up to a million boats in the smallest cluster, the multiplier is still less than one.
+        // The multiplier is 1/1000000 in case there is only one boat and approaches 1.0 for many boats.
+        return DOWNWIND_WIND_ESTIMATION_CONFIDENCE * getConfidenceMultiplierForClusterSize(numberOfBoatsInSmallestCluster);
+    }
+
+    @Override
+    public double getUpwindWindEstimationConfidence(int numberOfBoatsInSmallestCluster) {
+        // Even for up to a million boats in the smallest cluster, the multiplier is still less than one.
+        // The multiplier is 1/1000000 in case there is only one boat and approaches 1.0 for many boats.
+        return UPWIND_WIND_ESTIMATION_CONFIDENCE * getConfidenceMultiplierForClusterSize(numberOfBoatsInSmallestCluster);
+    }
+
+    /**
+     * Even for up to a million boats in the smallest cluster, the multiplier is still less than one.
+     * The multiplier is 1/1000000 in case there is only one boat and approaches 1.0 for many boats.
+     */
+    private double getConfidenceMultiplierForClusterSize(int numberOfBoatsInSmallestCluster) {
+        return 1.0 + 1.0/1000000.0 - 1.0/(double) numberOfBoatsInSmallestCluster;
     }
 }

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.SortedSet;
@@ -14,7 +15,6 @@ import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -38,7 +38,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface TrackedRace {
+public interface TrackedRace extends Serializable {
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
     
     RaceDefinition getRace();
@@ -46,15 +46,9 @@ public interface TrackedRace {
     RaceIdentifier getRaceIdentifier();
     
     /**
-     * @return A pair of placemarks, where A is the start placemark and B is the finish placemark.<br />
-     *         The returning pair is never <code>null</code>, but A and/or B can be <code>null</code>.
-     */
-    Pair<Placemark, Placemark> getStartFinishPlacemarks();
-    
-    /**
-     * Computes the estimated start time for this race. When there are no {@link MarkPassing}s for the first mark, the
-     * start time received from the tracking infrastructure is used. This is also used if there are mark passings for
-     * the first mark and the start time is less than
+     * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time point
+     * which is expected to be before the race start time). When there are no {@link MarkPassing}s for the first mark, <code>null</code>
+     * is returned. If there are mark passings for the first mark and the start time is less than
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark passing for the
      * first mark. Otherwise, the first mark passing for the first mark minus
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.
@@ -69,7 +63,14 @@ public interface TrackedRace {
      * no boat passed the finish line yet.
      */
     TimePoint getAssumedEnd();
-    
+
+    /**
+     * Returns a list of the start times of all legs as far as we know them
+     * The leg time of the first leg is equal to #{@link #getStart()}
+     * All other leg times are equal to the first mark passing of the leg 
+     */
+    Iterable<TimePoint> getStartTimesOfTrackedLegs();
+
     /**
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
      */
@@ -111,7 +112,11 @@ public interface TrackedRace {
      * If the competitor hasn't passed the start waypoint yet, <code>null</code> is
      * returned because the competitor was not yet on any leg at that point in time. If
      * the time point happens to be after the last fix received from that competitor,
-     * the last known leg for that competitor is returned. 
+     * the last known leg for that competitor is returned. If the time point is after the
+     * competitor's mark passing for the finish line, <code>null</code> is returned.
+     * For all legs except the last, if the time point equals a mark passing time point
+     * of the leg's starting waypoint, that leg is returned. For the time point of
+     * the mark passing for the finish line, the last leg is returned.
      */
     TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, TimePoint at);
     
@@ -183,9 +188,8 @@ public interface TrackedRace {
 
     /**
      * Obtains estimated interpolated wind information for a given position and time point. The information is taken
-     * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, with preferences
-     * controlled by the {@link #getWindSource() current wind source} which can be selected using {@link #setWindSource},
-     * and by the order of the {@link WindSource} literals.
+     * from all wind sources available except for those listed in <code>windSourcesToExclude</code>, using the confidences
+     * of the wind values provided by the various sources during averaging.
      */
     Wind getWind(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude);
 
@@ -209,13 +213,29 @@ public interface TrackedRace {
      */
     void waitForNextUpdate(int sinceUpdate) throws InterruptedException;
 
+    /**
+     * Time stamp of the start of the actual tracking.
+     * The value can be null (e.g. if we have not received any signal from the tracking infrastructure) 
+     */
     TimePoint getStartOfTracking();
+
+    /**
+     * Time stamp of the end of the actual tracking.
+     * The value can be null (e.g. if we have not received any signal from the tracking infrastructure) 
+     */
+    TimePoint getEndOfTracking();
 
     /**
      * Regardless of the order in which events were received, this method returns the latest time point contained by any of
      * the events received and processed.
      */
     TimePoint getTimePointOfNewestEvent();
+
+    /**
+     * Regardless of the order in which events were received, this method returns the oldest time point contained by any of
+     * the events received and processed.
+     */
+    TimePoint getTimePointOfOldestEvent();
 
     /**
      * @return the mark passings for <code>competitor</code> in this race received so far; the mark passing objects are
@@ -315,6 +335,36 @@ public interface TrackedRace {
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
     Distance getWindwardDistanceToOverallLeader(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Calls {@link #getWindWithConfidence(Position, TimePoint, Iterable)} and excludes those wind sources listed in
+     * {@link #getWindSourcesToExclude}.
+     */
+    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at);
+    
+    /**
+     * Lists those wind sources which by default are not considered in {@link #getWind(Position, TimePoint)} and
+     * {@link #getWindWithConfidence(Position, TimePoint)}.
+     */
+    Iterable<WindSource> getWindSourcesToExclude();
 
-    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at, Iterable<WindSource> windSourcesToExclude);
+    /**
+     * Loops over this tracked race's wind sources and from each asks its averaged wind for the position <code>p</code>
+     * and time point <code>at</code>, using the particular wind source's averaging interval. The confidences delivered
+     * by each wind source are used during computing the averaged result across the wind sources. The result has the averaged
+     * confidence attached.
+     */
+    WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at,
+            Iterable<WindSource> windSourcesToExclude);
+
+    /**
+     * Same as {@link #getEstimatedWindDirection(Position, TimePoint)}, but propagates the confidence of the wind
+     * estimation, relative to the <code>timePoint</code> for which the request is made, in the result.
+     */
+    WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint);
+
+    /**
+     * After the call returns, {@link #getWindSourcesToExclude()} returns an iterable that equals <code>windSourcesToExclude</code>
+     */
+    void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude);
 }

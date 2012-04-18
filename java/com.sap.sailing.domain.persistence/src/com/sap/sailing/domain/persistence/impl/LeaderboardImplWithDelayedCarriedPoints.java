@@ -25,6 +25,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
+    private static final long serialVersionUID = -8933075542228571746L;
     private final Map<String, Integer> carriedPointsByCompetitorName;
     private final Map<String, Map<RaceInLeaderboard, MaxPointsReason>> maxPointsReasonsByCompetitorName;
     private final Map<String, Map<RaceInLeaderboard, Integer>> correctedScoresByCompetitorName;
@@ -37,6 +38,8 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
      * @author Axel Uhl (D043530)
      */
     private class RaceInLeaderboardForDelayedCarriedPoints extends RaceInLeaderboardImpl {
+        private static final long serialVersionUID = -1243132535406059096L;
+
         public RaceInLeaderboardForDelayedCarriedPoints(Leaderboard leaderboard, String name, boolean medalRace) {
             super(leaderboard, name, medalRace);
         }

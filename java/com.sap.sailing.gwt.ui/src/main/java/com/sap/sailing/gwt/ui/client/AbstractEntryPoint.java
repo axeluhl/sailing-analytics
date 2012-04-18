@@ -67,8 +67,17 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         dialogCloseButton.setFocus(true);
     }
 
+    @Override
+    public void reportError(String message, boolean silentMode) {
+        if(silentMode) {
+            Window.setStatus(message);
+        } else {
+            reportError(message);
+        }
+    }
+
     public void createErrorPage(String message) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("", stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 
         RootPanel.get().add(logoAndTitlePanel);

@@ -254,6 +254,29 @@ public class LeaderboardDTO implements IsSerializable {
         }
         return competitors.indexOf(competitor) + 1;
     };
+    
+    /**
+     * Determines the competitor's rank in the race with name <code>raceName</code>. If a race with that name does not exist or the
+     * competitor has no score for that race, <code>null</code> is returned; the 1-based rank otherwise.
+     */
+    public Integer getRank(CompetitorDTO competitor, String raceName) {
+        Integer result = null;
+        if (rows.get(competitor) != null) {
+            LeaderboardEntryDTO fields = rows.get(competitor).fieldsByRaceName.get(raceName);
+            if (fields != null) {
+                List<CompetitorDTO> competitorsOrderedByNetPoints = new ArrayList<CompetitorDTO>(competitors);
+                Collections.sort(competitorsOrderedByNetPoints, new Comparator<CompetitorDTO>() {
+                    @Override
+                    public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                        return getTotalRankingComparator().compare(rows.get(o1), rows.get(o2));
+                    }
+                });
+                competitorsOrderedAccordingToTotalRank = true;
+                result = competitorsOrderedByNetPoints.indexOf(competitor) + 1;
+            }
+        }
+        return result;
+    }
 
     public boolean raceIsTracked(String raceColumnName) {
         for (RaceInLeaderboardDTO race : races) {
@@ -303,15 +326,6 @@ public class LeaderboardDTO implements IsSerializable {
         }
         return null;
     }
-/*
-    public List<String> getRaceColumnNameList() {
-        List<String> raceColumnNames = new ArrayList<String>();
-        for (RaceInLeaderboardDTO raceInLeaderboardDTO : races) {
-            raceColumnNames.add(raceInLeaderboardDTO.getRaceColumnName());
-        }
-        return raceColumnNames;
-    }
-*/
 
     public List<RaceInLeaderboardDTO> getRaceList() {
         return races;
@@ -384,6 +398,18 @@ public class LeaderboardDTO implements IsSerializable {
             }
         }
         return leaderboardPlaces;
+    }
+    
+    /**
+     * @return <code>true</code> if the leaderboard contains a race which is live
+     */
+    public boolean containsLiveRace() {
+        for (RaceInLeaderboardDTO race : getRaceList()) {
+            if (race.isLive()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

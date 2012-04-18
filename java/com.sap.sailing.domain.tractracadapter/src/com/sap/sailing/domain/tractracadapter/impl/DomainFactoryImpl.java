@@ -49,6 +49,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedEventRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -61,6 +62,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sailing.util.WeakIdentityHashMap;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -90,6 +92,14 @@ public class DomainFactoryImpl implements DomainFactory {
      */
     private final Map<Pair<String, String>, com.sap.sailing.domain.base.Event> eventCache =
             new HashMap<Pair<String, String>, com.sap.sailing.domain.base.Event>();
+    
+    /**
+     * A cache based on weak references to the TracTrac event, allowing for quick Event lookup as long as the
+     * TracTrac event remains referenced. This is intended to reduce the number of times the dominant boat
+     * class needs to be determined for an event. Synchronization for additions / removals is tied to the
+     * synchronization for {@link #eventCache}.
+     */
+    private final WeakIdentityHashMap<com.tractrac.clientmodule.Event, Event> weakEventCache = new WeakIdentityHashMap<>();
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
 
@@ -253,24 +263,33 @@ public class DomainFactoryImpl implements DomainFactory {
             // This means that currently it is permissible to assume that we'll get at most one
             // boat class per TracTrac event. Generally, however, we have to assume that
             // one TracTrac event may map to multiple domain Event objects with one BoatClass each
-            Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
-            for (com.tractrac.clientmodule.Competitor c : event.getCompetitorList()) {
-                competitorClassList.add(c.getCompetitorClass());
-            }
-            BoatClass boatClass = getDominantBoatClass(competitorClassList);
-            Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass==null?null:boatClass.getName());
-            Event result = eventCache.get(key);
+            
+            // try a quick look-up in the weak cache using the TracTrac event as key; only if that delivers no result,
+            // compute the dominant boat class which requires a lot more effort
+            Event result = weakEventCache.get(event);
             if (result == null) {
-                result = new EventImpl(event.getName(), boatClass);
-                eventCache.put(key, result);
+                Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
+                for (com.tractrac.clientmodule.Competitor c : event.getCompetitorList()) {
+                    competitorClassList.add(c.getCompetitorClass());
+                }
+                BoatClass boatClass = getDominantBoatClass(competitorClassList);
+                Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass == null ? null
+                        : boatClass.getName());
+                result = eventCache.get(key);
+                if (result == null) {
+                    result = new EventImpl(event.getName(), boatClass);
+                    eventCache.put(key, result);
+                    weakEventCache.put(event, result);
+                }
             }
             return result;
         }
     }
     
     @Override
-    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
-            WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types) {
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent,
+            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, TimePoint startOfTracking,
+            TimePoint endOfTracking, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types) {
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
@@ -281,7 +300,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
-                        trackedEvent, tractracEvent, this));
+                        trackedEvent, tractracEvent, startOfTracking, endOfTracking, this));
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(
@@ -302,10 +321,10 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedEvent trackedEvent,
-            com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, raceDefinitionSetToUpdate, ReceiverType.RACECOURSE,
-                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
-                ReceiverType.RAWPOSITIONS);
+            com.tractrac.clientmodule.Event tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, startOfTracking, endOfTracking,
+                raceDefinitionSetToUpdate, ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS,
+                ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
     
     @Override
@@ -336,6 +355,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     event.removeRace(raceDefinition);
                     if (oldSize > 0 && Util.size(event.getAllRaces()) == 0) {
                         eventCache.remove(key);
+                        weakEventCache.remove(tractracEvent);
                     }
                     TrackedEvent trackedEvent = trackedEventRegistry.getTrackedEvent(event);
                     if (trackedEvent != null) {
@@ -450,10 +470,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
-            TrackedEventRegistry trackedEventRegistry) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException {
-        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, windStore, trackedEventRegistry);
+    public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
+            TimePoint endOfTracking, WindStore windStore, TrackedEventRegistry trackedEventRegistry)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException {
+        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, startOfTracking, endOfTracking,
+                windStore, trackedEventRegistry);
     }
 
     @Override
@@ -471,6 +492,12 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public TracTracConfiguration createTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) {
         return new TracTracConfigurationImpl(name, jsonURL, liveDataURI, storedDataURI);
+    }
+
+    @Override
+    public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI,
+            URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore) {
+        return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, startOfTracking, endOfTracking, windStore, this);
     }
 
 }

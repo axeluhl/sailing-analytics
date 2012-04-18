@@ -10,6 +10,7 @@ public class GPSFixDTO implements IsSerializable {
     public Date timepoint;
     public PositionDTO position;
     public SpeedWithBearingDTO speedWithBearing;
+    public WindDTO wind;
     
     /**
      * tells if this fix was computed by extrapolation instead of having been captured by a device directly
@@ -31,8 +32,8 @@ public class GPSFixDTO implements IsSerializable {
     
     public GPSFixDTO() {}
 
-    public GPSFixDTO(Date timepoint, PositionDTO position, SpeedWithBearingDTO speedWithBearing, Tack tack,
-            LegType legType, boolean extrapolated) {
+    public GPSFixDTO(Date timepoint, PositionDTO position, SpeedWithBearingDTO speedWithBearing, WindDTO wind,
+            Tack tack, LegType legType, boolean extrapolated) {
         super();
         this.timepoint = timepoint;
         this.position = position;
@@ -40,5 +41,6 @@ public class GPSFixDTO implements IsSerializable {
         this.tack = tack;
         this.legType = legType;
         this.extrapolated = extrapolated;
+        this.wind = wind;
     }
 }

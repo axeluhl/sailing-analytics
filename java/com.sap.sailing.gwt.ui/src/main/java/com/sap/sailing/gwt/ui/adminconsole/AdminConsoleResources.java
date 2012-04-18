@@ -26,39 +26,9 @@ interface AdminConsoleResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/dice.png")
     ImageResource scoresIcon();
     
-    @Source("com/sap/sailing/gwt/ui/client/images/coursemark.png")
-    ImageResource buoyIcon();
-    
     @Source("com/sap/sailing/gwt/ui/client/images/blackdot.png")
     ImageResource blackdotIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/reddot.png")
     ImageResource reddotIcon();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/winddirection.png")
-    ImageResource windDirectionIcon();
-    
-    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_Port.png")
-    ImageResource lowlightedBoatIcon_Port();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_Starbord.png")
-    ImageResource lowlightedBoatIcon_Starboard();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_DW_Port.png")
-    ImageResource lowlightedBoatIconDW_Port();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_DW_Starbord.png")
-    ImageResource lowlightedBoatIconDW_Starboard();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_Port_Selected.png")
-    ImageResource highlightedBoatIcon_Port();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_Starbord_Selected.png")
-    ImageResource highlightedBoatIcon_Starboard();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_DW_Port_Selected.png")
-    ImageResource highlightedBoatIconDW_Port();
-
-    @Source("com/sap/sailing/gwt/ui/client/images/boats/Blue_DW_Starbord_Selected.png")
-    ImageResource highlightedBoatIconDW_Starboard();
 }

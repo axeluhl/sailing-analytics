@@ -12,6 +12,8 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.WindStore;
 
 import difflib.PatchFailedException;
 
@@ -37,4 +39,8 @@ public interface DomainFactory {
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
 
     void removeRace(String raceID);
+    
+    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, boolean canSendRequests,
+            SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore,
+            RaceSpecificMessageLoader messageLoader);
 }

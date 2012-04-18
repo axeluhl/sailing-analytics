@@ -4,6 +4,7 @@ import java.util.Date;
 
 
 public class MillisecondsTimePoint extends AbstractTimePoint {
+    private static final long serialVersionUID = -1021748860232043166L;
     private final long millis;
     private Date date;
     
