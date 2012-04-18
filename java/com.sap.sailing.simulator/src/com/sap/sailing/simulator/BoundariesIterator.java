@@ -1,24 +1,38 @@
 package com.sap.sailing.simulator;
 
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 
 public interface BoundariesIterator {
 	
-	enum direction {DownUp, UpDown};
-	
+	boolean hasNext();
 	boolean hasUp();
 	boolean hasDown();
-	boolean hasLeft();
 	boolean hasRight();
+	boolean hasLeft();
+
+	Position next() throws Exception;
+	Position up() throws Exception;
+	Position down() throws Exception;
+	Position right() throws Exception;
+	Position left() throws Exception;
 	
-	Position Up();
-	Position Down();
-	Position Left();
-	Position Right();
+	Distance getHorizontalStep();
+	Distance getVerticalStep();
 	
-	double verticalStep();
-	double horizontalStep();
+	void setVerticalStep(Distance newVerticalStep);
+	void setHorizontalStep(Distance newHorizontalStep);
 	
-	direction getDirection();
+	void setHorizontalResolution(double xRes);
+	void setVerticalResolution(double yRes);
+	
+	Bearing getVerticalBearing();
+	Bearing getHorizontalBearing();
+	
+	void setVerticalBearing(Bearing newVerticalBearing);
+	void setHorizontalBearing(Bearing newHorizontalBearing);
+	
+	void reset();
 
 }
