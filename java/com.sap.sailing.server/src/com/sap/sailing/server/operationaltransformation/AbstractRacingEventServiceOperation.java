@@ -25,12 +25,12 @@ public abstract class AbstractRacingEventServiceOperation implements RacingEvent
     }
 
     @Override
-    public RacingEventServiceOperation transformAddLeaderboardClientOp(AddLeaderboard addLeaderboard) {
+    public RacingEventServiceOperation transformAddLeaderboardClientOp(CreateLeaderboard addLeaderboard) {
         return addLeaderboard;
     }
 
     @Override
-    public RacingEventServiceOperation transformAddLeaderboardServerOp(AddLeaderboard addLeaderboard) {
+    public RacingEventServiceOperation transformAddLeaderboardServerOp(CreateLeaderboard addLeaderboard) {
         return addLeaderboard;
     }
 
@@ -47,12 +47,12 @@ public abstract class AbstractRacingEventServiceOperation implements RacingEvent
     }
 
     @Override
-    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp) {
+    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(RemoveLeaderboardColumn removeColumnFromLeaderboardServerOp) {
         return removeColumnFromLeaderboardServerOp;
     }
 
     @Override
-    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp) {
+    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(RemoveLeaderboardColumn removeColumnFromLeaderboardClientOp) {
         return removeColumnFromLeaderboardClientOp;
     }
     

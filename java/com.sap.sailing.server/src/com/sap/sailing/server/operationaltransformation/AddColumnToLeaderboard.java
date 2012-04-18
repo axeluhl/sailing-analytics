@@ -3,7 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.server.RacingEventService;
 
 /**
- * Doesn't transform for the {@link RemoveColumnFromLeaderboard} because only existing leaderboards can be removed,
+ * Doesn't transform for the {@link RemoveLeaderboardColumn} because only existing leaderboards can be removed,
  * and adding is only possible for non-existing names.
  * 
  * @author Axel Uhl (d043530)
