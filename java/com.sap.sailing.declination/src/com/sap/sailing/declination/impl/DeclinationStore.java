@@ -132,6 +132,9 @@ public class DeclinationStore {
                 NOAAImporter importer = new NOAAImporter();
                 for (int year = fromYear; year <= toYear; year++) {
                     QuadTree<Declination> storedDeclinations = getStoredDeclinations(year);
+                    if (storedDeclinations == null) {
+                        storedDeclinations = new QuadTree<>();
+                    }
                     // append if file already exists
                     File fileForYear = new File(getResourceForYear(year));
                     Writer out;
@@ -148,8 +151,10 @@ public class DeclinationStore {
                         for (double lng = 0; lng < 180; lng += grid) {
                             Position point = new DegreePosition(lat, lng);
                             Declination existingDeclinationRecord = storedDeclinations.get(point);
-                            if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
-                                    timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
+                            if (existingDeclinationRecord == null
+                                    || DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord
+                                            .getPosition().getDistance(point), timePoint, existingDeclinationRecord
+                                            .getTimePoint()) > 0.1) {
                                 // less than ~6 nautical miles and/or ~.6 months off
                                 fetchAndAppendDeclination(timePoint, point, importer, out);
                             }
@@ -157,8 +162,10 @@ public class DeclinationStore {
                         for (double lng = -grid; lng > -180; lng -= grid) {
                             Position point = new DegreePosition(lat, lng);
                             Declination existingDeclinationRecord = storedDeclinations.get(point);
-                            if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
-                                    timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
+                            if (existingDeclinationRecord == null
+                                    || DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord
+                                            .getPosition().getDistance(point), timePoint, existingDeclinationRecord
+                                            .getTimePoint()) > 0.1) {
                                 // less than ~6 nautical miles and/or ~.6 months off
                                 fetchAndAppendDeclination(timePoint, point, importer, out);
                             }

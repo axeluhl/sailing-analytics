@@ -21,6 +21,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
         this.started = started;
         this.competitor = competitor;
         this.raceDefinition = new RaceDefinition() {
+            private static final long serialVersionUID = 6812543850545870357L;
             @Override
             public String getName() {
                 return null;

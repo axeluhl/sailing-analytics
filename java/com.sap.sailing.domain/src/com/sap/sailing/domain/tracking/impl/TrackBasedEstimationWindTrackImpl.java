@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NavigableSet;
@@ -28,6 +30,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.util.SerializableComparator;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 /**
@@ -61,6 +64,8 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  * 
  */
 public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl implements RaceChangeListener {
+    private static final long serialVersionUID = -4397496421917807499L;
+
     private static final SpeedWithBearing defaultSpeedWithBearing = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
 
     private final EstimatedWindFixesAsNavigableSet virtualInternalRawFixes;
@@ -84,9 +89,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      */
     private final long delayForCacheInvalidationInMilliseconds;
     
-    private final Timer cacheInvalidationTimer;
+    private transient Timer cacheInvalidationTimer;
     
-    private static class InvalidationInterval {
+    private static class InvalidationInterval implements Serializable {
+        private static final long serialVersionUID = -6406690520919193690L;
         private WindWithConfidence<TimePoint> start;
         private TimePoint end;
         public InvalidationInterval() {
@@ -141,7 +147,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         this.cacheInvalidationTimer = new Timer("TrackBasedEstimationWindTrackImpl cache invalidation timer for race "+getTrackedRace().getRace());
         this.scheduledInvalidationInterval = new InvalidationInterval();
         cache = new ArrayListNavigableSet<WindWithConfidence<TimePoint>>(
-                new Comparator<WindWithConfidence<TimePoint>>() {
+                new SerializableComparator<WindWithConfidence<TimePoint>>() {
+                    private static final long serialVersionUID = 5760349397418542705L;
+
                     @Override
                     public int compare(WindWithConfidence<TimePoint> o1, WindWithConfidence<TimePoint> o2) {
                         return o1.getObject().getTimePoint().compareTo(o2.getObject().getTimePoint());
@@ -154,6 +162,11 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         this.timePointsWithCachedNullResult = new ArrayListNavigableSet<TimePoint>(
                 AbstractTimePoint.TIMEPOINT_COMPARATOR);
         this.timePointsWithCachedNullResultFastContains = new HashSet<TimePoint>();
+    }
+    
+    private final void readObject(final ObjectInputStream s) throws ClassNotFoundException, IOException {
+        s.defaultReadObject();
+        cacheInvalidationTimer = new Timer("TrackBasedEstimationWindTrackImpl cache invalidation timer for race "+getTrackedRace().getRace());
     }
 
     /**
@@ -427,6 +440,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * 
      */
     public class EstimatedWindFixesAsNavigableSet extends VirtualWindFixesAsNavigableSet {
+        private static final long serialVersionUID = -6902341522276949873L;
+
         public EstimatedWindFixesAsNavigableSet(TrackedRace trackedRace) {
             this(trackedRace, null, null);
         }

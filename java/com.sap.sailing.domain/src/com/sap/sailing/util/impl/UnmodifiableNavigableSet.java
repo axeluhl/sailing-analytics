@@ -13,6 +13,7 @@ import java.util.SortedSet;
  * @author Axel Uhl (D043530)
  */
 public class UnmodifiableNavigableSet<E> extends AbstractUnmodifiableNavigableSet<E> implements NavigableSet<E> {
+    private static final long serialVersionUID = -2829360843200741699L;
     private final NavigableSet<E> set;
 
     public UnmodifiableNavigableSet(NavigableSet<E> delegate) {

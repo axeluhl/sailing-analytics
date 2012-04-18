@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
 
 public class CentralAngleDistance extends AbstractDistance {
+    private static final long serialVersionUID = -388639688376644968L;
     private final double centralAngleRad;
     
     public CentralAngleDistance(double centralAngleRad) {

@@ -86,6 +86,7 @@ public class ConfidenceTest {
     
     private static class ScalableBearingWithConfidence<RelativeTo> extends ScalableBearing
     implements HasConfidenceAndIsScalable<ScalableBearing, Bearing, RelativeTo> {
+        private static final long serialVersionUID = 6609861367777720855L;
         private final double confidence;
         private final RelativeTo relativeTo;
         private final Bearing bearing;

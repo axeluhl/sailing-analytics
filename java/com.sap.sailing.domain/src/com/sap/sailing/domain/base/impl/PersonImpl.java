@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class PersonImpl extends NamedImpl implements Person {
+    private static final long serialVersionUID = -2104903799224233508L;
     private final Nationality nationality;
     private final Date dateOfBirth;
     private final String description;

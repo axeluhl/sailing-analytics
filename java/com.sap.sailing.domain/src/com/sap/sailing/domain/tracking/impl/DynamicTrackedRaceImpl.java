@@ -37,6 +37,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, WindListener, GPSTrackListener<Competitor> {
+    private static final long serialVersionUID = 1092726918239676958L;
+
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceImpl.class.getName());
     
     private Set<RaceChangeListener> listeners;
@@ -114,6 +116,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     protected DynamicGPSFixTrackImpl<Buoy> createBuoyTrack(Buoy buoy) {
         DynamicGPSFixTrackImpl<Buoy> result = super.createBuoyTrack(buoy);
         result.addListener(new GPSTrackListener<Buoy>() {
+            private static final long serialVersionUID = -2855787105725103732L;
+
             @Override
             public void gpsFixReceived(GPSFix fix, Buoy buoy) {
                 notifyListeners(fix, buoy);
@@ -258,16 +262,28 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
         Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
+        MarkPassing oldStartMarkPassing = null;
+        boolean requiresStartTimeUpdate = true;
         synchronized (this) {
             NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
             synchronized (markPassingsForCompetitor) {
                 for (MarkPassing oldMarkPassing : markPassingsForCompetitor) {
+                    if(oldStartMarkPassing == null) {
+                        oldStartMarkPassing = oldMarkPassing;
+                    }
                     oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);
                 }
             }
             clearMarkPassings(competitor);
             TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
             for (MarkPassing markPassing : markPassings) {
+                // try to find corresponding old start mark passing
+                if (oldStartMarkPassing != null && markPassing.getWaypoint().getName().equals(oldStartMarkPassing.getWaypoint().getName())) {
+                    if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null &&
+                        markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
+                        requiresStartTimeUpdate = false;
+                    }
+                }
                 synchronized (markPassingsForCompetitor) {
                     markPassingsForCompetitor.add(markPassing);
                 }
@@ -281,6 +297,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             }
             updated(timePointOfLatestEvent);
         }
+        // update the race times like start, end and the leg times
+        if (requiresStartTimeUpdate) {
+            invalidateStartTime();
+        }
+        invalidateLegTimes();
+        invalidateEndTime();
+        
         // notify *after* all mark passings have been re-established; should avoid flicker
         for (MarkPassing markPassing : markPassings) {
             notifyListeners(oldMarkPassings.get(markPassing.getWaypoint()), markPassing);

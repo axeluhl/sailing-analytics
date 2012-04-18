@@ -19,7 +19,6 @@ import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
@@ -88,14 +87,14 @@ public class DomainFactoryImpl implements DomainFactory {
         olympicClassesByID.put("009", baseDomainFactory.getOrCreateBoatClass("49er", /* alwaysStartsUpwind */ true));
         olympicClassesByID.put("007", baseDomainFactory.getOrCreateBoatClass("Star", /* typicallyStartsUpwind */ true));
         olympicClassesByID.put("010", baseDomainFactory.getOrCreateBoatClass("Elliott 6M", /* typicallyStartsUpwind */ true));
-        unknownBoatClass = new BoatClassImpl("Unknown", /* typicallyStartsUpwind */ true);
+        unknownBoatClass = baseDomainFactory.getOrCreateBoatClass("Unknown", /* typicallyStartsUpwind */ true);
     }
 
     @Override
     public Event getOrCreateEvent(String raceID) {
         Event result = raceIDToEventCache.get(raceID);
         if (result == null) {
-            result = new EventImpl(raceID, null);
+            result = new EventImpl(raceID, getOrCreateBoatClassFromRaceID(raceID));
             raceIDToEventCache.put(raceID, result);
         }
         return result;

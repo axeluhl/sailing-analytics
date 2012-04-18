@@ -11,6 +11,7 @@ import com.sap.sailing.domain.tracking.GPSFix;
  *
  */
 public class GPSFixImpl extends AbstractGPSFixImpl implements GPSFix {
+    private static final long serialVersionUID = -368671632334748334L;
     private final Position position;
     private final TimePoint timePoint;
     

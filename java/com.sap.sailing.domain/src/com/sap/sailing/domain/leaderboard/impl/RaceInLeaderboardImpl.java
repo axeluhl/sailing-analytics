@@ -10,6 +10,7 @@ import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class RaceInLeaderboardImpl implements RaceInLeaderboard {
+    private static final long serialVersionUID = -7801617988982540470L;
     private TrackedRace trackedRace;
     private final Leaderboard leaderboard;
     private boolean medalRace;

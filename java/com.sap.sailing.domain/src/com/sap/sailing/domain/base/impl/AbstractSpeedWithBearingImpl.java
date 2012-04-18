@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 public abstract class AbstractSpeedWithBearingImpl extends AbstractSpeedImpl implements SpeedWithBearing {
+    private static final long serialVersionUID = -8594305027333573010L;
     private final Bearing bearing;
     
     protected AbstractSpeedWithBearingImpl(Bearing bearing) {

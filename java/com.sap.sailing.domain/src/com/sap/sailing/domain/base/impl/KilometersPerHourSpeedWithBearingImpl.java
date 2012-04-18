@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 
 public class KilometersPerHourSpeedWithBearingImpl extends KilometersPerHourSpeedImpl implements SpeedWithBearing {
+    private static final long serialVersionUID = 5749611820871048625L;
     private final Bearing bearing;
     
     public KilometersPerHourSpeedWithBearingImpl(double speedInKilometersPerHour, Bearing bearing) {

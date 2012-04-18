@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class WindImpl extends KnotSpeedWithBearingImpl implements Wind {
+    private static final long serialVersionUID = 5431592324949471980L;
     private final Position position;
     private final TimePoint timepoint;
     private final Bearing from;

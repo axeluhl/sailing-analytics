@@ -3,8 +3,8 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.server.RacingEventService;
 
 public class RemoveColumnFromLeaderboard extends AbstractLeaderboardColumnOperation {
-    
-    
+    private static final long serialVersionUID = 5425526859417359535L;
+
     public RemoveColumnFromLeaderboard(String columnName, String leaderboardName) {
         super(leaderboardName, columnName);
     }

@@ -20,10 +20,13 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
  *
  */
 public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFixMoving {
+    private static final long serialVersionUID = 761582024504236533L;
     private final double knotSpeed;
     private final double degBearing;
     
     private class CompactSpeedWithBearing extends AbstractSpeedImpl implements SpeedWithBearing {
+        private static final long serialVersionUID = 1802065090733146728L;
+
         @Override
         public double getKnots() {
             return knotSpeed;
@@ -66,6 +69,8 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
     }
     
     private class CompactBearing extends AbstractBearing {
+        private static final long serialVersionUID = -6474909210513108635L;
+
         @Override
         public double getDegrees() {
             return degBearing;

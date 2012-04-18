@@ -4,6 +4,8 @@ import com.sap.sailing.server.RacingEventService;
 
 public class MoveLeaderboardColumnUp extends AbstractLeaderboardColumnOperation {
     
+    private static final long serialVersionUID = 8444485841005051004L;
+
     public MoveLeaderboardColumnUp(String leaderboardName, String columnName) {
         super(leaderboardName, columnName);
     }

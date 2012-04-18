@@ -10,6 +10,7 @@ import com.sap.sailing.server.RacingEventService;
  *
  */
 public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation {
+    private static final long serialVersionUID = -7670764349119941051L;
     private final boolean medalRace;
     
     public AddColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {

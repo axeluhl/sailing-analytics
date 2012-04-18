@@ -1,5 +1,6 @@
 package com.sap.sailing.util.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +35,8 @@ import java.util.SortedSet;
  * 
  * @author Axel Uhl (d043530)
  */
-public class ArrayListNavigableSet<E> implements NavigableSet<E> {
+public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
+    private static final long serialVersionUID = 6923963699509907975L;
     private final List<E> list;
     private final Comparator<? super E> comparator;
 

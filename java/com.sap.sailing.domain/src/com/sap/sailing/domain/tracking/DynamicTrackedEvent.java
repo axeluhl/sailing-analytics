@@ -12,6 +12,11 @@ public interface DynamicTrackedEvent extends TrackedEvent {
      */
     DynamicTrackedRace getExistingTrackedRace(RaceDefinition race);
 
+    /**
+     * @param raceDefinitionSetToUpdate
+     *            may be <code>null</code> which means that no update will be fired to any
+     *            {@link DynamicRaceDefinitionSet}.
+     */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate);

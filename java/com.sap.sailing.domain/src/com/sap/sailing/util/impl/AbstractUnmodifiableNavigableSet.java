@@ -1,9 +1,12 @@
 package com.sap.sailing.util.impl;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.NavigableSet;
 
-public abstract class AbstractUnmodifiableNavigableSet<E> implements NavigableSet<E> {
+public abstract class AbstractUnmodifiableNavigableSet<E> implements NavigableSet<E>, Serializable {
+
+    private static final long serialVersionUID = -256926414640453225L;
 
     @Override
     public boolean add(E e) {

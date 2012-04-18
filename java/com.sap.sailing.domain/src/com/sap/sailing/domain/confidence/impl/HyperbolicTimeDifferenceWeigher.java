@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.confidence.Weigher;
 
 public class HyperbolicTimeDifferenceWeigher implements Weigher<TimePoint> {
+    private static final long serialVersionUID = 4378168079868145134L;
     private final long halfConfidenceAfterMilliseconds;
     
     public HyperbolicTimeDifferenceWeigher(long halfConfidenceAfterMilliseconds) {

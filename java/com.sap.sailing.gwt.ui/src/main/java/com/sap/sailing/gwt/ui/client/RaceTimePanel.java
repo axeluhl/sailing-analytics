@@ -15,6 +15,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private RaceTimesInfoProvider raceTimesInfoProvider;
     private RaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
+    private RaceTimesInfoDTO lastRaceTimesInfo;
     
     public RaceTimePanel(Timer timer, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
         super(timer, stringMessages);
@@ -48,7 +49,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             // in case the race is not tracked anymore we reset the timer
             reset();
         } else { 
-            if (raceTimesInfo.startOfTracking != null && raceTimesInfo.timePointOfNewestEvent != null) {
+            if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && raceTimesInfo.timePointOfNewestEvent != null) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
                 // leg markers
                 boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
@@ -204,13 +205,26 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
         List<LegTimesInfoDTO> legTimepoints = newRaceTimesInfo.getLegTimes();
-        if (sliderBar.isMinMaxInitialized()) {
+        boolean requiresMarkerUpdate = true;
+        
+        // updating the sliderbar markers requires a lot of time, therefore we need to do this only if required
+        if(lastRaceTimesInfo != null  && lastRaceTimesInfo.legTimes.size() == newRaceTimesInfo.legTimes.size()) {
+            requiresMarkerUpdate = false;
+            for(int i = 0; i < newRaceTimesInfo.legTimes.size(); i++) {
+                if(newRaceTimesInfo.legTimes.get(i).firstPassingDate.getTime() != lastRaceTimesInfo.legTimes.get(i).firstPassingDate.getTime()) {
+                    requiresMarkerUpdate = true;
+                    break;
+                }
+            }
+        }
+        if (requiresMarkerUpdate && sliderBar.isMinMaxInitialized()) {
             sliderBar.clearMarkers();
             for (LegTimesInfoDTO legTimepointDTO : legTimepoints) {
               sliderBar.addMarker(legTimepointDTO.name, new Double(legTimepointDTO.firstPassingDate.getTime()));
             }
             sliderBar.redraw();
         }
+        lastRaceTimesInfo = newRaceTimesInfo;
     }
     
     @Override

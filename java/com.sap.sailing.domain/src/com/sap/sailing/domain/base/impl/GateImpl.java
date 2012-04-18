@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Gate;
 
 public class GateImpl implements Gate {
+    private static final long serialVersionUID = 2807354812133070574L;
     private final Buoy left;
     private final Buoy right;
     private final String name;

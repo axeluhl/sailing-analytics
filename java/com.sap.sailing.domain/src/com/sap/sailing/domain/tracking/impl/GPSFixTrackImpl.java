@@ -37,6 +37,7 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.WithValidityCache;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
+    private static final long serialVersionUID = -7282869695818293745L;
     private static final Speed DEFAULT_MAX_SPEED_FOR_SMOOTHING = new KnotSpeedImpl(50);
     protected final Speed maxSpeedForSmoothening;
     
@@ -81,6 +82,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     private class DummyGPSFix extends DummyTimed implements GPSFix {
+        private static final long serialVersionUID = -6258506654181816698L;
+
         public DummyGPSFix(TimePoint timePoint) {
             super(timePoint);
         }

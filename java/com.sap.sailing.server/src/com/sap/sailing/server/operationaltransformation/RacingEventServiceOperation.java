@@ -1,10 +1,12 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.io.Serializable;
+
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.operationaltransformation.Transformer;
 import com.sap.sailing.server.RacingEventService;
 
-public interface RacingEventServiceOperation extends Operation<RacingEventService> {
+public interface RacingEventServiceOperation extends Operation<RacingEventService>, Serializable {
     /**
      * Implements the specific transformation rule for the implementing subclass for the set of possible peer operations
      * along which to transform this operation, assuming this is the client operation. See

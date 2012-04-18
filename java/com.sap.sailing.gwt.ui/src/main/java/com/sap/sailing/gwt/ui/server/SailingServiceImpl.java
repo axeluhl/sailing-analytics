@@ -95,7 +95,6 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RacesHandle;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -923,48 +922,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             raceTimesInfo.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
             List<LegTimesInfoDTO> legTimes = new ArrayList<LegTimesInfoDTO>();
             raceTimesInfo.setLegTimes(legTimes);
-            Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
-            int i = 1;
-            // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time order of the leg times   
-            Date lastLegPassingTime = null;
-            for (TrackedLeg trackedLeg : trackedLegs) {
-                if (i == 1) {
-                    if (raceTimesInfo.startOfRace != null) {
-                        // For the race start, we'd like to show the race start date as provided by TrackedRace.getStart().
-                        // Therefore, the use of "firstPassingDate" is not exactly correct for the race start.
-                        LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("S");
-                        legTimepointDTO.firstPassingDate = raceTimesInfo.startOfRace;
-                        legTimepointDTO.lastPassingDate = raceTimesInfo.startOfRace;
-                        legTimes.add(legTimepointDTO);
-                        lastLegPassingTime = raceTimesInfo.startOfRace;
-                    }
-                }
-                Waypoint to = trackedLeg.getLeg().getTo();
-                Iterable<MarkPassing> markPassings = trackedRace.getMarkPassingsInOrder(to);
-                if (markPassings != null && Util.size(markPassings) > 0) {
-                    // ensure the passing date is in the right time order; there may perhaps be left-overs for marks to be reached later that
-                    // claim it has been passed in the past which may have been an accidental tracker read-out;
-                    // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point ordering
-                    synchronized (markPassings) {
-                        boolean isFirstValidPassing = true;
-                        LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO("L" + i++);
-                        for (MarkPassing currentMarkPassing : markPassings) {
-                            Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
-                            if(lastLegPassingTime == null || currentPassingDate.after(lastLegPassingTime)) {
-                                if(isFirstValidPassing) {
-                                    legTimes.add(legTimepointDTO);
-                                    legTimepointDTO.firstPassingDate = currentPassingDate;
-                                    legTimepointDTO.lastPassingDate = currentPassingDate;
-                                    lastLegPassingTime = currentPassingDate;
-                                    isFirstValidPassing = false;
-                                } else {
-                                    if (currentPassingDate.after(legTimepointDTO.lastPassingDate)) {
-                                        legTimepointDTO.lastPassingDate = currentPassingDate;
-                                    }
-                                }
-                            }
-                        }
-                    }
+            Iterable<TimePoint> startTimesOfTrackedLegs = trackedRace.getStartTimesOfTrackedLegs();
+            synchronized(startTimesOfTrackedLegs) {
+                int legNumber = 1;
+                for(TimePoint legStartTime: startTimesOfTrackedLegs) {
+                    LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO(legNumber);
+                    legTimepointDTO.name = (legNumber == 1) ? "S" : "L" + legNumber;  
+                    legTimepointDTO.firstPassingDate = legStartTime.asDate();
+                    legTimes.add(legTimepointDTO);
+                    legNumber++;
                 }
             }
         }        

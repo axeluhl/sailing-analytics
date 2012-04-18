@@ -39,6 +39,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
+    private static final long serialVersionUID = 5827912985564121181L;
     private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true);
     
     public WindTrack getWindTrack() {
@@ -271,9 +272,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public DynamicTrackedEvent getTrackedEvent() {
         return new DynamicTrackedEvent() {
+            private static final long serialVersionUID = 2651590861333064588L;
+
             @Override
             public Event getEvent() {
                 return new Event() {
+                    private static final long serialVersionUID = -4908774269425170811L;
+
                     @Override
                     public String getName() {
                         return "A Mocked Test Event";
@@ -524,4 +529,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         
     }
 
+    @Override
+    public Iterable<TimePoint> getStartTimesOfTrackedLegs() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
