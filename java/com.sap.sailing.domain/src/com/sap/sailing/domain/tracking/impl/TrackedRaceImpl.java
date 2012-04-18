@@ -82,8 +82,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
 
-    // TODO observe the race course; if it changes, update leg structures; consider fine-grained update events that tell
-    // what changed
     private final RaceDefinition race;
 
     private final TrackedEvent trackedEvent;
@@ -150,6 +148,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private final LinkedHashMap<Leg, TrackedLeg> trackedLegs;
 
     private final Map<Competitor, GPSFixTrack<Competitor, GPSFixMoving>> tracks;
+    
     private final Map<Competitor, NavigableSet<MarkPassing>> markPassingsForCompetitor;
 
     /**
@@ -183,7 +182,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private final WindStore windStore;
 
-    private Timer cacheInvalidationTimer;
+    private transient Timer cacheInvalidationTimer;
 
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
@@ -1502,6 +1501,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     private class StartToNextMarkCacheInvalidationListener implements GPSTrackListener<Buoy> {
+        private static final long serialVersionUID = 3540278554797445085L;
         private final GPSFixTrack<Buoy, GPSFix> listeningTo;
 
         public StartToNextMarkCacheInvalidationListener(GPSFixTrack<Buoy, GPSFix> listeningTo) {

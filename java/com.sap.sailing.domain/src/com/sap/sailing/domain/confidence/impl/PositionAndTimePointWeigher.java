@@ -16,6 +16,7 @@ import com.sap.sailing.domain.confidence.Weigher;
  *
  */
 public class PositionAndTimePointWeigher implements Weigher<Pair<Position, TimePoint>> {
+    private static final long serialVersionUID = -262428237738496818L;
     private final Weigher<TimePoint> weigher;
     
     public PositionAndTimePointWeigher(long halfConfidenceAfterMilliseconds) {

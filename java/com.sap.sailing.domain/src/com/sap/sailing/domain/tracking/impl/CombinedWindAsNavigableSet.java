@@ -17,6 +17,8 @@ import com.sap.sailing.domain.tracking.WindTrack;
  */
 public class CombinedWindAsNavigableSet extends VirtualWindFixesAsNavigableSet {
 
+    private static final long serialVersionUID = -153959652212518644L;
+
     public CombinedWindAsNavigableSet(WindTrack track, TrackedRace trackedRace, long resolutionInMilliseconds) {
         super(track, trackedRace, resolutionInMilliseconds);
     }

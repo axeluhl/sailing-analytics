@@ -24,6 +24,7 @@ import com.tractrac.ResultAPI.LiveResultItem;
 import com.tractrac.ResultAPI.MarkResultItem;
 
 public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
+    private static final long serialVersionUID = 2515934387641015173L;
     private final TracTracTrackedRaceImpl trackedRace;
     private final Leg leg;
     private final Competitor competitor;

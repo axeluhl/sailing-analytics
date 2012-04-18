@@ -10,6 +10,8 @@ public class ConfidenceBasedAveragerFactoryImpl implements ConfidenceFactory {
     @Override
     public <RelativeTo> Weigher<RelativeTo> createConstantWeigher(final double constantConfidence) {
         return new Weigher<RelativeTo>() {
+            private static final long serialVersionUID = 8693131975511149792L;
+
             @Override
             public double getConfidence(RelativeTo fix, RelativeTo request) {
                 return constantConfidence;

@@ -116,6 +116,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     protected DynamicGPSFixTrackImpl<Buoy> createBuoyTrack(Buoy buoy) {
         DynamicGPSFixTrackImpl<Buoy> result = super.createBuoyTrack(buoy);
         result.addListener(new GPSTrackListener<Buoy>() {
+            private static final long serialVersionUID = -2855787105725103732L;
+
             @Override
             public void gpsFixReceived(GPSFix fix, Buoy buoy) {
                 notifyListeners(fix, buoy);

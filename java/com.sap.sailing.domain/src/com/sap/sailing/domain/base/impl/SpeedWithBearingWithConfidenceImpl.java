@@ -10,6 +10,8 @@ import com.sap.sailing.domain.confidence.ScalableValue;
 public class SpeedWithBearingWithConfidenceImpl<RelativeTo> extends
         HasConfidenceImpl<Triple<Speed, Double, Double>, SpeedWithBearing, RelativeTo> implements
         SpeedWithBearingWithConfidence<RelativeTo>, IsScalable<Triple<Speed, Double, Double>, SpeedWithBearing> {
+    private static final long serialVersionUID = -4811576094614673625L;
+
     public SpeedWithBearingWithConfidenceImpl(SpeedWithBearing speedWithBearing, double confidence, RelativeTo relativeTo) {
         super(speedWithBearing, confidence, relativeTo);
     }

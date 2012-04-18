@@ -11,6 +11,8 @@ import com.sap.sailing.domain.confidence.Weigher;
  * @author Axel Uhl (d043530)
  */
 public class ExponentialTimeDifferenceWeigher implements Weigher<TimePoint> {
+    private static final long serialVersionUID = 1832731495731693670L;
+
     private final static double logHalf = Math.log(0.5);
     
     private final long halfConfidenceAfterMilliseconds;

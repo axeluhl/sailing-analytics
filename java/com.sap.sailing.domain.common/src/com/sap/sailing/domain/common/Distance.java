@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common;
 
+import java.io.Serializable;
+
 
 
 /**
@@ -8,8 +10,10 @@ package com.sap.sailing.domain.common;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Distance extends Comparable<Distance> {
+public interface Distance extends Comparable<Distance>, Serializable {
     static final Distance NULL = new Distance() {
+        private static final long serialVersionUID = -3167560884686340893L;
+
         @Override
         public int compareTo(Distance o) {
             return getMeters() > o.getMeters() ? 1 : getMeters() == o.getMeters() ? 0 : -1;

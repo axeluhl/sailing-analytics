@@ -38,7 +38,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         super();
         this.database = database;
     }
-
+    
     public DBObject storeWind(Wind wind) {
         DBObject result = new BasicDBObject();
         storePositioned(wind, result);

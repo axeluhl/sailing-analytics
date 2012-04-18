@@ -5,6 +5,7 @@ import com.sap.sailing.domain.common.Bearing;
 
 
 public class DegreeBearingImpl extends AbstractBearing implements Bearing {
+    private static final long serialVersionUID = -8045400378221073451L;
     private final double bearingDeg;
     /**
      * 

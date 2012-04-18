@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -13,7 +14,8 @@ import com.sap.sailing.domain.tracking.MarkPassing;
  * @author Axel Uhl (D043530)
  * 
  */
-public class MarkPassingByTimeComparator implements Comparator<MarkPassing> {
+public class MarkPassingByTimeComparator implements Comparator<MarkPassing>, Serializable {
+    private static final long serialVersionUID = 5758820139503482888L;
     public static MarkPassingByTimeComparator INSTANCE = new MarkPassingByTimeComparator();
     
     @Override

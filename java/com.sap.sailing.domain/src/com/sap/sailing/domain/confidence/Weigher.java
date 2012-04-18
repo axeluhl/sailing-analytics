@@ -1,11 +1,13 @@
 package com.sap.sailing.domain.confidence;
 
+import java.io.Serializable;
+
 /**
  * A weigher can compute a confidence value for a distance of two <code>RelativeTo</code> objects.
  * 
  * @author Axel Uhl (d043530)
  */
-public interface Weigher<RelativeTo> {
+public interface Weigher<RelativeTo> extends Serializable {
     /**
      * Computes a confidence, based on some weighed notion of "distance" between the two <code>RelativeTo</code> objects.
      * 

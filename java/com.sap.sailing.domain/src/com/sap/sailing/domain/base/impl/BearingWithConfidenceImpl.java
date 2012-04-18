@@ -9,6 +9,8 @@ import com.sap.sailing.domain.confidence.ScalableValue;
 
 public class BearingWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Pair<Double, Double>, Bearing, RelativeTo>
 implements BearingWithConfidence<RelativeTo>, IsScalable<Pair<Double, Double>, Bearing> {
+    private static final long serialVersionUID = 1624026377840747818L;
+
     public BearingWithConfidenceImpl(Bearing bearing, double confidence, RelativeTo relativeTo) {
         super(bearing, confidence, relativeTo);
     }

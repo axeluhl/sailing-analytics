@@ -3,6 +3,8 @@ package com.sap.sailing.domain.common;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
 public abstract class AbstractBearing implements Bearing {
+    private static final long serialVersionUID = 1968420344627864784L;
+
     @Override
     public Bearing reverse() {
         if (getDegrees() >= 180) {

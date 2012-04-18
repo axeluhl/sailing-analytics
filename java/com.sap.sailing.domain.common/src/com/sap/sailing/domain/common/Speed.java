@@ -1,13 +1,17 @@
 package com.sap.sailing.domain.common;
 
+import java.io.Serializable;
+
 /**
  * A speed, convertable in various units of measure. Can be negative.
  * 
  * @author Axel Uhl (d043530)
  *
  */
-public interface Speed extends Comparable<Speed> {
+public interface Speed extends Comparable<Speed>, Serializable {
     final static Speed NULL = new Speed() {
+        private static final long serialVersionUID = 1448378212070589610L;
+
         @Override
         public int compareTo(Speed o) {
             return getMetersPerSecond() > o.getMetersPerSecond() ? 1 : getMetersPerSecond() == o.getMetersPerSecond() ? 0 : -1;

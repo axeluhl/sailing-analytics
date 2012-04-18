@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.confidence;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -42,7 +44,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
  *            a correspondingly-typed weigher, such a value with confidence can be aggregated with
  *            other values, again relative to (maybe a different) time point.
  */
-public interface HasConfidence<ValueType, BaseType, RelativeTo> {
+public interface HasConfidence<ValueType, BaseType, RelativeTo> extends Serializable {
     /**
      * A confidence is a number between 0.0 and 1.0 (inclusive) where 0.0 means that the value is randomly guessed while
      * 1.0 means the value is authoritatively known for a fact. It represents the weight with which a value is to be

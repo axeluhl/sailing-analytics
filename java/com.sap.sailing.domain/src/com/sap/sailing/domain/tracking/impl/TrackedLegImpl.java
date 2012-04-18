@@ -28,6 +28,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
+    private static final long serialVersionUID = -1944668527284130545L;
+
     private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
     
     private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 60; // TracTrac does 22.5, Marcus Baur suggest 40; Nils Schröder suggests 60

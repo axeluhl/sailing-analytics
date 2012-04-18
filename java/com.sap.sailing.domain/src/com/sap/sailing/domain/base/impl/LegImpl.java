@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 
 public class LegImpl implements Leg {
+    private static final long serialVersionUID = -6730954156357241076L;
     private final CourseImpl course;
     private final int indexOfStartWaypoint;
     

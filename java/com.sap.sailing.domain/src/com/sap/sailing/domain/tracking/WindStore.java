@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.WindSource;
@@ -13,7 +14,7 @@ import com.sap.sailing.domain.common.WindSource;
  * @author Axel Uhl (d043530)
  *
  */
-public interface WindStore {
+public interface WindStore extends Serializable {
     WindTrack getWindTrack(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
             long millisecondsOverWhichToAverage, long delayForWindEstimationCacheInvalidation);
 

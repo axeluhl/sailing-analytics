@@ -4,6 +4,8 @@ import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 
 public abstract class AbstractDistance implements Distance {
 
+    private static final long serialVersionUID = 4393500221539639333L;
+
     @Override
     public boolean equals(Object o) {
         return (o instanceof Distance) && this.compareTo((Distance) o) == 0;

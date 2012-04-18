@@ -31,6 +31,7 @@ import com.sap.sailing.domain.tracking.Wind;
  *
  */
 public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
+    private static final long serialVersionUID = -7060076837717432808L;
     private final TrackedLegImpl trackedLeg;
     private final Competitor competitor;
     
