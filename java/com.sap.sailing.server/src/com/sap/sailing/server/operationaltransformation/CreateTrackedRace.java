@@ -18,12 +18,12 @@ import com.sap.sailing.server.RacingEventService;
  * @author Axel Uhl (d043530)
  *
  */
-public class TrackRace extends AbstractRaceOperation {
+public class CreateTrackedRace extends AbstractRaceOperation {
     private static final long serialVersionUID = 5084401060896514911L;
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
 
-    public TrackRace(EventAndRaceIdentifier raceIdentifier, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+    public CreateTrackedRace(EventAndRaceIdentifier raceIdentifier, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(raceIdentifier);
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
