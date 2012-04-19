@@ -1564,6 +1564,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint);
                 result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
                 break;
+            case RACE_RANK:
+                result = (double) trackedLeg.getRank(timePoint);
+                break;
             }
         }
         return result;

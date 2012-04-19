@@ -73,27 +73,27 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
  */
 public abstract class AbstractChartPanel<SettingsType extends ChartSettings> extends SimpleChartPanel
 implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeListener, RequiresResize {
-    protected static final int LINE_WIDTH = 1;
-    protected MultiCompetitorRaceDataDTO chartData;
-    protected final SailingServiceAsync sailingService;
-    protected final AsyncActionsExecutor asyncActionsExecutor;
-    protected final ErrorReporter errorReporter;
-    protected Chart chart;
+    private static final int LINE_WIDTH = 1;
+    private MultiCompetitorRaceDataDTO chartData;
+    private final SailingServiceAsync sailingService;
+    private final AsyncActionsExecutor asyncActionsExecutor;
+    private final ErrorReporter errorReporter;
+    private Chart chart;
     private boolean compactChart;
-    protected final AbsolutePanel busyIndicatorPanel;
-    protected final Label noCompetitorsSelectedLabel;
-    protected final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
-    protected final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
+    private final AbsolutePanel busyIndicatorPanel;
+    private final Label noCompetitorsSelectedLabel;
+    private final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
+    private final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
     private Series timeLineSeries;
     private boolean timeLineNeedsUpdate = true;
     private final boolean allowTimeAdjust;
     private boolean ignoreTimeAdjustOnce;
-    protected final RaceSelectionProvider raceSelectionProvider;
-    protected long stepSize = 5000;
+    private final RaceSelectionProvider raceSelectionProvider;
+    private long stepSize = 5000;
     protected final StringMessages stringMessages;
-    protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
-    protected DetailType dataToShow;
-    protected final CompetitorSelectionProvider competitorSelectionProvider;
+    private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
+    private DetailType dataToShow;
+    private final CompetitorSelectionProvider competitorSelectionProvider;
 
     public AbstractChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,

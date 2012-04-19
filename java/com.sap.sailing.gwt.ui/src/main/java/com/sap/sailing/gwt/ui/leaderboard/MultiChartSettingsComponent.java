@@ -28,7 +28,8 @@ public class MultiChartSettingsComponent extends AbstractChartSettingsComponent<
         dataSelection = dialog.createListBox(/* isMultiSelect */ false);
         int i=0;
         for (DetailType detailType : new DetailType[] { DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, DetailType.DISTANCE_TRAVELED,
-                DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, DetailType.GAP_TO_LEADER_IN_SECONDS, DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS }) {
+                DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, DetailType.GAP_TO_LEADER_IN_SECONDS, DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                DetailType.RACE_RANK }) {
             dataSelection.addItem(DetailTypeFormatter.format(detailType, getStringMessages()), detailType.toString());
             if (detailType == initialDataToShow) {
                 dataSelection.setSelectedIndex(i);
