@@ -49,6 +49,8 @@ public class DetailTypeFormatter {
             return stringMessages.legs();
         case CURRENT_LEG:
             return stringMessages.currentLeg();
+        case TIME_TRAVELED:
+            return stringMessages.time();
         }
         return null;
 

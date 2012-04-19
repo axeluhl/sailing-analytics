@@ -78,11 +78,15 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.raceID = raceID;
         this.messageLoader = messageLoader;
         this.windStore = windStore;
-        this.id = new Triple<String, String, Integer>(raceID, hostname, port);
+        this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
         event = domainFactory.getOrCreateEvent(raceID);
         setTrackedEvent(trackedEventRegistry.getOrCreateTrackedEvent(event));
         connector.trackRace(raceID);
+    }
+
+    static Triple<String, String, Integer> createID(String raceID, String hostname, int port) {
+        return new Triple<String, String, Integer>(raceID, hostname, port);
     }
 
     @Override

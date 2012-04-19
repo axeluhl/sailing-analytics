@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
@@ -42,9 +43,36 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     private static final Logger logger = Logger.getLogger(MarkPositionReceiver.class.getName());
     
     private int received;
-    
-    public MarkPositionReceiver(final DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, final DomainFactory domainFactory) {
+
+    /**
+     * if <code>null</code>, all stored data from the "beginning of time" will be loaded that the event has to provide,
+     * particularly for the mark positions which are stored per event, not per race; otherwise, particularly the mark
+     * position loading will be constrained to this start time.
+     */
+    private final TimePoint startOfTracking;
+
+    /**
+     * if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to provide,
+     * particularly for the mark positions which are stored per event, not per race; otherwise, particularly the mark
+     * position loading will be constrained to this end time.
+     */
+    private final TimePoint endOfTracking;
+
+    /**
+     * @param startOfTracking
+     *            if <code>null</code>, all stored data from the "beginning of time" will be loaded that the event has
+     *            to provide, particularly for the mark positions which are stored per event, not per race; otherwise,
+     *            particularly the mark position loading will be constrained to this start time.
+     * @param endOfTracking
+     *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to
+     *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
+     *            particularly the mark position loading will be constrained to this end time.
+     */
+    public MarkPositionReceiver(final DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
+            TimePoint startOfTracking, TimePoint endOfTracking, final DomainFactory domainFactory) {
         super(domainFactory, tractracEvent, trackedEvent);
+        this.startOfTracking = startOfTracking;
+        this.endOfTracking = endOfTracking;
         // assumption: there is currently only one race per TracTrac Event object
         if (tractracEvent.getRaceList().isEmpty()) {
             throw new IllegalArgumentException("Can't receive mark positions from event "+tractracEvent.getName()+" that has no race");
@@ -66,7 +94,8 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
                     public void gotData(ControlPoint controlPoint, ControlPointPositionData record, boolean isLiveData) {
                         enqueue(new Triple<ControlPoint, ControlPointPositionData, Boolean>(controlPoint, record, isLiveData));
                     }
-                }, /* fromTime */0l, /* toTime */Long.MAX_VALUE);
+                }, /* fromTime */ startOfTracking == null ? 0l : startOfTracking.asMillis(),
+                   /* toTime */ endOfTracking == null ? Long.MAX_VALUE : endOfTracking.asMillis());
         result.add(controlPointListener);
         setAndStartThread(new Thread(this, getClass().getName()));
         return result;

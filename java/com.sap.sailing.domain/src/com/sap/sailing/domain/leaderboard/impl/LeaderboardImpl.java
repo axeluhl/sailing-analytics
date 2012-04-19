@@ -23,6 +23,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class LeaderboardImpl implements Named, Leaderboard {
+    private static final long serialVersionUID = -328091952760083438L;
     private final List<RaceInLeaderboard> races;
     private final SettableScoreCorrection scoreCorrection;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
@@ -170,6 +171,16 @@ public class LeaderboardImpl implements Named, Leaderboard {
     public Competitor getCompetitorByName(String competitorName) {
         for (Competitor competitor : getCompetitors()) {
             if (competitor.getName().equals(competitorName)) {
+                return competitor;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public Competitor getCompetitorByIdAsString(String idAsString) {
+        for (Competitor competitor : getCompetitors()) {
+            if (competitor.getId().toString().equals(idAsString)) {
                 return competitor;
             }
         }

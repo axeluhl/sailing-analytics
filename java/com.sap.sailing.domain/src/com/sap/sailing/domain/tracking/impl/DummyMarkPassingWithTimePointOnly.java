@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
 public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
+    private static final long serialVersionUID = -5494669910047887984L;
     private final TimePoint timePoint;
     
     public DummyMarkPassingWithTimePointOnly(TimePoint timePoint) {
@@ -28,13 +29,15 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
     @Override
     public Competitor getCompetitor() {
         return new Competitor() {
+            private static final long serialVersionUID = 5663644650754031382L;
+
             @Override
             public String getName() {
                 return "Dummy";
             }
 
             @Override
-            public Object getId() {
+            public String getId() {
                 return "Dummy";
             }
 

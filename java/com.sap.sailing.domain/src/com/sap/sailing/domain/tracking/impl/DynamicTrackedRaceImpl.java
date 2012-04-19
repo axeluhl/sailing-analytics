@@ -37,20 +37,19 @@ import com.sap.sailing.domain.tracking.WindTrack;
 
 public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         DynamicTrackedRace, WindListener, GPSTrackListener<Competitor> {
+    private static final long serialVersionUID = 1092726918239676958L;
+
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceImpl.class.getName());
     
     private Set<RaceChangeListener> listeners;
     
     private boolean raceIsKnownToStartUpwind;
     
-    /**
-     * {@link #raceIsKnownToStartUpwind} (see also {@link #raceIsKnownToStartUpwind()}) is initialized based on the <code>race</code>'s
-     * {@link RaceDefinition#getBoatClass()} boat class's {@link BoatClass#typicallyStartsUpwind()} result. It can be changed
-     * using {@link #setRaceIsKnownToStartUpwind(boolean)}.
-     */
     public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
-            WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+            WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            long delayForCacheInvalidationOfWindEstimation) {
+        super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                delayForCacheInvalidationOfWindEstimation);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         for (Competitor competitor : getRace().getCompetitors()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
@@ -60,6 +59,18 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (WindSource windSource : getWindSources()) {
             getOrCreateWindTrack(windSource).addListener(this);
         }
+    }
+    /**
+     * {@link #raceIsKnownToStartUpwind} (see also {@link #raceIsKnownToStartUpwind()}) is initialized based on the <code>race</code>'s
+     * {@link RaceDefinition#getBoatClass()} boat class's {@link BoatClass#typicallyStartsUpwind()} result. It can be changed
+     * using {@link #setRaceIsKnownToStartUpwind(boolean)}. Uses <code>millisecondsOverWhichToAverageWind/2</code> for the
+     * <code>delayForCacheInvalidationOfWindEstimation</code> argument of the constructor.
+     */
+    public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
+            WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+        this(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                millisecondsOverWhichToAverageWind/2);
     }
 
     @Override
@@ -138,96 +149,110 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     private void notifyListeners(GPSFix fix, Buoy buoy) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.buoyPositionChanged(fix, buoy);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.buoyPositionChanged(fix, buoy);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
             }
         }
     }
 
     private void notifyListeners(GPSFix fix, Competitor competitor) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.competitorPositionChanged(fix, competitor);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.competitorPositionChanged(fix, competitor);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(GPSFix, Competitor)", t);
             }
         }
     }
 
     private void notifyListeners(Wind wind) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.windDataReceived(wind);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(Wind)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.windDataReceived(wind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(Wind)", t);
             }
         }
     }
 
     private void notifyListenersSpeedAveragingChanged(long oldMillisecondsOverWhichToAverageSpeed, long newMillisecondsOverWhichToAverageSpeed) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.speedAveragingChanged(oldMillisecondsOverWhichToAverageSpeed,
-                            newMillisecondsOverWhichToAverageSpeed);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(),
-                            "notifyListenersSpeedAveragingChanged(long, long)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.speedAveragingChanged(oldMillisecondsOverWhichToAverageSpeed,
+                        newMillisecondsOverWhichToAverageSpeed);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(),
+                        "notifyListenersSpeedAveragingChanged(long, long)", t);
             }
         }
     }
 
     private void notifyListenersWindAveragingChanged(long oldMillisecondsOverWhichToAverageWind, long newMillisecondsOverWhichToAverageWind) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.windAveragingChanged(oldMillisecondsOverWhichToAverageWind,
-                            newMillisecondsOverWhichToAverageWind);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(),
-                            "notifyListenersWindAveragingChanged(long, long)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.windAveragingChanged(oldMillisecondsOverWhichToAverageWind,
+                        newMillisecondsOverWhichToAverageWind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(),
+                        "notifyListenersWindAveragingChanged(long, long)", t);
             }
         }
     }
 
     private void notifyListenersWindRemoved(Wind wind) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.windDataRemoved(wind);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindRemoved(Wind)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.windDataRemoved(wind);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindRemoved(Wind)", t);
             }
         }
     }
 
     private void notifyListeners(MarkPassing oldMarkPassing, MarkPassing markPassing) {
+        RaceChangeListener[] listeners;
         synchronized (getListeners()) {
-            for (RaceChangeListener listener : getListeners()) {
-                try {
-                    listener.markPassingReceived(oldMarkPassing, markPassing);
-                } catch (Throwable t) {
-                    logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
-                    logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(MarkPassing)", t);
-                }
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.markPassingReceived(oldMarkPassing, markPassing);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(MarkPassing)", t);
             }
         }
     }
@@ -235,20 +260,32 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
         Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
+        MarkPassing oldStartMarkPassing = null;
+        boolean requiresStartTimeUpdate = true;
         synchronized (this) {
             NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
             synchronized (markPassingsForCompetitor) {
                 for (MarkPassing oldMarkPassing : markPassingsForCompetitor) {
+                    if(oldStartMarkPassing == null) {
+                        oldStartMarkPassing = oldMarkPassing;
+                    }
                     oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);
                 }
             }
             clearMarkPassings(competitor);
             TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
             for (MarkPassing markPassing : markPassings) {
+                // try to find corresponding old start mark passing
+                if (oldStartMarkPassing != null && markPassing.getWaypoint().getName().equals(oldStartMarkPassing.getWaypoint().getName())) {
+                    if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null &&
+                        markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
+                        requiresStartTimeUpdate = false;
+                    }
+                }
                 synchronized (markPassingsForCompetitor) {
                     markPassingsForCompetitor.add(markPassing);
                 }
-                Collection<MarkPassing> markPassingsInOrderForWaypoint = getMarkPassingsInOrder(markPassing.getWaypoint());
+                Collection<MarkPassing> markPassingsInOrderForWaypoint = getMarkPassingsInOrderAsNavigableSet(markPassing.getWaypoint());
                 synchronized (markPassingsInOrderForWaypoint) {
                     markPassingsInOrderForWaypoint.add(markPassing);
                 }
@@ -258,6 +295,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             }
             updated(timePointOfLatestEvent);
         }
+        // update the race times like start, end and the leg times
+        if (requiresStartTimeUpdate) {
+            invalidateStartTime();
+        }
+        invalidateLegTimes();
+        invalidateEndTime();
+        
         // notify *after* all mark passings have been re-established; should avoid flicker
         for (MarkPassing markPassing : markPassings) {
             notifyListeners(oldMarkPassings.get(markPassing.getWaypoint()), markPassing);
@@ -265,8 +309,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public Collection<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
-        return (Collection<MarkPassing>) super.getMarkPassingsInOrder(waypoint);
+    public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
+        return (NavigableSet<MarkPassing>) super.getMarkPassingsInOrder(waypoint);
     }
 
     private void clearMarkPassings(Competitor competitor) {
@@ -276,7 +320,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             while (mpIter.hasNext()) {
                 MarkPassing mp = mpIter.next();
                 mpIter.remove();
-                Collection<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(mp.getWaypoint());
+                Collection<MarkPassing> markPassingsInOrder = getMarkPassingsInOrderAsNavigableSet(mp.getWaypoint());
                 synchronized (markPassingsInOrder) {
                     markPassingsInOrder.remove(mp);
                 }
@@ -287,6 +331,16 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public void setStartTimeReceived(TimePoint start) {
         super.setStartTimeReceived(start);
+    }
+    
+    @Override
+    public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived) {
+        super.setStartOfTrackingReceived(startOfTrackingReceived);
+    }
+
+    @Override
+    public void setEndOfTrackingReceived(TimePoint endOfTrackingReceived) {
+        super.setEndOfTrackingReceived(endOfTrackingReceived);
     }
 
     /**
@@ -312,11 +366,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void gpsFixReceived(GPSFix fix, Competitor competitor) {
-        TimePoint start = getStart();
-        if (start == null || start.compareTo(fix.getTimePoint())>0) {
-            // infer race start time from fix; earliest fix received defines start if earlier than assumed start so far
-            setStartTimeReceived(fix.getTimePoint());
-        }
         updated(fix.getTimePoint());
         notifyListeners(fix, competitor);
     }

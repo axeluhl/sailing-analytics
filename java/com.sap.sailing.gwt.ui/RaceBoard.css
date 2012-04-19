@@ -1,4 +1,5 @@
 @import url(fontface.css);
+@import url(CommonControls.css);
 
 /** Add css rules here for your application. */
 /*
@@ -61,47 +62,8 @@ table {
 	border-collapse: separate;
 }
 
-.LogoAndTitlePanel {
-	height: 68px;
-	font-family: Arial, Verdana, sans-serif;
-	position: fixed;
-	width: 100%;
-	top: 0;
-	background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
-	background-position: center top, 0 0;
-	background-repeat: no-repeat, repeat-x;
-	box-shadow: 0 0 20px #858585;
-	-moz-box-shadow: 0 0 20px #858585;
-	-webkit-box-shadow: 0 0 20px #858585;
-}
-
-.LogoAndTitlePanel:after {
-	content: " ";
-	display: block;
-	height: 0;
-	clear: both;
-	visibility: hidden;
-}
-
 .RaceBoardHeaderPanel {
 	margin: 0 12px 14px 12px;
-}
-
-.sapLogo {
-	float: left;
-	margin: 13px 0 0 12px;
-}
-
-.sailingAnalyticsLabelPanel {
-	margin: 10px 0 0 0;
-}
-
-.sailingAnalyticsLabel {
-	float: left;
-	color: #fff;
-	font-size: 14px;
-	font-weight: bold;
-	margin: 15px 0 0 0;
 }
 
 .leaderboardLabel {
@@ -134,44 +96,6 @@ input.magnifier {
 	margin: 3px auto 0 auto !important;
 }
 
-.timeLinePanel {
-	width: 100%;
-	position: fixed;
-	bottom: 0;
-	height: 140px;
-	z-index: 9;
-	background: #DDDCDC;
-	box-shadow: 0 0 20px #858585;
-	-webkit-box-shadow: 0 0 20px #858585;
-	-moz-box-shadow: 0 0 20px #858585;
-}
-
-.timeLineInnerPanel {
-	/*height: 100%;*/
-	margin: 0 12px;
-	margin-top: 20px;
-	background: #dddcdc;
-	/*padding: 38px 24px 0 24px;*/
-}
-
-.timeLineInnerBgPanel {
-	background: url(images/timeslider-bg.png) 0 0 repeat-x #f6f6f6;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
-	border-radius: 6px;
-	padding: 6px 10px 0;
-	border: 1px solid #a6a6a6;
-}
-
-.footerShadowPanel {
-	position: fixed;
-	height: 15px;
-	bottom: 0;
-	background: url(images/footer_shadow.png) left bottom repeat-x;
-	width: 100%;
-	z-index: 10;
-}
-
 .breadcrumbPanel {
 	height: 30px;
 	margin: 0 12px 13px 12px;
@@ -183,7 +107,7 @@ input.magnifier {
 
 .raceBoardNavigation {
 	float: right;
-	margin: 26px 0 0 0;
+	margin:-23px 0 0 0;
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
@@ -207,32 +131,9 @@ input.magnifier {
 	text-decoration: none;
 }
 
-.timePanel-controls {
-	margin: 9px 0 0 0;
-}
-
-.timePanel-controls-play {
-}
-
-.timePanel-controls-playSpeed {
-	vertical-align: middle;
-	padding: 5px;
-	line-height: 25px;
-}
-
-.timePanel-label {
-}
-
-.timePanel-controls-time {
-}
-
-.timePanel-controls-timeDelay {
-}
-
 .gwt-DialogBox {
 	z-index: 20;
 }
-
 
 .abstractChartPanel-importantMessageOfChart {
     font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
@@ -248,3 +149,13 @@ input.magnifier {
 .breadcrumbPanel-NextArrow {
 	display: none;
 }
+
+.errorLabel {
+	color: #FF0000;
+}
+
+.raceBoardNavigation-settingsButtonPanel {
+	float: right;
+	margin: -26px 0 0 0;
+}
+

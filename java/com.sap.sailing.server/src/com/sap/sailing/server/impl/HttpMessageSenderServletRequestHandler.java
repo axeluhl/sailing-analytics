@@ -13,12 +13,13 @@ import com.sap.sailing.domain.common.HttpMessageSenderServletConstants;
 import com.sap.sailing.server.RacingEventService;
 
 public abstract class HttpMessageSenderServletRequestHandler {
+    private static final Logger logger = Logger.getLogger(AbstractHttpPostServlet.class.getName());
+
     /**
      * Every so many milliseconds the servlet will send a {@link #PONG} message. This shows clients that the connection
      * is still alive. If after several such intervals the client hasn't received a {@link #PONG} message it seems reasonable
      * to assume the connection has died.
      */
-    private static final Logger logger = Logger.getLogger(AbstractHttpPostServlet.class.getName());
     private static final long timeoutInMilliseconds = 60000;
     private long timeInMillisOfLastExpeditionMessageReceived;
     private boolean stop;
@@ -34,6 +35,10 @@ public abstract class HttpMessageSenderServletRequestHandler {
     protected RacingEventService getService() {
         return owner.getService();
     }
+    
+    /**
+     * Obtains the writer through which the server can push data to the client.
+     */
     protected PrintWriter getWriter() {
         return writer;
     }
@@ -77,9 +82,6 @@ public abstract class HttpMessageSenderServletRequestHandler {
     /**
      * Sends a single message across to the receiving client. To do so, the message is Base64 encoded before being sent
      * as a string. The message is terminated with a 0 byte.
-     * @param writer
-     * @param bytes
-     * @throws IOException
      */
     protected void send(Writer writer, byte[] message)  {
         String bytes = Base64Utils.toBase64(message);

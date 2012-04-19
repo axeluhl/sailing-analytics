@@ -8,6 +8,8 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.tracking.GPSFix;
 
 public abstract class AbstractGPSFixImpl implements GPSFix {
+    private static final long serialVersionUID = 9037068515469957639L;
+
     @Override
     public int hashCode() {
         final int prime = 31;

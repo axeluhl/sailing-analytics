@@ -12,7 +12,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -40,7 +39,8 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
-    private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000);
+    private static final long serialVersionUID = 5827912985564121181L;
+    private final WindTrack windTrack = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true);
     
     public WindTrack getWindTrack() {
         return windTrack;
@@ -272,9 +272,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public DynamicTrackedEvent getTrackedEvent() {
         return new DynamicTrackedEvent() {
+            private static final long serialVersionUID = 2651590861333064588L;
+
             @Override
             public Event getEvent() {
                 return new Event() {
+                    private static final long serialVersionUID = -4908774269425170811L;
+
                     @Override
                     public String getName() {
                         return "A Mocked Test Event";
@@ -422,12 +426,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Pair<Placemark, Placemark> getStartFinishPlacemarks() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public RaceIdentifier getRaceIdentifier() {
         // TODO Auto-generated method stub
         return null;
@@ -483,4 +481,57 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
+    @Override
+    public WindWithConfidence<TimePoint> getEstimatedWindDirectionWithConfidence(Position position, TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public WindWithConfidence<Pair<Position, TimePoint>> getWindWithConfidence(Position p, TimePoint at) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Iterable<WindSource> getWindSourcesToExclude() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public TimePoint getEndOfTracking() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public TimePoint getTimePointOfOldestEvent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setEndOfTrackingReceived(TimePoint endOfTrackingReceived) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Iterable<TimePoint> getStartTimesOfTrackedLegs() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

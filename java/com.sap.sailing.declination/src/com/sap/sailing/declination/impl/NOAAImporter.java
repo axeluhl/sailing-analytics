@@ -1,17 +1,22 @@
 package com.sap.sailing.declination.impl;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import com.sap.sailing.declination.Declination;
 import com.sap.sailing.domain.common.Position;
@@ -25,7 +30,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
  * 
  */
 public class NOAAImporter {
-    private static final String QUERY_URL = "http://www.ngdc.noaa.gov/geomagmodels/struts/calcDeclination";
+    private static final String QUERY_URL = "http://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination";
     private static final String REGEXP_DECLINATION = "<p class=\"indent\"><b>Declination</b> = ([0-9]*)&deg; ([0-9]*)' *([EW])";
     private static final String REGEXP_ANNUAL_CHANGE = "changing by *([0-9]*)&deg; *([0-9]*)' ([EW])/year *</p>";
     
@@ -46,69 +51,26 @@ public class NOAAImporter {
         return annualChangePattern;
     }
 
-    public Declination importRecord(Position position, TimePoint timePoint) throws IOException {
+    public Declination importRecord(Position position, TimePoint timePoint) throws IOException, ParserConfigurationException, SAXException {
         Declination result = null;
-        URL url = new URL(QUERY_URL);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
-        conn.setDoInput(true);
-        DataOutputStream out = new DataOutputStream(conn.getOutputStream());
         Date date = timePoint.asDate();
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
-        String content = "minLatStr=" + position.getLatDeg() + "&minLatHemisphere="
-                + (position.getLatDeg() >= 0 ? "n" : "s") + "&minLonStr=" + position.getLngDeg() + "&minLonHemisphere="
-                + (position.getLngDeg() >= 0 ? "e" : "w") + "&minYear=" + calendar.get(Calendar.YEAR) + "&minMonth="
-                + (calendar.get(Calendar.MONTH) + 1) + "&minDay=" + calendar.get(Calendar.DAY_OF_MONTH);
-        out.writeBytes(content);
-        out.flush();
-        out.close();
-        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        String line;
-        int declinationDeg = 0;
-        int declinationMin = 0;
-        boolean foundDeclination = false;
-        int annualChangeDeg = 0;
-        int annualChangeMin = 0;
-        boolean foundAnnualChange = false;
-        StringBuilder page = new StringBuilder();
-        while ((!foundDeclination || !foundAnnualChange) && (line = in.readLine()) != null) {
-            page.append(line);
-            page.append('\n');
-            if (!foundDeclination) {
-                Matcher declinationMatcher = declinationPattern.matcher(line);
-                if (declinationMatcher.find()) {
-                    foundDeclination = true;
-                    declinationDeg = Integer.valueOf(declinationMatcher.group(1));
-                    declinationMin = Integer.valueOf(declinationMatcher.group(2));
-                    char ew = declinationMatcher.group(3).charAt(0);
-                    if (ew == 'W') {
-                        declinationDeg = -declinationDeg;
-                        declinationMin = -declinationMin;
-                    }
-                }
-            }
-            if (!foundAnnualChange) {
-                Matcher annualChangeMatcher = annualChangePattern.matcher(line);
-                if (annualChangeMatcher.find()) {
-                    foundAnnualChange = true;
-                    annualChangeDeg = Integer.valueOf(annualChangeMatcher.group(1));
-                    annualChangeMin = Integer.valueOf(annualChangeMatcher.group(2));
-                    char ew = annualChangeMatcher.group(3).charAt(0);
-                    if (ew == 'W') {
-                        annualChangeDeg = -annualChangeDeg;
-                        annualChangeMin = -annualChangeMin;
-                    }
-                }
-            }
-        }
-        in.close();
-        if (foundDeclination && foundAnnualChange) {
-            result = new DeclinationRecordImpl(position, timePoint, new DegreeBearingImpl(((double) declinationDeg)
-                    + ((double) declinationMin) / 60.), new DegreeBearingImpl(((double) annualChangeDeg)
-                    + ((double) annualChangeMin) / 60.));
-        }
+        URL url = new URL(QUERY_URL+"?lon1="+position.getLngDeg()+"&lat1="+position.getLatDeg()+"&startYear=" + calendar.get(Calendar.YEAR) + "&startMonth="
+                + (calendar.get(Calendar.MONTH) + 1) + "&startDay=" + calendar.get(Calendar.DAY_OF_MONTH)+"&resultFormat=xml");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        final InputStream inputStream = conn.getInputStream();
+        Document doc = builder.parse(inputStream);
+        Element maggridresultNode = (Element) doc.getFirstChild();
+        Element resultNode = (Element) maggridresultNode.getElementsByTagName("result").item(0);
+        String declination = resultNode.getElementsByTagName("declination").item(0).getTextContent().trim();
+        String declinationAnnualChangeInMinutes = resultNode.getElementsByTagName("declination_sv").item(0).getTextContent().trim();
+        inputStream.close();
+        double declinationAsDouble = declination.equals("nan") ? Double.NaN : Double.valueOf(declination);
+        double declinationAnnualChangeInMinutesAsDouble = declinationAnnualChangeInMinutes.equals("nan") ? Double.NaN : Double.valueOf(declinationAnnualChangeInMinutes);
+        result = new DeclinationRecordImpl(position, timePoint, new DegreeBearingImpl(declinationAsDouble),
+                new DegreeBearingImpl(declinationAnnualChangeInMinutesAsDouble/60.));
         return result;
     }
 
@@ -136,7 +98,7 @@ public class NOAAImporter {
                         result[0] = fetched;
                         result.notifyAll();
                     }
-                } catch (IOException e) {
+                } catch (IOException | ParserConfigurationException | SAXException e) {
                     throw new RuntimeException(e);
                 }
             }

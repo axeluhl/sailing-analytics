@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
 public class MarkPassingImpl implements MarkPassing {
+    private static final long serialVersionUID = -2673562761742403742L;
     private final TimePoint timePoint;
     private final Waypoint waypoint;
     private final Competitor competitor;

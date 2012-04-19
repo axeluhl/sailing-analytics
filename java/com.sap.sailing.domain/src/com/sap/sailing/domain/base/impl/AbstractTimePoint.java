@@ -7,6 +7,8 @@ import java.util.Date;
 import com.sap.sailing.domain.common.TimePoint;
 
 public abstract class AbstractTimePoint implements TimePoint {
+    private static final long serialVersionUID = 8825508619301420378L;
+
     private static SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     
     public static Comparator<TimePoint> TIMEPOINT_COMPARATOR = new Comparator<TimePoint>() {

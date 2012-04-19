@@ -14,12 +14,12 @@ public interface Bearing {
     Bearing add(Bearing diff);
     
     /**
-     * Computes the bearing different that needs to be {@link #add(Bearing) added} to this bearing
+     * Computes the bearing difference that needs to be {@link #add(Bearing) added} to this bearing
      * to result in <code>b</code>. The absolute number of degrees of the resulting bearing is
      * guaranteed to be less or equal to 180. For example (simplifying bearings as the number
-     * of degrees they represent), <code>180.getDegreesTo(182)==2</code>, and
-     * <code>180.getDegreesTo(178)==-2</code>, and <code>10.getDegreesTo(-10)==-20</code>,
-     * and <code>350.getDegreesTo(10)==20</code>, and <code>10.getDegreesTo(350)==-20</code>
+     * of degrees they represent), <code>180.getDifferenceTo(182)==2</code>, and
+     * <code>180.getDifferenceTo(178)==-2</code>, and <code>10.getDifferenceTo(-10)==-20</code>,
+     * and <code>350.getDifferenceTo(10)==20</code>, and <code>10.getDifferenceTo(350)==-20</code>
      */
     Bearing getDifferenceTo(Bearing b);
 

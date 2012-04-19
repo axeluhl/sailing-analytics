@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
+    private static final long serialVersionUID = -1900955198751393727L;
     private final Course course;
     private final Iterable<Competitor> competitors;
     private final BoatClass boatClass;

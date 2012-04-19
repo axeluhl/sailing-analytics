@@ -80,6 +80,18 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         return places;
     }
     
+    /**
+     * @return <code>true</code> if the group contains a race which is live.
+     */
+    public boolean containsLiveRace() {
+        for (LeaderboardDTO leaderboard : leaderboards) {
+            if (leaderboard.containsLiveRace()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;

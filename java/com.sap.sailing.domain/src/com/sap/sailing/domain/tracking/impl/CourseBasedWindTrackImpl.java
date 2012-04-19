@@ -2,7 +2,9 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
@@ -19,11 +21,20 @@ import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
  * 
  */
 public class CourseBasedWindTrackImpl extends WindTrackImpl {
+    private static final long serialVersionUID = -729439204216641791L;
+
+    /**
+     * The first leg's direction will be measured this many milliseconds before the estimated race start time,
+     * at estimated race start time and this many milliseconds after estimated race start time.
+     */
+    private final long MILLISECONDS_AROUND_START_TO_TRACK = 30000l;
+    
     private final TrackedRace trackedRace;
     private static final NavigableSet<Wind> empty = new UnmodifiableNavigableSet<Wind>(new ArrayListNavigableSet<Wind>(WindComparator.INSTANCE));
     
-    public CourseBasedWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage) {
-        super(millisecondsOverWhichToAverage);
+    public CourseBasedWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence) {
+        super(millisecondsOverWhichToAverage, baseConfidence,
+                /* useSpeed: no usable wind speed information can be extracted from course */ WindSourceType.COURSE_BASED.useSpeed());
         this.trackedRace = trackedRace;
     }
 
@@ -33,8 +44,14 @@ public class CourseBasedWindTrackImpl extends WindTrackImpl {
         if (trackedRace.raceIsKnownToStartUpwind()) {
             TimePoint startTime = trackedRace.getStart();
             if (startTime != null) {
-                result = new ArrayListNavigableSet<Wind>(1, WindComparator.INSTANCE);
-                result.add(trackedRace.getDirectionFromStartToNextMark(startTime));
+                result = new ArrayListNavigableSet<Wind>(3, WindComparator.INSTANCE);
+                for (long t = startTime.asMillis() - MILLISECONDS_AROUND_START_TO_TRACK; t <= startTime.asMillis()
+                        + MILLISECONDS_AROUND_START_TO_TRACK; t += MILLISECONDS_AROUND_START_TO_TRACK) {
+                    final Wind directionFromStartToNextMark = trackedRace.getDirectionFromStartToNextMark(new MillisecondsTimePoint(t));
+                    if (directionFromStartToNextMark != null) {
+                        result.add(directionFromStartToNextMark);
+                    }
+                }
             } else {
                 result = empty;
             }
@@ -43,6 +60,4 @@ public class CourseBasedWindTrackImpl extends WindTrackImpl {
         }
         return result;
     }
-    
-    
 }

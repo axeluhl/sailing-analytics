@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 
 public class GPSFixMovingImpl extends GPSFixImpl implements GPSFixMoving {
+    private static final long serialVersionUID = 6508021498142383100L;
     private final SpeedWithBearing speed;
     
     public GPSFixMovingImpl(Position position, TimePoint timePoint, SpeedWithBearing speed) {

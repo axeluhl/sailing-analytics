@@ -182,32 +182,6 @@ input.magnifier {
 	width: 100%;
 }
 
-.collapsablePanel {
-	background: #b6b6b6;
-	margin: 0 0 12px 0;
-	border-radius: 7px;
-	overflow: hidden;
-}
-
-.collapsablePanel-content {
-	background: #fff;
-	margin: 12px;
-	border-radius: 10px;
-	width: auto !important;
-}
-
-.collapsablePanel-header {
-	background: url(images/titlebar-background.png) 0 0 repeat-x;
-	padding: 0;
-	margin: 0;
-	height: 42px;
-}
-
-.collapsablePanel-open {
-}
-
-.collapsablePanel-closed {
-}
 
 .raceBoardPanelHeader {
 	
@@ -342,4 +316,35 @@ input.magnifier {
 .leaderboardGroupPanel-InactiveRace {
 	background: #c0bebe;
 	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif
+}
+
+.errorLabel {
+	color: #FF0000;
+}
+
+.feedbackPanel {
+	position: fixed;
+	top: 300px;
+	right: 0;
+	height: 127px;
+	width: 29px;
+	margin: 10px;
+}
+
+.feedbackPanel a {
+	display: block;
+	height: 127px;
+	width: 29px;
+}
+
+.groupOverviewPanel-groupDescription {
+	padding: 10px;
+}
+
+.groupOverviewPanel-searchLabel {
+	margin: 3px 5px 0 5px;
+}
+
+.groupOverviewPanel-searchInputField {
+	margin: 0 5px 0 0;
 }

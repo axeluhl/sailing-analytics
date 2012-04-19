@@ -16,7 +16,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter.persistence,
  com.google.gwt.osgi;bundle-version="2.4.0",
  com.sap.sailing.domain.common,
- org.moxieapps.gwt.highcharts;bundle-version="1.1.4"
+ org.moxieapps.gwt.highcharts;bundle-version="1.1.4",
+ com.sap.sailing.geocoding
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui.test",
@@ -33,6 +34,5 @@ Import-Package: org.osgi.framework,
  org.json.simple.parser
 Web-ContextPath: /gwt
 Bundle-ClassPath: WEB-INF/classes/,
- WEB-INF/lib/gflot-1.0.1.jar,
  WEB-INF/lib/gwt-maps.jar,
  WEB-INF/lib/gwt-servlet.jar

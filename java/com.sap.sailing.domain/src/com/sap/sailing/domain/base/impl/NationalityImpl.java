@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.CountryCodeFactory;
 
 public class NationalityImpl implements Nationality {
+    private static final long serialVersionUID = 238906193483424259L;
     private final String threeLetterIOCAcronym;
     
     public NationalityImpl(String name, String threeLetterIOCAcronym) {

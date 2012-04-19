@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class EventImpl extends NamedImpl implements Event {
+    private static final long serialVersionUID = 6509564189552478869L;
     private final Set<RaceDefinition> races;
     private final BoatClass boatClass;
     

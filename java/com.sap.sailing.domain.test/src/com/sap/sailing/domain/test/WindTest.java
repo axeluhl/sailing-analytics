@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,7 +30,7 @@ public class WindTest {
      */
     @Test
     public void testAveragingWind() throws InterruptedException {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
         TimePoint t1 = MillisecondsTimePoint.now();
         TimePoint t2 = new MillisecondsTimePoint(t1.asMillis()+10);
         TimePoint middle = new MillisecondsTimePoint((t1.asMillis()+t2.asMillis())/2);
@@ -44,7 +45,7 @@ public class WindTest {
     
     @Test
     public void testMultipleWindFixesWithSameTimestampInSameWindTrack() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
         TimePoint now = MillisecondsTimePoint.now();
         DegreePosition pos1 = new DegreePosition(0, 0);
         DegreePosition pos2 = new DegreePosition(1, 1);
@@ -65,7 +66,7 @@ public class WindTest {
     
     @Test
     public void testEmptyTrackYieldsNullAsWindEstimate() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
         assertNull(track.getAveragedWind(new DegreePosition(0, 0), MillisecondsTimePoint.now()));
     }
 
@@ -76,15 +77,15 @@ public class WindTest {
      */
     @Test
     public void testAveragingOfSparseWindTrack() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
         DegreePosition pos = new DegreePosition(0, 0);
-        Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(0)));
+        Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
         Wind wind2 = new WindImpl(pos, new MillisecondsTimePoint(1000), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
-        Wind wind3 = new WindImpl(pos, new MillisecondsTimePoint(2000), new KnotSpeedWithBearingImpl(30, new DegreeBearingImpl(0)));
-        Wind wind4 = new WindImpl(pos, new MillisecondsTimePoint(10000), new KnotSpeedWithBearingImpl(40, new DegreeBearingImpl(0)));
-        Wind wind5 = new WindImpl(pos, new MillisecondsTimePoint(30000), new KnotSpeedWithBearingImpl(50, new DegreeBearingImpl(0)));
-        Wind wind6 = new WindImpl(pos, new MillisecondsTimePoint(40000), new KnotSpeedWithBearingImpl(60, new DegreeBearingImpl(0)));
-        Wind wind7 = new WindImpl(pos, new MillisecondsTimePoint(50000), new KnotSpeedWithBearingImpl(70, new DegreeBearingImpl(0)));
+        Wind wind3 = new WindImpl(pos, new MillisecondsTimePoint(2000), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
+        Wind wind4 = new WindImpl(pos, new MillisecondsTimePoint(10000), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
+        Wind wind5 = new WindImpl(pos, new MillisecondsTimePoint(30000), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
+        Wind wind6 = new WindImpl(pos, new MillisecondsTimePoint(40000), new KnotSpeedWithBearingImpl(130, new DegreeBearingImpl(0)));
+        Wind wind7 = new WindImpl(pos, new MillisecondsTimePoint(50000), new KnotSpeedWithBearingImpl(170, new DegreeBearingImpl(0)));
         track.add(wind1);
         track.add(wind2);
         track.add(wind3);
@@ -94,18 +95,22 @@ public class WindTest {
         track.add(wind7);
         
         // interval does bearely reach 20's burst because 0 has 0 length and 1000..30000 has 29000 length
-        assertEquals((10+20+30+40+50)/5, track.getAveragedWind(pos, new MillisecondsTimePoint(1)).getKnots(), 0.00000001);
+        assertEquals(20, track.getAveragedWind(pos, new MillisecondsTimePoint(1)).getKnots(), 0.00000001);
         // interval uses the two fixes to the left (0, 1000)=1000 and three to the right (2000, 10000, 30000)=28000
-        assertEquals((10+20+30+40+50)/5, track.getAveragedWind(pos, new MillisecondsTimePoint(1001)).getKnots(), 0.00000001);
+        assertEquals(20, track.getAveragedWind(pos, new MillisecondsTimePoint(1001)).getKnots(), 0.00000001);
         // in the middle of the "hole", fetches (0, 1000, 2000, 10000)=10000 and (30000, 40000)=10000, so 20000ms worth of wind
-        assertEquals((10+20+30+40+50+60)/6, track.getAveragedWind(pos, new MillisecondsTimePoint(11000)).getKnots(), 0.00000001);
+        final double averageFor20000 = track.getAveragedWind(pos, new MillisecondsTimePoint(20000)).getKnots();
+        // value is hard to predict exactly because time difference-based confidences rate fixes closer to 20000ms higher than those further away
+        assertEquals(35, averageFor20000, 5);
         // right of the middle of the "hole", fetches (0, 1000, 2000, 10000)=10000 and (30000, 40000, 50000)=20000
-        assertEquals((10+20+30+40+50+60+70)/7, track.getAveragedWind(pos, new MillisecondsTimePoint(20500)).getKnots(), 0.00000001);
+        final double averageFor20500 = track.getAveragedWind(pos, new MillisecondsTimePoint(20500)).getKnots();
+        assertEquals(37, averageFor20500, 5);
+        assertTrue(averageFor20500 > averageFor20000);
     }
     
     @Test
     public void testSingleElementWindTrack() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
@@ -116,7 +121,7 @@ public class WindTest {
 
     @Test
     public void testSingleElementExtrapolation() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
@@ -128,7 +133,7 @@ public class WindTest {
 
     @Test
     public void testSingleElementExtrapolationBeyondThreshold() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
@@ -141,20 +146,20 @@ public class WindTest {
 
     @Test
     public void testTwoElementWindTrackSameBearing() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(100)));
         track.add(wind1);
         Wind wind2 = new WindImpl(pos, new MillisecondsTimePoint(1000), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(100)));
         track.add(wind2);
-        Wind estimate = track.getAveragedWind(pos, new MillisecondsTimePoint(2000));
+        Wind estimate = track.getAveragedWind(pos, new MillisecondsTimePoint(500));
         assertEquals(15, estimate.getKnots(), 0.000000001);
         assertEquals(100, estimate.getBearing().getDegrees(), 0.00000001);
     }
 
     @Test
     public void testTwoElementWindTrackDifferentBearing() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(110)));
         track.add(wind1);
@@ -186,7 +191,7 @@ public class WindTest {
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(85)));
         Wind wind3 = new WindImpl(null, new MillisecondsTimePoint(df.parse("2009-07-11T17:31:40").getTime()),
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(80)));
-        WindTrack track = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000);
+        WindTrack track = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true);
         track.add(wind1);
         track.add(wind2);
         track.add(wind3);

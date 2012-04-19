@@ -22,6 +22,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public class TrackedEventImpl implements TrackedEvent {
+    private static final long serialVersionUID = 6480508193567014285L;
+
     private static final Logger logger = Logger.getLogger(TrackedEventImpl.class.getName());
     
     private final Event event;

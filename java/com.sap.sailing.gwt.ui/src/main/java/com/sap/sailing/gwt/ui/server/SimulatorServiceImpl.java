@@ -46,7 +46,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 		Position center = new DegreePosition(params.getCenter().latDeg, params.getCenter().lngDeg);
 		
 		WindLatticeDTO wl = new WindLatticeDTO();
-		PositionDTO [][] matrix = new PositionDTO[gridsizeX][gridsizeY];
+		PositionDTO [][] matrix = new PositionDTO[gridsizeY][gridsizeX];
 
 		Distance deastwest		= new NauticalMileDistance((gridsizeX-1.) / (2*gridsizeX) * xSize);
 		Distance dnorthsouth	= new NauticalMileDistance((gridsizeY-1.) / (2*gridsizeY) * ySize);

@@ -193,7 +193,9 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      */
     private void cachePlacemarks(Position position, Double radius, List<Placemark> placemarks) {
         Collections.sort(placemarks, new Placemark.ByDistance(position));
-        cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
+        if (position != null) {
+            cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
+        }
     }
     
     /**
@@ -208,7 +210,9 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      *            The new search results
      */
     private void updateCachedPlacemarks(Position cachedPoint, Double newRadius, List<Placemark> newPlacemarks) {
-        cache.replace(cachedPoint, new Triple<Position, Double, List<Placemark>>(cachedPoint, newRadius, newPlacemarks));
+        if (cachedPoint != null) {
+            cache.replace(cachedPoint, new Triple<Position, Double, List<Placemark>>(cachedPoint, newRadius, newPlacemarks));
+        }
     }
 
     /**

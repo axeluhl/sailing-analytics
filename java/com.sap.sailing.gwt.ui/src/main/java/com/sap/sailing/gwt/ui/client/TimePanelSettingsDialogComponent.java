@@ -27,7 +27,7 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings> imple
     }
 
     @Override
-    public Widget getAdditionalWidget(DataEntryDialog<T> dialog) {
+    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         mainContentPanel = new VerticalPanel();
 
         HorizontalPanel labelAndRefreshIntervalBoxPanel = new HorizontalPanel();

@@ -14,6 +14,7 @@ import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -41,7 +42,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.name,
+                    getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.id,
                             value == null || value.length() == 0 ? null : Integer.valueOf(value.trim()),
                             new AsyncCallback<Void>() {
                                 @Override
@@ -74,7 +75,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             setFieldUpdater(new FieldUpdater<LeaderboardRowDTO, String>() {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
-                    getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.name,
+                    getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.id,
                             value == null || value.length() == 0 ? null : value.trim(),
                             new AsyncCallback<Void>() {
                                 @Override
@@ -158,7 +159,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
-                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.name,
+                    getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id,
                             raceName, value == null || value.trim().length() == 0 ? null : value.trim(),
                             getLeaderboardDisplayDate(), new AsyncCallback<Pair<Integer, Integer>>() {
                                 @Override
@@ -216,7 +217,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
-                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.name, raceName,
+                    getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.id, raceName,
                             value == null || value.trim().length() == 0 ? null : Integer.valueOf(value.trim()), getLeaderboardDisplayDate(),
                     new AsyncCallback<Pair<Integer, Integer>>() {
                         @Override
@@ -250,10 +251,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
 
-    public EditableLeaderboardPanel(SailingServiceAsync sailingService, String leaderboardName, String leaderboardGroupName,
+    public EditableLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, String leaderboardName, String leaderboardGroupName,
             ErrorReporter errorReporter, StringMessages stringConstants, UserAgentTypes userAgentType) {
-        super(sailingService, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                /* autoExpandFirstRace */false), new CompetitorSelectionModel(/* hasMultiSelection */true),
+        super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
+                /* racesToShow */ null, /* namesOfRacesToShow */ null, /* autoExpandFirstRace */false),
+                new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, leaderboardGroupName, errorReporter, stringConstants, userAgentType);
     }
 
