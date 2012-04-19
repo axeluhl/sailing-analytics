@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -33,7 +33,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     private final Map<Pair<Competitor, RaceInLeaderboard>, Integer> correctedScores;
     
     public ScoreCorrectionImpl() {
-        this.maxPointsReasons = new HashMap<Util.Pair<Competitor,RaceInLeaderboard>, ScoreCorrection.MaxPointsReason>();
+        this.maxPointsReasons = new HashMap<Util.Pair<Competitor,RaceInLeaderboard>, MaxPointsReason>();
         this.correctedScores = new HashMap<Util.Pair<Competitor,RaceInLeaderboard>, Integer>();
     }
 

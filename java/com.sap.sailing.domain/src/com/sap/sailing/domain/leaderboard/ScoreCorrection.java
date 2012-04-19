@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -15,34 +16,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public interface ScoreCorrection {
-    /**
-     * The reasons why a competitor may get the maximum number of points, usually equaling the
-     * number of competitors enlisted for the regatta plus one.
-     * 
-     * @author Axel Uhl (d043530)
-     *
-     */
-    enum MaxPointsReason {
-        /** The competitor finished the race properly */
-        NONE,
-        /** Did Not Start */
-        DNS, 
-        /** Did Not Finish */
-        DNF,
-        /** DiSQualified */
-        DSQ,
-        /** On Course Side (jumped the gun) */
-        OCS,
-        /** Disqualified, non-discardable */
-        DND,
-        /** Black Flag Disqualified */
-        BFD,
-        /** Did Not Compete */
-        DNC,
-        /** Retired After Finishing */
-        RAF
-    };
-    
     public interface Result {
         int getCorrectedScore();
         MaxPointsReason getMaxPointsReason();
