@@ -779,7 +779,10 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
 
     @Override
     public TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
-        return (TrackedRace) raceIdentifier.getExistingTrackedRace(this);
+        Event event = getEventByName(raceIdentifier.getEventName());
+        RaceDefinition race = event.getRaceByName(raceIdentifier.getRaceName());
+        TrackedRace trackedRace = getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+        return trackedRace;
     }
 
     @Override
