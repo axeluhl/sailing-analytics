@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class RemoveLeaderboard extends AbstractLeaderboardOperation<Void> {
     private static final long serialVersionUID = -6491003416450255268L;

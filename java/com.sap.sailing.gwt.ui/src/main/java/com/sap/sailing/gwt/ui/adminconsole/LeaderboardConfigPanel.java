@@ -41,8 +41,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
@@ -846,7 +846,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
         // if no leaderboard column is selected, ignore the race selection change
         RaceInLeaderboardDTO selectedRaceInLeaderboard = getSelectedRaceInLeaderboard();
         if (selectedRaceInLeaderboard != null) {
@@ -859,7 +859,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private void linkTrackedRaceToSelectedRaceColumn(final RaceInLeaderboardDTO selectedRaceInLeaderboard,
-            final RaceIdentifier selectedRace) {
+            final EventAndRaceIdentifier selectedRace) {
         sailingService.connectTrackedRaceToLeaderboardColumn(getSelectedLeaderboardName(), selectedRaceInLeaderboard
                 .getRaceColumnName(), selectedRace,
                 new AsyncCallback<Boolean>() {

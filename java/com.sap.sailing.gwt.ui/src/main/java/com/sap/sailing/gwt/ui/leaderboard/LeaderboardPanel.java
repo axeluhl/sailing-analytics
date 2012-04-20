@@ -45,6 +45,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
@@ -1634,14 +1635,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
     
     private void compareCompetitors() {
-        List<RaceIdentifier> races = getTrackedRacesIdentifiers();
+        List<EventAndRaceIdentifier> races = getTrackedRacesIdentifiers();
         CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races,
                 competitorSelectionProvider, timer, stringMessages, errorReporter);
         chartDialog.show();
     }
     
-    private List<RaceIdentifier> getTrackedRacesIdentifiers() {
-        List<RaceIdentifier> result = new ArrayList<RaceIdentifier>();
+    private List<EventAndRaceIdentifier> getTrackedRacesIdentifiers() {
+        List<EventAndRaceIdentifier> result = new ArrayList<EventAndRaceIdentifier>();
         for (RaceInLeaderboardDTO raceColumn : getLeaderboard().getRaceList()) {
             if (raceColumn.getRaceIdentifier() != null) {
                 result.add(raceColumn.getRaceIdentifier());

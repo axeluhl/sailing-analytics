@@ -305,10 +305,10 @@ public interface SailingServiceAsync {
     void getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date,CompetitorDTO>> competitorsToLoad, Date toDate, long stepSize,
             DetailType detailType, AsyncCallback<MultiCompetitorRaceDataDTO> callback);
 
-    void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
+    void setRaceIsKnownToStartUpwind(EventAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind,
             AsyncCallback<Void> callback);
 
-    void setWindSourcesToExclude(RaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude,
+    void setWindSourcesToExclude(EventAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude,
             AsyncCallback<Void> callback);
 
     void getRaceMapData(RaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,

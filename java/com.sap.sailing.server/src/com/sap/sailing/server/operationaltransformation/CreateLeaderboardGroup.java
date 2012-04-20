@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class CreateLeaderboardGroup extends AbstractLeaderboardGroupOperation<LeaderboardGroup> {
     private static final long serialVersionUID = -5028997286564650805L;

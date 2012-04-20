@@ -3,6 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import java.util.List;
 
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class UpdateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Void> {
     private static final long serialVersionUID = -1822477339916802467L;

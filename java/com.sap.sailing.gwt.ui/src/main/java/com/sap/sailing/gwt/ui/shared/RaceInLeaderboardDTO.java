@@ -3,12 +3,12 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 
 public class RaceInLeaderboardDTO implements IsSerializable {
     private String raceColumnName;
     private boolean medalRace;
-    private RaceIdentifier trackedRaceIdentifier;
+    private EventAndRaceIdentifier trackedRaceIdentifier;
     private StrippedRaceDTO race;
 
     public String getRaceColumnName() {
@@ -31,7 +31,7 @@ public class RaceInLeaderboardDTO implements IsSerializable {
         return trackedRaceIdentifier != null;
     }
 
-    public void setRaceIdentifier(RaceIdentifier raceIdentifier) {
+    public void setRaceIdentifier(EventAndRaceIdentifier raceIdentifier) {
         this.trackedRaceIdentifier = raceIdentifier;
     }
 
@@ -40,7 +40,7 @@ public class RaceInLeaderboardDTO implements IsSerializable {
      *         data can be obtained from the server in great detail, as opposed to non-tracked races for which only
      *         result points may have been entered manually.
      */
-    public RaceIdentifier getRaceIdentifier() {
+    public EventAndRaceIdentifier getRaceIdentifier() {
         return trackedRaceIdentifier;
     }
 

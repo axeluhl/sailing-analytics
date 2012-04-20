@@ -1,17 +1,28 @@
-package com.sap.sailing.server.operationaltransformation;
+package com.sap.sailing.server;
 
 import java.io.Serializable;
 
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.operationaltransformation.Transformer;
-import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
+import com.sap.sailing.server.operationaltransformation.CreateLeaderboard;
+import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDown;
+import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
+import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 
 public interface RacingEventServiceOperation<ResultType> extends Operation<RacingEventService>, Serializable {
     /**
      * Performs the actual operation, applying it to the <code>toState</code> service. The operation's result is
      * returned.
      */
-    ResultType internalApplyTo(RacingEventService toState);
+    ResultType internalApplyTo(RacingEventService toState) throws Exception;
+    
+    /**
+     * Tells if this operation needs to be executed in order with other operations requesting synchronous execution.
+     */
+    boolean requiresSynchronousExecution();
     
     /**
      * Implements the specific transformation rule for the implementing subclass for the set of possible peer operations

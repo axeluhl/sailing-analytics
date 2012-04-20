@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class RemoveAndUntrackRace extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 4260421466093529004L;

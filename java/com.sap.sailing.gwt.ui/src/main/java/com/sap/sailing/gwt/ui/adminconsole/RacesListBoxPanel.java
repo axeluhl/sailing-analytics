@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.EventRefresher;
@@ -93,8 +94,8 @@ public class RacesListBoxPanel extends FormPanel implements EventDisplayer, Race
         raceSelectionProvider.setSelection(getSelectedRaceIdentifiers(), this);
     }
 
-    private List<RaceIdentifier> getSelectedRaceIdentifiers() {
-        List<RaceIdentifier> result = new ArrayList<RaceIdentifier>();
+    private List<EventAndRaceIdentifier> getSelectedRaceIdentifiers() {
+        List<EventAndRaceIdentifier> result = new ArrayList<EventAndRaceIdentifier>();
         for (RaceDTO selectedRace : getSelectedRaces()) {
             result.add(selectedRace.getRaceIdentifier());
         }
@@ -118,7 +119,7 @@ public class RacesListBoxPanel extends FormPanel implements EventDisplayer, Race
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             RaceDTO newSelection = getRace(selectedRaces.iterator().next());
             int index = raceList.indexOf(newSelection);

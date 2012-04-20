@@ -3,6 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class UpdateLeaderboardCarryValue extends AbstractLeaderboardOperation<Void> {
     private static final long serialVersionUID = 5467731814788887426L;

@@ -5,6 +5,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardColumnOperation<Boolean> {
     private static final long serialVersionUID = -1336511401516212508L;

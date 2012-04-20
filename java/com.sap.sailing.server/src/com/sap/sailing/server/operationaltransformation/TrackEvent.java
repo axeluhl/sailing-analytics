@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class TrackEvent extends AbstractRacingEventServiceOperation<DynamicTrackedEvent> {
     private static final long serialVersionUID = 7891960455598410633L;
