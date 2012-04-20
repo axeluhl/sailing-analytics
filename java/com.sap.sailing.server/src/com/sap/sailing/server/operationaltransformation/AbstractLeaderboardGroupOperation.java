@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-public abstract class AbstractLeaderboardGroupOperation extends AbstractRacingEventServiceOperation {
+public abstract class AbstractLeaderboardGroupOperation<ResultType> extends AbstractRacingEventServiceOperation<ResultType> {
     private static final long serialVersionUID = 4341066708061847418L;
     private final String leaderboardGroupName;
     
@@ -13,7 +13,7 @@ public abstract class AbstractLeaderboardGroupOperation extends AbstractRacingEv
         return leaderboardGroupName;
     }
 
-    protected boolean affectsSameLeaderboardGroup(AbstractLeaderboardGroupOperation other) {
+    protected boolean affectsSameLeaderboardGroup(AbstractLeaderboardGroupOperation<?> other) {
         return getLeaderboardGroupName().equals(other.getLeaderboardGroupName());
     }
 

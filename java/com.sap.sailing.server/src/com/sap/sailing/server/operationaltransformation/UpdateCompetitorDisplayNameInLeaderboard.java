@@ -1,15 +1,19 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
 
-public class UpdateIsMedalRace extends AbstractLeaderboardColumnOperation<Void> {
-    private static final long serialVersionUID = 5925081961634860757L;
-    private final boolean isMedalRace;
-
-    public UpdateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace) {
-        super(leaderboardName, columnName);
-        this.isMedalRace = isMedalRace;
+public class UpdateCompetitorDisplayNameInLeaderboard extends AbstractLeaderboardOperation<Void> {
+    private static final long serialVersionUID = 366335484317671148L;
+    private final String competitorIdAsString;
+    private final String newDisplayName;
+    
+    public UpdateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorIdAdString,
+            String newDisplayName) {
+        super(leaderboardName);
+        this.competitorIdAsString = competitorIdAdString;
+        this.newDisplayName = newDisplayName;
     }
 
     @Override
@@ -27,11 +31,10 @@ public class UpdateIsMedalRace extends AbstractLeaderboardColumnOperation<Void> 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
-        if (leaderboard != null) {
-            leaderboard.updateIsMedalRace(getColumnName(), isMedalRace);
+        Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
+        if (competitor != null) {
+            leaderboard.setDisplayName(competitor, newDisplayName);
             toState.updateStoredLeaderboard(leaderboard);
-        } else {
-            throw new IllegalArgumentException("Leaderboard named " + getLeaderboardName() + " not found");
         }
         return null;
     }

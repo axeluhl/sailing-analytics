@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,6 +12,7 @@ import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.SelectionCell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -143,7 +143,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         
         public MaxPointsDropDownCellProvider(String raceName) {
             this.raceName = raceName;
-            dropDownCell = new SelectionCell(Arrays.asList(new String[] { "", "DNS", "DNF", "OCS", "DND", "RAF", "BFD", "DNC", "DSQ" }));
+            List<String> selectionCellContents = new ArrayList<String>();
+            selectionCellContents.add(""); // represents "no" max points reason
+            for (MaxPointsReason maxPointReason : MaxPointsReason.values()) {
+                selectionCellContents.add(maxPointReason.name());
+            }
+            dropDownCell = new SelectionCell(selectionCellContents);
         }
         
         @Override
@@ -160,7 +165,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id,
-                            raceName, value == null || value.trim().length() == 0 ? null : value.trim(),
+                            raceName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
                             getLeaderboardDisplayDate(), new AsyncCallback<Pair<Integer, Integer>>() {
                                 @Override
                                 public void onFailure(Throwable t) {

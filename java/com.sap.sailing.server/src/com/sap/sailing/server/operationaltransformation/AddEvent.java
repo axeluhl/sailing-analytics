@@ -2,7 +2,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.server.RacingEventService;
 
-public class AddEvent extends AbstractRacingEventServiceOperation {
+public class AddEvent extends AbstractRacingEventServiceOperation<Void> {
     private static final long serialVersionUID = -3550383541066673065L;
     private final String eventName;
     private final String boatClassName;
@@ -16,21 +16,21 @@ public class AddEvent extends AbstractRacingEventServiceOperation {
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Void internalApplyTo(RacingEventService toState) {
         toState.createEvent(eventName, boatClassName, boatClassTypicallyStartsUpwind);
-        return toState;
+        return null;
     }
 
 }

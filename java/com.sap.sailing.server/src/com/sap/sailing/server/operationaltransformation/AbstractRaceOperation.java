@@ -2,7 +2,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 
-public abstract class AbstractRaceOperation extends AbstractRacingEventServiceOperation {
+public abstract class AbstractRaceOperation<ResultType> extends AbstractRacingEventServiceOperation<ResultType> {
     private static final long serialVersionUID = -1162468486451355784L;
     private EventAndRaceIdentifier raceIdentifier;
 

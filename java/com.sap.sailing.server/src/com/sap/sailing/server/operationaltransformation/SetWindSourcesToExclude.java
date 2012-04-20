@@ -1,16 +1,19 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.util.Set;
+
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class SetRaceIsKnownToStartUpwind extends AbstractRaceOperation<Void> {
-    private static final long serialVersionUID = 272403191741207144L;
-    private final boolean startsUpwind;
+public class SetWindSourcesToExclude extends AbstractRaceOperation<Void> {
+    private static final long serialVersionUID = 7639288885720509529L;
+    private final Set<WindSource> windSourcesToExclude;
     
-    public SetRaceIsKnownToStartUpwind(EventAndRaceIdentifier raceIdentifier, boolean startsUpwind) {
+    public SetWindSourcesToExclude(EventAndRaceIdentifier raceIdentifier, Set<WindSource> windSourcesToExclude) {
         super(raceIdentifier);
-        this.startsUpwind = startsUpwind;
+        this.windSourcesToExclude = windSourcesToExclude;
     }
 
     @Override
@@ -29,7 +32,7 @@ public class SetRaceIsKnownToStartUpwind extends AbstractRaceOperation<Void> {
     public Void internalApplyTo(RacingEventService toState) {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getExistingTrackedRace(getRaceIdentifier());
         if (trackedRace != null) {
-            trackedRace.setRaceIsKnownToStartUpwind(startsUpwind);
+            trackedRace.setWindSourcesToExclude(windSourcesToExclude);
         }
         return null;
     }

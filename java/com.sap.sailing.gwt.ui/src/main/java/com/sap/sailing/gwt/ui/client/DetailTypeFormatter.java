@@ -11,6 +11,8 @@ public class DetailTypeFormatter {
             return stringMessages.averageSpeedInKnots();
         case RANK_GAIN:
             return stringMessages.rankGain();
+        case RACE_RANK:
+            return stringMessages.rank();
         case NUMBER_OF_MANEUVERS:
             return stringMessages.numberOfManeuvers();
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:

@@ -10,6 +10,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
@@ -122,10 +123,11 @@ public interface SailingService extends RemoteService {
     void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Integer carriedPoints);
 
     /**
-     * @return the new net points in {@link Pair#getA()} and the new total points in {@link Pair#getB()}
+     * @return the new net points in {@link Pair#getA()} and the new total points in {@link Pair#getB()} for time point
+     * <code>date</code> after the max points reason has been updated to <code>maxPointsReasonAsString</code>.
      */
     Pair<Integer, Integer> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString,
-            String raceColumnName, String maxPointsReasonAsString, Date date) throws NoWindException;
+            String raceColumnName, MaxPointsReason maxPointsReason, Date date) throws NoWindException;
 
     Pair<Integer, Integer> updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString,
             String raceName, Integer correctedScore, Date date) throws NoWindException;

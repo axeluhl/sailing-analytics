@@ -69,7 +69,9 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
+import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.RacingEventServiceOperation;
 
 public class RacingEventServiceImpl implements RacingEventService, EventFetcher, RaceFetcher {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -779,7 +781,10 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
 
     @Override
     public TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
-        return (TrackedRace) raceIdentifier.getExistingTrackedRace(this);
+        Event event = getEventByName(raceIdentifier.getEventName());
+        RaceDefinition race = event.getRaceByName(raceIdentifier.getRaceName());
+        TrackedRace trackedRace = getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+        return trackedRace;
     }
 
     @Override
@@ -905,4 +910,15 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
         return scheduler;
     }
 
+    /**
+     * Currently, the operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
+     * service object.<p>
+     * 
+     * Future implementations of this method will need to also replicate the effects of the operation to all replica
+     * of this service known.
+     */
+    @Override
+    public <T> T apply(RacingEventServiceOperation<T> operation) {
+        return operation.internalApplyTo(this);
+    }
 }

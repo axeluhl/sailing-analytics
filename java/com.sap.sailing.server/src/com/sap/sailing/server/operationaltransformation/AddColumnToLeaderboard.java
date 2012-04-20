@@ -9,7 +9,7 @@ import com.sap.sailing.server.RacingEventService;
  * @author Axel Uhl (d043530)
  *
  */
-public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation {
+public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation<Void> {
     private static final long serialVersionUID = -7670764349119941051L;
     private final boolean medalRace;
     
@@ -19,18 +19,18 @@ public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation {
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Void internalApplyTo(RacingEventService toState) {
         toState.addColumnToLeaderboard(getColumnName(), getLeaderboardName(), medalRace);
-        return toState;
+        return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return serverOp.transformAddColumnToLeaderboardClientOp(this);
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return clientOp.transformAddColumnToLeaderboardServerOp(this);
     }
 }

@@ -18,33 +18,33 @@ import com.sap.sailing.server.RacingEventService;
  * @author Axel Uhl (d043530)
  *
  */
-public class TrackRace extends AbstractRaceOperation {
+public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
     private static final long serialVersionUID = 5084401060896514911L;
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
 
-    public TrackRace(EventAndRaceIdentifier raceIdentifier, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+    public CreateTrackedRace(EventAndRaceIdentifier raceIdentifier, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(raceIdentifier);
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
-        toState.createTrackedRace(getRaceIdentifier(), EmptyWindStore.INSTANCE, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        return toState;
+    public TrackedRace internalApplyTo(RacingEventService toState) {
+        return toState.createTrackedRace(getRaceIdentifier(), EmptyWindStore.INSTANCE,
+                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
     }
 
 }

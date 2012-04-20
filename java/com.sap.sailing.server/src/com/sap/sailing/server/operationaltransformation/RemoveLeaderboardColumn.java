@@ -2,7 +2,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.server.RacingEventService;
 
-public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation {
+public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation<Void> {
     private static final long serialVersionUID = 5425526859417359535L;
 
     public RemoveLeaderboardColumn(String columnName, String leaderboardName) {
@@ -10,23 +10,23 @@ public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation 
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Void internalApplyTo(RacingEventService toState) {
         toState.removeLeaderboardColumn(getLeaderboardName(), getColumnName());
-        return toState;
+        return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return serverOp.transformRemoveColumnFromLeaderboardClientOp(this);
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return clientOp.transformRemoveColumnFromLeaderboardServerOp(this);
     }
 
     @Override
-    public RacingEventServiceOperation transformRenameLeaderboardColumnClientOp(
+    public RacingEventServiceOperation<?> transformRenameLeaderboardColumnClientOp(
             RenameLeaderboardColumn renameLeaderboardColumnClientOp) {
         if (affectsSameColumn(renameLeaderboardColumnClientOp)) {
             return AbstractRacingEventServiceOperation.getNoOp();
@@ -36,7 +36,7 @@ public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation 
     }
 
     @Override
-    public RacingEventServiceOperation transformRenameLeaderboardColumnServerOp(
+    public RacingEventServiceOperation<?> transformRenameLeaderboardColumnServerOp(
             RenameLeaderboardColumn renameLeaderboardColumnServerOp) {
         if (affectsSameColumn(renameLeaderboardColumnServerOp)) {
             return AbstractRacingEventServiceOperation.getNoOp();
@@ -46,7 +46,7 @@ public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation 
     }
 
     @Override
-    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(
+    public RacingEventServiceOperation<?> transformRemoveColumnFromLeaderboardServerOp(
             RemoveLeaderboardColumn removeColumnFromLeaderboardServerOp) {
         if (affectsSameColumn(removeColumnFromLeaderboardServerOp)) {
             return AbstractRacingEventServiceOperation.getNoOp();
@@ -56,7 +56,7 @@ public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation 
     }
 
     @Override
-    public RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(
+    public RacingEventServiceOperation<?> transformRemoveColumnFromLeaderboardClientOp(
             RemoveLeaderboardColumn removeColumnFromLeaderboardClientOp) {
         if (affectsSameColumn(removeColumnFromLeaderboardClientOp)) {
             return AbstractRacingEventServiceOperation.getNoOp();
@@ -66,7 +66,7 @@ public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation 
     }
 
     @Override
-    public RacingEventServiceOperation transformMoveLeaderboardColumnDownClientOp(
+    public RacingEventServiceOperation<?> transformMoveLeaderboardColumnDownClientOp(
             MoveLeaderboardColumnDown moveLeaderboardColumnDown) {
         if (affectsSameColumn(moveLeaderboardColumnDown)) {
             return AbstractRacingEventServiceOperation.getNoOp();
@@ -76,7 +76,7 @@ public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation 
     }
 
     @Override
-    public RacingEventServiceOperation transformMoveLeaderboardColumnDownServerOp(
+    public RacingEventServiceOperation<?> transformMoveLeaderboardColumnDownServerOp(
             MoveLeaderboardColumnDown moveLeaderboardColumnDown) {
         if (affectsSameColumn(moveLeaderboardColumnDown)) {
             return AbstractRacingEventServiceOperation.getNoOp();
@@ -86,7 +86,7 @@ public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation 
     }
 
     @Override
-    public RacingEventServiceOperation transformMoveLeaderboardColumnUpClientOp(
+    public RacingEventServiceOperation<?> transformMoveLeaderboardColumnUpClientOp(
             MoveLeaderboardColumnUp moveLeaderboardColumnUp) {
         if (affectsSameColumn(moveLeaderboardColumnUp)) {
             return AbstractRacingEventServiceOperation.getNoOp();
@@ -96,7 +96,7 @@ public class RemoveLeaderboardColumn extends AbstractLeaderboardColumnOperation 
     }
 
     @Override
-    public RacingEventServiceOperation transformMoveLeaderboardColumnUpServerOp(
+    public RacingEventServiceOperation<?> transformMoveLeaderboardColumnUpServerOp(
             MoveLeaderboardColumnUp moveLeaderboardColumnUp) {
         if (affectsSameColumn(moveLeaderboardColumnUp)) {
             return AbstractRacingEventServiceOperation.getNoOp();
