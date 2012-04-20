@@ -55,7 +55,6 @@ import difflib.PatchFailedException;
  */
 public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Event> raceIDToEventCache;
-    private final Map<String, Competitor> boatIDToCompetitorCache;
     private final Map<Iterable<String>, ControlPoint> controlPointCache;
     private final Map<String, BoatClass> olympicClassesByID;
     private final BoatClass unknownBoatClass;
@@ -64,7 +63,6 @@ public class DomainFactoryImpl implements DomainFactory {
     public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
         raceIDToEventCache = new HashMap<String, Event>();
-        boatIDToCompetitorCache = new HashMap<String, Competitor>();
         controlPointCache = new HashMap<Iterable<String>, ControlPoint>();
         olympicClassesByID = new HashMap<String, BoatClass>();
         /*
@@ -102,12 +100,12 @@ public class DomainFactoryImpl implements DomainFactory {
     
     @Override
     public Competitor getCompetitorByBoatID(String boatID) {
-        return boatIDToCompetitorCache.get(boatID);
+        return baseDomainFactory.getExistingCompetitorById(boatID);
     }
     
     @Override
     public Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass) {
-        Competitor result = boatIDToCompetitorCache.get(competitor.getBoatID());
+        Competitor result = getCompetitorByBoatID(competitor.getBoatID());
         if (result == null) {
             Boat boat = new BoatImpl(competitor.getName(), boatClass, competitor.getBoatID());
             List<Person> teamMembers = new ArrayList<Person>();
@@ -116,8 +114,7 @@ public class DomainFactoryImpl implements DomainFactory {
                         /* dateOfBirth */ null, teamMemberName.trim()));
             }
             Team team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            result = new com.sap.sailing.domain.base.impl.CompetitorImpl(competitor.getBoatID(), competitor.getName(), team, boat);
-            boatIDToCompetitorCache.put(competitor.getBoatID(), result);
+            result = baseDomainFactory.createCompetitor(competitor.getBoatID(), competitor.getName(), team, boat);
         }
         return result;
     }
