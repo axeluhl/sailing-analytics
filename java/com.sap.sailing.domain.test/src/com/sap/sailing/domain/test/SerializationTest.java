@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -29,7 +30,6 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
-import com.sap.sailing.util.ObjectInputStreamWithConfigurableClassLoader;
 
 public class SerializationTest extends OnlineTracTracBasedTest {
     public SerializationTest() throws MalformedURLException, URISyntaxException {
@@ -71,7 +71,7 @@ public class SerializationTest extends OnlineTracTracBasedTest {
                 }
             }
         }.start();
-        ObjectInputStream dis = new ObjectInputStreamWithConfigurableClassLoader(pis);
+        ObjectInputStream dis = DomainFactory.INSTANCE.createObjectInputStreamResolvingAgainstThisFactory(pis);
         @SuppressWarnings("unchecked")
         T result = (T) dis.readObject();
         dis.close();
