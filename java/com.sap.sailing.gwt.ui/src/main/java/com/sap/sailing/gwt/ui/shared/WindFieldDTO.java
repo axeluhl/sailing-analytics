@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class WindFieldDTO implements Serializable {
 
@@ -8,12 +9,12 @@ public class WindFieldDTO implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private WindDTO[] matrix;
+	private List<WindDTO> matrix;
 	
-	public WindDTO[] getMatrix() {
+	public List<WindDTO> getMatrix() {
 		return matrix;
 	}
-	public void setMatrix(WindDTO[] matrix) {
+	public void setMatrix(List<WindDTO> matrix) {
 		this.matrix = matrix;
 	}
 	
