@@ -1117,14 +1117,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             LeaderboardDTO dao = createStrippedLeaderboardDTO(leaderboard, false);
             results.add(dao);
         }
-        
         return results;
     }
     
     @Override
     public List<LeaderboardDTO> getLeaderboardsByEvent(EventDTO event) {
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
-        
         for (RegattaDTO regatta : event.regattas) {
             for (RaceDTO race : regatta.races) {
                 List<LeaderboardDTO> leaderboard = getLeaderboardsByRace(race);
@@ -1133,7 +1131,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
-        //Removing duplicates
+        // Removing duplicates
         HashSet<LeaderboardDTO> set = new HashSet<LeaderboardDTO>(results);
         results.clear();
         results.addAll(set);
