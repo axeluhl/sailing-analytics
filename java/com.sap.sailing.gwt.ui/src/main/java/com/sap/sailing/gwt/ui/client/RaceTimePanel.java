@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
@@ -86,7 +87,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
     
     @Override
-    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             selectedRace = selectedRaces.iterator().next();
             if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {

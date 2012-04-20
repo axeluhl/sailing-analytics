@@ -20,8 +20,12 @@ public abstract class AbstractRacingEventServiceOperation<ResultType> implements
      */
     @Override
     public RacingEventService applyTo(RacingEventService toState) {
-        internalApplyTo(toState);
-        return toState;
+        try {
+            internalApplyTo(toState);
+            return toState;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
     @Override

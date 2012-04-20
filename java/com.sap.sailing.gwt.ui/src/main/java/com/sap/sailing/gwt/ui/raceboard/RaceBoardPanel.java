@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
@@ -87,7 +88,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final RaceSelectionProvider raceSelectionProvider;
     private final UserAgentTypes userAgentType;
     private final CompetitorSelectionModel competitorSelectionModel;
-    private final RaceIdentifier selectedRaceIdentifier;
+    private final EventAndRaceIdentifier selectedRaceIdentifier;
 
     private LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
@@ -482,7 +483,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
     }
 }
 

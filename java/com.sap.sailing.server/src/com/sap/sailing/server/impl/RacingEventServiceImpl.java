@@ -29,10 +29,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
-import com.sap.sailing.domain.common.EventFetcher;
 import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.EventName;
-import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -73,7 +71,7 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.RacingEventServiceOperation;
 
-public class RacingEventServiceImpl implements RacingEventService, EventFetcher, RaceFetcher {
+public class RacingEventServiceImpl implements RacingEventService {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -770,10 +768,15 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     @Override
+    public Event getEvent(EventName eventName) {
+        return (Event) eventsByName.get(eventName.getEventName());
+    }
+
+    @Override
     public Event getEvent(EventIdentifier eventIdentifier) {
         return (Event) eventIdentifier.getEvent(this);
     }
-
+    
     @Override
     public TrackedRace getTrackedRace(RaceIdentifier raceIdentifier) {
         return (TrackedRace) raceIdentifier.getTrackedRace(this);
@@ -795,11 +798,6 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
             result = event.getRaceByName(eventNameAndRaceName.getRaceName());
         }
         return result;
-    }
-
-    @Override
-    public Event getEvent(EventName eventIdentifier) {
-        return getEventByName(eventIdentifier.getEventName());
     }
 
     @Override
@@ -919,6 +917,10 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
      */
     @Override
     public <T> T apply(RacingEventServiceOperation<T> operation) {
-        return operation.internalApplyTo(this);
+        try {
+            return operation.internalApplyTo(this);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

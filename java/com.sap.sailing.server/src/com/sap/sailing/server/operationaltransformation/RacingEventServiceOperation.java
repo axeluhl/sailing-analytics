@@ -11,7 +11,7 @@ public interface RacingEventServiceOperation<ResultType> extends Operation<Racin
      * Performs the actual operation, applying it to the <code>toState</code> service. The operation's result is
      * returned.
      */
-    ResultType internalApplyTo(RacingEventService toState);
+    ResultType internalApplyTo(RacingEventService toState) throws Exception;
     
     /**
      * Implements the specific transformation rule for the implementing subclass for the set of possible peer operations

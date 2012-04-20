@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -132,7 +132,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
 
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
+        List<EventAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,

@@ -16,7 +16,10 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.EventFetcher;
 import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.EventName;
+import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -57,7 +60,7 @@ import com.sap.sailing.server.operationaltransformation.RacingEventServiceOperat
  * @author Axel Uhl (d043530)
  *
  */
-public interface RacingEventService extends TrackedEventRegistry {
+public interface RacingEventService extends TrackedEventRegistry, EventFetcher, RaceFetcher {
     /**
      * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
      *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
@@ -66,7 +69,13 @@ public interface RacingEventService extends TrackedEventRegistry {
 
     Event getEventByName(String name);
     
+    @Override
+    Event getEvent(EventName eventName);
+    
     Event getEvent(EventIdentifier eventIdentifier);
+
+    @Override
+    RaceDefinition getRace(EventAndRaceIdentifier raceIdentifier);
 
     TrackedRace getTrackedRace(Event event, RaceDefinition r);
     

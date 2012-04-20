@@ -42,6 +42,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -313,7 +314,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                 if (dontFireNextSelectionChangeEvent) {
                     dontFireNextSelectionChangeEvent = false;
                 } else {
-                    List<RaceIdentifier> selectedRaceIdentifiers = new ArrayList<RaceIdentifier>();
+                    List<EventAndRaceIdentifier> selectedRaceIdentifiers = new ArrayList<EventAndRaceIdentifier>();
                     for (RaceDTO selectedRace : selectedRaces) {
                         selectedRaceIdentifiers.add(selectedRace.getRaceIdentifier());
                     }
@@ -385,7 +386,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     }
 
     public void clearSelection() {
-        List<RaceIdentifier> emptySelection =  Collections.emptyList();
+        List<EventAndRaceIdentifier> emptySelection =  Collections.emptyList();
         raceSelectionProvider.setSelection(emptySelection, /* listenersNotToNotify */ this);
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
@@ -410,7 +411,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
             noTrackedRacesLabel.setVisible(false);
         }
         List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
-        List<RaceIdentifier> newAllRaceIdentifiers = new ArrayList<RaceIdentifier>();
+        List<EventAndRaceIdentifier> newAllRaceIdentifiers = new ArrayList<EventAndRaceIdentifier>();
         for (EventDTO event : events) {
             for (RegattaDTO regatta : event.regattas) {
                 for (RaceDTO race : regatta.races) {
@@ -500,7 +501,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
         for (RaceDTO raceFromAllRaces : raceList.getList()) {
             selectionModel.setSelected(raceFromAllRaces, selectedRaces.contains(raceFromAllRaces.getRaceIdentifier()));
         }

@@ -9,10 +9,10 @@ public class UpdateCompetitorDisplayNameInLeaderboard extends AbstractLeaderboar
     private final String competitorIdAsString;
     private final String newDisplayName;
     
-    public UpdateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorIdAdString,
+    public UpdateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorIdAsString,
             String newDisplayName) {
         super(leaderboardName);
-        this.competitorIdAsString = competitorIdAdString;
+        this.competitorIdAsString = competitorIdAsString;
         this.newDisplayName = newDisplayName;
     }
 

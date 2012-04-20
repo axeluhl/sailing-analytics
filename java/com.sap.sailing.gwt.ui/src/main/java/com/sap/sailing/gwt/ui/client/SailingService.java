@@ -130,7 +130,7 @@ public interface SailingService extends RemoteService {
             String raceColumnName, MaxPointsReason maxPointsReason, Date date) throws NoWindException;
 
     Pair<Integer, Integer> updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString,
-            String raceName, Integer correctedScore, Date date) throws NoWindException;
+            String columnName, Integer correctedScore, Date date) throws NoWindException;
 
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorIdAsString, String displayName);
     
@@ -175,7 +175,7 @@ public interface SailingService extends RemoteService {
             Date toDate, long stepSize, DetailType detailType) 
             throws NoWindException;
 
-    void setRaceIsKnownToStartUpwind(RaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
+    void setRaceIsKnownToStartUpwind(EventAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
 
-    void setWindSourcesToExclude(RaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
+    void setWindSourcesToExclude(EventAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
 }

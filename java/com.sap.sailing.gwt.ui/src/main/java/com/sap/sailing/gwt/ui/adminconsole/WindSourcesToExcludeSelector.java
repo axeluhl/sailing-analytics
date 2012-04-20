@@ -11,7 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -31,7 +31,7 @@ public class WindSourcesToExcludeSelector extends VerticalPanel {
     private final StringMessages stringMessages;
     private final SailingServiceAsync service;
     private final ErrorReporter errorReporter;
-    private RaceIdentifier raceIdentifier;
+    private EventAndRaceIdentifier raceIdentifier;
 
     public WindSourcesToExcludeSelector(SailingServiceAsync service,
             StringMessages stringMessages, ErrorReporter errorReporter) {
@@ -42,7 +42,7 @@ public class WindSourcesToExcludeSelector extends VerticalPanel {
         add(new Label(stringMessages.windSourcesUsed()));
     }
     
-    public void update(RaceIdentifier raceIdentifier, Iterable<WindSource> allWindSources, Iterable<WindSource> windSourcesToExclude) {
+    public void update(EventAndRaceIdentifier raceIdentifier, Iterable<WindSource> allWindSources, Iterable<WindSource> windSourcesToExclude) {
         this.raceIdentifier = raceIdentifier;
         Set<WindSource> windSourcesToRemove = new HashSet<WindSource>(checkboxesByWindSource.keySet());
         for (WindSource windSource : allWindSources) {
@@ -73,7 +73,7 @@ public class WindSourcesToExcludeSelector extends VerticalPanel {
         }
     }
 
-    private void onWindSourcesToExcludeChanged(final RaceIdentifier raceIdentifier) {
+    private void onWindSourcesToExcludeChanged(final EventAndRaceIdentifier raceIdentifier) {
         service.setWindSourcesToExclude(raceIdentifier, getWindSourcesToExclude(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable e) {
