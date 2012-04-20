@@ -140,6 +140,9 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
+import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 
 /**
  * The server side implementation of the RPC service.
@@ -1290,17 +1293,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
-        getService().addColumnToLeaderboard(columnName, leaderboardName, medalRace);
+        getService().apply(new AddColumnToLeaderboard(columnName, leaderboardName, medalRace));
     }
 
     @Override
     public void removeLeaderboardColumn(String leaderboardName, String columnName) {
-        getService().removeLeaderboardColumn(leaderboardName, columnName);
+        getService().apply(new RemoveLeaderboardColumn(columnName, leaderboardName));
     }
 
     @Override
     public void renameLeaderboardColumn(String leaderboardName, String oldColumnName, String newColumnName) {
-        getService().renameLeaderboardColumn(leaderboardName, oldColumnName, newColumnName);
+        getService().apply(new RenameLeaderboardColumn(leaderboardName, oldColumnName, newColumnName));
     }
 
     @Override
