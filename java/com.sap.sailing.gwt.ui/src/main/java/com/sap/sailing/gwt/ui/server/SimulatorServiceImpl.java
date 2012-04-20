@@ -9,6 +9,8 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
+import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
 
@@ -85,5 +87,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 		wl.setMatrix(matrix);
 		
 		return wl;
+	}
+
+	public WindFieldDTO getWindField(WindFieldGenParamsDTO params){
+		WindFieldDTO wf = new WindFieldDTO();
+		
+		
+		return wf;
+		
 	}
 }
