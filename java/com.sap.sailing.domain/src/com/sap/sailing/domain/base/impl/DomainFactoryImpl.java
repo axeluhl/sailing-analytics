@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.awt.TrayIcon.MessageType;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -11,6 +13,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -26,11 +29,14 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Buoy> buoyCache;
     
     private final Map<String, BoatClass> boatClassCache;
+    
+    private final Map<Serializable, Competitor> competitorCache;
 
     public DomainFactoryImpl() {
         nationalityCache = new HashMap<String, Nationality>();
         buoyCache = new HashMap<String, Buoy>();
         boatClassCache = new HashMap<String, BoatClass>();
+        competitorCache = new HashMap<Serializable, Competitor>();
     }
     
     @Override
@@ -85,6 +91,18 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             return result;
         }
+    }
+
+    @Override
+    public Competitor getExistingCompetitorById(Serializable competitorId) {
+        return competitorCache.get(competitorId);
+    }
+
+    @Override
+    public Competitor createCompetitor(Serializable id, String name, Team team, Boat boat) {
+        Competitor result = new CompetitorImpl(id, name, team, boat);
+        competitorCache.put(id, result);
+        return result;
     }
 
 }
