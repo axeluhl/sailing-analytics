@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -28,4 +30,11 @@ public interface DomainFactory {
     Competitor getExistingCompetitorById(Serializable competitorId);
     
     Competitor createCompetitor(Serializable id, String name, Team team, Boat boat);
+    
+    /**
+     * When de-serializing objects of types whose instances that are managed and cached by this domain factory,
+     * de-serialized instances need to be replaced by / resolved to the counterparts already known by this factory.
+     * The stream returned by this method can be used 
+     */
+    ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException;
 }

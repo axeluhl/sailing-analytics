@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.awt.TrayIcon.MessageType;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +15,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
@@ -103,6 +106,12 @@ public class DomainFactoryImpl implements DomainFactory {
         Competitor result = new CompetitorImpl(id, name, team, boat);
         competitorCache.put(id, result);
         return result;
+    }
+
+    @Override
+    public ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(
+            InputStream inputStream) throws IOException {
+        return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this);
     }
 
 }
