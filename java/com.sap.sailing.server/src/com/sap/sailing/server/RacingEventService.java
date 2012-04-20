@@ -332,6 +332,6 @@ public interface RacingEventService extends TrackedEventRegistry {
     /**
      * Executes an operation whose effects need to be replicated to any replica of this service known.
      */
-    void apply(RacingEventServiceOperation operation);
+    <T> T apply(RacingEventServiceOperation<T> operation);
 
 }

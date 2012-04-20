@@ -4,7 +4,7 @@ import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class SetRaceIsKnownToStartUpwind extends AbstractRaceOperation {
+public class SetRaceIsKnownToStartUpwind extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 272403191741207144L;
     private final boolean startsUpwind;
     
@@ -14,24 +14,24 @@ public class SetRaceIsKnownToStartUpwind extends AbstractRaceOperation {
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Void internalApplyTo(RacingEventService toState) {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getExistingTrackedRace(getRaceIdentifier());
         if (trackedRace != null) {
             trackedRace.setRaceIsKnownToStartUpwind(startsUpwind);
         }
-        return toState;
+        return null;
     }
 
 }

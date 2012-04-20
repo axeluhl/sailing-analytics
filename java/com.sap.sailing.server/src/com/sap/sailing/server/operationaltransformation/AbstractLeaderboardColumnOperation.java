@@ -2,7 +2,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 
 
-public abstract class AbstractLeaderboardColumnOperation extends AbstractLeaderboardOperation {
+public abstract class AbstractLeaderboardColumnOperation<ResultType> extends AbstractLeaderboardOperation<ResultType> {
     private static final long serialVersionUID = 8577267743945864388L;
     private final String columnName;
     
@@ -15,7 +15,7 @@ public abstract class AbstractLeaderboardColumnOperation extends AbstractLeaderb
         return columnName;
     }
     
-    protected boolean affectsSameColumn(AbstractLeaderboardColumnOperation other) {
+    protected boolean affectsSameColumn(AbstractLeaderboardColumnOperation<?> other) {
         return affectsSameLeaderboard(other) && getColumnName().equals(other.getColumnName());
     }
 

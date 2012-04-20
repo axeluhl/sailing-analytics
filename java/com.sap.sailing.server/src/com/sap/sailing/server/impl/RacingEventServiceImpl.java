@@ -911,14 +911,14 @@ public class RacingEventServiceImpl implements RacingEventService, EventFetcher,
     }
 
     /**
-     * Currently, the operation is executed by immediately {@link Operation#applyTo(Object) applying} it to this
+     * Currently, the operation is executed by immediately {@link Operation#internalApplyTo(Object) applying} it to this
      * service object.<p>
      * 
      * Future implementations of this method will need to also replicate the effects of the operation to all replica
      * of this service known.
      */
     @Override
-    public void apply(RacingEventServiceOperation operation) {
-        operation.applyTo(this);
+    public <T> T apply(RacingEventServiceOperation<T> operation) {
+        return operation.internalApplyTo(this);
     }
 }

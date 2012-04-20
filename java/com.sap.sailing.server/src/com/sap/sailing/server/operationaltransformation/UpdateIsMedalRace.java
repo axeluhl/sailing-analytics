@@ -3,7 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
 
-public class UpdateIsMedalRace extends AbstractLeaderboardColumnOperation {
+public class UpdateIsMedalRace extends AbstractLeaderboardColumnOperation<Void> {
     private static final long serialVersionUID = 5925081961634860757L;
     private final boolean isMedalRace;
 
@@ -13,19 +13,19 @@ public class UpdateIsMedalRace extends AbstractLeaderboardColumnOperation {
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Void internalApplyTo(RacingEventService toState) {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         if (leaderboard != null) {
             leaderboard.updateIsMedalRace(getColumnName(), isMedalRace);
@@ -33,7 +33,7 @@ public class UpdateIsMedalRace extends AbstractLeaderboardColumnOperation {
         } else {
             throw new IllegalArgumentException("Leaderboard named " + getLeaderboardName() + " not found");
         }
-        return toState;
+        return null;
     }
 
 }

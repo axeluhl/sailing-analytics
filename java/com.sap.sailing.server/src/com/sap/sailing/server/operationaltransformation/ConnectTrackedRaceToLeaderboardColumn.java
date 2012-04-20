@@ -6,7 +6,7 @@ import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardColumnOperation {
+public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardColumnOperation<Boolean> {
     private static final long serialVersionUID = -1336511401516212508L;
     private final RaceIdentifier raceToConnect;
     
@@ -16,19 +16,19 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Boolean internalApplyTo(RacingEventService toState) {
         boolean success = false;
         TrackedRace trackedRace = toState.getExistingTrackedRace(raceToConnect);
         if (trackedRace != null) {
@@ -43,7 +43,7 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
                 }
             }
         }
-        return toState;
+        return success;
     }
 
 }

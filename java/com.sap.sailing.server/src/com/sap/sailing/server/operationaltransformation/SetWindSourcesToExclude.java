@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
 
-public class SetWindSourcesToExclude extends AbstractRaceOperation {
+public class SetWindSourcesToExclude extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 7639288885720509529L;
     private final Set<WindSource> windSourcesToExclude;
     
@@ -17,24 +17,24 @@ public class SetWindSourcesToExclude extends AbstractRaceOperation {
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Void internalApplyTo(RacingEventService toState) {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getExistingTrackedRace(getRaceIdentifier());
         if (trackedRace != null) {
             trackedRace.setWindSourcesToExclude(windSourcesToExclude);
         }
-        return toState;
+        return null;
     }
 
 }

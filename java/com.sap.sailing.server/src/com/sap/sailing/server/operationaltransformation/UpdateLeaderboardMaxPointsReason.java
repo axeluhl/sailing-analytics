@@ -6,7 +6,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.server.RacingEventService;
 
-public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnOperation {
+public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnOperation<Void> {
     private static final long serialVersionUID = -492130952256848047L;
     private final String competitorIdAsString;
     private final MaxPointsReason newMaxPointsReason;
@@ -19,19 +19,19 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Void internalApplyTo(RacingEventService toState) {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
@@ -48,7 +48,7 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
         } else {
             throw new IllegalArgumentException("Didn't find leaderboard "+getLeaderboardName());
         }
-        return toState;
+        return null;
     }
 
 }
