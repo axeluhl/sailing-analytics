@@ -9,6 +9,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnOperation<Pair<Integer, Integer>> {
     private static final long serialVersionUID = -977025759476022993L;

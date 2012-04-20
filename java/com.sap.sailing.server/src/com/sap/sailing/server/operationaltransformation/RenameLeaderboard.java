@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class RenameLeaderboard extends AbstractLeaderboardOperation<Void> {
     private static final long serialVersionUID = 8874599127010526971L;

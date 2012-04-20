@@ -68,8 +68,9 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.operationaltransformation.Operation;
+import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.operationaltransformation.RacingEventServiceOperation;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class RacingEventServiceImpl implements RacingEventService {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -119,6 +120,8 @@ public class RacingEventServiceImpl implements RacingEventService {
     private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
 
     private final Map<Event, DynamicTrackedEvent> eventTrackingCache;
+    
+    private final Set<OperationExecutionListener> operationExecutionListeners;
 
     public RacingEventServiceImpl() {
         tractracDomainFactory = DomainFactory.INSTANCE;
@@ -135,6 +138,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         raceTrackersByID = new HashMap<Object, RaceTracker>();
         leaderboardGroupsByName = new HashMap<String, LeaderboardGroup>();
         leaderboardsByName = new HashMap<String, Leaderboard>();
+        operationExecutionListeners = new HashSet<OperationExecutionListener>();
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
@@ -918,9 +922,24 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public <T> T apply(RacingEventServiceOperation<T> operation) {
         try {
-            return operation.internalApplyTo(this);
+            T result = operation.internalApplyTo(this);
+            for (OperationExecutionListener listener : operationExecutionListeners) {
+                listener.executed(operation);
+            }
+            return result;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void addOperationExecutionListener(OperationExecutionListener listener) {
+        operationExecutionListeners.add(listener);
+    }
+
+    @Override
+    public void removeOperationExecutionListener(OperationExecutionListener listener) {
+        operationExecutionListeners.remove(listener);
+    }
+
 }

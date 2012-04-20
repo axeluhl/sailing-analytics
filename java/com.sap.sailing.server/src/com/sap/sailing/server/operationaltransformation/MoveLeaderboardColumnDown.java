@@ -1,6 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class MoveLeaderboardColumnDown extends AbstractLeaderboardColumnOperation<Void> {
     

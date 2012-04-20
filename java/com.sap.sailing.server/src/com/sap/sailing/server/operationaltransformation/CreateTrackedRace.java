@@ -8,6 +8,7 @@ import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 /**
  * Creates a tracked race for a race identifier by a {@link RaceIdentifier}. The operation assumes that the

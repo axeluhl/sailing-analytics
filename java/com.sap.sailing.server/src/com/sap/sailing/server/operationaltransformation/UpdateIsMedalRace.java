@@ -2,6 +2,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class UpdateIsMedalRace extends AbstractLeaderboardColumnOperation<Void> {
     private static final long serialVersionUID = 5925081961634860757L;

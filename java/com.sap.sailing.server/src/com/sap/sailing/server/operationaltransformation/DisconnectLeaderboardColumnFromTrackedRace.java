@@ -3,6 +3,7 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class DisconnectLeaderboardColumnFromTrackedRace extends AbstractLeaderboardColumnOperation<Void> {
 

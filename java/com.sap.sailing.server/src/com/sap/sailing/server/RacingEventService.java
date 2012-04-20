@@ -40,7 +40,6 @@ import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
-import com.sap.sailing.server.operationaltransformation.RacingEventServiceOperation;
 
 /**
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
@@ -339,8 +338,13 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
     void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames);
     
     /**
-     * Executes an operation whose effects need to be replicated to any replica of this service known.
+     * Executes an operation whose effects need to be replicated to any replica of this service known and
+     * {@link OperationExecutionListener#executed(RacingEventServiceOperation) notifies} all registered
+     * operation execution listeners about the execution of the operation.
      */
     <T> T apply(RacingEventServiceOperation<T> operation);
 
+    void addOperationExecutionListener(OperationExecutionListener listener);
+    
+    void removeOperationExecutionListener(OperationExecutionListener listener);
 }

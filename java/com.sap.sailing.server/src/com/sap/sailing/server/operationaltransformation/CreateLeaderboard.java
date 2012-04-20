@@ -2,6 +2,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class CreateLeaderboard extends AbstractLeaderboardOperation<Leaderboard> {
     private static final long serialVersionUID = 891352705068098580L;

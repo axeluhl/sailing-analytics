@@ -4,6 +4,7 @@ import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class SetWindSourcesToExclude extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 7639288885720509529L;

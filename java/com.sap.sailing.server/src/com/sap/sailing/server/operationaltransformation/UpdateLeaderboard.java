@@ -5,6 +5,7 @@ import java.util.Arrays;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class UpdateLeaderboard extends AbstractLeaderboardOperation<Void> {
     private static final long serialVersionUID = -8040361040050151768L;
