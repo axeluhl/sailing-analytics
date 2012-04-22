@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -11,7 +12,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 
-public interface TrackedLegOfCompetitor {
+public interface TrackedLegOfCompetitor extends Serializable {
     Leg getLeg();
 
     Competitor getCompetitor();

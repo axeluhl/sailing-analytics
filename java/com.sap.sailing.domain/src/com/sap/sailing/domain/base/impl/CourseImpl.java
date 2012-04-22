@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,6 +62,13 @@ public class CourseImpl extends NamedImpl implements Course {
                 previous = current;
             }
         }
+    }
+    
+    /**
+     * Synchronize on this object to avoid concurrent modifications of the underlying waypoints list
+     */
+    private synchronized void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
     }
     
     /**

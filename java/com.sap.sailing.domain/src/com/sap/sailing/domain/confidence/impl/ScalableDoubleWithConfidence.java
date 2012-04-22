@@ -3,6 +3,7 @@ package com.sap.sailing.domain.confidence.impl;
 import com.sap.sailing.domain.confidence.HasConfidenceAndIsScalable;
 
 public class ScalableDoubleWithConfidence<RelativeTo> extends ScalableDouble implements HasConfidenceAndIsScalable<Double, Double, RelativeTo> {
+    private static final long serialVersionUID = 1042652394404557792L;
     private final double confidence;
     private final RelativeTo relativeTo;
     

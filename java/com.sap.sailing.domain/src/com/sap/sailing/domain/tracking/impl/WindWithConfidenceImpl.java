@@ -5,6 +5,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 
 public class WindWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<ScalableWind, Wind, RelativeTo> implements WindWithConfidence<RelativeTo> {
+    private static final long serialVersionUID = -644015582690775666L;
     private final boolean useSpeed;
     
     public WindWithConfidenceImpl(Wind object, double confidence, RelativeTo relativeTo, boolean useSpeed) {

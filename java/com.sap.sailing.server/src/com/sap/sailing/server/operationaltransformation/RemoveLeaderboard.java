@@ -47,7 +47,7 @@ public class RemoveLeaderboard extends AbstractLeaderboardOperation {
 
     @Override
     public RacingEventServiceOperation transformRemoveColumnFromLeaderboardServerOp(
-            RemoveColumnFromLeaderboard removeColumnFromLeaderboardServerOp) {
+            RemoveLeaderboardColumn removeColumnFromLeaderboardServerOp) {
         if (affectsSameLeaderboard(removeColumnFromLeaderboardServerOp)) {
             return AbstractRacingEventServiceOperation.getNoOp();
         } else {
@@ -57,7 +57,7 @@ public class RemoveLeaderboard extends AbstractLeaderboardOperation {
 
     @Override
     public RacingEventServiceOperation transformRemoveColumnFromLeaderboardClientOp(
-            RemoveColumnFromLeaderboard removeColumnFromLeaderboardClientOp) {
+            RemoveLeaderboardColumn removeColumnFromLeaderboardClientOp) {
         if (affectsSameLeaderboard(removeColumnFromLeaderboardClientOp)) {
             return AbstractRacingEventServiceOperation.getNoOp();
         } else {

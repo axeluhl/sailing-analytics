@@ -9,6 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -209,7 +210,7 @@ public interface SailingServiceAsync {
     void updateLeaderboardCarryValue(String leaderboardName, String competitorID, Integer carriedPoints, AsyncCallback<Void> callback);
 
     void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorID, String raceColumnName,
-            String maxPointsReasonAsString, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
+            MaxPointsReason maxPointsReason, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
 
     void updateLeaderboardScoreCorrection(String leaderboardName, String competitorID, String raceName,
             Integer correctedScore, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
@@ -289,9 +290,9 @@ public interface SailingServiceAsync {
      * @param oldName The old name of the group
      * @param newName The new name of the group
      * @param description The new description of the group
-     * @param leaderboards The new leaderboards of the group
+     * @param leaderboardNames The list of names of the new leaderboards of the group
      */
-    void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards, AsyncCallback<Void> callback);
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames, AsyncCallback<Void> callback);
 
     /**
      * Returns the mark passings and the data for the given {@link DetailType} of all competitors in

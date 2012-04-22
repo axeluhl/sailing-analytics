@@ -573,7 +573,12 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     }
     
     private void updateGroup(final String oldGroupName, final LeaderboardGroupDTO groupToUpdate) {
-        sailingService.updateLeaderboardGroup(oldGroupName, groupToUpdate.name, groupToUpdate.description, groupToUpdate.leaderboards, new AsyncCallback<Void>() {
+        List<String> leaderboardNames = new ArrayList<String>();
+        for (LeaderboardDTO leaderboardDTO : groupToUpdate.leaderboards) {
+            leaderboardNames.add(leaderboardDTO.name);
+        }
+        sailingService.updateLeaderboardGroup(oldGroupName, groupToUpdate.name, groupToUpdate.description,
+                leaderboardNames, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update leaderboard group " + oldGroupName + ": "

@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.base.Timed;
@@ -13,7 +14,8 @@ import com.sap.sailing.domain.tracking.Wind;
  * @author Axel Uhl (d043530)
  * 
  */
-public class WindComparator implements Comparator<Timed> {
+public class WindComparator implements Comparator<Timed>, Serializable {
+    private static final long serialVersionUID = -7202702713168912931L;
     public static final Comparator<Timed> INSTANCE = new WindComparator();
 
     @Override

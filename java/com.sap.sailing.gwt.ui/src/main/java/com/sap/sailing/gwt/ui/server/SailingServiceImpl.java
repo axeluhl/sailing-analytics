@@ -58,6 +58,7 @@ import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.EventName;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Placemark;
@@ -80,7 +81,6 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
-import com.sap.sailing.domain.leaderboard.ScoreCorrection.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -522,9 +522,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void removeAndUntrackRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception{
         Event event = getEvent(eventAndRaceidentifier);
-        if(event!= null) {
+        if (event!= null) {
             RaceDefinition race = getRace(eventAndRaceidentifier);
-            if(race != null) {
+            if (race != null) {
                 getService().removeRace(event, race);
             }
         }
@@ -1269,13 +1269,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds) {
+    public void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThresholds) {
         if (!leaderboardName.equals(newLeaderboardName)) {
             getService().renameLeaderboard(leaderboardName, newLeaderboardName);
         }
         Leaderboard leaderboard = getService().getLeaderboardByName(newLeaderboardName);
-        if (!Arrays.equals(leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), newDiscardingThreasholds)) {
-            leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThreasholds));
+        if (!Arrays.equals(leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), newDiscardingThresholds)) {
+            leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThresholds));
         }
         getService().updateStoredLeaderboard(leaderboard);
     }
@@ -1381,7 +1381,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public Pair<Integer, Integer> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString, String raceColumnName,
-            String maxPointsReasonAsString, Date date) throws NoWindException {
+            MaxPointsReason maxPointsReason, Date date) throws NoWindException {
         TimePoint timePoint = new MillisecondsTimePoint(date);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
@@ -1391,11 +1391,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 if (raceColumn == null) {
                     throw new IllegalArgumentException("Didn't find race "+raceColumnName+" in leaderboard "+leaderboardName);
                 }
-                if (maxPointsReasonAsString == null) {
-                    leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, null); // null means "unset"
-                } else {
-                    leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, MaxPointsReason.valueOf(maxPointsReasonAsString));
-                }
+                leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, maxPointsReason);
                 getService().updateStoredLeaderboard(leaderboard);
                 Entry updatedEntry = leaderboard.getEntry(competitor, raceColumn, timePoint);
                 return new Pair<Integer, Integer>(updatedEntry.getNetPoints(), updatedEntry.getTotalPoints());
@@ -1567,6 +1563,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
                 Distance distanceToLeader = trackedLeg.getWindwardDistanceToOverallLeader(timePoint);
                 result = (distanceToLeader == null) ? null : distanceToLeader.getMeters();
+                break;
+            case RACE_RANK:
+                result = (double) trackedLeg.getRank(timePoint);
                 break;
             }
         }
@@ -1740,10 +1739,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public TrackedRace getExistingTrackedRace(RaceIdentifier eventNameAndRaceName) {
-        Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
-        RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
-        TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
-        return trackedRace;
+        return getService().getExistingTrackedRace(eventNameAndRaceName);
     }
     
     @Override
@@ -1823,22 +1819,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void updateLeaderboardGroup(String oldName, String newName, String description, List<LeaderboardDTO> leaderboards) {
-        if (!oldName.equals(newName)) {
-            getService().renameLeaderboardGroup(oldName, newName);
-        }
-        LeaderboardGroup group = getService().getLeaderboardGroupByName(newName);
-        if (!description.equals(group.getDescription())) {
-            group.setDescriptiom(description);
-        }
-        group.clearLeaderboards();
-        for (LeaderboardDTO leaderboardDTO : leaderboards) {
-            Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardDTO.name);
-            if (leaderboard != null) {
-                group.addLeaderboard(leaderboard);
-            }
-        }
-        getService().updateStoredLeaderboardGroup(group);
+    public void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames) {
+        getService().updateLeaderboardGroup(oldName, newName, description, leaderboardNames);
     }
 
 }

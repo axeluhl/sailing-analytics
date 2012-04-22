@@ -28,6 +28,8 @@ import com.sap.sailing.util.impl.DescendingNavigableSet;
  * 
  */
 public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiableNavigableSet<Wind> {
+    private static final long serialVersionUID = -7191543758261688727L;
+
     /**
      * The time resolution is one second.
      */

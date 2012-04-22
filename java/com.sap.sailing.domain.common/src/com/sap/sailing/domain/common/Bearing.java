@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common;
 
-public interface Bearing {
+import java.io.Serializable;
+
+public interface Bearing extends Serializable {
 
     double getDegrees();
 

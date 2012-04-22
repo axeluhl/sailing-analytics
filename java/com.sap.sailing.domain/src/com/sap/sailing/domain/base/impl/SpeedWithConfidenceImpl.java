@@ -5,6 +5,8 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.confidence.ScalableValue;
 
 public class SpeedWithConfidenceImpl<RelativeTo> extends HasConfidenceImpl<Double, Speed, RelativeTo> implements SpeedWithConfidence<RelativeTo> {
+    private static final long serialVersionUID = -3122580369653833748L;
+
     public SpeedWithConfidenceImpl(Speed object, double confidence, RelativeTo relativeTo) {
         super(object, confidence, relativeTo);
     }

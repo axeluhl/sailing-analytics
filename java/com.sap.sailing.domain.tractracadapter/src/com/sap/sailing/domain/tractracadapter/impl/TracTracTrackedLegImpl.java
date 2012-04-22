@@ -15,6 +15,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class TracTracTrackedLegImpl implements TrackedLeg {
+    private static final long serialVersionUID = 2396033396354531099L;
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private final TrackedRace trackedRace;

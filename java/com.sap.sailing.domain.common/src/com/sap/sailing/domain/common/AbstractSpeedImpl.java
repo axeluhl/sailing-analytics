@@ -4,6 +4,8 @@ import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 
 public abstract class AbstractSpeedImpl implements Speed {
 
+    private static final long serialVersionUID = 4910662213901175982L;
+
     @Override
     public double getBeaufort() {
         return Math.exp(Math.log(getKnots()*1.852/3.6 / 0.8360)*2/3);

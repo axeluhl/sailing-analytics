@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -60,6 +62,14 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             getOrCreateWindTrack(windSource).addListener(this);
         }
     }
+    
+    /**
+     * Synchronized object serialization on this object so that incoming new data doesn't disrupt the serialization process.
+     */
+    private synchronized void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+    }
+    
     /**
      * {@link #raceIsKnownToStartUpwind} (see also {@link #raceIsKnownToStartUpwind()}) is initialized based on the <code>race</code>'s
      * {@link RaceDefinition#getBoatClass()} boat class's {@link BoatClass#typicallyStartsUpwind()} result. It can be changed
@@ -116,6 +126,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     protected DynamicGPSFixTrackImpl<Buoy> createBuoyTrack(Buoy buoy) {
         DynamicGPSFixTrackImpl<Buoy> result = super.createBuoyTrack(buoy);
         result.addListener(new GPSTrackListener<Buoy>() {
+            private static final long serialVersionUID = -2855787105725103732L;
+
             @Override
             public void gpsFixReceived(GPSFix fix, Buoy buoy) {
                 notifyListeners(fix, buoy);

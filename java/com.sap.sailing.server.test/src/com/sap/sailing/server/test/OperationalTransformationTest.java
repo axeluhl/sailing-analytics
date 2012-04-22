@@ -18,7 +18,7 @@ import com.sap.sailing.operationaltransformation.PeerImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
-import com.sap.sailing.server.operationaltransformation.AddLeaderboard;
+import com.sap.sailing.server.operationaltransformation.CreateLeaderboard;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.OperationalTransformer;
 import com.sap.sailing.server.operationaltransformation.RacingEventServiceOperation;
@@ -48,7 +48,7 @@ public class OperationalTransformationTest {
 
     @Test
     public void testAddLeaderboard() {
-        RacingEventServiceOperation addLeaderboardOp = new AddLeaderboard(LEADERBOARDNAME, new int[] { 5 });
+        RacingEventServiceOperation addLeaderboardOp = new CreateLeaderboard(LEADERBOARDNAME, new int[] { 5 });
         server.apply(addLeaderboardOp);
         server.waitForNotRunning();
         replica.waitForNotRunning();
