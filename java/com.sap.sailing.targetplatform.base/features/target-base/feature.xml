@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="com.sap.sailing.target.base"
-      label="base libraries"
+      label="Base libraries"
       version="1.0.0">
 
    <description>
@@ -18,14 +18,14 @@
          install-size="0"
          version="2.5.0.v201103041518"
          unpack="false"/>
-         
+
    <plugin
          id="slf4j.api"
          download-size="0"
          install-size="0"
          version="1.6.4"
          unpack="false"/>
-         
+
    <plugin
          id="slf4j.jdk14"
          download-size="0"
@@ -35,6 +35,13 @@
 
    <plugin
          id="jul.to.slf4j"
+         download-size="0"
+         install-size="0"
+         version="1.6.4"
+         unpack="false"/>
+
+   <plugin
+         id="jcl.over.slf4j"
          download-size="0"
          install-size="0"
          version="1.6.4"
