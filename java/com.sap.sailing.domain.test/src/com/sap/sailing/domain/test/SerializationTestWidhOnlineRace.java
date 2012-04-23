@@ -5,10 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -31,8 +28,8 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 
-public class SerializationTest extends OnlineTracTracBasedTest {
-    public SerializationTest() throws MalformedURLException, URISyntaxException {
+public class SerializationTestWidhOnlineRace extends OnlineTracTracBasedTest {
+    public SerializationTestWidhOnlineRace() throws MalformedURLException, URISyntaxException {
         super();
     }
 
@@ -56,32 +53,11 @@ public class SerializationTest extends OnlineTracTracBasedTest {
         return new Pair<Integer, Long>(bos.size(), System.currentTimeMillis()-start);
     }
     
-    private <T extends Serializable> T cloneBySerialization(final T s) throws IOException, ClassNotFoundException {
-        PipedOutputStream pos = new PipedOutputStream();
-        PipedInputStream pis = new PipedInputStream(pos);
-        final ObjectOutputStream dos = new ObjectOutputStream(pos);
-        new Thread("clone writer") {
-            public void run() {
-                try {
-                    dos.writeObject(s);
-                    dos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
-            }
-        }.start();
-        ObjectInputStream dis = DomainFactory.INSTANCE.createObjectInputStreamResolvingAgainstThisFactory(pis);
-        @SuppressWarnings("unchecked")
-        T result = (T) dis.readObject();
-        dis.close();
-        return result;
-    }
-
     @Test
     public void testSerializingGPSTrack() throws ClassNotFoundException, IOException {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> findelsTrack = getTrackedRace().getTrack(getCompetitorByName("Findel"));
-        DynamicGPSFixTrack<Competitor, GPSFixMoving> cloneOfFindelsTrack = cloneBySerialization(findelsTrack);
+        DynamicGPSFixTrack<Competitor, GPSFixMoving> cloneOfFindelsTrack = AbstractSerializationTest
+                .cloneBySerialization(findelsTrack, DomainFactory.INSTANCE);
         assertEquals(Util.size(findelsTrack.getFixes()), Util.size(cloneOfFindelsTrack.getFixes()));
         Pair<Integer, Long> sizeAndTime = getSerializationSizeAndTime(findelsTrack);
         System.out.println(sizeAndTime);

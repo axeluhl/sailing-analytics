@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
@@ -99,4 +100,10 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     private double getConfidenceMultiplierForClusterSize(int numberOfBoatsInSmallestCluster) {
         return 1.0 + 1.0/1000000.0 - 1.0/(double) numberOfBoatsInSmallestCluster;
     }
+
+    @Override
+    public BoatClass resolve(DomainFactory domainFactory) {
+        return domainFactory.getOrCreateBoatClass(getName(), typicallyStartsUpwind());
+    }
+
 }

@@ -22,11 +22,13 @@ public abstract class ObjectInputStreamResolvingAgainstDomainFactory extends Obj
     
     /**
      * Package protected on purpose; instances to be created using
-     * {@link DomainFactory#createObjectInputStreamResolvingAgainstThisFactory(InputStream)}.
+     * {@link DomainFactory#createObjectInputStreamResolvingAgainstThisFactory(InputStream)}. This constructor
+     * {@link #enableResolveObject(boolean) enables resolving} by default.
      */
     protected ObjectInputStreamResolvingAgainstDomainFactory(InputStream in, DomainFactory domainFactory) throws IOException {
         super(in);
         this.domainFactory = domainFactory;
+        enableResolveObject(true);
     }
 
     @Override
@@ -38,5 +40,16 @@ public abstract class ObjectInputStreamResolvingAgainstDomainFactory extends Obj
     protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
         String className = classDesc.getName();
         return Thread.currentThread().getContextClassLoader().loadClass(className);
+    }
+    
+    @Override
+    protected Object resolveObject(Object o) {
+        Object result;
+        if (o instanceof IsManagedByDomainFactory) {
+            result = ((IsManagedByDomainFactory) o).resolve(getDomainFactory());
+        } else {
+            result = o;
+        }
+        return result;
     }
 }
