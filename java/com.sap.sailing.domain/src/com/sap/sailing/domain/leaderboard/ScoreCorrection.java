@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
@@ -15,7 +17,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface ScoreCorrection {
+public interface ScoreCorrection extends Serializable {
     public interface Result {
         int getCorrectedScore();
         MaxPointsReason getMaxPointsReason();

@@ -284,4 +284,6 @@ public interface StringMessages extends Messages {
     String degreesBoatToTheWind();
     String racesInLeaderboard();
     String leaderboardsInGroup();
+    String replication();
+    String errorFetchingReplicaData(String message);
 }

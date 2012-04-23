@@ -1,11 +1,13 @@
 package com.sap.sailing.server.replication;
 
-import java.io.Serializable;
+import java.util.List;
 
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public interface ServerReplicationMasterService {
+public interface ReplicationService {
     void broadcastOperation(RacingEventServiceOperation<?> operation) throws Exception;
     
-    void broadcastInitialServerState(Serializable state) throws Exception;
+    List<String> getHostnamesOfReplica();
+
+    boolean isMaster();
 }

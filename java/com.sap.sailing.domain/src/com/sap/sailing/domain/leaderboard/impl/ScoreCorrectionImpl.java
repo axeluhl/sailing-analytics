@@ -22,6 +22,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * 
  */
 public class ScoreCorrectionImpl implements SettableScoreCorrection {
+    private static final long serialVersionUID = -7088305215528928135L;
+
     /**
      * If no max point reason is provided for a competitor/race, {@link MaxPointsReason#NONE} should be the default.
      */

@@ -314,4 +314,6 @@ public interface SailingServiceAsync {
     void getRaceMapData(RaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
             Map<CompetitorDTO, Date> to, boolean extrapolate, AsyncCallback<RaceMapDataDTO> callback);
 
+    void getHostnamesOfReplica(AsyncCallback<List<String>> callback);
+
 }
