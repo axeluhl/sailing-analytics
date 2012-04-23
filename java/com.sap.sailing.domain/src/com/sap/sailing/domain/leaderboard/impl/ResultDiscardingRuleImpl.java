@@ -26,6 +26,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
  * 
  */
 public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingRule {
+    private static final long serialVersionUID = 386341628517357988L;
     private final int[] discardIndexResultsStartingWithHowManyRaces;
     
     public ResultDiscardingRuleImpl(int[] discardIndexResultsStartingWithHowManyRaces) {
