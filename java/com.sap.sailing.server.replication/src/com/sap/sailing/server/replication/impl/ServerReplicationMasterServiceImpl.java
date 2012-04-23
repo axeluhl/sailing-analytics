@@ -35,7 +35,7 @@ public class ServerReplicationMasterServiceImpl implements ServerReplicationMast
         return replicationTopic;
     }
     
-    public void broadcastOperation(RacingEventServiceOperation operation) throws Exception {
+    public void broadcastOperation(RacingEventServiceOperation<?> operation) throws Exception {
         Topic topic = getReplicationTopic();
         Session session = messageBrokerManager.getSession();
         
