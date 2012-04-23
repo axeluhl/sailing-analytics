@@ -9,7 +9,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
-import com.sap.sailing.server.operationaltransformation.RacingEventServiceOperation;
+import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ServerReplicationMasterService;
 
 public class ServerReplicationMasterServiceImpl implements ServerReplicationMasterService {

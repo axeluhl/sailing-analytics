@@ -2,9 +2,6 @@ package com.sap.sailing.server.replication.impl;
 
 import java.util.UUID;
 
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-
 import com.sap.sailing.server.replication.ReplicationSlaveDescriptor;
 import com.sap.sailing.server.replication.ServerReplicationSlaveService;
 
