@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.Named;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface Waypoint extends Named, WithID {
+public interface Waypoint extends Named, WithID, IsManagedByDomainFactory {
     ControlPoint getControlPoint();
 
     Iterable<Buoy> getBuoys();

@@ -1,0 +1,79 @@
+package com.sap.sailing.domain.test;
+
+import static org.junit.Assert.assertSame;
+
+import java.io.IOException;
+import java.util.Collections;
+
+import org.junit.Test;
+
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.base.impl.TeamImpl;
+
+public class OfflineSerializationTest extends AbstractSerializationTest {
+    @Test
+    public void testIdentityStabilityOfBuoySerialization() throws ClassNotFoundException, IOException {
+        DomainFactory senderDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        Buoy sendersBuoy1 = senderDomainFactory.getOrCreateBuoy("TestBuoy1");
+        Buoy receiversBuoy1 = cloneBySerialization(sendersBuoy1, receiverDomainFactory);
+        Buoy receiversSecondCopyOfBuoy1 = cloneBySerialization(sendersBuoy1, receiverDomainFactory);
+        assertSame(receiversBuoy1, receiversSecondCopyOfBuoy1);
+    }
+
+    @Test
+    public void testIdentityStabilityOfWaypointSerialization() throws ClassNotFoundException, IOException {
+        DomainFactory senderDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        Buoy sendersBuoy1 = senderDomainFactory.getOrCreateBuoy("TestBuoy1");
+        Waypoint sendersWaypoint1 = senderDomainFactory.createWaypoint(sendersBuoy1);
+        Waypoint receiversWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
+        Waypoint receiversSecondCopyOfWaypoint1 = cloneBySerialization(sendersWaypoint1, receiverDomainFactory);
+        assertSame(receiversWaypoint1, receiversSecondCopyOfWaypoint1);
+    }
+
+    @Test
+    public void testIdentityStabilityOfBoatClassSerialization() throws ClassNotFoundException, IOException {
+        DomainFactory senderDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        BoatClass sendersBoatClass1 = senderDomainFactory.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */ true);
+        BoatClass receiversBoatClass1 = cloneBySerialization(sendersBoatClass1, receiverDomainFactory);
+        BoatClass receiversSecondCopyOfBoatClass1 = cloneBySerialization(sendersBoatClass1, receiverDomainFactory);
+        assertSame(receiversBoatClass1, receiversSecondCopyOfBoatClass1);
+    }
+
+    @Test
+    public void testIdentityStabilityOfNationalitySerialization() throws ClassNotFoundException, IOException {
+        DomainFactory senderDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        Nationality sendersNationality1 = senderDomainFactory.getOrCreateNationality("GER");
+        Nationality receiversNationality1 = cloneBySerialization(sendersNationality1, receiverDomainFactory);
+        Nationality receiversSecondCopyOfNationality1 = cloneBySerialization(sendersNationality1, receiverDomainFactory);
+        assertSame(receiversNationality1, receiversSecondCopyOfNationality1);
+    }
+
+    @Test
+    public void testIdentityStabilityOfCompetitorSerialization() throws ClassNotFoundException, IOException {
+        DomainFactory senderDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        String competitorName = "Tina Maximiliane Lutz";
+        Competitor sendersCompetitor1 = new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
+                new PersonImpl(competitorName, senderDomainFactory.getOrCreateNationality("GER"),
+                /* dateOfBirth */ null, "This is famous "+competitorName)),
+                new PersonImpl("Rigo van Maas", senderDomainFactory.getOrCreateNationality("GER"),
+                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
+                        senderDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
+        Competitor receiversCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
+        Competitor receiversSecondCopyOfCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
+        assertSame(receiversCompetitor1, receiversSecondCopyOfCompetitor1);
+    }
+}
