@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -7,10 +9,20 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
+import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
+import com.sap.sailing.simulator.Boundaries;
+import com.sap.sailing.simulator.BoundariesIterator;
+import com.sap.sailing.simulator.WindField;
+import com.sap.sailing.simulator.impl.RectangularBoundary;
+import com.sap.sailing.simulator.impl.WindFieldCoordinatesImpl;
+import com.sap.sailing.simulator.impl.WindFieldImpl;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet  implements SimulatorService {
 
@@ -85,5 +97,39 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 		wl.setMatrix(matrix);
 		
 		return wl;
+	}
+
+
+	public WindFieldDTO getWindField(WindFieldGenParamsDTO params){
+		
+		
+		Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
+		Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
+		Boundaries bd = new RectangularBoundary(nw,se);
+		
+		WindField wf = new WindFieldImpl(bd, params.getWindSpeed(), params.getWindBearing());
+		
+		BoundariesIterator bi = wf.getBoundaries().boundariesIterator();
+		bi.setHorizontalResolution(params.getxRes());
+		bi.setVerticalResolution(params.getyRes());
+		
+		List<WindDTO> wList = new ArrayList<WindDTO>();
+		
+		while (bi.hasNext()) {
+			
+			Wind localWind = wf.getWind(new WindFieldCoordinatesImpl(bi.next()));
+			WindDTO w = new WindDTO();
+			w.position.latDeg = localWind.getPosition().getLatDeg();
+			w.position.lngDeg = localWind.getPosition().getLngDeg();
+			w.trueWindBearingDeg = localWind.getBearing().getDegrees();
+			w.trueWindSpeedInMetersPerSecond = localWind.getMetersPerSecond();
+			wList.add(w);
+			
+		}
+		
+		WindFieldDTO wfDTO = new WindFieldDTO();
+		wfDTO.setMatrix(wList);
+		return wfDTO;
+		
 	}
 }

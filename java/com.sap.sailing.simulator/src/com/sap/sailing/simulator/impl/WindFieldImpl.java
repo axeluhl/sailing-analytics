@@ -8,7 +8,6 @@ import com.sap.sailing.simulator.Boundaries;
 import com.sap.sailing.simulator.BoundariesIterator;
 import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.WindFieldCoordinates;
-import com.sap.sailing.simulator.impl.RectangularBoundary;
  
 public class WindFieldImpl implements WindField {
 
@@ -16,7 +15,7 @@ public class WindFieldImpl implements WindField {
 	double windBearing;
 	protected Boundaries boundary;
 	
-	public WindFieldImpl(RectangularBoundary b, double windspeed, double bearing)
+	public WindFieldImpl(Boundaries b, double windspeed, double bearing)
 	{
 		boundary = b;
 		windSpeed = windspeed;
