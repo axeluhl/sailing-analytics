@@ -16,11 +16,9 @@ public class Activator implements BundleActivator {
 
     public void start(BundleContext bundleContext) throws Exception {
         defaultContext = bundleContext;
-        MessageBrokerConfiguration brokerConfig = new MessageBrokerConfiguration();
-        brokerConfig.setBrokerUrl("tcp://localhost:61616");
         String tmpDir = System.getProperty("java.io.tmpdir");
-        brokerConfig.setDataStoreDirectory(new File(tmpDir, "kahadb").getAbsolutePath());
-        brokerConfig.setBrokerName("SailingServerReplicationBroker");
+        MessageBrokerConfiguration brokerConfig = new MessageBrokerConfiguration("SailingServerReplicationBroker",
+                "tcp://localhost:61616", new File(tmpDir, "kahadb").getAbsolutePath());
         messageBrokerManager = new MessageBrokerManager(brokerConfig);
         messageBrokerManager.startMessageBroker();
         messageBrokerManager.createAndStartConnection();

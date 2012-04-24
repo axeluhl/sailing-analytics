@@ -287,4 +287,6 @@ public interface StringMessages extends Messages {
     String replication();
     String errorFetchingReplicaData(String message);
     String averageCrossTrackErrorInMeters();
+    String enterMaster();
+    String errorStartingReplication(String hostname, String message);
 }

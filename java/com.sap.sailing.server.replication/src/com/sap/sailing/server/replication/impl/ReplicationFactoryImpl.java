@@ -6,9 +6,8 @@ import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 public class ReplicationFactoryImpl implements ReplicationFactory {
 
     @Override
-    public ReplicationMasterDescriptor createReplicationMasterDescriptor(String hostname) {
-        // TODO Auto-generated method stub
-        return null;
+    public ReplicationMasterDescriptor createReplicationMasterDescriptor(String hostname, int servletPort, int jmsPort) {
+        return new ReplicationMasterDescriptorImpl(hostname, servletPort, jmsPort);
     }
 
 }

@@ -5,12 +5,11 @@ import java.util.List;
 
 import javax.jms.JMSException;
 
-import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.impl.ReplicationServlet;
 
 public interface ReplicationService {
-    void broadcastOperation(RacingEventServiceOperation<?> operation) throws Exception;
-    
+    static String SAILING_SERVER_REPLICATION_TOPIC = "SailingServerReplicationTopic";
+
     List<String> getHostnamesOfReplica();
     
     /**
