@@ -93,21 +93,26 @@ public class ReplicationServiceImpl implements ReplicationService {
 
     @Override
     public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, JMSException {
-        URL replicationRegistrationRequestURL = registerReplicaWithMaster(master);
+        registerReplicaWithMaster(master);
         TopicSubscriber replicationSubscription = messageBrokerManager.getSession().createDurableSubscriber(
                 master.getReplicationTopic(), InetAddress.getLocalHost().getHostAddress());
+        startReplicationObserver(replicationSubscription);
         URL initialLoadURL = master.getInitialLoadURL();
         InputStream is = initialLoadURL.openStream();
         ObjectInputStream ois = new ObjectInputStream(is);
         getRacingEventService().initiallyFillFrom(ois);
     }
 
-    private URL registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException {
+    private void startReplicationObserver(TopicSubscriber replicationSubscription) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private void registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException {
         URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL();
         final URLConnection registrationRequestConnection = replicationRegistrationRequestURL.openConnection();
         registrationRequestConnection.connect();
         registrationRequestConnection.getContent();
-        return replicationRegistrationRequestURL;
     }
     
 }
