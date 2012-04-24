@@ -223,7 +223,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                 DetailType.VELOCITY_MADE_GOOD_IN_KNOTS, DetailType.GAP_TO_LEADER_IN_SECONDS,
                 DetailType.WINDWARD_DISTANCE_TO_GO_IN_METERS,
                 DetailType.NUMBER_OF_MANEUVERS,
-                DetailType.TIME_TRAVELED};
+                DetailType.TIME_TRAVELED, DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS };
     }
 
     @Override
