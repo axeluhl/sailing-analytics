@@ -286,4 +286,5 @@ public interface StringMessages extends Messages {
     String leaderboardsInGroup();
     String replication();
     String errorFetchingReplicaData(String message);
+    String averageCrossTrackErrorInMeters();
 }

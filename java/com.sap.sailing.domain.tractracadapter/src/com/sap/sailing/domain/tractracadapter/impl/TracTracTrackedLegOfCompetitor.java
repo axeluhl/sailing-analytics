@@ -176,4 +176,10 @@ public class TracTracTrackedLegOfCompetitor implements TrackedLegOfCompetitor {
         return result;
     }
 
+    @Override
+    public Distance getAverageCrossTrackError(TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

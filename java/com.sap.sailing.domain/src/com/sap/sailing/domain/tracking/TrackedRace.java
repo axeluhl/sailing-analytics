@@ -367,4 +367,9 @@ public interface TrackedRace extends Serializable {
      * After the call returns, {@link #getWindSourcesToExclude()} returns an iterable that equals <code>windSourcesToExclude</code>
      */
     void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude);
+
+    /**
+     * Computes the average cross-track error for the legs with type {@link LegType#UPWIND}.
+     */
+    Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException;
 }

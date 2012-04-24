@@ -335,6 +335,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace.getWindwardDistanceToOverallLeader(competitor, timePoint);
         entryDTO.windwardDistanceToOverallLeaderInMeters = windwardDistanceToOverallLeader == null ? null : windwardDistanceToOverallLeader.getMeters();
+        entryDTO.averageCrossTrackErrorInMeters = trackedRace.getAverageCrossTrackError(competitor, timePoint).getMeters();
         return entryDTO;
     }
 
@@ -345,8 +346,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         } else {
             result = new LegEntryDTO();
             final Speed averageSpeedOverGround = trackedLeg.getAverageSpeedOverGround(timePoint);
-            result.averageSpeedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround
-                    .getKnots();
+            result.averageSpeedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
+            final Distance averageCrossTrackError = trackedLeg.getAverageCrossTrackError(timePoint);
+            result.averageCrossTrackErrorInMeters = averageCrossTrackError == null ? null : averageCrossTrackError.getMeters();
             Double speedOverGroundInKnots;
             if (trackedLeg.hasFinishedLeg(timePoint))  {
                 speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();

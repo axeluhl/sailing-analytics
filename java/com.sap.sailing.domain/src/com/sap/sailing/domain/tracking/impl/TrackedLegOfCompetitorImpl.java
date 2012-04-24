@@ -20,6 +20,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -366,6 +367,32 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
         }
         return result;
+    }
+
+    @Override
+    public Distance getAverageCrossTrackError(TimePoint timePoint) throws NoWindException {
+        double distanceInMeters = 0;
+        int count = 0;
+        GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(competitor);
+        GPSFixMoving fix = null;
+        final TrackedLeg trackedLeg = getTrackedLeg();
+        final MarkPassing legStartMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getFrom());
+        if (legStartMarkPassing != null) {
+            TimePoint legStart = legStartMarkPassing.getTimePoint();
+            final MarkPassing legEndMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getTo());
+            Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
+            while (fixIter.hasNext()
+                    && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
+                            legEndMarkPassing.getTimePoint()) < 0) && fix.getTimePoint().compareTo(timePoint) < 0))) {
+                fix = fixIter.next();
+                if (fix.getTimePoint().compareTo(timePoint) < 0) {
+                    Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
+                    distanceInMeters += xte.getMeters();
+                    count++;
+                }
+            }
+        }
+        return new MeterDistance(distanceInMeters / count);
     }
 
     @Override

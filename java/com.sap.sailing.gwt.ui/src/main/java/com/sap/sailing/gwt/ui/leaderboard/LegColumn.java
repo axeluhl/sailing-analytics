@@ -64,6 +64,13 @@ public class LegColumn extends ExpandableSortableColumn<String> {
         }
     }
     
+    private class AverageCrossTrackErrorInMeters extends AbstractLegDetailField<Double> {
+        @Override
+        protected Double getFromNonNullEntry(LegEntryDTO entry) {
+            return entry.averageCrossTrackErrorInMeters;
+        }
+    }
+    
     private class CurrentSpeedOverGroundInKnots extends AbstractLegDetailField<Double> {
         @Override
         protected Double getFromNonNullEntry(LegEntryDTO entry) {
@@ -256,6 +263,9 @@ public class LegColumn extends ExpandableSortableColumn<String> {
                                 .getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.TIME_TRAVELED, new FormattedDoubleLegDetailColumn(stringConstants.time(),
                 "[" + stringConstants.secondsUnit() + "]", new TimeTraveledInSeconds(), 0,
+                getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+        result.put(DetailType.AVERAGE_CROSS_TRACK_ERROR_IN_METERS, new FormattedDoubleLegDetailColumn(stringConstants.averageCrossTrackErrorInMeters(),
+                "[" + stringConstants.metersUnit() + "]", new AverageCrossTrackErrorInMeters(), 0,
                 getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         return result;
     }
