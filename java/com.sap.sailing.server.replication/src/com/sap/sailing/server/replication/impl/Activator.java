@@ -11,8 +11,11 @@ public class Activator implements BundleActivator {
     private MessageBrokerManager messageBrokerManager;
 
     private ReplicationInstancesManager replicationInstancesManager;
+    
+    private static BundleContext defaultContext;
 
     public void start(BundleContext bundleContext) throws Exception {
+        defaultContext = bundleContext;
         MessageBrokerConfiguration brokerConfig = new MessageBrokerConfiguration();
         brokerConfig.setBrokerUrl("tcp://localhost:61616");
         String tmpDir = System.getProperty("java.io.tmpdir");
@@ -22,7 +25,7 @@ public class Activator implements BundleActivator {
         messageBrokerManager.startMessageBroker();
         messageBrokerManager.createAndStartConnection();
         replicationInstancesManager = new ReplicationInstancesManager();
-        ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(replicationInstancesManager, messageBrokerManager, true);
+        ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(replicationInstancesManager, messageBrokerManager);
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
     }
 
@@ -30,5 +33,9 @@ public class Activator implements BundleActivator {
         messageBrokerManager.closeSessions();
         messageBrokerManager.closeConnections();
         messageBrokerManager.stopMessageBroker();
+    }
+    
+    public static BundleContext getDefaultContext() {
+        return defaultContext;
     }
 }

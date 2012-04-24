@@ -2,13 +2,20 @@ package com.sap.sailing.server.replication.impl;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 
+import javax.jms.JMSException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.Servlet;
+import com.sap.sailing.server.replication.ReplicationService;
+import com.sap.sailing.server.replication.ReplicaDescriptor;
 
 /**
  * As the response to any type of <code>GET</code> request, sends a serialized copy of the {@link RacingEventService} to
@@ -19,10 +26,58 @@ import com.sap.sailing.server.Servlet;
  */
 public class ReplicationServlet extends Servlet {
     private static final long serialVersionUID = 4835516998934433846L;
+    
+    public enum Action { REGISTER, INITIAL_LOAD }
+    
+    public static final String ACTION = "action";
 
+    private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
+    
+    protected ReplicationServlet() {
+        BundleContext context = Activator.getDefaultContext();
+        replicationServiceTracker = new ServiceTracker<ReplicationService, ReplicationService>(context, ReplicationService.class.getName(), null);
+        replicationServiceTracker.open();
+    }
+
+    protected ReplicationService getReplicationService() {
+        return replicationServiceTracker.getService();
+    }
+
+    /**
+     * The client identifies itself in the request. Two servlet operations are supported currently: registering the
+     * client with the replication service (if not already created, the JMS replication topic will be created by this
+     * registration); and obtaining an initial load stream that the replica can use to initialize its
+     * {@link RacingEventService}. The operation performed is selected by passing one of the {@link Action} enumeration
+     * values for the URL parameter named {@link #ACTION}.
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ObjectOutputStream oos = new ObjectOutputStream(resp.getOutputStream());
-        getService().serializeForInitialReplication(oos);
+        String action = req.getParameter(ACTION);
+        switch (Action.valueOf(action)) {
+        case REGISTER:
+            try {
+                registerClientWithReplicationService(req, resp);
+            } catch (JMSException e) {
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            }
+            break;
+        case INITIAL_LOAD:
+            ObjectOutputStream oos = new ObjectOutputStream(resp.getOutputStream());
+            getService().serializeForInitialReplication(oos);
+            break;
+        default:
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "
+                    + Arrays.toString(Action.values()));
+        }
+    }
+
+    private void registerClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp) throws JMSException {
+        ReplicaDescriptor replica = getReplicaDescriptor(req);
+        getReplicationService().registerReplica(replica);
+    }
+
+    private ReplicaDescriptor getReplicaDescriptor(HttpServletRequest req) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -15,6 +15,7 @@ Export-Package: com.sap.sailing.server.replication
 Require-Bundle: com.sap.sailing.server;bundle-version="1.0.0",
  javax.servlet;bundle-version="2.5.0",
  com.sap.sailing.domain.common,
- com.sap.sailing.domain
+ com.sap.sailing.domain,
+ org.eclipse.osgi;bundle-version="3.7.1"
 Bundle-ClassPath: .
 Web-ContextPath: /replication

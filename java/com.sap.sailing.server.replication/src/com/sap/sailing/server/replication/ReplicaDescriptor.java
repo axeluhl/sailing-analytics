@@ -3,14 +3,14 @@ package com.sap.sailing.server.replication;
 import java.util.Date;
 import java.util.UUID;
 
-public class ReplicationSlaveDescriptor {
+public class ReplicaDescriptor {
     private UUID uuid;
     
     private String ipAddress;
     
     private Date registrationTime;
 
-    public ReplicationSlaveDescriptor(UUID uuid) {
+    public ReplicaDescriptor(UUID uuid) {
         this.uuid = uuid;
         this.registrationTime = new Date();
     }
