@@ -33,18 +33,15 @@ public class ReplicationInstancesManager {
         return replicationMasterDescriptor;
     }
     
-    public ReplicationSlaveDescriptor findSlaveDescriptor(UUID slaveUUID)
-    {
+    public ReplicationSlaveDescriptor findSlaveDescriptor(UUID slaveUUID) {
         return replicationSlavesDescriptors.get(slaveUUID);
     }
     
-    public ReplicationSlaveDescriptor addSlave(UUID slaveUUID)
-    {
+    public ReplicationSlaveDescriptor addSlave(UUID slaveUUID) {
         ReplicationSlaveDescriptor replicationSlaveDescriptor = replicationSlavesDescriptors.get(slaveUUID);
         if(replicationSlaveDescriptor == null) {
             replicationSlaveDescriptor = new ReplicationSlaveDescriptor(slaveUUID); 
         }
-
         return replicationSlaveDescriptor;
     }
 

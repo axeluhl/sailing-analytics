@@ -70,6 +70,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         leaderboardConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         eventDisplayers.add(leaderboardConfigPanel);
+        tabPanel.add(new ReplicationPanel(sailingService, this, stringMessages), stringMessages.replication(), /* asHTML */ false);
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {

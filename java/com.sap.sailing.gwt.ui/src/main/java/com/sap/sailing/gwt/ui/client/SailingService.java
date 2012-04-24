@@ -178,4 +178,6 @@ public interface SailingService extends RemoteService {
     void setRaceIsKnownToStartUpwind(EventAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
 
     void setWindSourcesToExclude(EventAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
+    
+    List<String> getHostnamesOfReplica();
 }
