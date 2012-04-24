@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -609,6 +610,40 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         } catch (NoWindError e) {
             throw e.getCause();
         }
+    }
+
+    @Override
+    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        double distanceInMeters = 0;
+        int count = 0;
+        GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+        GPSFixMoving fix = null;
+        for (Leg leg : getRace().getCourse().getLegs()) {
+            final TrackedLeg trackedLeg = getTrackedLeg(leg);
+            if (trackedLeg.getLegType(timePoint) == LegType.UPWIND) {
+                final MarkPassing legStartMarkPassing = getMarkPassing(competitor, leg.getFrom());
+                if (legStartMarkPassing != null) {
+                    TimePoint legStart = legStartMarkPassing.getTimePoint();
+                    final MarkPassing legEndMarkPassing = getMarkPassing(competitor, leg.getTo());
+                    Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
+                    while (fixIter.hasNext()
+                            && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
+                                    legEndMarkPassing.getTimePoint()) < 0)
+                                    && fix.getTimePoint().compareTo(timePoint) < 0))) {
+                        fix = fixIter.next();
+                        if (fix.getTimePoint().compareTo(timePoint) < 0) {
+                            Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
+                            distanceInMeters += xte.getMeters();
+                            count++;
+                        }
+                    }
+                }
+            }
+            if (fix != null && fix.getTimePoint().compareTo(timePoint) >= 0) {
+                break;
+            }
+        }
+        return new MeterDistance(distanceInMeters / count);
     }
 
     @Override

@@ -1,20 +1,19 @@
 package com.sap.sailing.server.replication.impl;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 
+import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
-import com.sap.sailing.server.replication.ReplicationSlaveDescriptor;
 
 public class ReplicationInstancesManager {
 
     /**
-     * The list of descriptors of all registered slaves
-     * All broadcast operations will send the messages to all registered slaves
+     * The set of descriptors of all registered slaves. All broadcast operations will send the messages to all
+     * registered slaves, assuming the slaves will have subscribed for the replication topic.
      */
-    private Map<UUID, ReplicationSlaveDescriptor> replicationSlavesDescriptors;
+    private Set<ReplicaDescriptor> replicaDescriptors;
     
     /**
      * The descriptor of the replication master
@@ -22,30 +21,22 @@ public class ReplicationInstancesManager {
     private ReplicationMasterDescriptor replicationMasterDescriptor;
 
     public ReplicationInstancesManager() {
-        replicationSlavesDescriptors = new HashMap<UUID, ReplicationSlaveDescriptor>();
+        replicaDescriptors = new HashSet<ReplicaDescriptor>();
     }
     
-    public Iterator<ReplicationSlaveDescriptor> getSlavesDescriptors() {
-        return replicationSlavesDescriptors.values().iterator();
+    public Iterator<ReplicaDescriptor> getSlavesDescriptors() {
+        return replicaDescriptors.iterator();
     }
 
     public ReplicationMasterDescriptor getReplicationMasterDescriptor() {
         return replicationMasterDescriptor;
     }
     
-    public ReplicationSlaveDescriptor findSlaveDescriptor(UUID slaveUUID) {
-        return replicationSlavesDescriptors.get(slaveUUID);
-    }
-    
-    public ReplicationSlaveDescriptor addSlave(UUID slaveUUID) {
-        ReplicationSlaveDescriptor replicationSlaveDescriptor = replicationSlavesDescriptors.get(slaveUUID);
-        if(replicationSlaveDescriptor == null) {
-            replicationSlaveDescriptor = new ReplicationSlaveDescriptor(slaveUUID); 
-        }
-        return replicationSlaveDescriptor;
+    public void registerReplica(ReplicaDescriptor replica) {
+        replicaDescriptors.add(replica);
     }
 
-    public ReplicationSlaveDescriptor removeSlave(UUID slaveUUID) {
-        return replicationSlavesDescriptors.remove(slaveUUID);
+    public void unregisterReplica(ReplicaDescriptor replica) {
+        replicaDescriptors.remove(replica);
     }
 }

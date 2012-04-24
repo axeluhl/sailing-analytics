@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -225,6 +226,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         synchronized (competitorTracksOrderedByRank) {
             competitorTracksOrderedByRank.clear();
         }
+    }
+
+    @Override
+    public Distance getCrossTrackError(Position p, TimePoint timePoint) {
+        return p.crossTrackError(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint), getLegBearing(timePoint));
     }
 
 }

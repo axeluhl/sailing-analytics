@@ -495,7 +495,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
         return new DetailType[] { DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
-                DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG };
+                DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
+                DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS };
     }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
@@ -563,10 +564,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     new FormattedDoubleLegDetailColumn(stringMessages.windwardDistanceToOverallLeader(), "["+stringMessages
                             .distanceInMetersUnit()+"]", new RaceDistanceToLeaderInMeters(), 0, getLeaderboardPanel()
                             .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(
+                    DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
+                    new FormattedDoubleLegDetailColumn(stringMessages.averageCrossTrackErrorInMeters(), "["+stringMessages
+                            .metersUnit()+"]", new RaceAverageCrossTrackErrorInMeters(), 0, getLeaderboardPanel()
+                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
             result.put(DetailType.CURRENT_LEG, new FormattedDoubleLegDetailColumn(stringMessages.currentLeg(), "",
                     new CurrentLeg(), 0, getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE));
+            
             return result;
         }
 
@@ -642,6 +649,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     if (timeInMilliseconds != 0) {
                         result = distanceTraveledInMeters / (double) timeInMilliseconds * 1000 * 3600 / 1852;
                     }
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the average cross-track error for the race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceAverageCrossTrackErrorInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.averageCrossTrackErrorInMeters;
                 }
                 return result;
             }

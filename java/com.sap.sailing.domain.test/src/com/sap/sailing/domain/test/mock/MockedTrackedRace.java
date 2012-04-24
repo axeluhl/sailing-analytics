@@ -534,4 +534,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

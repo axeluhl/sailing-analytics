@@ -26,6 +26,8 @@ public class LeaderboardEntryDTO implements IsSerializable {
     
     public Double windwardDistanceToOverallLeaderInMeters;
     
+    public Double averageCrossTrackErrorInMeters;
+    
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
      * haven't been requested from the server yet. Otherwise, the list holds one entry per {@link Leg} of the
@@ -40,6 +42,7 @@ public class LeaderboardEntryDTO implements IsSerializable {
         result = prime * result + (discarded ? 1231 : 1237);
         result = prime * result + ((legDetails == null) ? 0 : legDetails.hashCode());
         result = prime * result + netPoints;
+        result = prime * result + ((averageCrossTrackErrorInMeters == null) ? 0 : averageCrossTrackErrorInMeters.hashCode());
         result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
         result = prime * result + ((windwardDistanceToOverallLeaderInMeters == null) ? 0 : windwardDistanceToOverallLeaderInMeters.hashCode());
         result = prime * result + totalPoints;
@@ -73,6 +76,11 @@ public class LeaderboardEntryDTO implements IsSerializable {
             if (other.windwardDistanceToOverallLeaderInMeters != null)
                 return false;
         } else if (!windwardDistanceToOverallLeaderInMeters.equals(other.windwardDistanceToOverallLeaderInMeters))
+            return false;
+        if (averageCrossTrackErrorInMeters == null) {
+            if (other.averageCrossTrackErrorInMeters != null)
+                return false;
+        } else if (!averageCrossTrackErrorInMeters.equals(other.averageCrossTrackErrorInMeters))
             return false;
         if (totalPoints != other.totalPoints)
             return false;

@@ -26,10 +26,8 @@ public class MessageBrokerManager {
 
     public void startMessageBroker() throws Exception {
         broker = new BrokerService();
-        
         broker.setBrokerName(configuration.getBrokerName());
         broker.setDataDirectory(configuration.getDataStoreDirectory());
-
         broker.setUseJmx(true);
         TransportConnector transportConnector = new TransportConnector();
         transportConnector.setUri(new URI(configuration.getBrokerUrl()));

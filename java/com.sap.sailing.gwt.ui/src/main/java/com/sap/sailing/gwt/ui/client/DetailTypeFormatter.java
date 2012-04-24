@@ -33,6 +33,8 @@ public class DetailTypeFormatter {
             return stringMessages.gapToLeaderInSeconds();
         case RACE_DISTANCE_TO_LEADER_IN_METERS:
             return stringMessages.windwardDistanceToLeaderInMeters();
+        case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageCrossTrackErrorInMeters();
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
             return stringMessages.windwardDistanceToOverallLeader();
         case HEAD_UP:
@@ -53,6 +55,8 @@ public class DetailTypeFormatter {
             return stringMessages.currentLeg();
         case TIME_TRAVELED:
             return stringMessages.time();
+        case AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
+            return stringMessages.averageCrossTrackErrorInMeters();
         }
         return null;
 
