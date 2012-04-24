@@ -1,8 +1,11 @@
 package com.sap.sailing.server.replication;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 
-import javax.jms.Topic;
+import javax.jms.JMSException;
+import javax.jms.TopicSubscriber;
 
 /**
  * Identifies a master server instance from which a replica can obtain an initial load and continuous updates.
@@ -12,12 +15,9 @@ import javax.jms.Topic;
  */
 public interface ReplicationMasterDescriptor {
 
-    URL getReplicationRegistrationRequestURL();
+    URL getReplicationRegistrationRequestURL() throws MalformedURLException;
 
-    /**
-     * Obtains the remote master's replication topic for a replica to subscribe to.
-     */
-    Topic getReplicationTopic();
+    URL getInitialLoadURL() throws MalformedURLException;
 
-    URL getInitialLoadURL();
+    TopicSubscriber getTopicSubscriber() throws JMSException, UnknownHostException;
 }

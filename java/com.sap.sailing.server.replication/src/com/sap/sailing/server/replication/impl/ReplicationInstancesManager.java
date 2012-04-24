@@ -24,7 +24,17 @@ public class ReplicationInstancesManager {
         replicaDescriptors = new HashSet<ReplicaDescriptor>();
     }
     
-    public Iterator<ReplicaDescriptor> getSlavesDescriptors() {
+    /**
+     * Tells if at least one replica is currently registered.
+     * 
+     * @see #registerReplica(ReplicaDescriptor)
+     * @see #unregisterReplica(ReplicaDescriptor)
+     */
+    public boolean hasReplicas() {
+        return !replicaDescriptors.isEmpty();
+    }
+    
+    public Iterator<ReplicaDescriptor> getReplicaDescriptors() {
         return replicaDescriptors.iterator();
     }
 

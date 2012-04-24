@@ -3,7 +3,6 @@ package com.sap.sailing.server.replication.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -20,16 +19,34 @@ import javax.jms.TopicSubscriber;
 
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 
-public class ReplicationServiceImpl implements ReplicationService {
+/**
+ * Can observe a {@link RacingEventService} for the operations it performs that require replication. Only observes as
+ * long as there are replicas registered. If the last replica is de-registered, the service stops observing the
+ * {@link RacingEventService}. Operations received that require replication are broadcast to the
+ * {@link #getReplicationTopic() replication topic}.
+ * <p>
+ * 
+ * This service object {@link RacingEventService#addOperationExecutionListener(OperationExecutionListener) registers} as
+ * listener at the {@link RacingEventService} so it {@link #executed(RacingEventServiceOperation) receives}
+ * notifications about operations executed by the {@link RacingEventService} that require replication if and only if
+ * there is at least one replica registered.
+ * 
+ * @author Frank Mittag, Axel Uhl (d043530)
+ * 
+ */
+public class ReplicationServiceImpl implements ReplicationService, OperationExecutionListener {
     private final ReplicationInstancesManager replicationInstancesManager;
     
     private final MessageBrokerManager messageBrokerManager;
+    
+    private MessageProducer messageProducer;
     
     private Topic replicationTopic;
     
@@ -52,12 +69,27 @@ public class ReplicationServiceImpl implements ReplicationService {
     public void registerReplica(ReplicaDescriptor replica) throws JMSException {
         Topic topic = getReplicationTopic();
         assert topic != null;
+        if (!replicationInstancesManager.hasReplicas()) {
+            addAsListenerToRacingEventService();
+        }
         replicationInstancesManager.registerReplica(replica);
     }
     
+    private void addAsListenerToRacingEventService() {
+        getRacingEventService().addOperationExecutionListener(this);
+    }
+
     @Override
     public void unregisterReplica(ReplicaDescriptor replica) {
         replicationInstancesManager.unregisterReplica(replica);
+        if (!replicationInstancesManager.hasReplicas()) {
+            removeAsListenerFromRacingEventService();
+        }
+    }
+
+    private void removeAsListenerFromRacingEventService() {
+        getRacingEventService().removeOperationExecutionListener(this);
+        messageProducer = null;
     }
 
     private Topic getReplicationTopic() throws JMSException{
@@ -66,25 +98,31 @@ public class ReplicationServiceImpl implements ReplicationService {
             if (session == null) {
                 session = messageBrokerManager.createSession(true);
             }
-            replicationTopic = session.createTopic("SailingServerReplicationTopic");
+            replicationTopic = session.createTopic(SAILING_SERVER_REPLICATION_TOPIC);
         }
         return replicationTopic;
     }
     
-    public void broadcastOperation(RacingEventServiceOperation<?> operation) throws Exception {
+    private void broadcastOperation(RacingEventServiceOperation<?> operation) throws Exception {
         Topic topic = getReplicationTopic();
         Session session = messageBrokerManager.getSession();
-        MessageProducer producer = messageBrokerManager.getSession().createProducer(topic);
-        producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+        getMessageProducer(topic).setDeliveryMode(DeliveryMode.PERSISTENT);
         TextMessage message = session.createTextMessage("Hello World!");
         System.out.println("Sending message: " + message.getText());
-        producer.send(message);
+        messageProducer.send(message);
+    }
+
+    private MessageProducer getMessageProducer(Topic topic) throws JMSException {
+        if (messageProducer == null) {
+            messageProducer = messageBrokerManager.getSession().createProducer(topic);
+        }
+        return messageProducer;
     }
 
     @Override
     public List<String> getHostnamesOfReplica() {
         List<String> result = new ArrayList<String>();
-        for (Iterator<ReplicaDescriptor> i=replicationInstancesManager.getSlavesDescriptors(); i.hasNext(); ) {
+        for (Iterator<ReplicaDescriptor> i=replicationInstancesManager.getReplicaDescriptors(); i.hasNext(); ) {
             ReplicaDescriptor d = i.next();
             result.add(d.getIpAddress());
         }
@@ -94,8 +132,7 @@ public class ReplicationServiceImpl implements ReplicationService {
     @Override
     public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, JMSException {
         registerReplicaWithMaster(master);
-        TopicSubscriber replicationSubscription = messageBrokerManager.getSession().createDurableSubscriber(
-                master.getReplicationTopic(), InetAddress.getLocalHost().getHostAddress());
+        TopicSubscriber replicationSubscription = master.getTopicSubscriber();
         URL initialLoadURL = master.getInitialLoadURL();
         replicationSubscription.setMessageListener(new Replicator(master, racingEventServiceTracker));
         InputStream is = initialLoadURL.openStream();
@@ -108,6 +145,15 @@ public class ReplicationServiceImpl implements ReplicationService {
         final URLConnection registrationRequestConnection = replicationRegistrationRequestURL.openConnection();
         registrationRequestConnection.connect();
         registrationRequestConnection.getContent();
+    }
+
+    @Override
+    public <T> void executed(RacingEventServiceOperation<T> operation) {
+        try {
+            broadcastOperation(operation);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
 }

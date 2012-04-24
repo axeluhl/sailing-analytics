@@ -28,6 +28,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 import java.util.logging.Logger;
 
+import javax.jms.JMSException;
 import javax.servlet.ServletContext;
 
 import org.osgi.framework.BundleContext;
@@ -163,6 +164,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardCarryVa
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
+import com.sap.sailing.server.replication.ReplicationFactory;
 import com.sap.sailing.server.replication.ReplicationService;
 
 /**
@@ -1741,4 +1743,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return service.getHostnamesOfReplica();
     }
 
+    @Override
+    public void startReplicatingFromMaster(String masterName, int servletPort, int jmsPort) throws IOException, ClassNotFoundException, JMSException {
+        getReplicationService().startToReplicateFrom(ReplicationFactory.INSTANCE.createReplicationMasterDescriptor(masterName, servletPort, jmsPort));
+    }
 }
