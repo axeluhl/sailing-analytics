@@ -1,6 +1,8 @@
 package com.sap.sailing.server.impl;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
@@ -940,6 +942,30 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public void removeOperationExecutionListener(OperationExecutionListener listener) {
         operationExecutionListeners.remove(listener);
+    }
+
+    @Override
+    public void serializeForInitialReplication(ObjectOutputStream oos) throws IOException {
+        oos.writeObject(eventsByName);
+        oos.writeObject(eventsObservedForDefaultLeaderboard);
+        oos.writeObject(eventTrackingCache);
+        oos.writeObject(leaderboardGroupsByName);
+        oos.writeObject(leaderboardsByName);
+    }
+
+    @SuppressWarnings("unchecked") // the type-parameters in the casts of the de-serialized collection objects can't be checked
+    @Override
+    public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        eventsByName.clear();
+        eventsByName.putAll((Map<String, Event>) ois.readObject());
+        eventsObservedForDefaultLeaderboard.clear();
+        eventsObservedForDefaultLeaderboard.addAll((Set<DynamicTrackedEvent>) ois.readObject());
+        eventTrackingCache.clear();
+        eventTrackingCache.putAll((Map<Event, DynamicTrackedEvent>) ois.readObject());
+        leaderboardGroupsByName.clear();
+        leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
+        leaderboardsByName.clear();
+        leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
     }
 
 }

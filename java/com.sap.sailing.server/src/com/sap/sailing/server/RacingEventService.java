@@ -2,6 +2,8 @@ package com.sap.sailing.server;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
@@ -347,4 +349,23 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
     void addOperationExecutionListener(OperationExecutionListener listener);
     
     void removeOperationExecutionListener(OperationExecutionListener listener);
+    
+    /**
+     * Produces a one-shot serializable copy of those elements required for replication into <code>oos</code> so that
+     * afterwards the {@link RacingEventServiceOperation}s can be {@link #apply(RacingEventServiceOperation) applied} to
+     * maintain consistency with the master copy of the service. The dual operation is {@link #initiallyFillFrom}.
+     */
+    void serializeForInitialReplication(ObjectOutputStream oos) throws IOException;
+    
+    /**
+     * Dual, reading operation for {@link #serializeForInitialReplication(ObjectOutputStream)}. In other words,
+     * when this operation returns, this service instance is in a state "equivalent" to that of the service instance
+     * that produced the stream contents in its {@link #serializeForInitialReplication(ObjectOutputStream)}. "Equivalent"
+     * here means that a replica will have equal sets of events, tracked events, leaderboards and leaderboard groups
+     * but will not have any active trackers for wind or positions because it relies on these elements to be sent
+     * through the replication channel.<p>
+     * 
+     * <b>Caution:</b> All relevant contents of this service instance will be replaced by the stream contents.
+     */
+    void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException;
 }

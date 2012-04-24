@@ -163,6 +163,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardCarryVa
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
+import com.sap.sailing.server.replication.ReplicationService;
 
 /**
  * The server side implementation of the RPC service.
@@ -176,6 +177,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
+    private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
+
     private final MongoObjectFactory mongoObjectFactory;
     
     private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
@@ -195,6 +198,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
+        replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
         mongoObjectFactory = MongoObjectFactory.INSTANCE;
         domainObjectFactory = DomainObjectFactory.INSTANCE;
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
@@ -209,6 +213,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             BundleContext context) {
         ServiceTracker<RacingEventService, RacingEventService> result = new ServiceTracker<RacingEventService, RacingEventService>(
                 context, RacingEventService.class.getName(), null);
+        result.open();
+        return result;
+    }
+    
+    protected ServiceTracker<ReplicationService, ReplicationService> createAndOpenReplicationServiceTracker(
+            BundleContext context) {
+        ServiceTracker<ReplicationService, ReplicationService> result = new ServiceTracker<ReplicationService, ReplicationService>(
+                context, ReplicationService.class.getName(), null);
         result.open();
         return result;
     }
@@ -1101,6 +1113,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return racingEventServiceTracker.getService(); // grab the service
     }
 
+    private ReplicationService getReplicationService() {
+        return replicationServiceTracker.getService();
+    }
+
     @Override
     public List<String> getLeaderboardNames() throws Exception {
         return new ArrayList<String>(getService().getLeaderboards().keySet());
@@ -1714,6 +1730,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames) {
         getService().apply(new UpdateLeaderboardGroup(oldName, newName, description, leaderboardNames));
+    }
+
+    @Override
+    public List<String> getHostnamesOfReplica() {
+        ReplicationService service = getReplicationService();
+        return service.getHostnamesOfReplica();
     }
 
 }

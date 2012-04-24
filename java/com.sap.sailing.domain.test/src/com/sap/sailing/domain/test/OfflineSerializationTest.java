@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
 import java.io.IOException;
@@ -75,5 +77,17 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         Competitor receiversCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         Competitor receiversSecondCopyOfCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         assertSame(receiversCompetitor1, receiversSecondCopyOfCompetitor1);
+    }
+    
+    @Test
+    public void ensureSameObjectWrittenTwiceComesOutIdentical() throws ClassNotFoundException, IOException {
+        final DomainFactoryImpl senderDomainFactory = new DomainFactoryImpl();
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        Nationality n = senderDomainFactory.getOrCreateNationality("GER");
+        Object[] copies = cloneManyBySerialization(receiverDomainFactory, n, n);
+        assertEquals(2, copies.length);
+        assertSame(copies[0], copies[1]);
+        assertNotSame(n, copies[0]);
+        assertEquals(n.getName(), ((Nationality) copies[0]).getName());
     }
 }

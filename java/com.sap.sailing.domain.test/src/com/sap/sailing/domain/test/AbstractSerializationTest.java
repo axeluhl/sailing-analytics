@@ -31,4 +31,30 @@ public abstract class AbstractSerializationTest {
         dis.close();
         return result;
     }
+
+    static Object[] cloneManyBySerialization(DomainFactory resolveAgainst, final Serializable... objects) throws IOException, ClassNotFoundException {
+        PipedOutputStream pos = new PipedOutputStream();
+        PipedInputStream pis = new PipedInputStream(pos);
+        final ObjectOutputStream dos = new ObjectOutputStream(pos);
+        new Thread("clone writer") {
+            public void run() {
+                try {
+                    for (Serializable s : objects) {
+                        dos.writeObject(s);
+                    }
+                    dos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+            }
+        }.start();
+        ObjectInputStream dis = resolveAgainst.createObjectInputStreamResolvingAgainstThisFactory(pis);
+        Object[] result = new Object[objects.length];
+        for (int i=0; i<objects.length; i++) {
+            result[i] = dis.readObject();
+        }
+        dis.close();
+        return result;
+    }
 }
