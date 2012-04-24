@@ -96,16 +96,11 @@ public class ReplicationServiceImpl implements ReplicationService {
         registerReplicaWithMaster(master);
         TopicSubscriber replicationSubscription = messageBrokerManager.getSession().createDurableSubscriber(
                 master.getReplicationTopic(), InetAddress.getLocalHost().getHostAddress());
-        startReplicationObserver(replicationSubscription);
         URL initialLoadURL = master.getInitialLoadURL();
+        replicationSubscription.setMessageListener(new Replicator(master, racingEventServiceTracker));
         InputStream is = initialLoadURL.openStream();
         ObjectInputStream ois = new ObjectInputStream(is);
         getRacingEventService().initiallyFillFrom(ois);
-    }
-
-    private void startReplicationObserver(TopicSubscriber replicationSubscription) {
-        // TODO Auto-generated method stub
-        
     }
 
     private void registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException {

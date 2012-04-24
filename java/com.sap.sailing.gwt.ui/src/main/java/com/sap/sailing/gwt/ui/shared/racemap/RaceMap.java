@@ -320,10 +320,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (date != null) {
             if (selectedRaces != null && !selectedRaces.isEmpty()) {
                 RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
+                final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
                 
                 if (race != null) {
                     final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = 
-                            computeFromAndTo(date, getCompetitorsToShow());
+                            computeFromAndTo(date, competitorsToShow);
                     final int requestID = ++boatPositionRequestIDCounter;
 
                     GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, race, date, 
@@ -355,7 +356,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     // Do mark specific actions
                                     showMarksOnMap(raceMapDataDTO.coursePositions);
                                     showStartAndFinishLines(raceMapDataDTO.coursePositions);
-                                    showAdvantageLine();
+                                    showAdvantageLine(competitorsToShow);
                                     // Rezoom the map
                                     // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
                                     if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
@@ -620,17 +621,27 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return LatLng.newInstance(lat2 / Math.PI * 180., lon2  / Math.PI * 180.);
     }
 
-    private void showAdvantageLine() {
+    private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow) {
         if(map != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null && lastCombinedWindTrackInfoDTO.windFixes.size() > 0) {
-            final CompetitorDTO leadingCompetitorDTO = quickRanks.get(0).competitor; 
+            // find competitor with highest rank
+            CompetitorDTO leadingCompetitorDTO = null;
+            // this only works because the quickRanks are sorted
+            for (QuickRankDTO quickRank : quickRanks) {
+                if(Util.contains(competitorsToShow, quickRank.competitor)) {
+                    leadingCompetitorDTO = quickRank.competitor;
+                    break;
+                }
+            }
+            
             if (leadingCompetitorDTO != null && lastShownFix.containsKey(leadingCompetitorDTO) && lastShownFix.get(leadingCompetitorDTO) != -1) {
                 GPSFixDTO lastBoatFix = getBoatFix(leadingCompetitorDTO);
 
                 double advantageLineLengthInKm = 1.0;
+                double distanceFromBoatPosition = 0.005; // 5m
                 // implement and use Position.translateRhumb()
                 double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
                 LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
-                LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg, 0.05);
+                LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg, distanceFromBoatPosition);
                 double bearingOfCombinedWindInDeg = lastCombinedWindTrackInfoDTO.windFixes.get(0).trueWindBearingDeg; 
                 double rotatedBearingDeg = bearingOfCombinedWindInDeg + 90.0;
                 if(rotatedBearingDeg >= 360.0)
