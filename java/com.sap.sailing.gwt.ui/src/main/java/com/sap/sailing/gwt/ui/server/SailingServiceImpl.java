@@ -335,7 +335,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace.getWindwardDistanceToOverallLeader(competitor, timePoint);
         entryDTO.windwardDistanceToOverallLeaderInMeters = windwardDistanceToOverallLeader == null ? null : windwardDistanceToOverallLeader.getMeters();
-        entryDTO.averageCrossTrackErrorInMeters = trackedRace.getAverageCrossTrackError(competitor, timePoint).getMeters();
+        final Distance averageCrossTrackError = trackedRace.getAverageCrossTrackError(competitor, timePoint);
+        entryDTO.averageCrossTrackErrorInMeters = averageCrossTrackError == null ? null : averageCrossTrackError.getMeters();
         return entryDTO;
     }
 
