@@ -3,7 +3,7 @@
 body {
   font-family: 'UbuntuRegular';
   margin: 0;
-  padding: 0;
+  padding: 0 0 50px 0;
   background: url(images/splash-screen-compressed-02.png) center top no-repeat #ebebec;
   }
   
