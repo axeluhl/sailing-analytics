@@ -209,7 +209,7 @@ public interface TrackedRace extends Serializable {
      */
     Iterable<WindSource> getWindSources();
 
-    WindTrack getOrCreateWindTrack(WindSource windSource);
+    WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation);
 
     /**
      * Waits until {@link #getUpdateCount()} is after <code>sinceUpdate</code>.

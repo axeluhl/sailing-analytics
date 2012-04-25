@@ -155,7 +155,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public WindTrack getOrCreateWindTrack(WindSource windSource) {
+    public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         // TODO Auto-generated method stub
         return null;
     }

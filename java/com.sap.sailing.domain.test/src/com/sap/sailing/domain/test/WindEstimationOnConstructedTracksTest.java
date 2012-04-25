@@ -116,7 +116,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         MillisecondsTimePoint now = new MillisecondsTimePoint(new GregorianCalendar(2012, 03, 14).getTime());
         getTrackedRace().recordWind(new WindImpl(null, now, new KnotSpeedWithBearingImpl(/* speedInKnots */ 12, new DegreeBearingImpl(180.))),
                 new WindSourceImpl(WindSourceType.WEB));
-        // produces estimated bearing of 170deg; result should be averaged between 107 (estimation) and 180 (web) deg
+        // produces estimated bearing of 170deg; result should be averaged between 170 (estimation) and 180 (web) deg
         setBearingForCompetitor(competitors.get(0), now, 305);
         setBearingForCompetitor(competitors.get(1), now, 35);
         WindWithConfidence<Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeOne = getTrackedRace()

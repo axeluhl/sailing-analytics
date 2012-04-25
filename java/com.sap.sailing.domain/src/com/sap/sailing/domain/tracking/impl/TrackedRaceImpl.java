@@ -246,9 +246,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received
         // for them.
         WindSource courseBasedWindSource = new WindSourceImpl(WindSourceType.COURSE_BASED);
-        windTracks.put(courseBasedWindSource, getOrCreateWindTrack(courseBasedWindSource));
+        windTracks.put(courseBasedWindSource, getOrCreateWindTrack(courseBasedWindSource, delayForWindEstimationCacheInvalidation));
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
-        windTracks.put(trackBasedWindSource, getOrCreateWindTrack(trackBasedWindSource));
+        windTracks.put(trackBasedWindSource, getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
         this.trackedEvent = trackedEvent;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
     }
@@ -752,11 +752,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * which will not be added to {@link #windTracks} and will not lead to the wind source being listed in
      * {@link #getWindSources()} or {@link #getWindSources(WindSourceType)}. For all other wind sources, checks
      * {@link #windTracks} for the respective source. If found, it's returned; otherwise the wind track is created
-     * through the {@link #windStore} using {@link #createWindTrack(WindSource)} and added to {@link #windTracks} before
+     * through the {@link #windStore} using {@link #createWindTrack(WindSource, long)} and added to {@link #windTracks} before
      * being returned.
      */
     @Override
-    public WindTrack getOrCreateWindTrack(WindSource windSource) {
+    public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         WindTrack result;
         if (windSource.getType() == WindSourceType.COMBINED) {
             result = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
@@ -764,7 +764,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             synchronized (windTracks) {
                 result = windTracks.get(windSource);
                 if (result == null) {
-                    result = createWindTrack(windSource);
+                    result = createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
                     windTracks.put(windSource, result);
                 }
             }
@@ -777,9 +777,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * averaging interval is set according to the averaging interval set for all other wind sources, or the default if
      * no other wind source exists yet.
      */
-    protected WindTrack createWindTrack(WindSource windSource) {
+    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         return windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind,
-                getMillisecondsOverWhichToAverageWind() / 2);
+                delayForWindEstimationCacheInvalidation);
     }
 
     @Override
@@ -824,7 +824,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         for (WindSource windSource : getWindSources()) {
             // TODO consider parallelizing
             if (!Util.contains(windSourcesToExclude, windSource)) {
-                WindTrack track = getOrCreateWindTrack(windSource);
+                WindTrack track = getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind()/2);
                 WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(
                         p, at);
                 if (windWithConfidence != null) {

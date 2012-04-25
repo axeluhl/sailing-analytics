@@ -77,7 +77,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         for (WindSource windSource : getWindSources()) {
-            getOrCreateWindTrack(windSource).addListener(this);
+            getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind()/2).addListener(this);
         }
     }
     
@@ -118,7 +118,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind) {
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         for (WindSource windSource : getWindSources()) {
-            getOrCreateWindTrack(windSource).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
+            getOrCreateWindTrack(windSource, millisecondsOverWhichToAverageWind/2).
+                setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
         }
         updated(MillisecondsTimePoint.now());
     }
@@ -370,21 +371,21 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
      * In addition to calling the super class implementation, adds this tracked race as a listener for the wind track.
      */
     @Override
-    protected WindTrack createWindTrack(WindSource windSource) {
-        WindTrack result = super.createWindTrack(windSource);
+    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
+        WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
         result.addListener(this);
         return result;
     }
 
     @Override
     public synchronized void recordWind(Wind wind, WindSource windSource) {
-        getOrCreateWindTrack(windSource).add(wind);
+        getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind()/2).add(wind);
         updated(null); // wind events shouldn't advance race time
     }
     
     @Override
     public synchronized void removeWind(Wind wind, WindSource windSource) {
-        getOrCreateWindTrack(windSource).remove(wind);
+        getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind()/2).remove(wind);
         updated(wind.getTimePoint());
     }
 
@@ -435,7 +436,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public long getMillisecondsOverWhichToAverageWind() {
         long result = 0; // default in case there is no competitor
         for (WindSource windSource : getWindSources()) {
-            WindTrack someTrack = getOrCreateWindTrack(windSource);
+            WindTrack someTrack = getOrCreateWindTrack(windSource, 0);
             result = someTrack.getMillisecondsOverWhichToAverageWind();
         }
         return result;
