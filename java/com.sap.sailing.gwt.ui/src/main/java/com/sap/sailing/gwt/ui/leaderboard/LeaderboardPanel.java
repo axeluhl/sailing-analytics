@@ -200,6 +200,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private PlayModes oldPlayMode;
 
     private final AsyncActionsExecutor asyncActionsExecutor;
+    
+    /**
+     * See also {@link #getDefaultSortColumn()}. If no other column is explicitly selected for sorting and this attribute
+     * holds a non-<code>null</code> string identifying a valid race by name that is represented in this leaderboard panel
+     * then sort by it. Otherwise, default sorting will default to the overall rank column.
+     */
+    private String raceNameForDefaultSorting;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -447,11 +454,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (entry.reasonForMaxPoints.equals("NONE")) {
                     if (!entry.discarded) {
                         html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                        html.append(entry.totalPoints);
+                        html.appendHtmlConstant(entry.totalPoints == 0 ? "" : ""+entry.totalPoints);
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.append(entry.netPoints);
+                        html.appendHtmlConstant(entry.netPoints == 0 ? "" : ""+entry.netPoints);
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
@@ -791,7 +798,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         @Override
         public String getValue(LeaderboardRowDTO object) {
             int totalPoints = getLeaderboard().getTotalPoints(object);
-            return "" + totalPoints;
+            return "" + (totalPoints==0 ? "" : totalPoints);
         }
 
         @Override
@@ -859,7 +866,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return "" + getLeaderboard().getRank(object.competitor);
+            final int rank = getLeaderboard().getRank(object.competitor);
+            return "" + (rank == 0 ? "" : rank);
         }
 
         @Override
@@ -867,7 +875,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return new Comparator<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                    return getLeaderboard().getRank(o1.competitor) - getLeaderboard().getRank(o2.competitor);
+                    final int rank1 = getLeaderboard().getRank(o1.competitor);
+                    final int rank2 = getLeaderboard().getRank(o2.competitor);
+                    return rank1 == 0 ? rank2 == 0 ? 0 : 1 : rank2 == 0 ? -1 : rank1 - rank2;
                 }
             };
         }
@@ -1019,10 +1029,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         contentPanel.add(getLeaderboardTable());
         setWidget(contentPanel);
-        if (settings.getNameOfRaceToSort() != null) {
-            RaceColumn<?> column = getRaceColumnByRaceName(settings.getNameOfRaceToSort());
-            sort(column, settings.isSortAscending());
-        }
+        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
 
     private RaceInLeaderboardDTO getRaceByName(String raceName) {
@@ -1224,7 +1231,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (comparator != null) {
                     Collections.sort(getData().getList(), comparator);
                 } else {
-                    RankColumn columnToSortFor = getRankColumn();
+                    SortableColumn<LeaderboardRowDTO, ?> columnToSortFor = getDefaultSortColumn();
                     // if no sorting was selected, sort by ascending rank and mark
                     // table header so
                     sort(columnToSortFor, true);
@@ -1238,6 +1245,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 }
             }
         }
+    }
+
+    private SortableColumn<LeaderboardRowDTO, ?> getDefaultSortColumn() {
+        SortableColumn<LeaderboardRowDTO, ?> defaultSortColumn = null;
+        if (raceNameForDefaultSorting != null) {
+            defaultSortColumn = getRaceColumnByRaceName(raceNameForDefaultSorting);
+        }
+        if (defaultSortColumn == null) {
+            defaultSortColumn = getRankColumn();
+        }
+        return defaultSortColumn;
     }
 
     /**
@@ -1546,7 +1564,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private void ensureRankColumn() {
         if (getLeaderboardTable().getColumnCount() == RANK_COLUMN_INDEX) {
-            addColumn(getRankColumn());
+            addColumn(getDefaultSortColumn());
         } else {
             if (!(getLeaderboardTable().getColumn(RANK_COLUMN_INDEX) instanceof RankColumn)) {
                 throw new RuntimeException("The first column must always be the rank column but it was of type "

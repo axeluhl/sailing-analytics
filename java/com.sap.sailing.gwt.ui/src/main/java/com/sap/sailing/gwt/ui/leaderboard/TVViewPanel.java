@@ -82,7 +82,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     }
     
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName) {
-        LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* autoExpandFirstRace */ false); 
+        LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         Timer timer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
         timer.play();
@@ -131,7 +131,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
                     namesOfRaceColumnsToShow.add(race.getRaceColumnName());
                 }
                 LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                        namesOfRaceColumnsToShow, null, false);
+                        namesOfRaceColumnsToShow, null, null, false);
                 leaderboardPanel.updateSettings(settings);
             }
             
