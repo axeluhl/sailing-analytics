@@ -180,4 +180,6 @@ public interface SailingService extends RemoteService {
     void setWindSourcesToExclude(EventAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
     
     List<String> getHostnamesOfReplica();
+
+    void startReplicatingFromMaster(String masterName, int servletPort, int jmsPort) throws Exception;
 }

@@ -94,12 +94,6 @@ public class RacingEventServiceImpl implements RacingEventService {
     protected final Map<Event, Set<RaceTracker>> raceTrackersByEvent;
     
     /**
-     * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
-     * registers is listening for incoming Expedition messages.
-     */
-    private final Map<RaceDefinition, WindTracker> windTrackers;
-    
-    /**
      * Remembers the trackers by paramURL/liveURI/storedURI to avoid duplication
      */
     protected final Map<Object, RaceTracker> raceTrackersByID;
@@ -136,7 +130,6 @@ public class RacingEventServiceImpl implements RacingEventService {
         eventsByName = new HashMap<String, Event>();
         eventTrackingCache = new HashMap<Event, DynamicTrackedEvent>();
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
-        windTrackers = new HashMap<RaceDefinition, WindTracker>();
         raceTrackersByID = new HashMap<Object, RaceTracker>();
         leaderboardGroupsByName = new HashMap<String, LeaderboardGroup>();
         leaderboardsByName = new HashMap<String, Leaderboard>();
@@ -535,6 +528,9 @@ public class RacingEventServiceImpl implements RacingEventService {
     public synchronized void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
         if (raceTrackersByEvent.containsKey(event)) {
             for (RaceTracker raceTracker : raceTrackersByEvent.get(event)) {
+                for (RaceDefinition race : raceTracker.getRaces()) {
+                    stopTrackingWind(event, race);
+                }
                 raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                 raceTrackersByID.remove(raceTracker.getID());
             }
@@ -707,10 +703,9 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @Override
     public synchronized void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException {
-        WindTracker windTracker = windTrackers.get(race);
+        WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
         if (windTracker != null) {
             windTracker.stop();
-            windTrackers.remove(race);
         }
     }
 
@@ -719,8 +714,9 @@ public class RacingEventServiceImpl implements RacingEventService {
         List<Triple<Event, RaceDefinition, String>> result = new ArrayList<Triple<Event, RaceDefinition, String>>();
         for (Event event : getAllEvents()) {
             for (RaceDefinition race : event.getAllRaces()) {
-                if (windTrackers.containsKey(race)) {
-                    result.add(new Triple<Event, RaceDefinition, String>(event, race, windTrackers.get(race).toString()));
+                WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+                if (windTracker != null) {
+                    result.add(new Triple<Event, RaceDefinition, String>(event, race, windTracker.toString()));
                 }
             }
         }
@@ -791,8 +787,11 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
         Event event = getEventByName(raceIdentifier.getEventName());
-        RaceDefinition race = event.getRaceByName(raceIdentifier.getRaceName());
-        TrackedRace trackedRace = getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+        TrackedRace trackedRace = null;
+        if (event != null) {
+            RaceDefinition race = event.getRaceByName(raceIdentifier.getRaceName());
+            trackedRace = getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+        }
         return trackedRace;
     }
 

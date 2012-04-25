@@ -54,7 +54,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         windPanel.setSize("90%", "90%");
         tabPanel.add(windPanel, stringMessages.wind(), /* asHTML */ false);
         LeaderboardSettings defaultLeaderboardSettings = LeaderboardSettingsFactory.getInstance()
-                .createNewDefaultSettings(/* racesToShow */ null, /* namesOfRacesToShow */ null, /* autoExpandFirstRace */false);
+                .createNewDefaultSettings(/* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false);
         final LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 defaultLeaderboardSettings,
                 /* preSelectedRace */null, new CompetitorSelectionModel(/* hasMultiSelection */true),

@@ -316,4 +316,6 @@ public interface SailingServiceAsync {
 
     void getHostnamesOfReplica(AsyncCallback<List<String>> callback);
 
+    void startReplicatingFromMaster(String masterName, int servletPort, int jmsPort, AsyncCallback<Void> callback);
+
 }

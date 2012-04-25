@@ -141,6 +141,9 @@ public interface TrackedRace extends Serializable {
      * by the windward distance to go and therefore depends on the assumptions of the wind direction
      * for the given <code>timePoint</code>. If the race hasn't {@link #hasStarted(TimePoint) started}
      * yet, the result is undefined.
+     * 
+     * @return <code>0</code> in case the competitor hasn't participated in the race; a rank starting
+     * with <code>1</code> where rank <code>1</code> identifies the leader otherwise
      */
     int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
     

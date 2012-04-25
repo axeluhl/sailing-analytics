@@ -696,9 +696,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint) {
-        for (MarkPassing markPassing : getMarkPassings(competitor)) {
-            if (markPassing.getWaypoint() == waypoint) {
-                return markPassing;
+        final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        if (markPassings != null) {
+            for (MarkPassing markPassing : markPassings) {
+                if (markPassing.getWaypoint() == waypoint) {
+                    return markPassing;
+                }
             }
         }
         return null;
@@ -904,6 +907,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 @Override
                 public void run() {
                     synchronized (TrackedRaceImpl.this) {
+                        cacheInvalidationTimer.cancel();
                         cacheInvalidationTimer = null;
                         synchronized (competitorRankings) {
                             competitorRankings.clear();

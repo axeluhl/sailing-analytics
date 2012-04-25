@@ -4,33 +4,29 @@ package com.sap.sailing.server.replication.impl;
  * A simple configuration for the message broker
  */
 public class MessageBrokerConfiguration {
-    private String brokerName;
+    private final String brokerName;
     
-    private String brokerUrl;
+    private final String brokerUrl;
     
-    private String dataStoreDirectory;
+    private final String dataStoreDirectory;
+
+    public MessageBrokerConfiguration(String brokerName, String brokerUrl, String dataStoreDirectory) {
+        super();
+        this.brokerName = brokerName;
+        this.brokerUrl = brokerUrl;
+        this.dataStoreDirectory = dataStoreDirectory;
+    }
 
     public String getBrokerName() {
         return brokerName;
-    }
-
-    public void setBrokerName(String brokerName) {
-        this.brokerName = brokerName;
     }
 
     public String getDataStoreDirectory() {
         return dataStoreDirectory;
     }
 
-    public void setDataStoreDirectory(String dataStoreDirectory) {
-        this.dataStoreDirectory = dataStoreDirectory;
-    }
-
     public String getBrokerUrl() {
         return brokerUrl;
     }
 
-    public void setBrokerUrl(String brokerUrl) {
-        this.brokerUrl = brokerUrl;
-    }
 }

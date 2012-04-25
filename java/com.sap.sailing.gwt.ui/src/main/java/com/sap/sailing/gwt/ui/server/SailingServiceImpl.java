@@ -28,6 +28,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 import java.util.logging.Logger;
 
+import javax.jms.JMSException;
 import javax.servlet.ServletContext;
 
 import org.osgi.framework.BundleContext;
@@ -157,6 +158,7 @@ import com.sap.sailing.server.operationaltransformation.RenameLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.SetRaceIsKnownToStartUpwind;
 import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingEvent;
+import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateIsMedalRace;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
@@ -164,6 +166,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardCarryVa
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
+import com.sap.sailing.server.replication.ReplicationFactory;
 import com.sap.sailing.server.replication.ReplicationService;
 
 /**
@@ -174,7 +177,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private static final long serialVersionUID = 9031688830194537489L;
 
-    private static final long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 60000;
+    /**
+     * Wait five minutes for race data; sometimes, a tracking provider's server may be under heavy load and
+     * may serve races one after another. If many races are requested concurrently, this can lead to a queue
+     * of several minutes length.
+     */
+    private static final long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 300000;
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
@@ -546,7 +554,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public void stopTrackingRace(EventAndRaceIdentifier eventAndRaceIdentifier) throws Exception {
-        getService().apply(new StopTrackingEvent(eventAndRaceIdentifier));
+        getService().apply(new StopTrackingRace(eventAndRaceIdentifier));
     }
     
     @Override
@@ -1751,4 +1759,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return service.getHostnamesOfReplica();
     }
 
+    @Override
+    public void startReplicatingFromMaster(String masterName, int servletPort, int jmsPort) throws IOException, ClassNotFoundException, JMSException {
+        getReplicationService().startToReplicateFrom(ReplicationFactory.INSTANCE.createReplicationMasterDescriptor(masterName, servletPort, jmsPort));
+    }
 }
