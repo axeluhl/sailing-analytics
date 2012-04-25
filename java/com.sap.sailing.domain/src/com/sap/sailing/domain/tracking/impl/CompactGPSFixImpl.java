@@ -31,6 +31,7 @@ public class CompactGPSFixImpl extends AbstractGPSFixImpl {
     private byte validityCache = -1;
     
     private class CompactPosition extends AbstractPosition {
+        private static final long serialVersionUID = 5621506820766614178L;
 
         @Override
         public double getLatDeg() {

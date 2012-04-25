@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 public class RaceTimesInfoDTO implements IsSerializable {
     private RaceIdentifier raceIdentifier;
 
-    public List<LegTimesInfoDTO> legTimes;
+    public List<LegInfoDTO> legTimes;
     
     public Date startOfRace;
     public Date startOfTracking;
@@ -34,23 +34,23 @@ public class RaceTimesInfoDTO implements IsSerializable {
         this.raceIdentifier = raceIdentifier;
     }
 
-    public LegTimesInfoDTO getLastLegTimes() {
+    public LegInfoDTO getLastLegTimes() {
         if (legTimes == null || legTimes.isEmpty()) {
             return null;
         }
-        LegTimesInfoDTO lastLegTime = null;
-        Iterator<LegTimesInfoDTO> iterator = legTimes.iterator();
+        LegInfoDTO lastLegTime = null;
+        Iterator<LegInfoDTO> iterator = legTimes.iterator();
         while(iterator.hasNext()) {
             lastLegTime = iterator.next();
         }
         return lastLegTime;
     }
 
-    public List<LegTimesInfoDTO> getLegTimes() {
+    public List<LegInfoDTO> getLegTimes() {
         return legTimes;
     }
 
-    public void setLegTimes(List<LegTimesInfoDTO> legTimes) {
+    public void setLegTimes(List<LegInfoDTO> legTimes) {
         this.legTimes = legTimes;
     }
 
