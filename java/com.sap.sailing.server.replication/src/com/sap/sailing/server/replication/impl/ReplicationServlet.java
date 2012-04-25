@@ -2,6 +2,8 @@ package com.sap.sailing.server.replication.impl;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 
 import javax.jms.JMSException;
@@ -71,13 +73,16 @@ public class ReplicationServlet extends Servlet {
         }
     }
 
-    private void registerClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp) throws JMSException {
+    private void registerClientWithReplicationService(HttpServletRequest req, HttpServletResponse resp)
+            throws JMSException, IOException {
         ReplicaDescriptor replica = getReplicaDescriptor(req);
         getReplicationService().registerReplica(replica);
+        resp.setContentType("text/plain");
+        resp.getWriter().print(replica.getUuid());
     }
 
-    private ReplicaDescriptor getReplicaDescriptor(HttpServletRequest req) {
-        // TODO Auto-generated method stub
-        return null;
+    private ReplicaDescriptor getReplicaDescriptor(HttpServletRequest req) throws UnknownHostException {
+        InetAddress ipAddress = InetAddress.getByName(req.getRemoteAddr());
+        return new ReplicaDescriptor(ipAddress);
     }
 }
