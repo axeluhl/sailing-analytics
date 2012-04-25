@@ -392,7 +392,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                 }
             }
         }
-        return new MeterDistance(distanceInMeters / count);
+        return count == 0 ? null : new MeterDistance(distanceInMeters / count);
     }
 
     @Override
