@@ -754,6 +754,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * {@link #windTracks} for the respective source. If found, it's returned; otherwise the wind track is created
      * through the {@link #windStore} using {@link #createWindTrack(WindSource, long)} and added to {@link #windTracks} before
      * being returned.
+     * 
+     * @param delayForWindEstimationCacheInvalidation if <code>-1</code> and the parameter is accessed, it will be
+     * replaced by {@link #getMillisecondsOverWhichToAverageWind()}/2
      */
     @Override
     public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
@@ -764,12 +767,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             synchronized (windTracks) {
                 result = windTracks.get(windSource);
                 if (result == null) {
-                    result = createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
+                    result = createWindTrack(windSource, delayForWindEstimationCacheInvalidation == -1 ?
+                            getMillisecondsOverWhichToAverageWind()/2 : delayForWindEstimationCacheInvalidation);
                     windTracks.put(windSource, result);
                 }
             }
         }
         return result;
+    }
+
+    @Override
+    public WindTrack getOrCreateWindTrack(WindSource windSource) {
+        return getOrCreateWindTrack(windSource, -1);
     }
 
     /**
@@ -824,7 +833,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         for (WindSource windSource : getWindSources()) {
             // TODO consider parallelizing
             if (!Util.contains(windSourcesToExclude, windSource)) {
-                WindTrack track = getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind()/2);
+                WindTrack track = getOrCreateWindTrack(windSource);
                 WindWithConfidence<Pair<Position, TimePoint>> windWithConfidence = track.getAveragedWindWithConfidence(
                         p, at);
                 if (windWithConfidence != null) {

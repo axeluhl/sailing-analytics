@@ -209,6 +209,11 @@ public interface TrackedRace extends Serializable {
      */
     Iterable<WindSource> getWindSources();
 
+    /**
+     * Same as {@link #getOrCreateWindTrack(WindSource, long) getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind())}.
+     */
+    WindTrack getOrCreateWindTrack(WindSource windSource);
+    
     WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation);
 
     /**

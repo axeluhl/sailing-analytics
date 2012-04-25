@@ -91,7 +91,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());
         new MongoObjectFactoryImpl(firstDatabase).addWindTrackDumper(trackedEvent, trackedRace, windSource);
-        WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource, delayForWindEstimationCacheInvalidation);
+        WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
         Position pos = new DegreePosition(54, 9);
         TimePoint timePoint = MillisecondsTimePoint.now();
         for (double bearingDeg = 123.4; bearingDeg<140; bearingDeg += 1.1) {

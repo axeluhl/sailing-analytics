@@ -77,7 +77,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         for (WindSource windSource : getWindSources()) {
-            getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind()/2).addListener(this);
+            getOrCreateWindTrack(windSource).addListener(this);
         }
     }
     
@@ -118,8 +118,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind) {
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         for (WindSource windSource : getWindSources()) {
-            getOrCreateWindTrack(windSource, millisecondsOverWhichToAverageWind/2).
-                setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
+            getOrCreateWindTrack(windSource).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
         }
         updated(MillisecondsTimePoint.now());
     }
@@ -379,13 +378,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public synchronized void recordWind(Wind wind, WindSource windSource) {
-        getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind()/2).add(wind);
+        getOrCreateWindTrack(windSource).add(wind);
         updated(null); // wind events shouldn't advance race time
     }
     
     @Override
     public synchronized void removeWind(Wind wind, WindSource windSource) {
-        getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind()/2).remove(wind);
+        getOrCreateWindTrack(windSource).remove(wind);
         updated(wind.getTimePoint());
     }
 
@@ -436,7 +435,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public long getMillisecondsOverWhichToAverageWind() {
         long result = 0; // default in case there is no competitor
         for (WindSource windSource : getWindSources()) {
-            WindTrack someTrack = getOrCreateWindTrack(windSource, 0);
+            WindTrack someTrack = getOrCreateWindTrack(windSource);
             result = someTrack.getMillisecondsOverWhichToAverageWind();
         }
         return result;
