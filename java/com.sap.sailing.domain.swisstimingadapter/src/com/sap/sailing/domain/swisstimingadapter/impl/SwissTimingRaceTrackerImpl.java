@@ -96,7 +96,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public Set<RaceDefinition> getRaces() {
-        return race==null?null:Collections.singleton(race);
+        final Set<RaceDefinition> emptySet = Collections.emptySet();
+        return race==null?emptySet:Collections.singleton(race);
     }
 
     @Override

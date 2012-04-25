@@ -370,8 +370,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
      * In addition to calling the super class implementation, adds this tracked race as a listener for the wind track.
      */
     @Override
-    protected WindTrack createWindTrack(WindSource windSource) {
-        WindTrack result = super.createWindTrack(windSource);
+    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
+        WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
         result.addListener(this);
         return result;
     }
