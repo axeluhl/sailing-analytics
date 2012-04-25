@@ -647,7 +647,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             
             if (leadingCompetitorDTO != null && lastShownFix.containsKey(leadingCompetitorDTO) && lastShownFix.get(leadingCompetitorDTO) != -1
                     && legOfLeaderCompetitor > 0 && legOfLeaderCompetitor <= lastRaceTimesInfo.getLegTimes().size()) {
-                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegTimes().get(legOfLeaderCompetitor-1);
+                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegTimes().get(legOfLeaderCompetitor);
                 GPSFixDTO lastBoatFix = getBoatFix(leadingCompetitorDTO);
                 double advantageLineLengthInKm = 1.0;
                 double distanceFromBoatPosition = 0.005; // 5m
