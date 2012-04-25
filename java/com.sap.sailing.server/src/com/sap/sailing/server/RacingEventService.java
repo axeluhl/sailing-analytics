@@ -367,9 +367,9 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
      * the replication channel.
      * <p>
      * 
-     * Tracked events read from the stream are <em>not</em> observed (see {@link RaceListener}) by this object for
-     * automatic updates to the default leaderboard and for automatic linking to leaderboard columns. It is assumed that
-     * explicit replication of these operations will happen based on the changes performed on the replication master.
+     * Tracked events read from the stream are observed (see {@link RaceListener}) by this object for automatic updates
+     * to the default leaderboard and for automatic linking to leaderboard columns. It is assumed that no explicit
+     * replication of these operations will happen based on the changes performed on the replication master.<p>
      * 
      * <b>Caution:</b> All relevant contents of this service instance will be replaced by the stream contents.
      */
