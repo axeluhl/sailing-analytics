@@ -105,7 +105,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 		
 		Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
 		Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
-		Boundaries bd = new RectangularBoundary(nw,se);
+		RectangularBoundary bd = new RectangularBoundary(nw,se);
 		
 		WindField wf = new WindFieldImpl(bd, params.getWindSpeed(), params.getWindBearing());
 		
@@ -119,17 +119,18 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 			
 			Wind localWind = wf.getWind(new WindFieldCoordinatesImpl(bi.next()));
 			WindDTO w = new WindDTO();
-			w.position.latDeg = localWind.getPosition().getLatDeg();
-			w.position.lngDeg = localWind.getPosition().getLngDeg();
+			w.position = new PositionDTO(localWind.getPosition().getLatDeg(),localWind.getPosition().getLngDeg());
 			w.trueWindBearingDeg = localWind.getBearing().getDegrees();
 			w.trueWindSpeedInMetersPerSecond = localWind.getMetersPerSecond();
 			wList.add(w);
 			
 		}
 		
+	    
 		WindFieldDTO wfDTO = new WindFieldDTO();
 		wfDTO.setMatrix(wList);
 		return wfDTO;
 		
 	}
+	
 }
