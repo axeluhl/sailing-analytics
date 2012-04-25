@@ -19,5 +19,5 @@ public interface ReplicationMasterDescriptor {
 
     URL getInitialLoadURL() throws MalformedURLException;
 
-    TopicSubscriber getTopicSubscriber() throws JMSException, UnknownHostException;
+    TopicSubscriber getTopicSubscriber(String clientID) throws JMSException, UnknownHostException;
 }

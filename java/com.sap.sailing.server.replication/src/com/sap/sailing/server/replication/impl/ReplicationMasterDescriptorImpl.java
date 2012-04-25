@@ -42,9 +42,10 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     }
 
     @Override
-    public TopicSubscriber getTopicSubscriber() throws JMSException, UnknownHostException {
+    public TopicSubscriber getTopicSubscriber(String clientID) throws JMSException, UnknownHostException {
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_USER,
                 ActiveMQConnection.DEFAULT_PASSWORD, "tcp://" + hostname + ":" + jmsPort);
+        connectionFactory.setClientID(clientID);
         Connection connection = connectionFactory.createConnection();
         connection.start();
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);

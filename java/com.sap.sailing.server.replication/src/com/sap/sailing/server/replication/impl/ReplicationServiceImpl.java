@@ -6,8 +6,10 @@ import java.io.ObjectInputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
@@ -52,9 +54,15 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
+    /**
+     * The UUIDs with which this replica is registered by the master identified by the corresponding key
+     */
+    private final Map<ReplicationMasterDescriptor, String> replicaUUIDs;
+    
     public ReplicationServiceImpl(final ReplicationInstancesManager replicationInstancesManager,
             final MessageBrokerManager messageBrokerManager) {
         this.replicationInstancesManager = replicationInstancesManager;
+        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
         this.messageBrokerManager = messageBrokerManager;
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
                 Activator.getDefaultContext(), RacingEventService.class.getName(), null);
@@ -124,15 +132,15 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         List<String> result = new ArrayList<String>();
         for (Iterator<ReplicaDescriptor> i=replicationInstancesManager.getReplicaDescriptors(); i.hasNext(); ) {
             ReplicaDescriptor d = i.next();
-            result.add(d.getIpAddress());
+            result.add(d.getIpAddress().getHostAddress());
         }
         return result;
     }
 
     @Override
     public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, JMSException {
-        registerReplicaWithMaster(master);
-        TopicSubscriber replicationSubscription = master.getTopicSubscriber();
+        String uuid = registerReplicaWithMaster(master);
+        TopicSubscriber replicationSubscription = master.getTopicSubscriber(uuid);
         URL initialLoadURL = master.getInitialLoadURL();
         replicationSubscription.setMessageListener(new Replicator(master, racingEventServiceTracker));
         InputStream is = initialLoadURL.openStream();
@@ -140,11 +148,24 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         getRacingEventService().initiallyFillFrom(ois);
     }
 
-    private void registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException {
+    /**
+     * @return the UUID that the master generated for this client which is alsy entered into {@link #replicaUUIDs}
+     */
+    private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException {
         URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL();
         final URLConnection registrationRequestConnection = replicationRegistrationRequestURL.openConnection();
         registrationRequestConnection.connect();
-        registrationRequestConnection.getContent();
+        InputStream content = (InputStream) registrationRequestConnection.getContent();
+        StringBuilder uuid = new StringBuilder();
+        byte[] buf = new byte[256];
+        int read = content.read(buf);
+        while (read != -1) {
+            uuid.append(new String(buf, 0, read));
+            read = content.read(buf);
+        }
+        String replicaUUID = uuid.toString();
+        replicaUUIDs.put(master, replicaUUID);
+        return replicaUUID;
     }
 
     @Override
