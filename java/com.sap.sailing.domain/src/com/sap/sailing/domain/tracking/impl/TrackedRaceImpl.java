@@ -907,6 +907,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 @Override
                 public void run() {
                     synchronized (TrackedRaceImpl.this) {
+                        cacheInvalidationTimer.cancel();
                         cacheInvalidationTimer = null;
                         synchronized (competitorRankings) {
                             competitorRankings.clear();

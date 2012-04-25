@@ -157,6 +157,7 @@ import com.sap.sailing.server.operationaltransformation.RenameLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.SetRaceIsKnownToStartUpwind;
 import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingEvent;
+import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateIsMedalRace;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
@@ -552,7 +553,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public void stopTrackingRace(EventAndRaceIdentifier eventAndRaceIdentifier) throws Exception {
-        getService().apply(new StopTrackingEvent(eventAndRaceIdentifier));
+        getService().apply(new StopTrackingRace(eventAndRaceIdentifier));
     }
     
     @Override

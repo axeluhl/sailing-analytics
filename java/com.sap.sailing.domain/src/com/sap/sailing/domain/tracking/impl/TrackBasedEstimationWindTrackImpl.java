@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -90,8 +89,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      */
     private final long delayForCacheInvalidationInMilliseconds;
     
-    private transient Timer cacheInvalidationTimer;
-    
     private static class InvalidationInterval implements Serializable {
         private static final long serialVersionUID = -6406690520919193690L;
         private WindWithConfidence<TimePoint> start;
@@ -145,7 +142,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         super(trackedRace, millisecondsOverWhichToAverage, baseConfidence,
                 WindSourceType.TRACK_BASED_ESTIMATION.useSpeed());
         this.delayForCacheInvalidationInMilliseconds = delayForCacheInvalidationInMilliseconds;
-        this.cacheInvalidationTimer = new Timer("TrackBasedEstimationWindTrackImpl cache invalidation timer for race "+getTrackedRace().getRace());
         this.scheduledInvalidationInterval = new InvalidationInterval();
         cache = new ArrayListNavigableSet<WindWithConfidence<TimePoint>>(
                 new SerializableComparator<WindWithConfidence<TimePoint>>() {
@@ -172,11 +168,6 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         s.defaultWriteObject();
     }
     
-    private void readObject(final ObjectInputStream s) throws ClassNotFoundException, IOException {
-        s.defaultReadObject();
-        cacheInvalidationTimer = new Timer("TrackBasedEstimationWindTrackImpl cache invalidation timer for race "+getTrackedRace().getRace());
-    }
-
     /**
      * Constructs this track with cache invalidation happening after half the
      * {@link TrackedRace#getMillisecondsOverWhichToAverageWind() wind averaging interval specified by the tracked race}
@@ -284,10 +275,15 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             if (delayForCacheInvalidationInMilliseconds == 0) {
                 invalidateCache();
             } else {
+                final Timer cacheInvalidationTimer = new Timer("TrackBasedEstimationWindTrackImpl cache invalidation timer for race "
+                        + getTrackedRace().getRace());
                 cacheInvalidationTimer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        invalidateCache();
+                        synchronized (scheduledInvalidationInterval) {
+                            cacheInvalidationTimer.cancel(); // terminates the timer thread
+                            invalidateCache();
+                        }
                     }
                 }, delayForCacheInvalidationInMilliseconds);
             }

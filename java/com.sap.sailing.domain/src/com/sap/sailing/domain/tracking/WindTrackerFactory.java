@@ -13,4 +13,10 @@ import com.sap.sailing.domain.base.RaceDefinition;
 public interface WindTrackerFactory {
     WindTracker createWindTracker(DynamicTrackedEvent trackedEvent, RaceDefinition race, boolean correctByDeclination)
             throws SocketException;
+
+    /**
+     * Returns a {@link WindTracker} is one has been previously created for <code>race</code> and hasn't been
+     * stopped yet, <code>null</code> otherwise.
+     */
+    WindTracker getExistingWindTracker(RaceDefinition race);
 }
