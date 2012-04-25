@@ -456,8 +456,6 @@ public class RacingEventServiceImpl implements RacingEventService {
                         ". Wind store in use by existing tracker: "+existingTrackersWindStore);
             }
         }
-        DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
-        ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEvent);
         if (timeoutInMilliseconds != -1) {
             scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
         }
@@ -521,7 +519,6 @@ public class RacingEventServiceImpl implements RacingEventService {
                     leaderboardHasChanged = true;
                 }
             }
-            
             if (leaderboardHasChanged) {
                 //Update the corresponding groups, to keep them in sync
                 syncGroupsAfterLeaderboardChange(leaderboard, /*doDatabaseUpdate*/ false);
@@ -744,6 +741,7 @@ public class RacingEventServiceImpl implements RacingEventService {
             if (result == null) {
                 result = new DynamicTrackedEventImpl(event);
                 eventTrackingCache.put(event, result);
+                ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
             }
             return result;
         }
@@ -959,7 +957,7 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @SuppressWarnings("unchecked") // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
-    public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    public synchronized void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         eventsByName.clear();
         eventsByName.putAll((Map<String, Event>) ois.readObject());
         eventsObservedForDefaultLeaderboard.clear();

@@ -30,6 +30,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -358,12 +359,17 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
     void serializeForInitialReplication(ObjectOutputStream oos) throws IOException;
     
     /**
-     * Dual, reading operation for {@link #serializeForInitialReplication(ObjectOutputStream)}. In other words,
-     * when this operation returns, this service instance is in a state "equivalent" to that of the service instance
-     * that produced the stream contents in its {@link #serializeForInitialReplication(ObjectOutputStream)}. "Equivalent"
-     * here means that a replica will have equal sets of events, tracked events, leaderboards and leaderboard groups
-     * but will not have any active trackers for wind or positions because it relies on these elements to be sent
-     * through the replication channel.<p>
+     * Dual, reading operation for {@link #serializeForInitialReplication(ObjectOutputStream)}. In other words, when
+     * this operation returns, this service instance is in a state "equivalent" to that of the service instance that
+     * produced the stream contents in its {@link #serializeForInitialReplication(ObjectOutputStream)}. "Equivalent"
+     * here means that a replica will have equal sets of events, tracked events, leaderboards and leaderboard groups but
+     * will not have any active trackers for wind or positions because it relies on these elements to be sent through
+     * the replication channel.
+     * <p>
+     * 
+     * Tracked events read from the stream are <em>not</em> observed (see {@link RaceListener}) by this object for
+     * automatic updates to the default leaderboard and for automatic linking to leaderboard columns. It is assumed that
+     * explicit replication of these operations will happen based on the changes performed on the replication master.
      * 
      * <b>Caution:</b> All relevant contents of this service instance will be replaced by the stream contents.
      */

@@ -21,8 +21,6 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
 
-    // TODO need another listener protocol for general changes in ranking and leg completion
-
     /**
      * Updates all mark passings for <code>competitor</code> for this race. The
      * mark passings must be provided in the order of the race's course and in
