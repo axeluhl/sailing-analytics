@@ -62,6 +62,7 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.NetPointsComparator.SortOrderCalculator;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
@@ -472,8 +473,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (race.isMedalRace()) {
                 return getLeaderboard().getMedalRaceComparator(race.getRaceColumnName());
             } else {
-                return new NetPointsComparator(isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable()),
-                        race.getRaceColumnName());
+                SortOrderCalculator sortOrderCalculator = new SortOrderCalculator() {
+                    @Override
+                    public boolean isAscending() {
+                        return isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
+                    }
+                };
+                return new NetPointsComparator(sortOrderCalculator, race.getRaceColumnName());
             }
         }
 
@@ -514,7 +520,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return "" + object.fieldsByRaceName.get(getRaceColumnName()).totalPoints;
+            final int totalPoints = object.fieldsByRaceName.get(getRaceColumnName()).totalPoints;
+            return "" + (totalPoints == 0 ? "" : totalPoints);
         }
 
         @Override
