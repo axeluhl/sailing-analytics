@@ -175,7 +175,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private static final long serialVersionUID = 9031688830194537489L;
 
-    private static final long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 60000;
+    /**
+     * Wait five minutes for race data; sometimes, a tracking provider's server may be under heavy load and
+     * may serve races one after another. If many races are requested concurrently, this can lead to a queue
+     * of several minutes length.
+     */
+    private static final long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 300000;
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
