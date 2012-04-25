@@ -629,9 +629,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         GPSFixMoving fix = null;
         for (Leg leg : getRace().getCourse().getLegs()) {
             final TrackedLeg trackedLeg = getTrackedLeg(leg);
-            if (trackedLeg.getLegType(timePoint) == LegType.UPWIND) {
-                final MarkPassing legStartMarkPassing = getMarkPassing(competitor, leg.getFrom());
-                if (legStartMarkPassing != null) {
+            final MarkPassing legStartMarkPassing = getMarkPassing(competitor, leg.getFrom());
+            if (legStartMarkPassing != null) {
+                if (trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
                     TimePoint legStart = legStartMarkPassing.getTimePoint();
                     final MarkPassing legEndMarkPassing = getMarkPassing(competitor, leg.getTo());
                     Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
@@ -652,7 +652,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 break;
             }
         }
-        return new MeterDistance(distanceInMeters / count);
+        return count == 0 ? null : new MeterDistance(distanceInMeters / count);
     }
 
     @Override
