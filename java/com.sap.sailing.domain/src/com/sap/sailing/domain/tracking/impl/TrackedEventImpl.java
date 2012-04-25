@@ -29,7 +29,7 @@ public class TrackedEventImpl implements TrackedEvent {
     private final Event event;
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
-    private final Set<RaceListener> raceListeners;
+    private transient final Set<RaceListener> raceListeners;
   
     public TrackedEventImpl(Event event) {
         super();
@@ -38,7 +38,18 @@ public class TrackedEventImpl implements TrackedEvent {
         this.trackedRacesByBoatClass = new HashMap<BoatClass, Collection<TrackedRace>>();
         raceListeners = new HashSet<RaceListener>();
     }
-    
+
+    /**
+     * Resolving replaces this de-serialized object (which has a <code>null</code> {@link #raceListeners} collection) by
+     * a new one into which all other collection contents are copied.
+     */
+    private Object readResolve() {
+        TrackedEventImpl result = new TrackedEventImpl(this.event);
+        result.trackedRaces.putAll(this.trackedRaces);
+        result.trackedRacesByBoatClass.putAll(this.trackedRacesByBoatClass);
+        return result;
+    }
+
     @Override
     public void addTrackedRace(TrackedRace trackedRace) {
         synchronized (trackedRaces) {

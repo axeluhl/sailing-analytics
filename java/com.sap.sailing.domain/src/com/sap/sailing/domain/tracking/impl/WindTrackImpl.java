@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,7 +49,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     
     private final boolean useSpeed;
     
-    private final Set<WindListener> listeners;
+    /**
+     * Listeners won't be serialized.
+     */
+    private transient Set<WindListener> listeners;
 
     public WindTrackImpl(long millisecondsOverWhichToAverage, boolean useSpeed) {
         this(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, useSpeed);
@@ -56,7 +61,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     /**
      * @param baseConfidence
      *            the confidence to attribute to the raw wind fixes in this track
-     * @param useSpeed TODO
+     * @param useSpeed
+     *            whether the wind speed described by the fixes in this track are usable at all; example for an unusable
+     *            wind speed would be that of an estimation that only estimates the wind direction and uses some default
+     *            value for the speed
      */
     public WindTrackImpl(long millisecondsOverWhichToAverage, double baseConfidence, boolean useSpeed) {
         super(new ArrayListNavigableSet<Timed>(WindComparator.INSTANCE));
@@ -64,6 +72,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         listeners = new HashSet<WindListener>();
         this.useSpeed = useSpeed;
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        listeners = new HashSet<WindListener>();
     }
     
     @Override

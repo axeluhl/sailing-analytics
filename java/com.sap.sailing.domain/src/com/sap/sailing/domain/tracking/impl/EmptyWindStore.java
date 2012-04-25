@@ -11,7 +11,6 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 
 public class EmptyWindStore implements WindStore {
-    private static final long serialVersionUID = -981813704281564319L;
     public static EmptyWindStore INSTANCE = new EmptyWindStore();
     
     @Override

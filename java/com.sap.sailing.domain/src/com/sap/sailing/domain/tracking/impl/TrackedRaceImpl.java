@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -181,7 +183,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     protected long millisecondsOverWhichToAverageWind;
 
-    private final WindStore windStore;
+    private transient WindStore windStore;
 
     private transient Timer cacheInvalidationTimer;
 
@@ -244,13 +246,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received
         // for them.
         WindSource courseBasedWindSource = new WindSourceImpl(WindSourceType.COURSE_BASED);
-        windTracks.put(courseBasedWindSource, windStore.getWindTrack(trackedEvent, this, courseBasedWindSource,
-                millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation));
+        windTracks.put(courseBasedWindSource, getOrCreateWindTrack(courseBasedWindSource));
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
-        windTracks.put(trackBasedWindSource, windStore.getWindTrack(trackedEvent, this, trackBasedWindSource,
-                millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation));
+        windTracks.put(trackBasedWindSource, getOrCreateWindTrack(trackBasedWindSource));
         this.trackedEvent = trackedEvent;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
+    }
+    
+    /**
+     * When de-serializing, a possibly remote {@link #windStore} is ignored because it is transient. Instead,
+     * an {@link EmptyWindStore} is used for the de-serialized instance.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        windStore = EmptyWindStore.INSTANCE;
     }
 
     /**
