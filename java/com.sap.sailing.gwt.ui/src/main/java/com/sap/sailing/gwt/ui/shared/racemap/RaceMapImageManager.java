@@ -93,8 +93,8 @@ public class RaceMapImageManager {
     public void loadMapIcons(MapWidget map) {
         if(map != null) {
             buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
-            buoyIcon.setIconSize(Size.newInstance(8, 12));
-            buoyIcon.setIconAnchor(Point.newInstance(4, 4));
+            buoyIcon.setIconSize(Size.newInstance(12, 17));
+            buoyIcon.setIconAnchor(Point.newInstance(6, 15));
 
             Icon tackToStarboardIcon = Icon
                     .newInstance("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=T|00FF00|000000");
