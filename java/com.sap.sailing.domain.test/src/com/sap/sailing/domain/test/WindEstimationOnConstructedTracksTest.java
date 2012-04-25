@@ -132,7 +132,9 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertTrue(combinedDegreesNow > 170 && combinedDegreesNow < 180);
         // we expect the combined direction now to be closer to the estimation as compared to before because the estimation is more confident
         // since the minimum cluster size is 2 instead of 1
-        assertTrue(combinedDegreesNow < combinedDegreesMinClusterSizeOne);
+        assertTrue("expected combinedDegreesNow ("+combinedDegreesNow+
+                ") < combinedDegreesMinClusterSizeOne ("+combinedDegreesMinClusterSizeOne+")",
+                combinedDegreesNow < combinedDegreesMinClusterSizeOne);
     }
 
     @Test
