@@ -530,7 +530,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Iterable<TimePoint> getStartTimesOfTrackedLegs() {
+    public Iterable<Pair<TrackedLeg, TimePoint>> getStartTimesOfTrackedLegs() {
         // TODO Auto-generated method stub
         return null;
     }

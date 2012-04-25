@@ -8,7 +8,7 @@ import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
@@ -205,7 +205,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
 
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
-        List<LegTimesInfoDTO> legTimepoints = newRaceTimesInfo.getLegTimes();
+        List<LegInfoDTO> legTimepoints = newRaceTimesInfo.getLegTimes();
         boolean requiresMarkerUpdate = true;
         
         // updating the sliderbar markers requires a lot of time, therefore we need to do this only if required
@@ -220,7 +220,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
         if (requiresMarkerUpdate && sliderBar.isMinMaxInitialized()) {
             sliderBar.clearMarkers();
-            for (LegTimesInfoDTO legTimepointDTO : legTimepoints) {
+            for (LegInfoDTO legTimepointDTO : legTimepoints) {
               sliderBar.addMarker(legTimepointDTO.name, new Double(legTimepointDTO.firstPassingDate.getTime()));
             }
             sliderBar.redraw();
@@ -230,7 +230,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     
     @Override
     public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
-      // raceTimesInfo can be null if the race is not tracked anymore
-      updateTimeInfo(raceTimesInfos.get(selectedRace));
+        updateTimeInfo(raceTimesInfos.get(selectedRace));
     }
 }

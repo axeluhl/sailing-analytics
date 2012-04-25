@@ -62,6 +62,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -73,11 +74,13 @@ import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
@@ -87,7 +90,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
-        Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
+        RaceTimesInfoProviderListener, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize {
     private MapWidget map;
 
     private final SailingServiceAsync sailingService;
@@ -178,6 +181,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private final Timer timer;
 
+    private RaceTimesInfoDTO lastRaceTimesInfo;
+    
     /**
      * RPC calls may receive responses out of order if there are multiple calls in-flight at the same time. If the time
      * slider is moved quickly it generates many requests for boat positions quickly after each other. Sometimes,
@@ -313,6 +318,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
         this.selectedRaces = selectedRaces;
+    }
+
+    @Override
+    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+        this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaces.get(0));        
     }
 
     @Override
@@ -622,35 +632,56 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow) {
-        if(map != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null && lastCombinedWindTrackInfoDTO.windFixes.size() > 0) {
+        if(map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null && lastCombinedWindTrackInfoDTO.windFixes.size() > 0) {
             // find competitor with highest rank
             CompetitorDTO leadingCompetitorDTO = null;
+            int legOfLeaderCompetitor = -1;
             // this only works because the quickRanks are sorted
             for (QuickRankDTO quickRank : quickRanks) {
                 if(Util.contains(competitorsToShow, quickRank.competitor)) {
                     leadingCompetitorDTO = quickRank.competitor;
+                    legOfLeaderCompetitor = quickRank.legNumber;
                     break;
                 }
             }
             
-            if (leadingCompetitorDTO != null && lastShownFix.containsKey(leadingCompetitorDTO) && lastShownFix.get(leadingCompetitorDTO) != -1) {
+            if (leadingCompetitorDTO != null && lastShownFix.containsKey(leadingCompetitorDTO) && lastShownFix.get(leadingCompetitorDTO) != -1
+                    && legOfLeaderCompetitor > 0 && legOfLeaderCompetitor <= lastRaceTimesInfo.getLegTimes().size()) {
+                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegTimes().get(legOfLeaderCompetitor);
                 GPSFixDTO lastBoatFix = getBoatFix(leadingCompetitorDTO);
-
                 double advantageLineLengthInKm = 1.0;
                 double distanceFromBoatPosition = 0.005; // 5m
                 // implement and use Position.translateRhumb()
                 double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
                 LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
                 LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg, distanceFromBoatPosition);
-                double bearingOfCombinedWindInDeg = lastCombinedWindTrackInfoDTO.windFixes.get(0).trueWindBearingDeg; 
-                double rotatedBearingDeg = bearingOfCombinedWindInDeg + 90.0;
-                if(rotatedBearingDeg >= 360.0)
-                    rotatedBearingDeg -= 360.0;
-                LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg, advantageLineLengthInKm / 2.0);
-                rotatedBearingDeg = bearingOfCombinedWindInDeg - 90.0;
-                if(rotatedBearingDeg < 0.0)
-                    rotatedBearingDeg += 360.0;
-                LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg, advantageLineLengthInKm / 2.0);
+                double bearingOfCombinedWindInDeg = lastCombinedWindTrackInfoDTO.windFixes.get(0).trueWindBearingDeg;
+                double rotatedBearingDeg1 = 0.0;
+                double rotatedBearingDeg2 = 0.0;
+                switch(legInfoDTO.legType) {
+                    case UPWIND:
+                    case DOWNWIND: {
+                        rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
+                        if(rotatedBearingDeg1 >= 360.0)
+                            rotatedBearingDeg1 -= 360.0;
+                        rotatedBearingDeg2 = bearingOfCombinedWindInDeg - 90.0;
+                        if(rotatedBearingDeg2 < 0.0)
+                            rotatedBearingDeg2 += 360.0;
+                    }
+                    break;
+                    case REACHING: {
+                        rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
+                        if(rotatedBearingDeg1 >= 360.0)
+                            rotatedBearingDeg1 -= 360.0;
+                        rotatedBearingDeg2 = legInfoDTO.legBearingInDegrees - 90.0;
+                        if(rotatedBearingDeg2 < 0.0)
+                            rotatedBearingDeg2 += 360.0;
+                    }
+                    break;
+                }
+                
+                LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg1, advantageLineLengthInKm / 2.0);
+                LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat, rotatedBearingDeg2, advantageLineLengthInKm / 2.0);
                 
                 LatLng[] advantageLinePoints = new LatLng[2];
                 advantageLinePoints[0] = LatLng.newInstance(advantageLinePos1.getLatitude(), advantageLinePos1.getLongitude());
