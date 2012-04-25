@@ -3,6 +3,7 @@ package com.sap.sailing.server.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
@@ -483,20 +484,24 @@ public class RacingEventServiceImpl implements RacingEventService {
     private void ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedEvent trackedEvent) {
         synchronized (eventsObservedForDefaultLeaderboard) {
             if (!eventsObservedForDefaultLeaderboard.contains(trackedEvent)) {
-                trackedEvent.addRaceListener(new RaceListener() {
-                    @Override
-                    public void raceRemoved(TrackedRace trackedRace) {
-                    }
-
-                    @Override
-                    public void raceAdded(TrackedRace trackedRace) {
-                        linkRaceToConfiguredLeaderboardColumns(trackedRace);
-                        leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
-                                trackedRace.getRace().getName(), /* medalRace */ false);
-                    }
-                });
+                trackedEvent.addRaceListener(new RaceAdditionListener());
                 eventsObservedForDefaultLeaderboard.add(trackedEvent);
             }
+        }
+    }
+    
+    private class RaceAdditionListener implements RaceListener, Serializable {
+        private static final long serialVersionUID = 1036955460477000265L;
+
+        @Override
+        public void raceRemoved(TrackedRace trackedRace) {
+        }
+
+        @Override
+        public void raceAdded(TrackedRace trackedRace) {
+            linkRaceToConfiguredLeaderboardColumns(trackedRace);
+            leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
+                    trackedRace.getRace().getName(), /* medalRace */false);
         }
     }
 

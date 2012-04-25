@@ -6,6 +6,7 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.maps.client.geom.Size;
 import com.google.gwt.maps.client.overlay.Icon;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
@@ -92,6 +93,7 @@ public class RaceMapImageManager {
     public void loadMapIcons(MapWidget map) {
         if(map != null) {
             buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
+            buoyIcon.setIconSize(Size.newInstance(8, 12));
             buoyIcon.setIconAnchor(Point.newInstance(4, 4));
 
             Icon tackToStarboardIcon = Icon
