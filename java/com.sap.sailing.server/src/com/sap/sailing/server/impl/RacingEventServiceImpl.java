@@ -498,7 +498,6 @@ public class RacingEventServiceImpl implements RacingEventService {
         @Override
         public void raceAdded(TrackedRace trackedRace) {
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
-            // FIXME use AddColumnToLeaderboard and ConnectTrackedRaceToLeaderboardColumn for replication
             leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
                     trackedRace.getRace().getName(), /* medalRace */false);
         }
@@ -511,7 +510,6 @@ public class RacingEventServiceImpl implements RacingEventService {
      * {@link RaceInLeaderboard#getRaceIdentifier() race identifier} equals that of <code>trackedRace</code>.
      */
     private void linkRaceToConfiguredLeaderboardColumns(TrackedRace trackedRace) {
-        // FIXME need to perform the linking through the ConnectTrackedRaceToLeaderboardColumn command for replication
         boolean leaderboardHasChanged = false;
         RaceIdentifier trackedRaceIdentifier = trackedRace.getRaceIdentifier();
         for (Leaderboard leaderboard : getLeaderboards().values()) {
