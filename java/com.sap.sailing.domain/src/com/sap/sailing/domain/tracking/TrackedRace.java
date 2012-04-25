@@ -69,7 +69,7 @@ public interface TrackedRace extends Serializable {
      * The leg time of the first leg is equal to #{@link #getStart()}
      * All other leg times are equal to the first mark passing of the leg 
      */
-    Iterable<TimePoint> getStartTimesOfTrackedLegs();
+    Iterable<Pair<TrackedLeg, TimePoint>> getStartTimesOfTrackedLegs();
 
     /**
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>

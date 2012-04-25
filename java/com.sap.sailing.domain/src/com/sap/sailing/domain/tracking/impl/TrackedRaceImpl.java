@@ -127,7 +127,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     /**
      * The calculated start times of the legs
      */
-    private final List<TimePoint> startTimesOfLegs;
+    private final List<Pair<TrackedLeg, TimePoint>> startTimesOfLegs;
 
     /**
      * The latest time point contained by any of the events received and processed
@@ -237,7 +237,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(
                     MarkPassingByTimeComparator.INSTANCE));
         }
-        startTimesOfLegs = new ArrayList<TimePoint>();
+        startTimesOfLegs = new ArrayList<Pair<TrackedLeg, TimePoint>>();
         windTracks = new HashMap<WindSource, WindTrack>();
         windTracks.putAll(windStore.loadWindTracks(trackedEvent, this, millisecondsOverWhichToAverageWind));
         // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
@@ -439,7 +439,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Iterable<TimePoint> getStartTimesOfTrackedLegs() {
+    public Iterable<Pair<TrackedLeg, TimePoint>> getStartTimesOfTrackedLegs() {
         if (startTimesOfLegs.isEmpty()) {
             int legNumber = 1;
             // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time order
@@ -452,7 +452,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     // therefore we are using the calculated start time here
                     TimePoint startOfRace = getStart();
                     if (startOfRace != null) {
-                        startTimesOfLegs.add(startOfRace);
+                        startTimesOfLegs.add(new Pair<TrackedLeg, TimePoint>(trackedLeg, startOfRace));
                     }
                 }
                 Waypoint to = trackedLeg.getLeg().getTo();
@@ -466,7 +466,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         for (MarkPassing currentMarkPassing : markPassings) {
                             Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
                             if (previousLegPassingTime == null || currentPassingDate.after(previousLegPassingTime)) {
-                                startTimesOfLegs.add(currentMarkPassing.getTimePoint());
+                                startTimesOfLegs.add(new Pair<TrackedLeg, TimePoint>(trackedLeg, currentMarkPassing.getTimePoint()));
                                 previousLegPassingTime = currentPassingDate;
                                 break;
                             }

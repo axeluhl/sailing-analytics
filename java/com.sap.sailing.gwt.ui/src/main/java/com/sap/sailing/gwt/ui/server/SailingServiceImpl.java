@@ -94,6 +94,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -116,7 +117,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
-import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
@@ -943,16 +944,25 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             raceTimesInfo.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
             raceTimesInfo.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
             raceTimesInfo.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
-            List<LegTimesInfoDTO> legTimes = new ArrayList<LegTimesInfoDTO>();
+            List<LegInfoDTO> legTimes = new ArrayList<LegInfoDTO>();
             raceTimesInfo.setLegTimes(legTimes);
-            Iterable<TimePoint> startTimesOfTrackedLegs = trackedRace.getStartTimesOfTrackedLegs();
+            Iterable<Pair<TrackedLeg, TimePoint>> startTimesOfTrackedLegs = trackedRace.getStartTimesOfTrackedLegs();
             synchronized(startTimesOfTrackedLegs) {
                 int legNumber = 1;
-                for(TimePoint legStartTime: startTimesOfTrackedLegs) {
-                    LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO(legNumber);
-                    legTimepointDTO.name = (legNumber == 1) ? "S" : "L" + legNumber;  
-                    legTimepointDTO.firstPassingDate = legStartTime.asDate();
-                    legTimes.add(legTimepointDTO);
+                for(Pair<TrackedLeg, TimePoint> legWithStarttime: startTimesOfTrackedLegs) {
+                    LegInfoDTO legInfoDTO = new LegInfoDTO(legNumber);
+                    legInfoDTO.name = (legNumber == 1) ? "S" : "L" + legNumber;
+                    TimePoint legStartTime = legWithStarttime.getB();
+                    if(legStartTime != null) {
+                        legInfoDTO.firstPassingDate = legStartTime.asDate();
+                        try {
+                            legInfoDTO.legType = legWithStarttime.getA().getLegType(legStartTime);
+                            legInfoDTO.legBearingInDegrees = legWithStarttime.getA().getLegBearing(legStartTime).getDegrees();
+                        } catch (NoWindException e) {
+                            // do nothing
+                        }
+                    }
+                    legTimes.add(legInfoDTO);
                     legNumber++;
                 }
             }
