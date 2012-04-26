@@ -1,14 +1,9 @@
 package com.sap.sailing.xcelsiusadapter;
 
-import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
+
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,24 +11,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom.Document;
 import org.jdom.Element;
 
-import com.sap.sailing.domain.base.Buoy;
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.base.RaceDefinition;
+
+import com.sap.sailing.domain.base.*;
+
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.Speed;
+
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
-import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
+
+import com.sap.sailing.domain.tracking.*;
+
 import com.sap.sailing.server.RacingEventService;
 
 public class EventDataPerLeg extends Action {
@@ -76,7 +62,7 @@ public class EventDataPerLeg extends Action {
             long minNextLegStart = raceStarted.asMillis(); //variable for keeping track of when the first competitor started the next leg
             TimePoint legStarted = new MillisecondsTimePoint(minNextLegStart); // get TimePoint for when the leg started
            
-            addNamedElementWithValue(race_node, "start_time", raceStarted.asDate()); // add the starttime to the race
+            
             addNamedElementWithValue(race_node, "start_time_ms", raceStarted.asMillis()); // add the starttime to the race
             addNamedElementWithValue(race_node, "assumed_end_ms", trackedRace.getAssumedEnd().asMillis()); // add the assumed enddtime
             
@@ -89,6 +75,7 @@ public class EventDataPerLeg extends Action {
             TrackedLeg previousLeg = null;
             
             LinkedHashMap<String, Long> legTimesAlternate = new LinkedHashMap<String, Long>(); // Map for  leg times calculated by mark passings
+           
             final Element legs_node = addNamedElement(race_node,"legs"); // add element that holds all legs for the race
             
             for (final TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
@@ -127,6 +114,7 @@ public class EventDataPerLeg extends Action {
                 	}else{                		
                 		legTimesAlternate.put(competitor.getName(), compareLegEnd.asMillis() - raceStarted.asMillis());
                 	}
+                    
                 	
                 	final TimePoint compLegTimeAlt = new MillisecondsTimePoint(legTimesAlternate.get(competitor.getName()));
                     
@@ -141,21 +129,28 @@ public class EventDataPerLeg extends Action {
 	                        posGL = trackedLegOfCompetitor.getRank(compFinishedLeg) - previousLeg.getTrackedLeg(competitor).getRank(compFinishedLeg);
 	                    }
 	                    
+	                                        
 	                    final Element competitor_node = addNamedElement(competitor_data_node,"competitor");
 	                    try{
 	                    	addNamedElementWithValue(competitor_node, "name", competitor.getName());
 		                    addNamedElementWithValue(competitor_node, "nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
 		                    addNamedElementWithValue(competitor_node, "sail_id", competitor.getBoat().getSailID());
-		                    addNamedElementWithValue(competitor_node, "leg_time_finished", compFinishedLeg.asMillis());
-		                    addNamedElementWithValue(competitor_node, "time_elapsed", compFinishedLeg.asMillis() - raceStarted.asMillis());
-		                    addNamedElementWithValue(competitor_node, "leg_time", compLegTimeAlt.asMillis()); 
+		                    addNamedElementWithValue(competitor_node, "leg_finished_time_ms", compFinishedLeg.asMillis());
+		                    addNamedElementWithValue(competitor_node, "time_elapsed_ms", compFinishedLeg.asMillis() - raceStarted.asMillis());
+		                    addNamedElementWithValue(competitor_node, "leg_time_ms", compLegTimeAlt.asMillis()); 
 		                    addNamedElementWithValue(competitor_node, "leg_rank", trackedLegOfCompetitor.getRank(compFinishedLeg));		                    		                    
 		                    addNamedElementWithValue(competitor_node, "rank_gain", posGL*-1); //Ranks Gained/Lost		                    
-		                    addNamedElementWithValue(competitor_node, "gap_to_leader", trackedLegOfCompetitor.getGapToLeaderInSeconds(compFinishedLeg));
-		                    addNamedElementWithValue(competitor_node, "avg_speed", trackedLegOfCompetitor.getAverageSpeedOverGround(compFinishedLeg).toString());
-		                    addNamedElementWithValue(competitor_node, "distance_sailed", trackedLegOfCompetitor.getDistanceTraveled(compFinishedLeg).toString());
-		                                   
-		 
+		                    addNamedElementWithValue(competitor_node, "gap_to_leader_s", trackedLegOfCompetitor.getGapToLeaderInSeconds(compFinishedLeg));
+		                    addNamedElementWithValue(competitor_node, "ww_distance_to_leader_m", trackedLegOfCompetitor.getWindwardDistanceToOverallLeader(compFinishedLeg).getMeters());
+		                    addNamedElementWithValue(competitor_node, "avg_speed_og_kn", trackedLegOfCompetitor.getAverageSpeedOverGround(compFinishedLeg).getKnots());
+		                    addNamedElementWithValue(competitor_node, "avg_speed_ww_kn", trackedLegOfCompetitor.getAverageVelocityMadeGood(compFinishedLeg).getKnots());//windwardSpeed over ground on leg finished time
+		                    addNamedElementWithValue(competitor_node, "distance_traveled_m", trackedLegOfCompetitor.getDistanceTraveled(compFinishedLeg).getMeters());
+		                    addNamedElementWithValue(competitor_node, "number_of_jibes",  trackedLegOfCompetitor.getNumberOfJibes(compFinishedLeg));
+		                    addNamedElementWithValue(competitor_node, "number_of_tacks",  trackedLegOfCompetitor.getNumberOfTacks(compFinishedLeg));
+		                    addNamedElementWithValue(competitor_node, "number_of_penalty_circles",  trackedLegOfCompetitor.getNumberOfPenaltyCircles(compFinishedLeg));
+		                    
+		                             
+		                    
 		                    // assign the smallest start time for the next leg
 		                    minNextLegStart = (minNextLegStart > compFinishedLeg.asMillis() ? compFinishedLeg.asMillis() : minNextLegStart);   
 	                    }catch(Exception ex){	                    	
@@ -193,29 +188,7 @@ public class EventDataPerLeg extends Action {
         
 	} // function end
 	
-	private void addNamedElementWithValue(Element parent,String newChildName, Boolean b) {
-		if(b == null){
-			addNamedElementWithValue(parent,newChildName, "False");
-		}else{
-			if(b){
-				addNamedElementWithValue(parent,newChildName, "True");
-			}else{
-				addNamedElementWithValue(parent,newChildName, "False");
-			}
-				
-			
-		}
-		
-	}
-
-	private void addNamedElementWithValue(Element parent,String newChildName, Date d) {
-		if(d == null){
-			addNamedElementWithValue(parent,newChildName, new Date().toString());
-		}else{
-			addNamedElementWithValue(parent,newChildName, d.toString());
-		}
-		
-	}
+	
 
 	private void addNamedElementWithValue(Element parent, String newChildName, Integer i) {
 		if(i == null){
