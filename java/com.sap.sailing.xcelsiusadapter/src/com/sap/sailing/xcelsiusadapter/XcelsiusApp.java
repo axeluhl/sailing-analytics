@@ -47,8 +47,12 @@ public class XcelsiusApp extends Servlet {
                 } else if ("getRankPerRace".equals(action)) {
                     final RankPerRace a = new RankPerRace(req, res, getService(), maxRows);
                     a.perform();
+                    return;                
+                } else if ("getEventDataPerLeg".equals(action)) {
+                    final EventDataPerLeg a = new EventDataPerLeg(req, res, getService(), maxRows);
+                    a.perform();
                     return;
-                } else {
+                }else {
                 }
                 Action.say("Unknown action", res);
                 return;

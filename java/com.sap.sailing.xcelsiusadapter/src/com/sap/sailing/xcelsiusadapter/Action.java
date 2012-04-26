@@ -188,6 +188,14 @@ public class Action {
             this.currentRow.addContent(col);
         }
     }
+    
+    public void addNamedColumn(String content, String columnName) {
+        if (maxRows == -1 || rowCount <= maxRows) {
+            final Element col = new Element(columnName);
+            col.setText(content);
+            this.currentRow.addContent(col);
+        }
+    }
 
     public static void say(String msg, HttpServletResponse res) throws IOException {
         final Document doc = new Document();
