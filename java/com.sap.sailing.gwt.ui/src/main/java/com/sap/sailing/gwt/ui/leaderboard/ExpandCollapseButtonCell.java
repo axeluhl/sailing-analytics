@@ -32,8 +32,8 @@ public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
         this.column = column;
         this.delegate = delegate;
 
-        String src = column.isExpanded() ? RESOURCES.magnifierSlashedIcon().getSafeUri().asString() : RESOURCES
-                .magnifierIcon().getSafeUri().asString();
+        String src = column.isExpanded() ? RESOURCES.minusIcon().getSafeUri().asString() : RESOURCES
+                .plusIcon().getSafeUri().asString();
         this.html = new SafeHtmlBuilder().appendHtmlConstant(
                 "<input class=\"valignMiddle magnifier\" type=\"image\" src=\"" + src + "\" />").toSafeHtml();
     }
