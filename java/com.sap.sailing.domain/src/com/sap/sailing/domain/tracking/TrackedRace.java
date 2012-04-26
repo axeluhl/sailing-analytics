@@ -69,7 +69,7 @@ public interface TrackedRace extends Serializable {
      * The leg time of the first leg is equal to #{@link #getStart()}
      * All other leg times are equal to the first mark passing of the leg 
      */
-    Iterable<TimePoint> getStartTimesOfTrackedLegs();
+    Iterable<Pair<TrackedLeg, TimePoint>> getStartTimesOfTrackedLegs();
 
     /**
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
@@ -141,6 +141,9 @@ public interface TrackedRace extends Serializable {
      * by the windward distance to go and therefore depends on the assumptions of the wind direction
      * for the given <code>timePoint</code>. If the race hasn't {@link #hasStarted(TimePoint) started}
      * yet, the result is undefined.
+     * 
+     * @return <code>0</code> in case the competitor hasn't participated in the race; a rank starting
+     * with <code>1</code> where rank <code>1</code> identifies the leader otherwise
      */
     int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
     
@@ -206,7 +209,12 @@ public interface TrackedRace extends Serializable {
      */
     Iterable<WindSource> getWindSources();
 
+    /**
+     * Same as {@link #getOrCreateWindTrack(WindSource, long) getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind())}.
+     */
     WindTrack getOrCreateWindTrack(WindSource windSource);
+    
+    WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation);
 
     /**
      * Waits until {@link #getUpdateCount()} is after <code>sinceUpdate</code>.

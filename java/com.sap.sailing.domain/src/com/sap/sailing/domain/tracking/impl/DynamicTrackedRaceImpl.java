@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -57,10 +58,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             track.addListener(this);
         }
-        // TODO ensure that when a wind source is added or removed, this object is added/removed as listener accordingly
-        for (WindSource windSource : getWindSources()) {
-            getOrCreateWindTrack(windSource).addListener(this);
-        }
+        // default wind tracks are observed because they are created by the superclass constructor using
+        // createWindTrack which adds this object as a listener
     }
     
     /**
@@ -68,6 +67,18 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
      */
     private synchronized void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
+    }
+    
+    /**
+     * After de-serialization adds this object again as {@link WindListener} to all its wind tracks because
+     * the wind listeners aren't serialized. This unfortunately breaks {@link WindTrack}'s encapsulation of how
+     * it manages and serializes / de-serializes its listeners, but we currently don't know any better way.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        for (WindSource windSource : getWindSources()) {
+            getOrCreateWindTrack(windSource).addListener(this);
+        }
     }
     
     /**
@@ -358,8 +369,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     /**
      * In addition to calling the super class implementation, adds this tracked race as a listener for the wind track.
      */
-    protected WindTrack createWindTrack(WindSource windSource) {
-        WindTrack result = super.createWindTrack(windSource);
+    @Override
+    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
+        WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
         result.addListener(this);
         return result;
     }

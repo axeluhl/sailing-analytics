@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -127,7 +129,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     /**
      * The calculated start times of the legs
      */
-    private final List<TimePoint> startTimesOfLegs;
+    private final List<Pair<TrackedLeg, TimePoint>> startTimesOfLegs;
 
     /**
      * The latest time point contained by any of the events received and processed
@@ -181,7 +183,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     protected long millisecondsOverWhichToAverageWind;
 
-    private final WindStore windStore;
+    private transient WindStore windStore;
 
     private transient Timer cacheInvalidationTimer;
 
@@ -237,20 +239,27 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(
                     MarkPassingByTimeComparator.INSTANCE));
         }
-        startTimesOfLegs = new ArrayList<TimePoint>();
+        startTimesOfLegs = new ArrayList<Pair<TrackedLeg, TimePoint>>();
         windTracks = new HashMap<WindSource, WindTrack>();
         windTracks.putAll(windStore.loadWindTracks(trackedEvent, this, millisecondsOverWhichToAverageWind));
         // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
         // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received
         // for them.
         WindSource courseBasedWindSource = new WindSourceImpl(WindSourceType.COURSE_BASED);
-        windTracks.put(courseBasedWindSource, windStore.getWindTrack(trackedEvent, this, courseBasedWindSource,
-                millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation));
+        windTracks.put(courseBasedWindSource, getOrCreateWindTrack(courseBasedWindSource, delayForWindEstimationCacheInvalidation));
         WindSource trackBasedWindSource = new WindSourceImpl(WindSourceType.TRACK_BASED_ESTIMATION);
-        windTracks.put(trackBasedWindSource, windStore.getWindTrack(trackedEvent, this, trackBasedWindSource,
-                millisecondsOverWhichToAverageWind, delayForWindEstimationCacheInvalidation));
+        windTracks.put(trackBasedWindSource, getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
         this.trackedEvent = trackedEvent;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
+    }
+    
+    /**
+     * When de-serializing, a possibly remote {@link #windStore} is ignored because it is transient. Instead,
+     * an {@link EmptyWindStore} is used for the de-serialized instance.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        windStore = EmptyWindStore.INSTANCE;
     }
 
     /**
@@ -439,7 +448,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Iterable<TimePoint> getStartTimesOfTrackedLegs() {
+    public Iterable<Pair<TrackedLeg, TimePoint>> getStartTimesOfTrackedLegs() {
         if (startTimesOfLegs.isEmpty()) {
             int legNumber = 1;
             // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time order
@@ -452,7 +461,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     // therefore we are using the calculated start time here
                     TimePoint startOfRace = getStart();
                     if (startOfRace != null) {
-                        startTimesOfLegs.add(startOfRace);
+                        startTimesOfLegs.add(new Pair<TrackedLeg, TimePoint>(trackedLeg, startOfRace));
                     }
                 }
                 Waypoint to = trackedLeg.getLeg().getTo();
@@ -466,7 +475,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         for (MarkPassing currentMarkPassing : markPassings) {
                             Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
                             if (previousLegPassingTime == null || currentPassingDate.after(previousLegPassingTime)) {
-                                startTimesOfLegs.add(currentMarkPassing.getTimePoint());
+                                startTimesOfLegs.add(new Pair<TrackedLeg, TimePoint>(trackedLeg, currentMarkPassing.getTimePoint()));
                                 previousLegPassingTime = currentPassingDate;
                                 break;
                             }
@@ -620,9 +629,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         GPSFixMoving fix = null;
         for (Leg leg : getRace().getCourse().getLegs()) {
             final TrackedLeg trackedLeg = getTrackedLeg(leg);
-            if (trackedLeg.getLegType(timePoint) == LegType.UPWIND) {
-                final MarkPassing legStartMarkPassing = getMarkPassing(competitor, leg.getFrom());
-                if (legStartMarkPassing != null) {
+            final MarkPassing legStartMarkPassing = getMarkPassing(competitor, leg.getFrom());
+            if (legStartMarkPassing != null) {
+                if (trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
                     TimePoint legStart = legStartMarkPassing.getTimePoint();
                     final MarkPassing legEndMarkPassing = getMarkPassing(competitor, leg.getTo());
                     Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
@@ -643,7 +652,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 break;
             }
         }
-        return new MeterDistance(distanceInMeters / count);
+        return count == 0 ? null : new MeterDistance(distanceInMeters / count);
     }
 
     @Override
@@ -743,11 +752,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * which will not be added to {@link #windTracks} and will not lead to the wind source being listed in
      * {@link #getWindSources()} or {@link #getWindSources(WindSourceType)}. For all other wind sources, checks
      * {@link #windTracks} for the respective source. If found, it's returned; otherwise the wind track is created
-     * through the {@link #windStore} using {@link #createWindTrack(WindSource)} and added to {@link #windTracks} before
+     * through the {@link #windStore} using {@link #createWindTrack(WindSource, long)} and added to {@link #windTracks} before
      * being returned.
+     * 
+     * @param delayForWindEstimationCacheInvalidation if <code>-1</code> and the parameter is accessed, it will be
+     * replaced by {@link #getMillisecondsOverWhichToAverageWind()}/2
      */
     @Override
-    public WindTrack getOrCreateWindTrack(WindSource windSource) {
+    public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         WindTrack result;
         if (windSource.getType() == WindSourceType.COMBINED) {
             result = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
@@ -755,7 +767,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             synchronized (windTracks) {
                 result = windTracks.get(windSource);
                 if (result == null) {
-                    result = createWindTrack(windSource);
+                    result = createWindTrack(windSource, delayForWindEstimationCacheInvalidation == -1 ?
+                            getMillisecondsOverWhichToAverageWind()/2 : delayForWindEstimationCacheInvalidation);
                     windTracks.put(windSource, result);
                 }
             }
@@ -763,14 +776,19 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return result;
     }
 
+    @Override
+    public WindTrack getOrCreateWindTrack(WindSource windSource) {
+        return getOrCreateWindTrack(windSource, -1);
+    }
+
     /**
      * Creates a wind track for the <code>windSource</code> specified and stores it in {@link #windTracks}. The
      * averaging interval is set according to the averaging interval set for all other wind sources, or the default if
      * no other wind source exists yet.
      */
-    protected WindTrack createWindTrack(WindSource windSource) {
+    protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         return windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind,
-                getMillisecondsOverWhichToAverageWind() / 2);
+                delayForWindEstimationCacheInvalidation);
     }
 
     @Override
@@ -907,6 +925,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 @Override
                 public void run() {
                     synchronized (TrackedRaceImpl.this) {
+                        cacheInvalidationTimer.cancel();
                         cacheInvalidationTimer = null;
                         synchronized (competitorRankings) {
                             competitorRankings.clear();

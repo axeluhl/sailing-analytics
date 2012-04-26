@@ -66,7 +66,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             contentScrollPanel.setWidget(tvViewPanel);
         } else {
             LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
-                    LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, /* autoExpandFirstRace */ false),
+                    LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false),
                     /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
                     new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
                     leaderboardName, leaderboardGroupName,

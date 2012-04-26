@@ -77,9 +77,8 @@ public class RaceRankComparator implements Comparator<Competitor> {
                 // TrackedLegOfCompetitor comparison also correctly uses finish times for a leg
                 // in case we have the final leg, so both competitors finished the race.
                 if (o1Leg == null) {
-                    // both must already finished race; sort by race finish time: earlier time means smaller
-                    // (better)
-                    // rank
+                    // both must already have finished race; sort by race finish time: earlier time means smaller
+                    // (better) rank
                     result = o1LastMarkPassingBeforeTimePoint.getTimePoint().compareTo(
                             o2LastMarkPassingBeforeTimePoint.getTimePoint());
                 } else {

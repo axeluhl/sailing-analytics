@@ -95,6 +95,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -117,7 +118,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
-import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
@@ -157,6 +158,7 @@ import com.sap.sailing.server.operationaltransformation.RenameLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.SetRaceIsKnownToStartUpwind;
 import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingEvent;
+import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateIsMedalRace;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
@@ -342,7 +344,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace.getWindwardDistanceToOverallLeader(competitor, timePoint);
         entryDTO.windwardDistanceToOverallLeaderInMeters = windwardDistanceToOverallLeader == null ? null : windwardDistanceToOverallLeader.getMeters();
-        final Distance averageCrossTrackError = trackedRace.getAverageCrossTrackError(competitor, timePoint);
+        final Distance averageCrossTrackError = trackedRace == null ? null : trackedRace.getAverageCrossTrackError(competitor, timePoint);
         entryDTO.averageCrossTrackErrorInMeters = averageCrossTrackError == null ? null : averageCrossTrackError.getMeters();
         return entryDTO;
     }
@@ -552,7 +554,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public void stopTrackingRace(EventAndRaceIdentifier eventAndRaceIdentifier) throws Exception {
-        getService().apply(new StopTrackingEvent(eventAndRaceIdentifier));
+        getService().apply(new StopTrackingRace(eventAndRaceIdentifier));
     }
     
     @Override
@@ -950,16 +952,25 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             raceTimesInfo.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
             raceTimesInfo.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
             raceTimesInfo.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
-            List<LegTimesInfoDTO> legTimes = new ArrayList<LegTimesInfoDTO>();
+            List<LegInfoDTO> legTimes = new ArrayList<LegInfoDTO>();
             raceTimesInfo.setLegTimes(legTimes);
-            Iterable<TimePoint> startTimesOfTrackedLegs = trackedRace.getStartTimesOfTrackedLegs();
+            Iterable<Pair<TrackedLeg, TimePoint>> startTimesOfTrackedLegs = trackedRace.getStartTimesOfTrackedLegs();
             synchronized(startTimesOfTrackedLegs) {
                 int legNumber = 1;
-                for(TimePoint legStartTime: startTimesOfTrackedLegs) {
-                    LegTimesInfoDTO legTimepointDTO = new LegTimesInfoDTO(legNumber);
-                    legTimepointDTO.name = (legNumber == 1) ? "S" : "L" + legNumber;  
-                    legTimepointDTO.firstPassingDate = legStartTime.asDate();
-                    legTimes.add(legTimepointDTO);
+                for(Pair<TrackedLeg, TimePoint> legWithStarttime: startTimesOfTrackedLegs) {
+                    LegInfoDTO legInfoDTO = new LegInfoDTO(legNumber);
+                    legInfoDTO.name = (legNumber == 1) ? "S" : "L" + legNumber;
+                    TimePoint legStartTime = legWithStarttime.getB();
+                    if(legStartTime != null) {
+                        legInfoDTO.firstPassingDate = legStartTime.asDate();
+                        try {
+                            legInfoDTO.legType = legWithStarttime.getA().getLegType(legStartTime);
+                            legInfoDTO.legBearingInDegrees = legWithStarttime.getA().getLegBearing(legStartTime).getDegrees();
+                        } catch (NoWindException e) {
+                            // do nothing
+                        }
+                    }
+                    legTimes.add(legInfoDTO);
                     legNumber++;
                 }
             }
@@ -1056,7 +1067,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     int rank = trackedRace.getRank(competitor, dateAsTimePoint);
                     TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, dateAsTimePoint);
                     if (trackedLeg != null) {
-                        int legNumber = race.getCourse().getLegs().indexOf(trackedLeg.getLeg());
+                        int legNumber = race.getCourse().getLegs().indexOf(trackedLeg.getLeg()) + 1;
                         QuickRankDTO quickRankDTO = new QuickRankDTO(getCompetitorDTO(competitor), rank, legNumber);
                         result.add(quickRankDTO);
                     }

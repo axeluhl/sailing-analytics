@@ -3,6 +3,7 @@ package com.sap.sailing.server.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
@@ -94,12 +95,6 @@ public class RacingEventServiceImpl implements RacingEventService {
     protected final Map<Event, Set<RaceTracker>> raceTrackersByEvent;
     
     /**
-     * Remembers the wind tracker and the port on which the UDP receiver with which the wind tracker is
-     * registers is listening for incoming Expedition messages.
-     */
-    private final Map<RaceDefinition, WindTracker> windTrackers;
-    
-    /**
      * Remembers the trackers by paramURL/liveURI/storedURI to avoid duplication
      */
     protected final Map<Object, RaceTracker> raceTrackersByID;
@@ -136,7 +131,6 @@ public class RacingEventServiceImpl implements RacingEventService {
         eventsByName = new HashMap<String, Event>();
         eventTrackingCache = new HashMap<Event, DynamicTrackedEvent>();
         raceTrackersByEvent = new HashMap<Event, Set<RaceTracker>>();
-        windTrackers = new HashMap<RaceDefinition, WindTracker>();
         raceTrackersByID = new HashMap<Object, RaceTracker>();
         leaderboardGroupsByName = new HashMap<String, LeaderboardGroup>();
         leaderboardsByName = new HashMap<String, Leaderboard>();
@@ -462,8 +456,6 @@ public class RacingEventServiceImpl implements RacingEventService {
                         ". Wind store in use by existing tracker: "+existingTrackersWindStore);
             }
         }
-        DynamicTrackedEvent trackedEvent = tracker.getTrackedEvent();
-        ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEvent);
         if (timeoutInMilliseconds != -1) {
             scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
         }
@@ -490,20 +482,24 @@ public class RacingEventServiceImpl implements RacingEventService {
     private void ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedEvent trackedEvent) {
         synchronized (eventsObservedForDefaultLeaderboard) {
             if (!eventsObservedForDefaultLeaderboard.contains(trackedEvent)) {
-                trackedEvent.addRaceListener(new RaceListener() {
-                    @Override
-                    public void raceRemoved(TrackedRace trackedRace) {
-                    }
-
-                    @Override
-                    public void raceAdded(TrackedRace trackedRace) {
-                        linkRaceToConfiguredLeaderboardColumns(trackedRace);
-                        leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
-                                trackedRace.getRace().getName(), /* medalRace */ false);
-                    }
-                });
+                trackedEvent.addRaceListener(new RaceAdditionListener());
                 eventsObservedForDefaultLeaderboard.add(trackedEvent);
             }
+        }
+    }
+    
+    private class RaceAdditionListener implements RaceListener, Serializable {
+        private static final long serialVersionUID = 1036955460477000265L;
+
+        @Override
+        public void raceRemoved(TrackedRace trackedRace) {
+        }
+
+        @Override
+        public void raceAdded(TrackedRace trackedRace) {
+            linkRaceToConfiguredLeaderboardColumns(trackedRace);
+            leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
+                    trackedRace.getRace().getName(), /* medalRace */false);
         }
     }
 
@@ -523,7 +519,6 @@ public class RacingEventServiceImpl implements RacingEventService {
                     leaderboardHasChanged = true;
                 }
             }
-            
             if (leaderboardHasChanged) {
                 //Update the corresponding groups, to keep them in sync
                 syncGroupsAfterLeaderboardChange(leaderboard, /*doDatabaseUpdate*/ false);
@@ -535,6 +530,9 @@ public class RacingEventServiceImpl implements RacingEventService {
     public synchronized void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException {
         if (raceTrackersByEvent.containsKey(event)) {
             for (RaceTracker raceTracker : raceTrackersByEvent.get(event)) {
+                for (RaceDefinition race : raceTracker.getRaces()) {
+                    stopTrackingWind(event, race);
+                }
                 raceTracker.stop(); // this also removes the TrackedRace from trackedEvent
                 raceTrackersByID.remove(raceTracker.getID());
             }
@@ -707,10 +705,9 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @Override
     public synchronized void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException {
-        WindTracker windTracker = windTrackers.get(race);
+        WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
         if (windTracker != null) {
             windTracker.stop();
-            windTrackers.remove(race);
         }
     }
 
@@ -719,8 +716,9 @@ public class RacingEventServiceImpl implements RacingEventService {
         List<Triple<Event, RaceDefinition, String>> result = new ArrayList<Triple<Event, RaceDefinition, String>>();
         for (Event event : getAllEvents()) {
             for (RaceDefinition race : event.getAllRaces()) {
-                if (windTrackers.containsKey(race)) {
-                    result.add(new Triple<Event, RaceDefinition, String>(event, race, windTrackers.get(race).toString()));
+                WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
+                if (windTracker != null) {
+                    result.add(new Triple<Event, RaceDefinition, String>(event, race, windTracker.toString()));
                 }
             }
         }
@@ -743,6 +741,7 @@ public class RacingEventServiceImpl implements RacingEventService {
             if (result == null) {
                 result = new DynamicTrackedEventImpl(event);
                 eventTrackingCache.put(event, result);
+                ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
             }
             return result;
         }
@@ -791,8 +790,11 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
         Event event = getEventByName(raceIdentifier.getEventName());
-        RaceDefinition race = event.getRaceByName(raceIdentifier.getRaceName());
-        TrackedRace trackedRace = getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+        TrackedRace trackedRace = null;
+        if (event != null) {
+            RaceDefinition race = event.getRaceByName(raceIdentifier.getRaceName());
+            trackedRace = getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+        }
         return trackedRace;
     }
 
@@ -955,11 +957,13 @@ public class RacingEventServiceImpl implements RacingEventService {
 
     @SuppressWarnings("unchecked") // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
-    public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    public synchronized void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         eventsByName.clear();
         eventsByName.putAll((Map<String, Event>) ois.readObject());
         eventsObservedForDefaultLeaderboard.clear();
-        eventsObservedForDefaultLeaderboard.addAll((Set<DynamicTrackedEvent>) ois.readObject());
+        for (DynamicTrackedEvent trackedEventToObserve : (Set<DynamicTrackedEvent>) ois.readObject()) {
+            ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEventToObserve);
+        }
         eventTrackingCache.clear();
         eventTrackingCache.putAll((Map<Event, DynamicTrackedEvent>) ois.readObject());
         leaderboardGroupsByName.clear();

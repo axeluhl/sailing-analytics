@@ -115,6 +115,8 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private CollapsableComponentViewer<MultiChartSettings> competitorChartViewer = null;
 
     private final AsyncActionsExecutor asyncActionsExecutor;
+    
+    private final RaceTimesInfoProvider raceTimesInfoProvider;
 
     public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
@@ -123,6 +125,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.raceSelectionProvider = theRaceSelectionProvider;
+        this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.scrollOffset = 0;
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         racesByIdentifier = new HashMap<RaceIdentifier, RaceDTO>();
@@ -168,6 +171,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         // create the default leaderboard and select the right race
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
         RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages);
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
 
         List<Component<?>> components = new ArrayList<Component<?>>();
@@ -272,6 +276,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
                     raceMap, "auto", "500px", stringMessages);
 
+            raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
             raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
             componentViewers.add(raceMapViewer);
         }
