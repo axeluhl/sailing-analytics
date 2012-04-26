@@ -634,16 +634,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 if (trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
                     TimePoint legStart = legStartMarkPassing.getTimePoint();
                     final MarkPassing legEndMarkPassing = getMarkPassing(competitor, leg.getTo());
-                    Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
-                    while (fixIter.hasNext()
-                            && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
-                                    legEndMarkPassing.getTimePoint()) < 0)
-                                    && fix.getTimePoint().compareTo(timePoint) < 0))) {
-                        fix = fixIter.next();
-                        if (fix.getTimePoint().compareTo(timePoint) < 0) {
-                            Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
-                            distanceInMeters += xte.getMeters();
-                            count++;
+                    synchronized (track) {
+                        Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
+                        while (fixIter.hasNext()
+                                && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
+                                        legEndMarkPassing.getTimePoint()) < 0) && fix.getTimePoint().compareTo(
+                                        timePoint) < 0))) {
+                            fix = fixIter.next();
+                            if (fix.getTimePoint().compareTo(timePoint) < 0) {
+                                Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
+                                distanceInMeters += xte.getMeters();
+                                count++;
+                            }
                         }
                     }
                 }
