@@ -7,3 +7,6 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: junit.framework;version="4.8.1",
  org.junit;version="4.8.1"
+Require-Bundle: com.sap.sailing.server,
+ com.sap.sailing.domain.common,
+ com.sap.sailing.domain
