@@ -91,9 +91,9 @@ table {
 	line-height: 1.0;
 }
 
-input.magnifier {
+input.opencoloumn {
 	display: block;
-	margin: 3px auto 0 auto !important;
+	margin: 3px auto 3px auto !important;
 }
 
 .breadcrumbPanel {
