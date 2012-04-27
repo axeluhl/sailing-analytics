@@ -176,13 +176,6 @@
 
 	</build>
 	
-  <distributionManagement>
-    <repository>
-      <id>ssh-repository</id>
-      <url>scpexe://trac@localhost:12347/home/trac/maven-repositories/dev</url>
-    </repository>
-  </distributionManagement>
-  
 	<repositories>
 		<repository>
 			<id>equinox-sdk-3.7</id>

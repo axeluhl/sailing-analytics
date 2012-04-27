@@ -39,7 +39,10 @@ public abstract class ObjectInputStreamResolvingAgainstDomainFactory extends Obj
     @Override
     protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
         String className = classDesc.getName();
-        return Thread.currentThread().getContextClassLoader().loadClass(className);
+        // see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6554519
+        // If using loadClass(...) on the class loader directly, an exception is thrown:
+        // StreamCorruptedException: invalid type code 00
+        return Class.forName(className, /* initialize */ true, Thread.currentThread().getContextClassLoader());
     }
     
     @Override
