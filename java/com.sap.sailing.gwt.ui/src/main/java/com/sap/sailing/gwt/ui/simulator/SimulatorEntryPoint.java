@@ -17,8 +17,10 @@ import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
@@ -37,7 +39,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private final DockLayoutPanel panel = new DockLayoutPanel(Unit.PX);
     private final ListBox raceSelector = new ListBox();
     private final CheckBox checkBox = new CheckBox("Show Grid");
- 
+    private Button button;
     private MapWidget mapw;
 
     
@@ -72,6 +74,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         initMap();
         initRaceSelector();
         initDisplayOptions();
+        initButton();
         initPanel();
 
         addOverlays();
@@ -150,7 +153,10 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("Simulator", stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         panel.addNorth(logoAndTitlePanel,68);
-        panel.addWest(raceSelector,300);
+        FlowPanel controlPanel = new FlowPanel();
+        controlPanel.add(raceSelector);
+        controlPanel.add(button);
+        panel.addWest(controlPanel,300);
         //panel.addWest(checkBox,200);
         panel.add(mapw);
         
@@ -254,5 +260,14 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         /*
          * if (checkBox.length > 1) { checkBox[0].setText("Grid"); checkBox[1].setText("Wind Direction"); }
          */
+    }
+    
+    private void initButton() {
+        button = new Button("Simulate", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent arg0) {
+               generateWindField();    
+            }
+            });
     }
 }
