@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.simulator;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -18,9 +18,11 @@ import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
+import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -28,10 +30,11 @@ import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import java.util.logging.*;
 
-public class SimulatorEntryPoint implements EntryPoint {
+public class SimulatorEntryPoint extends AbstractEntryPoint {
     private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
 
-    private final VerticalPanel panel = new VerticalPanel();
+    //private final VerticalPanel panel = new VerticalPanel(); 
+    private final DockLayoutPanel panel = new DockLayoutPanel(Unit.PX);
     private final ListBox raceSelector = new ListBox();
     private final CheckBox checkBox = new CheckBox("Show Grid");
  
@@ -46,7 +49,8 @@ public class SimulatorEntryPoint implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
-        logger.fine("In onModuleLoad");
+        super.onModuleLoad();
+       
         /*
          * Asynchronously loads the Maps API.
          * 
@@ -64,14 +68,15 @@ public class SimulatorEntryPoint implements EntryPoint {
         logger.severe("Logger Name : " + logger.getName() + " Logging level " + logger.getLevel());
         logger.fine("In buildUi");
         loadRaceLocations();
-
+        
         initMap();
         initRaceSelector();
         initDisplayOptions();
         initPanel();
 
         addOverlays();
-      
+        
+        
         // Add the map to the HTML host page
         RootLayoutPanel.get().add(panel);
         
@@ -141,9 +146,32 @@ public class SimulatorEntryPoint implements EntryPoint {
 
     private void initPanel() {
         logger.fine("In initPanel");
-        panel.add(raceSelector);
-        panel.add(checkBox);
+      
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("Simulator", stringMessages);
+        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+        panel.addNorth(logoAndTitlePanel,68);
+        panel.addWest(raceSelector,300);
+        //panel.addWest(checkBox,200);
         panel.add(mapw);
+        
+        //TabPanel tabPanel = new TabPanel();
+        //FlowPanel flowPanel = new FlowPanel();
+        //flowPanel.add(mapw);
+       /* tabPanel.add(flowPanel, "Summary");
+        flowPanel = new FlowPanel();
+        flowPanel.add(mapw);
+        tabPanel.add(flowPanel, "Replay");
+        flowPanel = new FlowPanel();
+        flowPanel.add(mapw);
+        tabPanel.add(flowPanel, "Wind Display");
+        tabPanel.selectTab(0);
+        tabPanel.addStyleName("table-center");
+        tabPanel.setSize("100%","100%");*/
+        //panel.add(tabPanel);
+        //panel.add(flowPanel);
+        
+       
+        
         panel.setSize("100%", "100%");
     }
 
@@ -202,6 +230,12 @@ public class SimulatorEntryPoint implements EntryPoint {
     private void refreshWindFieldOverlay(WindFieldDTO wl) {
         windFieldCanvasOverlay.setWindField(wl);
         windFieldCanvasOverlay.redraw(true);
+        /*
+         if (wl != null && wl.getMatrix()!= null && wl.getMatrix().size() > 0) {
+       
+            PositionDTO position = wl.getMatrix().get(0).position;
+            mapw.panTo(LatLng.newInstance(position.latDeg, position.lngDeg));
+        }*/
      }
     
     
