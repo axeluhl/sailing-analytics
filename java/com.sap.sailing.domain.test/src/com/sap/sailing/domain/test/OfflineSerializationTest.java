@@ -25,6 +25,10 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
+    /**
+     * We had trouble de-serializing int[] through our specialized ObjectInputStream with its own resolveClass
+     * implementation. This test failed initially before we changed the call for loading classes.
+     */
     @Test
     public void testSerializingIntArray() throws ClassNotFoundException, IOException {
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
@@ -33,6 +37,10 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         assertTrue(Arrays.equals(intArray, clone));
     }
     
+    /**
+     * We had trouble de-serializing int[] through our specialized ObjectInputStream with its own resolveClass
+     * implementation. This test failed initially before we changed the call for loading classes.
+     */
     @Test
     public void testSerializingResultDiscardingRuleImpl() throws ClassNotFoundException, IOException {
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
