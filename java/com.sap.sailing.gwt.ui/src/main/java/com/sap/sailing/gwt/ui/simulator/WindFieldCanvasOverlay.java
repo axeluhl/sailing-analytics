@@ -71,7 +71,7 @@ public class WindFieldCanvasOverlay extends CanvasOverlay {
 
         if (wl != null) {
             int canvasWidth = getMap().getSize().getWidth();
-            int canvasHeight = getMap().getSize().getWidth();
+            int canvasHeight = getMap().getSize().getHeight();
             canvas.setWidth(String.valueOf(canvasWidth));
             canvas.setHeight(String.valueOf(canvasHeight));
             canvas.setCoordinateSpaceWidth(canvasWidth);
