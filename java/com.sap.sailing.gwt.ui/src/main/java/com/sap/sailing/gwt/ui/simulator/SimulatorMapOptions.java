@@ -6,7 +6,7 @@ import com.google.gwt.maps.client.geom.Size;
 public class SimulatorMapOptions {
     private final static int width = 500;
     private final static int height = 300;
-    private final static boolean doubleClick = true;
+    private final static boolean doubleClick = false;
     private final static boolean hybridMapType = false;
     private final static boolean keyboard = false;
     private final static boolean largeMapControl3d = false;
