@@ -52,6 +52,10 @@ public class XcelsiusApp extends Servlet {
                     final EventDataPerLeg a = new EventDataPerLeg(req, res, getService(), maxRows);
                     a.perform();
                     return;
+                }else if ("getEventList".equals(action)) {
+                    final EventList a = new EventList(req, res, getService(), maxRows);
+                    a.perform();
+                    return;
                 }else {
                 }
                 Action.say("Unknown action", res);
