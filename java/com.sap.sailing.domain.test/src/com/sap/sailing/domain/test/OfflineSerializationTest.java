@@ -3,8 +3,10 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -20,8 +22,34 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
+    /**
+     * We had trouble de-serializing int[] through our specialized ObjectInputStream with its own resolveClass
+     * implementation. This test failed initially before we changed the call for loading classes.
+     */
+    @Test
+    public void testSerializingIntArray() throws ClassNotFoundException, IOException {
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        int[] intArray = new int[] { 5, 8 };
+        int[] clone = cloneBySerialization(intArray, receiverDomainFactory);
+        assertTrue(Arrays.equals(intArray, clone));
+    }
+    
+    /**
+     * We had trouble de-serializing int[] through our specialized ObjectInputStream with its own resolveClass
+     * implementation. This test failed initially before we changed the call for loading classes.
+     */
+    @Test
+    public void testSerializingResultDiscardingRuleImpl() throws ClassNotFoundException, IOException {
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        ResultDiscardingRuleImpl rdri = new ResultDiscardingRuleImpl(new int[] { 5, 8 });
+        ResultDiscardingRuleImpl clone = cloneBySerialization(rdri, receiverDomainFactory);
+        assertTrue(Arrays.equals(rdri.getDiscardIndexResultsStartingWithHowManyRaces(),
+                clone.getDiscardIndexResultsStartingWithHowManyRaces()));
+    }
+    
     @Test
     public void testIdentityStabilityOfBuoySerialization() throws ClassNotFoundException, IOException {
         DomainFactory senderDomainFactory = new DomainFactoryImpl();

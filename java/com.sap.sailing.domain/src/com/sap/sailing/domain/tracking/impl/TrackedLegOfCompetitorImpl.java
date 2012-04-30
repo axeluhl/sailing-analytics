@@ -380,19 +380,21 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (legStartMarkPassing != null) {
             TimePoint legStart = legStartMarkPassing.getTimePoint();
             final MarkPassing legEndMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getTo());
-            Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
-            while (fixIter.hasNext()
-                    && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
-                            legEndMarkPassing.getTimePoint()) < 0) && fix.getTimePoint().compareTo(timePoint) < 0))) {
-                fix = fixIter.next();
-                if (fix.getTimePoint().compareTo(timePoint) < 0) {
-                    Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
-                    distanceInMeters += xte.getMeters();
-                    count++;
+            synchronized (track) {
+                Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
+                while (fixIter.hasNext()
+                        && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
+                                legEndMarkPassing.getTimePoint()) < 0) && fix.getTimePoint().compareTo(timePoint) < 0))) {
+                    fix = fixIter.next();
+                    if (fix.getTimePoint().compareTo(timePoint) < 0) {
+                        Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
+                        distanceInMeters += xte.getMeters();
+                        count++;
+                    }
                 }
             }
         }
-        return new MeterDistance(distanceInMeters / count);
+        return count == 0 ? null : new MeterDistance(distanceInMeters / count);
     }
 
     @Override

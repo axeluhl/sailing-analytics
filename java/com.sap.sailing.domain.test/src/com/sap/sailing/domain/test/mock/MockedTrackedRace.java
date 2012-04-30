@@ -155,7 +155,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public WindTrack getOrCreateWindTrack(WindSource windSource) {
+    public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -537,6 +537,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public WindTrack getOrCreateWindTrack(WindSource windSource) {
         // TODO Auto-generated method stub
         return null;
     }

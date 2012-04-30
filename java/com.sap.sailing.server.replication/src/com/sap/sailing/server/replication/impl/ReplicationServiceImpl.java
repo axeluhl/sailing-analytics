@@ -54,6 +54,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
+    private final RacingEventService master;
+    
     /**
      * The UUIDs with which this replica is registered by the master identified by the corresponding key
      */
@@ -67,10 +69,29 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
                 Activator.getDefaultContext(), RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
+        master = null;
+    }
+    
+    /**
+     * Like {@link #ReplicationServiceImpl(ReplicationInstancesManager, MessageBrokerManager)}, only that instead of using
+     * an OSGi service tracker to discover the {@link RacingEventService}, the service to replicate is "injected" here.
+     */
+    public ReplicationServiceImpl(final ReplicationInstancesManager replicationInstancesManager,
+            final MessageBrokerManager messageBrokerManager, RacingEventService master) {
+        this.replicationInstancesManager = replicationInstancesManager;
+        replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
+        this.messageBrokerManager = messageBrokerManager;
+        this.master = master;
     }
     
     private RacingEventService getRacingEventService() {
-        return racingEventServiceTracker.getService();
+        RacingEventService result;
+        if (master != null) {
+            result = master;
+        } else {
+            result = racingEventServiceTracker.getService();
+        }
+        return result;
     }
 
     @Override
