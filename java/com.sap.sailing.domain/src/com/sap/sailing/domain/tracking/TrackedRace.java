@@ -65,11 +65,9 @@ public interface TrackedRace extends Serializable {
     TimePoint getAssumedEnd();
 
     /**
-     * Returns a list of the start times of all legs as far as we know them
-     * The leg time of the first leg is equal to #{@link #getStart()}
-     * All other leg times are equal to the first mark passing of the leg 
+     * Returns a list of the first and last mark passing times of all course waypoints
      */
-    Iterable<Pair<TrackedLeg, TimePoint>> getStartTimesOfTrackedLegs();
+    Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
 
     /**
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>

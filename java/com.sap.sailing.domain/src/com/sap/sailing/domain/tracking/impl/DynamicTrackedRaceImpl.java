@@ -100,7 +100,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 getOrCreateTrack(buoy).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageSpeed);
             }
         }
-        updated(MillisecondsTimePoint.now());
+        updated(/* time point */null);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         for (WindSource windSource : getWindSources()) {
             getOrCreateWindTrack(windSource).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
         }
-        updated(MillisecondsTimePoint.now());
+        updated(/* time point */null);
     }
 
     @Override
@@ -311,7 +311,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         if (requiresStartTimeUpdate) {
             invalidateStartTime();
         }
-        invalidateLegTimes();
+        invalidateMarkPassingTimes();
         invalidateEndTime();
         
         // notify *after* all mark passings have been re-established; should avoid flicker
@@ -367,13 +367,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     public synchronized void recordWind(Wind wind, WindSource windSource) {
         getOrCreateWindTrack(windSource).add(wind);
-        updated(null); // wind events shouldn't advance race time
+        updated(/* time point */null); // wind events shouldn't advance race time
     }
     
     @Override
     public synchronized void removeWind(Wind wind, WindSource windSource) {
         getOrCreateWindTrack(windSource).remove(wind);
-        updated(wind.getTimePoint());
+        updated(/* time point */null); // wind events shouldn't advance race time
     }
 
     @Override

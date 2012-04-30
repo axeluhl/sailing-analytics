@@ -646,8 +646,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             
             if (leadingCompetitorDTO != null && lastShownFix.containsKey(leadingCompetitorDTO) && lastShownFix.get(leadingCompetitorDTO) != -1
-                    && legOfLeaderCompetitor > 0 && legOfLeaderCompetitor <= lastRaceTimesInfo.getLegTimes().size()) {
-                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegTimes().get(legOfLeaderCompetitor);
+                    && legOfLeaderCompetitor > 0 && legOfLeaderCompetitor <= lastRaceTimesInfo.getLegInfos().size()) {
+                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(legOfLeaderCompetitor-1);
                 GPSFixDTO lastBoatFix = getBoatFix(leadingCompetitorDTO);
                 double advantageLineLengthInKm = 1.0;
                 double distanceFromBoatPosition = 0.005; // 5m
@@ -707,8 +707,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     private void showStartAndFinishLines(final CourseDTO courseDTO) {
-        if(map != null && courseDTO != null) {
-            if(courseDTO.startGate != null) {
+        if(map != null && courseDTO != null && quickRanks != null && !quickRanks.isEmpty() && lastRaceTimesInfo != null) {
+            int legOfLeadingCompetitor = quickRanks.get(0).legNumber;
+            int numberOfLegs = lastRaceTimesInfo.legInfos.size() - 1;
+            if(courseDTO.startGate != null && legOfLeadingCompetitor == 1) {
                 LatLng[] startGatePoints = new LatLng[2];
                 startGatePoints[0] = LatLng.newInstance(courseDTO.startGate.getA().position.latDeg, courseDTO.startGate.getA().position.lngDeg); 
                 startGatePoints[1] = LatLng.newInstance(courseDTO.startGate.getB().position.latDeg, courseDTO.startGate.getB().position.lngDeg); 
@@ -729,7 +731,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine.deleteVertex(0);
                 }
             }
-            if(courseDTO.finishGate != null) {
+            if(courseDTO.finishGate != null && legOfLeadingCompetitor == numberOfLegs) {
                 LatLng[] finishGatePoints = new LatLng[2];
                 finishGatePoints[0] = LatLng.newInstance(courseDTO.finishGate.getA().position.latDeg, courseDTO.finishGate.getA().position.lngDeg); 
                 finishGatePoints[1] = LatLng.newInstance(courseDTO.finishGate.getB().position.latDeg, courseDTO.finishGate.getB().position.lngDeg); 

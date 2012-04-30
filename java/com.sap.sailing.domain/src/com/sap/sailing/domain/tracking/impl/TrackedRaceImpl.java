@@ -125,9 +125,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private TimePoint endTime;
 
     /**
-     * The calculated start times of the legs
+     * The the first and last passing times of all course waypoints
      */
-    private final List<Pair<TrackedLeg, TimePoint>> startTimesOfLegs;
+    private final List<Pair<Waypoint, Pair<TimePoint, TimePoint>>> markPassingsTimes;
 
     /**
      * The latest time point contained by any of the events received and processed
@@ -237,7 +237,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(
                     MarkPassingByTimeComparator.INSTANCE));
         }
-        startTimesOfLegs = new ArrayList<Pair<TrackedLeg, TimePoint>>();
+        markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
         windTracks = new HashMap<WindSource, WindTrack>();
         windTracks.putAll(windStore.loadWindTracks(trackedEvent, this, millisecondsOverWhichToAverageWind));
         // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
@@ -294,8 +294,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         endTime = null;
     }
 
-    protected void invalidateLegTimes() {
-        startTimesOfLegs.clear();
+    protected void invalidateMarkPassingTimes() {
+        markPassingsTimes.clear();
     }
 
     /**
@@ -425,7 +425,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     protected void setStartTimeReceived(TimePoint start) {
         this.startTimeReceived = start;
         invalidateStartTime();
-        invalidateLegTimes();
+        invalidateMarkPassingTimes();
     }
 
     @Override
@@ -439,45 +439,44 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Iterable<Pair<TrackedLeg, TimePoint>> getStartTimesOfTrackedLegs() {
-        if (startTimesOfLegs.isEmpty()) {
-            int legNumber = 1;
+    public Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
+        if (markPassingsTimes.isEmpty()) {
+            int wayPointNumber = 1;
             // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time order
-            // of the leg times
+            // of the waypoint times
             Date previousLegPassingTime = null;
-            for (TrackedLeg trackedLeg : trackedLegs.values()) {
-                if (legNumber == 1) {
+            for (Waypoint waypoint: getRace().getCourse().getWaypoints()) {
+                Pair<TimePoint, TimePoint> timesPair = new Pair<TimePoint, TimePoint>(null, null);
+                markPassingsTimes.add(new Pair<Waypoint, Pair<TimePoint, TimePoint>>(waypoint, timesPair));
+                if (wayPointNumber == 1) {
                     // For the first leg the use of "firstPassingDate" is not correct,
                     // because boats can pass the start line before the actual start;
                     // therefore we are using the calculated start time here
-                    TimePoint startOfRace = getStart();
-                    if (startOfRace != null) {
-                        startTimesOfLegs.add(new Pair<TrackedLeg, TimePoint>(trackedLeg, startOfRace));
-                    }
-                }
-                Waypoint to = trackedLeg.getLeg().getTo();
-                NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(to);
-                if (markPassings != null && !markPassings.isEmpty()) {
-                    // ensure the leg times are in the right time order; there may perhaps be left-overs for marks to be
-                    // reached later that
-                    // claim it has been passed in the past which may have been an accidental tracker read-out;
-                    // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point ordering
-                    synchronized (markPassings) {
-                        for (MarkPassing currentMarkPassing : markPassings) {
-                            Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
-                            if (previousLegPassingTime == null || currentPassingDate.after(previousLegPassingTime)) {
-                                startTimesOfLegs.add(new Pair<TrackedLeg, TimePoint>(trackedLeg, currentMarkPassing.getTimePoint()));
-                                previousLegPassingTime = currentPassingDate;
-                                break;
+                    timesPair.setA(getStart());
+                } else {
+                    NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(waypoint);
+                    if (markPassings != null && !markPassings.isEmpty()) {
+                        // ensure the leg times are in the right time order; there may perhaps be left-overs for marks to be
+                        // reached later that
+                        // claim it has been passed in the past which may have been an accidental tracker read-out;
+                        // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point ordering
+                        synchronized (markPassings) {
+                            for (MarkPassing currentMarkPassing : markPassings) {
+                                Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
+                                if (previousLegPassingTime == null || currentPassingDate.after(previousLegPassingTime)) {
+                                    timesPair.setA(currentMarkPassing.getTimePoint());
+                                    previousLegPassingTime = currentPassingDate;
+                                    break;
+                                }
                             }
                         }
                     }
                 }
-                legNumber++;
+                wayPointNumber++;
             }
         }
 
-        return startTimesOfLegs;
+        return markPassingsTimes;
     }
 
     @Override
