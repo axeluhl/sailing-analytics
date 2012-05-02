@@ -143,14 +143,16 @@ public class ServerReplicationTest {
     
     @Test
     public void testLeaderboardCreationReplication() throws InterruptedException {
+        Thread.sleep(1000); // wait 1s for JMS to deliver any recovered messages; there should be none
         final String leaderboardName = "My new leaderboard";
+        assertNull(replica.getLeaderboardByName(leaderboardName));
         final int[] discardThresholds = new int[] { 17, 23 };
         CreateLeaderboard createTestLeaderboard = new CreateLeaderboard(leaderboardName, discardThresholds);
         assertNull(master.getLeaderboardByName(leaderboardName));
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
         assertNotNull(masterLeaderboard);
-        Thread.sleep(3000); // wait 3s for JMS to deliver the message and the message to be applied
+        Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
         final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
         assertNotNull(replicaLeaderboard);
         assertTrue(Arrays.equals(masterLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
