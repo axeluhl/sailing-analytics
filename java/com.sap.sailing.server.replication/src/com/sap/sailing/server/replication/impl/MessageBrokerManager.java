@@ -24,13 +24,13 @@ public class MessageBrokerManager {
         this.configuration = configuration;
     }
 
-    public void startMessageBroker() throws Exception {
+    public void startMessageBroker(boolean useJmx) throws Exception {
         broker = new BrokerService();
         broker.setBrokerName(configuration.getBrokerName());
         if (configuration.getDataStoreDirectory() != null) {
             broker.setDataDirectory(configuration.getDataStoreDirectory());
         }
-        broker.setUseJmx(true);
+        broker.setUseJmx(useJmx);
         TransportConnector transportConnector = new TransportConnector();
         transportConnector.setUri(new URI(configuration.getBrokerUrl()));
         broker.addConnector(transportConnector);

@@ -83,6 +83,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
@@ -209,8 +210,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
-        mongoObjectFactory = MongoObjectFactory.INSTANCE;
-        domainObjectFactory = DomainObjectFactory.INSTANCE;
+        mongoObjectFactory = MongoFactory.INSTANCE.getDefaultMongoObjectFactory();
+        domainObjectFactory = MongoFactory.INSTANCE.getDefaultDomainObjectFactory();
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;

@@ -1,7 +1,13 @@
 package com.sap.sailing.server.replication.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,6 +17,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -20,17 +27,20 @@ import javax.jms.TopicSubscriber;
 
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.operationaltransformation.CreateLeaderboard;
 import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
-import com.sap.sailing.server.replication.impl.HasRacingEventService;
 import com.sap.sailing.server.replication.impl.MessageBrokerConfiguration;
 import com.sap.sailing.server.replication.impl.MessageBrokerManager;
 import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
@@ -41,19 +51,28 @@ public class ServerReplicationTest {
     private DomainFactory resolveAgainst;
     private RacingEventServiceImpl replica;
     private RacingEventServiceImpl master;
-
+    private MessageBrokerManager brokerMgr;
+    private File brokerPersistenceDir;
+    
     /**
      * Sets up master and replica, starts the JMS message broker and registers the replica with the master.
      */
     @Before
     public void setUp() throws Exception {
+        final MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        mongoDBService.getDB().dropDatabase();
         resolveAgainst = DomainFactory.INSTANCE;
-        master = new RacingEventServiceImpl();
-        replica = new RacingEventServiceImpl();
+        master = new RacingEventServiceImpl(mongoDBService);
+        replica = new RacingEventServiceImpl(mongoDBService);
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
-        MessageBrokerManager brokerMgr = new MessageBrokerManager(new MessageBrokerConfiguration("local in-VM test broker",
-                "vm://localhost-jms-connection", System.getProperty("java.io.tmpdir")));
-        brokerMgr.startMessageBroker();
+        final String IN_VM_BROKER_URL = "vm://localhost-jms-connection";
+        final String activeMQPersistenceParentDir = System.getProperty("java.io.tmpdir");
+        final String brokerName = "local_in-VM_test_broker";
+        brokerPersistenceDir = new File(activeMQPersistenceParentDir, brokerName);
+        removeTemporaryTestBrokerPersistenceDirectory();
+        brokerMgr = new MessageBrokerManager(new MessageBrokerConfiguration(brokerName,
+                IN_VM_BROKER_URL, activeMQPersistenceParentDir));
+        brokerMgr.startMessageBroker(/* useJmx */ false);
         brokerMgr.createAndStartConnection();
         ReplicationService masterReplicator = new ReplicationServiceImpl(rim, brokerMgr, master);
         ReplicaDescriptor replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost());
@@ -71,7 +90,7 @@ public class ServerReplicationTest {
             @Override
             public TopicSubscriber getTopicSubscriber(String clientID) throws JMSException, UnknownHostException {
                 ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_USER,
-                        ActiveMQConnection.DEFAULT_PASSWORD, "vm://localhost-jms-connection");
+                        ActiveMQConnection.DEFAULT_PASSWORD, IN_VM_BROKER_URL);
                 connectionFactory.setClientID(clientID);
                 Connection connection = connectionFactory.createConnection();
                 connection.start();
@@ -81,33 +100,61 @@ public class ServerReplicationTest {
             }
         };
         ReplicationService replicaReplicator = new ReplicationServiceTestImpl(resolveAgainst, rim, brokerMgr, replicaDescriptor, replica, master, masterReplicator);
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_USER,
-                ActiveMQConnection.DEFAULT_PASSWORD, "vm://localhost-jms-connection");
-        connectionFactory.setClientID("Test Client");
-        Connection connection = connectionFactory.createConnection();
-        connection.start();
-        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        Topic topic = session.createTopic(ReplicationService.SAILING_SERVER_REPLICATION_TOPIC);
-        TopicSubscriber subscriber = session.createDurableSubscriber(topic, InetAddress.getLocalHost().getHostAddress());
-        subscriber.setMessageListener(createReplicator(masterDescriptor, replica));
         replicaReplicator.startToReplicateFrom(masterDescriptor);
     }
 
-    private Replicator createReplicator(ReplicationMasterDescriptor masterDescriptor, final RacingEventService master) {
-        return new Replicator(masterDescriptor, new HasRacingEventService() {
-            @Override
-            public RacingEventService getRacingEventService() {
-                return master;
-            }
-        });
+    private void removeTemporaryTestBrokerPersistenceDirectory() throws FileNotFoundException {
+        if (brokerPersistenceDir.exists() && brokerPersistenceDir.isDirectory()) {
+            System.out.println("deleted brokerPersistenceDir: "+deleteRecursive(brokerPersistenceDir));
+        }
+        File failoverStore = new File("activemq-data");
+        if (failoverStore.exists() && failoverStore.isDirectory()) {
+            System.out.println("deleted failover store: "+deleteRecursive(failoverStore));
+        }
     }
     
+    private boolean deleteRecursive(File path) throws FileNotFoundException{
+        if (!path.exists()) throw new FileNotFoundException(path.getAbsolutePath());
+        boolean ret = true;
+        if (path.isDirectory()){
+            for (File f : path.listFiles()){
+                ret = ret && deleteRecursive(f);
+            }
+        }
+        return ret && path.delete();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        brokerMgr.closeSessions();
+        brokerMgr.closeConnections();
+        brokerMgr.stopMessageBroker();
+        removeTemporaryTestBrokerPersistenceDirectory();
+    }
+
     @Test
     public void testBasicInitialLoad() throws Exception {
+        assertNotSame(master, replica);
         assertEquals(Util.size(master.getAllEvents()), Util.size(replica.getAllEvents()));
         assertEquals(master.getLeaderboardGroups().size(), replica.getLeaderboardGroups().size());
         assertEquals(master.getLeaderboards().size(), replica.getLeaderboards().size());
         assertEquals(master.getLeaderboards().keySet(), replica.getLeaderboards().keySet());
+    }
+    
+    @Test
+    public void testLeaderboardCreationReplication() throws InterruptedException {
+        final String leaderboardName = "My new leaderboard";
+        final int[] discardThresholds = new int[] { 17, 23 };
+        CreateLeaderboard createTestLeaderboard = new CreateLeaderboard(leaderboardName, discardThresholds);
+        assertNull(master.getLeaderboardByName(leaderboardName));
+        master.apply(createTestLeaderboard);
+        final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
+        assertNotNull(masterLeaderboard);
+        Thread.sleep(3000); // wait 3s for JMS to deliver the message and the message to be applied
+        final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+        assertNotNull(replicaLeaderboard);
+        assertTrue(Arrays.equals(masterLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
+                replicaLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()));
     }
 
     private static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
@@ -133,6 +180,7 @@ public class ServerReplicationTest {
         public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException,
                 ClassNotFoundException, JMSException {
             masterReplicationService.registerReplica(replicaDescriptor);
+            registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             TopicSubscriber replicationSubscription = master.getTopicSubscriber(replicaDescriptor.getUuid().toString());
             replicationSubscription.setMessageListener(new Replicator(master, this));
             initialLoad();

@@ -18,8 +18,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.tracking.Wind;
@@ -69,7 +68,7 @@ public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
         Wind wind = new WindImpl(new DegreePosition(123, 45), now, new KnotSpeedWithBearingImpl(10.4,
                 new DegreeBearingImpl(355.5)));
         {
-            DBObject windForMongo = ((MongoObjectFactoryImpl) MongoObjectFactory.INSTANCE).storeWind(wind);
+            DBObject windForMongo = ((MongoObjectFactoryImpl) MongoFactory.INSTANCE.getDefaultMongoObjectFactory()).storeWind(wind);
             DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
             coll.insert(windForMongo);
         }
@@ -83,7 +82,7 @@ public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
             DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
             assertNotNull(coll);
             DBObject object = coll.findOne();
-            Wind readWind = ((DomainObjectFactoryImpl) DomainObjectFactory.INSTANCE).loadWind(object);
+            Wind readWind = ((DomainObjectFactoryImpl) MongoFactory.INSTANCE.getDefaultDomainObjectFactory()).loadWind(object);
             assertEquals(wind.getPosition(), readWind.getPosition());
             assertEquals(wind.getKnots(), readWind.getKnots(), 0.00000001);
             assertEquals(wind.getBearing().getDegrees(), readWind.getBearing().getDegrees(), 0.00000001);

@@ -7,10 +7,8 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.mongodb.MongoDBService;
 
 /**
  * Offers methods to construct {@link DBObject MongoDB objects} from domain objects.
@@ -19,8 +17,6 @@ import com.sap.sailing.mongodb.MongoDBService;
  * 
  */
 public interface MongoObjectFactory {
-    MongoObjectFactory INSTANCE = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
-
     /**
      * Registers for changes of the wind coming from <code>windSource</code> on the <code>trackedRace</code>. Each
      * update received will be appended to the MongoDB and can later be retrieved. The key used to identify the race is

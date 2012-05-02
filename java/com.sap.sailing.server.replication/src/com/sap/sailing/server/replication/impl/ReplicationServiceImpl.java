@@ -174,7 +174,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     /**
-     * @return the UUID that the master generated for this client which is alsy entered into {@link #replicaUUIDs}
+     * @return the UUID that the master generated for this client which is also entered into {@link #replicaUUIDs}
      */
     private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException {
         URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL();
@@ -189,7 +189,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             read = content.read(buf);
         }
         String replicaUUID = uuid.toString();
-        replicaUUIDs.put(master, replicaUUID);
+        registerReplicaUuidForMaster(replicaUUID, master);
         return replicaUUID;
     }
 
@@ -201,5 +201,9 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             throw new RuntimeException(e);
         }
     }
-    
+
+    protected void registerReplicaUuidForMaster(String uuid, ReplicationMasterDescriptor master) {
+        replicaUUIDs.put(master, uuid);
+    }
+
 }
