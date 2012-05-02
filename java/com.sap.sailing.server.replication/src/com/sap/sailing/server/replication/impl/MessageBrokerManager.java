@@ -51,17 +51,18 @@ public class MessageBrokerManager {
     }
     
     public void closeConnections() throws JMSException {
-        if(connection != null) {
+        if (connection != null) {
             connection.close();
         }
     }
 
     public Session createSession(boolean transacted) throws JMSException {
-        return connection.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
+        session = connection.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
+        return session;
     }
 
     public void closeSessions() throws JMSException {
-        if(session != null) {
+        if (session != null) {
             session.close();
         }
     }
