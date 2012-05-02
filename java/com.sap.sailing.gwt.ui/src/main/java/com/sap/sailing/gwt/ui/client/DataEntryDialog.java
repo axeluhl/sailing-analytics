@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -228,6 +230,13 @@ public abstract class DataEntryDialog<T> {
         AbstractEntryPoint.linkEnterToButton(getOkButton(), longBox);
         AbstractEntryPoint.linkEscapeToButton(getCancelButton(), longBox);
         return longBox;
+    }
+
+    public Label createHeadlineLabel(String headlineText) {
+        Label headlineLabel = new Label(headlineText);
+        headlineLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        headlineLabel.getElement().getStyle().setPaddingTop(1, Unit.EM);
+        return headlineLabel;
     }
 
     public CheckBox createCheckbox(String checkboxLabel) {

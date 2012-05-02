@@ -1,0 +1,27 @@
+Trac Trac accounts and their access parameters
+
+Internationale Deutsche Meisterschaften
+http://germanmaster.traclive.dk/events/event_20110929_Internatio/jsonservice.php
+
+Sailing Team Germany
+http://germanmaster.traclive.dk/events/event_20110505_SailingTea/jsonservice.php
+
+Kieler Woche
+http://germanmaster.traclive.dk/events/event_20110609_KielerWoch/jsonservice.php
+Live-URI: tcp://germanmaster.traclive.dk:1520
+Stored-URI: tcp://germanmaster.traclive.dk:1521
+
+Arenal Training Camps Regatta 2012
+http://germanmaster.traclive.dk/events/event_20120314_ArenalTrai/jsonservice.php
+Live-URI: tcp://germanmaster.traclive.dk:1520
+Stored-URI: tcp://germanmaster.traclive.dk:1521
+
+SAP 2011 505 World Championship
+http://germanmaster.traclive.dk/events/event_20110308_SAPWorldCh/jsonservice.php
+Live-URI: tcp://germanmaster.traclive.dk:1520
+Stored-URI: tcp://germanmaster.traclive.dk:1521
+
+505 Worlds 2010
+http://germanmaster.traclive.dk/events/event_20100725_OWorlds/jsonservice.php
+Live-URI: tcp://germanmaster.traclive.dk:1520
+Stored-URI: tcp://germanmaster.traclive.dk:1521

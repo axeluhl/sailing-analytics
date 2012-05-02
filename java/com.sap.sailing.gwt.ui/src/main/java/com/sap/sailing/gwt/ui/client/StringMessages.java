@@ -289,4 +289,9 @@ public interface StringMessages extends Messages {
     String averageCrossTrackErrorInMeters();
     String enterMaster();
     String errorStartingReplication(String hostname, String message);
+    String helpLines();
+    String startLine();
+    String finishLine();
+    String advantageLine();
+    String courseMiddleLine();
 }

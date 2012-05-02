@@ -83,6 +83,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
@@ -121,6 +122,7 @@ import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
@@ -208,8 +210,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
-        mongoObjectFactory = MongoObjectFactory.INSTANCE;
-        domainObjectFactory = DomainObjectFactory.INSTANCE;
+        mongoObjectFactory = MongoFactory.INSTANCE.getDefaultMongoObjectFactory();
+        domainObjectFactory = MongoFactory.INSTANCE.getDefaultDomainObjectFactory();
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.DomainObjectFactory.INSTANCE;
         tractracMongoObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.MongoObjectFactory.INSTANCE;
@@ -944,33 +946,54 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier) {
         RaceTimesInfoDTO raceTimesInfo = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+
         if (trackedRace != null) {
             raceTimesInfo = new RaceTimesInfoDTO(raceIdentifier);
+            List<LegInfoDTO> legInfos = new ArrayList<LegInfoDTO>();
+            raceTimesInfo.setLegInfos(legInfos);
+            List<MarkPassingTimesDTO> markPassingTimesDTOs = new ArrayList<MarkPassingTimesDTO>();
+            raceTimesInfo.setMarkPassingTimes(markPassingTimesDTOs);
+
             raceTimesInfo.setStartOfRace(trackedRace.getStart() == null ? null : trackedRace.getStart().asDate());
             raceTimesInfo.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
-            raceTimesInfo.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
-            raceTimesInfo.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
+            raceTimesInfo.newestTrackingEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
             raceTimesInfo.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
             raceTimesInfo.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
-            List<LegInfoDTO> legTimes = new ArrayList<LegInfoDTO>();
-            raceTimesInfo.setLegTimes(legTimes);
-            Iterable<Pair<TrackedLeg, TimePoint>> startTimesOfTrackedLegs = trackedRace.getStartTimesOfTrackedLegs();
-            synchronized(startTimesOfTrackedLegs) {
+
+            Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
+            synchronized(markPassingsTimes) {
+                int numberOfWaypoints = Util.size(markPassingsTimes);
+                int wayPointNumber = 1;
+                for(Pair<Waypoint, Pair<TimePoint, TimePoint>> markPassingTimes: markPassingsTimes) {
+                    MarkPassingTimesDTO markPassingTimesDTO = new MarkPassingTimesDTO();
+                    markPassingTimesDTO.name = wayPointNumber == numberOfWaypoints ? "F" : "L" + wayPointNumber;
+                    Pair<TimePoint, TimePoint> timesPair = markPassingTimes.getB();
+                    TimePoint firstPassingTime = timesPair.getA();
+                    TimePoint lastPassingTime = timesPair.getB();
+                    markPassingTimesDTO.firstPassingDate = firstPassingTime == null ? null : firstPassingTime.asDate();
+                    markPassingTimesDTO.lastPassingDate = lastPassingTime == null ? null : lastPassingTime.asDate();
+                    markPassingTimesDTOs.add(markPassingTimesDTO);
+                    wayPointNumber++;
+                }
+            }
+
+            Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
+            synchronized(trackedLegs) {
                 int legNumber = 1;
-                for(Pair<TrackedLeg, TimePoint> legWithStarttime: startTimesOfTrackedLegs) {
+                for(TrackedLeg trackedLeg: trackedLegs) {
                     LegInfoDTO legInfoDTO = new LegInfoDTO(legNumber);
-                    legInfoDTO.name = (legNumber == 1) ? "S" : "L" + legNumber;
-                    TimePoint legStartTime = legWithStarttime.getB();
-                    if(legStartTime != null) {
-                        legInfoDTO.firstPassingDate = legStartTime.asDate();
-                        try {
-                            legInfoDTO.legType = legWithStarttime.getA().getLegType(legStartTime);
-                            legInfoDTO.legBearingInDegrees = legWithStarttime.getA().getLegBearing(legStartTime).getDegrees();
-                        } catch (NoWindException e) {
-                            // do nothing
+                    legInfoDTO.name = "L" + legNumber;
+                    try {
+                        MarkPassingTimesDTO markPassingTimesDTO = markPassingTimesDTOs.get(legNumber-1);
+                        if(markPassingTimesDTO.firstPassingDate != null) {
+                            TimePoint p = new MillisecondsTimePoint(markPassingTimesDTO.firstPassingDate);
+                            legInfoDTO.legType = trackedLeg.getLegType(p);
+                            legInfoDTO.legBearingInDegrees = trackedLeg.getLegBearing(p).getDegrees();
                         }
+                    } catch (NoWindException e) {
+                        // do nothing
                     }
-                    legTimes.add(legInfoDTO);
+                    legInfos.add(legInfoDTO);
                     legNumber++;
                 }
             }

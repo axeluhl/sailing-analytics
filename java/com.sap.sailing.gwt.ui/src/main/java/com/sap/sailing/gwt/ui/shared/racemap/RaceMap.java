@@ -87,6 +87,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener, RaceSelectionChangeListener,
@@ -367,9 +368,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     showMarksOnMap(raceMapDataDTO.coursePositions);
                                     showStartAndFinishLines(raceMapDataDTO.coursePositions);
                                     showAdvantageLine(competitorsToShow);
+                                        
                                     // Rezoom the map
                                     // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
-                                    if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
+                                    if (!getSettings().getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
                                         LatLngBounds bounds = getSettings().getZoomSettings().getNewBounds(RaceMap.this);
                                         zoomMapToNewBounds(bounds);
                                         mapFirstZoomDone = true;
@@ -645,9 +647,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             }
             
-            if (leadingCompetitorDTO != null && lastShownFix.containsKey(leadingCompetitorDTO) && lastShownFix.get(leadingCompetitorDTO) != -1
-                    && legOfLeaderCompetitor > 0 && legOfLeaderCompetitor <= lastRaceTimesInfo.getLegTimes().size()) {
-                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegTimes().get(legOfLeaderCompetitor);
+            if (leadingCompetitorDTO != null && getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.ADVANTAGELINE) && 
+                    lastShownFix.containsKey(leadingCompetitorDTO) && lastShownFix.get(leadingCompetitorDTO) != -1
+                    && legOfLeaderCompetitor > 0 && legOfLeaderCompetitor <= lastRaceTimesInfo.getLegInfos().size()) {
+                LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(legOfLeaderCompetitor-1);
                 GPSFixDTO lastBoatFix = getBoatFix(leadingCompetitorDTO);
                 double advantageLineLengthInKm = 1.0;
                 double distanceFromBoatPosition = 0.005; // 5m
@@ -707,14 +710,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     private void showStartAndFinishLines(final CourseDTO courseDTO) {
-        if(map != null && courseDTO != null) {
-            if(courseDTO.startGate != null) {
+        if(map != null && courseDTO != null && quickRanks != null && !quickRanks.isEmpty() && lastRaceTimesInfo != null) {
+            int legOfLeadingCompetitor = quickRanks.get(0).legNumber;
+            int numberOfLegs = lastRaceTimesInfo.legInfos.size();
+            if(courseDTO.startGate != null && legOfLeadingCompetitor == 1 && 
+                    getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.STARTLINE)) {
                 LatLng[] startGatePoints = new LatLng[2];
                 startGatePoints[0] = LatLng.newInstance(courseDTO.startGate.getA().position.latDeg, courseDTO.startGate.getA().position.lngDeg); 
                 startGatePoints[1] = LatLng.newInstance(courseDTO.startGate.getB().position.latDeg, courseDTO.startGate.getB().position.lngDeg); 
                 if(startLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
-                    startLine = new Polyline(startGatePoints, /* color */ "#1e60bc", /* width */ 1, /* opacity */1.0, options);
+                    startLine = new Polyline(startGatePoints, /* color */ "#FFFFFF", /* width */ 1, /* opacity */1.0, options);
                     map.addOverlay(startLine);
                 } else {
                     startLine.deleteVertex(1);
@@ -729,13 +735,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine.deleteVertex(0);
                 }
             }
-            if(courseDTO.finishGate != null) {
+            if(courseDTO.finishGate != null && legOfLeadingCompetitor == numberOfLegs &&
+                getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.FINISHLINE)) {
                 LatLng[] finishGatePoints = new LatLng[2];
                 finishGatePoints[0] = LatLng.newInstance(courseDTO.finishGate.getA().position.latDeg, courseDTO.finishGate.getA().position.lngDeg); 
                 finishGatePoints[1] = LatLng.newInstance(courseDTO.finishGate.getB().position.latDeg, courseDTO.finishGate.getB().position.lngDeg); 
                 if(finishLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
-                    finishLine = new Polyline(finishGatePoints, /* color */ "#1e60bc", /* width */ 1, /* opacity */1.0, options);
+                    finishLine = new Polyline(finishGatePoints, /* color */ "#000000", /* width */ 1, /* opacity */1.0, options);
                     map.addOverlay(finishLine);
                 } else {
                     finishLine.deleteVertex(1);
@@ -1276,7 +1283,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         //Trigger auto-zoom if needed
         RaceMapZoomSettings zoomSettings = getSettings().getZoomSettings();
-        if (!zoomSettings.contains(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
+        if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
             zoomMapToNewBounds(zoomSettings.getNewBounds(this));
         }
     }
@@ -1318,7 +1325,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         //Trigger auto-zoom if needed
         RaceMapZoomSettings zoomSettings = getSettings().getZoomSettings();
-        if (!zoomSettings.contains(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
+        if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
             zoomMapToNewBounds(zoomSettings.getNewBounds(this));
         }
     }
@@ -1346,6 +1353,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     @Override
     public void updateSettings(RaceMapSettings newSettings) {
         boolean maneuverTypeSelectionChanged = false;
+        boolean requiredRedraw = false;
         for (ManeuverType maneuverType : ManeuverType.values()) {
             if (newSettings.isShowManeuverType(maneuverType) != getSettings().isShowManeuverType(maneuverType)) {
                 maneuverTypeSelectionChanged = true;
@@ -1370,17 +1378,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         if (newSettings.getTailLengthInMilliseconds() != getSettings().getTailLengthInMilliseconds()) {
             getSettings().setTailLengthInMilliseconds(newSettings.getTailLengthInMilliseconds());
-            redraw();
+            requiredRedraw = true;
         }
         if (newSettings.isShowOnlySelectedCompetitors() != getSettings().isShowOnlySelectedCompetitors()) {
             getSettings().setShowOnlySelectedCompetitors(newSettings.isShowOnlySelectedCompetitors());
-            redraw();
+            requiredRedraw = true;
         }
         if (!newSettings.getZoomSettings().equals(getSettings().getZoomSettings())) {
             getSettings().setZoomSettings(newSettings.getZoomSettings());
-            if (!getSettings().getZoomSettings().contains(ZoomTypes.NONE)) {
+            if (!getSettings().getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
                 zoomMapToNewBounds(getSettings().getZoomSettings().getNewBounds(this));
             }
+        }
+        if (!newSettings.getHelpLinesSettings().equals(getSettings().getHelpLinesSettings())) {
+            getSettings().setHelpLinesSettings(newSettings.getHelpLinesSettings());
+            requiredRedraw = true;
+        }
+        if(requiredRedraw) {
+            redraw();
         }
     }
     

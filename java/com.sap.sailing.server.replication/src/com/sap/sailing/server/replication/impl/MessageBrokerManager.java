@@ -24,13 +24,13 @@ public class MessageBrokerManager {
         this.configuration = configuration;
     }
 
-    public void startMessageBroker() throws Exception {
+    public void startMessageBroker(boolean useJmx) throws Exception {
         broker = new BrokerService();
         broker.setBrokerName(configuration.getBrokerName());
         if (configuration.getDataStoreDirectory() != null) {
             broker.setDataDirectory(configuration.getDataStoreDirectory());
         }
-        broker.setUseJmx(true);
+        broker.setUseJmx(useJmx);
         TransportConnector transportConnector = new TransportConnector();
         transportConnector.setUri(new URI(configuration.getBrokerUrl()));
         broker.addConnector(transportConnector);
@@ -51,17 +51,18 @@ public class MessageBrokerManager {
     }
     
     public void closeConnections() throws JMSException {
-        if(connection != null) {
+        if (connection != null) {
             connection.close();
         }
     }
 
     public Session createSession(boolean transacted) throws JMSException {
-        return connection.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
+        session = connection.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
+        return session;
     }
 
     public void closeSessions() throws JMSException {
-        if(session != null) {
+        if (session != null) {
             session.close();
         }
     }

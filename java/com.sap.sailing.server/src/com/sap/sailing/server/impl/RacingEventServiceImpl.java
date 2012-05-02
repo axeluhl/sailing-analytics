@@ -47,6 +47,7 @@ import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
@@ -70,6 +71,7 @@ import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
+import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
@@ -121,9 +123,13 @@ public class RacingEventServiceImpl implements RacingEventService {
     private final Set<OperationExecutionListener> operationExecutionListeners;
 
     public RacingEventServiceImpl() {
+        this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE.getDefaultMongoObjectFactory());
+    }
+    
+    private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
         tractracDomainFactory = DomainFactory.INSTANCE;
-        domainObjectFactory = DomainObjectFactory.INSTANCE;
-        mongoObjectFactory = MongoObjectFactory.INSTANCE;
+        this.domainObjectFactory = domainObjectFactory;
+        this.mongoObjectFactory = mongoObjectFactory;
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         swissTimingDomainFactory = com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE;
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
@@ -141,15 +147,19 @@ public class RacingEventServiceImpl implements RacingEventService {
         loadStoredLeaderboardsAndGroups();
     }
     
+    public RacingEventServiceImpl(MongoDBService mongoDBService) {
+        this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE.getMongoObjectFactory(mongoDBService));
+    }
+    
     private void loadStoredLeaderboardsAndGroups() {
-        //Loading all leaderboard groups and putting the contained leaderboards
+        // Loading all leaderboard groups and putting the contained leaderboards
         for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups()) {
             leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 leaderboardsByName.put(leaderboard.getName(), leaderboard);
             }
         }
-        //Loading the remaining leaderboards
+        // Loading the remaining leaderboards
         for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup()) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
         }

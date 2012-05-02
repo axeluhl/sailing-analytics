@@ -26,5 +26,5 @@ public interface ReplicationService {
      */
     void registerReplica(ReplicaDescriptor replica) throws JMSException;
 
-    void unregisterReplica(ReplicaDescriptor replica);
+    void unregisterReplica(ReplicaDescriptor replica) throws JMSException;
 }

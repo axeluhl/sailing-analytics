@@ -88,6 +88,10 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
      */
     Map<String, Leaderboard> getLeaderboards();
 
+    /**
+     * @return a leaderboard whose {@link Leaderboard#getName()} method returns the value of the <code>name</code>
+     *         parameter, or <code>null</code> if no such leaderboard is known to this service
+     */
     Leaderboard getLeaderboardByName(String name);
 
     /**

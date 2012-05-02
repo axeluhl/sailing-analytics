@@ -5,17 +5,23 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
-import org.osgi.util.tracker.ServiceTracker;
-
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 
+/**
+ * Receives {@link RacingEventServiceOperation}s through JMS and
+ * {@link RacingEventService#apply(RacingEventServiceOperation) applies} them to the {@link RacingEventService} passed
+ * to this replicator at construction.
+ * 
+ * @author Axel Uhl (d043530)
+ * 
+ */
 public class Replicator implements MessageListener {
     private final ReplicationMasterDescriptor master;
-    private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final HasRacingEventService racingEventServiceTracker;
     
-    public Replicator(ReplicationMasterDescriptor master, ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker) {
+    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker) {
         this.master = master;
         this.racingEventServiceTracker = racingEventServiceTracker;
     }
@@ -29,7 +35,7 @@ public class Replicator implements MessageListener {
     public void onMessage(Message m) {
         try {
             RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ((ObjectMessage) m).getObject();
-            racingEventServiceTracker.getService().apply(operation);
+            racingEventServiceTracker.getRacingEventService().apply(operation);
         } catch (JMSException e) {
             throw new RuntimeException(e);
         }
