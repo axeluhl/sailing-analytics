@@ -54,7 +54,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
-    private final RacingEventService master;
+    private final RacingEventService localService;
     
     /**
      * The UUIDs with which this replica is registered by the master identified by the corresponding key
@@ -69,7 +69,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
                 Activator.getDefaultContext(), RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
-        master = null;
+        localService = null;
     }
     
     /**
@@ -77,18 +77,18 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * an OSGi service tracker to discover the {@link RacingEventService}, the service to replicate is "injected" here.
      */
     public ReplicationServiceImpl(final ReplicationInstancesManager replicationInstancesManager,
-            final MessageBrokerManager messageBrokerManager, RacingEventService master) {
+            final MessageBrokerManager messageBrokerManager, RacingEventService localService) {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
         this.messageBrokerManager = messageBrokerManager;
-        this.master = master;
+        this.localService = localService;
     }
     
     @Override
     public RacingEventService getRacingEventService() {
         RacingEventService result;
-        if (master != null) {
-            result = master;
+        if (localService != null) {
+            result = localService;
         } else {
             result = racingEventServiceTracker.getService();
         }
