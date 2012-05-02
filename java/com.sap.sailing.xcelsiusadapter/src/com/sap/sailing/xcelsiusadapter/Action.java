@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-import javax.servlet.ServletException;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,7 +26,7 @@ import org.jdom.JDOMException;
 import org.jdom.output.DOMOutputter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
-import org.w3c.dom.Node;
+
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;

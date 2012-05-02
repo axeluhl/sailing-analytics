@@ -1,29 +1,19 @@
 package com.sap.sailing.xcelsiusadapter;
 
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 
-import javax.servlet.ServletOutputStream;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+
 
 import org.jdom.Document;
 import org.jdom.Element;
-import org.w3c.dom.Node;
+
 
 
 import com.sap.sailing.domain.base.*;
