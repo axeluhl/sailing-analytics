@@ -20,7 +20,7 @@ public class Activator implements BundleActivator {
         MessageBrokerConfiguration brokerConfig = new MessageBrokerConfiguration("SailingServerReplicationBroker",
                 "tcp://localhost:61616", new File(tmpDir, "kahadb").getAbsolutePath());
         messageBrokerManager = new MessageBrokerManager(brokerConfig);
-        messageBrokerManager.startMessageBroker(true);
+        messageBrokerManager.startMessageBroker(/* use JMX */ false);
         messageBrokerManager.createAndStartConnection();
         replicationInstancesManager = new ReplicationInstancesManager();
         ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(replicationInstancesManager, messageBrokerManager);
