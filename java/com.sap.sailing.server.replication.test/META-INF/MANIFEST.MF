@@ -14,6 +14,5 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.server.replication,
  com.sap.sailing.domain.test,
  org.apache.activemq.activemq-core;bundle-version="5.4.3",
- org.eclipse.osgi;bundle-version="3.7.1",
  com.sap.sailing.mongodb,
  com.mongodb.driver;bundle-version="2.6.2"
