@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.Bearing;
@@ -109,6 +110,13 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 		Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
 		RectangularBoundary bd = new RectangularBoundary(nw,se);
 		List<Position> lattice = bd.extractLattice(5, 5);
+		
+		//TODO remove this, only placed so that we can display some points
+		if (lattice == null) {
+		    lattice = new LinkedList<Position>();
+		    lattice.add(nw);
+		    lattice.add(se);
+		}
 		
 		WindField wf = new WindFieldImpl(bd, params.getWindSpeed(), params.getWindBearing());
 		List<WindDTO> wList = new ArrayList<WindDTO>();
