@@ -1049,6 +1049,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             trackedLegs.remove(toRemove);
             updated(/* time point */null);
         }
+        // remove all corresponding markpassings if a waypoint has been removed
+        NavigableSet<MarkPassing> markPassingsRemoved = markPassingsForWaypoint.remove(waypointThatGotRemoved);
+        for (NavigableSet<MarkPassing> markPassingsForOneCompetitor : markPassingsForCompetitor.values()) {
+            markPassingsForOneCompetitor.removeAll(markPassingsRemoved);
+        }
     }
 
     private void updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointRemoved(int zeroBasedIndex,
