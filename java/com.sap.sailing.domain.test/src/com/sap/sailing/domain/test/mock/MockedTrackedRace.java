@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -316,6 +317,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public RaceDefinition getRaceByName(String raceName) {
                         // TODO Auto-generated method stub
                         return null;
+                    }
+
+                    @Override
+                    public void addEventListener(EventListener listener) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void removeEventListener(EventListener listener) {
+                        // TODO Auto-generated method stub
+                        
                     }
                 };
             }

@@ -48,6 +48,10 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         CreateSwissTimingRacePanel createSwissTimingRacePanel = new CreateSwissTimingRacePanel(sailingService,this,stringMessages);
         createSwissTimingRacePanel.setSize("90%", "90%");
         tabPanel.add(createSwissTimingRacePanel,"Create SwissTiming race",false);
+        TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this, this, stringMessages);
+        eventDisplayers.add(trackedRacesManagementPanel);
+        trackedRacesManagementPanel.setSize("90%", "90%");
+        tabPanel.add(trackedRacesManagementPanel, stringMessages.trackedRaces(),false);
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         WindPanel windPanel = new WindPanel(sailingService, asyncActionsExecutor, this, this, stringMessages);
         eventDisplayers.add(windPanel);

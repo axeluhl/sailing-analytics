@@ -29,6 +29,8 @@ public class RaceMapSettingsTypeFormatter {
             return stringConstants.finishLine();
         case ADVANTAGELINE:
             return stringConstants.advantageLine();
+        case COURSEMIDDLELINE:            
+            return stringConstants.courseMiddleLine();
         }
         return null;
     }
