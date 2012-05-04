@@ -113,15 +113,16 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 		WindField wf = new WindFieldImpl(bd, params.getWindSpeed(), params.getWindBearing());
 		List<WindDTO> wList = new ArrayList<WindDTO>();
 		
-		for (Position p : lattice) {			
+		if (lattice != null) {
+		    for (Position p : lattice) {			
 			Wind localWind = wf.getWind(new WindFieldCoordinatesImpl(p));
 			WindDTO w = new WindDTO();
 			w.position = new PositionDTO(localWind.getPosition().getLatDeg(),localWind.getPosition().getLngDeg());
 			w.trueWindBearingDeg = localWind.getBearing().getDegrees();
 			w.trueWindSpeedInMetersPerSecond = localWind.getMetersPerSecond();
 			wList.add(w);	
+		    }
 		}
-		
 		WindFieldDTO wfDTO = new WindFieldDTO();
 		wfDTO.setMatrix(wList);
 		return wfDTO;
