@@ -17,8 +17,6 @@ import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
-import com.sap.sailing.simulator.Boundaries;
-import com.sap.sailing.simulator.BoundariesIterator;
 import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.WindFieldCoordinatesImpl;
@@ -106,27 +104,20 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 		Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
 		Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
 		RectangularBoundary bd = new RectangularBoundary(nw,se);
+		List<Position> lattice = bd.extractLattice(5, 5);
 		
 		WindField wf = new WindFieldImpl(bd, params.getWindSpeed(), params.getWindBearing());
-		
-		BoundariesIterator bi = wf.getBoundaries().boundariesIterator();
-		bi.setHorizontalResolution(params.getxRes());
-		bi.setVerticalResolution(params.getyRes());
-		
 		List<WindDTO> wList = new ArrayList<WindDTO>();
 		
-		while (bi.hasNext()) {
-			
-			Wind localWind = wf.getWind(new WindFieldCoordinatesImpl(bi.next()));
+		for (Position p : lattice) {			
+			Wind localWind = wf.getWind(new WindFieldCoordinatesImpl(p));
 			WindDTO w = new WindDTO();
 			w.position = new PositionDTO(localWind.getPosition().getLatDeg(),localWind.getPosition().getLngDeg());
 			w.trueWindBearingDeg = localWind.getBearing().getDegrees();
 			w.trueWindSpeedInMetersPerSecond = localWind.getMetersPerSecond();
-			wList.add(w);
-			
+			wList.add(w);	
 		}
 		
-	    
 		WindFieldDTO wfDTO = new WindFieldDTO();
 		wfDTO.setMatrix(wList);
 		return wfDTO;
