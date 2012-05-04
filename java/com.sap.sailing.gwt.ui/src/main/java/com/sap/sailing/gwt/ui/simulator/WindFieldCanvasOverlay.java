@@ -30,9 +30,9 @@ import com.sap.sailing.gwt.ui.simulator.util.WindFieldMouseMoveHandler;
 public class WindFieldCanvasOverlay extends CanvasOverlay {
 
     /* x coordinate where the widget is placed */
-    private final int xPos = 0;
+    private int xPos = 0;
     /* y coordinate where the widget is placed */
-    private final int yPos = 0;
+    private int yPos = 0;
 
     /* The wind field that is to be displayed in the overlay */
     private WindFieldDTO wl;
@@ -79,9 +79,14 @@ public class WindFieldCanvasOverlay extends CanvasOverlay {
 
             clear();
 
-            drawWindField();
-
+            
+            Point sw = getMap().convertLatLngToDivPixel(getMap().getBounds().getSouthWest());
+            Point ne = getMap().convertLatLngToDivPixel(getMap().getBounds().getNorthEast());
+            xPos = Math.min(sw.getX(), ne.getX());
+            yPos = Math.min(sw.getY(), ne.getY());
+            
             getPane().setWidgetPosition(getCanvas(), xPos, yPos);
+            drawWindField();
         }
 
     }
@@ -120,11 +125,13 @@ public class WindFieldCanvasOverlay extends CanvasOverlay {
 
         LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
         Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
-        windFieldPoints.put(new ToolTip(canvasPositionInPx.getX(), canvasPositionInPx.getY()), windDTO);
+       
       
-        int x = canvasPositionInPx.getX();
-        int y = canvasPositionInPx.getY();
+        int x = canvasPositionInPx.getX() - xPos;
+        int y = canvasPositionInPx.getY() - yPos;
 
+        windFieldPoints.put(new ToolTip(x, y), windDTO);
+        
         double dx = length * Math.cos(angle);
         double dy = length * Math.sin(angle);
 
