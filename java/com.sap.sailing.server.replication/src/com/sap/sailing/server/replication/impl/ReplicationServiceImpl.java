@@ -1,8 +1,10 @@
 package com.sap.sailing.server.replication.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -11,10 +13,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.jms.BytesMessage;
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
-import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
@@ -141,7 +143,13 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         Topic topic = getReplicationTopic();
         Session session = messageBrokerManager.getSession();
         getMessageProducer(topic).setDeliveryMode(DeliveryMode.PERSISTENT);
-        ObjectMessage operationAsMessage = session.createObjectMessage(operation);
+        BytesMessage operationAsMessage = session.createBytesMessage();
+        // serialize operation into message
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(operation);
+        oos.close();
+        operationAsMessage.writeBytes(bos.toByteArray());
         messageProducer.send(operationAsMessage);
     }
 

@@ -1,11 +1,14 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
@@ -13,11 +16,18 @@ public class EventImpl extends NamedImpl implements Event {
     private static final long serialVersionUID = 6509564189552478869L;
     private final Set<RaceDefinition> races;
     private final BoatClass boatClass;
+    private transient Set<EventListener> eventListeners;
     
     public EventImpl(String name, BoatClass boatClass) {
         super(name+(boatClass==null?"":" ("+boatClass.getName()+")"));
         races = new HashSet<RaceDefinition>();
+        eventListeners = new HashSet<EventListener>();
         this.boatClass = boatClass;
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        eventListeners = new HashSet<>();
     }
 
     @Override
@@ -46,12 +56,22 @@ public class EventImpl extends NamedImpl implements Event {
         synchronized (races) {
             races.add(race);
         }
+        synchronized (eventListeners) {
+            for (EventListener l : eventListeners) {
+                l.raceAdded(this, race);
+            }
+        }
     }
     
     @Override
     public void removeRace(RaceDefinition race) {
         synchronized (races) {
             races.remove(race);
+        }
+        synchronized (eventListeners) {
+            for (EventListener l : eventListeners) {
+                l.raceRemoved(this, race);
+            }
         }
     }
 
@@ -69,6 +89,20 @@ public class EventImpl extends NamedImpl implements Event {
             }
         }
         return result;
+    }
+
+    @Override
+    public void addEventListener(EventListener listener) {
+        synchronized (eventListeners) {
+            eventListeners.add(listener);
+        }
+    }
+
+    @Override
+    public void removeEventListener(EventListener listener) {
+        synchronized (eventListeners) {
+            eventListeners.remove(listener);
+        }
     }
 
 }

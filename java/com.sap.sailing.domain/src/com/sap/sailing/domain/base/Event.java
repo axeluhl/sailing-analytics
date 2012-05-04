@@ -40,5 +40,8 @@ public interface Event extends Named {
     void addRace(RaceDefinition race);
 
     void removeRace(RaceDefinition raceDefinition);
+ 
+    void addEventListener(EventListener listener);
     
+    void removeEventListener(EventListener listener);
 }
