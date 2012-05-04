@@ -190,7 +190,7 @@ public class ServerReplicationTest {
     @Test
     public void testWaypointRemovalReplication() throws InterruptedException {
         final String boatClassName = "49er";
-        // FIXME use master DomainFactory
+        // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true);
         final String baseEventName = "Test Event";
@@ -203,13 +203,18 @@ public class ServerReplicationTest {
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new EventName(event.getName()), race);
         master.apply(addRaceOperation);
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy1")));
+        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy2")));
+        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
+        masterCourse.removeWaypoint(1);
         Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
         Event replicaEvent = replica.getEvent(new EventName(event.getName()));
         assertNotNull(replicaEvent);
         RaceDefinition replicaRace = replicaEvent.getRaceByName(raceName);
         assertNotNull(replicaRace);
         Course replicaCourse = replicaRace.getCourse();
-        assertEquals(1, Util.size(replicaCourse.getWaypoints()));
+        assertEquals(2, Util.size(replicaCourse.getWaypoints()));
+        assertEquals("Buoy1", replicaCourse.getFirstWaypoint().getBuoys().iterator().next().getName());
+        assertEquals("Buoy3", replicaCourse.getLastWaypoint().getBuoys().iterator().next().getName());
     }
 
     private static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
