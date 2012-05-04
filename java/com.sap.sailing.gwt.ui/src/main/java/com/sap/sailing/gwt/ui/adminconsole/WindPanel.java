@@ -77,7 +77,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final TextColumn<WindDTO> windDirectionInDegColumn;
     private final TextColumn<WindDTO> dampenedSpeedInKnotsColumn;
     private final TextColumn<WindDTO> dampenedWindDirectionInDegColumn;
-    private final TrackedEventsComposite trackedEventsComposite;
+    private final TrackedRacesListComposite trackedRacesListComposite;
     private final RaceSelectionProvider raceSelectionProvider;
     private final WindSourcesToExcludeSelector windSourcesToExcludeSelector;
     private final Map<WindSource, ListDataProvider<WindDTO>> windLists;
@@ -148,10 +148,10 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
             }
         };
         grid = new Grid(4, 2); // first row: event/race selection; second row: wind source selection; third row: wind display
-        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher,
+        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, eventRefresher,
                 raceSelectionProvider, stringMessages, false);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
-        grid.setWidget(0, 0, trackedEventsComposite);
+        grid.setWidget(0, 0, trackedRacesListComposite);
         windSettingPanel = new WindSettingPanel(sailingService, errorReporter, raceSelectionProvider, this);
         grid.setWidget(0, 1, windSettingPanel);
         HorizontalPanel windSourceSelectionPanel = new HorizontalPanel();
@@ -198,7 +198,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
 
     @Override
     public void fillEvents(List<EventDTO> result) {
-        trackedEventsComposite.fillEvents(result);
+        trackedRacesListComposite.fillEvents(result);
     }
 
     @Override

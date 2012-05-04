@@ -61,7 +61,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link EventDisplayer}, e.g., with
  * the {@link AdminConsoleEntryPoint}.
  */
-public class TrackedEventsComposite extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
+public class TrackedRacesListComposite extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
     private final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
 
     private final boolean multiSelection;
@@ -111,7 +111,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
 
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
-    public TrackedEventsComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+    public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final EventRefresher eventRefresher, RaceSelectionProvider raceSelectionProvider,
             StringMessages stringConstants, boolean hasMultiSelection) {
         if (eventRefresher == null) {
@@ -318,7 +318,7 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
                     for (RaceDTO selectedRace : selectedRaces) {
                         selectedRaceIdentifiers.add(selectedRace.getRaceIdentifier());
                     }
-                    TrackedEventsComposite.this.raceSelectionProvider.setSelection(selectedRaceIdentifiers, TrackedEventsComposite.this);
+                    TrackedRacesListComposite.this.raceSelectionProvider.setSelection(selectedRaceIdentifiers, TrackedRacesListComposite.this);
                 }
             }
         });
@@ -427,6 +427,10 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         raceSelectionProvider.setAllRaces(newAllRaceIdentifiers); // have this object be notified; triggers onRaceSelectionChange
     }
 
+    public void addRaceSelectionChangeListener(RaceSelectionChangeListener listener) {
+        this.raceSelectionProvider.addRaceSelectionChangeListener(listener);
+    }
+    
     public void addTrackedRaceChangeListener(TrackedRaceChangedListener listener) {
         this.raceIsTrackedRaceChangeListener.add(listener);
     }
@@ -505,7 +509,6 @@ public class TrackedEventsComposite extends FormPanel implements EventDisplayer,
         for (RaceDTO raceFromAllRaces : raceList.getList()) {
             selectionModel.setSelected(raceFromAllRaces, selectedRaces.contains(raceFromAllRaces.getRaceIdentifier()));
         }
-        
     }
 
     private Iterable<RaceDTO> getAllRaces() {

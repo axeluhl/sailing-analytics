@@ -230,7 +230,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         declinationCheckbox.setWordWrap(false);
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
-        trackedRacesPanel.add(trackedEventsComposite);
+        trackedRacesPanel.add(trackedRacesListComposite);
 
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
         racesPanel.add(racesButtonPanel);
@@ -373,7 +373,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     @Override
     public void fillEvents(List<EventDTO> result) {
-        trackedEventsComposite.fillEvents(result);
+        trackedRacesListComposite.fillEvents(result);
     }
     
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
