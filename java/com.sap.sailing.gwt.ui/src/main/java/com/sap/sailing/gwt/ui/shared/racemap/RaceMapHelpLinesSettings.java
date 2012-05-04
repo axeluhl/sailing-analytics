@@ -9,7 +9,7 @@ public class RaceMapHelpLinesSettings {
      * Types of help lines on the map
      */
     public enum HelpLineTypes {
-        STARTLINE, FINISHLINE, ADVANTAGELINE, // COURSEMIDDLELINE ..not supported yet
+        STARTLINE, FINISHLINE, ADVANTAGELINE, COURSEMIDDLELINE
     }
     
     private ArrayList<HelpLineTypes> visibleHelpLines;
@@ -22,6 +22,7 @@ public class RaceMapHelpLinesSettings {
         visibleHelpLines.add(HelpLineTypes.STARTLINE);
         visibleHelpLines.add(HelpLineTypes.FINISHLINE);
         visibleHelpLines.add(HelpLineTypes.ADVANTAGELINE);
+        visibleHelpLines.add(HelpLineTypes.COURSEMIDDLELINE);
     }
     
     public RaceMapHelpLinesSettings(ArrayList<HelpLineTypes> visibleHelpLines) {

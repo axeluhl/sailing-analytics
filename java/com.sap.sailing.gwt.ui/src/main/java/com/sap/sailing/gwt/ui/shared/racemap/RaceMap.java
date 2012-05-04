@@ -117,6 +117,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private Polyline advantageLine;
 
+    /**
+     * Polyline for the course middle line.
+     */
+    private Polyline courseMiddleLine;
+
     private WindTrackInfoDTO lastCombinedWindTrackInfoDTO;
     
     /**
@@ -708,11 +713,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         }
     }
-    
+
     private void showStartAndFinishLines(final CourseDTO courseDTO) {
         if(map != null && courseDTO != null && quickRanks != null && !quickRanks.isEmpty() && lastRaceTimesInfo != null) {
             int legOfLeadingCompetitor = quickRanks.get(0).legNumber;
             int numberOfLegs = lastRaceTimesInfo.legInfos.size();
+            // draw the start line
             if(courseDTO.startGate != null && legOfLeadingCompetitor == 1 && 
                     getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.STARTLINE)) {
                 LatLng[] startGatePoints = new LatLng[2];
@@ -735,6 +741,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     startLine.deleteVertex(0);
                 }
             }
+            // draw the finish line
             if(courseDTO.finishGate != null && legOfLeadingCompetitor == numberOfLegs &&
                 getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.FINISHLINE)) {
                 LatLng[] finishGatePoints = new LatLng[2];
@@ -757,6 +764,32 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     finishLine.deleteVertex(0);
                 }
             }
+            // draw the course middle line
+            if(courseDTO.startGate != null && legOfLeadingCompetitor == 1 && courseDTO.buoys.size() >= 1 &&
+                    getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.COURSEMIDDLELINE)) {
+                LatLng[] courseMiddleLinePoints = new LatLng[2];
+                double p1Lat = (courseDTO.startGate.getA().position.latDeg + courseDTO.startGate.getB().position.latDeg) / 2.0;
+                double p1Lng = (courseDTO.startGate.getA().position.lngDeg + courseDTO.startGate.getB().position.lngDeg) / 2.0;
+                courseMiddleLinePoints[0] = LatLng.newInstance(p1Lat, p1Lng); 
+                courseMiddleLinePoints[1] = LatLng.newInstance(courseDTO.buoys.get(0).position.latDeg, courseDTO.buoys.get(0).position.lngDeg); 
+                if(courseMiddleLine == null) {
+                    PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
+                    courseMiddleLine = new Polyline(courseMiddleLinePoints, /* color */ "#FF0000", /* width */ 1, /* opacity */1.0, options);
+                    map.addOverlay(courseMiddleLine);
+                } else {
+                    courseMiddleLine.deleteVertex(1);
+                    courseMiddleLine.deleteVertex(0);
+                    courseMiddleLine.insertVertex(0, courseMiddleLinePoints[0]);
+                    courseMiddleLine.insertVertex(1, courseMiddleLinePoints[1]);
+                }
+            }
+            else {
+                if(courseMiddleLine != null) {
+                    courseMiddleLine.deleteVertex(1);
+                    courseMiddleLine.deleteVertex(0);
+                }
+            }
+
         }
     }
     
