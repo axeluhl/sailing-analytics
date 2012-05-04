@@ -35,8 +35,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -461,7 +460,9 @@ public class AdminApp extends Servlet {
             if (windStore.equals(WIND_STORE_EMPTY)) {
                 return EmptyWindStore.INSTANCE;
             } else if (windStore.equals(WIND_STORE_MONGO)) {
-                return MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoObjectFactory.INSTANCE, DomainObjectFactory.INSTANCE);
+                return MongoWindStoreFactory.INSTANCE.getMongoWindStore(
+                        MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
             } else {
                 log("Couldn't find wind store "+windStore+". Using EmptyWindStore instead.");
                 return EmptyWindStore.INSTANCE;

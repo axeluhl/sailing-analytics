@@ -14,8 +14,8 @@ import java.util.Map;
 import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicSubscriber;
 
@@ -43,7 +43,7 @@ import com.sap.sailing.server.replication.ReplicationService;
  * @author Frank Mittag, Axel Uhl (d043530)
  * 
  */
-public class ReplicationServiceImpl implements ReplicationService, OperationExecutionListener {
+public class ReplicationServiceImpl implements ReplicationService, OperationExecutionListener, HasRacingEventService {
     private final ReplicationInstancesManager replicationInstancesManager;
     
     private final MessageBrokerManager messageBrokerManager;
@@ -54,7 +54,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
-    private final RacingEventService master;
+    private final RacingEventService localService;
     
     /**
      * The UUIDs with which this replica is registered by the master identified by the corresponding key
@@ -69,7 +69,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
                 Activator.getDefaultContext(), RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
-        master = null;
+        localService = null;
     }
     
     /**
@@ -77,17 +77,18 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      * an OSGi service tracker to discover the {@link RacingEventService}, the service to replicate is "injected" here.
      */
     public ReplicationServiceImpl(final ReplicationInstancesManager replicationInstancesManager,
-            final MessageBrokerManager messageBrokerManager, RacingEventService master) {
+            final MessageBrokerManager messageBrokerManager, RacingEventService localService) {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
         this.messageBrokerManager = messageBrokerManager;
-        this.master = master;
+        this.localService = localService;
     }
     
-    private RacingEventService getRacingEventService() {
+    @Override
+    public RacingEventService getRacingEventService() {
         RacingEventService result;
-        if (master != null) {
-            result = master;
+        if (localService != null) {
+            result = localService;
         } else {
             result = racingEventServiceTracker.getService();
         }
@@ -100,6 +101,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         assert topic != null;
         if (!replicationInstancesManager.hasReplicas()) {
             addAsListenerToRacingEventService();
+            messageBrokerManager.createAndStartConnection();
+            messageBrokerManager.createSession(/* transacted */ false);
         }
         replicationInstancesManager.registerReplica(replica);
     }
@@ -109,10 +112,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public void unregisterReplica(ReplicaDescriptor replica) {
+    public void unregisterReplica(ReplicaDescriptor replica) throws JMSException {
         replicationInstancesManager.unregisterReplica(replica);
         if (!replicationInstancesManager.hasReplicas()) {
             removeAsListenerFromRacingEventService();
+            messageBrokerManager.closeSessions();
+            messageBrokerManager.closeConnections();
         }
     }
 
@@ -136,9 +141,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         Topic topic = getReplicationTopic();
         Session session = messageBrokerManager.getSession();
         getMessageProducer(topic).setDeliveryMode(DeliveryMode.PERSISTENT);
-        TextMessage message = session.createTextMessage("Hello World!");
-        System.out.println("Sending message: " + message.getText());
-        messageProducer.send(message);
+        ObjectMessage operationAsMessage = session.createObjectMessage(operation);
+        messageProducer.send(operationAsMessage);
     }
 
     private MessageProducer getMessageProducer(Topic topic) throws JMSException {
@@ -163,14 +167,14 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         String uuid = registerReplicaWithMaster(master);
         TopicSubscriber replicationSubscription = master.getTopicSubscriber(uuid);
         URL initialLoadURL = master.getInitialLoadURL();
-        replicationSubscription.setMessageListener(new Replicator(master, racingEventServiceTracker));
+        replicationSubscription.setMessageListener(new Replicator(master, this));
         InputStream is = initialLoadURL.openStream();
         ObjectInputStream ois = new ObjectInputStream(is);
         getRacingEventService().initiallyFillFrom(ois);
     }
 
     /**
-     * @return the UUID that the master generated for this client which is alsy entered into {@link #replicaUUIDs}
+     * @return the UUID that the master generated for this client which is also entered into {@link #replicaUUIDs}
      */
     private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException {
         URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL();
@@ -185,7 +189,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             read = content.read(buf);
         }
         String replicaUUID = uuid.toString();
-        replicaUUIDs.put(master, replicaUUID);
+        registerReplicaUuidForMaster(replicaUUID, master);
         return replicaUUID;
     }
 
@@ -197,5 +201,9 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
             throw new RuntimeException(e);
         }
     }
-    
+
+    protected void registerReplicaUuidForMaster(String uuid, ReplicationMasterDescriptor master) {
+        replicaUUIDs.put(master, uuid);
+    }
+
 }
