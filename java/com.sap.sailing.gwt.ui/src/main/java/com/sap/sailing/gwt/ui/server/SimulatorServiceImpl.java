@@ -41,7 +41,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 		lakeGeneva.latDeg = 46.23376539670794;
 		lakeGeneva.lngDeg = 6.168651580810547;
 		
-		return new PositionDTO[]{lakeGeneva, lakeGarda};
+		PositionDTO kiel = new PositionDTO();
+		kiel.latDeg = 54.3232927;
+		kiel.lngDeg = 10.122765200000003;
+		
+		return new PositionDTO[]{kiel, lakeGeneva, lakeGarda};
 	}
 
 	public  WindLatticeDTO getWindLatice(WindLatticeGenParamsDTO params) {
