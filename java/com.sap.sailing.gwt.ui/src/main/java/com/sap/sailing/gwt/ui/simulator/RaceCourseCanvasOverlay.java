@@ -3,10 +3,6 @@ package com.sap.sailing.gwt.ui.simulator;
 import java.util.logging.Logger;
 
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.event.MapClickHandler;
 import com.google.gwt.maps.client.event.MapDoubleClickHandler;
@@ -19,10 +15,12 @@ import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlay;
 
 public class RaceCourseCanvasOverlay extends CanvasOverlay {
 
-    private LatLng startPoint = null;
-    private LatLng endPoint = null;
+    public LatLng startPoint = null;
+    public LatLng endPoint = null;
     private  Marker startMarker = null;
     private Marker endMarker = null;
+    private int widgetPosLeft = 0;
+    private int widgetPosTop  = 0;
     private RaceCourseMapMouseMoveHandler raceCourseMapMouseMoveHandler = new RaceCourseMapMouseMoveHandler();
     
     private static Logger logger = Logger.getLogger("com.sap.sailing");
@@ -48,6 +46,8 @@ public class RaceCourseCanvasOverlay extends CanvasOverlay {
     public void reset() {
         startPoint = null;
         endPoint = null;
+        widgetPosLeft = 0;
+        widgetPosTop = 0;
         if (startMarker != null) {
             map.removeOverlay(startMarker);
             startMarker = null;
@@ -58,8 +58,8 @@ public class RaceCourseCanvasOverlay extends CanvasOverlay {
         }
         setCanvasSettings();
         canvas.setVisible(true);
-        getMap().addMapMouseMoveHandler(raceCourseMapMouseMoveHandler);
-        getPane().setWidgetPosition(getCanvas(), 0, 0);
+        //getMap().addMapMouseMoveHandler(raceCourseMapMouseMoveHandler);
+        //getPane().setWidgetPosition(getCanvas(), 0, 0);
        
         
     }
@@ -86,7 +86,7 @@ public class RaceCourseCanvasOverlay extends CanvasOverlay {
         
         if (startPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(startPoint);
-            drawPointWithText(point.getX(),point.getY(),"Start");
+            drawPointWithText(point.getX()-widgetPosLeft,point.getY()-widgetPosTop,"Start");
             startMarker = new Marker(startPoint);
             map.addOverlay(startMarker);
  
@@ -100,7 +100,7 @@ public class RaceCourseCanvasOverlay extends CanvasOverlay {
         }
         if (endPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(endPoint);
-            drawPointWithText(point.getX(),point.getY(),"End");
+            drawPointWithText(point.getX()-widgetPosLeft,point.getY()-widgetPosTop,"End");
             endMarker = new Marker(endPoint);
             map.addOverlay(endMarker);
             
@@ -110,12 +110,26 @@ public class RaceCourseCanvasOverlay extends CanvasOverlay {
     private void setCanvasSettings() {
         int canvasWidth = getMap().getSize().getWidth();
         int canvasHeight = getMap().getSize().getHeight();
+        logger.info("Canvas Width : " + canvasWidth);
+        logger.info("Canvas Height : " + canvasHeight);
         canvas.setWidth(String.valueOf(canvasWidth));
         canvas.setHeight(String.valueOf(canvasHeight));
         canvas.setCoordinateSpaceWidth(canvasWidth);
         canvas.setCoordinateSpaceHeight(canvasHeight);
-        //getPane().setWidgetPosition(getCanvas(), 0, 0);
-    
+      
+        if (startPoint != null) {
+            //Point point = getMap().convertLatLngToDivPixel(startPoint);
+            //widgetPosLeft = point.getX();
+            //widgetPosTop = point.getY();
+            Point sw = getMap().convertLatLngToDivPixel(getMap().getBounds().getSouthWest());
+            Point ne = getMap().convertLatLngToDivPixel(getMap().getBounds().getNorthEast());
+            widgetPosLeft = Math.min(sw.getX(), ne.getX());
+            widgetPosTop = Math.min(sw.getY(), ne.getY());
+            logger.info("WidgetPos Left,Top " + widgetPosLeft + "," + widgetPosTop);
+
+        }
+        getPane().setWidgetPosition(getCanvas(), widgetPosLeft, widgetPosTop);
+        
     }
     
     @Override
@@ -134,8 +148,14 @@ public class RaceCourseCanvasOverlay extends CanvasOverlay {
              
                 if (startPoint == null) {
                     startPoint = event.getLatLng();
-                    logger.info("Clicked startPoint here " + startPoint);               
-                    setStartPoint(startPoint);
+                    logger.info("Clicked startPoint here " + startPoint);   
+                    if (startPoint != null) {
+                       
+                        setCanvasSettings();
+                        drawCanvas();
+                        setStartPoint(startPoint);
+                        getMap().addMapMouseMoveHandler(raceCourseMapMouseMoveHandler); 
+                    }
                 }
             }
         });
@@ -157,18 +177,21 @@ public class RaceCourseCanvasOverlay extends CanvasOverlay {
         });
         
         //raceCourseMapMouseMoveHandler = new RaceCourseMapMouseMoveHandler();
-        getMap().addMapMouseMoveHandler(raceCourseMapMouseMoveHandler); 
+        
     }
 
     @Override
     protected void redraw(boolean force) {
+        //setCanvasSettings();
+        //drawCanvas();
         if (startPoint != null && endPoint != null) {
             logger.info("In RaceCourseCanvasOverlay.redraw");
             
             setCanvasSettings();
+            drawCanvas();
             setStartEndPoint(startPoint,endPoint);
             drawLine(endPoint, "White");
-            getPane().setWidgetPosition(getCanvas(), 0, 0);
+            //getPane().setWidgetPosition(getCanvas(), 0, 0);
         }    
     }   
 
@@ -176,17 +199,22 @@ public class RaceCourseCanvasOverlay extends CanvasOverlay {
         Context2d context2d = canvas.getContext2d();
         context2d.setStrokeStyle("Red");
         context2d.setLineWidth(3);
+        context2d.beginPath();
         context2d.moveTo(x, y);
         context2d.lineTo(x, y);
         context2d.closePath();
         context2d.stroke();
+        //context2d.fill();
+        
     }
     
     private void drawPointWithText(double x, double y, String text) {
+        
         Context2d context2d = canvas.getContext2d();
         drawPoint(x, y);
         context2d.setFillStyle("Black");
         context2d.fillText(text, x, y);
+       
     }
     
     /*
@@ -196,7 +224,7 @@ public class RaceCourseCanvasOverlay extends CanvasOverlay {
     private void refreshLine(LatLng currentPoint, String color)  {
            setCanvasSettings();
            drawLine(currentPoint, color);
-           getPane().setWidgetPosition(getCanvas(), 0, 0);
+           //getPane().setWidgetPosition(getCanvas(), 0, 0);
     }
     
     private void drawLine(LatLng currentPoint, String color) {
@@ -204,11 +232,45 @@ public class RaceCourseCanvasOverlay extends CanvasOverlay {
             Point s = map.convertLatLngToDivPixel(startPoint);
             Context2d context2d  = canvas.getContext2d();
             context2d.setStrokeStyle(color);
-            context2d.moveTo(s.getX(), s.getY());
+            context2d.beginPath();
+            context2d.moveTo(s.getX()-widgetPosLeft, s.getY()-widgetPosTop);
             Point e = map.convertLatLngToDivPixel(currentPoint);
-            context2d.lineTo(e.getX(), e.getY());
+            context2d.lineTo(e.getX()-widgetPosLeft, e.getY()-widgetPosTop);
             context2d.closePath();
             context2d.stroke();
+            //context2d.fill();
         }
+    }
+    
+    private void drawCanvas() {
+        logger.info("In drawCanvas");
+        Context2d context2d  = canvas.getContext2d();
+        context2d.setStrokeStyle("Black");
+        context2d.setLineWidth(3);
+       
+        context2d.beginPath();
+        context2d.moveTo(0,0);
+        context2d.lineTo(0, canvas.getCoordinateSpaceHeight());
+        context2d.closePath();
+        context2d.stroke();
+        
+        context2d.beginPath();
+        context2d.moveTo(0,0);
+        context2d.lineTo(canvas.getCoordinateSpaceWidth(),0);
+        context2d.closePath();
+        context2d.stroke();
+        
+        context2d.beginPath();   
+        context2d.moveTo(canvas.getCoordinateSpaceWidth(),0);
+        context2d.lineTo(canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+        context2d.closePath();
+        context2d.stroke();
+        
+        context2d.beginPath();   
+        context2d.moveTo(0, canvas.getCoordinateSpaceHeight());
+        context2d.lineTo(canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+        context2d.closePath();
+        context2d.stroke();
+        
     }
 }
