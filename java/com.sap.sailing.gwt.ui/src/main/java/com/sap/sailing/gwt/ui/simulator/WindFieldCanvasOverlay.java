@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.core.client.GWT;
+
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
@@ -16,7 +15,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
-import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlay;
+import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ToolTip;
 import com.sap.sailing.gwt.ui.simulator.util.WindFieldMouseMoveHandler;
 
@@ -27,12 +26,7 @@ import com.sap.sailing.gwt.ui.simulator.util.WindFieldMouseMoveHandler;
  * @author Nidhi Sawhney(D054070)
  * 
  */
-public class WindFieldCanvasOverlay extends CanvasOverlay {
-
-    /* x coordinate where the widget is placed */
-    private int xPos = 0;
-    /* y coordinate where the widget is placed */
-    private int yPos = 0;
+public class WindFieldCanvasOverlay extends FullCanvasOverlay {
 
     /* The wind field that is to be displayed in the overlay */
     private WindFieldDTO wl;
@@ -68,24 +62,10 @@ public class WindFieldCanvasOverlay extends CanvasOverlay {
 
     @Override
     protected void redraw(boolean force) {
-
+        
+        super.redraw(force);
         if (wl != null) {
-            int canvasWidth = getMap().getSize().getWidth();
-            int canvasHeight = getMap().getSize().getHeight();
-            canvas.setWidth(String.valueOf(canvasWidth));
-            canvas.setHeight(String.valueOf(canvasHeight));
-            canvas.setCoordinateSpaceWidth(canvasWidth);
-            canvas.setCoordinateSpaceHeight(canvasHeight);
-
             clear();
-
-            
-            Point sw = getMap().convertLatLngToDivPixel(getMap().getBounds().getSouthWest());
-            Point ne = getMap().convertLatLngToDivPixel(getMap().getBounds().getNorthEast());
-            xPos = Math.min(sw.getX(), ne.getX());
-            yPos = Math.min(sw.getY(), ne.getY());
-            
-            getPane().setWidgetPosition(getCanvas(), xPos, yPos);
             drawWindField();
         }
 
@@ -117,31 +97,23 @@ public class WindFieldCanvasOverlay extends CanvasOverlay {
     private void drawArrow(WindDTO windDTO, double angle, double length, double weight, int index) {
 
         PositionDTO position = windDTO.position;
-        Context2d context2d = canvas.getContext2d();
-        context2d.setStrokeStyle("Blue");
-        // context2d.setLineCap(LineCap.SQUARE);
-        context2d.setLineWidth(weight);
-        context2d.beginPath();
-
+      
         LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
         Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
        
-      
-        int x = canvasPositionInPx.getX() - xPos;
-        int y = canvasPositionInPx.getY() - yPos;
+        int x = canvasPositionInPx.getX() - this.widgetPosLeft;
+        int y = canvasPositionInPx.getY() - this.widgetPosTop;
 
         windFieldPoints.put(new ToolTip(x, y), windDTO);
         
         double dx = length * Math.cos(angle);
         double dy = length * Math.sin(angle);
-
-        context2d.moveTo(x - dx / 2, y - dy / 2);
+ 
         double x1 = x + dx / 2;
         double y1 = y + dy / 2;
-        context2d.lineTo(x1, y1);
-        context2d.closePath();
-        context2d.stroke();
-
+        
+        drawLine(x -dx/2, y-dy/2, x1,y1,weight,"Blue");
+       
         double theta = Math.atan2(-dy, dx);
 
         drawHead(x1, y1, theta, length / 2, weight);
@@ -149,21 +121,8 @@ public class WindFieldCanvasOverlay extends CanvasOverlay {
         drawPointWithText(x, y, text);
     }
 
-    private void drawPoint(double x, double y) {
-        Context2d context2d = canvas.getContext2d();
-        context2d.setStrokeStyle("Red");
-        context2d.moveTo(x, y);
-        context2d.lineTo(x, y);
-        context2d.closePath();
-        context2d.stroke();
-    }
+    
 
-    private void drawPointWithText(double x, double y, String text) {
-        Context2d context2d = canvas.getContext2d();
-        drawPoint(x, y);
-        context2d.setFillStyle("Black");
-        context2d.fillText(text, x, y);
-    }
 
     private void drawHead(double x, double y, double theta, double headLength, double weight) {
 
@@ -178,21 +137,9 @@ public class WindFieldCanvasOverlay extends CanvasOverlay {
         double y1 = Math.round(y + Math.sin(t) * headLength);
         double x2 = Math.round(x - Math.cos(t2) * headLength);
         double y2 = Math.round(y + Math.sin(t2) * headLength);
-        Context2d context2d = canvas.getContext2d();
-        context2d.setStrokeStyle("Red");
-        context2d.setLineWidth(weight);
-        context2d.beginPath();
-        context2d.moveTo(x, y);
-        context2d.lineTo(x1, y1);
-        context2d.closePath();
-        context2d.stroke();
-
-        context2d.beginPath();
-        context2d.moveTo(x, y);
-        context2d.lineTo(x2, y2);
-        context2d.closePath();
-        context2d.stroke();
-
+        drawLine(x,y,x1,y1,weight,"Red");
+        drawLine(x,y,x2,y2,weight,"Red");
+       
     }
 
 }
