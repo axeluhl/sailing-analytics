@@ -4,8 +4,7 @@ import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.simulator.Boundaries;
-import com.sap.sailing.simulator.BoundariesIterator;
+import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.WindFieldCoordinates;
  
@@ -13,9 +12,9 @@ public class WindFieldImpl implements WindField {
 
 	double windSpeed;
 	double windBearing;
-	protected Boundaries boundary;
+	protected Boundary boundary;
 	
-	public WindFieldImpl(Boundaries b, double windspeed, double bearing)
+	public WindFieldImpl(Boundary b, double windspeed, double bearing)
 	{
 		boundary = b;
 		windSpeed = windspeed;
@@ -30,16 +29,10 @@ public class WindFieldImpl implements WindField {
 	}
 
 	@Override
-	public Boundaries getBoundaries() {
+	public Boundary getBoundaries() {
 
 		return boundary;
 	}
-	
-	public BoundariesIterator iterator()
-	{
-		return boundary.boundariesIterator();
-	}
-	
 	
 }
 
