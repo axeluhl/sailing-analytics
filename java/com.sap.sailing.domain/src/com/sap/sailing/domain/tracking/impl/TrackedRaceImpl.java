@@ -793,8 +793,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * no other wind source exists yet.
      */
     protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
-        return windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind,
+        WindTrack result = windStore.getWindTrack(trackedEvent, this, windSource, millisecondsOverWhichToAverageWind,
                 delayForWindEstimationCacheInvalidation);
+        return result;
     }
 
     @Override

@@ -378,11 +378,17 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     /**
-     * In addition to calling the super class implementation, adds this tracked race as a listener for the wind track.
+     * In addition to calling the super class implementation, notifies all race listeners registered with this tracked
+     * race which in particular replicates all wind fixes that may have been loaded from the wind store for the new
+     * track.
      */
     @Override
     protected WindTrack createWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
+        // replicate all wind fixed that may have been loaded by the wind store
+        for (Wind wind : result.getRawFixes()) {
+            notifyListeners(wind, windSource);
+        }
         return result;
     }
 
