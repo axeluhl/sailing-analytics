@@ -897,8 +897,19 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
     }
     
     @Override
-    public TrackedRace getTrackedRace(RaceIdentifier raceIdentifier) {
-        return (TrackedRace) raceIdentifier.getTrackedRace(this);
+    public TrackedRace getTrackedRace(EventAndRaceIdentifier raceIdentifier) {
+        TrackedRace result = null;
+        Event event = eventsByName.get(raceIdentifier.getEventName());
+        if (event != null) {
+            DynamicTrackedEvent trackedEvent = eventTrackingCache.get(event);
+            if (trackedEvent != null) {
+                RaceDefinition race = getRace(raceIdentifier);
+                if (race != null) {
+                    result = trackedEvent.getTrackedRace(race);
+                }
+            }
+        }
+        return result;
     }
 
     @Override

@@ -1,0 +1,90 @@
+package com.sap.sailing.server.replication.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CourseImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.EventName;
+import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.server.operationaltransformation.AddEvent;
+import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
+import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
+import com.sap.sailing.server.operationaltransformation.TrackEvent;
+
+public class TrackedRaceContentsReplicationTest extends AbstractServerReplicationTest {
+    private Competitor competitor;
+    private DynamicTrackedRace trackedRace;
+    private EventNameAndRaceName raceIdentifier;
+    
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        final String boatClassName = "49er";
+        // FIXME use master DomainFactory; see bug 592
+        final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
+        BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
+        competitor = masterDomainFactory.getOrCreateCompetitor("GER 61", "Tina Lutz", new TeamImpl("Tina Lutz + Susann Beucke",
+                (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null),
+                new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null) }),
+                new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
+                new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
+        final String baseEventName = "Test Event";
+        AddEvent addEventOperation = new AddEvent(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true);
+        Event event = master.apply(addEventOperation);
+        final String raceName = "Test Race";
+        final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
+        RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Collections.singletonList(competitor));
+        AddRaceDefinition addRaceOperation = new AddRaceDefinition(new EventName(event.getName()), race);
+        master.apply(addRaceOperation);
+        masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy1")));
+        masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy2")));
+        masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
+        masterCourse.removeWaypoint(1);
+        raceIdentifier = new EventNameAndRaceName(event.getName(), raceName);
+        master.apply(new TrackEvent(raceIdentifier));
+        trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
+                /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
+    }
+    
+    @Test
+    public void testGPSFixReplication() throws InterruptedException {
+        final GPSFixMovingImpl fix = new GPSFixMovingImpl(new DegreePosition(1, 2), new MillisecondsTimePoint(12345),
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
+        trackedRace.recordFix(competitor, fix);
+        Thread.sleep(1000);
+        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        Competitor replicaCompetitor = replicaTrackedRace.getRace().getCompetitors().iterator().next();
+        assertNotNull(replicaCompetitor);
+        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = replicaTrackedRace.getTrack(replicaCompetitor);
+        assertEquals(1, Util.size(competitorTrack.getRawFixes()));
+        assertEquals(fix, competitorTrack.getRawFixes().iterator().next());
+    }
+}
