@@ -187,6 +187,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private transient Timer cacheInvalidationTimer;
 
+    private transient CombinedWindTrackImpl combinedWindTrack;
+
     public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         this(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
@@ -763,8 +765,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         WindTrack result;
         if (windSource.getType() == WindSourceType.COMBINED) {
-            // TODO does this need to be cached? Are we creating a new CombinedWindTrackImpl with its cache for each request?
-            result = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
+            if (combinedWindTrack == null) {
+                combinedWindTrack = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());;
+            }
+            result = combinedWindTrack;
         } else {
             synchronized (windTracks) {
                 result = windTracks.get(windSource);
