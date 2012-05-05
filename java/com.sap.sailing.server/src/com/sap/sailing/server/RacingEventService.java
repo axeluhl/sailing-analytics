@@ -81,7 +81,7 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
 
     TrackedRace getTrackedRace(Event event, RaceDefinition r);
     
-    TrackedRace getTrackedRace(RaceIdentifier raceIdentifier);
+    TrackedRace getTrackedRace(EventAndRaceIdentifier raceIdentifier);
 
     /**
      * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.

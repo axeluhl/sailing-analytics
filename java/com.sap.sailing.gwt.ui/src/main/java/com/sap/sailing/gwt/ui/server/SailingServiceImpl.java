@@ -1118,7 +1118,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void removeWind(RaceIdentifier raceIdentifier, WindDTO windDTO) {
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Position p = null;
             if (windDTO.position != null) {
@@ -1687,7 +1687,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public TrackedRace getTrackedRace(RaceIdentifier eventNameAndRaceName) {
+    public TrackedRace getTrackedRace(EventAndRaceIdentifier eventNameAndRaceName) {
         Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
         RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
         TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);

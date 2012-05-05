@@ -2,10 +2,11 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.WindSource;
 
 
-public interface RaceChangeListener extends WindListener {
-    void competitorPositionChanged(GPSFix fix, Competitor competitor);
+public interface RaceChangeListener {
+    void competitorPositionChanged(GPSFixMoving fix, Competitor competitor);
     
     void buoyPositionChanged(GPSFix fix, Buoy buoy);
     
@@ -21,4 +22,9 @@ public interface RaceChangeListener extends WindListener {
 
     void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 
+    void windDataReceived(Wind wind, WindSource windSource);
+    
+    void windDataRemoved(Wind wind, WindSource windSource);
+
+    void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 }
