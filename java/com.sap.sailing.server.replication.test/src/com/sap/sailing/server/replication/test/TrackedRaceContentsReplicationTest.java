@@ -28,15 +28,21 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.EventName;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.server.operationaltransformation.AddEvent;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
@@ -106,5 +112,36 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         assertEquals(1, Util.size(replicaBuoyTrack.getRawFixes()));
         assertEquals(replicaBuoyTrack.getRawFixes().iterator().next(), fix);
         assertNotSame(fix, replicaBuoyTrack.getRawFixes().iterator().next());
+    }
+
+    @Test
+    public void testWindAdditionReplication() throws InterruptedException {
+        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
+                new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
+        WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
+        trackedRace.recordWind(wind, webWindSource);
+        Thread.sleep(1000);
+        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
+                .getWindSources(WindSourceType.WEB).iterator().next());
+        assertEquals(1, Util.size(replicaWindTrack.getRawFixes()));
+        Wind replicaWind = replicaWindTrack.getRawFixes().iterator().next();
+        assertEquals(wind, replicaWind);
+        assertNotSame(wind, replicaWind);
+    }
+
+    @Test
+    public void testWindRemovalReplication() throws InterruptedException {
+        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
+                new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
+        WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
+        trackedRace.recordWind(wind, webWindSource);
+        trackedRace.removeWind(wind, webWindSource);
+        assertEquals(0, Util.size(trackedRace.getOrCreateWindTrack(webWindSource).getRawFixes()));
+        Thread.sleep(1000);
+        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
+                .getWindSources(WindSourceType.WEB).iterator().next());
+        assertEquals(0, Util.size(replicaWindTrack.getRawFixes()));
     }
 }
