@@ -11,10 +11,8 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -113,8 +111,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         for (Race tractracRace : getTracTracEvent().getRaceList()) {
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {
-                ((DynamicGPSFixTrack<Buoy, GPSFix>) trackedRace.getOrCreateTrack(buoy))
-                        .addGPSFix(getDomainFactory().createGPSFixMoving(event.getB()));
+                trackedRace.recordFix(buoy, getDomainFactory().createGPSFixMoving(event.getB()));
             } else {
                 logger.warning("Couldn't find tracked race for race " + tractracRace.getName()
                         + ". Dropping mark position event " + event);

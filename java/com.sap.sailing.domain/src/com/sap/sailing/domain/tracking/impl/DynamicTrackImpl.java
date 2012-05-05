@@ -23,9 +23,9 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
             getInternalRawFixes().add(gpsFix);
             invalidateValidityCaches(gpsFix);
         }
-        Iterable<GPSTrackListener<ItemType>> listeners = getListeners();
+        Iterable<GPSTrackListener<ItemType, FixType>> listeners = getListeners();
         synchronized (listeners) {
-            for (GPSTrackListener<ItemType> listener : listeners) {
+            for (GPSTrackListener<ItemType, FixType> listener : listeners) {
                 listener.gpsFixReceived(gpsFix, getTrackedItem());
             }
         }
@@ -35,9 +35,9 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
     public void setMillisecondsOverWhichToAverage(long millisecondsOverWhichToAverage) {
         long oldMillis = getMillisecondsOverWhichToAverage();
         super.setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverage);
-        Iterable<GPSTrackListener<ItemType>> listeners = getListeners();
+        Iterable<GPSTrackListener<ItemType, FixType>> listeners = getListeners();
         synchronized (listeners) {
-            for (GPSTrackListener<ItemType> listener : listeners) {
+            for (GPSTrackListener<ItemType, FixType> listener : listeners) {
                 listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
             }
         }

@@ -44,7 +44,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
 
-    private final Set<GPSTrackListener<ItemType>> listeners;
+    private final Set<GPSTrackListener<ItemType, FixType>> listeners;
     
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
@@ -55,18 +55,18 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothening = maxSpeedForSmoothening;
-        this.listeners = new HashSet<GPSTrackListener<ItemType>>();
+        this.listeners = new HashSet<GPSTrackListener<ItemType, FixType>>();
     }
 
     @Override
-    public void addListener(GPSTrackListener<ItemType> listener) {
+    public void addListener(GPSTrackListener<ItemType, FixType> listener) {
         synchronized (listeners) {
             listeners.add(listener);
         }
     }
     
     @Override
-    public void removeListener(GPSTrackListener<ItemType> listener) {
+    public void removeListener(GPSTrackListener<ItemType, FixType> listener) {
         synchronized (listeners) {
             listeners.remove(listener);
         }
@@ -77,7 +77,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * {@link ConcurrentModificationException}s because listeners may be added on the fly, and this object will
      * synchronize on the listeners collection before adding on.
      */
-    protected Iterable<GPSTrackListener<ItemType>> getListeners() {
+    protected Iterable<GPSTrackListener<ItemType, FixType>> getListeners() {
         return listeners;
     }
 

@@ -39,13 +39,13 @@ import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -267,7 +267,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     abstract protected TrackedLeg createTrackedLeg(Leg leg);
 
-    public RaceIdentifier getRaceIdentifier() {
+    public EventAndRaceIdentifier getRaceIdentifier() {
         return new EventNameAndRaceName(getTrackedEvent().getEvent().getName(), getRace().getName());
     }
 
@@ -763,6 +763,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
         WindTrack result;
         if (windSource.getType() == WindSourceType.COMBINED) {
+            // TODO does this need to be cached? Are we creating a new CombinedWindTrackImpl with its cache for each request?
             result = new CombinedWindTrackImpl(this, WindSourceType.COMBINED.getBaseConfidence());
         } else {
             synchronized (windTracks) {
@@ -1563,7 +1564,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return getRace().getBoatClass().getApproximateManeuverDurationInMilliseconds();
     }
 
-    private class StartToNextMarkCacheInvalidationListener implements GPSTrackListener<Buoy> {
+    private class StartToNextMarkCacheInvalidationListener implements GPSTrackListener<Buoy, GPSFix> {
         private static final long serialVersionUID = 3540278554797445085L;
         private final GPSFixTrack<Buoy, GPSFix> listeningTo;
 

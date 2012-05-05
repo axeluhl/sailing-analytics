@@ -26,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventListener;
@@ -37,6 +39,7 @@ import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.EventName;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -56,12 +59,17 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
@@ -77,6 +85,12 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.operationaltransformation.RecordBuoyGPSFix;
+import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
+import com.sap.sailing.server.operationaltransformation.RecordWindFix;
+import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
+import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
+import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 
 public class RacingEventServiceImpl implements RacingEventService, EventListener {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -518,11 +532,31 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
         }
     }
     
+    /**
+     * A listener class used to ensure that when a tracked race is added to any {@link TrackedEvent} managed by this
+     * service, the service adds the tracked race to the default leaderboard and links it to the leaderboard columns
+     * that were previously connected to it. Additionally, a {@link RaceChangeListener} is added to the {@link TrackedRace}
+     * which is responsible for triggering the replication of all relevant changes to the tracked race. When a tracked
+     * race is removed, the {@link TrackedRaceReplicator} that was added as listener to that tracked race is removed again.
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
     private class RaceAdditionListener implements RaceListener, Serializable {
         private static final long serialVersionUID = 1036955460477000265L;
+        
+        private final Map<TrackedRace, TrackedRaceReplicator> trackedRaceReplicators;
+
+        public RaceAdditionListener() {
+            this.trackedRaceReplicators = new HashMap<TrackedRace, TrackedRaceReplicator>();
+        }
 
         @Override
         public void raceRemoved(TrackedRace trackedRace) {
+            TrackedRaceReplicator trackedRaceReplicator = trackedRaceReplicators.remove(trackedRace);
+            if (trackedRaceReplicator != null) {
+                trackedRace.removeListener(trackedRaceReplicator);
+            }
         }
 
         @Override
@@ -530,6 +564,54 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
             leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
                     trackedRace.getRace().getName(), /* medalRace */false);
+            TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace.getRaceIdentifier());
+            trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
+            trackedRace.addListener(trackedRaceReplicator);
+        }
+    }
+    
+    private class TrackedRaceReplicator implements RaceChangeListener {
+        private final EventAndRaceIdentifier raceIdentifier;
+
+        public TrackedRaceReplicator(EventAndRaceIdentifier raceIdentifier) {
+            this.raceIdentifier = raceIdentifier;
+        }
+
+        @Override
+        public void windDataReceived(Wind wind, WindSource windSource) {
+            replicate(new RecordWindFix(raceIdentifier, windSource, wind));
+            
+        }
+
+        @Override
+        public void windDataRemoved(Wind wind, WindSource windSource) {
+            replicate(new RemoveWindFix(raceIdentifier, windSource, wind));
+        }
+
+        @Override
+        public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            replicate(new UpdateWindAveragingTime(raceIdentifier, newMillisecondsOverWhichToAverage));
+        }
+
+        @Override
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+            replicate(new RecordCompetitorGPSFix(raceIdentifier, competitor, fix));
+            
+        }
+
+        @Override
+        public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+            replicate(new RecordBuoyGPSFix(raceIdentifier, buoy, fix));
+        }
+
+        @Override
+        public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
+            replicate(new UpdateMarkPassings(raceIdentifier, markPassing.getCompetitor(), Collections.singleton(markPassing)));
+        }
+
+        @Override
+        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            replicate(new UpdateWindAveragingTime(raceIdentifier, newMillisecondsOverWhichToAverage));
         }
     }
 

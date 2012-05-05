@@ -25,9 +25,9 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
     /**
      * A listener is notified whenever a new fix is added to this track
      */
-    void addListener(GPSTrackListener<ItemType> listener);
+    void addListener(GPSTrackListener<ItemType, FixType> listener);
     
-    void removeListener(GPSTrackListener<ItemType> listener);
+    void removeListener(GPSTrackListener<ItemType, FixType> listener);
     
     ItemType getTrackedItem();
 
