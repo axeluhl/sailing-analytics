@@ -2,6 +2,7 @@ package com.sap.sailing.server.replication.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -30,6 +32,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -86,5 +89,22 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = replicaTrackedRace.getTrack(replicaCompetitor);
         assertEquals(1, Util.size(competitorTrack.getRawFixes()));
         assertEquals(fix, competitorTrack.getRawFixes().iterator().next());
+        assertNotSame(fix, competitorTrack.getRawFixes().iterator().next());
+    }
+
+    @Test
+    public void testBuoyFixReplication() throws InterruptedException {
+        final GPSFixMovingImpl fix = new GPSFixMovingImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
+                new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
+        final Buoy masterBuoy = trackedRace.getRace().getCourse().getFirstWaypoint().getBuoys().iterator().next();
+        trackedRace.recordFix(masterBuoy, fix);
+        Thread.sleep(1000);
+        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        Buoy replicaBuoy = replicaTrackedRace.getRace().getCourse().getFirstWaypoint().getBuoys().iterator().next();
+//        assertNotSame(replicaBuoy, masterBuoy); // TODO this would require solving bug 592
+        GPSFixTrack<Buoy, GPSFix> replicaBuoyTrack = replicaTrackedRace.getOrCreateTrack(replicaBuoy);
+        assertEquals(1, Util.size(replicaBuoyTrack.getRawFixes()));
+        assertEquals(replicaBuoyTrack.getRawFixes().iterator().next(), fix);
+        assertNotSame(fix, replicaBuoyTrack.getRawFixes().iterator().next());
     }
 }
