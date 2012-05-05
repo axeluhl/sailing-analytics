@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,6 +13,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -34,6 +36,10 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.persistence.MongoFactory;
+import com.sap.sailing.domain.persistence.MongoWindStore;
+import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -52,6 +58,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     private Competitor competitor;
     private DynamicTrackedRace trackedRace;
     private EventNameAndRaceName raceIdentifier;
+    private DynamicTrackedEvent trackedEvent;
     
     @Before
     public void setUp() throws Exception {
@@ -78,8 +85,10 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
         masterCourse.removeWaypoint(1);
         raceIdentifier = new EventNameAndRaceName(event.getName(), raceName);
-        master.apply(new TrackEvent(raceIdentifier));
+        trackedEvent = master.apply(new TrackEvent(raceIdentifier));
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
+                MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory()),
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
     }
     
@@ -143,5 +152,27 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
                 .getWindSources(WindSourceType.WEB).iterator().next());
         assertEquals(0, Util.size(replicaWindTrack.getRawFixes()));
+    }
+    
+    @Test
+    public void testReplicationOfLoadingOfStoredWindTrack() throws UnknownHostException, MongoException, InterruptedException {
+        MongoWindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
+        WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
+        WindTrack windTrack = windStore.getWindTrack(trackedEvent, trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
+                /* delayForWindEstimationCacheInvalidation */ 10000);
+        final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
+                new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
+        windTrack.add(wind);
+        Thread.sleep(1000); // give MongoDB time to read its own writes in a separate session
+        WindTrack trackedRaceWebWindTrack = trackedRace.getOrCreateWindTrack(webWindSource);
+        assertEquals(Util.size(windTrack.getRawFixes()), Util.size(trackedRaceWebWindTrack.getRawFixes()));
+        assertEquals(windTrack.getRawFixes().iterator().next(), trackedRaceWebWindTrack.getRawFixes().iterator().next());
+        Thread.sleep(1000); // wait for replication to happen
+        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
+                .getWindSources(WindSourceType.WEB).iterator().next());
+        assertEquals(Util.size(windTrack.getRawFixes()), Util.size(replicaWindTrack.getRawFixes()));
+        assertEquals(windTrack.getRawFixes().iterator().next(), replicaWindTrack.getRawFixes().iterator().next());
     }
 }
