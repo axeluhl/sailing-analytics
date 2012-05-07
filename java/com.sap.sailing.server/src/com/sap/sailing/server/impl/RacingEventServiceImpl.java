@@ -1087,18 +1087,27 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
     @SuppressWarnings("unchecked") // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
     public synchronized void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        eventsByName.clear();
-        eventsByName.putAll((Map<String, Event>) ois.readObject());
-        eventsObservedForDefaultLeaderboard.clear();
-        for (DynamicTrackedEvent trackedEventToObserve : (Set<DynamicTrackedEvent>) ois.readObject()) {
-            ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEventToObserve);
+        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
+        try {
+            // Use this object's class's class loader as the context class loader which will then be used for
+            // de-serialization; this will cause all classes to be visible that this bundle
+            // (com.sap.sailing.server) can see
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            eventsByName.clear();
+            eventsByName.putAll((Map<String, Event>) ois.readObject());
+            eventsObservedForDefaultLeaderboard.clear();
+            for (DynamicTrackedEvent trackedEventToObserve : (Set<DynamicTrackedEvent>) ois.readObject()) {
+                ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEventToObserve);
+            }
+            eventTrackingCache.clear();
+            eventTrackingCache.putAll((Map<Event, DynamicTrackedEvent>) ois.readObject());
+            leaderboardGroupsByName.clear();
+            leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
+            leaderboardsByName.clear();
+            leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldContextClassloader);
         }
-        eventTrackingCache.clear();
-        eventTrackingCache.putAll((Map<Event, DynamicTrackedEvent>) ois.readObject());
-        leaderboardGroupsByName.clear();
-        leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
-        leaderboardsByName.clear();
-        leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
     }
 
 }
