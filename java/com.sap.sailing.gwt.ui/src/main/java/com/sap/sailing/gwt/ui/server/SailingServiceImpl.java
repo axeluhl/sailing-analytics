@@ -764,7 +764,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack
                             .getMillisecondsOverWhichToAverageWind();
                     TimePoint timePoint = from;
-                    for (int i = 0; i < numberOfFixes && timePoint.compareTo(newestEvent) < 0; i++) {
+                    for (int i = 0; i < numberOfFixes && newestEvent != null && timePoint.compareTo(newestEvent) < 0; i++) {
                         Wind wind = windTrack.getAveragedWind(null, timePoint);
                         if (wind != null) {
                             WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, windTrack);
