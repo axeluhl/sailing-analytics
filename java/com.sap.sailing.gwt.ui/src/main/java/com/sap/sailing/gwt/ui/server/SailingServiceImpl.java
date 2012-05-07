@@ -457,11 +457,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             RaceDTO raceDTO = new RaceDTO(r.getName(), getCompetitorDTOs(r.getCompetitors()), getService().isRaceBeingTracked(r));
             if (raceDTO.currentlyTracked) {
                 TrackedRace trackedRace = getService().getTrackedRace(event, r);
-                raceDTO.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
+                raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                 raceDTO.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
                 raceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
-                raceDTO.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
+                raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
             }
             result.add(raceDTO);
         }
@@ -595,7 +595,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 windSourcesToExclude.add(windSourceToExclude);
             }
             result.windSourcesToExclude = windSourcesToExclude;
-            TimePoint from = fromDate == null ? trackedRace.getStart() : new MillisecondsTimePoint(fromDate);
+            TimePoint from = fromDate == null ? trackedRace.getStartOfRace() : new MillisecondsTimePoint(fromDate);
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             TimePoint to = (toDate == null || toDate.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(toDate);
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
@@ -794,7 +794,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 fromTimePoint = new MillisecondsTimePoint(from);
             }
             TimePoint toTimePoint;
-            TimePoint assumedEnd = trackedRace.getAssumedEnd();
+            TimePoint assumedEnd = trackedRace.getEndOfRace();
             if (to == null || (assumedEnd != null && to.getTime() > assumedEnd.asMillis())) {
                 toTimePoint = assumedEnd;
             } else {
@@ -954,11 +954,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             List<MarkPassingTimesDTO> markPassingTimesDTOs = new ArrayList<MarkPassingTimesDTO>();
             raceTimesInfo.setMarkPassingTimes(markPassingTimesDTOs);
 
-            raceTimesInfo.setStartOfRace(trackedRace.getStart() == null ? null : trackedRace.getStart().asDate());
+            raceTimesInfo.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
             raceTimesInfo.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
             raceTimesInfo.newestTrackingEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
             raceTimesInfo.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
-            raceTimesInfo.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
+            raceTimesInfo.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
 
             Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
             synchronized(markPassingsTimes) {
@@ -1252,10 +1252,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     }
                     //Creating raceDTO and getting the dates
                     race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
-                    race.startOfRace = trackedRace.getStart() == null ? null : trackedRace.getStart().asDate();
+                    race.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                     race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace
                             .getStartOfTracking().asDate();
-                    race.endOfRace = trackedRace.getAssumedEnd() == null ? null : trackedRace.getAssumedEnd().asDate();
+                    race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 }
             }
             dto.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
@@ -1537,7 +1537,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (trackedRace != null) {
             TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
             TimePoint endTime = (toDate == null || toDate.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(toDate);
-            data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStart(),
+            data = getMultiCompetitorRaceDataDTO(trackedRace, competitorsQuery, trackedRace.getStartOfRace(),
                         endTime, stepSize, detailType);
         }
         return data;

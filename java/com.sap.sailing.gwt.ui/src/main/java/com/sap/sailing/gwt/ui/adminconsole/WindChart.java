@@ -107,7 +107,8 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         this.windSourceTypesToDisplay = new HashSet<WindSourceType>();
         chart = new Chart()
                 .setZoomType(Chart.ZoomType.X)
-                .setSpacingRight(20)
+                .setMarginLeft(65)
+                .setMarginRight(65)
                 .setWidth100()
                 .setHeight100()
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))

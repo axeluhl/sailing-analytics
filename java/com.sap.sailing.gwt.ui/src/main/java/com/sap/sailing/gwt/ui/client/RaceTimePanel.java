@@ -50,7 +50,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             // in case the race is not tracked anymore we reset the timer
             reset();
         } else { 
-            if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && raceTimesInfo.newestTrackingEvent != null) {
+            if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && 
+                    (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null)) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
                 // leg markers
                 boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
@@ -218,13 +219,22 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     break;
                 }
             }
+            if((lastRaceTimesInfo.endOfRace == null && newRaceTimesInfo.endOfRace != null) ||
+               (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace == null) ||
+               lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace != null && lastRaceTimesInfo.endOfRace.getTime() != newRaceTimesInfo.endOfRace.getTime()) {
+                requiresMarkerUpdate = true;
+            }
         }
         if (requiresMarkerUpdate && sliderBar.isMinMaxInitialized()) {
             sliderBar.clearMarkers();
             for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
               sliderBar.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
             }
-            sliderBar.redraw();
+            if(newRaceTimesInfo.endOfRace != null) {
+                sliderBar.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
+            }
+                
+            sliderBar.redraw(); 
         }
         lastRaceTimesInfo = newRaceTimesInfo;
     }

@@ -311,7 +311,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * Calculates the start time of the race from various sources
      */
     @Override
-    public TimePoint getStart() {
+    public TimePoint getStartOfRace() {
         if (startTime == null) {
             startTime = startTimeReceived;
             // If not null, check if the first mark passing for the start line is too much after the startTimeReceived;
@@ -342,18 +342,24 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * Calculates the end time of the race from the mark passings of the last course waypoint
      */
     @Override
-    public TimePoint getAssumedEnd() {
+    public TimePoint getEndOfRace() {
         if (endTime == null) {
-            Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint());
-            synchronized (markPassingsInOrder) {
-                for (MarkPassing passingFinishLine : markPassingsInOrder) {
-                    endTime = passingFinishLine.getTimePoint();
-                }
-            }
+            endTime = getLastPassingOfFinishLine();
         }
         return endTime;
     }
 
+    private TimePoint getLastPassingOfFinishLine() {
+        TimePoint passingTime = null;
+        Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint());
+        synchronized (markPassingsInOrder) {
+            for (MarkPassing passingFinishLine : markPassingsInOrder) {
+                passingTime = passingFinishLine.getTimePoint();
+            }
+        }
+        return passingTime;
+    }
+    
     private TimePoint getFirstPassingTime(Waypoint waypoint) {
         NavigableSet<MarkPassing> markPassingsInOrder = getMarkPassingsInOrderAsNavigableSet(waypoint);
         MarkPassing firstMarkPassing = null;
@@ -428,7 +434,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public boolean hasStarted(TimePoint at) {
-        return getStart() != null && getStart().compareTo(at) <= 0;
+        return getStartOfRace() != null && getStartOfRace().compareTo(at) <= 0;
     }
 
     protected void setStartTimeReceived(TimePoint start) {
@@ -461,7 +467,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     // For the first leg the use of "firstPassingDate" is not correct,
                     // because boats can pass the start line before the actual start;
                     // therefore we are using the calculated start time here
-                    timesPair.setA(getStart());
+                    timesPair.setA(getStartOfRace());
                 } else {
                     NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(waypoint);
                     if (markPassings != null && !markPassings.isEmpty()) {
