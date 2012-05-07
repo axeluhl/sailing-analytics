@@ -45,7 +45,7 @@ public class MessageBrokerManager {
 
     public void createAndStartConnection() throws JMSException {
         connectionFactory = new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_USER,
-                ActiveMQConnection.DEFAULT_PASSWORD, "failover://" + configuration.getBrokerUrl());
+                ActiveMQConnection.DEFAULT_PASSWORD, configuration.getBrokerUrl());
         connection = connectionFactory.createConnection();
         connection.start();
     }
