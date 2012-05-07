@@ -2,7 +2,7 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.4.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.4.0/distro-source/core/src/gwt-module.dtd">
 <module>
 	
-	<stylesheet src="../reset.css" />
+	<!--  <stylesheet src="../reset.css" />							-->
 	<!-- Inherit the core Web Toolkit stuff.                        -->
 	<inherits name='com.google.gwt.user.User'/>
 	
@@ -13,7 +13,7 @@
 	<!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
 	<!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
 	<!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
-	<!-- <stylesheet src="../RaceBoard.css" />						-->
+	<stylesheet src="../Simulator.css" />						
 	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.maps.GoogleMaps' />
 	

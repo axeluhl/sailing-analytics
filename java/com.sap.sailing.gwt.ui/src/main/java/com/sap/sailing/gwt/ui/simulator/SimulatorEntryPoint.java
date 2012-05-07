@@ -48,8 +48,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     
     private List<PositionDTO> locations = new ArrayList<PositionDTO>();
 
-    private WindFieldCanvasOverlay windFieldCanvasOverlay;
-    private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
+    
     
     
     private static Logger logger = Logger.getLogger("com.sap.sailing");
@@ -66,11 +65,19 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
          */
         Maps.loadMapsApi("", "2", false, new Runnable() {
             public void run() {
-                buildUi();
+                //buildUi();
+                createUi();
             }
         });
     }
 
+    private void createUi() {
+        initMap();
+        
+        SimulatorMainPanel mainPanel = new SimulatorMainPanel(mapw, stringMessages, simulatorSvc);
+        RootLayoutPanel.get().add(mainPanel);
+    }
+    
     private void buildUi() {
         logger.severe("Logger Name : " + logger.getName() + " Logging level " + logger.getLevel());
         logger.fine("In buildUi");
@@ -79,34 +86,24 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         initMap();
         initRaceSelector();
         initDisplayOptions();
-        initButton();
+        //initButton();
         initPanel();
 
-        addOverlays();
-        
         
         // Add the map to the HTML host page
         RootLayoutPanel.get().add(panel);
-        if (locations != null && locations.size() > 2) {
-            selectRaceLocation(locations.get(2));
-        }
+       
         
     }
 
-    private void addOverlays() {
-        raceCourseCanvasOverlay = new RaceCourseCanvasOverlay();
-        mapw.addOverlay(raceCourseCanvasOverlay);
-        
-        windFieldCanvasOverlay = new WindFieldCanvasOverlay();
-        //mapw.addOverlay(windFieldCanvasOverlay);   
-    }
-    
+   
     private void initMap() {
         logger.fine("In initMap");
         mapw = new MapWidget();
         mapw.setUI(SimulatorMapOptions.newInstance());
         mapw.setZoomLevel(15);
-        mapw.setSize("100%", "650px");        
+        mapw.setSize("100%", "650px"); 
+        //mapw.setSize("100%", "80%");
     }
 
     private void loadRaceLocations() {
@@ -199,66 +196,9 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         mapw.panTo(position);
     }
 
-    private void generateWindField() {
-        logger.info("In generateWindField");
-        WindFieldGenParamsDTO params = new WindFieldGenParamsDTO();
-        /*
-        LatLngBounds bounds = mapw.getBounds();
    
-        PositionDTO ne = new PositionDTO(bounds.getNorthEast().getLatitude(),
-                bounds.getNorthEast().getLongitude());
-        PositionDTO sw = new PositionDTO(bounds.getSouthWest().getLatitude(),
-                bounds.getSouthWest().getLongitude());
-        int width = mapw.getSize().getWidth();
-  
-        
-        Point nePoint = mapw.convertLatLngToDivPixel(LatLng.newInstance(ne.latDeg, ne.lngDeg));
-        Point nwPoint = Point.newInstance(nePoint.getX()-width, nePoint.getY());
-        LatLng nwLatLng = mapw.convertDivPixelToLatLng(nwPoint);
-        PositionDTO nw = new PositionDTO(nwLatLng.getLatitude(),nwLatLng.getLongitude());
-        
-        Point swPoint = mapw.convertLatLngToDivPixel(LatLng.newInstance(sw.latDeg, sw.lngDeg));
-        Point sePoint = Point.newInstance(swPoint.getX()+width, swPoint.getY());
-        LatLng seLatLng = mapw.convertDivPixelToLatLng(sePoint);
-        PositionDTO se = new PositionDTO(seLatLng.getLatitude(),seLatLng.getLongitude());;
-        Window.alert("NE : " + ne + " NW : " + nw + " SW : " + sw + " SE : " + se);
-        */
-        
-        PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(), raceCourseCanvasOverlay.startPoint.getLongitude());
-        PositionDTO endPointDTO =  new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(), raceCourseCanvasOverlay.endPoint.getLongitude());
-       
-        params.setNorthWest(startPointDTO);
-        params.setSouthEast(endPointDTO);
-        params.setxRes(5);
-        params.setyRes(5);
-        params.setWindBearing(45);
-        params.setWindSpeed(7.2);
-        
-        simulatorSvc.getWindField(params, new AsyncCallback<WindFieldDTO>() {
-            @Override
-            public void onFailure(Throwable message) {
-                Window.alert("Failed servlet call to SimulatorService\n" + message);
-            }
-
-            @Override
-            public void onSuccess(WindFieldDTO wl) {
-                logger.info("Number of windDTO : " + wl.getMatrix().size());
-                refreshWindFieldOverlay(wl);
-            }
-        });
-        
-    }
     
-    private void refreshWindFieldOverlay(WindFieldDTO wl) {
-        windFieldCanvasOverlay.setWindField(wl);
-        windFieldCanvasOverlay.redraw(true);
-        /*
-         if (wl != null && wl.getMatrix()!= null && wl.getMatrix().size() > 0) {
-       
-            PositionDTO position = wl.getMatrix().get(0).position;
-            mapw.panTo(LatLng.newInstance(position.latDeg, position.lngDeg));
-        }*/
-     }
+   
     
     
 
@@ -270,7 +210,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
 
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                generateWindField();
+                //generateWindField();
             }
         });
         /*
@@ -278,6 +218,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
          */
     }
     
+    /*
     private void initButton() {
         windDisplayButton = new RadioButton("Map Display Options", "Wind Display");
         windDisplayButton.addClickHandler( new ClickHandler() {
@@ -312,4 +253,5 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         replayButton = new RadioButton("Map Display Options","Replay");
         summaryButton = new RadioButton("Map Display Options","Summary");
     }
+    */
 }
