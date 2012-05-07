@@ -38,14 +38,20 @@ public class Replicator implements MessageListener {
      */
     @Override
     public void onMessage(Message m) {
+        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             byte[] bytesFromMessage = getBytes((BytesMessage) m);
+            // Set this object's class's class loader as context for de-serialization so that all exported classes
+            // of all required bundles/packages can be deserialized at least
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             ObjectInputStream ois = DomainFactory.INSTANCE.createObjectInputStreamResolvingAgainstThisFactory(
                     new ByteArrayInputStream(bytesFromMessage));
             RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
             racingEventServiceTracker.getRacingEventService().apply(operation);
         } catch (IOException | ClassNotFoundException | JMSException e) {
             throw new RuntimeException(e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldClassLoader);
         }
     }
     
