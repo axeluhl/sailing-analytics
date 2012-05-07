@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.persistence;
+package com.sap.sailing.domain.persistence.impl;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,7 +12,6 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.RaceInLeaderboardImpl;
-import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
