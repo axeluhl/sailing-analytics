@@ -1,5 +1,7 @@
 package com.sap.sailing.simulator.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,14 +17,41 @@ public class RectangularBoundary implements Boundary {
 	private Position southWest;
 	private Position northEast;
 	
+	private Bearing north;
+	private Bearing south;
+	private Bearing east;
+	private Bearing west;
+	
+	private Distance width;
+	private Distance height;
+	
 	public RectangularBoundary(Position p1, Position p2) {
+		
+		north = p2.getBearingGreatCircle(p1);
+		south = north.reverse();
+		east = north.add(TRUEEAST);
+		west = north.add(TRUEWEST);
+		
+		height = p1.getDistance(p2);
+		width = height.scale(2);
+		
+		northWest = p1.translateGreatCircle(west, width.scale(0.5));
+		northEast = p1.translateGreatCircle(east, width.scale(0.5));
+		southEast = northEast.translateGreatCircle(south, height);
+		southWest = northWest.translateGreatCircle(south, height);
 
 	}
 
 	@Override
 	public Map<String, Position> getCorners() {
 
-		return null;
+		Map<String, Position> map = new HashMap<String, Position>();
+		map.put("NorthWest", northWest);
+		map.put("SouthWest", southWest);
+		map.put("SouthEast", southEast);
+		map.put("NorthEast", northEast);
+		
+		return map;
 
 	}
 
@@ -47,50 +76,79 @@ public class RectangularBoundary implements Boundary {
 
 	@Override
 	public List<Position> extractLattice(int hPoints, int vPoints) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return extractLattice(width.scale(1.0/hPoints), height.scale(1.0/vPoints));
+		
 	}
 
 	@Override
-	public List<Position> extractLattice(Distance hStep, Distance vstep) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Position> extractLattice(Distance hStep, Distance vStep) {
+		
+		Bearing diagBearing = southWest.getBearingGreatCircle(northEast);
+		Distance diag = southWest.getDistance(northEast);
+		Position startPoint = southWest.translateGreatCircle(diagBearing, diag.scale(0.01));
+		
+		Bearing vBearing = getNorth();
+		Bearing hBearing = getEast();
+		boolean hMode = true;
+		
+		List<Position> lst = new ArrayList<Position>();
+		
+		Position current = startPoint;
+		lst.add(current);
+		Position next;
+		
+		while (true) {
+			
+			if (hMode) next = current.translateGreatCircle(hBearing, hStep);
+			else next = current.translateGreatCircle(vBearing, vStep);
+			
+			if (isWithinBoundaries(next)) {
+				current = next;
+				lst.add(current);
+				if (!hMode) {
+					hMode = true;
+					hBearing = hBearing.reverse();
+				}
+			}
+			else {
+				if(hMode) hMode = false;
+				else break;
+			}
+			
+		}
+			
+		return lst;
 	}
 
 	@Override
 	public Bearing getNorth() {
-		// TODO Auto-generated method stub
-		return null;
+		return north;
 	}
 
 	@Override
 	public Bearing getSouth() {
-		// TODO Auto-generated method stub
-		return null;
+		return south;
 	}
 
 	@Override
 	public Bearing getEast() {
-		// TODO Auto-generated method stub
-		return null;
+		return east;
 	}
 
 	@Override
 	public Bearing getWest() {
-		// TODO Auto-generated method stub
-		return null;
+		return west;
 	}
 
 	@Override
 	public Distance getWidth() {
-		// TODO Auto-generated method stub
-		return null;
+		return width;
 	}
 	
 	@Override
 	public Distance getHeight() {
-		return northWest.getDistance(southWest);
+		return height;
 	}
 	
-
 }
