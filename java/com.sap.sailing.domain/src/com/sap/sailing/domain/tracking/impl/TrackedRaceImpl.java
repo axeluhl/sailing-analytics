@@ -281,6 +281,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     protected NavigableSet<MarkPassing> getMarkPassingsInOrderAsNavigableSet(Waypoint waypoint) {
         return markPassingsForWaypoint.get(waypoint);
     }
+    
+    @Override
+    public WindStore getWindStore() {
+        return windStore;
+    }
 
     @Override
     public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {

@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -204,7 +205,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
-    public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
+    public void markPassingReceived(Map<Waypoint, MarkPassing> oldMarkPassing, Iterable<MarkPassing> markPassing) {
         clearCaches();
     }
 

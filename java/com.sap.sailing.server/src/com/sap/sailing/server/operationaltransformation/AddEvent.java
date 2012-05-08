@@ -6,13 +6,13 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class AddEvent extends AbstractRacingEventServiceOperation<Event> {
     private static final long serialVersionUID = -3550383541066673065L;
-    private final String eventName;
+    private final String baseEventName;
     private final String boatClassName;
     private final boolean boatClassTypicallyStartsUpwind;
     
-    public AddEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
+    public AddEvent(String baseEventName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
         super();
-        this.eventName = eventName;
+        this.baseEventName = baseEventName;
         this.boatClassName = boatClassName;
         this.boatClassTypicallyStartsUpwind = boatClassTypicallyStartsUpwind;
     }
@@ -31,7 +31,7 @@ public class AddEvent extends AbstractRacingEventServiceOperation<Event> {
 
     @Override
     public Event internalApplyTo(RacingEventService toState) {
-        return toState.createEvent(eventName, boatClassName, boatClassTypicallyStartsUpwind);
+        return toState.getOrCreateEvent(baseEventName, boatClassName, boatClassTypicallyStartsUpwind);
     }
 
 }
