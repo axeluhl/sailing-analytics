@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,7 +31,7 @@ public class TrackedEventImpl implements TrackedEvent {
     private final Event event;
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
-    private transient final Set<RaceListener> raceListeners;
+    private transient Set<RaceListener> raceListeners;
   
     public TrackedEventImpl(Event event) {
         super();
@@ -37,6 +39,11 @@ public class TrackedEventImpl implements TrackedEvent {
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
         this.trackedRacesByBoatClass = new HashMap<BoatClass, Collection<TrackedRace>>();
         raceListeners = new HashSet<RaceListener>();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        this.raceListeners = new HashSet<RaceListener>();
     }
 
     /**

@@ -20,6 +20,7 @@ public interface WindTrack extends Track<Wind> {
      * estimate at all.<p>
      * 
      * If the track has no wind data at all, <code>null</code> will be returned.
+     * Attention: The TimePoint of the returned Wind is NOT necessarily equal to the requested timepoint.  
      */
     Wind getAveragedWind(Position p, TimePoint at);
     

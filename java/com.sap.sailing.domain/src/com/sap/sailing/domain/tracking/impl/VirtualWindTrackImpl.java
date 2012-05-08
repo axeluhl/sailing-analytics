@@ -56,7 +56,7 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
     public synchronized WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindWithConfidence(Position p, TimePoint at) {
         WindWithConfidence<Pair<Position, TimePoint>> result = null;
         TimePoint adjustedAt;
-        TimePoint raceStartTimePoint = getTrackedRace().getStart();
+        TimePoint raceStartTimePoint = getTrackedRace().getStartOfRace();
         TimePoint timePointOfNewestEvent = getTrackedRace().getTimePointOfNewestEvent();
         if (raceStartTimePoint != null) {
             if (timePointOfNewestEvent != null) {

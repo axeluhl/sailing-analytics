@@ -146,7 +146,7 @@ public class Action {
     }
 
     public TimePoint getTimePoint(TrackedRace race) throws IOException, InvalidDateException {
-        final TimePoint start = race.getStart();
+        final TimePoint start = race.getStartOfRace();
         final String time = getAttribute("time");
         if (time == null) {
             return start;
