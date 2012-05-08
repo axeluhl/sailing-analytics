@@ -37,10 +37,12 @@ public class PathImpl implements Path {
 	@Override
 	public TimedPosition getPositionAtTime(TimePoint t) {
 		
+		if (t.compareTo(pathPoints.get(0).getTimePoint()) == 0) return pathPoints.get(0); 
+		
 		TimedPositionWithSpeed p1 = null;
 		TimedPositionWithSpeed p2 = null;
 		for (TimedPositionWithSpeed p : pathPoints) {
-			if (p.getTimePoint().compareTo(t) > 0) {
+			if (p.getTimePoint().compareTo(t) >= 0) {
 				p2 = p;
 				p1 = pathPoints.get(pathPoints.indexOf(p)-1);
 				break;
@@ -73,7 +75,7 @@ public class PathImpl implements Path {
 		TimePoint t = pathPoints.get(0).getTimePoint();
 		TimePoint lastPoint = pathPoints.get(pathPoints.size()-1).getTimePoint();
 
-		while(t.compareTo(lastPoint) < 0) {
+		while(t.compareTo(lastPoint) <= 0) {
 			lst.add(getPositionAtTime(t));
 			t = new MillisecondsTimePoint(t.asMillis() + milliseconds);
 		}
@@ -94,6 +96,7 @@ public class PathImpl implements Path {
 		List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
 		lst.add(p1);
 		lst.add(p2);
+		lst.add(p3);
 		
 		Path pth = new PathImpl(lst);
 		//System.out.println(pth.getPositionAtTime(new MillisecondsTimePoint(100000)));
@@ -101,7 +104,7 @@ public class PathImpl implements Path {
 			System.out.println(p.getPosition());
 			System.out.println(p.getTimePoint());
 		}
-		System.out.println(pth.getPositionAtTime(new MillisecondsTimePoint(4000000)).getPosition());
+		System.out.println(pth.getPositionAtTime(new MillisecondsTimePoint(0)).getPosition());
 	}
 
 }
