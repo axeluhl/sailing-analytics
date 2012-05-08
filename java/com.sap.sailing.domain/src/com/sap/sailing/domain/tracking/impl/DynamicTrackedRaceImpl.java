@@ -34,7 +34,6 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.WindListener;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 
@@ -44,7 +43,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceImpl.class.getName());
     
-    private Set<RaceChangeListener> listeners;
+    private transient Set<RaceChangeListener> listeners;
     
     private boolean raceIsKnownToStartUpwind;
     
@@ -70,12 +69,12 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     /**
-     * After de-serialization adds this object again as {@link WindListener} to all its wind tracks because
-     * the wind listeners aren't serialized. This unfortunately breaks {@link WindTrack}'s encapsulation of how
-     * it manages and serializes / de-serializes its listeners, but we currently don't know any better way.
+     * After de-serialization sets a valid {@link #listeners} collection which is transient and therefore
+     * hasn't been serialized.
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        listeners = new HashSet<RaceChangeListener>();
     }
     
     /**
