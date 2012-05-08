@@ -8,7 +8,11 @@ import com.sap.sailing.domain.common.WindSource;
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
     
+    void recordFix(Buoy buoy, GPSFix fix);
+    
     void recordWind(Wind wind, WindSource windSource);
+
+    void removeWind(Wind wind, WindSource windSource);
 
     /**
      * The raw, updating feed of a single competitor participating in this race

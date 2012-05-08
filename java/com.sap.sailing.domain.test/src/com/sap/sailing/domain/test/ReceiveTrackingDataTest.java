@@ -18,6 +18,7 @@ import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -51,7 +52,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             private boolean first = true;
             
             @Override
-            public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
+            public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
                 System.out.println("Received fix "+fix);
                 synchronized (semaphor) {
                     if (first) {

@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -188,7 +189,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
-    public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
+    public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
         clearCaches();
     }
 
@@ -213,12 +214,12 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
-    public void windDataReceived(Wind wind) {
+    public void windDataReceived(Wind wind, WindSource windSource) {
         clearCaches();
     }
     
     @Override
-    public void windDataRemoved(Wind wind) {
+    public void windDataRemoved(Wind wind, WindSource windSource) {
         clearCaches();
     }
     

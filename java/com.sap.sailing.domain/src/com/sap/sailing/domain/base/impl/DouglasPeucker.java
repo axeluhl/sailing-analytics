@@ -54,27 +54,29 @@ public class DouglasPeucker<ItemType, FixType extends GPSFix> {
         if (firstFixAtOrAfter != null) {
             final Position fromPosition = firstFixAtOrAfter.getPosition();
             FixType toFix = track.getLastFixAtOrBefore(to);
-            final Bearing bearing = fromPosition.getBearingGreatCircle(toFix.getPosition());
-            synchronized (track) {
-                Iterator<FixType> fixIter = track.getFixesIterator(from, /* inclusive */false);
-                if (executor != null) {
-                    result = getFixWithGreatestCrossTrackErrorUsingExecutor(to, maxDistance, 
-                            fromPosition, bearing, fixIter);
-                } else {
-                    // avoid the extra effort of dealing with futures and executors
-                    FixType fixFurthestAway = null;
-                    while (fixIter.hasNext()) {
-                        final FixType fix = fixIter.next();
-                        if (fix.getTimePoint().compareTo(to) > 0) {
-                            break;
+            if (toFix != null) {
+                final Bearing bearing = fromPosition.getBearingGreatCircle(toFix.getPosition());
+                synchronized (track) {
+                    Iterator<FixType> fixIter = track.getFixesIterator(from, /* inclusive */false);
+                    if (executor != null) {
+                        result = getFixWithGreatestCrossTrackErrorUsingExecutor(to, maxDistance, fromPosition, bearing,
+                                fixIter);
+                    } else {
+                        // avoid the extra effort of dealing with futures and executors
+                        FixType fixFurthestAway = null;
+                        while (fixIter.hasNext()) {
+                            final FixType fix = fixIter.next();
+                            if (fix.getTimePoint().compareTo(to) > 0) {
+                                break;
+                            }
+                            Distance crossTrackError = fix.getPosition().crossTrackError(fromPosition, bearing);
+                            if (crossTrackError.compareTo(maxDistance) > 0) {
+                                maxDistance = crossTrackError;
+                                fixFurthestAway = fix;
+                            }
                         }
-                        Distance crossTrackError = fix.getPosition().crossTrackError(fromPosition, bearing);
-                        if (crossTrackError.compareTo(maxDistance) > 0) {
-                            maxDistance = crossTrackError;
-                            fixFurthestAway = fix;
-                        }
+                        result = new Pair<GPSFix, Distance>(fixFurthestAway, maxDistance);
                     }
-                    result = new Pair<GPSFix, Distance>(fixFurthestAway, maxDistance);
                 }
             }
         }

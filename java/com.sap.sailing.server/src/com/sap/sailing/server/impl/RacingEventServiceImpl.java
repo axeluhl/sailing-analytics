@@ -26,8 +26,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.EventListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
@@ -36,6 +39,7 @@ import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.EventName;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -55,12 +59,17 @@ import com.sap.sailing.domain.swisstimingadapter.SailMasterMessage;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
@@ -76,8 +85,14 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.operationaltransformation.RecordBuoyGPSFix;
+import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
+import com.sap.sailing.server.operationaltransformation.RecordWindFix;
+import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
+import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
+import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 
-public class RacingEventServiceImpl implements RacingEventService {
+public class RacingEventServiceImpl implements RacingEventService, EventListener {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -93,6 +108,8 @@ public class RacingEventServiceImpl implements RacingEventService {
     private final ExpeditionWindTrackerFactory windTrackerFactory;
     
     protected final Map<String, Event> eventsByName;
+    
+    private final Map<RaceDefinition, CourseChangeReplicator> courseListeners;
     
     protected final Map<Event, Set<RaceTracker>> raceTrackersByEvent;
     
@@ -141,6 +158,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         leaderboardGroupsByName = new HashMap<String, LeaderboardGroup>();
         leaderboardsByName = new HashMap<String, Leaderboard>();
         operationExecutionListeners = new HashSet<OperationExecutionListener>();
+        courseListeners = new HashMap<RaceDefinition, CourseChangeReplicator>();
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
@@ -378,10 +396,12 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
 
     @Override
-    public void createEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
+    public Event createEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
         Event event = new EventImpl(eventName, com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(
                 boatClassName, boatClassTypicallyStartsUpwind));
-        eventsByName.put(eventName, event);
+        eventsByName.put(event.getName(), event);
+        event.addEventListener(this);
+        return event;
     }
 
     @Override
@@ -427,7 +447,19 @@ public class RacingEventServiceImpl implements RacingEventService {
     @Override
     public void addRace(EventIdentifier addToEvent, RaceDefinition raceDefinition) {
         Event event = getEvent(addToEvent);
-        event.addRace(raceDefinition);
+        event.addRace(raceDefinition); // will trigger the raceAdded operation because this service is listening on all its events
+    }
+    
+    @Override
+    public void raceAdded(Event event, RaceDefinition raceDefinition) {
+        final CourseChangeReplicator listener = new CourseChangeReplicator(this, event, raceDefinition);
+        courseListeners.put(raceDefinition, listener);
+        raceDefinition.getCourse().addCourseListener(listener);
+    }
+
+    @Override
+    public void raceRemoved(Event event, RaceDefinition raceDefinition) {
+        raceDefinition.getCourse().removeCourseListener(courseListeners.remove(raceDefinition));
     }
 
     @Override
@@ -452,12 +484,14 @@ public class RacingEventServiceImpl implements RacingEventService {
                     if (Util.isEmpty(eventWithName.getAllRaces())) {
                         // probably, tracker removed the last races from the old event and created a new one
                         eventsByName.put(eventName, tracker.getEvent());
+                        tracker.getEvent().addEventListener(this);
                     } else {
                         throw new RuntimeException("Internal error. Two Event objects with equal name "+eventName);
                     }
                 }
             } else {
                 eventsByName.put(eventName, tracker.getEvent());
+                tracker.getEvent().addEventListener(this);
             }
         } else {
             WindStore existingTrackersWindStore = tracker.getWindStore();
@@ -498,11 +532,31 @@ public class RacingEventServiceImpl implements RacingEventService {
         }
     }
     
+    /**
+     * A listener class used to ensure that when a tracked race is added to any {@link TrackedEvent} managed by this
+     * service, the service adds the tracked race to the default leaderboard and links it to the leaderboard columns
+     * that were previously connected to it. Additionally, a {@link RaceChangeListener} is added to the {@link TrackedRace}
+     * which is responsible for triggering the replication of all relevant changes to the tracked race. When a tracked
+     * race is removed, the {@link TrackedRaceReplicator} that was added as listener to that tracked race is removed again.
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
     private class RaceAdditionListener implements RaceListener, Serializable {
         private static final long serialVersionUID = 1036955460477000265L;
+        
+        private final Map<TrackedRace, TrackedRaceReplicator> trackedRaceReplicators;
+
+        public RaceAdditionListener() {
+            this.trackedRaceReplicators = new HashMap<TrackedRace, TrackedRaceReplicator>();
+        }
 
         @Override
         public void raceRemoved(TrackedRace trackedRace) {
+            TrackedRaceReplicator trackedRaceReplicator = trackedRaceReplicators.remove(trackedRace);
+            if (trackedRaceReplicator != null) {
+                trackedRace.removeListener(trackedRaceReplicator);
+            }
         }
 
         @Override
@@ -510,6 +564,54 @@ public class RacingEventServiceImpl implements RacingEventService {
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
             leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
                     trackedRace.getRace().getName(), /* medalRace */false);
+            TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace.getRaceIdentifier());
+            trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
+            trackedRace.addListener(trackedRaceReplicator);
+        }
+    }
+    
+    private class TrackedRaceReplicator implements RaceChangeListener {
+        private final EventAndRaceIdentifier raceIdentifier;
+
+        public TrackedRaceReplicator(EventAndRaceIdentifier raceIdentifier) {
+            this.raceIdentifier = raceIdentifier;
+        }
+
+        @Override
+        public void windDataReceived(Wind wind, WindSource windSource) {
+            replicate(new RecordWindFix(raceIdentifier, windSource, wind));
+            
+        }
+
+        @Override
+        public void windDataRemoved(Wind wind, WindSource windSource) {
+            replicate(new RemoveWindFix(raceIdentifier, windSource, wind));
+        }
+
+        @Override
+        public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            replicate(new UpdateWindAveragingTime(raceIdentifier, newMillisecondsOverWhichToAverage));
+        }
+
+        @Override
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+            replicate(new RecordCompetitorGPSFix(raceIdentifier, competitor, fix));
+            
+        }
+
+        @Override
+        public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+            replicate(new RecordBuoyGPSFix(raceIdentifier, buoy, fix));
+        }
+
+        @Override
+        public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
+            replicate(new UpdateMarkPassings(raceIdentifier, markPassing.getCompetitor(), Collections.singleton(markPassing)));
+        }
+
+        @Override
+        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            replicate(new UpdateWindAveragingTime(raceIdentifier, newMillisecondsOverWhichToAverage));
         }
     }
 
@@ -556,6 +658,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         if (event != null) {
             if (event.getName() != null) {
                 eventsByName.remove(event.getName());
+                event.removeEventListener(this);
             }
             for (RaceDefinition race : event.getAllRaces()) {
                 stopTrackingWind(event, race);
@@ -667,6 +770,7 @@ public class RacingEventServiceImpl implements RacingEventService {
         event.removeRace(race);
         if (Util.isEmpty(event.getAllRaces())) {
             eventsByName.remove(event.getName());
+            event.removeEventListener(this);
         }
     }
 
@@ -793,8 +897,19 @@ public class RacingEventServiceImpl implements RacingEventService {
     }
     
     @Override
-    public TrackedRace getTrackedRace(RaceIdentifier raceIdentifier) {
-        return (TrackedRace) raceIdentifier.getTrackedRace(this);
+    public TrackedRace getTrackedRace(EventAndRaceIdentifier raceIdentifier) {
+        TrackedRace result = null;
+        Event event = eventsByName.get(raceIdentifier.getEventName());
+        if (event != null) {
+            DynamicTrackedEvent trackedEvent = eventTrackingCache.get(event);
+            if (trackedEvent != null) {
+                RaceDefinition race = getRace(raceIdentifier);
+                if (race != null) {
+                    result = trackedEvent.getTrackedRace(race);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -937,12 +1052,16 @@ public class RacingEventServiceImpl implements RacingEventService {
     public <T> T apply(RacingEventServiceOperation<T> operation) {
         try {
             T result = operation.internalApplyTo(this);
-            for (OperationExecutionListener listener : operationExecutionListeners) {
-                listener.executed(operation);
-            }
+            replicate(operation);
             return result;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    <T> void replicate(RacingEventServiceOperation<T> operation) {
+        for (OperationExecutionListener listener : operationExecutionListeners) {
+            listener.executed(operation);
         }
     }
 
@@ -968,18 +1087,27 @@ public class RacingEventServiceImpl implements RacingEventService {
     @SuppressWarnings("unchecked") // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
     public synchronized void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
-        eventsByName.clear();
-        eventsByName.putAll((Map<String, Event>) ois.readObject());
-        eventsObservedForDefaultLeaderboard.clear();
-        for (DynamicTrackedEvent trackedEventToObserve : (Set<DynamicTrackedEvent>) ois.readObject()) {
-            ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEventToObserve);
+        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
+        try {
+            // Use this object's class's class loader as the context class loader which will then be used for
+            // de-serialization; this will cause all classes to be visible that this bundle
+            // (com.sap.sailing.server) can see
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            eventsByName.clear();
+            eventsByName.putAll((Map<String, Event>) ois.readObject());
+            eventsObservedForDefaultLeaderboard.clear();
+            for (DynamicTrackedEvent trackedEventToObserve : (Set<DynamicTrackedEvent>) ois.readObject()) {
+                ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedEventToObserve);
+            }
+            eventTrackingCache.clear();
+            eventTrackingCache.putAll((Map<Event, DynamicTrackedEvent>) ois.readObject());
+            leaderboardGroupsByName.clear();
+            leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
+            leaderboardsByName.clear();
+            leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldContextClassloader);
         }
-        eventTrackingCache.clear();
-        eventTrackingCache.putAll((Map<Event, DynamicTrackedEvent>) ois.readObject());
-        leaderboardGroupsByName.clear();
-        leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
-        leaderboardsByName.clear();
-        leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
     }
 
 }

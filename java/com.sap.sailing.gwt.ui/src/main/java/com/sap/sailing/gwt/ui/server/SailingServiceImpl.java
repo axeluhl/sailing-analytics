@@ -765,7 +765,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack
                             .getMillisecondsOverWhichToAverageWind();
                     TimePoint timePoint = from;
-                    for (int i = 0; i < numberOfFixes && timePoint.compareTo(newestEvent) < 0; i++) {
+                    for (int i = 0; i < numberOfFixes && newestEvent != null && timePoint.compareTo(newestEvent) < 0; i++) {
                         Wind wind = windTrack.getAveragedWind(null, timePoint);
                         if (wind != null) {
                             if(wind.getTimePoint().compareTo(from) > 0 && wind.getTimePoint().compareTo(to) < 0) {
@@ -1119,7 +1119,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void removeWind(RaceIdentifier raceIdentifier, WindDTO windDTO) {
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Position p = null;
             if (windDTO.position != null) {
@@ -1688,7 +1688,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public TrackedRace getTrackedRace(RaceIdentifier eventNameAndRaceName) {
+    public TrackedRace getTrackedRace(EventAndRaceIdentifier eventNameAndRaceName) {
         Event event = getService().getEventByName(eventNameAndRaceName.getEventName());
         RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
         TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);

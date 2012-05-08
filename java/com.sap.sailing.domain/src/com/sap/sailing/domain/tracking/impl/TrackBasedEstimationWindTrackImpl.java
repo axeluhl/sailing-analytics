@@ -18,12 +18,14 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.Weigher;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -329,7 +331,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
-    public void windDataReceived(Wind wind) {
+    public void windDataReceived(Wind wind, WindSource windSource) {
         invalidateForNewWind(wind);
     }
 
@@ -342,7 +344,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
-    public void windDataRemoved(Wind wind) {
+    public void windDataRemoved(Wind wind, WindSource windSource) {
         invalidateForNewWind(wind);
     }
 
@@ -352,7 +354,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
-    public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
+    public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
         WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(fix
                 .getTimePoint().asMillis() - averagingInterval));

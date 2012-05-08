@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public class CourseImpl extends NamedImpl implements Course {
     private final List<Waypoint> waypoints;
     private final Map<Waypoint, Integer> waypointIndexes;
     private final List<Leg> legs;
-    private final Set<CourseListener> listeners;
+    private transient Set<CourseListener> listeners;
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
@@ -62,6 +63,11 @@ public class CourseImpl extends NamedImpl implements Course {
                 previous = current;
             }
         }
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        listeners = new HashSet<>();
     }
     
     /**
@@ -238,6 +244,11 @@ public class CourseImpl extends NamedImpl implements Course {
     @Override
     public void addCourseListener(CourseListener listener) {
         listeners.add(listener);
+    }
+    
+    @Override
+    public void removeCourseListener(CourseListener listener) {
+        listeners.remove(listener);
     }
 
     @Override

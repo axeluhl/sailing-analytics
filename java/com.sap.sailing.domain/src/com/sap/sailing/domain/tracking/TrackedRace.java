@@ -13,10 +13,10 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -43,7 +43,7 @@ public interface TrackedRace extends Serializable {
     
     RaceDefinition getRace();
     
-    RaceIdentifier getRaceIdentifier();
+    EventAndRaceIdentifier getRaceIdentifier();
     
     /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time point
@@ -257,8 +257,6 @@ public interface TrackedRace extends Serializable {
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
 
-    void removeWind(Wind wind, WindSource windSource);
-
     /**
      * Time stamp that the event received last from the underlying push service carried on it.
      * Note that these times may not increase monotonically.
@@ -339,6 +337,8 @@ public interface TrackedRace extends Serializable {
     boolean raceIsKnownToStartUpwind();
     
     void addListener(RaceChangeListener listener);
+    
+    void removeListener(RaceChangeListener listener);
 
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 

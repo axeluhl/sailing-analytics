@@ -81,7 +81,7 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
 
     TrackedRace getTrackedRace(Event event, RaceDefinition r);
     
-    TrackedRace getTrackedRace(RaceIdentifier raceIdentifier);
+    TrackedRace getTrackedRace(EventAndRaceIdentifier raceIdentifier);
 
     /**
      * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.
@@ -332,7 +332,7 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
     TrackedRace createTrackedRace(EventAndRaceIdentifier raceIdentifier, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
-    void createEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
+    Event createEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Event} such that it will appear in {@link Event#getAllRaces()}
