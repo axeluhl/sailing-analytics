@@ -60,6 +60,7 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings>
 				.refreshInterval() + ":"));
 		refreshIntervalBox = dialog.createDoubleBox(
 				((double) initialSettings.getRefreshInterval()) / 1000, 4);
+		labelAndRefreshIntervalBoxPanel.setStyleName("labelAndRefresh");
 		labelAndRefreshIntervalBoxPanel.add(refreshIntervalBox);
 
 		FlowPanel labelAndTimeDelayBoxPanel = new FlowPanel();
@@ -67,7 +68,8 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings>
 				+ ":"));
 		timeDelayBox = dialog.createLongBox(
 				initialSettings.getDelayToLivePlayInSeconds(), 10);
-		labelAndTimeDelayBoxPanel.add(labelAndTimeDelayBoxPanel);
+		labelAndTimeDelayBoxPanel.setStyleName("labelAndTime");
+		labelAndTimeDelayBoxPanel.add(timeDelayBox);
 
 		mainContentPanel.add(labelAndRefreshIntervalBoxPanel);
 		mainContentPanel.add(labelAndTimeDelayBoxPanel);
