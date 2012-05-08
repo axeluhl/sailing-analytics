@@ -78,7 +78,7 @@ public interface SailingServiceAsync {
      * @param from if <code>null</code>, the tracked race's start of tracking is used
      * @param to if <code>null</code>, the tracked race's time point of newest event is used
      */
-    void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
+    void getAveragedWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
             Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
 
     /**
@@ -86,7 +86,7 @@ public interface SailingServiceAsync {
      *            if <code>null</code>, data from all available wind sources will be returned, otherwise only from those
      *            whose {@link WindSource} name is contained in the <code>windSources</code> collection.
      */
-    void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
+    void getAveragedWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
             double latDeg, double lngDeg, Collection<String> windSourceTypeNames,
             AsyncCallback<WindInfoForRaceDTO> callback);
 
@@ -103,7 +103,7 @@ public interface SailingServiceAsync {
      *            no matter how great this value is chosen, never returns data beyond the newest event recorded in the
      *            race
      */
-    void getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
+    void getAveragedWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth, int numberOfFixes,
             Collection<String> windSourceTypeNames, AsyncCallback<WindInfoForRaceDTO> callback);
 
     void setWind(RaceIdentifier raceIdentifier, WindDTO wind, AsyncCallback<Void> callback);
@@ -218,14 +218,11 @@ public interface SailingServiceAsync {
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorID, String displayName,
             AsyncCallback<Void> callback);
 
-	void moveLeaderboardColumnUp(String leaderboardName, String columnName,
-			AsyncCallback<Void> callback);
+    void moveLeaderboardColumnUp(String leaderboardName, String columnName, AsyncCallback<Void> callback);
 
-	void moveLeaderboardColumnDown(String leaderboardName, String columnName,
-			AsyncCallback<Void> callback);
+    void moveLeaderboardColumnDown(String leaderboardName, String columnName, AsyncCallback<Void> callback);
 
-	void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace,
-			AsyncCallback<Void> callback);
+    void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace, AsyncCallback<Void> callback);
 
     void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationDTO>> asyncCallback);
 

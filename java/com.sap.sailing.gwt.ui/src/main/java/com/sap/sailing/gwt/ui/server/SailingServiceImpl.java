@@ -681,8 +681,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * Fetches the {@link WindTrack#getAveragedWind(Position, TimePoint) average wind} from all wind tracks or those identified
      * by <code>windSourceTypeNames</code>
      */
-    @Override
-    public WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+    //@Override
+    public WindInfoForRaceDTO getAveragedWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSourceTypeNames)
             throws NoWindException {
         Position position = new DegreePosition(latDeg, lngDeg);
@@ -727,17 +727,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+    public WindInfoForRaceDTO getAveragedWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, Collection<String> windSourceTypeNames)
             throws NoWindException {
         assert from != null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        WindInfoForRaceDTO result = getWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
+        
+        WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), trackedRace.getTimePointOfNewestEvent(), millisecondsStepWidth, numberOfFixes,
                 windSourceTypeNames, trackedRace);
         return result;
     }
 
-    private WindInfoForRaceDTO getWindInfo(TimePoint from, long millisecondsStepWidth, int numberOfFixes,
+    private WindInfoForRaceDTO getAveragedWindInfo(TimePoint from, TimePoint to, long millisecondsStepWidth, int numberOfFixes,
             Collection<String> windSourceTypeNames, TrackedRace trackedRace) {
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
@@ -767,8 +768,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     for (int i = 0; i < numberOfFixes && timePoint.compareTo(newestEvent) < 0; i++) {
                         Wind wind = windTrack.getAveragedWind(null, timePoint);
                         if (wind != null) {
-                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, windTrack);
-                            windTrackInfoDTO.windFixes.add(windDTO);
+                            if(wind.getTimePoint().compareTo(from) > 0 && wind.getTimePoint().compareTo(to) < 0) {
+                                WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, windTrack);
+                                windTrackInfoDTO.windFixes.add(windDTO);
+                            }
                         }
                         timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
                     }
@@ -779,7 +782,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to,
+    public WindInfoForRaceDTO getAveragedWindInfo(RaceIdentifier raceIdentifier, Date from, Date to,
             long resolutionInMilliseconds, Collection<String> windSourceTypeNames) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = null;
@@ -787,21 +790,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint fromTimePoint;
             if (from == null) {
                 fromTimePoint = trackedRace.getStartOfTracking();
-                if (fromTimePoint == null) {
-                    fromTimePoint = new MillisecondsTimePoint(from);
-                }
             } else {
                 fromTimePoint = new MillisecondsTimePoint(from);
             }
             TimePoint toTimePoint;
-            TimePoint assumedEnd = trackedRace.getEndOfRace();
-            if (to == null || (assumedEnd != null && to.getTime() > assumedEnd.asMillis())) {
-                toTimePoint = assumedEnd;
+            if (to == null) {
+                toTimePoint = trackedRace.getEndOfRace();
             } else {
                 toTimePoint = new MillisecondsTimePoint(to);
             }
-            int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
-            result = getWindInfo(fromTimePoint, resolutionInMilliseconds, numberOfFixes, windSourceTypeNames, trackedRace);
+            if(fromTimePoint != null && toTimePoint != null) {
+                int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
+                result = getAveragedWindInfo(fromTimePoint, toTimePoint, resolutionInMilliseconds, numberOfFixes, windSourceTypeNames, trackedRace);
+            }
         }
         return result;
     }

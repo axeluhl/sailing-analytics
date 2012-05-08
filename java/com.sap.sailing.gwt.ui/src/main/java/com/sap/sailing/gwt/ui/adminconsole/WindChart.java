@@ -39,25 +39,30 @@ import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
+import com.sap.sailing.gwt.ui.raceboard.RaceTimesCalculationUtil;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class WindChart extends SimpleChartPanel implements Component<WindChartSettings>, RaceSelectionChangeListener, TimeListener, RequiresResize {
+public class WindChart extends SimpleChartPanel implements Component<WindChartSettings>, RaceSelectionChangeListener, 
+    RaceTimesInfoProviderListener, TimeListener, RequiresResize {
     public static final long DEFAULT_RESOLUTION_IN_MILLISECONDS = 10000;
 
     private static final int LINE_WIDTH = 1;
@@ -82,7 +87,12 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
+    
+    private Date chartMinTimepoint;
+    private Date chartMaxTimepoint;
+    
     private RaceIdentifier selectedRaceIdentifier;
+    private RaceTimesInfoDTO lastRaceTimesInfo;
     
     private final ColorMap<WindSource> colorMap;
 
@@ -435,8 +445,8 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     private void clearCacheAndReload() {
         timeOfEarliestRequestInMillis = null;
         timeOfLatestRequestInMillis = null;
-        loadData(selectedRaceIdentifier, /* from */null, /* to */
-                new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */false);
+        
+        loadData(selectedRaceIdentifier, chartMinTimepoint, chartMaxTimepoint, /* append */false);
     }
 
     /**
@@ -463,11 +473,11 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     private void loadData(final RaceIdentifier raceIdentifier, final Date from, final Date to, final boolean append) {
         if (raceIdentifier == null) {
             clearChart();
-        } else if (needsDataLoading()) {
+        } else if (needsDataLoading() && from != null && to != null) {
             GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, raceIdentifier,
                     // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
                     // Consider incremental updates for new data only.
-                    from, to, resolutionInMilliseconds, // use race start and time of newest event as default time period
+                    from, to, resolutionInMilliseconds,
                     null, new AsyncCallback<WindInfoForRaceDTO>() {
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
@@ -505,6 +515,16 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         }
     }
 
+    @Override
+    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+        this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaceIdentifier);
+        
+        Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.caluclateRaceMinMax(timer, this.lastRaceTimesInfo);
+        
+        this.chartMinTimepoint = raceMinMax.getA();
+        this.chartMaxTimepoint = raceMinMax.getB();
+    }
+
     /**
      * If in live mode, fetches what's missing since the last fix and <code>date</code>. If nothing has been loaded yet,
      * loads from the beginning up to <code>date</code>. If in replay mode, checks if anything has been loaded at all. If not,
@@ -515,17 +535,15 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         if (timer.getPlayMode() == PlayModes.Live) {
             // is date before first cache entry or is cache empty?
             if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > date.getTime()) {
-                loadData(selectedRaceIdentifier, null, date, /* append */ true);
+                loadData(selectedRaceIdentifier, chartMinTimepoint, date, /* append */ true);
             } else if (timeOfLatestRequestInMillis < date.getTime()) {
-                loadData(selectedRaceIdentifier, new Date(timeOfLatestRequestInMillis), /* to */
-                        new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */true);
+                loadData(selectedRaceIdentifier, new Date(timeOfLatestRequestInMillis), chartMaxTimepoint, /* append */true);
             }
             // otherwise the cache spans across date and so we don't need to load anything
         } else {
             // assuming play mode is replay / non-live
             if (timeOfLatestRequestInMillis == null) {
-                loadData(selectedRaceIdentifier, /* from */null, /* to */
-                        new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis()), /* append */false); // replace old series
+                loadData(selectedRaceIdentifier, chartMinTimepoint, chartMaxTimepoint, /* append */false); // replace old series
             }
         }
         updateTimeLine(date);

@@ -6,8 +6,10 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.raceboard.RaceTimesCalculationUtil;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
@@ -117,58 +119,16 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * was <code>null</code> before, or extended to a later point in time.
      */
     private void initMinMax(RaceTimesInfoDTO newRaceTimesInfo) {
-        Date min = null;
-        Date max = null;
-
-        switch (timer.getPlayMode()) {
-        case Live:
-            if (newRaceTimesInfo.startOfRace != null) {
-                long extensionTime = calculateRaceExtensionTime(newRaceTimesInfo.startOfRace, newRaceTimesInfo.newestTrackingEvent);
-                
-                min = new Date(newRaceTimesInfo.startOfRace.getTime() - extensionTime);
-            } else if (newRaceTimesInfo.startOfTracking != null) {
-                min = newRaceTimesInfo.startOfTracking;
-            }
-            
-            if (newRaceTimesInfo.newestTrackingEvent != null) {
-                max = newRaceTimesInfo.newestTrackingEvent;
-            }
-            break;
-        case Replay:
-            long extensionTime = calculateRaceExtensionTime(newRaceTimesInfo.startOfRace, newRaceTimesInfo.endOfRace);
-            
-            if (newRaceTimesInfo.startOfRace != null) {
-                min = new Date(newRaceTimesInfo.startOfRace.getTime() - extensionTime);
-            } else if (newRaceTimesInfo.startOfTracking != null) {
-                min = newRaceTimesInfo.startOfTracking;
-            }
-            
-            if (newRaceTimesInfo.endOfRace != null) {
-                max = new Date(newRaceTimesInfo.endOfRace.getTime() + extensionTime);
-            } else if (newRaceTimesInfo.newestTrackingEvent != null) {
-                max = newRaceTimesInfo.newestTrackingEvent;
-            }
-            break;
-        }
+        Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.caluclateRaceMinMax(timer, newRaceTimesInfo);
+        
+        Date min = raceMinMax.getA();
+        Date max = raceMinMax.getB();
+        
         // never reduce max if it was already set
         if (min != null && max != null && (getMax() == null || getMax().before(max))) {
             setMinMax(min, max, /* fireEvent */ false); // no event because we guarantee time to be between min and max
         }
     }
-    
-    private long calculateRaceExtensionTime(Date startTime, Date endTime) {
-        if (startTime == null || endTime == null) {
-            return 5 * 60 * 1000; //5 minutes
-        }
-        
-        long minExtensionTime = 60 * 1000; // 1 minute
-        long maxExtensionTime = 10 * 60 * 1000; // 10 minutes
-        double extensionTimeFactor = 0.1; // 10 percent of the overall race length
-        long extensionTime = (long) ((endTime.getTime() - startTime.getTime()) * extensionTimeFactor);
-        
-        return extensionTime < minExtensionTime ? minExtensionTime : extensionTime > maxExtensionTime ? maxExtensionTime : extensionTime;
-    }
-     
     
     /**
      * When in {@link PlayModes#Replay} mode, tries to put the {@link #timer} to the time point when the last leg was
