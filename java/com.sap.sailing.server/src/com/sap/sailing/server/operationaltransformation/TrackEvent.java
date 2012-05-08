@@ -2,9 +2,11 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class TrackEvent extends AbstractRacingEventServiceOperation {
+public class TrackEvent extends AbstractRacingEventServiceOperation<DynamicTrackedEvent> {
     private static final long serialVersionUID = 7891960455598410633L;
     private final EventIdentifier eventIdentifier;
     
@@ -14,22 +16,21 @@ public class TrackEvent extends AbstractRacingEventServiceOperation {
     }
     
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public DynamicTrackedEvent internalApplyTo(RacingEventService toState) {
         Event event = toState.getEvent(eventIdentifier);
-        toState.getOrCreateTrackedEvent(event);
-        return toState;
+        return toState.getOrCreateTrackedEvent(event);
     }
 
 }

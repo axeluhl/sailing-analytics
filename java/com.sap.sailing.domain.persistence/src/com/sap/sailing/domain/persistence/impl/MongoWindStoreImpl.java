@@ -24,7 +24,6 @@ import com.sap.sailing.mongodb.MongoDBService;
  *
  */
 public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore {
-    private static final long serialVersionUID = 5236931230924201642L;
     private transient final DB db;
     private final MongoObjectFactory mongoObjectFactory;
     private final DomainObjectFactory domainObjectFactory;

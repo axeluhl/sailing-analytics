@@ -38,6 +38,7 @@ public class LegEntryDTO implements IsSerializable {
     public Integer numberOfJibes;
     public Integer numberOfTacks;
     public Integer numberOfPenaltyCircles;
+    public Double averageCrossTrackErrorInMeters;
     
     @Override
     public int hashCode() {

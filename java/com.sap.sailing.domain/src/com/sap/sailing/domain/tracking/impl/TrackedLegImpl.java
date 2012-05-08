@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -187,7 +189,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
-    public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
+    public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
         clearCaches();
     }
 
@@ -212,12 +214,12 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
-    public void windDataReceived(Wind wind) {
+    public void windDataReceived(Wind wind, WindSource windSource) {
         clearCaches();
     }
     
     @Override
-    public void windDataRemoved(Wind wind) {
+    public void windDataRemoved(Wind wind, WindSource windSource) {
         clearCaches();
     }
     
@@ -225,6 +227,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         synchronized (competitorTracksOrderedByRank) {
             competitorTracksOrderedByRank.clear();
         }
+    }
+
+    @Override
+    public Distance getCrossTrackError(Position p, TimePoint timePoint) {
+        return p.crossTrackError(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint), getLegBearing(timePoint));
     }
 
 }

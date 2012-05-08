@@ -1,9 +1,14 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.awt.TrayIcon.MessageType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -11,6 +16,8 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.ObjectInputStreamResolvingAgainstDomainFactory;
+import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -19,27 +26,33 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 public class DomainFactoryImpl implements DomainFactory {
     /**
      * Ensure that the <em>same</em> string is used as key that is also used to set the {@link Nationality}
-     * object's {@link Nationality#getName() name}.
+     * object's {@link Nationality#getThreeLetterIOCAcronym() IOC code}.
      */
     private final Map<String, Nationality> nationalityCache;
     
     private final Map<String, Buoy> buoyCache;
     
     private final Map<String, BoatClass> boatClassCache;
+    
+    private final Map<Serializable, Competitor> competitorCache;
+    
+    private final WeakHashMap<Serializable, Waypoint> waypointCache;
 
     public DomainFactoryImpl() {
         nationalityCache = new HashMap<String, Nationality>();
         buoyCache = new HashMap<String, Buoy>();
         boatClassCache = new HashMap<String, BoatClass>();
+        competitorCache = new HashMap<Serializable, Competitor>();
+        waypointCache = new WeakHashMap<Serializable, Waypoint>();
     }
     
     @Override
-    public Nationality getOrCreateNationality(String nationalityName) {
+    public Nationality getOrCreateNationality(String threeLetterIOCCode) {
         synchronized (nationalityCache) {
-            Nationality result = nationalityCache.get(nationalityName);
+            Nationality result = nationalityCache.get(threeLetterIOCCode);
             if (result == null) {
-                result = new NationalityImpl(nationalityName, nationalityName);
-                nationalityCache.put(nationalityName, result);
+                result = new NationalityImpl(threeLetterIOCCode);
+                nationalityCache.put(threeLetterIOCCode, result);
             }
             return result;
         }
@@ -66,8 +79,23 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Waypoint createWaypoint(ControlPoint controlPoint) {
-        return new WaypointImpl(controlPoint);
+    public synchronized Waypoint createWaypoint(ControlPoint controlPoint) {
+        Waypoint result = new WaypointImpl(controlPoint);
+        waypointCache.put(result.getId(), result);
+        return result;
+    }
+
+    @Override
+    public synchronized void cacheWaypoint(Waypoint waypoint) {
+        if (getExistingWaypointById(waypoint.getId()) != null) {
+            throw new IllegalArgumentException("Trying to cache an already cached waypoint: "+waypoint);
+        }
+        waypointCache.put(waypoint.getId(), waypoint);
+    }
+
+    @Override
+    public Waypoint getExistingWaypointById(Serializable id) {
+        return waypointCache.get(id);
     }
 
     @Override
@@ -85,6 +113,33 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             return result;
         }
+    }
+
+    @Override
+    public Competitor getExistingCompetitorById(Serializable competitorId) {
+        return competitorCache.get(competitorId);
+    }
+
+    @Override
+    public synchronized Competitor createCompetitor(Serializable id, String name, Team team, Boat boat) {
+        Competitor result = new CompetitorImpl(id, name, team, boat);
+        competitorCache.put(id, result);
+        return result;
+    }
+    
+    @Override
+    public synchronized Competitor getOrCreateCompetitor(Serializable competitorId, String name, Team team, Boat boat) {
+        Competitor result = getExistingCompetitorById(competitorId);
+        if (result == null) {
+            result = createCompetitor(competitorId, name, team, boat);
+        }
+        return result;
+    }
+
+    @Override
+    public ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(
+            InputStream inputStream) throws IOException {
+        return new ObjectInputStreamResolvingAgainstDomainFactoryImpl(inputStream, this);
     }
 
 }

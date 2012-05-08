@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -48,7 +48,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
     private final CollapsablePanel collapsablePanel;
     
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService,
-            List<RaceIdentifier> races, final CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
+            List<EventAndRaceIdentifier> races, final CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             StringMessages stringConstants, ErrorReporter errorReporter) {
         super(false);
         raceSelectionProvider = new RaceSelectionModel();
@@ -118,7 +118,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         HorizontalPanel raceChooserPanel = new HorizontalPanel();
         raceChooserPanel.setSpacing(5);
         boolean first = true;
-        for (final RaceIdentifier selectedRace : raceSelectionProvider.getAllRaces()) {
+        for (final EventAndRaceIdentifier selectedRace : raceSelectionProvider.getAllRaces()) {
             RadioButton raceSelectionRadioButton = new RadioButton("chooseRace");
             raceSelectionRadioButton.setText(selectedRace.toString());
             raceChooserPanel.add(raceSelectionRadioButton);
@@ -138,7 +138,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         
     }
 
-    private void selectRace(final RaceIdentifier selectedRace) {
+    private void selectRace(final EventAndRaceIdentifier selectedRace) {
         if(selectedRace != null)
             collapsablePanel.getHeaderTextAccessor().setText(selectedRace.getRaceName());
         else

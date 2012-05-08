@@ -56,6 +56,11 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory {
         return result;
     }
     
+    @Override
+    public WindTracker getExistingWindTracker(RaceDefinition race) {
+        return windTrackers.get(race);
+    }
+    
     public UDPExpeditionReceiver getOrCreateWindReceiverOnDefaultPort() throws SocketException {
         return getOrCreateWindReceiverForPort(defaultPort);
     }

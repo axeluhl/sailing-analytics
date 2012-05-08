@@ -10,15 +10,17 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 public class RaceTimesInfoDTO implements IsSerializable {
     private RaceIdentifier raceIdentifier;
 
-    public List<LegTimesInfoDTO> legTimes;
+    public List<LegInfoDTO> legInfos;
+
+    public List<MarkPassingTimesDTO> markPassingTimes;
     
     public Date startOfRace;
     public Date startOfTracking;
     public Date endOfTracking;
     public Date endOfRace;
 
-    public Date timePointOfLastEvent;
-    public Date timePointOfNewestEvent;
+    public Date assumedEndOfRace;
+    public Date newestTrackingEvent;
 
     public RaceTimesInfoDTO(RaceIdentifier raceIdentifier) {
         this.raceIdentifier = raceIdentifier;
@@ -34,25 +36,18 @@ public class RaceTimesInfoDTO implements IsSerializable {
         this.raceIdentifier = raceIdentifier;
     }
 
-    public LegTimesInfoDTO getLastLegTimes() {
-        if (legTimes == null || legTimes.isEmpty()) {
+    public MarkPassingTimesDTO getLastMarkPassingTimes() {
+        if (markPassingTimes == null || markPassingTimes.isEmpty()) {
             return null;
         }
-        LegTimesInfoDTO lastLegTime = null;
-        Iterator<LegTimesInfoDTO> iterator = legTimes.iterator();
+        MarkPassingTimesDTO lastTimes = null;
+        Iterator<MarkPassingTimesDTO> iterator = markPassingTimes.iterator();
         while(iterator.hasNext()) {
-            lastLegTime = iterator.next();
+            lastTimes = iterator.next();
         }
-        return lastLegTime;
+        return lastTimes;
     }
 
-    public List<LegTimesInfoDTO> getLegTimes() {
-        return legTimes;
-    }
-
-    public void setLegTimes(List<LegTimesInfoDTO> legTimes) {
-        this.legTimes = legTimes;
-    }
 
     public Date getStartOfRace() {
         return startOfRace;
@@ -70,19 +65,51 @@ public class RaceTimesInfoDTO implements IsSerializable {
         this.startOfTracking = startOfTracking;
     }
 
-    public Date getTimePointOfLastEvent() {
-        return timePointOfLastEvent;
+    public Date getEndOfTracking() {
+        return endOfTracking;
     }
 
-    public void setTimePointOfLastEvent(Date timePointOfLastEvent) {
-        this.timePointOfLastEvent = timePointOfLastEvent;
+    public void setEndOfTracking(Date endOfTracking) {
+        this.endOfTracking = endOfTracking;
     }
 
-    public Date getTimePointOfNewestEvent() {
-        return timePointOfNewestEvent;
+    public Date getEndOfRace() {
+        return endOfRace;
     }
 
-    public void setTimePointOfNewestEvent(Date timePointOfNewestEvent) {
-        this.timePointOfNewestEvent = timePointOfNewestEvent;
+    public void setEndOfRace(Date endOfRace) {
+        this.endOfRace = endOfRace;
+    }
+
+    public Date getAssumedEndOfRace() {
+        return assumedEndOfRace;
+    }
+
+    public void setAssumedEndOfRace(Date assumedEndOfRace) {
+        this.assumedEndOfRace = assumedEndOfRace;
+    }
+
+    public Date getNewestTrackingEvent() {
+        return newestTrackingEvent;
+    }
+
+    public void setNewestTrackingEvent(Date newestTrackingEvent) {
+        this.newestTrackingEvent = newestTrackingEvent;
+    }
+
+    public List<LegInfoDTO> getLegInfos() {
+        return legInfos;
+    }
+
+    public void setLegInfos(List<LegInfoDTO> legInfos) {
+        this.legInfos = legInfos;
+    }
+
+    public List<MarkPassingTimesDTO> getMarkPassingTimes() {
+        return markPassingTimes;
+    }
+
+    public void setMarkPassingTimes(List<MarkPassingTimesDTO> markPassingTimes) {
+        this.markPassingTimes = markPassingTimes;
     }
 }

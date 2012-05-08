@@ -2,6 +2,8 @@ package com.sap.sailing.server;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
@@ -16,7 +18,10 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.EventFetcher;
 import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.EventName;
+import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -25,6 +30,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -56,7 +62,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RacingEventService extends TrackedEventRegistry {
+public interface RacingEventService extends TrackedEventRegistry, EventFetcher, RaceFetcher {
     /**
      * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
      *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
@@ -65,17 +71,27 @@ public interface RacingEventService extends TrackedEventRegistry {
 
     Event getEventByName(String name);
     
+    @Override
+    Event getEvent(EventName eventName);
+    
     Event getEvent(EventIdentifier eventIdentifier);
+
+    @Override
+    RaceDefinition getRace(EventAndRaceIdentifier raceIdentifier);
 
     TrackedRace getTrackedRace(Event event, RaceDefinition r);
     
-    TrackedRace getTrackedRace(RaceIdentifier raceIdentifier);
+    TrackedRace getTrackedRace(EventAndRaceIdentifier raceIdentifier);
 
     /**
      * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.
      */
     Map<String, Leaderboard> getLeaderboards();
 
+    /**
+     * @return a leaderboard whose {@link Leaderboard#getName()} method returns the value of the <code>name</code>
+     *         parameter, or <code>null</code> if no such leaderboard is known to this service
+     */
     Leaderboard getLeaderboardByName(String name);
 
     /**
@@ -316,7 +332,7 @@ public interface RacingEventService extends TrackedEventRegistry {
     TrackedRace createTrackedRace(EventAndRaceIdentifier raceIdentifier, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
-    void createEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
+    Event createEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Event} such that it will appear in {@link Event#getAllRaces()}
@@ -327,5 +343,39 @@ public interface RacingEventService extends TrackedEventRegistry {
     void addRace(EventIdentifier addToEvent, RaceDefinition raceDefinition);
 
     void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames);
+    
+    /**
+     * Executes an operation whose effects need to be replicated to any replica of this service known and
+     * {@link OperationExecutionListener#executed(RacingEventServiceOperation) notifies} all registered
+     * operation execution listeners about the execution of the operation.
+     */
+    <T> T apply(RacingEventServiceOperation<T> operation);
 
+    void addOperationExecutionListener(OperationExecutionListener listener);
+    
+    void removeOperationExecutionListener(OperationExecutionListener listener);
+    
+    /**
+     * Produces a one-shot serializable copy of those elements required for replication into <code>oos</code> so that
+     * afterwards the {@link RacingEventServiceOperation}s can be {@link #apply(RacingEventServiceOperation) applied} to
+     * maintain consistency with the master copy of the service. The dual operation is {@link #initiallyFillFrom}.
+     */
+    void serializeForInitialReplication(ObjectOutputStream oos) throws IOException;
+    
+    /**
+     * Dual, reading operation for {@link #serializeForInitialReplication(ObjectOutputStream)}. In other words, when
+     * this operation returns, this service instance is in a state "equivalent" to that of the service instance that
+     * produced the stream contents in its {@link #serializeForInitialReplication(ObjectOutputStream)}. "Equivalent"
+     * here means that a replica will have equal sets of events, tracked events, leaderboards and leaderboard groups but
+     * will not have any active trackers for wind or positions because it relies on these elements to be sent through
+     * the replication channel.
+     * <p>
+     * 
+     * Tracked events read from the stream are observed (see {@link RaceListener}) by this object for automatic updates
+     * to the default leaderboard and for automatic linking to leaderboard columns. It is assumed that no explicit
+     * replication of these operations will happen based on the changes performed on the replication master.<p>
+     * 
+     * <b>Caution:</b> All relevant contents of this service instance will be replaced by the stream contents.
+     */
+    void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException;
 }

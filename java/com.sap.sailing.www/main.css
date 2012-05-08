@@ -3,8 +3,8 @@
 body {
   font-family: 'UbuntuRegular';
   margin: 0;
-  padding: 0;
-  background: url(images/splash-screen-compressed-02.png) center top no-repeat #ebebec;
+  padding: 0 0 50px 0;
+  background: url(images/splash-screen-compressed-03.png) center top no-repeat #ebebec;
   }
   
 
@@ -51,18 +51,20 @@ body {
 	margin: 15px 0 0 0;
 }
 
-.chooseModule {
+.chooseModule, .table {
   margin: 0 auto;
-  width: 580px;
+  display: table;
   margin-top: 600px;
 }
 
 .chooseModule ul {
   list-style: none;
+	min-width: 545px;
 }
 
 .chooseModule ul li {
-  float: left;
+  /*float: left;*/
+  display: inline;
   margin: 0 10px 0 0;
 }
 

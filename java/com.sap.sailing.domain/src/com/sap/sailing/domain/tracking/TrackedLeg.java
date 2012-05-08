@@ -6,8 +6,10 @@ import java.util.LinkedHashMap;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 
 public interface TrackedLeg extends Serializable {
@@ -42,4 +44,5 @@ public interface TrackedLeg extends Serializable {
 
     Bearing getLegBearing(TimePoint at);
 
+    Distance getCrossTrackError(Position p, TimePoint timePoint);
 }

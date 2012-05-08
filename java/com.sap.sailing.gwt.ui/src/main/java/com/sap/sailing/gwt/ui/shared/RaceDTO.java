@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
-import com.sap.sailing.domain.common.RaceIdentifier;
 
 public class RaceDTO extends NamedDTO implements IsSerializable {
     public Iterable<CompetitorDTO> competitors;
@@ -40,7 +40,7 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
         this.regatta = regatta;
     }
     
-    public RaceIdentifier getRaceIdentifier() {
+    public EventAndRaceIdentifier getRaceIdentifier() {
         return new EventNameAndRaceName(regatta.getEvent().name, name);
     }
     

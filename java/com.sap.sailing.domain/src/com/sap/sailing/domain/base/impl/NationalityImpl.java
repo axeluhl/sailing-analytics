@@ -2,6 +2,8 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.InputStream;
 
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.IsManagedByDomainFactory;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.CountryCodeFactory;
@@ -10,7 +12,7 @@ public class NationalityImpl implements Nationality {
     private static final long serialVersionUID = 238906193483424259L;
     private final String threeLetterIOCAcronym;
     
-    public NationalityImpl(String name, String threeLetterIOCAcronym) {
+    public NationalityImpl(String threeLetterIOCAcronym) {
         if (threeLetterIOCAcronym.length() != 3) {
             throw new IllegalArgumentException("Three-letter IOC nationality acronym \""+threeLetterIOCAcronym+"\" doesn't have three letters.");
         }
@@ -39,6 +41,11 @@ public class NationalityImpl implements Nationality {
     @Override
     public CountryCode getCountryCode() {
         return CountryCodeFactory.INSTANCE.getFromThreeLetterIOCName(getThreeLetterIOCAcronym());
+    }
+
+    @Override
+    public IsManagedByDomainFactory resolve(DomainFactory domainFactory) {
+        return domainFactory.getOrCreateNationality(getThreeLetterIOCAcronym());
     }
     
 }

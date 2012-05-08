@@ -45,6 +45,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
@@ -61,6 +62,7 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.leaderboard.NetPointsComparator.SortOrderCalculator;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
@@ -198,6 +200,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private PlayModes oldPlayMode;
 
     private final AsyncActionsExecutor asyncActionsExecutor;
+    
+    /**
+     * See also {@link #getDefaultSortColumn()}. If no other column is explicitly selected for sorting and this attribute
+     * holds a non-<code>null</code> string identifying a valid race by name that is represented in this leaderboard panel
+     * then sort by it. Otherwise, default sorting will default to the overall rank column.
+     */
+    private String raceNameForDefaultSorting;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -445,11 +454,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (entry.reasonForMaxPoints.equals("NONE")) {
                     if (!entry.discarded) {
                         html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                        html.append(entry.totalPoints);
+                        html.appendHtmlConstant(entry.totalPoints == 0 ? "" : ""+entry.totalPoints);
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.append(entry.netPoints);
+                        html.appendHtmlConstant(entry.netPoints == 0 ? "" : ""+entry.netPoints);
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
@@ -471,8 +480,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (race.isMedalRace()) {
                 return getLeaderboard().getMedalRaceComparator(race.getRaceColumnName());
             } else {
-                return new NetPointsComparator(isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable()),
-                        race.getRaceColumnName());
+                SortOrderCalculator sortOrderCalculator = new SortOrderCalculator() {
+                    @Override
+                    public boolean isAscending() {
+                        return isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
+                    }
+                };
+                return new NetPointsComparator(sortOrderCalculator, race.getRaceColumnName());
             }
         }
 
@@ -494,7 +508,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public static DetailType[] getAvailableRaceDetailColumnTypes() {
         return new DetailType[] { DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TRAVELED, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
-                DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG };
+                DetailType.NUMBER_OF_MANEUVERS, DetailType.DISPLAY_LEGS, DetailType.CURRENT_LEG,
+                DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS };
     }
 
     private class TextRaceColumn extends RaceColumn<String> implements RaceNameProvider {
@@ -512,7 +527,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return "" + object.fieldsByRaceName.get(getRaceColumnName()).totalPoints;
+            final int totalPoints = object.fieldsByRaceName.get(getRaceColumnName()).totalPoints;
+            return "" + (totalPoints == 0 ? "" : totalPoints);
         }
 
         @Override
@@ -562,10 +578,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     new FormattedDoubleLegDetailColumn(stringMessages.windwardDistanceToOverallLeader(), "["+stringMessages
                             .distanceInMetersUnit()+"]", new RaceDistanceToLeaderInMeters(), 0, getLeaderboardPanel()
                             .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(
+                    DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
+                    new FormattedDoubleLegDetailColumn(stringMessages.averageCrossTrackErrorInMeters(), "["+stringMessages
+                            .metersUnit()+"]", new RaceAverageCrossTrackErrorInMeters(), 0, getLeaderboardPanel()
+                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
             result.put(DetailType.CURRENT_LEG, new FormattedDoubleLegDetailColumn(stringMessages.currentLeg(), "",
                     new CurrentLeg(), 0, getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE));
+            
             return result;
         }
 
@@ -641,6 +663,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     if (timeInMilliseconds != 0) {
                         result = distanceTraveledInMeters / (double) timeInMilliseconds * 1000 * 3600 / 1852;
                     }
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Fetches the average cross-track error for the race
+         * 
+         * @author Axel Uhl (D043530)
+         */
+        private class RaceAverageCrossTrackErrorInMeters implements LegDetailField<Double> {
+            @Override
+            public Double get(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.averageCrossTrackErrorInMeters;
                 }
                 return result;
             }
@@ -759,7 +798,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         @Override
         public String getValue(LeaderboardRowDTO object) {
             int totalPoints = getLeaderboard().getTotalPoints(object);
-            return "" + totalPoints;
+            return "" + (totalPoints==0 ? "" : totalPoints);
         }
 
         @Override
@@ -827,7 +866,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return "" + getLeaderboard().getRank(object.competitor);
+            final int rank = getLeaderboard().getRank(object.competitor);
+            return "" + (rank == 0 ? "" : rank);
         }
 
         @Override
@@ -835,7 +875,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return new Comparator<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                    return getLeaderboard().getRank(o1.competitor) - getLeaderboard().getRank(o2.competitor);
+                    final int rank1 = getLeaderboard().getRank(o1.competitor);
+                    final int rank2 = getLeaderboard().getRank(o2.competitor);
+                    return rank1 == 0 ? rank2 == 0 ? 0 : 1 : rank2 == 0 ? -1 : rank1 - rank2;
                 }
             };
         }
@@ -987,10 +1029,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         contentPanel.add(getLeaderboardTable());
         setWidget(contentPanel);
-        if (settings.getNameOfRaceToSort() != null) {
-            RaceColumn<?> column = getRaceColumnByRaceName(settings.getNameOfRaceToSort());
-            sort(column, settings.isSortAscending());
-        }
+        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
 
     private RaceInLeaderboardDTO getRaceByName(String raceName) {
@@ -1192,7 +1231,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (comparator != null) {
                     Collections.sort(getData().getList(), comparator);
                 } else {
-                    RankColumn columnToSortFor = getRankColumn();
+                    SortableColumn<LeaderboardRowDTO, ?> columnToSortFor = getDefaultSortColumn();
                     // if no sorting was selected, sort by ascending rank and mark
                     // table header so
                     sort(columnToSortFor, true);
@@ -1206,6 +1245,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 }
             }
         }
+    }
+
+    private SortableColumn<LeaderboardRowDTO, ?> getDefaultSortColumn() {
+        SortableColumn<LeaderboardRowDTO, ?> defaultSortColumn = null;
+        if (raceNameForDefaultSorting != null) {
+            defaultSortColumn = getRaceColumnByRaceName(raceNameForDefaultSorting);
+        }
+        if (defaultSortColumn == null) {
+            defaultSortColumn = getRankColumn();
+        }
+        return defaultSortColumn;
     }
 
     /**
@@ -1514,7 +1564,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private void ensureRankColumn() {
         if (getLeaderboardTable().getColumnCount() == RANK_COLUMN_INDEX) {
-            addColumn(getRankColumn());
+            addColumn(getDefaultSortColumn());
         } else {
             if (!(getLeaderboardTable().getColumn(RANK_COLUMN_INDEX) instanceof RankColumn)) {
                 throw new RuntimeException("The first column must always be the rank column but it was of type "
@@ -1634,14 +1684,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
     
     private void compareCompetitors() {
-        List<RaceIdentifier> races = getTrackedRacesIdentifiers();
+        List<EventAndRaceIdentifier> races = getTrackedRacesIdentifiers();
         CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races,
                 competitorSelectionProvider, timer, stringMessages, errorReporter);
         chartDialog.show();
     }
     
-    private List<RaceIdentifier> getTrackedRacesIdentifiers() {
-        List<RaceIdentifier> result = new ArrayList<RaceIdentifier>();
+    private List<EventAndRaceIdentifier> getTrackedRacesIdentifiers() {
+        List<EventAndRaceIdentifier> result = new ArrayList<EventAndRaceIdentifier>();
         for (RaceInLeaderboardDTO raceColumn : getLeaderboard().getRaceList()) {
             if (raceColumn.getRaceIdentifier() != null) {
                 result.add(raceColumn.getRaceIdentifier());

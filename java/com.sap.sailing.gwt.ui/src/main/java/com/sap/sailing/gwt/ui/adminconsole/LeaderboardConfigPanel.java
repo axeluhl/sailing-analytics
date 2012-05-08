@@ -41,8 +41,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.EventDisplayer;
@@ -59,7 +59,7 @@ import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener,
         TrackedRaceChangedListener {
 
-    private final TrackedEventsComposite trackedEventsComposite;
+    private final TrackedRacesListComposite trackedRacesListComposite;
 
     private final StringMessages stringMessages;
 
@@ -279,10 +279,10 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         trackedRacesCaptionPanel.setStyleName("bold");
 
         raceSelectionProvider = new RaceSelectionModel();
-        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, adminConsole,
+        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, adminConsole,
                 raceSelectionProvider, stringMessages, /* multiselection */false);
-        trackedRacesPanel.add(trackedEventsComposite);
-        trackedEventsComposite.addTrackedRaceChangeListener(this);
+        trackedRacesPanel.add(trackedRacesListComposite);
+        trackedRacesListComposite.addTrackedRaceChangeListener(this);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
 
         HorizontalPanel hPanel = new HorizontalPanel();
@@ -465,7 +465,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
                     @Override
                     public void onSuccess(Void arg0) {
-                        trackedEventsComposite.clearSelection();
+                        trackedRacesListComposite.clearSelection();
                         getSelectedRaceInLeaderboard().setRaceIdentifier(null);
                         raceColumnList.refresh();
                     }
@@ -567,7 +567,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
         } else {
             columnMoveUpButton.setEnabled(false);
             columnMoveDownButton.setEnabled(false);
-            trackedEventsComposite.clearSelection();
+            trackedRacesListComposite.clearSelection();
         }
     }
 
@@ -588,7 +588,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                         if (eventAndRaceName != null) {
                             selectRaceInList(eventAndRaceName.getA(), eventAndRaceName.getB());
                         } else {
-                            trackedEventsComposite.clearSelection();
+                            trackedRacesListComposite.clearSelection();
                         }
                     }
                 });
@@ -596,7 +596,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     private void selectRaceInList(String eventName, String raceName) {
         EventNameAndRaceName raceIdentifier = new EventNameAndRaceName(eventName, raceName);  
-        trackedEventsComposite.selectRaceByIdentifier(raceIdentifier);
+        trackedRacesListComposite.selectRaceByIdentifier(raceIdentifier);
     }
 
     private RaceInLeaderboardDTO getSelectedRaceInLeaderboard() {
@@ -726,7 +726,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     private void leaderboardSelectionChanged() {
         // make sure that clearing the selection doesn't cause an unlinking of the selected tracked race
         raceSelectionProvider.removeRaceSelectionChangeListener(this);
-        trackedEventsComposite.clearSelection();
+        trackedRacesListComposite.clearSelection();
         // add listener again using a scheduled command which is executed when the browser's event loop re-gains
         // control; we assume that at that point in time the selection updates have already been performed
         Scheduler.get().scheduleFinally(new ScheduledCommand() {
@@ -753,7 +753,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
 
     @Override
     public void fillEvents(List<EventDTO> result) {
-        trackedEventsComposite.fillEvents(result);
+        trackedRacesListComposite.fillEvents(result);
     }
 
     @Override
@@ -846,7 +846,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     @Override
-    public void onRaceSelectionChange(List<RaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
         // if no leaderboard column is selected, ignore the race selection change
         RaceInLeaderboardDTO selectedRaceInLeaderboard = getSelectedRaceInLeaderboard();
         if (selectedRaceInLeaderboard != null) {
@@ -859,7 +859,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private void linkTrackedRaceToSelectedRaceColumn(final RaceInLeaderboardDTO selectedRaceInLeaderboard,
-            final RaceIdentifier selectedRace) {
+            final EventAndRaceIdentifier selectedRace) {
         sailingService.connectTrackedRaceToLeaderboardColumn(getSelectedLeaderboardName(), selectedRaceInLeaderboard
                 .getRaceColumnName(), selectedRace,
                 new AsyncCallback<Boolean>() {
@@ -868,7 +868,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                         errorReporter.reportError("Error trying to link tracked race " + selectedRace + " to race column named "
                                 + selectedRaceInLeaderboard.getRaceColumnName() + " of leaderboard "
                                 + getSelectedLeaderboardName() + ": " + t.getMessage());
-                        trackedEventsComposite.clearSelection();
+                        trackedRacesListComposite.clearSelection();
                     }
 
                     @Override

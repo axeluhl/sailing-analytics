@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -26,6 +29,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
  * 
  */
 public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingRule {
+    private static final long serialVersionUID = 386341628517357988L;
     private final int[] discardIndexResultsStartingWithHowManyRaces;
     
     public ResultDiscardingRuleImpl(int[] discardIndexResultsStartingWithHowManyRaces) {
@@ -33,6 +37,14 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
         this.discardIndexResultsStartingWithHowManyRaces = new int[discardIndexResultsStartingWithHowManyRaces.length];
         System.arraycopy(discardIndexResultsStartingWithHowManyRaces, 0,
                 this.discardIndexResultsStartingWithHowManyRaces, 0, discardIndexResultsStartingWithHowManyRaces.length);
+    }
+    
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
     }
 
     @Override

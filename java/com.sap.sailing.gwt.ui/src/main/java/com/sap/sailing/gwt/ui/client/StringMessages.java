@@ -284,4 +284,14 @@ public interface StringMessages extends Messages {
     String degreesBoatToTheWind();
     String racesInLeaderboard();
     String leaderboardsInGroup();
+    String replication();
+    String errorFetchingReplicaData(String message);
+    String averageCrossTrackErrorInMeters();
+    String enterMaster();
+    String errorStartingReplication(String hostname, String message);
+    String helpLines();
+    String startLine();
+    String finishLine();
+    String advantageLine();
+    String courseMiddleLine();
 }

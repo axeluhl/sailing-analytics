@@ -48,13 +48,17 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         CreateSwissTimingRacePanel createSwissTimingRacePanel = new CreateSwissTimingRacePanel(sailingService,this,stringMessages);
         createSwissTimingRacePanel.setSize("90%", "90%");
         tabPanel.add(createSwissTimingRacePanel,"Create SwissTiming race",false);
+        TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(sailingService, this, this, stringMessages);
+        eventDisplayers.add(trackedRacesManagementPanel);
+        trackedRacesManagementPanel.setSize("90%", "90%");
+        tabPanel.add(trackedRacesManagementPanel, stringMessages.trackedRaces(),false);
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         WindPanel windPanel = new WindPanel(sailingService, asyncActionsExecutor, this, this, stringMessages);
         eventDisplayers.add(windPanel);
         windPanel.setSize("90%", "90%");
         tabPanel.add(windPanel, stringMessages.wind(), /* asHTML */ false);
         LeaderboardSettings defaultLeaderboardSettings = LeaderboardSettingsFactory.getInstance()
-                .createNewDefaultSettings(/* racesToShow */ null, /* namesOfRacesToShow */ null, /* autoExpandFirstRace */false);
+                .createNewDefaultSettings(/* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false);
         final LeaderboardPanel defaultLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 defaultLeaderboardSettings,
                 /* preSelectedRace */null, new CompetitorSelectionModel(/* hasMultiSelection */true),
@@ -70,6 +74,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         leaderboardConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         eventDisplayers.add(leaderboardConfigPanel);
+        tabPanel.add(new ReplicationPanel(sailingService, this, stringMessages), stringMessages.replication(), /* asHTML */ false);
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {

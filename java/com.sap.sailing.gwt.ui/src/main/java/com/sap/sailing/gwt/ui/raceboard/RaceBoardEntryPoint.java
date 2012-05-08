@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -49,9 +49,8 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
         String viewModeParamValue = Window.Location.getParameter("viewMode");
         // set the view mode for the race board 
-        if(viewModeParamValue != null && !viewModeParamValue.isEmpty()) {
+        if (viewModeParamValue != null && !viewModeParamValue.isEmpty()) {
             try {
-                
                 viewMode = RaceBoardViewModes.valueOf(viewModeParamValue);
             } catch (IllegalArgumentException e) {
                 viewMode = RaceBoardViewModes.ONESCREEN;
@@ -59,12 +58,12 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         } else {
             viewMode = RaceBoardViewModes.ONESCREEN;
         }
-        if(leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
+        if (leaderboardNameParamValue == null || leaderboardNameParamValue.isEmpty()) {
             leaderboardName = DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME;
         } else {
             leaderboardName = leaderboardNameParamValue;
         }
-        if(leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
+        if (leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
             leaderboardGroupName = leaderboardGroupNameParamValue; 
         }
         if (eventName == null || eventName.isEmpty() || raceName == null || raceName.isEmpty()) {
@@ -101,7 +100,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
         sailingService.listEvents(listEventsCallback);
         sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
-        if(leaderboardGroupName != null) {
+        if (leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, getLeaderboardGroupByNameCallback);
         }
         userManagementService.getUser(getUserCallback);
@@ -126,13 +125,13 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             }
         }
         selectedRace = findRace(eventName, raceName, events);
-        if(selectedRace == null) {
+        if (selectedRace == null) {
             createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
             return;
         }
 
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        List<RaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
+        List<EventAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
@@ -151,10 +150,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
 
     private RaceDTO findRace(String eventName, String raceName, List<EventDTO> events) {
         for (EventDTO eventDTO : events) {
-            if(eventDTO.name.equals(eventName)) {
+            if (eventDTO.name.equals(eventName)) {
                 for (RegattaDTO regattaDTO : eventDTO.regattas) {
-                    for(RaceDTO raceDTO: regattaDTO.races) {
-                        if(raceDTO.name.equals(raceName)) {
+                    for (RaceDTO raceDTO: regattaDTO.races) {
+                        if (raceDTO.name.equals(raceName)) {
                             return raceDTO;
                         }
                     }

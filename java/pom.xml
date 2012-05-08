@@ -33,6 +33,8 @@
 		<module>com.sap.sailing.expeditionconnector</module>
 		<module>com.sap.sailing.expeditionconnector.test</module>
 		<module>com.sap.sailing.server</module>
+		<module>com.sap.sailing.server.replication</module>
+		<module>com.sap.sailing.server.replication.test</module>
 		<module>com.sap.sailing.www</module>
 		<module>com.sap.sailing.www.events</module>
 		<module>com.sap.sailing.xcelsiusadapter</module>
@@ -52,8 +54,6 @@
 		<module>com.sap.sailing.feature.runtime</module>
 		<module>com.sap.sailing.feature.p2build</module>
 		<module>org.moxieapps.gwt.highcharts</module>
-		<module>com.sap.sailing.simulator</module>
-		<module>com.sap.sailing.simulator.test</module>
 	</modules>
 	
 	<properties>
@@ -140,14 +140,14 @@
 				<configuration>
 <!-- non-debug -->
 <!-- proxy -->
-					<argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.206.73 -Dmongo.host=10.18.206.73 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
+					<argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.206.73 -Dmongo.host=10.18.206.73 -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 <!-- -->
 <!-- no proxy 
-					<argLine>-Dfile.encoding=cp1252 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
+					<argLine>-Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
  -->
 <!-- -->
-<!-- debug
-					<argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
+<!-- debug, proxy
+					<argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 -->
 					<excludes>
 						<exclude>**/*$*</exclude> <!-- Exclude inner classes -->
@@ -176,13 +176,6 @@
 
 	</build>
 	
-  <distributionManagement>
-    <repository>
-      <id>ssh-repository</id>
-      <url>scpexe://trac@localhost:12347/home/trac/maven-repositories/dev</url>
-    </repository>
-  </distributionManagement>
-  
 	<repositories>
 		<repository>
 			<id>equinox-sdk-3.7</id>

@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.Serializable;
 import java.util.Collections;
 
 import com.sap.sailing.domain.base.Buoy;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class BuoyImpl extends NamedImpl implements Buoy {
@@ -10,6 +12,11 @@ public class BuoyImpl extends NamedImpl implements Buoy {
 
     public BuoyImpl(String name) {
         super(name);
+    }
+    
+    @Override
+    public Serializable getId() {
+        return getName();
     }
 
     @SuppressWarnings("unchecked")
@@ -19,4 +26,9 @@ public class BuoyImpl extends NamedImpl implements Buoy {
         return (Iterable<Buoy>) result;
     }
 
+    @Override
+    public Buoy resolve(DomainFactory domainFactory) {
+        Buoy result = domainFactory.getOrCreateBuoy(getName());
+        return result;
+    }
 }

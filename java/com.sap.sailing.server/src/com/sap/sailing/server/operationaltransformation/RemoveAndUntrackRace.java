@@ -6,8 +6,9 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class RemoveAndUntrackRace extends AbstractRaceOperation {
+public class RemoveAndUntrackRace extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 4260421466093529004L;
 
     public RemoveAndUntrackRace(EventAndRaceIdentifier raceIdentifier) {
@@ -15,19 +16,19 @@ public class RemoveAndUntrackRace extends AbstractRaceOperation {
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Void internalApplyTo(RacingEventService toState) {
         Event event = toState.getEvent(getRaceIdentifier());
         if (event!= null) {
             RaceDefinition race = event.getRaceByName(getRaceIdentifier().getRaceName());
@@ -39,7 +40,7 @@ public class RemoveAndUntrackRace extends AbstractRaceOperation {
                 }
             }
         }
-        return toState;
+        return null;
     }
 
 }

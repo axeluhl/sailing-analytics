@@ -2,6 +2,8 @@ package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.IsManagedByDomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
@@ -49,6 +51,11 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             @Override
             public Boat getBoat() {
                 return null;
+            }
+
+            @Override
+            public IsManagedByDomainFactory resolve(DomainFactory domainFactory) {
+                return this;
             }
         };
     }

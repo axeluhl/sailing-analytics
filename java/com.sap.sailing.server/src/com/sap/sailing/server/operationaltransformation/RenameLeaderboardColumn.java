@@ -1,8 +1,9 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class RenameLeaderboardColumn extends AbstractLeaderboardColumnOperation {
+public class RenameLeaderboardColumn extends AbstractLeaderboardColumnOperation<Void> {
     private static final long serialVersionUID = -1238503068559477351L;
     private final String newColumnName;
     
@@ -13,19 +14,19 @@ public class RenameLeaderboardColumn extends AbstractLeaderboardColumnOperation 
 
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Void internalApplyTo(RacingEventService toState) {
         toState.renameLeaderboardColumn(getLeaderboardName(), getColumnName(), newColumnName);
-        return toState;
+        return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         return serverOp.transformRenameLeaderboardColumnClientOp(this);
     }
 
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         return clientOp.transformRenameLeaderboardColumnServerOp(this);
     }
 

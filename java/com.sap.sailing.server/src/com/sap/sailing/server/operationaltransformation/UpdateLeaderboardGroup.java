@@ -3,8 +3,9 @@ package com.sap.sailing.server.operationaltransformation;
 import java.util.List;
 
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class UpdateLeaderboardGroup extends AbstractLeaderboardGroupOperation {
+public class UpdateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Void> {
     private static final long serialVersionUID = -1822477339916802467L;
     private final String newName;
     private final String newDescription;
@@ -19,21 +20,21 @@ public class UpdateLeaderboardGroup extends AbstractLeaderboardGroupOperation {
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
+    public Void internalApplyTo(RacingEventService toState) {
         toState.updateLeaderboardGroup(getLeaderboardGroupName(), newName, newDescription, leaderboardNames);
-        return toState;
+        return null;
     }
 
 }

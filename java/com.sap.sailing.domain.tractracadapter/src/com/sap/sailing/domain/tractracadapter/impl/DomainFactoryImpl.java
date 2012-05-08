@@ -30,7 +30,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
@@ -79,9 +78,6 @@ public class DomainFactoryImpl implements DomainFactory {
     // TODO consider (re-)introducing WeakHashMaps for cache structures, but such that the cache is maintained as long as our domain objects are strongly referenced
     private final Map<ControlPoint, com.sap.sailing.domain.base.ControlPoint> controlPointCache =
         new HashMap<ControlPoint, com.sap.sailing.domain.base.ControlPoint>();
-    
-    private final Map<com.tractrac.clientmodule.Competitor, com.sap.sailing.domain.base.Competitor> competitorCache =
-            new HashMap<com.tractrac.clientmodule.Competitor, com.sap.sailing.domain.base.Competitor>();
     
     private final Map<String, Person> personCache = new HashMap<String, Person>();
     
@@ -167,18 +163,15 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Competitor getOrCreateCompetitor(com.tractrac.clientmodule.Competitor competitor) {
-        synchronized (competitorCache) {
-            Competitor result = competitorCache.get(competitor);
-            if (result == null) {
-                BoatClass boatClass = getOrCreateBoatClass(competitor.getCompetitorClass());
-                Nationality nationality = getOrCreateNationality(competitor.getNationality());
-                Team team = getOrCreateTeam(competitor.getName(), nationality);
-                Boat boat = new BoatImpl(competitor.getShortName(), boatClass, competitor.getShortName());
-                result = new CompetitorImpl(competitor.getId(), competitor.getName(), team, boat);
-                competitorCache.put(competitor, result);
-            }
-            return result;
+        Competitor result = baseDomainFactory.getExistingCompetitorById(competitor.getId());
+        if (result == null) {
+            BoatClass boatClass = getOrCreateBoatClass(competitor.getCompetitorClass());
+            Nationality nationality = getOrCreateNationality(competitor.getNationality());
+            Team team = getOrCreateTeam(competitor.getName(), nationality);
+            Boat boat = new BoatImpl(competitor.getShortName(), boatClass, competitor.getShortName());
+            result = baseDomainFactory.createCompetitor(competitor.getId(), competitor.getName(), team, boat);
         }
+        return result;
     }
 
     @Override

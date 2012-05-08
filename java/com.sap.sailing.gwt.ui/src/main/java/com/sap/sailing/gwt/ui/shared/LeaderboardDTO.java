@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 
 /**
  * Captures the serializable properties of a leaderboard which in particular has the competitors, any optional display
@@ -101,10 +101,12 @@ public class LeaderboardDTO implements IsSerializable {
             } else if (o2 == null) {
                 result = 1;
             } else {
+                final int totalPoints1 = getTotalPoints(o1);
+                final int totalPoints2 = getTotalPoints(o2);
                 if (scoredInMedalRace(o1.competitor)) {
                     if (scoredInMedalRace(o2.competitor)) {
                         // both scored in medal race
-                        result = getTotalPoints(o1) - getTotalPoints(o2);
+                        result = totalPoints1 - totalPoints2;
                         // in case of tie, medal race points decide:
                         if (result == 0) {
                             result = getMedalRaceScore(o1.competitor) - getMedalRaceScore(o2.competitor);
@@ -118,10 +120,11 @@ public class LeaderboardDTO implements IsSerializable {
                         // only o2 scored in medal race, so o2 scores better, o1 scores worse = "greater"
                         result = 1;
                     } else {
-                        // neither one scored in any medal race
-                        result = getTotalPoints(o1) - getTotalPoints(o2);
+                        // neither one scored in any medal race; 0 total points means "did not participate" and ranks worse
+                        result = totalPoints1 == 0 ? totalPoints2 == 0 ? 0 : 1 : totalPoints2 == 0 ? -1 : totalPoints1 - totalPoints2;
                         // Now if both have equal points, count races won.
                         if (result == 0) {
+                            // TODO bug 469: not the number of races won but the better rankings count
                             result = getNumberOfRacesWon(o2.competitor) - getNumberOfRacesWon(o1.competitor);
                         }
                         // If number of races won is still equal, use rank in last race where at least one of the two
@@ -292,7 +295,7 @@ public class LeaderboardDTO implements IsSerializable {
         return getRaceInLeaderboardByName(raceColumnName).isMedalRace();
     }
 
-    public void addRace(String raceColumnName, boolean medalRace, RaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
+    public void addRace(String raceColumnName, boolean medalRace, EventAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
@@ -301,7 +304,7 @@ public class LeaderboardDTO implements IsSerializable {
     	races.add(raceInLeaderboardDTO);
     }
 
-    public void addRaceAt(String raceColumnName, boolean medalRace, RaceIdentifier trackedRaceIdentifier, int index) {
+    public void addRaceAt(String raceColumnName, boolean medalRace, EventAndRaceIdentifier trackedRaceIdentifier, int index) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);

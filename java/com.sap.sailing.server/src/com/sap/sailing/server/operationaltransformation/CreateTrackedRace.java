@@ -6,8 +6,10 @@ import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 
 /**
  * Creates a tracked race for a race identifier by a {@link RaceIdentifier}. The operation assumes that the
@@ -18,33 +20,47 @@ import com.sap.sailing.server.RacingEventService;
  * @author Axel Uhl (d043530)
  *
  */
-public class CreateTrackedRace extends AbstractRaceOperation {
+public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
     private static final long serialVersionUID = 5084401060896514911L;
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
+    
+    /**
+     * If a {@link WindStore} is provided to this command, it will be used for the construction of the tracked race.
+     * However, after de-serialization, the wind store will always be <code>null</code>, causing the use of an
+     * {@link EmptyWindStore}.
+     */
+    private transient final WindStore windStore;
 
-    public CreateTrackedRace(EventAndRaceIdentifier raceIdentifier, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+    /**
+     * @param windStore
+     *            if <code>null</code>, an {@link EmptyWindStore} will be used. Note that the {@link #windStore} field
+     *            won't be serialized. A receiver of this operation will therefore always use an {@link EmptyWindStore}.
+     */
+    public CreateTrackedRace(EventAndRaceIdentifier raceIdentifier, WindStore windStore,
+            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(raceIdentifier);
+        this.windStore = windStore;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
     }
 
     @Override
-    public RacingEventServiceOperation transformClientOp(RacingEventServiceOperation serverOp) {
+    public RacingEventServiceOperation<?> transformClientOp(RacingEventServiceOperation<?> serverOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventServiceOperation transformServerOp(RacingEventServiceOperation clientOp) {
+    public RacingEventServiceOperation<?> transformServerOp(RacingEventServiceOperation<?> clientOp) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public RacingEventService applyTo(RacingEventService toState) {
-        toState.createTrackedRace(getRaceIdentifier(), EmptyWindStore.INSTANCE, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
-        return toState;
+    public TrackedRace internalApplyTo(RacingEventService toState) {
+        return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore,
+                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
     }
 
 }

@@ -38,7 +38,6 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -96,7 +95,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public Set<RaceDefinition> getRaces() {
-        return race==null?null:Collections.singleton(race);
+        final Set<RaceDefinition> emptySet = Collections.emptySet();
+        return race==null?emptySet:Collections.singleton(race);
     }
 
     @Override
@@ -164,8 +164,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
                     case UNIDENTIFIED:
                         String trackerID = fix.getBoatID();
                         Buoy buoy = domainFactory.getOrCreateBuoy(trackerID);
-                        DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
-                        buoyTrack.addGPSFix(gpsFix);
+                        trackedRace.recordFix(buoy, gpsFix);
                         break;
                     case COMPETITOR:
                         Competitor competitor = domainFactory.getCompetitorByBoatID(fix.getBoatID());

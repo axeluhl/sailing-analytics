@@ -327,7 +327,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
         
-        trackedRacesPanel.add(trackedEventsComposite);
+        trackedRacesPanel.add(trackedRacesListComposite);
 
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
         racesPanel.add(racesButtonPanel);
@@ -487,7 +487,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
     @Override
     public void fillEvents(List<EventDTO> result) {
-        trackedEventsComposite.fillEvents(result);
+        trackedRacesListComposite.fillEvents(result);
     }
     
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {

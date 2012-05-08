@@ -14,7 +14,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -52,7 +51,7 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
         super.setUpWithoutLaunchingController(eventName, raceId);
         final RaceChangeListener positionListener = new AbstractRaceChangeListener() {
             @Override
-            public void competitorPositionChanged(GPSFix fix, Competitor competitor) {
+            public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
                 DynamicGPSFixTrack<Competitor, GPSFixMoving> track = tracks.get(competitor);
                 if (track == null) {
                     track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, /* millisecondsOverWhichToAverage */ 40000);

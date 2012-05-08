@@ -6,5 +6,8 @@
    <feature url="features/target-test/com.sap.sailing.target.test_1.0.0.jar" id="com.sap.sailing.target.test" version="1.0.0">
       <category name="RaceAnalysisTarget"/>
    </feature>
+   <feature url="features/target-jms/com.sap.sailing.target.jms_1.0.0.jar" id="com.sap.sailing.target.jms" version="1.0.0">
+      <category name="RaceAnalysisTarget"/>
+   </feature>
    <category-def name="RaceAnalysisTarget" label="Race Analysis Target-Platform"/>
 </site>

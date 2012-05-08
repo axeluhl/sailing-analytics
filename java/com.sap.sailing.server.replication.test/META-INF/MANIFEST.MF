@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Server Replication Test
+Bundle-SymbolicName: com.sap.sailing.server.replication.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: javax.jms;version="1.1.0",
+ junit.framework;version="4.8.1",
+ org.junit;version="4.8.1"
+Require-Bundle: com.sap.sailing.server,
+ com.sap.sailing.domain.common,
+ com.sap.sailing.domain,
+ com.sap.sailing.server.replication,
+ com.sap.sailing.domain.test,
+ org.apache.activemq.activemq-core;bundle-version="5.4.3",
+ com.sap.sailing.mongodb,
+ com.mongodb.driver;bundle-version="2.6.2",
+ com.sap.sailing.domain.persistence

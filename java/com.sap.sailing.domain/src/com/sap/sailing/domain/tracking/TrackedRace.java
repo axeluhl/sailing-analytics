@@ -13,10 +13,10 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -43,7 +43,7 @@ public interface TrackedRace extends Serializable {
     
     RaceDefinition getRace();
     
-    RaceIdentifier getRaceIdentifier();
+    EventAndRaceIdentifier getRaceIdentifier();
     
     /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time point
@@ -65,11 +65,9 @@ public interface TrackedRace extends Serializable {
     TimePoint getAssumedEnd();
 
     /**
-     * Returns a list of the start times of all legs as far as we know them
-     * The leg time of the first leg is equal to #{@link #getStart()}
-     * All other leg times are equal to the first mark passing of the leg 
+     * Returns a list of the first and last mark passing times of all course waypoints
      */
-    Iterable<TimePoint> getStartTimesOfTrackedLegs();
+    Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes();
 
     /**
      * Shorthand for <code>{@link #getStart()}.{@link TimePoint#compareTo(TimePoint) compareTo(at)} &lt;= 0</code>
@@ -141,6 +139,9 @@ public interface TrackedRace extends Serializable {
      * by the windward distance to go and therefore depends on the assumptions of the wind direction
      * for the given <code>timePoint</code>. If the race hasn't {@link #hasStarted(TimePoint) started}
      * yet, the result is undefined.
+     * 
+     * @return <code>0</code> in case the competitor hasn't participated in the race; a rank starting
+     * with <code>1</code> where rank <code>1</code> identifies the leader otherwise
      */
     int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException;
     
@@ -206,7 +207,12 @@ public interface TrackedRace extends Serializable {
      */
     Iterable<WindSource> getWindSources();
 
+    /**
+     * Same as {@link #getOrCreateWindTrack(WindSource, long) getOrCreateWindTrack(windSource, getMillisecondsOverWhichToAverageWind())}.
+     */
     WindTrack getOrCreateWindTrack(WindSource windSource);
+    
+    WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation);
 
     /**
      * Waits until {@link #getUpdateCount()} is after <code>sinceUpdate</code>.
@@ -248,8 +254,6 @@ public interface TrackedRace extends Serializable {
      * on that collection.
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
-
-    void removeWind(Wind wind, WindSource windSource);
 
     /**
      * Time stamp that the event received last from the underlying push service carried on it.
@@ -331,6 +335,8 @@ public interface TrackedRace extends Serializable {
     boolean raceIsKnownToStartUpwind();
     
     void addListener(RaceChangeListener listener);
+    
+    void removeListener(RaceChangeListener listener);
 
     Distance getDistanceTraveled(Competitor competitor, TimePoint timePoint);
 
@@ -367,4 +373,9 @@ public interface TrackedRace extends Serializable {
      * After the call returns, {@link #getWindSourcesToExclude()} returns an iterable that equals <code>windSourcesToExclude</code>
      */
     void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude);
+
+    /**
+     * Computes the average cross-track error for the legs with type {@link LegType#UPWIND}.
+     */
+    Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException;
 }
