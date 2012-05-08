@@ -29,30 +29,6 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings>
 
 	@Override
 	public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
-		// mainContentPanel = new VerticalPanel();
-		//
-		// HorizontalPanel labelAndRefreshIntervalBoxPanel = new
-		// HorizontalPanel();
-		// labelAndRefreshIntervalBoxPanel.setSpacing(5);
-		// labelAndRefreshIntervalBoxPanel.add(new
-		// Label(stringMessages.refreshInterval() + ":"));
-		// refreshIntervalBox = dialog.createDoubleBox(((double)
-		// initialSettings.getRefreshInterval()) / 1000, 4);
-		// labelAndRefreshIntervalBoxPanel.add(refreshIntervalBox);
-		// mainContentPanel.add(labelAndRefreshIntervalBoxPanel);
-		//
-		// HorizontalPanel labelAndTimeDelayBoxPanel = new HorizontalPanel();
-		// labelAndTimeDelayBoxPanel.setSpacing(5);
-		// labelAndTimeDelayBoxPanel.add(new Label(stringMessages.timeDelay() +
-		// ":"));
-		// timeDelayBox =
-		// dialog.createLongBox(initialSettings.getDelayToLivePlayInSeconds(),
-		// 10);
-		// labelAndTimeDelayBoxPanel.add(timeDelayBox);
-		// mainContentPanel.add(labelAndTimeDelayBoxPanel);
-		//
-		// return mainContentPanel;
-
 		mainContentPanel = new FlowPanel();
 
 		FlowPanel labelAndRefreshIntervalBoxPanel = new FlowPanel();
