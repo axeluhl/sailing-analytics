@@ -697,6 +697,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if(advantageLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
                     advantageLine = new Polyline(advantageLinePoints, /* color */ "#000000", /* width */ 1, /* opacity */0.5, options);
+                    advantageLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
+                        @Override
+                        public void onMouseOver(PolylineMouseOverEvent event) {
+                            map.setTitle(stringMessages.advantageLine());
+                        }
+                    });
+                    advantageLine.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
+                        @Override
+                        public void onMouseOut(PolylineMouseOutEvent event) {
+                            map.setTitle("");
+                        }
+                    });
                     map.addOverlay(advantageLine);
                 } else {
                     advantageLine.deleteVertex(1);
@@ -727,6 +739,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if(startLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
                     startLine = new Polyline(startGatePoints, /* color */ "#FFFFFF", /* width */ 1, /* opacity */1.0, options);
+                    startLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
+                        @Override
+                        public void onMouseOver(PolylineMouseOverEvent event) {
+                            map.setTitle(stringMessages.startLine());
+                        }
+                    });
+                    startLine.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
+                        @Override
+                        public void onMouseOut(PolylineMouseOutEvent event) {
+                            map.setTitle("");
+                        }
+                    });
                     map.addOverlay(startLine);
                 } else {
                     startLine.deleteVertex(1);
@@ -750,6 +774,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if(finishLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
                     finishLine = new Polyline(finishGatePoints, /* color */ "#000000", /* width */ 1, /* opacity */1.0, options);
+                    finishLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
+                        @Override
+                        public void onMouseOver(PolylineMouseOverEvent event) {
+                            map.setTitle(stringMessages.finishLine());
+                        }
+                    });
+                    finishLine.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
+                        @Override
+                        public void onMouseOut(PolylineMouseOutEvent event) {
+                            map.setTitle("");
+                        }
+                    });
                     map.addOverlay(finishLine);
                 } else {
                     finishLine.deleteVertex(1);
@@ -775,6 +811,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if(courseMiddleLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
                     courseMiddleLine = new Polyline(courseMiddleLinePoints, /* color */ "#FF0000", /* width */ 1, /* opacity */1.0, options);
+                    courseMiddleLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
+                        @Override
+                        public void onMouseOver(PolylineMouseOverEvent event) {
+                            map.setTitle(stringMessages.courseMiddleLine());
+                        }
+                    });
+                    courseMiddleLine.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
+                        @Override
+                        public void onMouseOut(PolylineMouseOutEvent event) {
+                            map.setTitle("");
+                        }
+                    });
                     map.addOverlay(courseMiddleLine);
                 } else {
                     courseMiddleLine.deleteVertex(1);
@@ -789,7 +837,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     courseMiddleLine.deleteVertex(0);
                 }
             }
-
         }
     }
     

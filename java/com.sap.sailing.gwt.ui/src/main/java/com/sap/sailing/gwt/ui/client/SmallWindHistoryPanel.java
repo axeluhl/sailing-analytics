@@ -70,7 +70,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
         if (date != null) {
             Date from = new Date(date.getTime() - windIndicators.length * millisecondStepsPerLabel);
             if (race != null) {
-                sailingService.getWindInfo(race, from, millisecondStepsPerLabel,
+                sailingService.getAveragedWindInfo(race, from, millisecondStepsPerLabel,
                         windIndicators.length, position.latDeg, position.lngDeg, /* all sources */ null,
                         new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override

@@ -203,7 +203,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
 
     @Override
     public void showWind(final EventAndRaceIdentifier raceIdentifier) {
-        sailingService.getWindInfo(raceIdentifier,
+        sailingService.getAveragedWindInfo(raceIdentifier,
         // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
                 null, null, // use race start and time of newest event as default time period
                 WindChart.DEFAULT_RESOLUTION_IN_MILLISECONDS,

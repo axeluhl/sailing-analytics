@@ -46,14 +46,14 @@ public class ListEvents extends Action {
                     addColumn(race.getBoatClass().getName());
                     addColumn(eventName);
                     addColumn(raceName);
-                    addColumn(trackedRace.getStart() == null ? " " : dateFormat.format(trackedRace.getStart().asDate()));
+                    addColumn(trackedRace.getStartOfRace() == null ? " " : dateFormat.format(trackedRace.getStartOfRace().asDate()));
                     addColumn("" + Util.size(race.getCompetitors()));
                     Iterator<Waypoint> waypointsIter = race.getCourse().getWaypoints().iterator();
                     Position startPos = trackedRace
-                            .getApproximatePosition(waypointsIter.next(), trackedRace.getStart());
+                            .getApproximatePosition(waypointsIter.next(), trackedRace.getStartOfRace());
                     Position secondMarkPos = trackedRace.getApproximatePosition(waypointsIter.next(),
-                            trackedRace.getStart());
-                    Wind wind = trackedRace.getWind(startPos, trackedRace.getStart());
+                            trackedRace.getStartOfRace());
+                    Wind wind = trackedRace.getWind(startPos, trackedRace.getStartOfRace());
                     addColumn("" + wind.getBeaufort());
                     addColumn("" + wind.getFrom().getDegrees());
                     addColumn("0"); // gusts
