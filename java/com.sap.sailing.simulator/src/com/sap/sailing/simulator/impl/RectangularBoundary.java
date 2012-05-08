@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Distance;
@@ -26,17 +25,21 @@ public class RectangularBoundary implements Boundary {
 	private Distance height;
 	
 	public RectangularBoundary(Position p1, Position p2) {
-		
+				
 		north = p2.getBearingGreatCircle(p1);
 		south = north.reverse();
 		east = north.add(TRUEEAST);
 		west = north.add(TRUEWEST);
 		
-		height = p1.getDistance(p2);
+		Distance dist = p1.getDistance(p2);
+		Position pp1 = p1.translateGreatCircle(getNorth(), dist.scale(0.1));
+		Position pp2 = p2.translateGreatCircle(getSouth(), dist.scale(0.1)) ;
+		
+		height = p1.getDistance(pp2);
 		width = height.scale(2);
 		
-		northWest = p1.translateGreatCircle(west, width.scale(0.5));
-		northEast = p1.translateGreatCircle(east, width.scale(0.5));
+		northWest = pp1.translateGreatCircle(west, width.scale(0.5));
+		northEast = pp1.translateGreatCircle(east, width.scale(0.5));
 		southEast = northEast.translateGreatCircle(south, height);
 		southWest = northWest.translateGreatCircle(south, height);
 
@@ -149,6 +152,28 @@ public class RectangularBoundary implements Boundary {
 	@Override
 	public Distance getHeight() {
 		return height;
+	}
+
+	@Override
+	public Map<String, Double> getRelativeCoordinates(Position p) {
+		if (!isWithinBoundaries(p)) return null;
+		
+		Map<String,Double> map = new HashMap<String,Double>();
+		Position px = p.projectToLineThrough(southWest, getEast());
+		Position py = p.projectToLineThrough(southWest, getNorth());
+		
+		map.put("X", px.getDistance(southWest).getMeters()/getWidth().getMeters());
+		map.put("Y", py.getDistance(southWest).getMeters()/getHeight().getMeters());
+		return map;
+	}
+
+	@Override
+	public Position getRelativePoint(double x, double y) {
+		
+		Position point = southWest;
+		point = point.translateGreatCircle(getEast(), getWidth().scale(x));
+		point = point.translateGreatCircle(getNorth(), getHeight().scale(y));
+		return point;
 	}
 	
 }

@@ -1,14 +1,15 @@
 package com.sap.sailing.simulator;
 
-import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.simulator.BoatSimulationParameters;
+import java.util.List;
+
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.simulator.WindField;
 
 public interface SimulationParameters {
 	
-	Course getCourse();
+	List<Position> getCourse();
 	
-	BoatSimulationParameters getBoatSimulationParameters();
+	PolarDiagram getBoatPolarDiagram();
 	
 	WindField getWindField();
 	

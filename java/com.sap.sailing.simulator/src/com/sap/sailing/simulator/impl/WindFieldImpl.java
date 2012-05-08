@@ -1,5 +1,6 @@
 package com.sap.sailing.simulator.impl;
 
+import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.tracking.Wind;
@@ -23,9 +24,13 @@ public class WindFieldImpl implements WindField {
 	
 	@Override
 	public Wind getWind(TimedPosition coordinates) {
-		return new WindImpl(coordinates.getPosition(),coordinates.getTimePoint(), 
-				new KilometersPerHourSpeedWithBearingImpl(windSpeed,
-						new DegreeBearingImpl(windBearing)));
+		
+		double wBearing = windBearing *
+				(1 + coordinates.getPosition().getDistance(boundary.getCorners().get("NorthWest")).getMeters()/boundary.getHeight().getMeters());
+		SpeedWithBearing wspeed = new KilometersPerHourSpeedWithBearingImpl(windSpeed, new DegreeBearingImpl(wBearing));
+		
+		return new WindImpl(coordinates.getPosition(),coordinates.getTimePoint(), wspeed);
+				
 	}
 
 	@Override
