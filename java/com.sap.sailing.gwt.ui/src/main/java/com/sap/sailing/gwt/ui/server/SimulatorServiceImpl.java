@@ -12,10 +12,12 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
+import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO.WindPattern;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
 import com.sap.sailing.simulator.WindField;
@@ -137,4 +139,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 		
 	}
 	
+	public WindPattern[] getWindPatterns() {
+	   return WindFieldGenParamsDTO.WindPattern.values();
+	}
+	
+	public BoatClassDTO[] getBoatClasses() {
+	    BoatClassDTO boatClassDTO = new BoatClassDTO("49er");
+	    
+	    return new BoatClassDTO[]{boatClassDTO};
+	    
+	}
 }

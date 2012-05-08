@@ -3,7 +3,11 @@ package com.sap.sailing.gwt.ui.shared;
 import java.io.Serializable;
 
 public class WindFieldGenParamsDTO implements Serializable {
-
+        
+        public enum WindPattern {
+            CONSTANT,
+            OSCILLATING
+        }
 	private static final long serialVersionUID = 1L;
 	
 	private PositionDTO northWest;
