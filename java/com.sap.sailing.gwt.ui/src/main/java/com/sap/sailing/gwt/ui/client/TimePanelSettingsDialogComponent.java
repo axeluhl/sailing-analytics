@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.user.client.ui.DoubleBox;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -16,6 +16,10 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings>
 	protected final StringMessages stringMessages;
 	protected final T initialSettings;
 	protected FlowPanel mainContentPanel;
+
+	private static String STYLE_LABEL = "settingsDialogLabel";
+	private static String STYLE_INPUT = "settingsDialogValue";
+	private static String STYLE_BOXPANEL = "boxPanel";
 
 	public TimePanelSettingsDialogComponent(T settings,
 			StringMessages stringMessages) {
@@ -32,19 +36,28 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings>
 		mainContentPanel = new FlowPanel();
 
 		FlowPanel labelAndRefreshIntervalBoxPanel = new FlowPanel();
-		labelAndRefreshIntervalBoxPanel.add(new Label(stringMessages
-				.refreshInterval() + ":"));
+		Label labelIntervalBox = new Label(stringMessages.refreshInterval()
+				+ ":");
+		labelIntervalBox.setStyleName(STYLE_LABEL);
+		labelAndRefreshIntervalBoxPanel.add(labelIntervalBox);
+
 		refreshIntervalBox = dialog.createDoubleBox(
 				((double) initialSettings.getRefreshInterval()) / 1000, 4);
-		labelAndRefreshIntervalBoxPanel.setStyleName("labelAndRefresh");
+		refreshIntervalBox.setStyleName(STYLE_INPUT);
+
+		labelAndRefreshIntervalBoxPanel.setStyleName(STYLE_BOXPANEL);
 		labelAndRefreshIntervalBoxPanel.add(refreshIntervalBox);
 
 		FlowPanel labelAndTimeDelayBoxPanel = new FlowPanel();
-		labelAndTimeDelayBoxPanel.add(new Label(stringMessages.timeDelay()
-				+ ":"));
+		Label labelTimeDelayBox = new Label(stringMessages.timeDelay() + ":");
+		labelTimeDelayBox.setStyleName(STYLE_LABEL);
+		labelAndTimeDelayBoxPanel.add(labelTimeDelayBox);
+
 		timeDelayBox = dialog.createLongBox(
 				initialSettings.getDelayToLivePlayInSeconds(), 10);
-		labelAndTimeDelayBoxPanel.setStyleName("labelAndTime");
+		timeDelayBox.setStyleName(STYLE_INPUT);
+
+		labelAndTimeDelayBoxPanel.setStyleName(STYLE_BOXPANEL);
 		labelAndTimeDelayBoxPanel.add(timeDelayBox);
 
 		mainContentPanel.add(labelAndRefreshIntervalBoxPanel);
