@@ -1,6 +1,7 @@
 package com.sap.sailing.simulator.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.simulator.Boundary;
@@ -38,6 +39,11 @@ public class SimulationParametersImpl implements SimulationParameters {
 	@Override
 	public Boundary getBoundaries() {
 		return windField.getBoundaries();
+	}
+
+	@Override
+	public Map<String, Object> getSettings() {
+		return null;
 	}
 
 }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
@@ -87,7 +86,7 @@ public class PathImpl implements Path {
 		return null;
 	}
 	
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		
 		TimedPositionWithSpeed p1 = new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(0), new DegreePosition(25.045792, -91.472168), new KilometersPerHourSpeedWithBearingImpl(30, null));
 		TimedPositionWithSpeed p2 = new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(3000000), new DegreePosition(26.076521,-89.681396), new KilometersPerHourSpeedWithBearingImpl(30, null));
@@ -99,12 +98,16 @@ public class PathImpl implements Path {
 		lst.add(p3);
 		
 		Path pth = new PathImpl(lst);
-		//System.out.println(pth.getPositionAtTime(new MillisecondsTimePoint(100000)));
+		System.out.println(pth.getPositionAtTime(new MillisecondsTimePoint(0)).getPosition());
 		for (TimedPositionWithSpeed p : pth.getPathPoints()) {
 			System.out.println(p.getPosition());
 			System.out.println(p.getTimePoint());
 		}
 		System.out.println(pth.getPositionAtTime(new MillisecondsTimePoint(0)).getPosition());
-	}
+		for(TimedPosition p : pth.getEvenTimedPoints(500000)) {
+			System.out.println(p.getTimePoint());
+			System.out.println(p.getPosition());
+		}
+	}*/
 
 }

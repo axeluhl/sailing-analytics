@@ -27,17 +27,18 @@ public class PolarDiagramImpl implements PolarDiagram {
 
 	@Override
 	public void setWind(SpeedWithBearing newWind) {
-		wind = newWind;
-		
-		northWest = wind.getBearing().add(new DegreeBearingImpl(0));
-		northEast = wind.getBearing().add(new DegreeBearingImpl(0));
-		southWest = wind.getBearing().add(new DegreeBearingImpl(0));
-		southEast = wind.getBearing().add(new DegreeBearingImpl(0));
+		wind = newWind;	
+		northWest = wind.getBearing().add(new DegreeBearingImpl(-30));
+		northEast = wind.getBearing().add(new DegreeBearingImpl(30));
+		southWest = wind.getBearing().add(new DegreeBearingImpl(210));
+		southEast = wind.getBearing().add(new DegreeBearingImpl(150));
 	}
 
 	@Override
 	public SpeedWithBearing getSpeedAtBearing(Bearing bearing) {
-		return new KilometersPerHourSpeedWithBearingImpl(0, bearing);
+		if (bearing.equals(northEast) || bearing.equals(northWest)) return new KilometersPerHourSpeedWithBearingImpl(wind.getKilometersPerHour(), bearing);
+		if (bearing.equals(southEast) || bearing.equals(southWest)) return new KilometersPerHourSpeedWithBearingImpl(0.7*wind.getKilometersPerHour(), bearing);
+		return new KilometersPerHourSpeedWithBearingImpl(0.5*wind.getKilometersPerHour(), bearing);
 	}
 
 	@Override
