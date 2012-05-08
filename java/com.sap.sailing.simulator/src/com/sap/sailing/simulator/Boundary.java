@@ -30,4 +30,7 @@ public interface Boundary {
 	Distance getHeight();
 	Distance getWidth();
 	
+	Map<String,Double> getRelativeCoordinates(Position p);
+	Position getRelativePoint(double x, double y);
+	
 }

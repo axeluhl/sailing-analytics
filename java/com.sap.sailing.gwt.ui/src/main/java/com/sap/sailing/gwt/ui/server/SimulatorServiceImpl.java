@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
 import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
-import com.sap.sailing.simulator.impl.WindFieldCoordinatesImpl;
+import com.sap.sailing.simulator.impl.TimedPositionWithSpeedSimple;
 import com.sap.sailing.simulator.impl.WindFieldImpl;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet  implements SimulatorService {
@@ -125,7 +125,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet  implements Simul
 		
 		if (lattice != null) {
 		    for (Position p : lattice) {			
-			Wind localWind = wf.getWind(new WindFieldCoordinatesImpl(p));
+			Wind localWind = wf.getWind(new TimedPositionWithSpeedSimple(p));
 			WindDTO w = new WindDTO();
 			w.position = new PositionDTO(localWind.getPosition().getLatDeg(),localWind.getPosition().getLngDeg());
 			w.trueWindBearingDeg = localWind.getBearing().getDegrees();
