@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 
 /**
@@ -95,6 +96,13 @@ public class ReplicationPanel extends FlowPanel {
                     registeredReplicas.removeRow(0);
                 }
                 int i=0;
+                final ReplicationMasterDTO replicatingFromMaster = replicas.getReplicatingFromMaster();
+                if (replicatingFromMaster != null) {
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
+                            replicatingFromMaster.getJmsPort(), replicatingFromMaster.getServletPort())));
+                    i++;
+                }
                 for (ReplicaDTO replica : replicas.getReplicas()) {
                     registeredReplicas.insertRow(i);
                     registeredReplicas.setWidget(i, 0, new Label(replica.getHostname()));
