@@ -74,6 +74,7 @@ public abstract class DataEntryDialog<T> {
         dialogFPanel.add(panelForAdditionalWidget);
         FlowPanel buttonPanel = new FlowPanel();
         dialogFPanel.add(buttonPanel);
+        buttonPanel.setStyleName("additionalWidgets");
         buttonPanel.add(okButton);
         cancelButton = new Button(cancelButtonName);
         buttonPanel.add(cancelButton);
