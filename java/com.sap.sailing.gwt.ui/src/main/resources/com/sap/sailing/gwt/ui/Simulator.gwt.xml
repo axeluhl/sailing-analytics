@@ -26,6 +26,7 @@
 	<extend-property name="locale" values="de"/>
 	<source path='shared'/>
 	<source path='client'/>
+	<source path='actions'/>
 	<source path='simulator'/>
 	
 	<inherits name='com.google.gwt.logging.Logging'/>
