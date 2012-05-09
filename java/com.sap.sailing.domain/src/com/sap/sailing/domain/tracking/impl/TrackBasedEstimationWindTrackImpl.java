@@ -336,6 +336,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     public void windDataReceived(Wind wind, WindSource windSource) {
         invalidateForNewWind(wind);
     }
+    
+    @Override
+    public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
+    }
 
     private void invalidateForNewWind(Wind wind) {
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();

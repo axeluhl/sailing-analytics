@@ -181,6 +181,22 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
     }
 
+    private void notifyListenersRaceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking,
+            TimePoint startTimeReceived) {
+        RaceChangeListener[] listeners;
+        synchronized (getListeners()) {
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.raceTimesChanged(startOfTracking, endOfTracking, startTimeReceived);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersRaceTimesChanged(TimePoint, TimePoint, TimePoint)", t);
+            }
+        }
+    }
+
     private void notifyListeners(GPSFix fix, Buoy buoy) {
         RaceChangeListener[] listeners;
         synchronized (getListeners()) {
@@ -360,18 +376,30 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public void setStartTimeReceived(TimePoint start) {
-        super.setStartTimeReceived(start);
+    public void setStartTimeReceived(TimePoint startTimeReceived) {
+        if ((startTimeReceived == null) != (getStartTimeReceived() == null)
+                || (startTimeReceived != null && !startTimeReceived.equals(getStartTimeReceived()))) {
+            super.setStartTimeReceived(startTimeReceived);
+            notifyListenersRaceTimesChanged(getStartOfTracking(), getEndOfTracking(), getStartTimeReceived());
+        }
     }
     
     @Override
     public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived) {
-        super.setStartOfTrackingReceived(startOfTrackingReceived);
+        if ((getStartOfTracking() == null) != (startOfTrackingReceived == null)
+                || (startOfTrackingReceived != null && !getStartOfTracking().equals(startOfTrackingReceived))) {
+            super.setStartOfTrackingReceived(startOfTrackingReceived);
+            notifyListenersRaceTimesChanged(getStartOfTracking(), getEndOfTracking(), getStartTimeReceived());
+        }
     }
 
     @Override
     public void setEndOfTrackingReceived(TimePoint endOfTrackingReceived) {
-        super.setEndOfTrackingReceived(endOfTrackingReceived);
+        if ((getEndOfTracking() == null) != (endOfTrackingReceived == null)
+                || (endOfTrackingReceived != null && !getEndOfTracking().equals(endOfTrackingReceived))) {
+            super.setEndOfTrackingReceived(endOfTrackingReceived);
+            notifyListenersRaceTimesChanged(getStartOfTracking(), getEndOfTracking(), getStartTimeReceived());
+        }
     }
 
     /**

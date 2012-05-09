@@ -96,6 +96,7 @@ import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.TrackEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
+import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 
 public class RacingEventServiceImpl implements RacingEventService, EventListener {
@@ -610,6 +611,11 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
 
         public TrackedRaceReplicator(TrackedRace trackedRace) {
             this.trackedRace = trackedRace;
+        }
+
+        @Override
+        public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
+            replicate(new UpdateRaceTimes(getRaceIdentifier(), startOfTracking, endOfTracking, startTimeReceived));
         }
 
         @Override

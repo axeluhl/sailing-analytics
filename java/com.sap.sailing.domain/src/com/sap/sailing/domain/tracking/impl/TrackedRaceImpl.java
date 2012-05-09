@@ -444,12 +444,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return getStartOfRace() != null && getStartOfRace().compareTo(at) <= 0;
     }
 
-    protected void setStartTimeReceived(TimePoint start) {
-        this.startTimeReceived = start;
-        invalidateStartTime();
-        invalidateMarkPassingTimes();
-    }
-
     @Override
     public RaceDefinition getRace() {
         return race;
@@ -922,6 +916,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             timePointOfLastEvent = timeOfEvent;
         }
         notifyAll();
+    }
+
+    protected void setStartTimeReceived(TimePoint start) {
+        if ((start == null) != (startTimeReceived == null) || (start != null && !start.equals(startTimeReceived))) {
+            this.startTimeReceived = start;
+            invalidateStartTime();
+            invalidateMarkPassingTimes();
+        }
+    }
+    
+    protected TimePoint getStartTimeReceived() {
+        return startTimeReceived;
     }
 
     protected void setStartOfTrackingReceived(TimePoint startOfTracking) {

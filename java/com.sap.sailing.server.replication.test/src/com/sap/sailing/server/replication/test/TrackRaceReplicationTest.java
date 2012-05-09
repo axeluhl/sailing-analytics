@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -22,6 +23,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -101,7 +103,6 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         RaceInLeaderboard column = replicaDefaultLeaderboard.getRaceColumnByName(replicaTrackedRace.getRace().getName());
         assertNotNull(column);
         assertSame(replicaTrackedRace, column.getTrackedRace());
-        tearDown();
     }
 
     @Test
@@ -125,7 +126,20 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         RaceInLeaderboard column = replicaLeaderboard.getRaceColumnByName(columnName);
         assertNotNull(column);
         assertSame(replicaTrackedRace, column.getTrackedRace());
-        tearDown();
+    }
+    
+    @Test
+    public void testRaceTimeReplication() throws InterruptedException, Exception {
+        startTracking();
+        Thread.sleep(1000);
+        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        assertEquals(masterTrackedRace.getStartOfTracking(), replicaTrackedRace.getStartOfTracking());
+        assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        assertFalse(now.equals(replicaTrackedRace.getStartOfRace()));
+        ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
+        Thread.sleep(1000);
+        assertEquals(now, replicaTrackedRace.getStartOfRace());
     }
 
     @After
