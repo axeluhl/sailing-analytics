@@ -100,4 +100,9 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         assertEquals("Buoy1", replicaCourse.getFirstWaypoint().getBuoys().iterator().next().getName());
         assertEquals("Buoy3", replicaCourse.getLastWaypoint().getBuoys().iterator().next().getName());
     }
+    
+    @Test
+    public void testStartTrackingRaceReplication() {
+        
+    }
 }
