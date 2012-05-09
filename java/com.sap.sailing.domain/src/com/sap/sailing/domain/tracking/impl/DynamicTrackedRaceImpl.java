@@ -275,14 +275,14 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
     }
 
-    private void notifyListeners(MarkPassing oldMarkPassing, MarkPassing markPassing) {
+    private void notifyListeners(Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
         RaceChangeListener[] listeners;
         synchronized (getListeners()) {
             listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
         }
         for (RaceChangeListener listener : listeners) {
             try {
-                listener.markPassingReceived(oldMarkPassing, markPassing);
+                listener.markPassingReceived(oldMarkPassings, markPassings);
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
                 logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListeners(MarkPassing)", t);
@@ -336,9 +336,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         invalidateEndTime();
         
         // notify *after* all mark passings have been re-established; should avoid flicker
-        for (MarkPassing markPassing : markPassings) {
-            notifyListeners(oldMarkPassings.get(markPassing.getWaypoint()), markPassing);
-        }
+        notifyListeners(oldMarkPassings, markPassings);
     }
     
     @Override

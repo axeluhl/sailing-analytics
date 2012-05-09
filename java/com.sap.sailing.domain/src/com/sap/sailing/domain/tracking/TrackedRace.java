@@ -380,4 +380,6 @@ public interface TrackedRace extends Serializable {
      * Computes the average cross-track error for the legs with type {@link LegType#UPWIND}.
      */
     Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException;
+
+    WindStore getWindStore();
 }

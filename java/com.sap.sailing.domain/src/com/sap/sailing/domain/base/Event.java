@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.tracking.TrackedEvent;
 
@@ -44,4 +45,12 @@ public interface Event extends Named {
     void addEventListener(EventListener listener);
     
     void removeEventListener(EventListener listener);
+
+    EventIdentifier getEventIdentifier();
+
+    /**
+     * An event name may be composed, e.g., from an overall event name and the boat class name. A factory or constructor
+     * may require the base name to which the boat class name will be appended. This method emits the base name.
+     */
+    String getBaseName();
 }

@@ -32,6 +32,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventListener;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
@@ -85,10 +86,14 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.operationaltransformation.AddEvent;
+import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
+import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordBuoyGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
+import com.sap.sailing.server.operationaltransformation.TrackEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 
@@ -107,6 +112,10 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
     
     private final ExpeditionWindTrackerFactory windTrackerFactory;
     
+    /**
+     * Holds the {@link Event} objects for those races registered with this service. Note that there may be {@link Event}
+     * objects that exist outside this service for races not (yet) registered here.
+     */
     protected final Map<String, Event> eventsByName;
     
     private final Map<RaceDefinition, CourseChangeReplicator> courseListeners;
@@ -396,12 +405,15 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
     }
 
     @Override
-    public Event createEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
-        Event event = new EventImpl(eventName, com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(
+    public Event getOrCreateEvent(String baseEventName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
+        Event event = new EventImpl(baseEventName, com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(
                 boatClassName, boatClassTypicallyStartsUpwind));
-        eventsByName.put(event.getName(), event);
-        event.addEventListener(this);
-        return event;
+        Event result = eventsByName.get(event.getName());
+        if (result == null) {
+            result = event;
+            cacheAndReplicateEvent(result);
+        }
+        return result;
     }
 
     @Override
@@ -455,6 +467,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
         final CourseChangeReplicator listener = new CourseChangeReplicator(this, event, raceDefinition);
         courseListeners.put(raceDefinition, listener);
         raceDefinition.getCourse().addCourseListener(listener);
+        replicate(new AddRaceDefinition(event.getEventIdentifier(), raceDefinition));
     }
 
     @Override
@@ -475,23 +488,21 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
                 raceTrackersByEvent.put(tracker.getEvent(), trackers);
             }
             trackers.add(tracker);
-            // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
+            // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in EventImpl constructor
             String eventName = tracker.getEvent().getName();
             Event eventWithName = eventsByName.get(eventName);
-            // TODO we assume here that the event name is unique which necessesitates adding the boat class name to it in EventImpl constructor
+            // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in EventImpl constructor
             if (eventWithName != null) {
                 if (eventWithName != tracker.getEvent()) {
                     if (Util.isEmpty(eventWithName.getAllRaces())) {
                         // probably, tracker removed the last races from the old event and created a new one
-                        eventsByName.put(eventName, tracker.getEvent());
-                        tracker.getEvent().addEventListener(this);
+                        cacheAndReplicateEvent(tracker.getEvent());
                     } else {
                         throw new RuntimeException("Internal error. Two Event objects with equal name "+eventName);
                     }
                 }
             } else {
-                eventsByName.put(eventName, tracker.getEvent());
-                tracker.getEvent().addEventListener(this);
+                cacheAndReplicateEvent(tracker.getEvent());
             }
         } else {
             WindStore existingTrackersWindStore = tracker.getWindStore();
@@ -504,6 +515,24 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
             scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
         }
         return tracker.getRacesHandle();
+    }
+
+    /**
+     * If <code>event</code> is not yet in {@link #eventsByName}, it is added, this service is
+     * {@link Event#addEventListener(EventListener) added} as event listener, and the event and all its contained
+     * {@link Event#getAllRaces() races} are replicated to all replica.
+     */
+    private void cacheAndReplicateEvent(Event event) {
+        if (!eventsByName.containsKey(event.getName())) {
+            eventsByName.put(event.getName(), event);
+            event.addEventListener(this);
+            replicate(new AddEvent(event.getBaseName(), event.getBoatClass().getName(), event.getBoatClass()
+                    .typicallyStartsUpwind()));
+            EventIdentifier eventIdentifier = event.getEventIdentifier();
+            for (RaceDefinition race : event.getAllRaces()) {
+                replicate(new AddRaceDefinition(eventIdentifier, race));
+            }
+        }
     }
     
     @Override
@@ -561,57 +590,64 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
 
         @Override
         public void raceAdded(TrackedRace trackedRace) {
+            // replicate the addition of the tracked race:
+            CreateTrackedRace op = new CreateTrackedRace(trackedRace.getRaceIdentifier(), trackedRace.getWindStore(),
+                    trackedRace.getMillisecondsOverWhichToAverageWind(), trackedRace.getMillisecondsOverWhichToAverageSpeed());
+            replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
             leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME).addRace(trackedRace,
                     trackedRace.getRace().getName(), /* medalRace */false);
-            TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace.getRaceIdentifier());
+            TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator);
         }
     }
     
     private class TrackedRaceReplicator implements RaceChangeListener {
-        private final EventAndRaceIdentifier raceIdentifier;
+        private final TrackedRace trackedRace;
 
-        public TrackedRaceReplicator(EventAndRaceIdentifier raceIdentifier) {
-            this.raceIdentifier = raceIdentifier;
+        public TrackedRaceReplicator(TrackedRace trackedRace) {
+            this.trackedRace = trackedRace;
         }
 
         @Override
         public void windDataReceived(Wind wind, WindSource windSource) {
-            replicate(new RecordWindFix(raceIdentifier, windSource, wind));
-            
+            replicate(new RecordWindFix(getRaceIdentifier(), windSource, wind));
         }
 
         @Override
         public void windDataRemoved(Wind wind, WindSource windSource) {
-            replicate(new RemoveWindFix(raceIdentifier, windSource, wind));
+            replicate(new RemoveWindFix(getRaceIdentifier(), windSource, wind));
         }
 
         @Override
         public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            replicate(new UpdateWindAveragingTime(raceIdentifier, newMillisecondsOverWhichToAverage));
+            replicate(new UpdateWindAveragingTime(getRaceIdentifier(), newMillisecondsOverWhichToAverage));
         }
 
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-            replicate(new RecordCompetitorGPSFix(raceIdentifier, competitor, fix));
-            
+            replicate(new RecordCompetitorGPSFix(getRaceIdentifier(), competitor, fix));
         }
 
         @Override
         public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
-            replicate(new RecordBuoyGPSFix(raceIdentifier, buoy, fix));
+            replicate(new RecordBuoyGPSFix(getRaceIdentifier(), buoy, fix));
         }
 
         @Override
-        public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
-            replicate(new UpdateMarkPassings(raceIdentifier, markPassing.getCompetitor(), Collections.singleton(markPassing)));
+        public void markPassingReceived(Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
+            replicate(new UpdateMarkPassings(getRaceIdentifier(), markPassings.iterator().next().getCompetitor(),
+                    markPassings));
         }
 
         @Override
         public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            replicate(new UpdateWindAveragingTime(raceIdentifier, newMillisecondsOverWhichToAverage));
+            replicate(new UpdateWindAveragingTime(getRaceIdentifier(), newMillisecondsOverWhichToAverage));
+        }
+
+        private EventAndRaceIdentifier getRaceIdentifier() {
+            return trackedRace.getRaceIdentifier();
         }
     }
 
@@ -850,10 +886,12 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
     
     @Override
     public DynamicTrackedEvent getOrCreateTrackedEvent(Event event) {
+        cacheAndReplicateEvent(event);
         synchronized (eventTrackingCache) {
             DynamicTrackedEvent result = eventTrackingCache.get(event);
             if (result == null) {
                 result = new DynamicTrackedEventImpl(event);
+                replicate(new TrackEvent(event.getEventIdentifier()));
                 eventTrackingCache.put(event, result);
                 ensureEventIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
             }

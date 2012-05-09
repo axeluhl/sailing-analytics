@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.tracking;
 
+import java.util.Map;
+
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.WindSource;
 
 
@@ -13,12 +16,10 @@ public interface RaceChangeListener {
     /**
      * Invoked after the mark passings have been updated in the {@link TrackedRace}.
      * 
-     * @param oldMarkPassing
-     *            the mark passing replaced by <code>markPassing</code> or <code>null</code> if for the mark passing's
-     *            waypoint no previous {@link MarkPassing} was recorded for the {@link MarkPassing#getCompetitor()
-     *            competitor}.
+     * @param oldMarkPassings
+     *            the mark passings replaced by <code>markPassings</code>, keyed by the waypoints
      */
-    void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing);
+    void markPassingReceived(Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings);
 
     void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 

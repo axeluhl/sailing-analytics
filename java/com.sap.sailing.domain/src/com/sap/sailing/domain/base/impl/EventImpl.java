@@ -10,6 +10,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventListener;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.EventName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class EventImpl extends NamedImpl implements Event {
@@ -18,11 +20,22 @@ public class EventImpl extends NamedImpl implements Event {
     private final BoatClass boatClass;
     private transient Set<EventListener> eventListeners;
     
-    public EventImpl(String name, BoatClass boatClass) {
-        super(name+(boatClass==null?"":" ("+boatClass.getName()+")"));
+    public EventImpl(String baseName, BoatClass boatClass) {
+        super(baseName+(boatClass==null?"":" ("+boatClass.getName()+")"));
         races = new HashSet<RaceDefinition>();
         eventListeners = new HashSet<EventListener>();
         this.boatClass = boatClass;
+    }
+    
+    @Override
+    public String getBaseName() {
+        String result;
+        if (boatClass == null) {
+            result = getName();
+        } else {
+            result = getName().substring(0, getName().length()-boatClass.getName().length()-3); // remove tralining boat class name and " (" and ")"
+        }
+        return result;
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
@@ -35,6 +48,11 @@ public class EventImpl extends NamedImpl implements Event {
         return races;
     }
     
+    @Override
+    public EventIdentifier getEventIdentifier() {
+        return new EventName(getName());
+    }
+
     @Override
     public RaceDefinition getRaceByName(String raceName) {
         Iterable<RaceDefinition> allRaces = getAllRaces();
