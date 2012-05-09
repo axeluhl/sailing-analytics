@@ -11,15 +11,22 @@ import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
 
+/**
+ * This class implements the layer to display the race course on the map. Currently the course only consists of the
+ * start(startPoint) and end point(endPoint) which are captured by a single and double click respectively.
+ * 
+ * @author Nidhi Sawhney(D054070)
+ * 
+ */
 public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     public LatLng startPoint = null;
     public LatLng endPoint = null;
-    private  Marker startMarker = null;
+    private Marker startMarker = null;
     private Marker endMarker = null;
-    
+
     private RaceCourseMapMouseMoveHandler raceCourseMapMouseMoveHandler = new RaceCourseMapMouseMoveHandler();
-    
+
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     class RaceCourseMapMouseMoveHandler implements MapMouseMoveHandler {
@@ -28,14 +35,14 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         public void onMouseMove(MapMouseMoveEvent event) {
             if (startPoint != null) {
                 Point s = getMap().convertLatLngToDivPixel(startPoint);
-                drawPointWithText(s.getX(),s.getY(), "Start");
+                drawPointWithText(s.getX(), s.getY(), "Start");
                 refreshLine(event.getLatLng(), "Grey");
             }
-            
+
         }
-        
+
     }
-    
+
     public RaceCourseCanvasOverlay() {
         super();
     }
@@ -48,23 +55,22 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
             map.removeOverlay(startMarker);
             startMarker = null;
         }
-        if (endMarker != null) { 
+        if (endMarker != null) {
             map.removeOverlay(endMarker);
             endMarker = null;
         }
-        setCanvasSettings(); 
+        setCanvasSettings();
     }
-    
+
     public boolean isCourseSet() {
         return startPoint != null && endPoint != null;
     }
-    
+
     private void setStartEndPoint(LatLng startPoint, LatLng endPoint) {
         setStartPoint(startPoint);
         setEndPoint(endPoint);
     }
-    
-    
+
     private void setStartPoint(LatLng startPoint) {
         this.startPoint = startPoint;
         if (startMarker != null) {
@@ -72,13 +78,13 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         }
         if (startPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(startPoint);
-            drawPointWithText(point.getX()-widgetPosLeft,point.getY()-widgetPosTop,"Start");
+            drawPointWithText(point.getX() - widgetPosLeft, point.getY() - widgetPosTop, "Start");
             startMarker = new Marker(startPoint);
             map.addOverlay(startMarker);
- 
+
         }
     }
-    
+
     private void setEndPoint(LatLng endPoint) {
         this.endPoint = endPoint;
         if (endMarker != null) {
@@ -86,14 +92,13 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         }
         if (endPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(endPoint);
-            drawPointWithText(point.getX()-widgetPosLeft,point.getY()-widgetPosTop,"End");
+            drawPointWithText(point.getX() - widgetPosLeft, point.getY() - widgetPosTop, "End");
             endMarker = new Marker(endPoint);
             map.addOverlay(endMarker);
-            
+
         }
     }
-    
-    
+
     @Override
     protected Overlay copy() {
         return new RaceCourseCanvasOverlay();
@@ -101,27 +106,27 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     @Override
     protected void initialize(MapWidget map) {
-        
+
         super.initialize(map);
-   
+
         getMap().addMapClickHandler(new MapClickHandler() {
             @Override
             public void onClick(MapClickEvent event) {
-             
+
                 if (startPoint == null) {
                     startPoint = event.getLatLng();
-                    logger.fine("Clicked startPoint here " + startPoint);   
+                    logger.fine("Clicked startPoint here " + startPoint);
                     if (startPoint != null) {
-                       
+
                         setCanvasSettings();
-                        drawCanvas();
+                        // drawCanvas();
                         setStartPoint(startPoint);
-                        getMap().addMapMouseMoveHandler(raceCourseMapMouseMoveHandler); 
+                        getMap().addMapMouseMoveHandler(raceCourseMapMouseMoveHandler);
                     }
                 }
             }
         });
-        
+
         getMap().addMapDoubleClickHandler(new MapDoubleClickHandler() {
 
             @Override
@@ -135,40 +140,36 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
             }
 
         });
-      
-        
+
     }
 
     @Override
     protected void redraw(boolean force) {
-  
-        if (startPoint != null && endPoint != null) {  
-            setCanvasSettings();
-            drawCanvas();
-            setStartEndPoint(startPoint,endPoint);
-            drawLine(endPoint, "White");
-        }    
-    }   
 
-   
-    
-    /*
-     * Draw a line on the canvas from the startPoint to current point given by mouse location 
-     * with a canvas refresh
-     */
-    private void refreshLine(LatLng currentPoint, String color)  {
-           setCanvasSettings();
-           drawLine(currentPoint, color);
+        if (startPoint != null && endPoint != null) {
+            setCanvasSettings();
+            // drawCanvas();
+            setStartEndPoint(startPoint, endPoint);
+            drawLine(endPoint, "White");
+        }
     }
-    
+
+    /*
+     * Draw a line on the canvas from the startPoint to current point given by mouse location with a canvas refresh
+     */
+    private void refreshLine(LatLng currentPoint, String color) {
+        setCanvasSettings();
+        drawLine(currentPoint, color);
+    }
+
     private void drawLine(LatLng currentPoint, String color) {
         if (startPoint != null) {
             Point s = map.convertLatLngToDivPixel(startPoint);
             Point e = map.convertLatLngToDivPixel(currentPoint);
-            drawLine(s.getX()-widgetPosLeft,s.getY()-widgetPosTop,e.getX()-widgetPosLeft,e.getY()-widgetPosTop,1,color);
-      
+            drawLine(s.getX() - widgetPosLeft, s.getY() - widgetPosTop, e.getX() - widgetPosLeft, e.getY()
+                    - widgetPosTop, 1, color);
+
         }
     }
-    
-    
+
 }

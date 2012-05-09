@@ -1,14 +1,13 @@
 package com.sap.sailing.gwt.ui.shared;
 
-import java.io.Serializable;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class WindFieldGenParamsDTO implements Serializable {
+public class WindFieldGenParamsDTO implements IsSerializable {
         
         public enum WindPattern {
             CONSTANT,
             OSCILLATING
         }
-	private static final long serialVersionUID = 1L;
 	
 	private PositionDTO northWest;
 	private PositionDTO southEast;

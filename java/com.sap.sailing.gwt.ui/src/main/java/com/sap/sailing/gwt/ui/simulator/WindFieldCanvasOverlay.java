@@ -29,23 +29,28 @@ import com.sap.sailing.gwt.ui.simulator.util.WindFieldMouseMoveHandler;
 public class WindFieldCanvasOverlay extends FullCanvasOverlay {
 
     /* The wind field that is to be displayed in the overlay */
-    private WindFieldDTO wl;
+    protected WindFieldDTO wl;
     
     /* The points where ToolTip is to be displayed */
-    private Map<ToolTip, WindDTO> windFieldPoints = new HashMap<ToolTip, WindDTO>();
-   
+    protected Map<ToolTip, WindDTO> windFieldPoints = new HashMap<ToolTip, WindDTO>();
+    protected String arrowColor = "Blue";
+    protected String arrowHeadColor = "Red";
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     public WindFieldCanvasOverlay() {
         super();
-
     }
 
     public void setWindField(WindFieldDTO wl) {
         this.wl = wl;
     }
 
+    public void setArrowColor(String arrowColor, String arrowHeadColor) {
+        this.arrowColor = arrowColor;
+        this.arrowHeadColor = arrowHeadColor;
+    }
+    
     @Override
     protected void initialize(MapWidget map) {
         super.initialize(map);
@@ -75,7 +80,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         windFieldPoints.clear();
     }
 
-    private void drawWindField() {
+    protected void drawWindField() {
         logger.fine("In WindFieldCanvasOverlay.drawWindField");
         List<WindDTO> windDTOList = wl.getMatrix();
 
@@ -85,7 +90,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
                 double length = 12;
-                int width = (int) Math.round(windDTO.trueWindSpeedInMetersPerSecond);
+                int width = (int) Math.min(2, Math.round(windDTO.trueWindSpeedInMetersPerSecond));
                 DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                 drawArrow(windDTO, dbi.getRadians(), length, width, ++index);
             }
@@ -94,7 +99,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         }
     }
 
-    private void drawArrow(WindDTO windDTO, double angle, double length, double weight, int index) {
+    protected void drawArrow(WindDTO windDTO, double angle, double length, double weight, int index) {
 
         PositionDTO position = windDTO.position;
       
@@ -112,7 +117,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         double x1 = x + dx / 2;
         double y1 = y + dy / 2;
         
-        drawLine(x -dx/2, y-dy/2, x1,y1,weight,"Blue");
+        drawLine(x -dx/2, y-dy/2, x1,y1,weight,arrowColor);
        
         double theta = Math.atan2(-dy, dx);
 
@@ -124,7 +129,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
     
 
 
-    private void drawHead(double x, double y, double theta, double headLength, double weight) {
+    protected void drawHead(double x, double y, double theta, double headLength, double weight) {
 
         double t = theta + (Math.PI / 4);
         if (t > Math.PI)
@@ -137,8 +142,8 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         double y1 = Math.round(y + Math.sin(t) * headLength);
         double x2 = Math.round(x - Math.cos(t2) * headLength);
         double y2 = Math.round(y + Math.sin(t2) * headLength);
-        drawLine(x,y,x1,y1,weight,"Red");
-        drawLine(x,y,x2,y2,weight,"Red");
+        drawLine(x,y,x1,y1,weight,arrowHeadColor);
+        drawLine(x,y,x2,y2,weight,arrowHeadColor);
        
     }
 

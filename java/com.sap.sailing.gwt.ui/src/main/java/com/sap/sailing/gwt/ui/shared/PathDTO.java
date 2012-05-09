@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class WindFieldDTO implements IsSerializable {
+public class PathDTO implements IsSerializable {
 
     private List<WindDTO> matrix;
 
