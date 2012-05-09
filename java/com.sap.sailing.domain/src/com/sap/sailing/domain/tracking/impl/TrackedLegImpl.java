@@ -224,6 +224,10 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         clearCaches();
     }
     
+    @Override
+    public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
+    }
+
     private void clearCaches() {
         synchronized (competitorTracksOrderedByRank) {
             competitorTracksOrderedByRank.clear();
