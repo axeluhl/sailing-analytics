@@ -35,7 +35,7 @@ import java.util.logging.*;
 public class SimulatorEntryPoint extends AbstractEntryPoint {
     private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
 
-    //private final VerticalPanel panel = new VerticalPanel(); 
+    // private final VerticalPanel panel = new VerticalPanel();
     private final DockLayoutPanel panel = new DockLayoutPanel(Unit.PX);
     private final ListBox raceSelector = new ListBox();
     private final CheckBox checkBox = new CheckBox("Show Grid");
@@ -45,18 +45,14 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private RadioButton replayButton;
     private MapWidget mapw;
 
-    
     private List<PositionDTO> locations = new ArrayList<PositionDTO>();
 
-    
-    
-    
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     @Override
     public void onModuleLoad() {
         super.onModuleLoad();
-       
+
         /*
          * Asynchronously loads the Maps API.
          * 
@@ -65,7 +61,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
          */
         Maps.loadMapsApi("", "2", false, new Runnable() {
             public void run() {
-                //buildUi();
+                // buildUi();
                 createUi();
             }
         });
@@ -73,37 +69,38 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
 
     private void createUi() {
         initMap();
-        
+
         SimulatorMainPanel mainPanel = new SimulatorMainPanel(mapw, stringMessages, simulatorSvc);
         RootLayoutPanel.get().add(mainPanel);
     }
-    
+
     private void buildUi() {
         logger.severe("Logger Name : " + logger.getName() + " Logging level " + logger.getLevel());
         logger.fine("In buildUi");
         loadRaceLocations();
-        
+
         initMap();
         initRaceSelector();
         initDisplayOptions();
-        //initButton();
+        // initButton();
         initPanel();
 
-        
         // Add the map to the HTML host page
         RootLayoutPanel.get().add(panel);
-       
-        
+
     }
 
-   
     private void initMap() {
         logger.fine("In initMap");
         mapw = new MapWidget();
         mapw.setUI(SimulatorMapOptions.newInstance());
         mapw.setZoomLevel(15);
-        mapw.setSize("100%", "650px"); 
-        //mapw.setSize("100%", "80%");
+        mapw.setSize("100%", "650px");
+        // mapw.setSize("100%", "80%");
+        PositionDTO kiel = new PositionDTO(54.33194056834371, 10.155057907104492);
+
+        LatLng position = LatLng.newInstance(kiel.latDeg, kiel.lngDeg);
+        mapw.panTo(position);
     }
 
     private void loadRaceLocations() {
@@ -136,7 +133,6 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         raceSelector.setTitle("Race Location Selection");
         raceSelector.setSize("100%", "20px");
 
-       
         raceSelector.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -148,59 +144,46 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
 
     private void initPanel() {
         logger.fine("In initPanel");
-      
+
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("Simulator", stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        panel.addNorth(logoAndTitlePanel,68);
-        
+        panel.addNorth(logoAndTitlePanel, 68);
+
         FlowPanel controlPanel = new FlowPanel();
         controlPanel.add(raceSelector);
-        panel.addWest(controlPanel,200);
-        
+        panel.addWest(controlPanel, 200);
+
         VerticalPanel mapDisplayPanel = new VerticalPanel();
         mapDisplayPanel.add(courseInputButton);
         mapDisplayPanel.add(windDisplayButton);
         mapDisplayPanel.add(summaryButton);
         mapDisplayPanel.add(replayButton);
         courseInputButton.setChecked(true);
-        panel.addEast(mapDisplayPanel,200);
-       
-        //panel.addWest(checkBox,200);
+        panel.addEast(mapDisplayPanel, 200);
+
+        // panel.addWest(checkBox,200);
         panel.add(mapw);
-        
-        //TabPanel tabPanel = new TabPanel();
-        //FlowPanel flowPanel = new FlowPanel();
-        //flowPanel.add(mapw);
-       /* tabPanel.add(flowPanel, "Summary");
-        flowPanel = new FlowPanel();
-        flowPanel.add(mapw);
-        tabPanel.add(flowPanel, "Replay");
-        flowPanel = new FlowPanel();
-        flowPanel.add(mapw);
-        tabPanel.add(flowPanel, "Wind Display");
-        tabPanel.selectTab(0);
-        tabPanel.addStyleName("table-center");
-        tabPanel.setSize("100%","100%");*/
-        //panel.add(tabPanel);
-        //panel.add(flowPanel);
-        
-       
-        
+
+        // TabPanel tabPanel = new TabPanel();
+        // FlowPanel flowPanel = new FlowPanel();
+        // flowPanel.add(mapw);
+        /*
+         * tabPanel.add(flowPanel, "Summary"); flowPanel = new FlowPanel(); flowPanel.add(mapw); tabPanel.add(flowPanel,
+         * "Replay"); flowPanel = new FlowPanel(); flowPanel.add(mapw); tabPanel.add(flowPanel, "Wind Display");
+         * tabPanel.selectTab(0); tabPanel.addStyleName("table-center"); tabPanel.setSize("100%","100%");
+         */
+        // panel.add(tabPanel);
+        // panel.add(flowPanel);
+
         panel.setSize("100%", "100%");
     }
 
     private void selectRaceLocation(PositionDTO rl) {
         logger.fine("In selectRaceLocation");
-        //mapw.clearOverlays();
+        // mapw.clearOverlays();
         LatLng position = LatLng.newInstance(rl.latDeg, rl.lngDeg);
         mapw.panTo(position);
     }
-
-   
-    
-   
-    
-    
 
     private void initDisplayOptions() {
         logger.fine("In initDisplayOptions");
@@ -210,48 +193,37 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
 
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
-                //generateWindField();
+                // generateWindField();
             }
         });
         /*
          * if (checkBox.length > 1) { checkBox[0].setText("Grid"); checkBox[1].setText("Wind Direction"); }
          */
     }
-    
+
     /*
-    private void initButton() {
-        windDisplayButton = new RadioButton("Map Display Options", "Wind Display");
-        windDisplayButton.addClickHandler( new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent arg0) {
-                
-                if (raceCourseCanvasOverlay.isCourseSet()) {
-                   mapw.addOverlay(windFieldCanvasOverlay);   
-                   generateWindField();    
-                   raceCourseCanvasOverlay.setVisible(true);
-                } else {
-                    Window.alert("No course set, please initialize the course with Start-End Input");
-                }
-            }
-            });
-        
-        courseInputButton = new RadioButton("Map Display Options","Start End Input");
-        courseInputButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent arg0) {
- 
-                mapw.removeOverlay(windFieldCanvasOverlay);   
-                
-                //raceCourseCanvasOverlay.setSelected(true);
-                //raceCourseCanvasOverlay.setVisible(true);
-                raceCourseCanvasOverlay.reset();
-                raceCourseCanvasOverlay.redraw(true);   
-                
-            }
-            });
-        
-        replayButton = new RadioButton("Map Display Options","Replay");
-        summaryButton = new RadioButton("Map Display Options","Summary");
-    }
-    */
+     * private void initButton() { windDisplayButton = new RadioButton("Map Display Options", "Wind Display");
+     * windDisplayButton.addClickHandler( new ClickHandler() {
+     * 
+     * @Override public void onClick(ClickEvent arg0) {
+     * 
+     * if (raceCourseCanvasOverlay.isCourseSet()) { mapw.addOverlay(windFieldCanvasOverlay); generateWindField();
+     * raceCourseCanvasOverlay.setVisible(true); } else {
+     * Window.alert("No course set, please initialize the course with Start-End Input"); } } });
+     * 
+     * courseInputButton = new RadioButton("Map Display Options","Start End Input");
+     * courseInputButton.addClickHandler(new ClickHandler() {
+     * 
+     * @Override public void onClick(ClickEvent arg0) {
+     * 
+     * mapw.removeOverlay(windFieldCanvasOverlay);
+     * 
+     * //raceCourseCanvasOverlay.setSelected(true); //raceCourseCanvasOverlay.setVisible(true);
+     * raceCourseCanvasOverlay.reset(); raceCourseCanvasOverlay.redraw(true);
+     * 
+     * } });
+     * 
+     * replayButton = new RadioButton("Map Display Options","Replay"); summaryButton = new
+     * RadioButton("Map Display Options","Summary"); }
+     */
 }

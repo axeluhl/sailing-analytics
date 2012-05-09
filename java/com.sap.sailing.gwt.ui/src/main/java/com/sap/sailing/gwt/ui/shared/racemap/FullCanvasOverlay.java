@@ -17,6 +17,10 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
     /* y coordinate where the widget is placed */
     protected int widgetPosTop = 0;
 
+    public String pointColor = "Red";
+    
+    public String textColor = "Black";
+    
     /* Set the canvas to be the size of the map and set it to the top left corner of the map */
     protected void setCanvasSettings() {
         int canvasWidth = getMap().getSize().getWidth();
@@ -53,7 +57,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
      */
     protected void drawPoint(double x, double y) {
         Context2d context2d = canvas.getContext2d();
-        context2d.setStrokeStyle("Red");
+        context2d.setStrokeStyle(pointColor);
         context2d.setLineWidth(3);
         context2d.beginPath();
         context2d.moveTo(x, y);
@@ -74,7 +78,7 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
         
         Context2d context2d = canvas.getContext2d();
         drawPoint(x, y);
-        context2d.setFillStyle("Black");
+        context2d.setFillStyle(textColor);
         context2d.fillText(text, x, y);
        
     }

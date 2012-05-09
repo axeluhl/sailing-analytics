@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
@@ -41,16 +42,27 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     RadioButton windDisplayButton;
 
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
+    private PathCanvasOverlay pathCanvasOverlay;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
 
     private final StringMessages stringMessages;
     private MapWidget mapw;
     private SimulatorServiceAsync simulatorSvc;
-    
+
     private ListBox patternSelector = new ListBox();
     private ListBox boatSelector = new ListBox();
 
+    WindFieldGenParamsDTO windParams = new WindFieldGenParamsDTO();
+
     private static Logger logger = Logger.getLogger("com.sap.sailing");
+
+    /**
+     * Temporary place holders for parameters
+     */
+    private final int xRes = 5;
+    private final int yRes = 5;
+    private final double windSpeed = 7.2;
+    private final double windBearing = 45;
 
     public SimulatorMainPanel(MapWidget mapw, StringMessages stringMessages, SimulatorServiceAsync svc) {
         // splitPanel = new SplitLayoutPanel();
@@ -102,16 +114,16 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         Label windSetupLabel = new Label(windSetup);
 
         controlPanel.add(windSetupLabel);
-        
+
         Label pattern = new Label(stringMessages.pattern());
         controlPanel.add(pattern);
-        
+
         simulatorSvc.getWindPatterns(new AsyncCallback<WindPattern[]>() {
 
             @Override
             public void onFailure(Throwable message) {
                 Window.alert("Failed to initialize wind patterns\n" + message);
-                
+
             }
 
             @Override
@@ -120,7 +132,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                     patternSelector.addItem(patterns[i].toString());
                 }
             }
-            
+
         });
         controlPanel.add(patternSelector);
         leftPanel.add(controlPanel);
@@ -128,21 +140,21 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     private void createSailingSetup(Panel controlPanel) {
-        
+
         String sailingSetup = stringMessages.sailing() + " " + stringMessages.setup();
         Label sailingSetupLabel = new Label(sailingSetup);
 
         controlPanel.add(sailingSetupLabel);
-        
+
         Label boatClassLabel = new Label(stringMessages.boatClass());
         controlPanel.add(boatClassLabel);
-        
+
         simulatorSvc.getWindPatterns(new AsyncCallback<WindPattern[]>() {
 
             @Override
             public void onFailure(Throwable message) {
                 Window.alert("Failed to initialize wind patterns\n" + message);
-                
+
             }
 
             @Override
@@ -151,7 +163,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                     patternSelector.addItem(patterns[i].toString());
                 }
             }
-            
+
         });
         controlPanel.add(patternSelector);
         leftPanel.add(controlPanel);
@@ -189,25 +201,25 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         windFieldCanvasOverlay = new WindFieldCanvasOverlay();
         // mapw.addOverlay(windFieldCanvasOverlay);
+        pathCanvasOverlay = new PathCanvasOverlay();
     }
 
     private void generateWindField() {
         logger.info("In generateWindField");
-        WindFieldGenParamsDTO params = new WindFieldGenParamsDTO();
 
         PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
                 raceCourseCanvasOverlay.startPoint.getLongitude());
         PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(),
                 raceCourseCanvasOverlay.endPoint.getLongitude());
+        logger.info("StartPoint:" + startPointDTO);
+        windParams.setNorthWest(startPointDTO);
+        windParams.setSouthEast(endPointDTO);
+        windParams.setxRes(xRes);
+        windParams.setyRes(yRes);
+        windParams.setWindBearing(windBearing);
+        windParams.setWindSpeed(windSpeed);
 
-        params.setNorthWest(startPointDTO);
-        params.setSouthEast(endPointDTO);
-        params.setxRes(5);
-        params.setyRes(5);
-        params.setWindBearing(45);
-        params.setWindSpeed(7.2);
-
-        simulatorSvc.getWindField(params, new AsyncCallback<WindFieldDTO>() {
+        simulatorSvc.getWindField(windParams, new AsyncCallback<WindFieldDTO>() {
             @Override
             public void onFailure(Throwable message) {
                 Window.alert("Failed servlet call to SimulatorService\n" + message);
@@ -225,6 +237,40 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private void refreshWindFieldOverlay(WindFieldDTO wl) {
         windFieldCanvasOverlay.setWindField(wl);
         windFieldCanvasOverlay.redraw(true);
+    }
+
+    private void generatePath() {
+        logger.info("In generatePath");
+
+        PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
+                raceCourseCanvasOverlay.startPoint.getLongitude());
+        PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(),
+                raceCourseCanvasOverlay.endPoint.getLongitude());
+
+        windParams.setNorthWest(startPointDTO);
+        windParams.setSouthEast(endPointDTO);
+        windParams.setxRes(xRes);
+        windParams.setyRes(yRes);
+        windParams.setWindBearing(windBearing);
+        windParams.setWindSpeed(windSpeed);
+
+        simulatorSvc.getPaths(windParams, new AsyncCallback<PathDTO[]>() {
+            @Override
+            public void onFailure(Throwable message) {
+                Window.alert("Failed servlet call to SimulatorService\n" + message);
+            }
+
+            @Override
+            public void onSuccess(PathDTO[] paths) {
+                logger.info("Number of Paths : " + paths.length);
+                /* TODO Revisit for now creating a WindFieldDTO from the path */
+                WindFieldDTO pathWindDTO = new WindFieldDTO();
+                pathWindDTO.setMatrix(paths[0].getMatrix());
+                pathCanvasOverlay.setWindField(pathWindDTO);
+                pathCanvasOverlay.redraw(true);
+
+            }
+        });
 
     }
 
@@ -237,9 +283,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
                 if (raceCourseCanvasOverlay.isCourseSet()) {
                     if (windDisplayButton.getValue()) {
-                        mapw.addOverlay(windFieldCanvasOverlay);
-                        generateWindField();
-                        // raceCourseCanvasOverlay.setVisible(true);
+                        refreshWindDisplayView();
+                    } else if (summaryButton.getValue()) {
+                        refreshSummaryView();
+                    } else if (replayButton.getValue()) {
+                        refreshReplayView();
                     }
                 } else {
                     Window.alert("No course set, please initialize the course with Start-End Input");
@@ -258,7 +306,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onClick(ClickEvent arg0) {
 
                 mapw.removeOverlay(windFieldCanvasOverlay);
-
+                mapw.removeOverlay(pathCanvasOverlay);
                 // raceCourseCanvasOverlay.setSelected(true);
                 // raceCourseCanvasOverlay.setVisible(true);
                 raceCourseCanvasOverlay.reset();
@@ -276,8 +324,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
-                mapw.removeOverlay(windFieldCanvasOverlay);
-
+                if (raceCourseCanvasOverlay.isCourseSet()) {
+                    refreshSummaryView();
+                } else {
+                    Window.alert("No course set, please initialize the course with Start-End Input");
+                }
             }
 
         });
@@ -288,8 +339,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
-                mapw.removeOverlay(windFieldCanvasOverlay);
-
+                if (raceCourseCanvasOverlay.isCourseSet()) {
+                    refreshReplayView();
+                } else {
+                    Window.alert("No course set, please initialize the course with Start-End Input");
+                }
             }
 
         });
@@ -302,9 +356,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onClick(ClickEvent arg0) {
 
                 if (raceCourseCanvasOverlay.isCourseSet()) {
-                        mapw.addOverlay(windFieldCanvasOverlay);
-                        generateWindField();
-                        // raceCourseCanvasOverlay.setVisible(true);
+                    refreshWindDisplayView();
                 } else {
                     Window.alert("No course set, please initialize the course with Start-End Input");
                 }
@@ -318,9 +370,30 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         p.add(summaryButton);
         p.add(replayButton);
         p.add(windDisplayButton);
-        //windDisplayButton.setValue(true);
+        // windDisplayButton.setValue(true);
         d.add(p);
         mapOptions.add(d);
 
+    }
+
+    private void refreshSummaryView() {
+        mapw.removeOverlay(windFieldCanvasOverlay);
+        pathCanvasOverlay.displayWindAlongPath = true;
+        mapw.addOverlay(pathCanvasOverlay);
+        generatePath();
+    }
+
+    private void refreshReplayView() {
+        mapw.addOverlay(windFieldCanvasOverlay);
+        pathCanvasOverlay.displayWindAlongPath = false;
+        mapw.addOverlay(pathCanvasOverlay);
+        generateWindField();
+        generatePath();
+    }
+
+    private void refreshWindDisplayView() {
+        mapw.removeOverlay(pathCanvasOverlay);
+        mapw.addOverlay(windFieldCanvasOverlay);
+        generateWindField();
     }
 }
