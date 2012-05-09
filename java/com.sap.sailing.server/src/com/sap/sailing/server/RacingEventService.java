@@ -243,7 +243,7 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
      */
     void renameLeaderboard(String oldName, String newName);
 
-    void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
+    RaceInLeaderboard addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
 
     void moveLeaderboardColumnUp(String leaderboardName, String columnName);
 

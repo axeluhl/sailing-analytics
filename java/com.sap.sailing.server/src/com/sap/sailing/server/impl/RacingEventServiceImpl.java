@@ -88,6 +88,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddEvent;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
+import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordBuoyGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
@@ -207,11 +208,12 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
     }
     
     @Override
-    public void addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
+    public RaceInLeaderboard addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            leaderboard.addRaceColumn(columnName, medalRace);
+            RaceInLeaderboard result = leaderboard.addRaceColumn(columnName, medalRace);
             updateStoredLeaderboard(leaderboard);
+            return result;
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
@@ -665,6 +667,7 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
                 if (trackedRaceIdentifier.equals(column.getRaceIdentifier()) && column.getTrackedRace() == null) {
                     column.setTrackedRace(trackedRace);
                     leaderboardHasChanged = true;
+                    replicate(new ConnectTrackedRaceToLeaderboardColumn(leaderboard.getName(), column.getName(), trackedRaceIdentifier));
                 }
             }
             if (leaderboardHasChanged) {

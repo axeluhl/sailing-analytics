@@ -133,6 +133,9 @@ import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedRaceDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
@@ -143,6 +146,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboard;
@@ -168,7 +172,9 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardCarryVa
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
+import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationFactory;
+import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
 
 /**
@@ -606,7 +612,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     windSourcesToDeliver.addAll(Arrays.asList(windSources));
                 } else {
                     Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
-                    // TODO bug #375: add the combined wind; currently, CombinedWindTrackImpl just takes too long to return results...
                     windSourcesToDeliver.add(new WindSourceImpl(WindSourceType.COMBINED));
                 }
                 for (WindSource windSource : windSourcesToDeliver) {
@@ -1778,9 +1783,27 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<String> getHostnamesOfReplica() {
+    public ReplicationStateDTO getReplicaInfo() {
         ReplicationService service = getReplicationService();
-        return service.getHostnamesOfReplica();
+        Set<ReplicaDTO> replicaDTOs = new HashSet<ReplicaDTO>();
+        for (ReplicaDescriptor replicaDescriptor : service.getReplicaInfo()) {
+            final Map<Class<? extends RacingEventServiceOperation<?>>, Integer> statistics = service.getStatistics(replicaDescriptor);
+            Map<String, Integer> replicationCountByOperationClassName = new HashMap<String, Integer>();
+            for (Map.Entry<Class<? extends RacingEventServiceOperation<?>>, Integer> e : statistics.entrySet()) {
+                replicationCountByOperationClassName.put(e.getKey().getName(), e.getValue());
+            }
+            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor.getRegistrationTime().asDate(),
+                    replicationCountByOperationClassName));
+        }
+        ReplicationMasterDTO master;
+        ReplicationMasterDescriptor replicatingFromMaster = service.isReplicatingFromMaster();
+        if (replicatingFromMaster == null) {
+            master = null;
+        } else {
+            master = new ReplicationMasterDTO(replicatingFromMaster.getHostname(), replicatingFromMaster.getJMSPort(),
+                    replicatingFromMaster.getServletPort());
+        }
+        return new ReplicationStateDTO(master, replicaDTOs);
     }
 
     @Override

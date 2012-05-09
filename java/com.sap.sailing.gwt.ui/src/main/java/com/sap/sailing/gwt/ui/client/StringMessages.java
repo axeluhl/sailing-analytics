@@ -296,4 +296,6 @@ public interface StringMessages extends Messages {
     String courseMiddleLine();
     String jmsPortNumber();
     String servletPortNumber();
+    String registeredAt(String string);
+    String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
 }

@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -78,6 +79,12 @@ public class RaceTrackerMock implements RaceTracker{
     @Override
     public Object getID() {
         return id;
+    }
+
+    @Override
+    public Set<EventAndRaceIdentifier> getRaceIdentifiers() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

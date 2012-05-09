@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -18,6 +17,9 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 
 /**
  * Allows administrators to manage all aspects of server instance replication such as showing whether the instance
@@ -27,7 +29,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
  *
  */
 public class ReplicationPanel extends FlowPanel {
-    private final ListBox registeredReplicas;
+    private final Grid registeredReplicas;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -36,7 +38,8 @@ public class ReplicationPanel extends FlowPanel {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        registeredReplicas = new ListBox();
+        registeredReplicas = new Grid();
+        registeredReplicas.resizeColumns(3);
         add(registeredReplicas);
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
@@ -86,12 +89,31 @@ public class ReplicationPanel extends FlowPanel {
     }
 
     private void updateReplicaList() {
-        sailingService.getHostnamesOfReplica(new AsyncCallback<List<String>>() {
+        sailingService.getReplicaInfo(new AsyncCallback<ReplicationStateDTO>() {
             @Override
-            public void onSuccess(List<String> hostnames) {
-                registeredReplicas.clear();
-                for (String hostname : hostnames) {
-                    registeredReplicas.addItem(hostname);
+            public void onSuccess(ReplicationStateDTO replicas) {
+                while (registeredReplicas.getRowCount() > 0) {
+                    registeredReplicas.removeRow(0);
+                }
+                int i=0;
+                final ReplicationMasterDTO replicatingFromMaster = replicas.getReplicatingFromMaster();
+                if (replicatingFromMaster != null) {
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
+                            replicatingFromMaster.getJmsPort(), replicatingFromMaster.getServletPort())));
+                    i++;
+                }
+                for (ReplicaDTO replica : replicas.getReplicas()) {
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 0, new Label(replica.getHostname()));
+                    registeredReplicas.setWidget(i, 1, new Label(stringMessages.registeredAt(replica.getRegistrationTime().toString())));
+                    i++;
+                    for (Map.Entry<String, Integer> e : replica.getOperationCountByOperationClassName().entrySet()) {
+                        registeredReplicas.insertRow(i);
+                        registeredReplicas.setWidget(i, 1, new Label(e.getKey()));
+                        registeredReplicas.setWidget(i, 2, new Label(e.getValue().toString()));
+                        i++;
+                    }
                 }
             }
             
