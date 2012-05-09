@@ -55,9 +55,22 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
      */
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
-        setUp(new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c"),
-            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
-                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED));
+        final String eventID = "event_20110505_SailingTea";
+        final String raceID = "bd8c778e-7c65-11e0-8236-406186cbf87c";
+        setUp(getParamURL(eventID, raceID), getLiveURI(), getStoredURI());
+    }
+
+    public static URI getStoredURI() throws URISyntaxException {
+        return tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED);
+    }
+
+    public static URI getLiveURI() throws URISyntaxException {
+        return tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE);
+    }
+
+    public static URL getParamURL(final String eventID, final String raceID) throws MalformedURLException {
+        return new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/clientparams.php?event="+eventID+
+                "&race="+raceID);
     }
     
     protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException {

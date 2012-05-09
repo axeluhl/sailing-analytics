@@ -31,18 +31,18 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
     @Override
     public Boolean internalApplyTo(RacingEventService toState) {
         boolean success = false;
-        TrackedRace trackedRace = toState.getExistingTrackedRace(raceToConnect);
-        if (trackedRace != null) {
-            Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
-            if (leaderboard != null) {
-                RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(getColumnName());
-                if (raceColumn != null) {
+        Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
+        if (leaderboard != null) {
+            RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(getColumnName());
+            if (raceColumn != null) {
+                TrackedRace trackedRace = toState.getExistingTrackedRace(raceToConnect);
+                if (trackedRace != null) {
                     raceColumn.setTrackedRace(trackedRace);
-                    raceColumn.setRaceIdentifier(trackedRace.getRaceIdentifier());
-                    success = true;
-                    toState.updateStoredLeaderboard(leaderboard);
                 }
             }
+            raceColumn.setRaceIdentifier(raceToConnect);
+            success = true;
+            toState.updateStoredLeaderboard(leaderboard);
         }
         return success;
     }

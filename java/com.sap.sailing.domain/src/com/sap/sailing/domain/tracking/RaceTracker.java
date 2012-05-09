@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 
 /**
  * Centerpiece of a tracking adapter. A tracker is responsible for receiving tracking data for one or more
@@ -46,6 +47,8 @@ public interface RaceTracker {
      * longer update their {@link TrackedRace} with new data.
      */
     Set<RaceDefinition> getRaces();
+    
+    Set<EventAndRaceIdentifier> getRaceIdentifiers();
 
     RacesHandle getRacesHandle();
 
