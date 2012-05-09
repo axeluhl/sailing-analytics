@@ -39,15 +39,21 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
         if (windDTOList != null && windDTOList.size() > 0) {
             Iterator<WindDTO> windDTOIter = windDTOList.iterator();
             int index = 0;
+            WindDTO prevWindDTO = null;
+            double length = 12;
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
-                double length = 12;
+                if (prevWindDTO != null) {
+                    drawLine(prevWindDTO, windDTO);
+                }
 
                 WindDTO windDTONext = null;
                 if (windDTOIter.hasNext()) {
                     windDTONext = windDTOIter.next();
-                    drawLine(windDTO, windDTONext);
+                    drawLine(windDTO, windDTONext); 
+                    prevWindDTO = windDTONext;
                 }
+                
                 if (displayWindAlongPath) {
                     int width = (int) Math.min(2, Math.round(windDTO.trueWindSpeedInMetersPerSecond));
                     DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
