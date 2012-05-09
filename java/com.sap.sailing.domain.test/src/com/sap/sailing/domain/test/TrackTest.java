@@ -132,10 +132,9 @@ public class TrackTest {
         GPSFixMoving firstOfSubset = subsetIter.next();
         assertEquals(gpsFix2, firstOfSubset);
         // now add a fix:
-        waitThreeMillis();
+        TimePoint now6 = addMillisToTimepoint(gpsFix5.getTimePoint(), 3);
         track.addGPSFix(new GPSFixMovingImpl(
-                new DegreePosition(6, 5), new MillisecondsTimePoint(
-                        System.currentTimeMillis()), new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(0))));
+                new DegreePosition(6, 5), now6, new KnotSpeedWithBearingImpl(2, new DegreeBearingImpl(0))));
         try {
             GPSFixMoving secondOfSubset = subsetIter.next();
             assertEquals(gpsFix3, secondOfSubset);
@@ -145,14 +144,6 @@ public class TrackTest {
         }
     }
     
-    /**
-     * Used to ensure that for the test fixes there is always a time point between the two that
-     * is different from the time points of the adjacent fixes
-     */
-    private void waitThreeMillis() throws InterruptedException {
-        Thread.sleep(3);
-    }
-
    private TimePoint addMillisToTimepoint(TimePoint p, long millis) {
        return new MillisecondsTimePoint(p.asMillis() + millis);
    }
