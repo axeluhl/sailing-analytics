@@ -87,6 +87,18 @@ public abstract class AbstractServerReplicationTest {
                 Topic topic = session.createTopic(ReplicationService.SAILING_SERVER_REPLICATION_TOPIC);
                 return session.createDurableSubscriber(topic, InetAddress.getLocalHost().getHostAddress());
             }
+            @Override
+            public int getJMSPort() {
+                return 0;
+            }
+            @Override
+            public int getServletPort() {
+                return 0;
+            }
+            @Override
+            public String getHostname() {
+                return null;
+            }
         };
         ReplicationService replicaReplicator = new ReplicationServiceTestImpl(resolveAgainst, rim, brokerMgr, replicaDescriptor, replica, master, masterReplicator);
         replicaReplicator.startToReplicateFrom(masterDescriptor);

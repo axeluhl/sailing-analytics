@@ -20,4 +20,10 @@ public interface ReplicationMasterDescriptor {
     URL getInitialLoadURL() throws MalformedURLException;
 
     TopicSubscriber getTopicSubscriber(String clientID) throws JMSException, UnknownHostException;
+    
+    int getJMSPort();
+    
+    int getServletPort();
+
+    String getHostname();
 }
