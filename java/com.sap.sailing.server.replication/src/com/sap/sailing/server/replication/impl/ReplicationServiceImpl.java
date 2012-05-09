@@ -7,10 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.jms.BytesMessage;
@@ -57,6 +54,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     private final RacingEventService localService;
+    
+    /**
+     * <code>null</code>, if this instance is not currently replicating from some master; the master's descriptor otherwise
+     */
+    private ReplicationMasterDescriptor replicatingFromMaster;
     
     /**
      * The UUIDs with which this replica is registered by the master identified by the corresponding key
@@ -151,6 +153,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         oos.close();
         operationAsMessage.writeBytes(bos.toByteArray());
         messageProducer.send(operationAsMessage);
+        replicationInstancesManager.log(operation);
     }
 
     private MessageProducer getMessageProducer(Topic topic) throws JMSException {
@@ -161,17 +164,18 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public List<String> getHostnamesOfReplica() {
-        List<String> result = new ArrayList<String>();
-        for (Iterator<ReplicaDescriptor> i=replicationInstancesManager.getReplicaDescriptors(); i.hasNext(); ) {
-            ReplicaDescriptor d = i.next();
-            result.add(d.getIpAddress().getHostAddress());
-        }
-        return result;
+    public Iterable<ReplicaDescriptor> getReplicaInfo() {
+        return replicationInstancesManager.getReplicaDescriptors();
+    }
+
+    @Override
+    public ReplicationMasterDescriptor isReplicatingFromMaster() {
+        return replicatingFromMaster;
     }
 
     @Override
     public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, JMSException {
+        replicatingFromMaster = master;
         String uuid = registerReplicaWithMaster(master);
         TopicSubscriber replicationSubscription = master.getTopicSubscriber(uuid);
         URL initialLoadURL = master.getInitialLoadURL();
@@ -212,6 +216,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
 
     protected void registerReplicaUuidForMaster(String uuid, ReplicationMasterDescriptor master) {
         replicaUUIDs.put(master, uuid);
+    }
+
+    @Override
+    public Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
+        return replicationInstancesManager.getStatistics(replicaDescriptor);
     }
 
 }
