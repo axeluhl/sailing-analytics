@@ -529,8 +529,8 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
         if (!eventsByName.containsKey(event.getName())) {
             eventsByName.put(event.getName(), event);
             event.addEventListener(this);
-            replicate(new AddEvent(event.getBaseName(), event.getBoatClass().getName(), event.getBoatClass()
-                    .typicallyStartsUpwind()));
+            replicate(new AddEvent(event.getBaseName(), event.getBoatClass() == null ? null : event.getBoatClass().getName(),
+                    event.getBoatClass() == null ? false : event.getBoatClass().typicallyStartsUpwind()));
             EventIdentifier eventIdentifier = event.getEventIdentifier();
             for (RaceDefinition race : event.getAllRaces()) {
                 replicate(new AddRaceDefinition(eventIdentifier, race));
