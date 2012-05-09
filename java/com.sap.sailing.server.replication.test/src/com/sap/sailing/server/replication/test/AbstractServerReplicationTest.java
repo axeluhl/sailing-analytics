@@ -1,7 +1,6 @@
 package com.sap.sailing.server.replication.test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -30,6 +29,7 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
+import com.sap.sailing.server.replication.impl.Activator;
 import com.sap.sailing.server.replication.impl.MessageBrokerConfiguration;
 import com.sap.sailing.server.replication.impl.MessageBrokerManager;
 import com.sap.sailing.server.replication.impl.ReplicationInstancesManager;
@@ -58,7 +58,7 @@ public abstract class AbstractServerReplicationTest {
         final String activeMQPersistenceParentDir = System.getProperty("java.io.tmpdir");
         final String brokerName = "local_in-VM_test_broker";
         brokerPersistenceDir = new File(activeMQPersistenceParentDir, brokerName);
-        removeTemporaryTestBrokerPersistenceDirectory();
+        Activator.removeTemporaryTestBrokerPersistenceDirectory(brokerPersistenceDir);
         brokerMgr = new MessageBrokerManager(new MessageBrokerConfiguration(brokerName,
                 IN_VM_BROKER_URL, activeMQPersistenceParentDir));
         brokerMgr.startMessageBroker(/* useJmx */ false);
@@ -92,33 +92,12 @@ public abstract class AbstractServerReplicationTest {
         replicaReplicator.startToReplicateFrom(masterDescriptor);
     }
 
-    private void removeTemporaryTestBrokerPersistenceDirectory() throws FileNotFoundException {
-        if (brokerPersistenceDir.exists() && brokerPersistenceDir.isDirectory()) {
-            System.out.println("deleted brokerPersistenceDir: "+deleteRecursive(brokerPersistenceDir));
-        }
-        File failoverStore = new File("activemq-data");
-        if (failoverStore.exists() && failoverStore.isDirectory()) {
-            System.out.println("deleted failover store: "+deleteRecursive(failoverStore));
-        }
-    }
-    
-    private boolean deleteRecursive(File path) throws FileNotFoundException{
-        if (!path.exists()) throw new FileNotFoundException(path.getAbsolutePath());
-        boolean ret = true;
-        if (path.isDirectory()){
-            for (File f : path.listFiles()){
-                ret = ret && deleteRecursive(f);
-            }
-        }
-        return ret && path.delete();
-    }
-
     @After
     public void tearDown() throws Exception {
         brokerMgr.closeSessions();
         brokerMgr.closeConnections();
         brokerMgr.stopMessageBroker();
-        removeTemporaryTestBrokerPersistenceDirectory();
+        Activator.removeTemporaryTestBrokerPersistenceDirectory(brokerPersistenceDir);
     }
 
     private static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
