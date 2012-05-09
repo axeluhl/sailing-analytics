@@ -461,8 +461,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         List<RaceDTO> result = new ArrayList<RaceDTO>();
         for (RaceDefinition r : races) {
             RaceDTO raceDTO = new RaceDTO(r.getName(), getCompetitorDTOs(r.getCompetitors()), getService().isRaceBeingTracked(r));
-            if (raceDTO.currentlyTracked) {
-                TrackedRace trackedRace = getService().getTrackedRace(event, r);
+            TrackedRace trackedRace = getService().getExistingTrackedRace(new EventNameAndRaceName(event.getName(), r.getName()));
+            if (trackedRace != null) {
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                 raceDTO.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
