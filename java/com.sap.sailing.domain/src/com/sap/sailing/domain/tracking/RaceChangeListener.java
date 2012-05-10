@@ -31,4 +31,6 @@ public interface RaceChangeListener {
     void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 
     void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived);
+
+    void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude);
 }

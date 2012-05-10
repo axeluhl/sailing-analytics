@@ -195,6 +195,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
+    public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+        clearCaches();
+    }
+
+    @Override
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         clearCaches();
     }
