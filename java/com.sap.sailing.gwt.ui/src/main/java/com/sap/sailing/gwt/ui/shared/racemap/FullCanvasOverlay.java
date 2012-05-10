@@ -45,9 +45,9 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
         /*
          * Reset the canvas only if the pixel coordinates need to be recomputed
          */
-        if (force) {
+        //if (force) {
             setCanvasSettings();
-        }
+        //}
     }
     
     /**
