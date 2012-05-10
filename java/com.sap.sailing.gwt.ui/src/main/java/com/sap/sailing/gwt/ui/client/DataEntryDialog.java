@@ -13,14 +13,13 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DoubleBox;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -37,7 +36,7 @@ public abstract class DataEntryDialog<T> {
     private final Button okButton;
     private final Button cancelButton;
     private final Label statusLabel;
-    private final HorizontalPanel panelForAdditionalWidget;
+    private final FlowPanel panelForAdditionalWidget;
 
     public static interface Validator<T> {
         /**
@@ -62,22 +61,20 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.setAnimationEnabled(true);
         this.validator = validator;
         okButton = new Button(okButtonName);
-        VerticalPanel dialogVPanel = new VerticalPanel();
-        dialogVPanel.setSpacing(10);
+        FlowPanel dialogFPanel = new FlowPanel();
         statusLabel = new Label();
-        dialogVPanel.add(statusLabel);
+        dialogFPanel.add(statusLabel);
         if (message != null) {
             Label messageLabel = new Label(message);
             messageLabel.addStyleName("dialogMessageLabel");
-            dialogVPanel.add(messageLabel);
+            dialogFPanel.add(messageLabel);
         }
         
-        dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
-        panelForAdditionalWidget = new HorizontalPanel();
-        dialogVPanel.add(panelForAdditionalWidget);
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.setSpacing(5);
-        dialogVPanel.add(buttonPanel);
+        panelForAdditionalWidget = new FlowPanel();
+        dialogFPanel.add(panelForAdditionalWidget);
+        FlowPanel buttonPanel = new FlowPanel();
+        dialogFPanel.add(buttonPanel);
+        buttonPanel.setStyleName("additionalWidgets");
         buttonPanel.add(okButton);
         cancelButton = new Button(cancelButtonName);
         buttonPanel.add(cancelButton);
@@ -88,7 +85,7 @@ public abstract class DataEntryDialog<T> {
                 callback.onFailure(null);
             }
         });
-        dateEntryDialog.setWidget(dialogVPanel);
+        dateEntryDialog.setWidget(dialogFPanel);
         okButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 dateEntryDialog.hide();

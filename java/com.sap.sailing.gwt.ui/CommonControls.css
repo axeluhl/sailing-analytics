@@ -294,3 +294,85 @@
 	font-weight: bold;
 	margin: 15px 0 0 0;
 }
+
+.gwt-DialogBox {
+	-webkit-box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.75);
+	-moz-box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.75);
+	box-shadow: 7px 7px 5px rgba(50, 50, 50, 0.75);
+	line-height: 1.4;
+}
+
+.gwt-DialogBox .Caption { 
+    font-size: 14px;
+    padding: 14px 10px;	
+    background: url(images/dialogBox-bg.png) 0 0 repeat-x;
+    -webkit-border-top-left-radius: 5px;
+	-webkit-border-top-right-radius: 5px;
+	-moz-border-radius-topleft: 5px;
+	-moz-border-radius-topright: 5px;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+	font-family: UbuntuBold, Verdana, Arial, sans-serif;
+}
+
+.gwt-DialogBox .dialogContent { 
+    background: #ffffff;
+    padding: 10px;
+    border: 10px solid #a6a6a6;	
+	-webkit-border-bottom-right-radius: 5px;
+	-webkit-border-bottom-left-radius: 5px;
+	-moz-border-radius-bottomright: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 5px;
+}
+	
+.gwt-Button {
+	background: url(images/btn-cta-orangeleft.png) center 0 repeat-x;
+	color: #fff;
+	font-family: UbuntuBold, Verdana, Arial, sans-serif;
+	font-size: 14px;
+	border: none;
+	padding: 5px 3px;
+	margin: 0 0 0 5px;
+	cursor: pointer;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;	
+}	
+
+.gwt-Button:hover {
+    background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+    cursor: pointer;
+}
+
+.gwt-DialogBox .boxPanel {
+	padding: 0 0 10px 0;
+}
+
+.gwt-DialogBox .boxPanel:after {
+	display: inline-block;
+    content: " ";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.gwt-DialogBox .settingsDialogLabel {
+    float: left;
+    padding: 3px 6px 0 0;
+}
+
+.gwt-DialogBox .settingsDialogValue {
+	float: right;
+}
+
+.gwt-DialogBox .additionalWidgets {
+	padding: 5px 0 0 0;
+	text-align: right;
+}
+
+.gwt-DialogBox .gwt-Label {
+	line-height: 1.4;
+}
