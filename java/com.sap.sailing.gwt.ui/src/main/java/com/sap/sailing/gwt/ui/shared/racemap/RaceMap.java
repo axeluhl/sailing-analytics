@@ -772,7 +772,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             }
             // draw the finish line
-            if (legOfLeadingCompetitor == numberOfLegs &&
+            if (legOfLeadingCompetitor > 0 && legOfLeadingCompetitor == numberOfLegs &&
                 getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.FINISHLINE) && courseDTO.finishBuoyPositions.size() == 2) {
                 LatLng[] finishGatePoints = new LatLng[2];
                 finishGatePoints[0] = LatLng.newInstance(courseDTO.finishBuoyPositions.get(0).latDeg, courseDTO.finishBuoyPositions.get(0).lngDeg); 
@@ -807,7 +807,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             }
             // draw the course middle line
-            if (courseDTO.waypointPositions.size() > legOfLeadingCompetitor &&
+            if (legOfLeadingCompetitor > 0 && courseDTO.waypointPositions.size() > legOfLeadingCompetitor &&
                     getSettings().getHelpLinesSettings().containsHelpLine(HelpLineTypes.COURSEMIDDLELINE)) {
                 LatLng[] courseMiddleLinePoints = new LatLng[2];
                 double p1Lat = courseDTO.waypointPositions.get(legOfLeadingCompetitor-1).latDeg;
