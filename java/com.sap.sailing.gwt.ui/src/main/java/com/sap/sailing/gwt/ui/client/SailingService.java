@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -60,11 +61,14 @@ public interface SailingService extends RemoteService {
 
     void setWind(RaceIdentifier raceIdentifier, WindDTO wind);
 
-    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+    WindInfoForRaceDTO getAveragedWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
             int numberOfFixes, Collection<String> windSourceTypeNames) throws NoWindException;
 
-    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
+    WindInfoForRaceDTO getAveragedWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, long resolutionInMilliseconds,
             Collection<String> windSourceTypeNames);
+
+    WindInfoForRaceDTO getAveragedWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
+            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources) throws NoWindException;
 
     RaceMapDataDTO getRaceMapData(RaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
             boolean extrapolate) throws NoWindException;
@@ -79,9 +83,6 @@ public interface SailingService extends RemoteService {
     CourseDTO getCoursePositions(RaceIdentifier raceIdentifier, Date date);
 
     List<QuickRankDTO> getQuickRanks(RaceIdentifier raceIdentifier, Date date) throws NoWindException;
-
-    WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, long millisecondsStepWidth,
-            int numberOfFixes, double latDeg, double lngDeg, Collection<String> windSources) throws NoWindException;
 
     void removeWind(RaceIdentifier raceIdentifier, WindDTO windDTO);
 
@@ -179,7 +180,7 @@ public interface SailingService extends RemoteService {
 
     void setWindSourcesToExclude(EventAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
     
-    List<String> getHostnamesOfReplica();
+    ReplicationStateDTO getReplicaInfo();
 
     void startReplicatingFromMaster(String masterName, int servletPort, int jmsPort) throws Exception;
 }

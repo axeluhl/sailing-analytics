@@ -53,16 +53,18 @@ public interface TrackedRace extends Serializable {
      * first mark. Otherwise, the first mark passing for the first mark minus
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.
      */
-    TimePoint getStart();
+    TimePoint getStartOfRace();
     
     /**
-     * Computing the race end time is tricky. Boats may sink, stop, not finish, although they started the race. We therefore
+     * Determine the race end time is tricky. Boats may sink, stop, not finish, although they started the race. We therefore
      * cannot wait for all boats to reach the finish line.
-     * 
-     * TODO Currently, the time point returned is the time of the last mark passing recorded for the finish line or <code>null</code> if
-     * no boat passed the finish line yet.
+     * The following rules are used to calculate the endOfRace:
+     * 1. Returns <code>Null</code> if no boat passed the finish line 
+     * 2. Returns time of the last mark passing recorded for the finish line
+     * 3. TODO: Returns the time of the first passing of the finish line + the target window (defined in the competition rules)
+     *    if a target window has been defined for the race 
      */
-    TimePoint getAssumedEnd();
+    TimePoint getEndOfRace();
 
     /**
      * Returns a list of the first and last mark passing times of all course waypoints
@@ -378,4 +380,6 @@ public interface TrackedRace extends Serializable {
      * Computes the average cross-track error for the legs with type {@link LegType#UPWIND}.
      */
     Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException;
+
+    WindStore getWindStore();
 }

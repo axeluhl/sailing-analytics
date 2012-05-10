@@ -155,9 +155,10 @@ implements CompetitorSelectionChangeListener, RaceSelectionChangeListener, TimeL
      */
     private Chart createChart(DetailType dataToShow) {
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
-                .setSpacingRight(20)
                 .setWidth100()
                 .setHeight100()
+                .setMarginLeft(65)
+                .setMarginRight(65)
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)

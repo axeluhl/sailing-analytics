@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -21,7 +22,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
@@ -89,8 +90,12 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         this.stringMessages = stringMessages;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
-        VerticalPanel vp = new VerticalPanel();
+        FlowPanel vp = new FlowPanel();
         vp.setSize("100%", "100%");
+        
+        SimplePanel s = new SimplePanel();
+        s.getElement().getStyle().setMarginLeft(55, Unit.PX);
+        s.getElement().getStyle().setMarginRight(55, Unit.PX);
 
         playButtonImg = resources.timesliderPlayActiveIcon();
         pauseButtonImg = resources.timesliderPauseIcon();
@@ -127,7 +132,8 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
         });
         
-        vp.add(sliderBar);
+        vp.add(s);
+        s.add(sliderBar);
 
         HorizontalPanel controlsPanel = new HorizontalPanel();
         controlsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);

@@ -53,4 +53,18 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         return session.createDurableSubscriber(topic, InetAddress.getLocalHost().getHostAddress());
     }
 
+    @Override
+    public int getJMSPort() {
+        return jmsPort;
+    }
+
+    @Override
+    public int getServletPort() {
+        return servletPort;
+    }
+
+    @Override
+    public String getHostname() {
+        return hostname;
+    }
 }

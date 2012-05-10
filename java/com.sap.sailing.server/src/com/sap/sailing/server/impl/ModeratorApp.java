@@ -141,7 +141,7 @@ public class ModeratorApp extends Servlet {
         } else {
             try {
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-                        trackedRace.getStart() != null ? trackedRace.getStart()
+                        trackedRace.getStartOfRace() != null ? trackedRace.getStartOfRace()
                                 : trackedRace.getStartOfTracking() != null ? trackedRace.getStartOfTracking()
                                         : trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
                                                 : trackedRace.getTimePointOfNewestEvent());
@@ -197,7 +197,7 @@ public class ModeratorApp extends Servlet {
                 jsonRace.put("name", trackedRace.getRace().getName());
                 jsonRace.put("startoftracking", trackedRace.getStartOfTracking() == null ? 0l : trackedRace
                         .getStartOfTracking().asMillis());
-                jsonRace.put("start", trackedRace.getStart() == null ? 0l : trackedRace.getStart().asMillis());
+                jsonRace.put("start", trackedRace.getStartOfRace() == null ? 0l : trackedRace.getStartOfRace().asMillis());
                 jsonRace.put("timeofnewestevent", trackedRace.getTimePointOfNewestEvent() == null ? 0l : trackedRace
                         .getTimePointOfNewestEvent().asMillis());
                 jsonRace.put("timeoflastevent", trackedRace.getTimePointOfLastEvent() == null ? 0l : trackedRace
@@ -383,7 +383,7 @@ public class ModeratorApp extends Servlet {
                     JSONObject jsonRace = new JSONObject();
                     jsonRace.put("name", race.getName());
                     jsonRace.put("boatclass", race.getBoatClass() == null ? "" : race.getBoatClass().getName());
-                    TimePoint start = trackedRace.getStart();
+                    TimePoint start = trackedRace.getStartOfRace();
                     jsonRace.put("start", start == null ? Long.MAX_VALUE : start.asMillis());
                     JSONArray jsonLegs = new JSONArray();
                     for (Leg leg : race.getCourse().getLegs()) {

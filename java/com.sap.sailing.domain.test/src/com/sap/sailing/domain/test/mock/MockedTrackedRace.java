@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.EventIdentifier;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
@@ -54,7 +55,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public TimePoint getStart() {
+    public TimePoint getStartOfRace() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -330,6 +331,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         
                     }
+
+                    @Override
+                    public EventIdentifier getEventIdentifier() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public String getBaseName() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
                 };
             }
 
@@ -445,7 +458,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public TimePoint getAssumedEnd() {
+    public TimePoint getEndOfRace() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -570,5 +583,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public void removeListener(RaceChangeListener listener) {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public WindStore getWindStore() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

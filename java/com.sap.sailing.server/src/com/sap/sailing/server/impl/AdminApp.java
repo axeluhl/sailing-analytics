@@ -255,8 +255,8 @@ public class AdminApp extends Servlet {
             } else {
                 TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
                 TimePoint from = getTimePoint(req, PARAM_NAME_FROM_TIME, PARAM_NAME_FROM_TIME_MILLIS,
-                        trackedRace.getStart()==null?new MillisecondsTimePoint(0):
-                            /* 24h before race start */ new MillisecondsTimePoint(trackedRace.getStart().asMillis()-24*3600*1000));
+                        trackedRace.getStartOfRace()==null?new MillisecondsTimePoint(0):
+                            /* 24h before race start */ new MillisecondsTimePoint(trackedRace.getStartOfRace().asMillis()-24*3600*1000));
                 TimePoint to = getTimePoint(req, PARAM_NAME_TO_TIME, PARAM_NAME_TO_TIME_MILLIS, MillisecondsTimePoint.now());
                 JSONObject jsonWindTracks = new JSONObject();
                 for (WindSource windSource : trackedRace.getWindSources()) {

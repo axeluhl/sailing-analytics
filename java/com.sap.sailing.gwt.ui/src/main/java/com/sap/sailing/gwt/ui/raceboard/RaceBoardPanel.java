@@ -183,6 +183,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         competitorChart.setVisible(false);
 
         windChart = createWindChart(asyncActionsExecutor);
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(windChart);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         windChart.setVisible(false);
         components.add(windChart);
@@ -284,6 +285,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         windChart = createWindChart(asyncActionsExecutor);
         windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
                 windChart, "auto", "400px", stringMessages);
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(windChart);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         componentViewers.add(windChartViewer);
         if (showCompetitorCharts) {
@@ -316,7 +318,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages,
                 userAgentType);
-    }
+     }
 
     private WindChart createWindChart(AsyncActionsExecutor asyncActionsExecutor) {
         WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());

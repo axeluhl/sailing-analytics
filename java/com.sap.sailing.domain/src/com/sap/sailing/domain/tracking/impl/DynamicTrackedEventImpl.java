@@ -5,7 +5,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public class DynamicTrackedEventImpl extends TrackedEventImpl implements DynamicTrackedEvent {
@@ -18,11 +17,6 @@ public class DynamicTrackedEventImpl extends TrackedEventImpl implements Dynamic
     @Override
     public DynamicTrackedRace getTrackedRace(RaceDefinition race) {
         return (DynamicTrackedRace) super.getTrackedRace(race);
-    }
-
-    @Override
-    public void addTrackedRace(TrackedRace trackedRace) {
-        super.addTrackedRace((DynamicTrackedRace) trackedRace);
     }
 
     @Override
@@ -39,7 +33,4 @@ public class DynamicTrackedEventImpl extends TrackedEventImpl implements Dynamic
         addTrackedRace(result);
         return result;
     }
-    
-    
-
 }

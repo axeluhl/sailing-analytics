@@ -19,7 +19,12 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * apply. This allows the {@link DomainObjectFactoryImpl} to set carried points and score corrections by competitor
  * names when the {@link TrackedRace}s haven't been associated yet with the leaderboard. The carried points and
  * score corrections are then assigned to the {@link Competitor}s once they show up by
- * {@link #addRace(TrackedRace, String, boolean) adding races} to this leaderboard.
+ * {@link #addRace(TrackedRace, String, boolean) adding races} to this leaderboard.<p>
+ * 
+ * TODO This class should be in the impl package. However, in order to temporarily solve bug 595, moving this class
+ * to the exported package may help. A better solution would involve obtaining this bundle's class loader in
+ * <code>ObjectInputStreamResolvingAgainstDomainFactory</code> which is able to obtain the class from a non-exported
+ * package.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -75,12 +80,12 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
         return new RaceInLeaderboardForDelayedCarriedPoints(this, columnName, medalRace);
     }
 
-    void setCarriedPoints(String competitorName, int carriedPoints) {
+    public void setCarriedPoints(String competitorName, int carriedPoints) {
         assertNoTrackedRaceAssociatedYet();
         carriedPointsByCompetitorName.put(competitorName, carriedPoints);
     }
     
-    void setMaxPointsReason(String competitorName, RaceInLeaderboard raceColumn, MaxPointsReason maxPointsReason) {
+    public void setMaxPointsReason(String competitorName, RaceInLeaderboard raceColumn, MaxPointsReason maxPointsReason) {
         assertNoTrackedRaceAssociatedYet();
         Map<RaceInLeaderboard, MaxPointsReason> map = maxPointsReasonsByCompetitorName.get(competitorName);
         if (map == null) {
@@ -90,7 +95,7 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
         map.put(raceColumn, maxPointsReason);
     }
 
-    void correctScore(String competitorName, RaceInLeaderboard raceColumn, int correctedScore) {
+    public void correctScore(String competitorName, RaceInLeaderboard raceColumn, int correctedScore) {
         assertNoTrackedRaceAssociatedYet();
         Map<RaceInLeaderboard, Integer> map = correctedScoresByCompetitorName.get(competitorName);
         if (map == null) {
@@ -164,7 +169,7 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
         }
     }
 
-    void setDisplayName(String competitorName, String displayName) {
+    public void setDisplayName(String competitorName, String displayName) {
         assertNoTrackedRaceAssociatedYet();
         displayNamesByCompetitorName.put(competitorName, displayName);
     }

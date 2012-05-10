@@ -73,12 +73,11 @@ public class TrackedRacesManagementPanel extends AbstractEventManagementPanel im
     @Override
     public void fillEvents(List<EventDTO> result) {
         trackedRacesListComposite.fillEvents(result);
-        
         savedEvents = result;
     }
     
     public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
-        if(selectedRaces.size() == 1) {
+        if (selectedRaces.size() == 1) {
             singleSelectedRace = selectedRaces.get(0);
             selectedRacePanel.setCaptionText(singleSelectedRace.getRaceName());
             selectedRacePanel.setVisible(true);
@@ -102,8 +101,7 @@ public class TrackedRacesManagementPanel extends AbstractEventManagementPanel im
     }
     
     private void refreshRaceData() {
-
-        if(singleSelectedRace != null && selectedRaceDTO != null) {
+        if (singleSelectedRace != null && selectedRaceDTO != null) {
             if (selectedRaceDTO.startOfRace != null) {
                 raceDataGrid.setText(0, 1, dateFormatter.render(selectedRaceDTO.startOfRace) + " "
                         + timeFormatter.render(selectedRaceDTO.startOfRace));

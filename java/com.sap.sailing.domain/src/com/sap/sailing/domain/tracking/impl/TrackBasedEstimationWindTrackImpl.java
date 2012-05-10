@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -13,6 +14,7 @@ import java.util.TimerTask;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.AbstractTimePoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -334,6 +336,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     public void windDataReceived(Wind wind, WindSource windSource) {
         invalidateForNewWind(wind);
     }
+    
+    @Override
+    public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
+    }
 
     private void invalidateForNewWind(Wind wind) {
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
@@ -363,20 +369,28 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
-    public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
+    public void markPassingReceived(Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
         WindWithConfidence<TimePoint> startOfInvalidation;
         TimePoint endOfInvalidation;
-        if (oldMarkPassing == null) {
-            startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()-averagingInterval));
-            endOfInvalidation = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()+averagingInterval);
-        } else {
-            TimePoint[] interval = new TimePoint[] { oldMarkPassing.getTimePoint(), markPassing.getTimePoint() };
-            Arrays.sort(interval);
-            startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(interval[0].asMillis()-averagingInterval));
-            endOfInvalidation = new MillisecondsTimePoint(interval[1].asMillis()+averagingInterval);
+        for (MarkPassing markPassing : markPassings) {
+            MarkPassing oldMarkPassing = oldMarkPassings.get(markPassing.getWaypoint());
+            if (oldMarkPassing != markPassing) {
+                if (oldMarkPassing == null) {
+                    startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(markPassing
+                            .getTimePoint().asMillis() - averagingInterval));
+                    endOfInvalidation = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()
+                            + averagingInterval);
+                } else {
+                    TimePoint[] interval = new TimePoint[] { oldMarkPassing.getTimePoint(), markPassing.getTimePoint() };
+                    Arrays.sort(interval);
+                    startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(interval[0].asMillis()
+                            - averagingInterval));
+                    endOfInvalidation = new MillisecondsTimePoint(interval[1].asMillis() + averagingInterval);
+                }
+                scheduleCacheInvalidation(startOfInvalidation, endOfInvalidation);
+            }
         }
-        scheduleCacheInvalidation(startOfInvalidation, endOfInvalidation);
     }
 
     @Override
