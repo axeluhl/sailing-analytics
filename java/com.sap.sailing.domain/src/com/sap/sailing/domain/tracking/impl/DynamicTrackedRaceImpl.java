@@ -180,6 +180,27 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             getListeners().remove(listener);
         }
     }
+    
+    @Override
+    public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
+        super.setWindSourcesToExclude(windSourcesToExclude);
+        notifyListenersWindSourcesToExcludeChanged(windSourcesToExclude);
+    }
+
+    private void notifyListenersWindSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+        RaceChangeListener[] listeners;
+        synchronized (getListeners()) {
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.windSourcesToExcludeChanged(windSourcesToExclude);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(), "notifyListenersWindSourcesToExcludeChanged(Iterable<WindSource>)", t);
+            }
+        }
+    }
 
     private void notifyListenersRaceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking,
             TimePoint startTimeReceived) {

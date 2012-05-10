@@ -98,6 +98,7 @@ import com.sap.sailing.server.operationaltransformation.TrackEvent;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
+import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 
 public class RacingEventServiceImpl implements RacingEventService, EventListener {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
@@ -611,6 +612,11 @@ public class RacingEventServiceImpl implements RacingEventService, EventListener
 
         public TrackedRaceReplicator(TrackedRace trackedRace) {
             this.trackedRace = trackedRace;
+        }
+
+        @Override
+        public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+            replicate(new UpdateWindSourcesToExclude(getRaceIdentifier(), windSourcesToExclude));
         }
 
         @Override
