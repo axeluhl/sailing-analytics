@@ -132,6 +132,10 @@ h1 {
 	color: #000;
 }
 
+.gwt-Button:hover {
+    color: #fff;
+}
+
 .gwt-TextBox {
 	font-family: Arial !important;
 	font-size: 12px !important;
