@@ -4,6 +4,7 @@
 package com.sap.sailing.gwt.ui.simulator.util;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -24,22 +25,28 @@ public class WindFieldMouseMoveHandler implements MouseMoveHandler {
     private Canvas canvas;
     private Map<ToolTip, WindDTO> windFieldPoints = null;
     private ImageData lastImageData = null;
-    double lastToolx;
-    double lastTooly;
-    
+    private double lastToolx;
+    private double lastTooly;
+    private static Logger logger = Logger.getLogger("com.sap.sailing");
+
 
     public WindFieldMouseMoveHandler(Canvas canvas) {
         super();
         this.canvas = canvas;
     }
 
+    public void clear() {
+        lastImageData = null;
+    }
+    
     public void setWindFieldPoints(Map<ToolTip, WindDTO> windFieldPoints) {
         this.windFieldPoints = windFieldPoints;
     }
 
     @Override
     public void onMouseMove(MouseMoveEvent event) {
-
+        logger.info("In MouseMove");
+        
         if (windFieldPoints == null) {
             return;
         }
@@ -51,21 +58,22 @@ public class WindFieldMouseMoveHandler implements MouseMoveHandler {
         if (lastImageData != null) {
             context2d.putImageData(lastImageData, lastToolx, lastTooly);
         }
-        lastToolx = x;
-        lastTooly = y;
-
-        lastImageData = context2d.getImageData(x, y, ToolTip.toolRectW, ToolTip.toolRectH);
-
+        
         if (windFieldPoints.containsKey(point)) {
-
+            logger.info("Found Point");
+            lastToolx = x;
+            lastTooly = y;
+            lastImageData = context2d.getImageData(x, y, ToolTip.toolRectW, ToolTip.toolRectH);
+           
+            
             WindDTO windDTO = windFieldPoints.get(point);
             context2d.setFillStyle("#4f4f4f");
             context2d.fillRect(x, y, ToolTip.toolRectW, ToolTip.toolRectH);
 
             context2d.setFillStyle("#FFFFFF");
             context2d.fillRect(x + 3, y + 3, ToolTip.toolRectW - 6, ToolTip.toolRectH - 6);
-            context2d.setFillStyle("Blue");
            
+            context2d.setFillStyle("Blue");
             String speedStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindSpeedInKnots);
             String bearingStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindFromDeg);
             String ttMsg = speedStr + " kn " + bearingStr + "°";

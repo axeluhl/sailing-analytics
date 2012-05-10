@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
@@ -34,11 +33,17 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
     protected Map<ToolTip, WindDTO> windFieldPoints = new HashMap<ToolTip, WindDTO>();
     protected String arrowColor = "Blue";
     protected String arrowHeadColor = "Blue";
-
+    protected  WindFieldMouseMoveHandler mmHandler = null;
+    
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     public WindFieldCanvasOverlay() {
         super();
+        if (mmHandler == null) {
+            mmHandler = new WindFieldMouseMoveHandler(getCanvas());
+         }
+         mmHandler.setWindFieldPoints(windFieldPoints);
+         getCanvas().addMouseMoveHandler(mmHandler);
     }
 
     public void setWindField(WindFieldDTO wl) {
@@ -50,14 +55,6 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         this.arrowHeadColor = arrowHeadColor;
     }
 
-    @Override
-    protected void initialize(MapWidget map) {
-        super.initialize(map);
-
-        WindFieldMouseMoveHandler mmHandler = new WindFieldMouseMoveHandler(getCanvas());
-        mmHandler.setWindFieldPoints(windFieldPoints);
-        getCanvas().addMouseMoveHandler(mmHandler);
-    }
 
     @Override
     protected Overlay copy() {
@@ -70,6 +67,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         super.redraw(force);
         if (wl != null) {
             clear();
+            drawCanvas();
             drawWindField();
         }
 
@@ -79,6 +77,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         canvas.getContext2d().clearRect(widgetPosLeft, widgetPosTop, canvas.getCoordinateSpaceWidth(),
                 canvas.getCoordinateSpaceHeight());
         windFieldPoints.clear();
+        mmHandler.clear();
     }
 
     protected void drawWindField() {
@@ -128,7 +127,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         double theta = Math.atan2(-dy, dx);
 
         drawHead(x1, y1, theta, length / 2, weight);
-        String text = "P" + index;// + "(" + position.latDeg + "," + position.lngDeg + ")";
+        //String text = "P" + index;// + "(" + position.latDeg + "," + position.lngDeg + ")";
         // drawPointWithText(x, y, text);
         drawPoint(x, y);
     }

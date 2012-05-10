@@ -53,9 +53,9 @@ public class ToolTip {
         if (other != null) {
             ToolTip otherPoint = (ToolTip) other;
 
-            boolean value = (this.getX() >= otherPoint.getX() - toolTipTolerance && this.getX() <= otherPoint.getX()
+            boolean value = (otherPoint.getX() >= this.getX() - toolTipTolerance && otherPoint.getX() <= this.getX()
                     + toolTipTolerance)
-                    && (this.getY() >= otherPoint.getY() - toolTipTolerance && this.getY() <= otherPoint.getY()
+                    && (otherPoint.getY() >= this.getY() - toolTipTolerance && otherPoint.getY() <= this.getY()
                             + toolTipTolerance);
             return value;
         }
