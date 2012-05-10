@@ -129,6 +129,11 @@ h1 {
 	background-color: #e2e2e2;
 	border-color: #a3a3a3 !important;
 	white-space: nowrap;
+	color: #000;
+}
+
+.gwt-Button:hover {
+    color: #fff;
 }
 
 .gwt-TextBox {
