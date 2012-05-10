@@ -10,6 +10,7 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 
 /**
@@ -25,8 +26,8 @@ public class WindFieldMouseMoveHandler implements MouseMoveHandler {
     private ImageData lastImageData = null;
     double lastToolx;
     double lastTooly;
-   
     
+
     public WindFieldMouseMoveHandler(Canvas canvas) {
         super();
         this.canvas = canvas;
@@ -64,7 +65,11 @@ public class WindFieldMouseMoveHandler implements MouseMoveHandler {
             context2d.setFillStyle("#FFFFFF");
             context2d.fillRect(x + 3, y + 3, ToolTip.toolRectW - 6, ToolTip.toolRectH - 6);
             context2d.setFillStyle("Blue");
-            context2d.fillText("Wind " + windDTO.trueWindBearingDeg, x + 15, y + 20);
+           
+            String speedStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindSpeedInKnots);
+            String bearingStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindFromDeg);
+            String ttMsg = speedStr + " kn " + bearingStr + "°";
+            context2d.fillText(ttMsg, x+10,y+15,60);
         }
 
     }

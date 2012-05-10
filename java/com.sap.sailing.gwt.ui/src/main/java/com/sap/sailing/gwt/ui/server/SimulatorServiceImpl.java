@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.ui.server;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
+
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -41,7 +43,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
      * Generated uid serial version
      */
     private static final long serialVersionUID = 4445427185387524086L;
-
+    
+    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    
     @Override
     public PositionDTO[] getRaceLocations() {
         PositionDTO lakeGarda = new PositionDTO();
@@ -147,10 +151,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         if (lattice != null) {
             for (Position p : lattice) {
                 Wind localWind = wf.getWind(new TimedPositionWithSpeedSimple(p));
-                WindDTO w = new WindDTO();
-                w.position = new PositionDTO(localWind.getPosition().getLatDeg(), localWind.getPosition().getLngDeg());
-                w.trueWindBearingDeg = localWind.getBearing().getDegrees();
-                w.trueWindSpeedInMetersPerSecond = localWind.getMetersPerSecond();
+                logger.fine(localWind.toString());
+                WindDTO w = createWindDTO(localWind);
                 wList.add(w);
             }
         }
@@ -204,10 +206,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             // System.out.println("Position: " + p.getPosition() + " Wind: " +
             // wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
             Wind localWind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
-            WindDTO w = new WindDTO();
-            w.position = new PositionDTO(localWind.getPosition().getLatDeg(), localWind.getPosition().getLngDeg());
-            w.trueWindBearingDeg = localWind.getBearing().getDegrees();
-            w.trueWindSpeedInMetersPerSecond = localWind.getMetersPerSecond();
+            logger.fine(localWind.toString());
+            WindDTO w = createWindDTO(localWind);
             wList.add(w);
         }
         return wList;
@@ -223,5 +223,22 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         return new BoatClassDTO[] { boatClassDTO };
 
+    }
+    
+    private WindDTO createWindDTO(Wind wind) {
+        WindDTO windDTO = new WindDTO();
+        windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
+        windDTO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
+        windDTO.trueWindSpeedInKnots = wind.getKnots();
+        windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
+        if (wind.getPosition() != null) {
+            windDTO.position = new PositionDTO(wind.getPosition().getLatDeg(), wind.getPosition()
+                    .getLngDeg());
+        }
+        if (wind.getTimePoint() != null) {
+            windDTO.timepoint = wind.getTimePoint().asMillis();
+        }
+        
+        return windDTO;
     }
 }
