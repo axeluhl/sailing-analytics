@@ -526,12 +526,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     public TimePoint getEndOfTracking() {
         // TODO Auto-generated method stub
         return null;
@@ -589,5 +583,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public WindStore getWindStore() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
+        // TODO Auto-generated method stub
     }
 }

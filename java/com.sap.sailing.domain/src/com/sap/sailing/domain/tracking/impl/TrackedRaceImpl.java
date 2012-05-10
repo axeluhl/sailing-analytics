@@ -826,7 +826,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude) {
+    public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
         this.windSourcesToExclude.clear();
         for (WindSource windSourceToExclude : windSourcesToExclude) {
             this.windSourcesToExclude.add(windSourceToExclude);

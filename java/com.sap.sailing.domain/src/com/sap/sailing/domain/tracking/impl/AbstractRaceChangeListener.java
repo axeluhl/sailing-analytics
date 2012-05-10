@@ -16,6 +16,10 @@ import com.sap.sailing.domain.tracking.Wind;
 public abstract class AbstractRaceChangeListener implements RaceChangeListener {
 
     @Override
+    public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+    }
+
+    @Override
     public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
     }
 
