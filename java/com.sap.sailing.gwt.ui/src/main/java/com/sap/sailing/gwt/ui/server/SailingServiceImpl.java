@@ -40,7 +40,6 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -1026,10 +1025,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
             TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {
-                result.buoys = new ArrayList<MarkDTO>();
+                result.buoys = new HashSet<MarkDTO>();
+                result.waypointPositions = new ArrayList<PositionDTO>();
                 Set<Buoy> buoys = new HashSet<Buoy>();
                 Course course = trackedRace.getRace().getCourse();
                 for (Waypoint waypoint : course.getWaypoints()) {
+                    Position waypointPosition = trackedRace.getApproximatePosition(waypoint, dateAsTimePoint);
+                    result.waypointPositions.add(new PositionDTO(waypointPosition.getLatDeg(), waypointPosition.getLngDeg()));
                     for (Buoy b : waypoint.getBuoys()) {
                         buoys.add(b);
                     }
@@ -1044,44 +1046,28 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     }
                 }
                 
-                // set the buoys of the start and finish gate
+                // set the positions of start and finish
                 Waypoint firstWaypoint = course.getFirstWaypoint();
-                if(firstWaypoint != null && firstWaypoint.getControlPoint() instanceof Gate) {
-                    Gate startGate = (Gate) firstWaypoint.getControlPoint();
-                    MarkDTO leftMark = null;
-                    MarkDTO rightMark = null;
-                    for(MarkDTO mark: result.buoys) {
-                        if(mark.name.equals(startGate.getLeft().getName())) {
-                            leftMark = mark;
-                        }
-                        if(mark.name.equals(startGate.getRight().getName())) {
-                            rightMark = mark;
-                        }
-                    }
-                    if(leftMark != null && rightMark != null) {
-                        result.startGate = new Pair<MarkDTO, MarkDTO>(leftMark, rightMark);
-                    }
+                if (firstWaypoint != null) {
+                    result.startBuoyPositions = getBuoyPositionDTOs(dateAsTimePoint, trackedRace, firstWaypoint);
                 }                    
                 Waypoint lastWaypoint = course.getLastWaypoint();
-                if(lastWaypoint != null && lastWaypoint.getControlPoint() instanceof Gate) {
-                    Gate finishGate = (Gate) lastWaypoint.getControlPoint();
-                    MarkDTO leftMark = null;
-                    MarkDTO rightMark = null;
-                    for(MarkDTO mark: result.buoys) {
-                        if(mark.name.equals(finishGate.getLeft().getName())) {
-                            leftMark = mark;
-                        }
-                        if(mark.name.equals(finishGate.getRight().getName())) {
-                            rightMark = mark;
-                        }
-                    }
-                    if(leftMark != null && rightMark != null) {
-                        result.finishGate = new Pair<MarkDTO, MarkDTO>(leftMark, rightMark);
-                    }
+                if (lastWaypoint != null) {
+                    result.finishBuoyPositions = getBuoyPositionDTOs(dateAsTimePoint, trackedRace, lastWaypoint);
                 }                    
             }
         }
         return result;
+    }
+
+    private List<PositionDTO> getBuoyPositionDTOs(TimePoint timePoint, TrackedRace trackedRace, Waypoint waypoint) {
+        List<PositionDTO> startBuoyPositions = new ArrayList<PositionDTO>();
+        for (Buoy startBuoy : waypoint.getBuoys()) {
+            final Position estimatedBuoyPosition = trackedRace.getOrCreateTrack(startBuoy)
+                    .getEstimatedPosition(timePoint, /* extrapolate */false);
+            startBuoyPositions.add(new PositionDTO(estimatedBuoyPosition.getLatDeg(), estimatedBuoyPosition.getLngDeg()));
+        }
+        return startBuoyPositions;
     }
 
     @Override
