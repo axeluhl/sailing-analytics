@@ -662,8 +662,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     && visibleLeaderInfo.getA() > 0 && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
                 LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA()-1);
                 GPSFixDTO lastBoatFix = getBoatFix(visibleLeaderInfo.getB());
-                double advantageLineLengthInKm = 1.0;
-                double distanceFromBoatPosition = 0.005; // 5m
+                double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible area of the map; bug 616
+                double distanceFromBoatPosition = visibleLeaderInfo.getB().boatClass.getHullLengthInMeters(); // one hull length
                 // implement and use Position.translateRhumb()
                 double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
                 LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
