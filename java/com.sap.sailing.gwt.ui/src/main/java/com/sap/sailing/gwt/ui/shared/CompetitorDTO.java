@@ -10,6 +10,8 @@ public class CompetitorDTO extends NamedDTO implements IsSerializable {
     public String id;
     public BoatClassDTO boatClass;
     
+    CompetitorDTO() {}
+    
     public CompetitorDTO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String sailID, String id, BoatClassDTO boatClass) {
         super(name);

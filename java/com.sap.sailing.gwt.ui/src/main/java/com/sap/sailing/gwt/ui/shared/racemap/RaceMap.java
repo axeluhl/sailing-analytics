@@ -703,7 +703,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 LatLng[] advantageLinePoints = new LatLng[2];
                 advantageLinePoints[0] = LatLng.newInstance(advantageLinePos1.getLatitude(), advantageLinePos1.getLongitude());
                 advantageLinePoints[1] = LatLng.newInstance(advantageLinePos2.getLatitude(), advantageLinePos2.getLongitude());; 
-                if(advantageLine == null) {
+                if (advantageLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
                     advantageLine = new Polyline(advantageLinePoints, /* color */ "#000000", /* width */ 1, /* opacity */0.5, options);
                     advantageLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
