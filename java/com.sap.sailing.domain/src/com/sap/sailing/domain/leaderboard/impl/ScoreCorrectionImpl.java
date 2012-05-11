@@ -82,7 +82,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * <p>
      */
     @Override
-    public Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceInLeaderboard raceColumn,
+    public Result getCorrectedScore(int uncorrectedScore, final Competitor competitor, final RaceInLeaderboard raceColumn,
             TimePoint timePoint, int numberOfCompetitorsInLeaderboard) {
         int result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn);
@@ -108,6 +108,11 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             @Override
             public int getCorrectedScore() {
                 return correctedScore;
+            }
+
+            @Override
+            public boolean isCorrected() {
+                return isScoreCorrected(competitor, raceColumn);
             }
         };
     }

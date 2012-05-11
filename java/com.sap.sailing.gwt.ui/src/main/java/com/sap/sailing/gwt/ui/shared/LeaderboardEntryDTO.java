@@ -20,6 +20,11 @@ public class LeaderboardEntryDTO implements IsSerializable {
     
     public int netPoints;
     
+    /**
+     * Tells if the net points have been overridden by a score correction. Can be used to render differently in editing environment.
+     */
+    public boolean netPointsCorrected;
+    
     public int totalPoints;
     
     public boolean discarded;

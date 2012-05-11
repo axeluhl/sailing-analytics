@@ -334,6 +334,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint timePoint, boolean addLegDetails) throws NoWindException {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         entryDTO.netPoints = entry.getNetPoints();
+        entryDTO.netPointsCorrected = entry.isNetPointsCorrected();
         entryDTO.totalPoints = entry.getTotalPoints();
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason().name();
         entryDTO.discarded = entry.isDiscarded();
@@ -1395,8 +1396,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public Pair<Integer, Integer> updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString, String columnName,
-            Integer correctedScore, Date date) throws NoWindException {
+    public Triple<Integer, Integer, Boolean> updateLeaderboardScoreCorrection(String leaderboardName,
+            String competitorIdAsString, String columnName, Integer correctedScore, Date date) throws NoWindException {
         return getService().apply(new UpdateLeaderboardScoreCorrection(leaderboardName, columnName, competitorIdAsString, correctedScore, date));
     }
     

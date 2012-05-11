@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -213,8 +214,8 @@ public interface SailingServiceAsync {
     void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorID, String raceColumnName,
             MaxPointsReason maxPointsReason, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
 
-    void updateLeaderboardScoreCorrection(String leaderboardName, String competitorID, String raceName,
-            Integer correctedScore, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
+    void updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString, String columnName,
+            Integer correctedScore, Date date, AsyncCallback<Triple<Integer, Integer, Boolean>> asyncCallback);
 
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorID, String displayName,
             AsyncCallback<Void> callback);
