@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -325,5 +326,43 @@ public class ReachingLegTest extends TrackBasedTest {
         assertEquals(0., schomaekersDistanceToLeader.getMeters(), 0.00001);
         // distance to leading Schomaeker expected to be the entire upwind distance plus the offset distance plus half the downwind
         assertEquals(distanceOfReachingLeg.getMeters()+windwardDistanceOfUpwindLeg.getMeters()*1.5, plattnersDistanceToLeader.getMeters(), 0.00001);
+    }
+
+    @Test
+    public void testWindwardDistanceOnReachingLegProjectsOntoLegDirection() throws NoWindException {
+        final MillisecondsTimePoint whenBothFinishedUpwind = new MillisecondsTimePoint(start.asMillis()+600000);
+        final MillisecondsTimePoint timePointToConsider = new MillisecondsTimePoint(whenBothFinishedUpwind.asMillis()+10000);
+        
+        Position windwardMarkPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(0).getTo(), timePointToConsider);
+        Position offsetMarkPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(1).getTo(), timePointToConsider);
+        Distance distanceOfReachingLeg = windwardMarkPos.getDistance(offsetMarkPos);
+        assertTrue(distanceOfReachingLeg.getMeters() > 0);
+        getTrackedRace().updateMarkPassings(hunger, createMarkPassings(hunger, start, whenBothFinishedUpwind));
+        getTrackedRace().updateMarkPassings(plattner, createMarkPassings(plattner, start, whenBothFinishedUpwind));
+        Bearing reachingLegBearing = windwardMarkPos.getBearingGreatCircle(offsetMarkPos);
+        // Hunger turns left after the windward mark
+        getTrackedRace().recordFix(
+                hunger,
+                new GPSFixMovingImpl(windwardMarkPos.translateGreatCircle(new DegreeBearingImpl(reachingLegBearing.getDegrees()-45),
+                        distanceOfReachingLeg.scale(1./Math.sqrt(2.))), timePointToConsider, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(270))));
+        // Plattner turns right after the windward mark; both travel the same distance projected along the leg
+        getTrackedRace().recordFix(
+                plattner,
+                new GPSFixMovingImpl(windwardMarkPos.translateGreatCircle(new DegreeBearingImpl(reachingLegBearing.getDegrees()+45),
+                        distanceOfReachingLeg.scale(1./Math.sqrt(2.))), timePointToConsider, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(270))));
+        // with 90deg separating them, traveling 1/sqrt(2) the distance of the leg should put them the distance of the leg apart geometrically
+        assertEquals(
+                distanceOfReachingLeg.getMeters(),
+                getTrackedRace()
+                        .getTrack(hunger)
+                        .getEstimatedPosition(timePointToConsider, /* extrapolate */false)
+                        .getDistance(
+                                getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointToConsider, /* extrapolate */
+                                        false)).getMeters(), 0.00001);
+        // however, projected onto the leg their distance should be 0
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointToConsider);
+        assertEquals(0., plattnersDistanceToLeader.getMeters(), 0.00001);
     }
 }
