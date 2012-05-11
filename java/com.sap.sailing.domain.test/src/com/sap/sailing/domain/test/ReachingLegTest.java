@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
@@ -27,6 +28,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -42,6 +44,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedEventImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
@@ -96,7 +99,7 @@ public class ReachingLegTest extends TrackBasedTest {
         Position leftPosition = new DegreePosition(0, -0.00001);
         Position rightPosition = new DegreePosition(0, 0.00001);
         Position topPosition = new DegreePosition(1, 0);
-        Position offsetPosition = new DegreePosition(1, -0.000001);
+        Position offsetPosition = new DegreePosition(1, -0.0001);
         TimePoint afterTheRace = new MillisecondsTimePoint(timePointForFixes.asMillis() + 36000000); // 10h after the fix time
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(leftPosition, new MillisecondsTimePoint(0)));
         trackedRace.getOrCreateTrack(right).addGPSFix(new GPSFixImpl(rightPosition, new MillisecondsTimePoint(0)));
@@ -132,5 +135,147 @@ public class ReachingLegTest extends TrackBasedTest {
                 getTrackedRace().getRace().getCourse().getLegs().get(0),
                 getTrackedRace().getTrackedLeg(plattner,
                         new MillisecondsTimePoint(whenHungerFinishedUpwind.asMillis() + 10000)).getLeg());
+    }
+
+    @Test
+    public void testHungerAndPlattnerInReaching() {
+        // give Hunger and Plattner a mark passing for the windward mark, putting both of them into the reaching leg
+        final MillisecondsTimePoint whenBothFinishedUpwind = new MillisecondsTimePoint(start.asMillis()+600000);
+        getTrackedRace().updateMarkPassings(hunger, createMarkPassings(hunger, start, whenBothFinishedUpwind));
+        getTrackedRace().updateMarkPassings(plattner, createMarkPassings(plattner, start, whenBothFinishedUpwind));
+        assertEquals(
+                getTrackedRace().getRace().getCourse().getLegs().get(1),
+                getTrackedRace().getTrackedLeg(hunger,
+                        new MillisecondsTimePoint(whenBothFinishedUpwind.asMillis() + 10000)).getLeg());
+        assertEquals(
+                getTrackedRace().getRace().getCourse().getLegs().get(1),
+                getTrackedRace().getTrackedLeg(plattner,
+                        new MillisecondsTimePoint(whenBothFinishedUpwind.asMillis() + 10000)).getLeg());
+    }
+
+    @Test
+    public void testDistanceWithHungerAndPlattnerInReaching() throws NoWindException {
+        // give Hunger and Plattner a mark passing for the windward mark, putting both of them into the reaching leg
+        final MillisecondsTimePoint whenBothFinishedUpwind = new MillisecondsTimePoint(start.asMillis()+600000);
+        final MillisecondsTimePoint timePointInReaching = new MillisecondsTimePoint(whenBothFinishedUpwind.asMillis()+10000);
+        Position windwardMarkPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(0).getTo(), timePointInReaching);
+        Position offsetMarkPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(1).getTo(), timePointInReaching);
+        Distance distanceOfReachingLeg = windwardMarkPos.getDistance(offsetMarkPos);
+        assertTrue(distanceOfReachingLeg.getMeters() > 0);
+        getTrackedRace().updateMarkPassings(hunger, createMarkPassings(hunger, start, whenBothFinishedUpwind));
+        getTrackedRace().updateMarkPassings(plattner, createMarkPassings(plattner, start, whenBothFinishedUpwind));
+        getTrackedRace().recordFix(
+                hunger,
+                new GPSFixMovingImpl(offsetMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(270))));
+        getTrackedRace().recordFix(
+                plattner,
+                new GPSFixMovingImpl(windwardMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(270))));
+        assertEquals(0.,
+                getTrackedRace().getTrack(hunger).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
+                        .getDistance(offsetMarkPos).getMeters(), 0.00001);
+        assertEquals(0.,
+                getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
+                        .getDistance(windwardMarkPos).getMeters(), 0.00001);
+        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(hunger, timePointInReaching);
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointInReaching);
+        assertEquals(0., hungersDistanceToLeader.getMeters(), 0.00001);
+        assertEquals(distanceOfReachingLeg.getMeters(), plattnersDistanceToLeader.getMeters(), 0.00001);
+    }
+
+    @Test
+    public void testDistanceWithHungerInReachingAndPlattnerInUpwind() throws NoWindException {
+        // give Hunger and Plattner a mark passing for the windward mark, putting both of them into the reaching leg
+        final MillisecondsTimePoint whenBothFinishedUpwind = new MillisecondsTimePoint(start.asMillis()+600000);
+        final MillisecondsTimePoint timePointInReaching = new MillisecondsTimePoint(whenBothFinishedUpwind.asMillis()+10000);
+        Position windwardMarkPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(0).getTo(), timePointInReaching);
+        Position offsetMarkPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(1).getTo(), timePointInReaching);
+        Distance distanceOfReachingLeg = windwardMarkPos.getDistance(offsetMarkPos);
+        assertTrue(distanceOfReachingLeg.getMeters() > 0);
+        getTrackedRace().updateMarkPassings(hunger, createMarkPassings(hunger, start, whenBothFinishedUpwind));
+        getTrackedRace().recordFix(
+                hunger,
+                new GPSFixMovingImpl(offsetMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(270))));
+        getTrackedRace().recordFix(
+                plattner,
+                new GPSFixMovingImpl(windwardMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(270))));
+        assertEquals(0.,
+                getTrackedRace().getTrack(hunger).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
+                        .getDistance(offsetMarkPos).getMeters(), 0.00001);
+        assertEquals(0.,
+                getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
+                        .getDistance(windwardMarkPos).getMeters(), 0.00001);
+        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(hunger, timePointInReaching);
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointInReaching);
+        assertEquals(0., hungersDistanceToLeader.getMeters(), 0.00001);
+        assertEquals(distanceOfReachingLeg.getMeters(), plattnersDistanceToLeader.getMeters(), 0.00001);
+    }
+
+    @Test
+    public void testDistanceWithHungerInDownwindAndPlattnerInReaching() throws NoWindException {
+        // give Hunger and Plattner a mark passing for the windward mark, putting both of them into the reaching leg
+        final MillisecondsTimePoint whenBothFinishedUpwind = new MillisecondsTimePoint(start.asMillis()+600000);
+        final MillisecondsTimePoint timePointInReaching = new MillisecondsTimePoint(whenBothFinishedUpwind.asMillis()+10000);
+        Position windwardMarkPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(0).getTo(), timePointInReaching);
+        Position offsetMarkPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(1).getTo(), timePointInReaching);
+        Distance distanceOfReachingLeg = windwardMarkPos.getDistance(offsetMarkPos);
+        assertTrue(distanceOfReachingLeg.getMeters() > 0);
+        getTrackedRace().updateMarkPassings(hunger, createMarkPassings(hunger, start, whenBothFinishedUpwind));
+        getTrackedRace().recordFix(
+                hunger,
+                new GPSFixMovingImpl(offsetMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(270))));
+        getTrackedRace().recordFix(
+                plattner,
+                new GPSFixMovingImpl(windwardMarkPos, timePointInReaching, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(270))));
+        assertEquals(0.,
+                getTrackedRace().getTrack(hunger).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
+                        .getDistance(offsetMarkPos).getMeters(), 0.00001);
+        assertEquals(0.,
+                getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointInReaching, /* extrapolate */false)
+                        .getDistance(windwardMarkPos).getMeters(), 0.00001);
+        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(hunger, timePointInReaching);
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointInReaching);
+        assertEquals(0., hungersDistanceToLeader.getMeters(), 0.00001);
+        assertEquals(distanceOfReachingLeg.getMeters(), plattnersDistanceToLeader.getMeters(), 0.00001);
+    }
+
+    @Test
+    public void testDistanceWithHungerInDownwindAndPlattnerInUpwindWithReachingInBetween() throws NoWindException {
+        // give Hunger a mark passing for the windward mark, consume Plattner is stuck at the starting line, putting
+        // the empty reaching leg between the two; see if the reaching leg's non-windward distance is counted, and if
+        // Plattner's distance is accumulated correctly
+        final MillisecondsTimePoint whenHungerFinishedUpwind = new MillisecondsTimePoint(start.asMillis()+600000);
+        final MillisecondsTimePoint whenHungerFinishedReaching = new MillisecondsTimePoint(whenHungerFinishedUpwind.asMillis()+10000);
+        final MillisecondsTimePoint timePointToConsider = new MillisecondsTimePoint(whenHungerFinishedReaching.asMillis()+10000);
+        Position leewardPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(0).getFrom(), timePointToConsider);
+        Position windwardMarkPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(0).getTo(), timePointToConsider);
+        Position offsetMarkPos = getTrackedRace().getApproximatePosition(getTrackedRace().getRace().getCourse().getLegs().get(1).getTo(), timePointToConsider);
+        Distance distanceOfReachingLeg = windwardMarkPos.getDistance(offsetMarkPos);
+        Distance windwardDistanceOfUpwindLeg = leewardPos.getDistance(windwardMarkPos);
+        assertTrue(distanceOfReachingLeg.getMeters() > 0);
+        getTrackedRace().updateMarkPassings(hunger, createMarkPassings(hunger, start, whenHungerFinishedUpwind, whenHungerFinishedReaching));
+        getTrackedRace().recordFix(
+                hunger,
+                new GPSFixMovingImpl(offsetMarkPos, timePointToConsider, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(270))));
+        getTrackedRace().recordFix(
+                plattner,
+                new GPSFixMovingImpl(leewardPos, timePointToConsider, new KnotSpeedWithBearingImpl(12,
+                        new DegreeBearingImpl(270))));
+        assertEquals(0.,
+                getTrackedRace().getTrack(hunger).getEstimatedPosition(timePointToConsider, /* extrapolate */false)
+                        .getDistance(offsetMarkPos).getMeters(), 0.00001);
+        assertEquals(0.,
+                getTrackedRace().getTrack(plattner).getEstimatedPosition(timePointToConsider, /* extrapolate */false)
+                        .getDistance(leewardPos).getMeters(), 0.00001);
+        Distance hungersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(hunger, timePointToConsider);
+        Distance plattnersDistanceToLeader = getTrackedRace().getWindwardDistanceToOverallLeader(plattner, timePointToConsider);
+        assertEquals(0., hungersDistanceToLeader.getMeters(), 0.00001);
+        assertEquals(distanceOfReachingLeg.getMeters()+windwardDistanceOfUpwindLeg.getMeters(), plattnersDistanceToLeader.getMeters(), 0.00001);
     }
 }

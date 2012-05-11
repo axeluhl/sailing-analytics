@@ -197,10 +197,12 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * 
      * @param at the wind estimation is performed for this point in time
      */
-    private Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
+    @Override
+    public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
         if (getTrackedLeg().isUpOrDownwindLeg(at)) {
             Wind wind = getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
             if (wind == null) {
+                // FIXME bug 608
                 return pos1.getDistance(pos2);
             } else {
                 Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
@@ -208,6 +210,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
         } else {
             // cross leg, return true distance
+            // FIXME bug 608
             return pos1.getDistance(pos2);
         }
     }
@@ -338,6 +341,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException {
+        // FIXME bug 607 it seems the following fetches the leader of this leg, not the overall leader; validate!!! Use getTrackedRace().getRanks() instead
         Competitor leader = getTrackedLeg().getRanks(timePoint).keySet().iterator().next();
         TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
         Distance result = null;
@@ -354,14 +358,16 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     // if the leaderLeg is null, the leader has already arrived
                     if (leaderLeg == null || leg != leaderLeg.getLeg()) {
                         // add distance to next mark
-                        // FIXME bug 440 don't use this leg's getWindwardDistance but "leg"'s getWindwardDistance
                         Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
-                        Distance distanceToNextMark = getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
+                        Distance distanceToNextMark = getTrackedRace().getTrackedLeg(getCompetitor(), leg)
+                                .getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
                         result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                        currentPosition = nextMarkPosition;
                     } else {
                         // we're now in the same leg with leader; compute windward distance to leader
                         result = new MeterDistance(result.getMeters()
-                                + getWindwardDistance(leaderPosition, currentPosition, timePoint).getMeters());
+                                + getTrackedRace().getTrackedLeg(getCompetitor(), leg)
+                                        .getWindwardDistance(leaderPosition, currentPosition, timePoint).getMeters());
                         break;
                     }
                 }
