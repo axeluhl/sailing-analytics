@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
-import com.google.gwt.cell.client.AbstractEditableCell;
 import com.google.gwt.cell.client.HasCell;
 
 public interface RowUpdateWhiteboardProducerThatAlsoHasCell<T, C> extends RowUpdateWhiteboardProducer<T>, HasCell<T, C> {
@@ -10,6 +9,4 @@ public interface RowUpdateWhiteboardProducerThatAlsoHasCell<T, C> extends RowUpd
      * and {@link HasCell#getValue(Object)} are called.
      */
     void setCurrentlyRendering(T object);
-    
-    AbstractEditableCell<C, ?> getCell();
 }
