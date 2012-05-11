@@ -269,7 +269,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     }
     
     @After
-    public void tearDown() throws MalformedURLException, IOException {
+    public void tearDown() throws MalformedURLException, IOException, InterruptedException {
         super.tearDown();
         routeData[0] = null;
     }

@@ -473,4 +473,8 @@ public class LeaderboardDTO implements IsSerializable {
         return true;
     }
 
+    public boolean isDisplayNameSet(CompetitorDTO competitor) {
+        return competitorDisplayNames.get(competitor) != null;
+    }
+
 }
