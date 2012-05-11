@@ -166,11 +166,6 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         @Override
-        public CompositeCellRememberingRenderingContextAndObject getCell() {
-            return (CompositeCellRememberingRenderingContextAndObject) super.getCell();
-        }
-
-        @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder html) {
             defaultRender(context, object, html);
         }
