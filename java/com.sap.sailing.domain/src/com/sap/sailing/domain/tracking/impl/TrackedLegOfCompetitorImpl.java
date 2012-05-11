@@ -342,7 +342,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     @Override
     public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException {
         // FIXME bug 607 it seems the following fetches the leader of this leg, not the overall leader; validate!!! Use getTrackedRace().getRanks() instead
-        Competitor leader = getTrackedLeg().getRanks(timePoint).keySet().iterator().next();
+        Competitor leader = getTrackedRace().getOverallLeader(timePoint);
         TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
         Distance result = null;
         Position leaderPosition = getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, /* extrapolate */ false);
