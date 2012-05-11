@@ -69,6 +69,18 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         public EditTextCell getCell() {
             return (EditTextCell) super.getCell();
         }
+        
+        @Override
+        public void render(Context context, LeaderboardRowDTO row, SafeHtmlBuilder sb) {
+            final boolean isDisplayNameSet = getLeaderboard().isDisplayNameSet(row.competitor);
+            if (isDisplayNameSet) {
+                sb.appendHtmlConstant("<b>");
+            }
+            super.render(context, row, sb);
+            if (isDisplayNameSet) {
+                sb.appendHtmlConstant("</b>");
+            }
+        }
 
         public EditableCompetitorColumn() {
             super(new EditTextCell());
@@ -90,8 +102,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                     if (getLeaderboard().competitorDisplayNames == null) {
                                         getLeaderboard().competitorDisplayNames = new HashMap<CompetitorDTO, String>();
                                     }
-                                    getCell().setViewData(row, null); // ensure that getValue() is called again
                                     getLeaderboard().competitorDisplayNames.put(row.competitor, value == null || value.trim().length() == 0 ? null : value.trim());
+                                    getCell().setViewData(row, null); // ensure that getValue() is called again
                                     EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
                                 }
                             });
