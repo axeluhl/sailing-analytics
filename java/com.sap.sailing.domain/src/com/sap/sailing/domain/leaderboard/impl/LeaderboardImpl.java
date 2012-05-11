@@ -279,8 +279,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
                 }
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 Entry entry = new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(),
-                        correctedResults.isCorrected(),
-                                discarded ? 0 : correctedResults.getCorrectedScore() * (raceColumn.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded);
+                        correctedResults.isCorrected(), discarded ? 0 : correctedResults.getCorrectedScore()
+                                * (raceColumn.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded);
                 result.put(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn), entry);
             }
         }

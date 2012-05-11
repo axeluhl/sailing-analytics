@@ -336,7 +336,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         entryDTO.netPoints = entry.getNetPoints();
         entryDTO.netPointsCorrected = entry.isNetPointsCorrected();
         entryDTO.totalPoints = entry.getTotalPoints();
-        entryDTO.reasonForMaxPoints = entry.getMaxPointsReason().name();
+        entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
         if (addLegDetails && trackedRace != null) {
             entryDTO.legDetails = new ArrayList<LegEntryDTO>();
