@@ -166,11 +166,6 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         @Override
-        public CompositeCellRememberingRenderingContextAndObject getCell() {
-            return (CompositeCellRememberingRenderingContextAndObject) super.getCell();
-        }
-
-        @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder html) {
             defaultRender(context, object, html);
         }
@@ -227,7 +222,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 @Override
                                 public void onSuccess(Pair<Integer, Integer> newNetAndTotalPoints) {
                                     row.fieldsByRaceName.get(raceName).reasonForMaxPoints = value == null
-                                            || value.length() == 0 ? null : value.trim();
+                                            || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
                                     row.fieldsByRaceName.get(raceName).netPoints = newNetAndTotalPoints.getA();
                                     row.fieldsByRaceName.get(raceName).totalPoints = newNetAndTotalPoints.getB();
                                     getCell().setViewData(row, null); // ensure that getValue() is called again
@@ -241,11 +236,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         @Override
         public String getValue(LeaderboardRowDTO object) {
             LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceName.get(raceName);
-            String reasonForMaxPoints = null;
+            MaxPointsReason reasonForMaxPoints = null;
             if (leaderboardEntryDTO != null) {
                 reasonForMaxPoints = leaderboardEntryDTO.reasonForMaxPoints;
             }
-            return reasonForMaxPoints == null ? "" : reasonForMaxPoints;
+            return reasonForMaxPoints == null || reasonForMaxPoints == MaxPointsReason.NONE ? "" : reasonForMaxPoints.name();
         }
     }
     
