@@ -201,4 +201,11 @@ public class WindTest {
         assertEquals((wind1.getKnots() + wind2.getKnots() + wind3.getKnots()) / 3, result.getKnots(), 0.000000001);
         assertEquals(80., result.getBearing().getDegrees(), 5);
     }
+    
+    @Test
+    public void testWindwardDistanceForReachingLeg() {
+        // TODO construct a tiny course with one upwind, one reaching and one downwind leg, a race with two competitors;
+        // TODO create a tracked race with corresponding WEB wind source; put leader in downwind, trailer in upwind and
+        // TODO test that windward distance includes the full reaching leg's length
+    }
 }

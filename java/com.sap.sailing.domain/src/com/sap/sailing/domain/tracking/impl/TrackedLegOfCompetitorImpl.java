@@ -354,6 +354,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     // if the leaderLeg is null, the leader has already arrived
                     if (leaderLeg == null || leg != leaderLeg.getLeg()) {
                         // add distance to next mark
+                        // FIXME bug 440 don't use this leg's getWindwardDistance but "leg"'s getWindwardDistance
                         Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
                         Distance distanceToNextMark = getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
                         result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
