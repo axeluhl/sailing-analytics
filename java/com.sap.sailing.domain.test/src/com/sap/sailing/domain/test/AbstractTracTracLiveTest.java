@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,7 +19,6 @@ import org.junit.Before;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
-import com.sap.tractrac.clientmodule.util.Base64;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
@@ -38,8 +36,6 @@ import com.tractrac.clientmodule.setup.KeyValue;
 public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest implements Listener {
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
-    private static final String START_SIMULATOR_URL = "http://sapsimulation.tracdev.dk/start.php";
-    private static final String KILL_URL = "http://sapsimulation.tracdev.dk/kill.php";
     private Event event;
     private final Collection<Receiver> receivers;
     
@@ -115,7 +111,6 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     
     @After
     public void tearDown() throws MalformedURLException, IOException {
-        killAllRunningSimulations();
         controller.stop(/* abortStored */ true);
         try {
             ioThread.join();
@@ -128,30 +123,6 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     }
 
     
-    protected void startRaceSimulation(int speedMultiplier, int raceNumber)
-            throws MalformedURLException, IOException, InterruptedException {
-        URL url = new URL(
-                START_SIMULATOR_URL+"?racenumber="+raceNumber+"&speed="+
-                speedMultiplier+"&replaytime=sample");
-        URLConnection conn = url.openConnection();
-        authorize(conn);
-        conn.getContent(new Class[] { String.class });
-        Thread.sleep(2000); // wait 2s to ensure server has cleaned up properly
-    }
-
-    private void killAllRunningSimulations() throws IOException,
-            MalformedURLException {
-        URL url = new URL(KILL_URL);
-        URLConnection conn = url.openConnection();
-        authorize(conn);
-        conn.getContent(new Class[] { String.class });
-    }
-
-    private void authorize(URLConnection conn) {
-        conn.setRequestProperty("Authorization", "Basic "+
-                Base64.encode("SAP:ext2Boat".getBytes()));
-    }
-
     protected Event getEvent() {
         return event;
     }
