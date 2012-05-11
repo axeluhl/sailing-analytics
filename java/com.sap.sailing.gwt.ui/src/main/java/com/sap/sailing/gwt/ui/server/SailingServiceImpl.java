@@ -447,7 +447,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         for (Map.Entry<BoatClass, Set<RaceDefinition>> e : racesByBoatClass.entrySet()) {
             List<RaceDTO> raceDTOsInBoatClass = getRaceDTOs(event, e.getValue());
             if (!raceDTOsInBoatClass.isEmpty()) {
-                RegattaDTO regatta = new RegattaDTO(new BoatClassDTO(e.getKey()==null?"":e.getKey().getName()), raceDTOsInBoatClass);
+                RegattaDTO regatta = new RegattaDTO(new BoatClassDTO(e.getKey() == null ? "" : e.getKey().getName(), e
+                        .getKey().getHullLength().getMeters()), raceDTOsInBoatClass);
                 for (RaceDTO race : raceDTOsInBoatClass) {
                     race.setRegatta(regatta);
                 }
@@ -485,9 +486,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private CompetitorDTO getCompetitorDTO(Competitor c) {
         CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
-        CompetitorDTO competitorDTO = new CompetitorDTO(c.getName(), countryCode==null?"":countryCode.getTwoLetterISOCode(),
-                countryCode==null?"":countryCode.getThreeLetterIOCCode(), countryCode==null?"":countryCode.getName(), c.getBoat().getSailID(),
-                        c.getId().toString());
+        CompetitorDTO competitorDTO = new CompetitorDTO(c.getName(), countryCode == null ? ""
+                : countryCode.getTwoLetterISOCode(), countryCode == null ? "" : countryCode.getThreeLetterIOCCode(),
+                countryCode == null ? "" : countryCode.getName(), c.getBoat().getSailID(), c.getId().toString(),
+                new BoatClassDTO(c.getBoat().getBoatClass().getName(), c.getBoat().getBoatClass().getHullLength()
+                        .getMeters()));
         return competitorDTO;
     }
 

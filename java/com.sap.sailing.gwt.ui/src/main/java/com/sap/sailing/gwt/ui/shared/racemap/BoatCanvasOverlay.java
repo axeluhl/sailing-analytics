@@ -64,8 +64,7 @@ public class BoatCanvasOverlay extends CanvasOverlay {
         double minScaleFactor = 0.45;
         double maxScaleFactor = 2.0;
         double realBoatSizeScaleFactor = minScaleFactor;
-        // here it would be better to get the boat length from the boat class -> for now we assume a length of 5m 
-        double boatLengthInMeter = 5.0;
+        double hullLengthInMeters = competitorDTO.boatClass.getHullLengthInMeters();
         // to scale the boats to a realistic size we need the length of the boat in pixel, 
         // but it does not work to just take the image size, because the images for the different boat states can be different
         int boatLengthInPixel = 50;
@@ -77,7 +76,7 @@ public class BoatCanvasOverlay extends CanvasOverlay {
                 LatLng upperLeft = LatLng.newInstance(upperRight.getLatitude(), bottomLeft.getLongitude());
                 double distXInMeters = upperLeft.distanceFrom(upperRight);
                 int widthInPixel = map.getSize().getWidth();
-                double realBoatSizeInPixel  = (widthInPixel * boatLengthInMeter) / distXInMeters;
+                double realBoatSizeInPixel  = (widthInPixel * hullLengthInMeters) / distXInMeters;
                 realBoatSizeScaleFactor = realBoatSizeInPixel / (double) boatLengthInPixel;
                 if (realBoatSizeScaleFactor < minScaleFactor) {
                     realBoatSizeScaleFactor = minScaleFactor;

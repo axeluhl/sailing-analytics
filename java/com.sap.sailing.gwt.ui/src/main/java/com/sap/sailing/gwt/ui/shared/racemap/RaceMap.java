@@ -662,12 +662,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     && visibleLeaderInfo.getA() > 0 && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
                 LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA()-1);
                 GPSFixDTO lastBoatFix = getBoatFix(visibleLeaderInfo.getB());
-                double advantageLineLengthInKm = 1.0;
-                double distanceFromBoatPosition = 0.005; // 5m
+                double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible area of the map; bug 616
+                double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().boatClass.getHullLengthInMeters()/1000.; // one hull length
                 // implement and use Position.translateRhumb()
                 double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
                 LatLng boatPosition = LatLng.newInstance(lastBoatFix.position.latDeg, lastBoatFix.position.lngDeg);
-                LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg, distanceFromBoatPosition);
+                LatLng posAheadOfFirstBoat = calculatePositionAlongRhumbline(boatPosition, bearingOfBoatInDeg, distanceFromBoatPositionInKm);
                 double bearingOfCombinedWindInDeg = lastCombinedWindTrackInfoDTO.windFixes.get(0).trueWindBearingDeg;
                 double rotatedBearingDeg1 = 0.0;
                 double rotatedBearingDeg2 = 0.0;
@@ -675,20 +675,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     case UPWIND:
                     case DOWNWIND: {
                         rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
-                        if(rotatedBearingDeg1 >= 360.0)
+                        if (rotatedBearingDeg1 >= 360.0) {
                             rotatedBearingDeg1 -= 360.0;
+                        }
                         rotatedBearingDeg2 = bearingOfCombinedWindInDeg - 90.0;
-                        if(rotatedBearingDeg2 < 0.0)
+                        if (rotatedBearingDeg2 < 0.0) {
                             rotatedBearingDeg2 += 360.0;
+                        }
                     }
                     break;
                     case REACHING: {
                         rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
-                        if(rotatedBearingDeg1 >= 360.0)
+                        if (rotatedBearingDeg1 >= 360.0) {
                             rotatedBearingDeg1 -= 360.0;
+                        }
                         rotatedBearingDeg2 = legInfoDTO.legBearingInDegrees - 90.0;
-                        if(rotatedBearingDeg2 < 0.0)
+                        if (rotatedBearingDeg2 < 0.0) {
                             rotatedBearingDeg2 += 360.0;
+                        }
                     }
                     break;
                 }
@@ -699,8 +703,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 LatLng[] advantageLinePoints = new LatLng[2];
                 advantageLinePoints[0] = LatLng.newInstance(advantageLinePos1.getLatitude(), advantageLinePos1.getLongitude());
                 advantageLinePoints[1] = LatLng.newInstance(advantageLinePos2.getLatitude(), advantageLinePos2.getLongitude());; 
-                if(advantageLine == null) {
-                    PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
+                if (advantageLine == null) {
+                    PolylineOptions options = PolylineOptions.newInstance(/* clickable must be true for hover sensitivity*/ true, /* geodesic */true);
                     advantageLine = new Polyline(advantageLinePoints, /* color */ "#000000", /* width */ 1, /* opacity */0.5, options);
                     advantageLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
                         @Override
@@ -723,9 +727,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             }
             else {
-                if(advantageLine != null) {
-                    advantageLine.deleteVertex(1);
-                    advantageLine.deleteVertex(0);
+                if (advantageLine != null) {
+                    map.removeOverlay(advantageLine);
+                    advantageLine = null;
                 }
             }
         }
@@ -743,7 +747,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 startGatePoints[0] = LatLng.newInstance(courseDTO.startBuoyPositions.get(0).latDeg, courseDTO.startBuoyPositions.get(0).lngDeg); 
                 startGatePoints[1] = LatLng.newInstance(courseDTO.startBuoyPositions.get(1).latDeg, courseDTO.startBuoyPositions.get(1).lngDeg); 
                 if (startLine == null) {
-                    PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
+                    PolylineOptions options = PolylineOptions.newInstance(/* clickable must be true for hover sensititivy*/ true, /* geodesic */true);
                     startLine = new Polyline(startGatePoints, /* color */ "#FFFFFF", /* width */ 1, /* opacity */1.0, options);
                     startLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
                         @Override
@@ -767,8 +771,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             else {
                 if (startLine != null) {
-                    startLine.deleteVertex(1);
-                    startLine.deleteVertex(0);
+                    map.removeOverlay(startLine);
+                    startLine = null;
                 }
             }
             // draw the finish line
@@ -778,7 +782,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 finishGatePoints[0] = LatLng.newInstance(courseDTO.finishBuoyPositions.get(0).latDeg, courseDTO.finishBuoyPositions.get(0).lngDeg); 
                 finishGatePoints[1] = LatLng.newInstance(courseDTO.finishBuoyPositions.get(1).latDeg, courseDTO.finishBuoyPositions.get(1).lngDeg); 
                 if(finishLine == null) {
-                    PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
+                    PolylineOptions options = PolylineOptions.newInstance(/* clickable must be true for hover sensitivity */ true, /* geodesic */true);
                     finishLine = new Polyline(finishGatePoints, /* color */ "#000000", /* width */ 1, /* opacity */1.0, options);
                     finishLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
                         @Override
@@ -802,8 +806,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             else {
                 if (finishLine != null) {
-                    finishLine.deleteVertex(1);
-                    finishLine.deleteVertex(0);
+                    map.removeOverlay(finishLine);
+                    finishLine = null;
                 }
             }
             // draw the course middle line
@@ -816,7 +820,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 courseMiddleLinePoints[1] = LatLng.newInstance(courseDTO.waypointPositions.get(legOfLeadingCompetitor).latDeg,
                         courseDTO.waypointPositions.get(legOfLeadingCompetitor).lngDeg); 
                 if (courseMiddleLine == null) {
-                    PolylineOptions options = PolylineOptions.newInstance(/* clickable */false, /* geodesic */true);
+                    PolylineOptions options = PolylineOptions.newInstance(/* clickable must be true for hover sensitivity */ true, /* geodesic */true);
                     courseMiddleLine = new Polyline(courseMiddleLinePoints, /* color */ "#666666", /* width */ 1, /* opacity */1.0, options);
                     courseMiddleLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
                         @Override
@@ -839,9 +843,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             }
             else {
-                if(courseMiddleLine != null) {
-                    courseMiddleLine.deleteVertex(1);
-                    courseMiddleLine.deleteVertex(0);
+                if (courseMiddleLine != null) {
+                    map.removeOverlay(courseMiddleLine);
+                    courseMiddleLine = null;
                 }
             }
         }
