@@ -23,6 +23,9 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
     private final WindChartSettings initialSettings;
     private IntegerBox resolutionInSecondsBox;
     private final Map<WindSourceType, CheckBox> checkboxes;
+    private CheckBox showWindSpeedSeriesCheckbox;
+    private CheckBox showWindDirectionsSeriesCheckbox;
+
     private final StringMessages stringMessages;
     
     public WindChartSettingsDialogComponent(WindChartSettings initialSettings, StringMessages stringMessages) {
@@ -36,10 +39,22 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
         resolutionInSecondsBox = dialog.createIntegerBox((int) (initialSettings.getResolutionInMilliseconds()/1000), /* visibleLength */ 5);
+
         HorizontalPanel hp = new HorizontalPanel();
         hp.add(new Label(stringMessages.stepSizeInSeconds()));
         hp.add(resolutionInSecondsBox);
         vp.add(hp);
+        
+        showWindSpeedSeriesCheckbox = dialog.createCheckbox(stringMessages.showWindSpeedSeries());
+        showWindSpeedSeriesCheckbox.setValue(initialSettings.isShowWindSpeedSeries());
+        vp.add(showWindSpeedSeriesCheckbox);
+
+        showWindDirectionsSeriesCheckbox = dialog.createCheckbox(stringMessages.showWindDirectionSeries());
+        showWindDirectionsSeriesCheckbox.setValue(initialSettings.isShowWindDirectionsSeries());
+        vp.add(showWindDirectionsSeriesCheckbox);
+
+        Label createHeadlineLabel = dialog.createHeadlineLabel(stringMessages.windSourcesUsed());
+        vp.add(createHeadlineLabel);
         for (WindSourceType windSourceType : WindSourceType.values()) {
             CheckBox checkbox = dialog.createCheckbox(WindSourceTypeFormatter.format(windSourceType, stringMessages));
             checkboxes.put(windSourceType, checkbox);
@@ -57,7 +72,8 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
                 windSourceTypesToDisplay.add(e.getKey());
             }
         }
-        return new WindChartSettings(windSourceTypesToDisplay, resolutionInSecondsBox.getValue() == null ? -1 : resolutionInSecondsBox.getValue()*1000);
+        return new WindChartSettings(showWindSpeedSeriesCheckbox.getValue(), showWindDirectionsSeriesCheckbox.getValue(),
+                windSourceTypesToDisplay, resolutionInSecondsBox.getValue() == null ? -1 : resolutionInSecondsBox.getValue()*1000);
     }
 
     @Override

@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -321,9 +323,9 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
      }
 
     private WindChart createWindChart(AsyncActionsExecutor asyncActionsExecutor) {
-        WindChartSettings windChartSettings = new WindChartSettings(WindSourceType.values());
+        WindChartSettings windChartSettings = new WindChartSettings(false, true, new HashSet<WindSourceType>(Arrays.asList(WindSourceType.values())));
         return new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
-                stringMessages, asyncActionsExecutor, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN, true);
+                stringMessages, asyncActionsExecutor, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN);
     }
 
     private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,

@@ -100,6 +100,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -661,8 +662,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     /**
      * Uses <code>wind</code> for both, the non-dampened and dampened fields of the {@link WindDTO} object returned
      */
-    protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, WindTrack windTrack) {
+    protected WindDTO createWindDTOFromAlreadyAveraged(Wind wind, WindTrack windTrack, TimePoint originTimepoint) {
         WindDTO windDTO = new WindDTO();
+        windDTO.originTimepoint = originTimepoint.asMillis();
         windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
         windDTO.trueWindFromDeg = wind.getBearing().reverse().getDegrees();
         windDTO.trueWindSpeedInKnots = wind.getKnots();
@@ -717,9 +719,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             .getMillisecondsOverWhichToAverageWind();
                     TimePoint timePoint = fromTimePoint;
                     for (int i = 0; i < numberOfFixes; i++) {
-                        Wind wind = windTrack.getAveragedWind(position, timePoint);
-                        if (wind != null) {
-                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, windTrack);
+                        WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(position, timePoint);
+                        
+                        if (averagedWindWithConfidence != null) {
+                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), windTrack, timePoint);
+                            windDTO.confidence = averagedWindWithConfidence.getConfidence();
                             windTrackInfoDTO.windFixes.add(windDTO);
                         }
                         timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
@@ -737,12 +741,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         assert from != null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         
-        WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), trackedRace.getTimePointOfNewestEvent(), millisecondsStepWidth, numberOfFixes,
+        WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
                 windSourceTypeNames, trackedRace);
         return result;
     }
 
-    private WindInfoForRaceDTO getAveragedWindInfo(TimePoint from, TimePoint to, long millisecondsStepWidth, int numberOfFixes,
+    private WindInfoForRaceDTO getAveragedWindInfo(TimePoint from, long millisecondsStepWidth, int numberOfFixes,
             Collection<String> windSourceTypeNames, TrackedRace trackedRace) {
         WindInfoForRaceDTO result = null;
         if (trackedRace != null) {
@@ -770,12 +774,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             .getMillisecondsOverWhichToAverageWind();
                     TimePoint timePoint = from;
                     for (int i = 0; i < numberOfFixes && newestEvent != null && timePoint.compareTo(newestEvent) < 0; i++) {
-                        Wind wind = windTrack.getAveragedWind(null, timePoint);
-                        if (wind != null) {
-                            if(wind.getTimePoint().compareTo(from) > 0 && wind.getTimePoint().compareTo(to) < 0) {
-                                WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, windTrack);
-                                windTrackInfoDTO.windFixes.add(windDTO);
-                            }
+                        WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
+                        if (averagedWindWithConfidence != null) {
+                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), windTrack, timePoint);
+                            windDTO.confidence = averagedWindWithConfidence.getConfidence();
+                            windTrackInfoDTO.windFixes.add(windDTO);
                         }
                         timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
                     }
@@ -805,7 +808,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
             if(fromTimePoint != null && toTimePoint != null) {
                 int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
-                result = getAveragedWindInfo(fromTimePoint, toTimePoint, resolutionInMilliseconds, numberOfFixes, windSourceTypeNames, trackedRace);
+                result = getAveragedWindInfo(fromTimePoint, resolutionInMilliseconds, numberOfFixes, windSourceTypeNames, trackedRace);
             }
         }
         return result;
@@ -900,9 +903,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                     fix.getTimePoint());
                             LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
                                     trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
-                            GPSFixDTO fixDTO = createGPSFixDTO(fix, fix.getSpeed(), createWindDTOFromAlreadyAveraged(trackedRace.getWind(fix.getPosition(),
-                                    toTimePointExcluding), trackedRace
-                                    .getOrCreateWindTrack(windSource)), tack, legType, /* extrapolate */
+                            Wind wind = trackedRace.getWind(fix.getPosition(),toTimePointExcluding);
+                            WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, trackedRace.getOrCreateWindTrack(windSource), toTimePointExcluding);
+                            GPSFixDTO fixDTO = createGPSFixDTO(fix, fix.getSpeed(), windDTO, tack, legType, /* extrapolate */
                                     false);
                             fixesForCompetitor.add(fixDTO);
                             if (fixIter.hasNext()) {
@@ -916,13 +919,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                             .getTrackedLeg(trackedLegOfCompetitor.getLeg()).getLegType(
                                                     fix.getTimePoint());
                                     SpeedWithBearing speedWithBearing = track.getEstimatedSpeed(toTimePointExcluding);
+                                    Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
+                                    WindDTO windDTO2 = createWindDTOFromAlreadyAveraged(wind2, trackedRace.getOrCreateWindTrack(windSource), toTimePointExcluding);
                                     GPSFixDTO extrapolated = new GPSFixDTO(
                                             to.get(competitorDTO),
                                             new PositionDTO(position.getLatDeg(), position.getLngDeg()),
-                                            createSpeedWithBearingDTO(speedWithBearing),
-                                            createWindDTOFromAlreadyAveraged(trackedRace.getWind(position,
-                                                    toTimePointExcluding), trackedRace
-                                                    .getOrCreateWindTrack(windSource)), /* extrapolated */
+                                            createSpeedWithBearingDTO(speedWithBearing), windDTO2, /* extrapolated */
                                             tack2, legType2, true);
                                     fixesForCompetitor.add(extrapolated);
                                 }
@@ -1601,9 +1603,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, fix.getTimePoint());
                         LegType legType = trackedLegOfCompetitor == null ? null : trackedRace.getTrackedLeg(
                                 trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
-                        GPSFixDTO fixDTO = createGPSFixDTO(fix, speedWithBearing,  createWindDTOFromAlreadyAveraged(trackedRace.getWind(
-                                fix.getPosition(), fix.getTimePoint()),
-                                trackedRace.getOrCreateWindTrack(windSource)), tack, legType, /* extrapolated */false);
+                        Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
+                        WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, trackedRace.getOrCreateWindTrack(windSource), fix.getTimePoint());
+                        GPSFixDTO fixDTO = createGPSFixDTO(fix, speedWithBearing,  windDTO, tack, legType, /* extrapolated */false);
                         gpsFixDouglasList.add(fixDTO);
                     }
                     result.put(competitorDTO, gpsFixDouglasList);
