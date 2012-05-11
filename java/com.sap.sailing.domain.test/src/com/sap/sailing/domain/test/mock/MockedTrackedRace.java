@@ -589,4 +589,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
         // TODO Auto-generated method stub
     }
+
+    @Override
+    public Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

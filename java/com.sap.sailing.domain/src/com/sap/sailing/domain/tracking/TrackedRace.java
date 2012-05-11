@@ -382,4 +382,6 @@ public interface TrackedRace extends Serializable {
     Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     WindStore getWindStore();
+
+    Competitor getOverallLeader(TimePoint timePoint) throws NoWindException;
 }

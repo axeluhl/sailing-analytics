@@ -13,7 +13,6 @@ import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
-import org.moxieapps.gwt.highcharts.client.Extremes;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
@@ -70,6 +69,8 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     private final StringMessages stringMessages;
     private final Set<WindSourceType> windSourceTypesToDisplay;
     private long resolutionInMilliseconds;
+    private boolean showWindSpeedSeries;
+    private boolean showWindDirectionsSeries;
     
     /**
      * Holds one series for each wind source for which data has been received.
@@ -81,8 +82,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final SailingServiceAsync sailingService;
     private final Chart chart;
-    private Series timeLineSeries;
-    private final boolean allowTimeAdjust;
     private boolean ignoreClickOnce;
     private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     
@@ -108,17 +107,18 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
             WindChartSettings settings, final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust) {
+            ErrorReporter errorReporter, boolean compactChart) {
         super(timer);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.allowTimeAdjust = allowTimeAdjust;
         this.windSourceDirectionSeries = new HashMap<WindSource, Series>();
         this.windSourceSpeedSeries = new HashMap<WindSource, Series>();
         this.colorMap = new ColorMap<WindSource>();
         this.windSourceTypesToDisplay = new HashSet<WindSourceType>();
+        this.showWindSpeedSeries = false;
+        this.showWindDirectionsSeries = true;
         chart = new Chart()
                 .setZoomType(Chart.ZoomType.X)
                 .setMarginLeft(65)
@@ -137,7 +137,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
             @Override
             public String format(ToolTipData toolTipData) {
                 String seriesName = toolTipData.getSeriesName();
-                
                 if (seriesName.equals(WindChart.this.stringMessages.time())) {
                     return "<b>" + seriesName + ":</b> " + dateFormat.format(new Date(toolTipData.getXAsLong()))
                             + "<br/>(" + stringMessages.clickChartToSetTime() + ")";
@@ -158,7 +157,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         
         chart.setBackgroundColor(new Color("#ebebec"));
         
-        if (allowTimeAdjust) {
             chart.setClickEventHandler(new ChartClickEventHandler() {
                 @Override
                 public boolean onClick(ChartClickEvent chartClickEvent) {
@@ -171,6 +169,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                     return true;
                 }
             });
+           
             chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
                 @Override
                 public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
@@ -191,7 +190,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                     return true;
                 }
             });
-        }
+
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
                 .setAxisTitleText(stringMessages.time());
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false)
@@ -202,6 +201,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                         return new Long(value < 0 ? value + 360 : value).toString();
                     }
                 }));
+        
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.averageSpeedInKnotsUnit()+")")
             .setStartOnTick(false).setShowFirstLabel(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         
@@ -212,8 +212,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                  .setChartSubtitle(null)
                  .getXAxis().setAxisTitle(null);
         }
-        
-        timeLineSeries = createTimeLineSeries();
         
         setWidget(chart);
         setSize("100%", "100%");
@@ -237,37 +235,40 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     }
 
     private void showVisibleSeries() {
-        Series[] currentlyVisible = chart.getSeries();
-        Set<Series> seriesToRemove = new HashSet<Series>();
-        for (Series series : currentlyVisible) {
-            seriesToRemove.add(series);
-        }
-        for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
-            if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
-                if (!seriesToRemove.contains(e.getValue())) {
-                    chart.addSeries(e.getValue());
-                    e.getValue().select(true); // ensures that the checkbox will be ticked
-                } else {
-                    seriesToRemove.remove(e.getValue());
-                }
-            }
-        }
-        for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
-            if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
-                if (!seriesToRemove.contains(e.getValue())) {
-                    chart.addSeries(e.getValue());
-                    e.getValue().select(true); // ensures that the checkbox will be ticked
-                } else {
-                    seriesToRemove.remove(e.getValue());
-                }
-            }
-        }
+        Set<Series> visibleSeries = new HashSet<Series>(Arrays.asList(chart.getSeries()));
         
-        // never remove the timeLineSeries
-        seriesToRemove.remove(timeLineSeries);
-        for (Series series : seriesToRemove) {
-            chart.removeSeries(series);
+        if(showWindDirectionsSeries) {
+            for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
+                Series series = e.getValue();
+                if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
+                    if (!visibleSeries.contains(series)) {
+                        chart.addSeries(series, false, false);
+                        series.select(true); // ensures that the checkbox will be ticked
+                    }
+                } else {
+                    if(visibleSeries.contains(series)) {
+                        chart.removeSeries(series, false);
+                    }
+                }
+            }
+        } 
+
+        if(showWindSpeedSeries) {
+            for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
+                Series series = e.getValue();
+                if (windSourceTypesToDisplay.contains(e.getKey().getType())) {
+                    if (!visibleSeries.contains(series)) {
+                        chart.addSeries(series, false, false);
+                        series.select(true); // ensures that the checkbox will be ticked
+                    }
+                } else {
+                    if(visibleSeries.contains(series)) {
+                        chart.removeSeries(series, false);
+                    }
+                }
+            }
         }
+        chart.redraw();
     }
 
     /**
@@ -279,7 +280,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         if (result == null) {
             result = createSpeedSeries(windSource);
             windSourceSpeedSeries.put(windSource, result);
-            if (windSourceTypesToDisplay.contains(windSource.getType())) {
+            if (showWindSpeedSeries &&  windSourceTypesToDisplay.contains(windSource.getType())) {
                 chart.addSeries(result);
             }
         }
@@ -316,15 +317,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         return newSeries;
     }
 
-    private Series createTimeLineSeries() {
-        return chart
-                .createSeries()
-                .setType(Series.Type.LINE)
-                .setName(stringMessages.time())
-                .setYAxis(0)
-                .setPlotOptions(new LinePlotOptions().setShowInLegend(false).setHoverStateEnabled(false).setLineWidth(2));
-    }
-
     /**
      * Updates the wind charts with the wind data from <code>result</code>. If <code>append</code> is <code>true</code>, previously
      * existing points in the chart are left unchanged. Otherwise, the existing wind series are replaced.
@@ -346,15 +338,17 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
             int i=0;
             for (WindDTO wind : windTrackInfo.windFixes) {
                 if (timeOfEarliestRequestInMillis == null || wind.timepoint<timeOfEarliestRequestInMillis) {
-                    timeOfEarliestRequestInMillis = wind.timepoint;
+                    timeOfEarliestRequestInMillis = wind.originTimepoint;
                 }
                 if (timeOfLatestRequestInMillis == null || wind.timepoint>timeOfLatestRequestInMillis) {
-                    timeOfLatestRequestInMillis = wind.timepoint;
+                    timeOfLatestRequestInMillis = wind.originTimepoint;
                 }
                 
-                Point newDirectionPoint = new Point(wind.timepoint, wind.dampenedTrueWindFromDeg);
+                Point newDirectionPoint = new Point(wind.originTimepoint, wind.dampenedTrueWindFromDeg);
                 if (wind.dampenedTrueWindSpeedInKnots != null) {
-                    newDirectionPoint.setName(numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+stringMessages.averageSpeedInKnotsUnit());
+                    String name = numberFormat.format(wind.dampenedTrueWindSpeedInKnots)+ stringMessages.averageSpeedInKnotsUnit();
+                    // name += " Confidence:" + wind.confidence;
+                    newDirectionPoint.setName(name);
                 }
                 newDirectionPoint = recalculateDirectionPoint(directionMax, directionMin, newDirectionPoint);
                 directionPoints[i] = newDirectionPoint;
@@ -367,7 +361,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                     directionMin = direction;
                 }
 
-                Point newSpeedPoint = new Point(wind.timepoint, wind.dampenedTrueWindSpeedInKnots);
+                Point newSpeedPoint = new Point(wind.originTimepoint, wind.dampenedTrueWindSpeedInKnots);
                 speedPoints[i++] = newSpeedPoint;
             }
             Point[] newDirectionPoints;
@@ -425,7 +419,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
 
     @Override
     public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent() {
-        return new WindChartSettingsDialogComponent(new WindChartSettings(windSourceTypesToDisplay, resolutionInMilliseconds), stringMessages);
+        return new WindChartSettingsDialogComponent(new WindChartSettings(showWindSpeedSeries, showWindDirectionsSeries, windSourceTypesToDisplay, resolutionInMilliseconds), stringMessages);
     }
 
     /**
@@ -438,10 +432,11 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
             resolutionInMilliseconds = newSettings.getResolutionInMilliseconds();
             clearCacheAndReload();
         }
+        showWindDirectionsSeries = newSettings.isShowWindDirectionsSeries();
+        showWindSpeedSeries = newSettings.isShowWindSpeedSeries();
         windSourceTypesToDisplay.clear();
         windSourceTypesToDisplay.addAll(newSettings.getWindSourceTypesToDisplay());
         showVisibleSeries();
-        chart.redraw();
     }
 
     private void clearCacheAndReload() {
@@ -460,7 +455,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         if (result == null) {
             result = createDirectionSeries(windSource);
             windSourceDirectionSeries.put(windSource, result);
-            if (windSourceTypesToDisplay.contains(windSource.getType())) {
+            if (showWindDirectionsSeries && windSourceTypesToDisplay.contains(windSource.getType())) {
                 chart.addSeries(result);
             }
         }
@@ -491,8 +486,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                                 xAxis.setMax(maxTimepoint.getTime());
                                 xAxis.setStartOnTick(false);
                                 xAxis.setEndOnTick(false);
-                                
-                                xAxis.setPlotLines(xAxis.createPlotLine().setColor("#CC0000").setValue(WindChart.this.timer.getTime().getTime()));
                                 
                                 updateStripChartSeries(result, append);
                             } else {
@@ -560,49 +553,13 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                 loadData(selectedRaceIdentifier, minTimepoint, maxTimepoint, /* append */false); // replace old series
             }
         }
-        updateTimeLine(date);
     }
 
-    /**
-     * Forces the chart to {@link #updateTimeLine(Date) update} the position and to {@link #ensureTimeLineIsVisible()
-     * ensure}, that the time line is visible.
-     */
-    public void forceTimeLineUpdate() {
-        updateTimeLine(timer.getTime());
-    }
-    
-    /**
-     * Updates the position of the time line for the given {@link Date}, if {@link #allowTimeAdjust} is <code>true</code>.<br />
-     * @param date Defines the x-Value of the line points
-     */
-    private void updateTimeLine(Date date) {
-        if (allowTimeAdjust) {
-            Long x = date.getTime();
-            try {
-                Extremes extremes = chart.getYAxis(0).getExtremes();
-                Point[] points = new Point[2];
-                points[0] = new Point(x, extremes.getMin());
-                points[1] = new Point(x, extremes.getMax());
-                timeLineSeries.setPoints(points);
-                ensureTimeLineIsVisible();
-            } catch (NullPointerException e) {
-                // explicitly do nothing; it means that getExtremes() has thrown an exception, so we don't know how to set them
-            }
-        }
-    }
-    
-    /**
-     * Checks if the series of the chart contain the {@link #timeLineSeries}. If not, it is added to the chart.
-     */
-    private void ensureTimeLineIsVisible() {
-        if (!Arrays.asList(chart.getSeries()).contains(timeLineSeries)) {
-            chart.addSeries(timeLineSeries);
-        }
-    }
-    
     @Override
     public void onResize() {
-        chart.setSizeToMatchContainer();
+        if(isVisible()) {
+            chart.setSizeToMatchContainer();
+        }
     }
     
     private boolean needsDataLoading() {

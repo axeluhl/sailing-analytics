@@ -298,4 +298,6 @@ public interface StringMessages extends Messages {
     String servletPortNumber();
     String registeredAt(String string);
     String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
+    String showWindSpeedSeries();
+    String showWindDirectionSeries();
 }
