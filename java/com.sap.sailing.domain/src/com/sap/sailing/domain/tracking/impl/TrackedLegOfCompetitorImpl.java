@@ -202,16 +202,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (getTrackedLeg().isUpOrDownwindLeg(at)) {
             Wind wind = getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
             if (wind == null) {
-                // FIXME bug 608
-                return pos1.getDistance(pos2);
+                return pos1.alongTrackDistance(pos2, getTrackedLeg().getLegBearing(at));
             } else {
                 Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
                 return projectionToLineThroughPos2.getDistance(pos2);
             }
         } else {
             // cross leg, return true distance
-            // FIXME bug 608
-            return pos1.getDistance(pos2);
+            return pos1.alongTrackDistance(pos2, getTrackedLeg().getLegBearing(at));
         }
     }
     
