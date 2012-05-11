@@ -226,7 +226,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 } else if ("ACTION_EDIT_SCORES".equals(value)) {
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     Window.open("/gwt/LeaderboardEditing.html?name=" + object.name
-                            + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : ""), "_blank", null);
+                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""), "_blank", null);
                 }
             }
         });
