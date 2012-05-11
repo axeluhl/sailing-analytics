@@ -202,14 +202,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (getTrackedLeg().isUpOrDownwindLeg(at)) {
             Wind wind = getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
             if (wind == null) {
-                return pos1.alongTrackDistance(pos2, getTrackedLeg().getLegBearing(at));
+                return pos2.alongTrackDistance(pos1, getTrackedLeg().getLegBearing(at));
             } else {
                 Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
                 return projectionToLineThroughPos2.getDistance(pos2);
             }
         } else {
-            // cross leg, return true distance
-            return pos1.alongTrackDistance(pos2, getTrackedLeg().getLegBearing(at));
+            // reaching leg, return distance projected onto leg's bearing
+            return pos2.alongTrackDistance(pos1, getTrackedLeg().getLegBearing(at));
         }
     }
     
@@ -365,7 +365,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         // we're now in the same leg with leader; compute windward distance to leader
                         result = new MeterDistance(result.getMeters()
                                 + getTrackedRace().getTrackedLeg(getCompetitor(), leg)
-                                        .getWindwardDistance(leaderPosition, currentPosition, timePoint).getMeters());
+                                        .getWindwardDistance(currentPosition, leaderPosition, timePoint).getMeters());
                         break;
                     }
                 }
