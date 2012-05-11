@@ -45,7 +45,7 @@ public class WindFieldMouseMoveHandler implements MouseMoveHandler {
 
     @Override
     public void onMouseMove(MouseMoveEvent event) {
-        logger.info("In MouseMove");
+        //logger.info("In MouseMove");
         
         if (windFieldPoints == null) {
             return;
@@ -60,7 +60,7 @@ public class WindFieldMouseMoveHandler implements MouseMoveHandler {
         }
         
         if (windFieldPoints.containsKey(point)) {
-            logger.info("Found Point");
+            //logger.info("Found Point");
             lastToolx = x;
             lastTooly = y;
             lastImageData = context2d.getImageData(x, y, ToolTip.toolRectW, ToolTip.toolRectH);

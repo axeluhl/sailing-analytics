@@ -131,11 +131,13 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
             @Override
             public void onDoubleClick(MapDoubleClickEvent event) {
-                endPoint = event.getLatLng();
-                logger.fine("Clicked endPoint " + "here " + endPoint);
-                if (endPoint != null) {
-                    setEndPoint(endPoint);
-                    getMap().removeMapMouseMoveHandler(raceCourseMapMouseMoveHandler);
+                if (isSelected) {
+                    endPoint = event.getLatLng();
+                    logger.fine("Clicked endPoint " + "here " + endPoint);
+                    if (endPoint != null) {
+                        setEndPoint(endPoint);
+                        getMap().removeMapMouseMoveHandler(raceCourseMapMouseMoveHandler);
+                    }
                 }
             }
 
