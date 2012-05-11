@@ -675,20 +675,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     case UPWIND:
                     case DOWNWIND: {
                         rotatedBearingDeg1 = bearingOfCombinedWindInDeg + 90.0;
-                        if(rotatedBearingDeg1 >= 360.0)
+                        if (rotatedBearingDeg1 >= 360.0) {
                             rotatedBearingDeg1 -= 360.0;
+                        }
                         rotatedBearingDeg2 = bearingOfCombinedWindInDeg - 90.0;
-                        if(rotatedBearingDeg2 < 0.0)
+                        if (rotatedBearingDeg2 < 0.0) {
                             rotatedBearingDeg2 += 360.0;
+                        }
                     }
                     break;
                     case REACHING: {
                         rotatedBearingDeg1 = legInfoDTO.legBearingInDegrees + 90.0;
-                        if(rotatedBearingDeg1 >= 360.0)
+                        if (rotatedBearingDeg1 >= 360.0) {
                             rotatedBearingDeg1 -= 360.0;
+                        }
                         rotatedBearingDeg2 = legInfoDTO.legBearingInDegrees - 90.0;
-                        if(rotatedBearingDeg2 < 0.0)
+                        if (rotatedBearingDeg2 < 0.0) {
                             rotatedBearingDeg2 += 360.0;
+                        }
                     }
                     break;
                 }
@@ -723,7 +727,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             }
             else {
-                if(advantageLine != null) {
+                if (advantageLine != null) {
                     advantageLine.deleteVertex(1);
                     advantageLine.deleteVertex(0);
                 }
