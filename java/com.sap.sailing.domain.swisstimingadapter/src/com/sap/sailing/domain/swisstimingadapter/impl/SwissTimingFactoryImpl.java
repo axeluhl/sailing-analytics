@@ -77,10 +77,10 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     @Override
     public SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests,
             WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedEventRegistry) throws InterruptedException, UnknownHostException, IOException,
+            TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException,
             ParseException {
         return new SwissTimingRaceTrackerImpl(raceID, hostname, port, windStore, domainFactory, this, messageLoader,
-                trackedEventRegistry, canSendRequests);
+                trackedRegattaRegistry, canSendRequests);
     }
 
     @Override

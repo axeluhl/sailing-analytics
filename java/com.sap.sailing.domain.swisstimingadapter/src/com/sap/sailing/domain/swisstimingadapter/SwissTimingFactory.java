@@ -49,7 +49,7 @@ public interface SwissTimingFactory {
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port, boolean canSendRequests);
 
-    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedRegattaRegistry trackedEventRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
+    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     Race createRace(String raceId, String description, TimePoint startTime);
 

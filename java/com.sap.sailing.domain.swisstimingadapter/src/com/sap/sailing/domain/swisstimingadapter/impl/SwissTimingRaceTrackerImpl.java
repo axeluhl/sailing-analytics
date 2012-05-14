@@ -69,7 +69,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
-            TrackedRegattaRegistry trackedEventRegistry, boolean canSendRequests) throws InterruptedException,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         super();
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
@@ -80,7 +80,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
         event = domainFactory.getOrCreateEvent(raceID);
-        setTrackedEvent(trackedEventRegistry.getOrCreateTrackedRegatta(event));
+        setTrackedEvent(trackedRegattaRegistry.getOrCreateTrackedRegatta(event));
         connector.trackRace(raceID);
     }
 

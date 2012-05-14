@@ -53,7 +53,7 @@ import com.tractrac.clientmodule.Race;
 public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     private DomainFactoryImpl domainFactory;
     private Regatta domainEvent;
-    private DynamicTrackedRegatta trackedEvent;
+    private DynamicTrackedRegatta trackedRegatta;
     private RaceDefinition race;
     private DynamicTrackedRace trackedRace;
 
@@ -89,7 +89,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws InterruptedException {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        for (Receiver r : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE,
+        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getEvent(), EmptyWindStore.INSTANCE,
                 /* startOfTracking */ null, /* endOfTracking */ null, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
@@ -132,7 +132,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
         domainEvent = domainFactory.getOrCreateEvent(getEvent());
-        trackedEvent = new DynamicTrackedRegattaImpl(domainEvent);
+        trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
     }
     
     protected Competitor getCompetitorByName(String nameRegexp) {
@@ -206,7 +206,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     }
 
     protected DynamicTrackedRegatta getTrackedEvent() {
-        return trackedEvent;
+        return trackedRegatta;
     }
 
     protected Object getSemaphor() {

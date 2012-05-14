@@ -59,20 +59,20 @@ public class RaceTrackerStartStopTest {
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
         event = new RegattaImpl(EVENTNAME, boatClass);
         racingEventService.getEventsByName().put(EVENTNAME, event);
-        TrackedRegatta trackedEvent1 = racingEventService.getOrCreateTrackedRegatta(event);
+        TrackedRegatta trackedRegatta1 = racingEventService.getOrCreateTrackedRegatta(event);
         racingEventService.getEventsByNameMap().put(EVENTNAME, event);
         raceTrackerSet = new HashSet<RaceTracker>();
         raceDef1 = new RaceDefinitionImpl(RACENAME1, new CourseImpl("Course1", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         raceDef2 = new RaceDefinitionImpl(RACENAME2, new CourseImpl("Course2", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         raceDef3 = new RaceDefinitionImpl(RACENAME3, new CourseImpl("Course3", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         event.addRace(raceDef1);
-        trackedEvent1.createTrackedRace(raceDef1, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
+        trackedRegatta1.createTrackedRace(raceDef1, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         event.addRace(raceDef2);
-        trackedEvent1.createTrackedRace(raceDef2, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
+        trackedRegatta1.createTrackedRace(raceDef2, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         event.addRace(raceDef3);
-        trackedEvent1.createTrackedRace(raceDef3, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
+        trackedRegatta1.createTrackedRace(raceDef3, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         Set<RaceDefinition> raceDefinitionSetRace1 = new HashSet<RaceDefinition>();
         raceDefinitionSetRace1.add(raceDef1);
@@ -104,15 +104,15 @@ public class RaceTrackerStartStopTest {
     @Test
     public void testStopTrackingRace() throws MalformedURLException, IOException, InterruptedException {
         Regatta event = racingEventService.getRegattaByName(EVENTNAME);
-        TrackedRegatta trackedEvent = racingEventService.getTrackedRegatta(event);
+        TrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
         assertNotNull(event.getRaceByName(RACENAME2));
-        assertNotNull(trackedEvent.getExistingTrackedRace(event.getRaceByName(RACENAME2)));
+        assertNotNull(trackedRegatta.getExistingTrackedRace(event.getRaceByName(RACENAME2)));
         racingEventService.stopTracking(event, raceDef2);
         // the raceDef2 should still be part of the event, and the corresponding tracked race should still be part
         // of the tracked event
         assertNotNull(event.getRaceByName(RACENAME2));
         boolean foundTrackedRaceForRaceDef2 = false;
-        for (TrackedRace trackedRace : trackedEvent.getTrackedRaces()) {
+        for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
             if (trackedRace.getRace().getName().equals(RACENAME2)) {
                 foundTrackedRaceForRaceDef2 = true;
             }
@@ -141,15 +141,15 @@ public class RaceTrackerStartStopTest {
     @Test
     public void testRemoveRace() throws MalformedURLException, IOException, InterruptedException {
         Regatta event = racingEventService.getRegattaByName(EVENTNAME);
-        TrackedRegatta trackedEvent = racingEventService.getTrackedRegatta(event);
+        TrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
         assertNotNull(event.getRaceByName(RACENAME2));
-        assertNotNull(trackedEvent.getExistingTrackedRace(event.getRaceByName(RACENAME2)));
+        assertNotNull(trackedRegatta.getExistingTrackedRace(event.getRaceByName(RACENAME2)));
         racingEventService.removeRace(event, raceDef2);
         // the raceDef2 should be removed from the event, and the corresponding tracked race should be removed
         // from the tracked event
         assertNull(event.getRaceByName(RACENAME2));
         boolean foundTrackedRaceForRaceDef2 = false;
-        for (TrackedRace trackedRace : trackedEvent.getTrackedRaces()) {
+        for (TrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
             if (trackedRace.getRace().getName().equals(RACENAME2)) {
                 foundTrackedRaceForRaceDef2 = true;
             }

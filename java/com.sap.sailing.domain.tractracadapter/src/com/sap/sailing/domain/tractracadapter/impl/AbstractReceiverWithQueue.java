@@ -29,7 +29,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final LinkedBlockingQueue<Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
     private final com.tractrac.clientmodule.Event tractracEvent;
-    private final DynamicTrackedRegatta trackedEvent;
+    private final DynamicTrackedRegatta trackedRegatta;
     private Thread thread;
 
     /**
@@ -38,10 +38,10 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
      */
     private boolean receivedEventDuringTimeout;
     
-    public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedRegatta trackedEvent) {
+    public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedRegatta trackedRegatta) {
         super();
         this.tractracEvent = tractracEvent;
-        this.trackedEvent = trackedEvent;
+        this.trackedRegatta = trackedRegatta;
         this.domainFactory = domainFactory;
         this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
     }
@@ -60,7 +60,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     }
     
     protected DynamicTrackedRegatta getTrackedEvent() {
-        return trackedEvent;
+        return trackedRegatta;
     }
     
     public void stopPreemptively() {
@@ -142,7 +142,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race);
         com.sap.sailing.domain.base.Regatta domainEvent = getDomainFactory().getOrCreateEvent(getTracTracEvent());
         if (domainEvent.getRaceByName(raceDefinition.getName()) != null) {
-            result = trackedEvent.getTrackedRace(raceDefinition);
+            result = trackedRegatta.getTrackedRace(raceDefinition);
         }
         return result;
     }

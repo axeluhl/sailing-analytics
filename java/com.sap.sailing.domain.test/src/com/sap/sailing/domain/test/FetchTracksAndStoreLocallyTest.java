@@ -60,8 +60,8 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
                 track.addGPSFix((GPSFixMoving) fix);
             }
         };
-        DynamicTrackedRegatta trackedEvent = getTrackedEvent();
-        trackedEvent.addRaceListener(new RaceListener() {
+        DynamicTrackedRegatta trackedRegatta = getTrackedEvent();
+        trackedRegatta.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
                 System.out.println("Subscribing raw position listener for race "+trackedRace);

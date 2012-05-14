@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.WindSource;
  *
  */
 public interface WindStore {
-    WindTrack getWindTrack(TrackedRegatta trackedEvent, TrackedRace trackedRace, WindSource windSource,
+    WindTrack getWindTrack(TrackedRegatta trackedRegatta, TrackedRace trackedRace, WindSource windSource,
             long millisecondsOverWhichToAverage, long delayForWindEstimationCacheInvalidation);
 
     /**
@@ -22,6 +22,6 @@ public interface WindStore {
      * 
      * @return a map that is never <code>null</code> but may be empty
      */
-    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(TrackedRegatta trackedEvent,
+    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(TrackedRegatta trackedRegatta,
             TrackedRace trackedRace, long millisecondsOverWhichToAverageWind);
 }

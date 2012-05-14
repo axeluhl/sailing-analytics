@@ -47,10 +47,10 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     private boolean raceIsKnownToStartUpwind;
     
-    public DynamicTrackedRaceImpl(TrackedRegatta trackedEvent, RaceDefinition race,
+    public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation) {
-        super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        super(trackedRegatta, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         for (Competitor competitor : getRace().getCompetitors()) {
@@ -83,10 +83,10 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
      * using {@link #setRaceIsKnownToStartUpwind(boolean)}. Uses <code>millisecondsOverWhichToAverageWind/2</code> for the
      * <code>delayForCacheInvalidationOfWindEstimation</code> argument of the constructor.
      */
-    public DynamicTrackedRaceImpl(TrackedRegatta trackedEvent, RaceDefinition race,
+    public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        this(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        this(trackedRegatta, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 millisecondsOverWhichToAverageWind/2);
     }
 

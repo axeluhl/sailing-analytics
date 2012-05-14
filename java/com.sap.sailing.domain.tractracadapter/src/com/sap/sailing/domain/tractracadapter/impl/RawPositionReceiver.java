@@ -21,8 +21,8 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
 
     private int received;
 
-    public RawPositionReceiver(DynamicTrackedRegatta trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedEvent);
+    public RawPositionReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta);
     }
     
     /**

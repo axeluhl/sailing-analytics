@@ -14,13 +14,13 @@ import com.tractrac.clientmodule.Race;
 public class RaceHandleImpl implements RacesHandle {
     private final Event tractracEvent;
     private final DomainFactory domainFactory;
-    private final DynamicTrackedRegatta trackedEvent;
+    private final DynamicTrackedRegatta trackedRegatta;
     private final TracTracRaceTracker raceTracker;
     
-    public RaceHandleImpl(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedRegatta trackedEvent, TracTracRaceTracker raceTracker) {
+    public RaceHandleImpl(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedRegatta trackedRegatta, TracTracRaceTracker raceTracker) {
         this.domainFactory = domainFactory;
         this.tractracEvent = tractracEvent;
-        this.trackedEvent = trackedEvent;
+        this.trackedRegatta = trackedRegatta;
         this.raceTracker = raceTracker;
     }
 
@@ -40,7 +40,7 @@ public class RaceHandleImpl implements RacesHandle {
     
     @Override
     public DynamicTrackedRegatta getTrackedEvent() {
-        return trackedEvent;
+        return trackedRegatta;
     }
 
     @Override

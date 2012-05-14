@@ -71,8 +71,8 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     public void testStoreAFewWindEntries() throws UnknownHostException, MongoException, InterruptedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta domainEvent = domainFactory.getOrCreateEvent(getEvent());
-        DynamicTrackedRegatta trackedEvent = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
-        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
+        DynamicTrackedRegatta trackedRegatta = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
+        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, getEvent(),
                 EmptyWindStore.INSTANCE, /* startOfTracking */ null, /* endOfTracking */ null, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
@@ -80,7 +80,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
                 }, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
         RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getEvent().getRaceList().iterator().next());
-        DynamicTrackedRace trackedRace = trackedEvent.createTrackedRace(race, /* millisecondsOverWhichToAverageWind */
+        DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, /* millisecondsOverWhichToAverageWind */
                 EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageSpeed */
                 30000, 10000, new DynamicRaceDefinitionSet() {
                     @Override
@@ -90,7 +90,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         WindSource windSource = new WindSourceImpl(WindSourceType.WEB);
         Mongo myFirstMongo = newMongo();
         DB firstDatabase = myFirstMongo.getDB(dbConfiguration.getDatabaseName());
-        new MongoObjectFactoryImpl(firstDatabase).addWindTrackDumper(trackedEvent, trackedRace, windSource);
+        new MongoObjectFactoryImpl(firstDatabase).addWindTrackDumper(trackedRegatta, trackedRace, windSource);
         WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
         Position pos = new DegreePosition(54, 9);
         TimePoint timePoint = MillisecondsTimePoint.now();

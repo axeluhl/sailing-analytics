@@ -64,9 +64,9 @@ public class RaceTrackerTest {
         service.stopTracking(raceHandle.getRegatta());
     }
 
-    private TrackedRace getTrackedRace(TrackedRegatta trackedEvent) throws InterruptedException {
+    private TrackedRace getTrackedRace(TrackedRegatta trackedRegatta) throws InterruptedException {
         final TrackedRace[] trackedRaces = new TrackedRace[1];
-        trackedEvent.addRaceListener(new RaceListener() {
+        trackedRegatta.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
                 synchronized (trackedRaces) {

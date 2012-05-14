@@ -39,11 +39,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final WindStore windStore;
     private final DynamicRaceDefinitionSet raceDefinitionSetToUpdate;
     
-    public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedEvent,
+    public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             long millisecondsOverWhichToAverageWind) {
-        super(domainFactory, tractracEvent, trackedEvent);
+        super(domainFactory, tractracEvent, trackedRegatta);
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.windStore = windStore;
         this.raceDefinitionSetToUpdate = raceDefinitionSetToUpdate;

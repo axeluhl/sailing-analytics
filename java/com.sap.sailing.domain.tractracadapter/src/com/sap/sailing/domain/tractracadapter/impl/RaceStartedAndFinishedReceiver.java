@@ -31,8 +31,8 @@ import com.tractrac.clientmodule.data.StartStopTimesData;
 public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Race, StartStopTimesData, Boolean> {
     private static final Logger logger = Logger.getLogger(RaceStartedAndFinishedReceiver.class.getName());
 
-    public RaceStartedAndFinishedReceiver(DynamicTrackedRegatta trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedEvent);
+    public RaceStartedAndFinishedReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta);
     }
 
     /**

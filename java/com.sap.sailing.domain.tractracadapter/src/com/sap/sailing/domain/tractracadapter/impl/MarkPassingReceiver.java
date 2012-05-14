@@ -29,9 +29,9 @@ import com.tractrac.clientmodule.data.MarkPassingsData;
 public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetitor, MarkPassingsData, Boolean> {
     private static final Logger logger = Logger.getLogger(MarkPassingReceiver.class.getName());
     
-    public MarkPassingReceiver(DynamicTrackedRegatta trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
+    public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
             DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedEvent);
+        super(domainFactory, tractracEvent, trackedRegatta);
     }
 
     /**

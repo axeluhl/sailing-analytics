@@ -58,7 +58,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
     private Competitor competitor;
     private DynamicTrackedRace trackedRace;
     private RegattaNameAndRaceName raceIdentifier;
-    private DynamicTrackedRegatta trackedEvent;
+    private DynamicTrackedRegatta trackedRegatta;
     
     @Before
     public void setUp() throws Exception {
@@ -85,7 +85,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
         masterCourse.removeWaypoint(1);
         raceIdentifier = new RegattaNameAndRaceName(event.getName(), raceName);
-        trackedEvent = master.apply(new TrackRegatta(raceIdentifier));
+        trackedRegatta = master.apply(new TrackRegatta(raceIdentifier));
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory()),
@@ -159,7 +159,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         MongoWindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                 MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
-        WindTrack windTrack = windStore.getWindTrack(trackedEvent, trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
+        WindTrack windTrack = windStore.getWindTrack(trackedRegatta, trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
                 /* delayForWindEstimationCacheInvalidation */ 10000);
         final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));

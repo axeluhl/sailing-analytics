@@ -279,7 +279,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
-    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedEvent,
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, TimePoint startOfTracking,
             TimePoint endOfTracking, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types) {
         Collection<Receiver> result = new ArrayList<Receiver>();
@@ -287,24 +287,24 @@ public class DomainFactoryImpl implements DomainFactory {
             switch (type) {
             case RACECOURSE:
                 result.add(new RaceCourseReceiver(
-                        this, trackedEvent, tractracEvent, windStore,
+                        this, trackedRegatta, tractracEvent, windStore,
                         raceDefinitionSetToUpdate, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
-                        trackedEvent, tractracEvent, startOfTracking, endOfTracking, this));
+                        trackedRegatta, tractracEvent, startOfTracking, endOfTracking, this));
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(
-                        trackedEvent, tractracEvent, this));
+                        trackedRegatta, tractracEvent, this));
                 break;
             case MARKPASSINGS:
                 result.add(new MarkPassingReceiver(
-                        trackedEvent, tractracEvent, this));
+                        trackedRegatta, tractracEvent, this));
                 break;
             case RACESTARTFINISH:
                 result.add(new RaceStartedAndFinishedReceiver(
-                        trackedEvent, tractracEvent, this));
+                        trackedRegatta, tractracEvent, this));
                 break;
             }
         }
@@ -312,15 +312,15 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedEvent,
+    public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        return getUpdateReceivers(trackedEvent, tractracEvent, windStore, startOfTracking, endOfTracking,
+        return getUpdateReceivers(trackedRegatta, tractracEvent, windStore, startOfTracking, endOfTracking,
                 raceDefinitionSetToUpdate, ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS,
                 ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
     
     @Override
-    public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace, TrackedRegattaRegistry trackedEventRegistry) {
+    public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace, TrackedRegattaRegistry trackedRegattaRegistry) {
         RaceDefinition raceDefinition;
         synchronized (raceCache) {
             raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
@@ -349,13 +349,13 @@ public class DomainFactoryImpl implements DomainFactory {
                         eventCache.remove(key);
                         weakEventCache.remove(tractracEvent);
                     }
-                    TrackedRegatta trackedEvent = trackedEventRegistry.getTrackedRegatta(event);
-                    if (trackedEvent != null) {
+                    TrackedRegatta trackedRegatta = trackedRegattaRegistry.getTrackedRegatta(event);
+                    if (trackedRegatta != null) {
                         // see above; only remove tracked event if it *became* empty because of the tracked race removal here
-                        int oldSizeOfTrackedRaces = Util.size(trackedEvent.getTrackedRaces());
-                        trackedEvent.removeTrackedRace(raceDefinition);
-                        if (oldSizeOfTrackedRaces > 0 && Util.size(trackedEvent.getTrackedRaces()) == 0) {
-                            trackedEventRegistry.removeTrackedRegatta(event);
+                        int oldSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
+                        trackedRegatta.removeTrackedRace(raceDefinition);
+                        if (oldSizeOfTrackedRaces > 0 && Util.size(trackedRegatta.getTrackedRaces()) == 0) {
+                            trackedRegattaRegistry.removeTrackedRegatta(event);
                         }
                     }
                 }
@@ -364,7 +364,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Pair<RaceDefinition, TrackedRace> getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedEvent,
+    public Pair<RaceDefinition, TrackedRace> getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
             Race race, Course course, WindStore windStore, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         synchronized (raceCache) {
@@ -374,14 +374,14 @@ public class DomainFactoryImpl implements DomainFactory {
                 raceDefinition = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
                         competitorsAndDominantBoatClass.getA());
                 // add to domain Event only if boat class matches
-                if (raceDefinition.getBoatClass() == trackedEvent.getRegatta().getBoatClass()) {
-                    trackedEvent.getRegatta().addRace(raceDefinition);
+                if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
+                    trackedRegatta.getRegatta().addRace(raceDefinition);
                 } else {
-                    logger.warning("Not adding race "+raceDefinition+" to event "+trackedEvent.getRegatta()+
+                    logger.warning("Not adding race "+raceDefinition+" to event "+trackedRegatta.getRegatta()+
                             " because boat class "+raceDefinition.getBoatClass()+" doesn't match event's boat class "+
-                            trackedEvent.getRegatta().getBoatClass());
+                            trackedRegatta.getRegatta().getBoatClass());
                 }
-                TrackedRace trackedRace = createTrackedRace(trackedEvent, raceDefinition, windStore,
+                TrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, windStore,
                         millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                 synchronized (raceCache) {
                     raceCache.put(race, raceDefinition);
@@ -394,9 +394,9 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
 
-    private TrackedRace createTrackedRace(TrackedRegatta trackedEvent, RaceDefinition race, WindStore windStore,
+    private TrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        return trackedEvent.createTrackedRace(race,
+        return trackedRegatta.createTrackedRace(race,
                 windStore, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
@@ -463,10 +463,10 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
-            TimePoint endOfTracking, WindStore windStore, TrackedRegattaRegistry trackedEventRegistry)
+            TimePoint endOfTracking, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException {
         return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, startOfTracking, endOfTracking,
-                windStore, trackedEventRegistry);
+                windStore, trackedRegattaRegistry);
     }
 
     @Override

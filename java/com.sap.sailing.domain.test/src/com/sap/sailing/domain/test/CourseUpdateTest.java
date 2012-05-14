@@ -55,7 +55,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private RaceDefinition race;
     private Course course;
     private Regatta domainEvent;
-    private DynamicTrackedRegatta trackedEvent;
+    private DynamicTrackedRegatta trackedRegatta;
     private final RouteData[] routeData = new RouteData[1];
     private DomainFactory domainFactory;
 
@@ -68,9 +68,9 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         super.setUp();
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         domainEvent = domainFactory.getOrCreateEvent(getEvent());
-        trackedEvent = new DynamicTrackedRegattaImpl(domainEvent);
+        trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        receivers.add(new RaceCourseReceiver(domainFactory, trackedEvent, getEvent(), /* millisecondsOverWhichToAverageWind */
+        receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getEvent(), /* millisecondsOverWhichToAverageWind */
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {}
@@ -111,7 +111,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private void testLegStructure(int minimalNumberOfLegsExpected) throws InterruptedException {
         waitForRouteData();
         assertTrue(course.getLegs().size() >= minimalNumberOfLegsExpected);
-        TrackedRace trackedRace = trackedEvent.getTrackedRace(race);
+        TrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
         assertEquals(course.getLegs().size(), Util.size(trackedRace.getTrackedLegs()));
         Iterator<Leg> legIter = course.getLegs().iterator();
         for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {

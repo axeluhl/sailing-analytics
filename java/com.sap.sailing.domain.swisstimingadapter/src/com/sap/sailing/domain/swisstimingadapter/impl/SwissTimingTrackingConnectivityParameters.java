@@ -33,9 +33,9 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     }
 
     @Override
-    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedEventRegistry) throws Exception {
+    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry) throws Exception {
         return swissTimingFactory.createRaceTracker(raceID, hostname, port, canSendRequests, windStore, messageLoader,
-                domainFactory, trackedEventRegistry);
+                domainFactory, trackedRegattaRegistry);
     }
 
     @Override

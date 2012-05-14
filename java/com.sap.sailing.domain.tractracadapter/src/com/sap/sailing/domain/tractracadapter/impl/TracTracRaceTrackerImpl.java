@@ -100,12 +100,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
-     * @param trackedEventRegistry
+     * @param trackedRegattaRegistry
      *            used to create the {@link TrackedRegatta} for the domain event
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
-            TrackedRegattaRegistry trackedEventRegistry) throws URISyntaxException, MalformedURLException,
+            TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException {
         super();
         urls = createID(paramURL, liveURI, storedURI);
@@ -129,10 +129,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             // removeRace may detach the domain event from the domain factory if that
             // removed the last race; therefore, it's important to getOrCreate the
             // domainEvent *after* calling removeRace
-            domainFactory.removeRace(tractracEvent, tractracRace, trackedEventRegistry);
+            domainFactory.removeRace(tractracEvent, tractracRace, trackedRegattaRegistry);
         }
         domainEvent = domainFactory.getOrCreateEvent(tractracEvent);
-        setTrackedEvent(trackedEventRegistry.getOrCreateTrackedRegatta(domainEvent));
+        setTrackedEvent(trackedRegattaRegistry.getOrCreateTrackedRegatta(domainEvent));
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,

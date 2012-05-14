@@ -43,11 +43,11 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory {
     }
     
     @Override
-    public WindTracker createWindTracker(DynamicTrackedRegatta trackedEvent, RaceDefinition race,
+    public WindTracker createWindTracker(DynamicTrackedRegatta trackedRegatta, RaceDefinition race,
             boolean correctByDeclination) throws SocketException {
         WindTracker result = windTrackers.get(race);
         if (result == null) {
-            DynamicTrackedRace trackedRace = trackedEvent.getTrackedRace(race);
+            DynamicTrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
             UDPExpeditionReceiver receiver = getOrCreateWindReceiverOnDefaultPort();
             result = new ExpeditionWindTracker(trackedRace,
                     correctByDeclination ? DeclinationService.INSTANCE : null, receiver, this);

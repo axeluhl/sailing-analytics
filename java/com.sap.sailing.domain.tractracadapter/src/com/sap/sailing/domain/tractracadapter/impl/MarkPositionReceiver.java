@@ -66,9 +66,9 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
      *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
      *            particularly the mark position loading will be constrained to this end time.
      */
-    public MarkPositionReceiver(final DynamicTrackedRegatta trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
+    public MarkPositionReceiver(final DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
             TimePoint startOfTracking, TimePoint endOfTracking, final DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedEvent);
+        super(domainFactory, tractracEvent, trackedRegatta);
         this.startOfTracking = startOfTracking;
         this.endOfTracking = endOfTracking;
         // assumption: there is currently only one race per TracTrac Event object

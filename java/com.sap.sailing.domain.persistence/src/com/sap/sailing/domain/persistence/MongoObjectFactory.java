@@ -22,7 +22,7 @@ public interface MongoObjectFactory {
      * update received will be appended to the MongoDB and can later be retrieved. The key used to identify the race is
      * the {@link RaceDefinition#getName() race name} and the {@link Regatta#getName() event name}.
      */
-    void addWindTrackDumper(TrackedRegatta trackedEvent, TrackedRace trackedRace, WindSource windSource);
+    void addWindTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace, WindSource windSource);
 
     /**
      * Stores the configuration data of <code>leaderboard</code> in the Mongo DB associated with this

@@ -16,7 +16,7 @@ public interface RaceTrackingConnectivityParameters {
     /**
      * Starts a {@link RaceTracker} using the connectivity parameters provided by this object.
      */
-    RaceTracker createRaceTracker(TrackedRegattaRegistry trackedEventRegistry) throws Exception;
+    RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry) throws Exception;
     
     /**
      * Deliver an ID object equal to that of the {@link RaceTracker#getID()} delivered by the {@link RaceTracker}

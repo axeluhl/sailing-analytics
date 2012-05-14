@@ -66,8 +66,8 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
         Regatta event = domainFactory.getOrCreateEvent(getEvent());
-        DynamicTrackedRegatta trackedEvent = new DynamicTrackedRegattaImpl(event);
-        trackedEvent.addRaceListener(new RaceListener() {
+        DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(event);
+        trackedRegatta.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
                 System.out.println("Subscribing raw position listener for race "+trackedRace);
@@ -77,7 +77,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             public void raceRemoved(TrackedRace trackedRace) {
             }
         });
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), /* start of tracking */ null,
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedRegatta, getEvent(), /* start of tracking */ null,
                 /* end of tracking */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
@@ -87,7 +87,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                 listeners.add(raceListener);
             }
         }
-        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
+        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedRegatta, getEvent(),
                 /* start of tracking */ null, /* end of tracking */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {

@@ -20,17 +20,17 @@ public abstract class AbstractRaceTrackerImpl implements RaceTracker {
         return result;
     }
 
-    private DynamicTrackedRegatta trackedEvent;
+    private DynamicTrackedRegatta trackedRegatta;
     
     public AbstractRaceTrackerImpl() {
     }
 
     @Override
     public DynamicTrackedRegatta getTrackedRegatta() {
-        return trackedEvent;
+        return trackedRegatta;
     }
 
-    protected void setTrackedEvent(DynamicTrackedRegatta trackedEvent) {
-        this.trackedEvent = trackedEvent;
+    protected void setTrackedEvent(DynamicTrackedRegatta trackedRegatta) {
+        this.trackedRegatta = trackedRegatta;
     }
 }

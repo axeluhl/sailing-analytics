@@ -140,8 +140,8 @@ public class Action {
     }
 
     public TrackedRace getTrackedRace(Regatta event, RaceDefinition race) throws IOException {
-        DynamicTrackedRegatta trackedEvent = getService().getOrCreateTrackedRegatta(event);
-        TrackedRace trackedRace = trackedEvent == null ? null : trackedEvent.getExistingTrackedRace(race);
+        DynamicTrackedRegatta trackedRegatta = getService().getOrCreateTrackedRegatta(event);
+        TrackedRace trackedRace = trackedRegatta == null ? null : trackedRegatta.getExistingTrackedRace(race);
         return trackedRace;
     }
 
