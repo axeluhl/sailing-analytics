@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.simulator;
 
+import java.util.Date;
 import java.util.logging.Logger;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -75,7 +76,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.simulatorSvc = svc;
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
-        wControls = new WindControlParameters(7.2, 0);
+        wControls = new WindControlParameters(1, 0);
         patternSelector = new ListBox();
         boatSelector = new ListBox();
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.simulator(), stringMessages);
@@ -193,7 +194,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         });
         // sliderBar.setMinValue(1.0, false);
         // sliderBar.setMaxValue(10.0, false);
-        sliderBar.setCurrentValue(1.0);
+        sliderBar.setCurrentValue(wControls.windSpeedInKnots);
         vp.add(sliderBar);
         sliderBar.setWidth("60%");
 
@@ -267,11 +268,23 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         simulatorMap.setSize("100%", "82%");
         rightPanel.add(simulatorMap);
 
+        addTimePanel(rightPanel);
+        
+    }
+    
+    //TODO Get the right dates and times
+    private void addTimePanel(Panel parentPanel) {
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
+        Date now = new Date();
+        
+        logger.info("Now " + now);
+        Date maxTime = new Date(now.getTime()+100000);
+        logger.info("MaxTime " + maxTime);
+        timePanel.setMinMax(now, maxTime, false);
         rightPanel.add(timePanel);
     }
-
+    
     private void initUpdateButton() {
         updateButton = new Button(stringMessages.update());
         updateButton.addClickHandler(new ClickHandler() {
