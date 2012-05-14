@@ -39,8 +39,8 @@ import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindError;
@@ -66,7 +66,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -87,7 +87,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private final RaceDefinition race;
 
-    private final TrackedEvent trackedEvent;
+    private final TrackedRegatta trackedEvent;
 
     /**
      * By default, all wind sources are used, none are excluded. However, e.g., for performance reasons, particular wind
@@ -189,13 +189,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private transient CombinedWindTrackImpl combinedWindTrack;
 
-    public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
+    public TrackedRaceImpl(TrackedRegatta trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         this(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
         /* delay for wind estimation cache invalidation */millisecondsOverWhichToAverageWind / 2);
     }
 
-    public TrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race, WindStore windStore,
+    public TrackedRaceImpl(TrackedRegatta trackedEvent, RaceDefinition race, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
@@ -269,8 +269,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     abstract protected TrackedLeg createTrackedLeg(Leg leg);
 
-    public EventAndRaceIdentifier getRaceIdentifier() {
-        return new EventNameAndRaceName(getTrackedEvent().getEvent().getName(), getRace().getName());
+    public RegattaAndRaceIdentifier getRaceIdentifier() {
+        return new RegattaNameAndRaceName(getTrackedEvent().getRegatta().getName(), getRace().getName());
     }
 
     @Override
@@ -1117,7 +1117,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public TrackedEvent getTrackedEvent() {
+    public TrackedRegatta getTrackedEvent() {
         return trackedEvent;
     }
 

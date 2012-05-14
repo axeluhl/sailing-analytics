@@ -24,7 +24,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -36,7 +36,7 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.StoreAndForward;
 import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterPersistence;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -91,7 +91,7 @@ public class EndToEndListeningStoreAndFowardTest {
     public void tearDown() throws InterruptedException, IOException {
         logger.entering(getClass().getName(), "tearDown");
         for (RacesHandle raceHandle : raceHandles) {
-            racingEventService.stopTracking(raceHandle.getEvent());
+            racingEventService.stopTracking(raceHandle.getRegatta());
         }
         logger.info("Calling StoreAndForward.stop() in tearDown");
         storeAndForward.stop();
@@ -105,9 +105,9 @@ public class EndToEndListeningStoreAndFowardTest {
         setUpUsingScript(racesToTrack, scriptName);
 
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Event> allEvents = racingEventService.getAllEvents();
-        for (Event event : allEvents) {
-            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
+        for (Regatta event : allEvents) {
+            DynamicTrackedRegatta trackedEvent = racingEventService.getTrackedRegatta(event);
             Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
             for (TrackedRace trackedRace : trackedRaces) {
                 allTrackedRaces.add(trackedRace);
@@ -134,9 +134,9 @@ public class EndToEndListeningStoreAndFowardTest {
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
 
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Event> allEvents = racingEventService.getAllEvents();
-        for (Event event : allEvents) {
-            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
+        for (Regatta event : allEvents) {
+            DynamicTrackedRegatta trackedEvent = racingEventService.getTrackedRegatta(event);
             Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
             for (TrackedRace trackedRace : trackedRaces) {
                 allTrackedRaces.add(trackedRace);
@@ -186,9 +186,9 @@ public class EndToEndListeningStoreAndFowardTest {
         String scriptNewCourseConfig = "/SailMasterDataInterfaceNewCourseConfig.txt";
         setUpUsingScript(racesToTrack, scriptName1, scriptName2, scriptNewCourseConfig);
         Set<TrackedRace> allNewTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Event> allNewEvents = racingEventService.getAllEvents();
-        for (Event event : allNewEvents) {
-            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+        Iterable<Regatta> allNewEvents = racingEventService.getAllRegattas();
+        for (Regatta event : allNewEvents) {
+            DynamicTrackedRegatta trackedEvent = racingEventService.getTrackedRegatta(event);
             Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
             for (TrackedRace trackedRace : trackedRaces) {
                 allNewTrackedRaces.add(trackedRace);
@@ -236,9 +236,9 @@ public class EndToEndListeningStoreAndFowardTest {
         setUpUsingScript(racesToTrack, "/DuplicateCCG.txt");
 
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Event> allEvents = racingEventService.getAllEvents();
-        for (Event event : allEvents) {
-            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
+        for (Regatta event : allEvents) {
+            DynamicTrackedRegatta trackedEvent = racingEventService.getTrackedRegatta(event);
             Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
             for (TrackedRace trackedRace : trackedRaces) {
                 allTrackedRaces.add(trackedRace);
@@ -259,9 +259,9 @@ public class EndToEndListeningStoreAndFowardTest {
         String scriptName2 = "/SailMasterDataInterfaceRACZero.txt";
         setUpUsingScript(racesToTrack, scriptName2);
         Set<TrackedRace> allNewTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Event> allNewEvents = racingEventService.getAllEvents();
-        for (Event event : allNewEvents) {
-            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+        Iterable<Regatta> allNewEvents = racingEventService.getAllRegattas();
+        for (Regatta event : allNewEvents) {
+            DynamicTrackedRegatta trackedEvent = racingEventService.getTrackedRegatta(event);
             Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
             for (TrackedRace trackedRace : trackedRaces) {
                 allNewTrackedRaces.add(trackedRace);
@@ -278,9 +278,9 @@ public class EndToEndListeningStoreAndFowardTest {
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
 
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Event> allEvents = racingEventService.getAllEvents();
-        for (Event event : allEvents) {
-            DynamicTrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
+        for (Regatta event : allEvents) {
+            DynamicTrackedRegatta trackedEvent = racingEventService.getTrackedRegatta(event);
             Iterable<TrackedRace> trackedRaces = trackedEvent.getTrackedRaces();
             for (TrackedRace trackedRace : trackedRaces) {
                 allTrackedRaces.add(trackedRace);

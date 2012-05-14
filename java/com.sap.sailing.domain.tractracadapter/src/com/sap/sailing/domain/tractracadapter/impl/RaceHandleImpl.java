@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
@@ -14,10 +14,10 @@ import com.tractrac.clientmodule.Race;
 public class RaceHandleImpl implements RacesHandle {
     private final Event tractracEvent;
     private final DomainFactory domainFactory;
-    private final DynamicTrackedEvent trackedEvent;
+    private final DynamicTrackedRegatta trackedEvent;
     private final TracTracRaceTracker raceTracker;
     
-    public RaceHandleImpl(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedEvent trackedEvent, TracTracRaceTracker raceTracker) {
+    public RaceHandleImpl(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedRegatta trackedEvent, TracTracRaceTracker raceTracker) {
         this.domainFactory = domainFactory;
         this.tractracEvent = tractracEvent;
         this.trackedEvent = trackedEvent;
@@ -25,7 +25,7 @@ public class RaceHandleImpl implements RacesHandle {
     }
 
     @Override
-    public com.sap.sailing.domain.base.Event getEvent() {
+    public com.sap.sailing.domain.base.Regatta getRegatta() {
         return domainFactory.getOrCreateEvent(tractracEvent);
     }
 
@@ -39,7 +39,7 @@ public class RaceHandleImpl implements RacesHandle {
     }
     
     @Override
-    public DynamicTrackedEvent getTrackedEvent() {
+    public DynamicTrackedRegatta getTrackedEvent() {
         return trackedEvent;
     }
 

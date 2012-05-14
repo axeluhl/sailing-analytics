@@ -19,7 +19,7 @@ import org.junit.Before;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -27,9 +27,9 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
@@ -52,8 +52,8 @@ import com.tractrac.clientmodule.Race;
  */
 public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     private DomainFactoryImpl domainFactory;
-    private Event domainEvent;
-    private DynamicTrackedEvent trackedEvent;
+    private Regatta domainEvent;
+    private DynamicTrackedRegatta trackedEvent;
     private RaceDefinition race;
     private DynamicTrackedRace trackedRace;
 
@@ -132,7 +132,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
         domainEvent = domainFactory.getOrCreateEvent(getEvent());
-        trackedEvent = new DynamicTrackedEventImpl(domainEvent);
+        trackedEvent = new DynamicTrackedRegattaImpl(domainEvent);
     }
     
     protected Competitor getCompetitorByName(String nameRegexp) {
@@ -201,11 +201,11 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         return domainFactory;
     }
 
-    protected Event getDomainEvent() {
+    protected Regatta getDomainEvent() {
         return domainEvent;
     }
 
-    protected DynamicTrackedEvent getTrackedEvent() {
+    protected DynamicTrackedRegatta getTrackedEvent() {
         return trackedEvent;
     }
 

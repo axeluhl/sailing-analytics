@@ -6,18 +6,18 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
-public abstract class AbstractEventPanel extends FormPanel implements EventDisplayer {
+public abstract class AbstractRegattaPanel extends FormPanel implements RegattaDisplayer {
     protected final SailingServiceAsync sailingService;
     protected DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     protected DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
-    protected final EventRefresher eventRefresher;
+    protected final RegattaRefresher eventRefresher;
     protected ErrorReporter errorReporter;
     protected StringMessages stringConstants;
     
-    public AbstractEventPanel(SailingServiceAsync sailingService,
-            EventRefresher eventRefresher, ErrorReporter errorReporter, StringMessages stringConstants) {
+    public AbstractRegattaPanel(SailingServiceAsync sailingService,
+            RegattaRefresher eventRefresher, ErrorReporter errorReporter, StringMessages stringConstants) {
         super();
         this.sailingService = sailingService;
         this.eventRefresher = eventRefresher;
@@ -26,7 +26,7 @@ public abstract class AbstractEventPanel extends FormPanel implements EventDispl
     }
 
     @Override
-    public abstract void fillEvents(List<EventDTO> result);
+    public abstract void fillRegattas(List<RegattaDTO> result);
     
     /**
      * Returns <code>false</code> if <code>wordsToFilter</code> contain a value of the <code>valuesToCheck</code>  

@@ -19,15 +19,15 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.EventImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
@@ -41,7 +41,7 @@ public class RaceTrackerStartStopTest {
     private final static String BOATCLASSNAME = "HAPPYBOATCLASS";
 
     private RacingEventServiceImplMock racingEventService;
-    private Event event;
+    private Regatta event;
     private BoatClass boatClass;
     private Set<RaceTracker> raceTrackerSet = new HashSet<RaceTracker>();
 
@@ -57,9 +57,9 @@ public class RaceTrackerStartStopTest {
     public void setUp() {
         racingEventService = new RacingEventServiceImplMock();
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
-        event = new EventImpl(EVENTNAME, boatClass);
+        event = new RegattaImpl(EVENTNAME, boatClass);
         racingEventService.getEventsByName().put(EVENTNAME, event);
-        TrackedEvent trackedEvent1 = racingEventService.getOrCreateTrackedEvent(event);
+        TrackedRegatta trackedEvent1 = racingEventService.getOrCreateTrackedRegatta(event);
         racingEventService.getEventsByNameMap().put(EVENTNAME, event);
         raceTrackerSet = new HashSet<RaceTracker>();
         raceDef1 = new RaceDefinitionImpl(RACENAME1, new CourseImpl("Course1", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
@@ -99,12 +99,12 @@ public class RaceTrackerStartStopTest {
     }
 
     /**
-     * This test method tests, if the {@link RacingEventService#stopTracking(Event, RaceDefinition) stopTracking} method works correctly.
+     * This test method tests, if the {@link RacingEventService#stopTracking(Regatta, RaceDefinition) stopTracking} method works correctly.
      */
     @Test
     public void testStopTrackingRace() throws MalformedURLException, IOException, InterruptedException {
-        Event event = racingEventService.getEventByName(EVENTNAME);
-        TrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+        Regatta event = racingEventService.getRegattaByName(EVENTNAME);
+        TrackedRegatta trackedEvent = racingEventService.getTrackedRegatta(event);
         assertNotNull(event.getRaceByName(RACENAME2));
         assertNotNull(trackedEvent.getExistingTrackedRace(event.getRaceByName(RACENAME2)));
         racingEventService.stopTracking(event, raceDef2);
@@ -136,12 +136,12 @@ public class RaceTrackerStartStopTest {
         }
     }
     /**
-     * This test methods checks if the {@link RacingEventService#removeRace(Event, RaceDefinition) removeRace} method works correctly
+     * This test methods checks if the {@link RacingEventService#removeRace(Regatta, RaceDefinition) removeRace} method works correctly
      */
     @Test
     public void testRemoveRace() throws MalformedURLException, IOException, InterruptedException {
-        Event event = racingEventService.getEventByName(EVENTNAME);
-        TrackedEvent trackedEvent = racingEventService.getTrackedEvent(event);
+        Regatta event = racingEventService.getRegattaByName(EVENTNAME);
+        TrackedRegatta trackedEvent = racingEventService.getTrackedRegatta(event);
         assertNotNull(event.getRaceByName(RACENAME2));
         assertNotNull(trackedEvent.getExistingTrackedRace(event.getRaceByName(RACENAME2)));
         racingEventService.removeRace(event, raceDef2);
@@ -176,7 +176,7 @@ public class RaceTrackerStartStopTest {
     }
     
     /**
-     * This test methods checks if the {@link RacingEventService#removeRace(Event, RaceDefinition) removeRace} method works correctly if the
+     * This test methods checks if the {@link RacingEventService#removeRace(Regatta, RaceDefinition) removeRace} method works correctly if the
      * race to be stopped is the last race of a tracker
      */
     @Test

@@ -4,18 +4,18 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 
 /**
- * Manages a set of {@link TrackedRace} objects that belong to the same {@link Event} (regatta, sailing event for a
+ * Manages a set of {@link TrackedRace} objects that belong to the same {@link Regatta} (regatta, sailing event for a
  * single boat class). It therefore represents the entry point into the tracking-related objects for such an event.
  * Allows clients to find a {@link TrackedRace} by the {@link RaceDefinition} for which it holds the tracking data.
  * <p>
  * 
- * Please note that the result of calling {@link #getEvent()}.{@link Event#getAllRaces() getAllRaces()} is not
+ * Please note that the result of calling {@link #getRegatta()}.{@link Regatta#getAllRaces() getAllRaces()} is not
  * guaranteed to match up with the races obtained by calling {@link TrackedRace#getRace()} on all {@link TrackedRaces}
  * resulting from {@link #getTrackedRaces()}. In other words, the processes for adding and removing races to the
  * server do not guarantee to update the master and tracking data for races atomically.
@@ -23,8 +23,8 @@ import com.sap.sailing.domain.common.TimePoint;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface TrackedEvent extends Serializable {
-    Event getEvent();
+public interface TrackedRegatta extends Serializable {
+    Regatta getRegatta();
 
     Iterable<TrackedRace> getTrackedRaces();
 

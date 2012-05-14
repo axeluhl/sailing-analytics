@@ -21,7 +21,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 
-public class MultipleClassesInEventTest {
+public class MultipleClassesInRegattaTest {
     private static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     private static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private DomainFactory domainFactory;
@@ -49,34 +49,34 @@ public class MultipleClassesInEventTest {
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=cce678c8-97e6-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI),
-                        /* startOfTracking */ null, /* endOfTracking */ null, EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
+                        /* startOfTracking */ null, /* endOfTracking */ null, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry());
         kiwotest2 = domainFactory
                 .createRaceTracker(
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=11290bd6-97e7-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI),
-                        /* startOfTracking */ null, /* endOfTracking */ null, EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
+                        /* startOfTracking */ null, /* endOfTracking */ null, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry());
         kiwotest3 = domainFactory
                 .createRaceTracker(
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=39635b24-97e7-11e0-9aed-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI),
-                        /* startOfTracking */ null, /* endOfTracking */ null, EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
+                        /* startOfTracking */ null, /* endOfTracking */ null, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry());
         weym470may112014_2 = domainFactory
                 .createRaceTracker(
                         new URL(
                                 httpAndHost+"/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=04498426-7dfd-11e0-8236-406186cbf87c"),
                         new URI(liveURI), new URI(storedURI),
-                        /* startOfTracking */ null, /* endOfTracking */ null, EmptyWindStore.INSTANCE, new DummyTrackedEventRegistry());
+                        /* startOfTracking */ null, /* endOfTracking */ null, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry());
         
-        assertEquals("STG", kiwotest1.getEvent().getBoatClass().getName());
-        assertEquals("505", kiwotest2.getEvent().getBoatClass().getName());
-        assertEquals("49er", kiwotest3.getEvent().getBoatClass().getName());
-        assertEquals("STG", weym470may112014_2.getEvent().getBoatClass().getName());
-        assertSame(weym470may112014_2.getEvent(), kiwotest1.getEvent());
-        assertNotSame(kiwotest1.getEvent(), kiwotest2.getEvent());
-        assertNotSame(kiwotest1.getEvent(), kiwotest3.getEvent());
-        assertNotSame(kiwotest2.getEvent(), kiwotest3.getEvent());
+        assertEquals("STG", kiwotest1.getRegatta().getBoatClass().getName());
+        assertEquals("505", kiwotest2.getRegatta().getBoatClass().getName());
+        assertEquals("49er", kiwotest3.getRegatta().getBoatClass().getName());
+        assertEquals("STG", weym470may112014_2.getRegatta().getBoatClass().getName());
+        assertSame(weym470may112014_2.getRegatta(), kiwotest1.getRegatta());
+        assertNotSame(kiwotest1.getRegatta(), kiwotest2.getRegatta());
+        assertNotSame(kiwotest1.getRegatta(), kiwotest3.getRegatta());
+        assertNotSame(kiwotest2.getRegatta(), kiwotest3.getRegatta());
     }
     
     @After

@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -60,7 +60,7 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
                 track.addGPSFix((GPSFixMoving) fix);
             }
         };
-        DynamicTrackedEvent trackedEvent = getTrackedEvent();
+        DynamicTrackedRegatta trackedEvent = getTrackedEvent();
         trackedEvent.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {

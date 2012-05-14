@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -22,11 +22,11 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.DeprecatedRegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
@@ -70,7 +70,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             return;
         }
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
-        final ParallelExecutionCallback<List<EventDTO>> listEventsCallback = new ParallelExecutionCallback<List<EventDTO>>();  
+        final ParallelExecutionCallback<List<RegattaDTO>> listEventsCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
         final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();  
         final ParallelExecutionCallback<UserDTO> getUserCallback = new ParallelExecutionCallback<UserDTO>();  
         if (leaderboardGroupName != null) {
@@ -105,7 +105,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         userManagementService.getUser(getUserCallback);
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<EventDTO> events, UserDTO user) {
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<RegattaDTO> events, UserDTO user) {
         if (!leaderboardNames.contains(leaderboardName)) {
           createErrorPage(stringMessages.noSuchLeaderboard());
           return;
@@ -130,12 +130,12 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
 
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        List<EventAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
+        List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
                 RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, new RaceTimesInfoProvider(sailingService, this, singletonList, 1000l));
-        raceBoardPanel.fillEvents(events);
+        raceBoardPanel.fillRegattas(events);
 
         switch (viewMode) {
             case ONESCREEN:
@@ -144,10 +144,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
     }  
 
-    private RaceDTO findRace(String eventName, String raceName, List<EventDTO> events) {
-        for (EventDTO eventDTO : events) {
+    private RaceDTO findRace(String eventName, String raceName, List<RegattaDTO> events) {
+        for (RegattaDTO eventDTO : events) {
             if (eventDTO.name.equals(eventName)) {
-                for (RegattaDTO regattaDTO : eventDTO.regattas) {
+                for (DeprecatedRegattaDTO regattaDTO : eventDTO.regattas) {
                     for (RaceDTO raceDTO: regattaDTO.races) {
                         if (raceDTO.name.equals(raceName)) {
                             return raceDTO;

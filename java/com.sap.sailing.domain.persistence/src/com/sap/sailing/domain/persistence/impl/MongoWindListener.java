@@ -5,18 +5,18 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 
 public class MongoWindListener implements com.sap.sailing.domain.tracking.WindListener {
-    private final TrackedEvent trackedEvent;
+    private final TrackedRegatta trackedEvent;
     private final TrackedRace trackedRace;
     private final WindSource windSource;
     private final MongoObjectFactoryImpl mongoObjectFactory;
     private final DBCollection windTracksCollection;
 
-    public MongoWindListener(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
+    public MongoWindListener(TrackedRegatta trackedEvent, TrackedRace trackedRace, WindSource windSource,
             MongoObjectFactory mongoObjectFactory, DB database) {
         super();
         this.trackedEvent = trackedEvent;
@@ -28,13 +28,13 @@ public class MongoWindListener implements com.sap.sailing.domain.tracking.WindLi
 
     @Override
     public void windDataReceived(Wind wind) {
-        DBObject windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedEvent.getEvent(), trackedRace.getRace(), windSource, wind);
+        DBObject windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedEvent.getRegatta(), trackedRace.getRace(), windSource, wind);
         windTracksCollection.insert(windTrackEntry);
     }
 
     @Override
     public void windDataRemoved(Wind wind) {
-        DBObject windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedEvent.getEvent(), trackedRace.getRace(), windSource, wind);
+        DBObject windTrackEntry = mongoObjectFactory.storeWindTrackEntry(trackedEvent.getRegatta(), trackedRace.getRace(), windSource, wind);
         windTracksCollection.remove(windTrackEntry);
     }
 

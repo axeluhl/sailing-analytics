@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -9,7 +9,7 @@ public class SetRaceIsKnownToStartUpwind extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 272403191741207144L;
     private final boolean startsUpwind;
     
-    public SetRaceIsKnownToStartUpwind(EventAndRaceIdentifier raceIdentifier, boolean startsUpwind) {
+    public SetRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean startsUpwind) {
         super(raceIdentifier);
         this.startsUpwind = startsUpwind;
     }

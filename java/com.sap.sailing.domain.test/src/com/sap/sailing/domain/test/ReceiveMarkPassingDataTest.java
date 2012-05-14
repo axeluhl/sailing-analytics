@@ -17,7 +17,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -93,7 +93,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         List<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(receiver);
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
-                new DynamicTrackedEventImpl(DomainFactory.INSTANCE.getOrCreateEvent(getEvent())),
+                new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateEvent(getEvent())),
                 getEvent(), EmptyWindStore.INSTANCE, /* startOfTracking */ null, /* endOfTracking */ null,
                 new DynamicRaceDefinitionSet() {
                     @Override

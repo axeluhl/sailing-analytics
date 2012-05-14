@@ -1,16 +1,16 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
+import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public abstract class AbstractEventManagementPanel extends AbstractEventPanel {
+public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel {
     protected final TrackedRacesListComposite trackedRacesListComposite;
     
-    public AbstractEventManagementPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
+    public AbstractEventManagementPanel(SailingServiceAsync sailingService, RegattaRefresher eventRefresher,
             ErrorReporter errorReporter, RaceSelectionProvider raceSelectionProvider, StringMessages stringConstants) {
         super(sailingService, eventRefresher, errorReporter, stringConstants);
         // TrackedEventsComposite should exist in every *ManagementPanel. 

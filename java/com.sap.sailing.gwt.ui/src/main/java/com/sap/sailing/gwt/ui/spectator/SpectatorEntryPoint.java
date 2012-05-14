@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleWelcomeWidget;
@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.shared.panels.SimpleWelcomeWidget;
  * @author Lennart Hensler (D054527)
  *
  */
-public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefresher {
+public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
     
     @Override
     public void onModuleLoad() {
@@ -85,11 +85,11 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements EventRefr
             rootPanel.add(groupAndFeedbackPanel);
         }
         
-        fillEvents();
+        fillRegattas();
     }
 
     @Override
-    public void fillEvents() {
+    public void fillRegattas() {
         
     }
     

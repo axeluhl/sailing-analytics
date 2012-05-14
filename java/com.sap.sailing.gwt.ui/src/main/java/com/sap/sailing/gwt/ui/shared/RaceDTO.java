@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 
 public class RaceDTO extends NamedDTO implements IsSerializable {
     public Iterable<CompetitorDTO> competitors;
@@ -22,7 +22,7 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
     public Date timePointOfNewestEvent;
     public Date endOfRace;
     
-    private RegattaDTO regatta;
+    private DeprecatedRegattaDTO regatta;
     
     public RaceDTO() {}
 
@@ -32,19 +32,19 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
         this.currentlyTracked = currentlyTracked;
     }
 
-    public RegattaDTO getRegatta() {
+    public DeprecatedRegattaDTO getRegatta() {
         return regatta;
     }
 
-    public void setRegatta(RegattaDTO regatta) {
+    public void setRegatta(DeprecatedRegattaDTO regatta) {
         this.regatta = regatta;
     }
     
-    public EventAndRaceIdentifier getRaceIdentifier() {
-        return new EventNameAndRaceName(regatta.getEvent().name, name);
+    public RegattaAndRaceIdentifier getRaceIdentifier() {
+        return new RegattaNameAndRaceName(regatta.getRegatta().name, name);
     }
     
-    public EventDTO getEvent() {
-        return regatta.getEvent();
+    public RegattaDTO getEvent() {
+        return regatta.getRegatta();
     }
 }

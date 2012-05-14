@@ -15,25 +15,25 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.gwt.ui.client.EventDisplayer;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RaceDTO;
+import com.sap.sailing.gwt.ui.shared.DeprecatedRegattaDTO;
 
-public class RacesListBoxPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
+public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, RaceSelectionChangeListener {
     private final List<RaceDTO> raceList;
     private final ListBox raceListBox;
-    private final EventRefresher eventRefresher;
+    private final RegattaRefresher eventRefresher;
     private final StringMessages stringConstants;
     private final RaceSelectionProvider raceSelectionProvider;
     
-    public RacesListBoxPanel(EventRefresher eventRefresher, RaceSelectionProvider raceSelectionProvider, StringMessages stringConstants) {
+    public RacesListBoxPanel(RegattaRefresher eventRefresher, RaceSelectionProvider raceSelectionProvider, StringMessages stringConstants) {
         this.eventRefresher = eventRefresher;
         this.stringConstants = stringConstants;
         this.raceSelectionProvider = raceSelectionProvider;
@@ -61,7 +61,7 @@ public class RacesListBoxPanel extends FormPanel implements EventDisplayer, Race
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                RacesListBoxPanel.this.eventRefresher.fillEvents();
+                RacesListBoxPanel.this.eventRefresher.fillRegattas();
             }
         });
         labelAndRefreshButton.add(btnRefresh);
@@ -69,11 +69,11 @@ public class RacesListBoxPanel extends FormPanel implements EventDisplayer, Race
     }
 
     @Override
-    public void fillEvents(List<EventDTO> result) {
+    public void fillRegattas(List<RegattaDTO> result) {
         raceList.clear();
         raceListBox.clear();
-        for (EventDTO event : result) {
-            for (RegattaDTO regatta : event.regattas) {
+        for (RegattaDTO event : result) {
+            for (DeprecatedRegattaDTO regatta : event.regattas) {
                 for (RaceDTO race : regatta.races) {
                     raceList.add(race);
                 }
@@ -94,8 +94,8 @@ public class RacesListBoxPanel extends FormPanel implements EventDisplayer, Race
         raceSelectionProvider.setSelection(getSelectedRaceIdentifiers(), this);
     }
 
-    private List<EventAndRaceIdentifier> getSelectedRaceIdentifiers() {
-        List<EventAndRaceIdentifier> result = new ArrayList<EventAndRaceIdentifier>();
+    private List<RegattaAndRaceIdentifier> getSelectedRaceIdentifiers() {
+        List<RegattaAndRaceIdentifier> result = new ArrayList<RegattaAndRaceIdentifier>();
         for (RaceDTO selectedRace : getSelectedRaces()) {
             result.add(selectedRace.getRaceIdentifier());
         }
@@ -119,7 +119,7 @@ public class RacesListBoxPanel extends FormPanel implements EventDisplayer, Race
     }
 
     @Override
-    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             RaceDTO newSelection = getRace(selectedRaces.iterator().next());
             int index = raceList.indexOf(newSelection);

@@ -10,7 +10,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
@@ -25,7 +25,7 @@ import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.tracking.Positioned;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -73,7 +73,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void addWindTrackDumper(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource) {
+    public void addWindTrackDumper(TrackedRegatta trackedEvent, TrackedRace trackedRace, WindSource windSource) {
         WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
         windTrack.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, this, database));
     }
@@ -84,7 +84,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeWindTrackEntry(Event event, RaceDefinition race, WindSource windSource, Wind wind) {
+    public DBObject storeWindTrackEntry(Regatta event, RaceDefinition race, WindSource windSource, Wind wind) {
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.EVENT_NAME.name(), event.getName());
         result.put(FieldNames.RACE_NAME.name(), race.getName());
@@ -99,7 +99,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject) {
         if (raceIdentifier != null) {
-            dbObject.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getEventName());
+            dbObject.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getRegattaName());
             dbObject.put(FieldNames.RACE_NAME.name(), raceIdentifier.getRaceName());
         }
     }

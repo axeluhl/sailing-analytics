@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 /**
  * Captures the serializable properties of a leaderboard which in particular has the competitors, any optional display
@@ -295,7 +295,7 @@ public class LeaderboardDTO implements IsSerializable {
         return getRaceInLeaderboardByName(raceColumnName).isMedalRace();
     }
 
-    public void addRace(String raceColumnName, boolean medalRace, EventAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
+    public void addRace(String raceColumnName, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
@@ -304,7 +304,7 @@ public class LeaderboardDTO implements IsSerializable {
     	races.add(raceInLeaderboardDTO);
     }
 
-    public void addRaceAt(String raceColumnName, boolean medalRace, EventAndRaceIdentifier trackedRaceIdentifier, int index) {
+    public void addRaceAt(String raceColumnName, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, int index) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);

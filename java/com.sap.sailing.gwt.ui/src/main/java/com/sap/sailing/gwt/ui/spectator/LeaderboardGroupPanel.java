@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.NoSelectionModel;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -197,9 +197,9 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             b.append(ANCHORTEMPLATE.anchor(link, displayName, STYLE_NAME_PREFIX + "ActiveLeaderboard"));
         } else {
             if (race.getRaceIdentifier() != null) {
-                EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
+                RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier();
                 String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + raceId.getRaceName()
-                        + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName=" + group.name + "&root=" + root);
+                        + "&eventName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + group.name + "&root=" + root);
                 if(debugParam != null && !debugParam.isEmpty())
                     link += "&gwt.codesvr=" + debugParam;
                 if(viewMode != null && !viewMode.isEmpty())
@@ -217,10 +217,10 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
             if (race.getRaceIdentifier() != null) {
-                EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
+                RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier();
                 String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
                         + "&raceName=" + raceId.getRaceName() + "&root=" + root + raceId.getRaceName() + "&eventName="
-                        + raceId.getEventName() + "&leaderboardGroupName=" + group.name);
+                        + raceId.getRegattaName() + "&leaderboardGroupName=" + group.name);
                 if(debugParam != null && !debugParam.isEmpty())
                     link += "&gwt.codesvr=" + debugParam;
                 if(viewMode != null && !viewMode.isEmpty())

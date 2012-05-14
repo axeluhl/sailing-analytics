@@ -13,16 +13,16 @@ import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.client.EventDisplayer;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.panels.UserStatusPanel;
 
-public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventRefresher {
-    private Set<EventDisplayer> eventDisplayers;
+public class AdminConsoleEntryPoint extends AbstractEntryPoint implements RegattaRefresher {
+    private Set<RegattaDisplayer> eventDisplayers;
     
     @Override
     public void onModuleLoad() {
@@ -36,7 +36,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
         rootPanel.add(tabPanel); //, 10, 10);
         tabPanel.setSize("95%", "95%");
         
-        eventDisplayers = new HashSet<EventDisplayer>();
+        eventDisplayers = new HashSet<RegattaDisplayer>();
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringMessages);
         eventDisplayers.add(tractracEventManagementPanel);
         tractracEventManagementPanel.setSize("90%", "90%");
@@ -85,16 +85,16 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements EventR
 				}
 			}
 		});
-        fillEvents();
+        fillRegattas();
     }
 
     @Override
-    public void fillEvents() {
-        sailingService.listEvents(new AsyncCallback<List<EventDTO>>() {
+    public void fillRegattas() {
+        sailingService.listEvents(new AsyncCallback<List<RegattaDTO>>() {
             @Override
-            public void onSuccess(List<EventDTO> result) {
-                for (EventDisplayer eventDisplayer : eventDisplayers) {
-                    eventDisplayer.fillEvents(result);
+            public void onSuccess(List<RegattaDTO> result) {
+                for (RegattaDisplayer eventDisplayer : eventDisplayers) {
+                    eventDisplayer.fillRegattas(result);
                 }
             }
 

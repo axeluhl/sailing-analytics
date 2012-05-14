@@ -8,11 +8,11 @@ import java.util.logging.Logger;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Race;
@@ -25,9 +25,9 @@ import difflib.PatchFailedException;
 /**
  * The ordering of the {@link ControlPoint}s of a {@link Course} are received
  * dynamically through a callback interface. Therefore, when connected to an
- * {@link Event}, these orders are not yet defined. An instance of this class
+ * {@link Regatta}, these orders are not yet defined. An instance of this class
  * can be used to create the listeners needed to receive this information and
- * set it on an {@link Event}.
+ * set it on an {@link Regatta}.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -39,7 +39,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final WindStore windStore;
     private final DynamicRaceDefinitionSet raceDefinitionSetToUpdate;
     
-    public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedEvent trackedEvent,
+    public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedEvent,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             long millisecondsOverWhichToAverageWind) {

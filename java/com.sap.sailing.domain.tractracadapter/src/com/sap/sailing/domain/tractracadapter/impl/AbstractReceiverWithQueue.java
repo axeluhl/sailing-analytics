@@ -6,9 +6,9 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -29,7 +29,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final LinkedBlockingQueue<Triple<A, B, C>> queue;
     private final DomainFactory domainFactory;
     private final com.tractrac.clientmodule.Event tractracEvent;
-    private final DynamicTrackedEvent trackedEvent;
+    private final DynamicTrackedRegatta trackedEvent;
     private Thread thread;
 
     /**
@@ -38,7 +38,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
      */
     private boolean receivedEventDuringTimeout;
     
-    public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedEvent trackedEvent) {
+    public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent, DynamicTrackedRegatta trackedEvent) {
         super();
         this.tractracEvent = tractracEvent;
         this.trackedEvent = trackedEvent;
@@ -59,7 +59,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         return tractracEvent;
     }
     
-    protected DynamicTrackedEvent getTrackedEvent() {
+    protected DynamicTrackedRegatta getTrackedEvent() {
         return trackedEvent;
     }
     
@@ -132,15 +132,15 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     protected abstract void handleEvent(Triple<A, B, C> event);
 
     /**
-     * Tries to find a {@link TrackedRace} for <code>race</code> in the {@link com.sap.sailing.domain.base.Event} corresponding
+     * Tries to find a {@link TrackedRace} for <code>race</code> in the {@link com.sap.sailing.domain.base.Regatta} corresponding
      * to {@link #tractracEvent}, as keyed by the {@link #domainFactory}. If the {@link RaceDefinition} for <code>race</code>
-     * is not found in the {@link com.sap.sailing.domain.base.Event}, <code>null</code> is returned. If the {@link TrackedRace}
-     * for <code>race</code> isn't found in the {@link TrackedEvent}, <code>null</code> is returned, too.
+     * is not found in the {@link com.sap.sailing.domain.base.Regatta}, <code>null</code> is returned. If the {@link TrackedRace}
+     * for <code>race</code> isn't found in the {@link TrackedRegatta}, <code>null</code> is returned, too.
      */
     protected DynamicTrackedRace getTrackedRace(Race race) {
         DynamicTrackedRace result = null;
         RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race);
-        com.sap.sailing.domain.base.Event domainEvent = getDomainFactory().getOrCreateEvent(getTracTracEvent());
+        com.sap.sailing.domain.base.Regatta domainEvent = getDomainFactory().getOrCreateEvent(getTracTracEvent());
         if (domainEvent.getRaceByName(raceDefinition.getName()) != null) {
             result = trackedEvent.getTrackedRace(raceDefinition);
         }

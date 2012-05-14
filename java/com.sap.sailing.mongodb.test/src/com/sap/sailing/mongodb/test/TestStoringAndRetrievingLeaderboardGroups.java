@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -150,7 +150,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         //RaceIdentifier change test
         final String eventName = "Event";
         final String raceName = "Race";
-        leaderboard.getRaceColumnByName(columnName).setRaceIdentifier(new EventNameAndRaceName(eventName, raceName));
+        leaderboard.getRaceColumnByName(columnName).setRaceIdentifier(new RegattaNameAndRaceName(eventName, raceName));
         mongoObjectFactory.storeLeaderboard(leaderboard);
         
         //Check if the leaderboard updated correctly

@@ -14,7 +14,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -350,7 +350,7 @@ public class ModeratorApp extends Servlet {
 
     private void listEvents(HttpServletResponse resp) throws IOException {
         JSONArray eventList = new JSONArray();
-        for (Event event : getService().getAllEvents()) {
+        for (Regatta event : getService().getAllRegattas()) {
             JSONObject jsonEvent = new JSONObject();
             jsonEvent.put("name", event.getName());
             if (event.getBoatClass() != null) {
@@ -378,7 +378,7 @@ public class ModeratorApp extends Servlet {
             JSONArray jsonRaces = new JSONArray();
             for (RaceDefinition race : event.getAllRaces()) {
                 // don't wait for the arrival of a tracked race; just ignore it if it's not currently being tracked
-                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(event).getExistingTrackedRace(race);
                 if (trackedRace != null) {
                     JSONObject jsonRace = new JSONObject();
                     jsonRace.put("name", race.getName());

@@ -1,17 +1,17 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 
-public class DynamicTrackedEventImpl extends TrackedEventImpl implements DynamicTrackedEvent {
+public class DynamicTrackedRegattaImpl extends TrackedRegattaImpl implements DynamicTrackedRegatta {
     private static final long serialVersionUID = -90155868534737120L;
 
-    public DynamicTrackedEventImpl(Event event) {
-        super(event);
+    public DynamicTrackedRegattaImpl(Regatta regatta) {
+        super(regatta);
     }
 
     @Override

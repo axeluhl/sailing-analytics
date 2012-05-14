@@ -36,11 +36,11 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 
@@ -75,7 +75,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final List<TracTracRaceRecordDTO> availableTracTracRaces;
     
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            EventRefresher eventRefresher, StringMessages stringConstants) {
+            RegattaRefresher eventRefresher, StringMessages stringConstants) {
         super(sailingService, eventRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
         this.errorReporter = errorReporter;
         availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
@@ -464,7 +464,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                     @Override
                     public void onSuccess(Void result) {
-                        eventRefresher.fillEvents();
+                        eventRefresher.fillRegattas();
                     }
                 });
             }
@@ -486,8 +486,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     @Override
-    public void fillEvents(List<EventDTO> result) {
-        trackedRacesListComposite.fillEvents(result);
+    public void fillRegattas(List<RegattaDTO> result) {
+        trackedRacesListComposite.fillRegattas(result);
     }
     
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {

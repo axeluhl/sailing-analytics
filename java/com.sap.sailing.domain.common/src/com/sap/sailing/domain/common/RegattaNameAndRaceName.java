@@ -2,14 +2,14 @@ package com.sap.sailing.domain.common;
 
 
 
-public class EventNameAndRaceName extends EventName implements EventAndRaceIdentifier {
+public class RegattaNameAndRaceName extends RegattaName implements RegattaAndRaceIdentifier {
     private static final long serialVersionUID = 3599904513673776450L;
     private String raceName;
     
-    EventNameAndRaceName() {}
+    RegattaNameAndRaceName() {}
     
-    public EventNameAndRaceName(String eventName, String raceName) {
-        super(eventName);
+    public RegattaNameAndRaceName(String regattaName, String raceName) {
+        super(regattaName);
         this.raceName = raceName;
     }
     public String getRaceName() {
@@ -49,7 +49,7 @@ public class EventNameAndRaceName extends EventName implements EventAndRaceIdent
             return false;
         if (getClass() != obj.getClass())
             return false;
-        EventNameAndRaceName other = (EventNameAndRaceName) obj;
+        RegattaNameAndRaceName other = (RegattaNameAndRaceName) obj;
         if (raceName == null) {
             if (other.raceName != null)
                 return false;

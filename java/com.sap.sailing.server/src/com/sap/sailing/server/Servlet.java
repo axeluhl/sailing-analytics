@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
@@ -40,13 +40,13 @@ public abstract class Servlet extends HttpServlet {
         return racingEventServiceTracker.getService();
     }
 
-    protected Event getEvent(HttpServletRequest req) {
-        Event event = getService().getEventByName(req.getParameter(PARAM_NAME_EVENTNAME));
+    protected Regatta getEvent(HttpServletRequest req) {
+        Regatta event = getService().getRegattaByName(req.getParameter(PARAM_NAME_EVENTNAME));
         return event;
     }
 
     protected RaceDefinition getRaceDefinition(HttpServletRequest req) {
-        Event event = getEvent(req);
+        Regatta event = getEvent(req);
         if (event != null) {
             String racename = req.getParameter(PARAM_NAME_RACENAME);
             for (RaceDefinition race : event.getAllRaces()) {
@@ -58,7 +58,7 @@ public abstract class Servlet extends HttpServlet {
         return null;
     }
 
-    protected RaceDefinition getRaceDefinition(Event event, HttpServletRequest req) {
+    protected RaceDefinition getRaceDefinition(Regatta event, HttpServletRequest req) {
         String racename = req.getParameter(PARAM_NAME_RACENAME);
         for (RaceDefinition race : event.getAllRaces()) {
             if (race.getName().equals(racename)) {
@@ -86,11 +86,11 @@ public abstract class Servlet extends HttpServlet {
     }
 
 	protected TrackedRace getTrackedRace(HttpServletRequest req) {
-	    Event event = getEvent(req);
+	    Regatta event = getEvent(req);
 	    RaceDefinition race = getRaceDefinition(req);
 	    TrackedRace trackedRace = null;
 	    if (event != null && race != null) {
-	        trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
+	        trackedRace = getService().getOrCreateTrackedRegatta(event).getTrackedRace(race);
 	    }
 	    return trackedRace;
 	}

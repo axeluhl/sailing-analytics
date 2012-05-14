@@ -24,14 +24,14 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -47,7 +47,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     private boolean raceIsKnownToStartUpwind;
     
-    public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
+    public DynamicTrackedRaceImpl(TrackedRegatta trackedEvent, RaceDefinition race,
             WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation) {
         super(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
@@ -83,7 +83,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
      * using {@link #setRaceIsKnownToStartUpwind(boolean)}. Uses <code>millisecondsOverWhichToAverageWind/2</code> for the
      * <code>delayForCacheInvalidationOfWindEstimation</code> argument of the constructor.
      */
-    public DynamicTrackedRaceImpl(TrackedEvent trackedEvent, RaceDefinition race,
+    public DynamicTrackedRaceImpl(TrackedRegatta trackedEvent, RaceDefinition race,
             WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         this(trackedEvent, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
@@ -492,8 +492,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public DynamicTrackedEvent getTrackedEvent() {
-        return (DynamicTrackedEvent) super.getTrackedEvent();
+    public DynamicTrackedRegatta getTrackedEvent() {
+        return (DynamicTrackedRegatta) super.getTrackedEvent();
     }
 
     @Override

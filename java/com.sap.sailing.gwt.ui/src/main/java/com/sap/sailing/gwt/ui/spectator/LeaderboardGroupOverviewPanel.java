@@ -34,7 +34,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -426,10 +426,10 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 if (race.getRaceIdentifier() != null) {
                     LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                     LeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
-                    EventNameAndRaceName raceId = (EventNameAndRaceName) race.getRaceIdentifier();
+                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier();
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName()
-                            + "&eventName=" + raceId.getEventName() + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
+                            + "&eventName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                     name = ANCHORTEMPLATE.anchor(link, raceId.getRaceName());
                 } else {

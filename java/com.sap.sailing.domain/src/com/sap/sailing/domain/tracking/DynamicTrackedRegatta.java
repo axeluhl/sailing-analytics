@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 
-public interface DynamicTrackedEvent extends TrackedEvent {
+public interface DynamicTrackedRegatta extends TrackedRegatta {
 
     DynamicTrackedRace getTrackedRace(RaceDefinition race);
 

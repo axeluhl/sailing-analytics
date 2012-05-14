@@ -29,8 +29,8 @@ import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RacesHandle;
-import com.sap.sailing.domain.tracking.TrackedEvent;
-import com.sap.sailing.domain.tracking.TrackedEventRegistry;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -56,7 +56,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
     private final Event tractracEvent;
-    private final com.sap.sailing.domain.base.Event domainEvent;
+    private final com.sap.sailing.domain.base.Regatta domainEvent;
     private final Thread ioThread;
     private final DataController controller;
     private final Set<Receiver> receivers;
@@ -77,9 +77,9 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * 
      * A race tracker uses the <code>paramURL</code> for the TracTrac Java client to register for push data about one
      * race. The {@link DomainFactory} is asked to retrieve an existing or create a new
-     * {@link com.sap.sailing.domain.base.Event} based on the TracTrac event. The {@link RaceDefinition} for the race,
+     * {@link com.sap.sailing.domain.base.Regatta} based on the TracTrac event. The {@link RaceDefinition} for the race,
      * however, isn't created until the {@link Course} has been received. Therefore, the {@link RaceCourseReceiver} will
-     * create the {@link RaceDefinition} and will add it to the {@link com.sap.sailing.domain.base.Event}.
+     * create the {@link RaceDefinition} and will add it to the {@link com.sap.sailing.domain.base.Regatta}.
      * <p>
      * 
      * The link to the {@link RaceDefinition} is created in the {@link DomainFactory} when the
@@ -101,11 +101,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
      * @param trackedEventRegistry
-     *            used to create the {@link TrackedEvent} for the domain event
+     *            used to create the {@link TrackedRegatta} for the domain event
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
-            TrackedEventRegistry trackedEventRegistry) throws URISyntaxException, MalformedURLException,
+            TrackedRegattaRegistry trackedEventRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException {
         super();
         urls = createID(paramURL, liveURI, storedURI);
@@ -132,10 +132,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             domainFactory.removeRace(tractracEvent, tractracRace, trackedEventRegistry);
         }
         domainEvent = domainFactory.getOrCreateEvent(tractracEvent);
-        setTrackedEvent(trackedEventRegistry.getOrCreateTrackedEvent(domainEvent));
+        setTrackedEvent(trackedEventRegistry.getOrCreateTrackedRegatta(domainEvent));
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
-        for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedEvent(), tractracEvent, startOfTracking,
+        for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
                 endOfTracking, windStore, this)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllersAndStart()) {
@@ -172,7 +172,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                         boolean first = true;
                         for (Buoy buoy : domainControlPoint.getBuoys()) {
                             for (RaceDefinition raceDefinition : raceDefinitions) {
-                                DynamicTrackedRace trackedRace = getTrackedEvent().getExistingTrackedRace(
+                                DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(
                                         raceDefinition);
                                 DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
                                 if (buoyTrack.getFirstRawFix() == null) {
@@ -202,7 +202,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
 
     @Override
     public RacesHandle getRacesHandle() {
-        return new RaceHandleImpl(domainFactory, tractracEvent, getTrackedEvent(), this);
+        return new RaceHandleImpl(domainFactory, tractracEvent, getTrackedRegatta(), this);
     }
     
     @Override
@@ -218,7 +218,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
     
     @Override
-    public com.sap.sailing.domain.base.Event getEvent() {
+    public com.sap.sailing.domain.base.Regatta getRegatta() {
         return domainEvent;
     }
     

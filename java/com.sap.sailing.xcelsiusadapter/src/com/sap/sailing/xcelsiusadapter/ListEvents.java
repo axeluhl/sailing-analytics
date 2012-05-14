@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom.Document;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -34,9 +34,9 @@ public class ListEvents extends Action {
     public void perform() throws Exception {
         final Document table = getTable("data");
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm zzz");
-        final HashMap<String, Event> events = getEvents();
+        final HashMap<String, Regatta> events = getEvents();
         for (final String eventName : events.keySet()) {
-            final Event event = events.get(eventName);
+            final Regatta event = events.get(eventName);
             final HashMap<String, RaceDefinition> races = getRaces(event);
             for (final String raceName : races.keySet()) {
                 RaceDefinition race = races.get(raceName);

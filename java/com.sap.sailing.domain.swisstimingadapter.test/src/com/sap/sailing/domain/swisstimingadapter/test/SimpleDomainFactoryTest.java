@@ -9,10 +9,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.EventImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
@@ -31,7 +31,7 @@ public class SimpleDomainFactoryTest {
     @Test
     public void testCourseConfigForBuoy() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Event event = new EventImpl("TestEvent", /* boatClass */ null);
+        Regatta event = new RegattaImpl("TestEvent", /* boatClass */ null);
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
@@ -55,7 +55,7 @@ public class SimpleDomainFactoryTest {
     @Test
     public void testCourseConfigForGate() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Event event = new EventImpl("TestEvent", /* boatClass */ null);
+        Regatta event = new RegattaImpl("TestEvent", /* boatClass */ null);
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);

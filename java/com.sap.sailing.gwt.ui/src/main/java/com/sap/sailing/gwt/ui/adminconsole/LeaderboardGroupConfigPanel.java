@@ -36,18 +36,18 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
-import com.sap.sailing.gwt.ui.client.AbstractEventPanel;
+import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 
-public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
+public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
@@ -86,7 +86,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     private ArrayList<LeaderboardGroupDTO> availableLeaderboardGroups;
     private ArrayList<LeaderboardDTO> availableLeaderboards;
 
-    public LeaderboardGroupConfigPanel(SailingServiceAsync sailingService, EventRefresher eventRefresher,
+    public LeaderboardGroupConfigPanel(SailingServiceAsync sailingService, RegattaRefresher eventRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
         super(sailingService, eventRefresher, errorReporter, stringMessages);
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -762,7 +762,7 @@ public class LeaderboardGroupConfigPanel extends AbstractEventPanel {
     }
 
     @Override
-    public void fillEvents(List<EventDTO> result) {
+    public void fillRegattas(List<RegattaDTO> result) {
     }
 
     private void setDescriptionEditable(boolean isEditable) {

@@ -13,29 +13,29 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.RaceListener;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 
-public class TrackedEventImpl implements TrackedEvent {
+public class TrackedRegattaImpl implements TrackedRegatta {
     private static final long serialVersionUID = 6480508193567014285L;
 
-    private static final Logger logger = Logger.getLogger(TrackedEventImpl.class.getName());
+    private static final Logger logger = Logger.getLogger(TrackedRegattaImpl.class.getName());
     
-    private final Event event;
+    private final Regatta regatta;
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     private final Map<BoatClass, Collection<TrackedRace>> trackedRacesByBoatClass;
     private transient Set<RaceListener> raceListeners;
   
-    public TrackedEventImpl(Event event) {
+    public TrackedRegattaImpl(Regatta regatta) {
         super();
-        this.event = event;
+        this.regatta = regatta;
         this.trackedRaces = new HashMap<RaceDefinition, TrackedRace>();
         this.trackedRacesByBoatClass = new HashMap<BoatClass, Collection<TrackedRace>>();
         raceListeners = new HashSet<RaceListener>();
@@ -51,7 +51,7 @@ public class TrackedEventImpl implements TrackedEvent {
      * a new one into which all other collection contents are copied.
      */
     private Object readResolve() {
-        TrackedEventImpl result = new TrackedEventImpl(this.event);
+        TrackedRegattaImpl result = new TrackedRegattaImpl(this.regatta);
         result.trackedRaces.putAll(this.trackedRaces);
         result.trackedRacesByBoatClass.putAll(this.trackedRacesByBoatClass);
         return result;
@@ -100,8 +100,8 @@ public class TrackedEventImpl implements TrackedEvent {
     }
 
     @Override
-    public Event getEvent() {
-        return event;
+    public Regatta getRegatta() {
+        return regatta;
     }
 
     @Override

@@ -10,13 +10,13 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 
 public class IdentifierSerializationTest {
 
     @Test
     public void identifierSerializationTest() throws IOException, ClassNotFoundException {
-        EventNameAndRaceName original = new EventNameAndRaceName("TestEvent", "Test Race");
+        RegattaNameAndRaceName original = new RegattaNameAndRaceName("TestEvent", "Test Race");
         PipedInputStream pis = new PipedInputStream();
         PipedOutputStream pos = new PipedOutputStream(pis);
         
@@ -27,7 +27,7 @@ public class IdentifierSerializationTest {
         oos.writeObject(original);
         oos.flush();
         
-        EventNameAndRaceName streamed = (EventNameAndRaceName) ois.readObject();
+        RegattaNameAndRaceName streamed = (RegattaNameAndRaceName) ois.readObject();
         
         ois.close();
         oos.close();
