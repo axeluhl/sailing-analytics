@@ -56,6 +56,8 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.charts.WindChart;
+import com.sap.sailing.gwt.ui.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 
 /**

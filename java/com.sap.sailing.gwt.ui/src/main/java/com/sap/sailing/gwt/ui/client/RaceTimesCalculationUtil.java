@@ -1,9 +1,8 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class RaceTimesCalculationUtil {
