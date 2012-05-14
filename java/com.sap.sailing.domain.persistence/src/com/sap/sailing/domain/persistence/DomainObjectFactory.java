@@ -41,7 +41,7 @@ public interface DomainObjectFactory {
      */
     Iterable<Leaderboard> getLeaderboardsNotInGroup();
 
-    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta event, RaceDefinition race,
+    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
             long millisecondsOverWhichToAverageWind);
 
 }

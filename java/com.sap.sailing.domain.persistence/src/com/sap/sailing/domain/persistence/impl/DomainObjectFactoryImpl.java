@@ -83,10 +83,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public RaceIdentifier loadRaceIdentifier(DBObject dbObject) {
         RaceIdentifier result = null;
-        String eventName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
+        String regattaName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
         String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
-        if (eventName != null && raceName != null) {
-            result = new RegattaNameAndRaceName(eventName, raceName);
+        if (regattaName != null && raceName != null) {
+            result = new RegattaNameAndRaceName(regattaName, raceName);
         }
         return result;
     }
@@ -270,12 +270,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta event, RaceDefinition race,
+    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
             long millisecondsOverWhichToAverageWind) {
         Map<WindSource, WindTrack> result = new HashMap<WindSource, WindTrack>();
         try {
             BasicDBObject query = new BasicDBObject();
-            query.put(FieldNames.EVENT_NAME.name(), event.getName());
+            // TODO EVENT_NAME has to become REGATTA_NAME, but we'd need a DB migration script for this for legacy instances
+            query.put(FieldNames.EVENT_NAME.name(), regatta.getName());
             query.put(FieldNames.RACE_NAME.name(), race.getName());
             DBCollection windTracks = database.getCollection(CollectionNames.WIND_TRACKS.name());
             for (DBObject o : windTracks.find(query)) {

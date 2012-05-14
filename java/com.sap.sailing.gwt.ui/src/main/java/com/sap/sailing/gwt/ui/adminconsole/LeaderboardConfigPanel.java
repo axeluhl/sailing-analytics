@@ -309,7 +309,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier();
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName="
-                            + selectedLeaderboard.name + "&raceName=" + raceIdentifier.getRaceName() + "&eventName="
+                            + selectedLeaderboard.name + "&raceName=" + raceIdentifier.getRaceName() + "&regattaName="
                             + raceIdentifier.getRegattaName()
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTO.getRaceColumnName());
@@ -596,8 +596,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 });
     }
 
-    private void selectRaceInList(String eventName, String raceName) {
-        RegattaNameAndRaceName raceIdentifier = new RegattaNameAndRaceName(eventName, raceName);  
+    private void selectRaceInList(String regattaName, String raceName) {
+        RegattaNameAndRaceName raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);  
         trackedRacesListComposite.selectRaceByIdentifier(raceIdentifier);
     }
 
@@ -759,10 +759,10 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     }
 
     @Override
-    public void changeTrackingRace(RegattaNameAndRaceName eventNameAndRaceName, boolean isTracked) {
+    public void changeTrackingRace(RegattaNameAndRaceName regattaNameAndRaceName, boolean isTracked) {
         for (RaceInLeaderboardDTO race : raceColumnList.getList()) {
-            if (race.getRaceColumnName().equals(eventNameAndRaceName.getRaceName())) {
-                race.setRaceIdentifier(eventNameAndRaceName);
+            if (race.getRaceColumnName().equals(regattaNameAndRaceName.getRaceName())) {
+                race.setRaceIdentifier(regattaNameAndRaceName);
             }
         }
         raceColumnList.refresh();

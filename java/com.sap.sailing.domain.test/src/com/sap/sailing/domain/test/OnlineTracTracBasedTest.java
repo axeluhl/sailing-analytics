@@ -77,9 +77,9 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         // to select a race
     }
 
-    protected void setUp(String eventName, String raceId, ReceiverType... receiverTypes) throws MalformedURLException,
+    protected void setUp(String regattaName, String raceId, ReceiverType... receiverTypes) throws MalformedURLException,
             IOException, InterruptedException, URISyntaxException {
-        setUpWithoutLaunchingController(eventName, raceId);
+        setUpWithoutLaunchingController(regattaName, raceId);
         assertEquals(getExpectedEventName(), getEvent().getName());
         completeSetupLaunchingControllerAndWaitForRaceDefinition(receiverTypes);
     }
@@ -123,9 +123,9 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     }
 
 
-    protected void setUpWithoutLaunchingController(String eventName, String raceId) throws FileNotFoundException, MalformedURLException,
+    protected void setUpWithoutLaunchingController(String regattaName, String raceId) throws FileNotFoundException, MalformedURLException,
             URISyntaxException {
-        super.setUp(new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+eventName+"/clientparams.php?event="+eventName+"&race="+raceId),
+        super.setUp(new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId),
                 tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
                         tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED));
         if (domainFactory == null) {

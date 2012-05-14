@@ -199,7 +199,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             if (race.getRaceIdentifier() != null) {
                 RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier();
                 String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + raceId.getRaceName()
-                        + "&eventName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + group.name + "&root=" + root);
+                        + "&regattaName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + group.name + "&root=" + root);
                 if(debugParam != null && !debugParam.isEmpty())
                     link += "&gwt.codesvr=" + debugParam;
                 if(viewMode != null && !viewMode.isEmpty())
@@ -219,7 +219,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             if (race.getRaceIdentifier() != null) {
                 RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier();
                 String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
-                        + "&raceName=" + raceId.getRaceName() + "&root=" + root + raceId.getRaceName() + "&eventName="
+                        + "&raceName=" + raceId.getRaceName() + "&root=" + root + raceId.getRaceName() + "&regattaName="
                         + raceId.getRegattaName() + "&leaderboardGroupName=" + group.name);
                 if(debugParam != null && !debugParam.isEmpty())
                     link += "&gwt.codesvr=" + debugParam;

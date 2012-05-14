@@ -522,7 +522,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 new MillisecondsTimePoint(rr.trackingStartTime), new MillisecondsTimePoint(rr.trackingEndTime),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory), TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         if (trackWind) {
-            new Thread("Wind tracking starter for race "+rr.eventName+"/"+rr.name) {
+            new Thread("Wind tracking starter for race "+rr.regattaName+"/"+rr.name) {
                 public void run() {
                     try {
                         startTrackingWind(raceHandle, correctWindByDeclination, TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
@@ -1685,16 +1685,16 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public TrackedRace getTrackedRace(RegattaAndRaceIdentifier eventNameAndRaceName) {
-        Regatta event = getService().getRegattaByName(eventNameAndRaceName.getRegattaName());
-        RaceDefinition race = getRaceByName(event, eventNameAndRaceName.getRaceName());
+    public TrackedRace getTrackedRace(RegattaAndRaceIdentifier regattaNameAndRaceName) {
+        Regatta event = getService().getRegattaByName(regattaNameAndRaceName.getRegattaName());
+        RaceDefinition race = getRaceByName(event, regattaNameAndRaceName.getRaceName());
         TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(event).getTrackedRace(race);
         return trackedRace;
     }
 
     @Override
-    public TrackedRace getExistingTrackedRace(RaceIdentifier eventNameAndRaceName) {
-        return getService().getExistingTrackedRace(eventNameAndRaceName);
+    public TrackedRace getExistingTrackedRace(RaceIdentifier regattaNameAndRaceName) {
+        return getService().getExistingTrackedRace(regattaNameAndRaceName);
     }
     
     @Override

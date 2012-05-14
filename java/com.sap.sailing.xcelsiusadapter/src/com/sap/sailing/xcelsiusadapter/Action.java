@@ -62,18 +62,18 @@ public class Action {
         /*
          * EVENT
          */
-        final String eventName = getAttribute("event");
+        final String regattaName = getAttribute("event");
 
-        if (eventName == null) {
+        if (regattaName == null) {
             say("Use the event= parameter to specify the event");
 
             return null;
         }
 
-        final Regatta event = getEvent(eventName);
+        final Regatta event = getEvent(regattaName);
 
         if (event == null) {
-            say("Event " + eventName + " not found.");
+            say("Event " + regattaName + " not found.");
 
             return null;
         }

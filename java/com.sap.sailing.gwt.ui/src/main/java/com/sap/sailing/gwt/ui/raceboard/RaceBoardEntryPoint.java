@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
 
-    private String eventName;
+    private String regattaName;
     private String raceName;
     private String leaderboardName;
     private String leaderboardGroupName;
@@ -42,7 +42,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
-        eventName = Window.Location.getParameter("eventName");
+        regattaName = Window.Location.getParameter("regattaName");
         raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
         String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
@@ -65,7 +65,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         if (leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
             leaderboardGroupName = leaderboardGroupNameParamValue; 
         }
-        if (eventName == null || eventName.isEmpty() || raceName == null || raceName.isEmpty()) {
+        if (regattaName == null || regattaName.isEmpty() || raceName == null || raceName.isEmpty()) {
             createErrorPage("This page requires a valid event name and race name.");
             return;
         }
@@ -123,9 +123,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 return;
             }
         }
-        selectedRace = findRace(eventName, raceName, events);
+        selectedRace = findRace(regattaName, raceName, events);
         if (selectedRace == null) {
-            createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
+            createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + regattaName);
             return;
         }
 
@@ -144,9 +144,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
     }  
 
-    private RaceDTO findRace(String eventName, String raceName, List<RegattaDTO> events) {
+    private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> events) {
         for (RegattaDTO eventDTO : events) {
-            if (eventDTO.name.equals(eventName)) {
+            if (eventDTO.name.equals(regattaName)) {
                 for (DeprecatedRegattaDTO regattaDTO : eventDTO.regattas) {
                     for (RaceDTO raceDTO: regattaDTO.races) {
                         if (raceDTO.name.equals(raceName)) {

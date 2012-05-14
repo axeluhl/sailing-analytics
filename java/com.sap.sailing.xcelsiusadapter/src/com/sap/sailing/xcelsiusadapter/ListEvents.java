@@ -35,8 +35,8 @@ public class ListEvents extends Action {
         final Document table = getTable("data");
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm zzz");
         final HashMap<String, Regatta> events = getEvents();
-        for (final String eventName : events.keySet()) {
-            final Regatta event = events.get(eventName);
+        for (final String regattaName : events.keySet()) {
+            final Regatta event = events.get(regattaName);
             final HashMap<String, RaceDefinition> races = getRaces(event);
             for (final String raceName : races.keySet()) {
                 RaceDefinition race = races.get(raceName);
@@ -44,7 +44,7 @@ public class ListEvents extends Action {
                 if (trackedRace != null) {
                     addRow();
                     addColumn(race.getBoatClass().getName());
-                    addColumn(eventName);
+                    addColumn(regattaName);
                     addColumn(raceName);
                     addColumn(trackedRace.getStartOfRace() == null ? " " : dateFormat.format(trackedRace.getStartOfRace().asDate()));
                     addColumn("" + Util.size(race.getCompetitors()));
@@ -79,7 +79,7 @@ public class ListEvents extends Action {
                     addColumn("" + startPos.getBearingGreatCircle(secondMarkPos).getDegrees());
                     addColumn("" + startPos.getLatDeg());
                     addColumn("" + startPos.getLngDeg());
-                    addColumn(URLEncoder.encode(eventName, "UTF-8"));
+                    addColumn(URLEncoder.encode(regattaName, "UTF-8"));
                     addColumn(URLEncoder.encode(raceName, "UTF-8"));
                 }
             }

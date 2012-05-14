@@ -152,15 +152,15 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         raceTable = new CellTable<RaceDTO>(/* pageSize */200, tableRes);
         ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(
                 raceList.getList());
-        TextColumn<RaceDTO> eventNameColumn = new TextColumn<RaceDTO>() {
+        TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
                 return raceDTO.getRegatta().getRegatta().name;
             }
         };
-        eventNameColumn.setSortable(true);
+        regattaNameColumn.setSortable(true);
 
-        columnSortHandler.setComparator(eventNameColumn, new Comparator<RaceDTO>() {
+        columnSortHandler.setComparator(regattaNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO t1, RaceDTO t2) {
                 RegattaDTO eventOne = t1.getEvent();
@@ -181,15 +181,15 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
             }
         });
 
-        TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
+        TextColumn<RaceDTO> deprecatedRegattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
                 return raceDTO.getRegatta().boatClass.name;
             }
         };
-        regattaNameColumn.setSortable(true);
+        deprecatedRegattaNameColumn.setSortable(true);
 
-        columnSortHandler.setComparator(regattaNameColumn, new Comparator<RaceDTO>() {
+        columnSortHandler.setComparator(deprecatedRegattaNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO t1, RaceDTO t2) {
                 DeprecatedRegattaDTO regattaOne = t1.getRegatta();
@@ -219,7 +219,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
                     RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceDTO.getRaceIdentifier();
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?raceName="
-                            + raceIdentifier.getRaceName() + "&eventName=" + raceIdentifier.getRegattaName()
+                            + raceIdentifier.getRaceName() + "&regattaName=" + raceIdentifier.getRegattaName()
                             + ((debugParam != null && !debugParam.isEmpty()) ? "&gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.cell(link, raceDTO.name);
                 } else {
@@ -289,8 +289,8 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
             }
         };
 
-        raceTable.addColumn(eventNameColumn, stringConstants.event());
-        raceTable.addColumn(regattaNameColumn, stringConstants.regatta());
+        raceTable.addColumn(regattaNameColumn, stringConstants.event());
+        raceTable.addColumn(deprecatedRegattaNameColumn, stringConstants.regatta());
         raceTable.addColumn(raceNameColumn, stringConstants.race());
         raceTable.addColumn(raceStartColumn, stringConstants.startTime());
         raceTable.addColumn(raceTrackedColumn, stringConstants.tracked());
@@ -436,8 +436,8 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
     }
 
     private void stopTrackingRace(final RaceDTO race) {
-        final RegattaNameAndRaceName eventNameAndRaceName = (RegattaNameAndRaceName) race.getRaceIdentifier();
-        sailingService.stopTrackingRace(eventNameAndRaceName, new AsyncCallback<Void>() {
+        final RegattaNameAndRaceName regattaNameAndRaceName = (RegattaNameAndRaceName) race.getRaceIdentifier();
+        sailingService.stopTrackingRace(regattaNameAndRaceName, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
@@ -448,15 +448,15 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
             public void onSuccess(Void result) {
                 eventRefresher.fillRegattas();
                 for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                    listener.changeTrackingRace(eventNameAndRaceName, false);
+                    listener.changeTrackingRace(regattaNameAndRaceName, false);
                 }
             }
         });
     }
 
     private void removeAndUntrackRace(final RaceDTO race) {
-        final RegattaNameAndRaceName eventNameAndRaceName = (RegattaNameAndRaceName) race.getRaceIdentifier();
-        sailingService.removeAndUntrackRace(eventNameAndRaceName,
+        final RegattaNameAndRaceName regattaNameAndRaceName = (RegattaNameAndRaceName) race.getRaceIdentifier();
+        sailingService.removeAndUntrackRace(regattaNameAndRaceName,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -468,7 +468,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
                     public void onSuccess(Void result) {
                         eventRefresher.fillRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                            listener.changeTrackingRace(eventNameAndRaceName, false);
+                            listener.changeTrackingRace(regattaNameAndRaceName, false);
                         }
                     }
                 });

@@ -10,9 +10,9 @@ public class AddRegatta extends AbstractRacingEventServiceOperation<Regatta> {
     private final String boatClassName;
     private final boolean boatClassTypicallyStartsUpwind;
     
-    public AddRegatta(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
+    public AddRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
         super();
-        this.baseEventName = eventName;
+        this.baseEventName = regattaName;
         this.boatClassName = boatClassName;
         this.boatClassTypicallyStartsUpwind = boatClassTypicallyStartsUpwind;
     }

@@ -87,10 +87,10 @@ public abstract class TrackBasedTest {
      *            tracked race returned by this method) is important because otherwise confidences of wind readouts may
      *            be ridiculously low.
      */
-    protected DynamicTrackedRace createTestTrackedRace(String eventName, String raceName, String boatClassName,
+    protected DynamicTrackedRace createTestTrackedRace(String regattaName, String raceName, String boatClassName,
             Iterable<Competitor> competitors, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
-        Regatta event = new RegattaImpl(eventName, boatClass);
+        Regatta event = new RegattaImpl(regattaName, boatClass);
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(event);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:

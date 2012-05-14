@@ -47,8 +47,8 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
      * into {@link #firstTracked} and {@link #firstData}. All events are converted into {@link GPSFixMovingImpl}
      * objects and appended to the {@link DynamicTrackedRace}s.
      */
-    private void setUp(String eventName, String raceId) throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
-        super.setUpWithoutLaunchingController(eventName, raceId);
+    private void setUp(String regattaName, String raceId) throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
+        super.setUpWithoutLaunchingController(regattaName, raceId);
         final RaceChangeListener positionListener = new AbstractRaceChangeListener() {
             @Override
             public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
@@ -140,9 +140,9 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
         storeRace("event_20110609_KielerWoch", "357c700a-9d9a-11e0-85be-406186cbf87c");
     }
 
-    private void storeRace(String eventName, String raceId) throws MalformedURLException, IOException, InterruptedException,
+    private void storeRace(String regattaName, String raceId) throws MalformedURLException, IOException, InterruptedException,
             URISyntaxException, FileNotFoundException {
-        setUp(eventName, raceId);
+        setUp(regattaName, raceId);
         storeTracks();
     }
     

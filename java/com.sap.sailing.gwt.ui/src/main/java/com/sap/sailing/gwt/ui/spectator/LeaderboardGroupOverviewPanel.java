@@ -429,7 +429,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                     RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier();
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName()
-                            + "&eventName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
+                            + "&regattaName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                     name = ANCHORTEMPLATE.anchor(link, raceId.getRaceName());
                 } else {

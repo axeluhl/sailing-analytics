@@ -148,9 +148,9 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         Assert.assertEquals(newLeaderboardName, loadedLeaderboardName);
         
         //RaceIdentifier change test
-        final String eventName = "Event";
+        final String regattaName = "Event";
         final String raceName = "Race";
-        leaderboard.getRaceColumnByName(columnName).setRaceIdentifier(new RegattaNameAndRaceName(eventName, raceName));
+        leaderboard.getRaceColumnByName(columnName).setRaceIdentifier(new RegattaNameAndRaceName(regattaName, raceName));
         mongoObjectFactory.storeLeaderboard(leaderboard);
         
         //Check if the leaderboard updated correctly
