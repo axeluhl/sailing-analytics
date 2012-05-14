@@ -6,25 +6,24 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class RegattaDTO extends NamedDTO implements IsSerializable {
-    public List<DeprecatedRegattaDTO> deprecatedRegattas;
+    public BoatClassDTO boatClass;
+    public List<RaceDTO> races;
     public List<CompetitorDTO> competitors;
 
     public RegattaDTO() {
     }
 
-    public RegattaDTO(String name, List<DeprecatedRegattaDTO> deprecatedRegattas, List<CompetitorDTO> competitors) {
+    public RegattaDTO(String name, List<CompetitorDTO> competitors) {
         super(name);
         this.name = name;
-        this.deprecatedRegattas = deprecatedRegattas;
         this.competitors = competitors;
     }
 
     /**
-     * @return The start date of the first {@link RaceDTO Race} in the first {@link DeprecatedRegattaDTO Regatta}, or
-     *         <code>null</code> if the start date isn't set
+     * @return The start date of the first {@link #races Race}, or <code>null</code> if the start date isn't set
      */
     public Date getStartDate() {
-        return deprecatedRegattas.get(0).races.get(0).startOfRace;
+        return races.get(0).startOfRace;
     }
     
     /**
@@ -32,17 +31,12 @@ public class RegattaDTO extends NamedDTO implements IsSerializable {
      */
     public boolean currentlyTracked() {
         boolean tracked = false;
-        
-        regattaLoop:
-        for (DeprecatedRegattaDTO deprecatedRegatta : deprecatedRegattas) {
-            for (RaceDTO race : deprecatedRegatta.races) {
-                tracked = race.currentlyTracked;
-                if (tracked) {
-                    break regattaLoop;
-                }
+        for (RaceDTO race : races) {
+            tracked = race.currentlyTracked;
+            if (tracked) {
+                break;
             }
         }
-        
         return tracked;
     }
 

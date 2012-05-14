@@ -35,13 +35,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
@@ -52,11 +51,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaFetcher;
-import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
@@ -65,6 +59,11 @@ import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaFetcher;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -112,7 +111,6 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
@@ -132,7 +130,7 @@ import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.DeprecatedRegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
@@ -163,8 +161,8 @@ import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.SetRaceIsKnownToStartUpwind;
 import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
-import com.sap.sailing.server.operationaltransformation.StopTrackingRegatta;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
+import com.sap.sailing.server.operationaltransformation.StopTrackingRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateIsMedalRace;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboard;
@@ -422,46 +420,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         for (Regatta regatta : getService().getAllRegattas()) {
             List<CompetitorDTO> competitorList = getCompetitorDTOs(regatta.getCompetitors());
-            List<DeprecatedRegattaDTO> regattasList = getRegattaDTOs(regatta);
-            RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), regattasList, competitorList);
-            for (DeprecatedRegattaDTO deprecatedRegatta : regattasList) {
-                deprecatedRegatta.setRegatta(regattaDTO);
-            }
-            if (!regattaDTO.deprecatedRegattas.isEmpty()) {
+            RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), competitorList);
+            regattaDTO.races = getRaceDTOs(regatta);
+            if (!regattaDTO.races.isEmpty()) {
                 result.add(regattaDTO);
             }
         }
         return result;
     }
 
-    private List<DeprecatedRegattaDTO> getRegattaDTOs(Regatta regatta) {
-        Map<BoatClass, Set<RaceDefinition>> racesByBoatClass = new HashMap<BoatClass, Set<RaceDefinition>>();
-        for (RaceDefinition r : regatta.getAllRaces()) {
-            Set<RaceDefinition> racesForBoatClass = racesByBoatClass.get(r.getBoatClass());
-            if (racesForBoatClass == null) {
-                racesForBoatClass = new HashSet<RaceDefinition>();
-                racesByBoatClass.put(r.getBoatClass(), racesForBoatClass);
-            }
-            racesForBoatClass.add(r);
-        }
-        List<DeprecatedRegattaDTO> result = new ArrayList<DeprecatedRegattaDTO>();
-        for (Map.Entry<BoatClass, Set<RaceDefinition>> e : racesByBoatClass.entrySet()) {
-            List<RaceDTO> raceDTOsInBoatClass = getRaceDTOs(regatta, e.getValue());
-            if (!raceDTOsInBoatClass.isEmpty()) {
-                DeprecatedRegattaDTO deprecatedRegatta = new DeprecatedRegattaDTO(new BoatClassDTO(e.getKey() == null ? "" : e.getKey().getName(), e
-                        .getKey().getHullLength().getMeters()), raceDTOsInBoatClass);
-                for (RaceDTO race : raceDTOsInBoatClass) {
-                    race.setRegatta(deprecatedRegatta);
-                }
-                result.add(deprecatedRegatta);
-            }
-        }
-        return result;
-    }
-
-    private List<RaceDTO> getRaceDTOs(Regatta regatta, Set<RaceDefinition> races) {
+    private List<RaceDTO> getRaceDTOs(Regatta regatta) {
         List<RaceDTO> result = new ArrayList<RaceDTO>();
-        for (RaceDefinition r : races) {
+        for (RaceDefinition r : regatta.getAllRaces()) {
             RaceDTO raceDTO = new RaceDTO(r.getName(), getCompetitorDTOs(r.getCompetitors()), getService().isRaceBeingTracked(r));
             TrackedRace trackedRace = getService().getExistingTrackedRace(new RegattaNameAndRaceName(regatta.getName(), r.getName()));
             if (trackedRace != null) {
@@ -1183,12 +1153,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public List<LeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta) {
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
-        for (DeprecatedRegattaDTO deprecatedRegatta : regatta.deprecatedRegattas) {
-            for (RaceDTO race : deprecatedRegatta.races) {
-                List<LeaderboardDTO> leaderboard = getLeaderboardsByRace(race);
-                if (leaderboard != null && !leaderboard.isEmpty()) {
-                    results.addAll(leaderboard);
-                }
+        for (RaceDTO race : regatta.races) {
+            List<LeaderboardDTO> leaderboard = getLeaderboardsByRace(race);
+            if (leaderboard != null && !leaderboard.isEmpty()) {
+                results.addAll(leaderboard);
             }
         }
         // Removing duplicates

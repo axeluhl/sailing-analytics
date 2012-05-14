@@ -20,17 +20,17 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
@@ -38,9 +38,8 @@ import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.DeprecatedRegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.charts.AbstractChartPanel;
 import com.sap.sailing.gwt.ui.shared.charts.MultiChartPanel;
@@ -369,11 +368,9 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     public void fillRegattas(List<RegattaDTO> regattas) {
         racesByIdentifier.clear();
         for (RegattaDTO regatta : regattas) {
-            for (DeprecatedRegattaDTO deprecatedRegatta : regatta.deprecatedRegattas) {
-                for (RaceDTO race : deprecatedRegatta.races) {
-                    if (race != null && race.getRaceIdentifier() != null) {
-                        racesByIdentifier.put(race.getRaceIdentifier(), race);
-                    }
+            for (RaceDTO race : regatta.races) {
+                if (race != null && race.getRaceIdentifier() != null) {
+                    racesByIdentifier.put(race.getRaceIdentifier(), race);
                 }
             }
         }

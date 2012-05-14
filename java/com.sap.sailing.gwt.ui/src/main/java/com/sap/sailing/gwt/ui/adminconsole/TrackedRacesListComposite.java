@@ -412,13 +412,11 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         }
         List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
         List<RegattaAndRaceIdentifier> newAllRaceIdentifiers = new ArrayList<RegattaAndRaceIdentifier>();
-        for (RegattaDTO event : events) {
-            for (DeprecatedRegattaDTO regatta : event.deprecatedRegattas) {
-                for (RaceDTO race : regatta.races) {
-                    if (race != null) {
-                        newAllRaces.add(race);
-                        newAllRaceIdentifiers.add(race.getRaceIdentifier());
-                    }
+        for (RegattaDTO regatta : events) {
+            for (RaceDTO race : regatta.races) {
+                if (race != null) {
+                    newAllRaces.add(race);
+                    newAllRaceIdentifiers.add(race.getRaceIdentifier());
                 }
             }
         }

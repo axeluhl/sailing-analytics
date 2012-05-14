@@ -12,14 +12,13 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.DeprecatedRegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class TrackedRacesManagementPanel extends AbstractEventManagementPanel implements RaceSelectionChangeListener {
     private RegattaAndRaceIdentifier singleSelectedRace;
@@ -82,14 +81,12 @@ public class TrackedRacesManagementPanel extends AbstractEventManagementPanel im
             selectedRacePanel.setCaptionText(singleSelectedRace.getRaceName());
             selectedRacePanel.setVisible(true);
             
-            for (RegattaDTO event : savedEvents) {
-                for (DeprecatedRegattaDTO regatta : event.deprecatedRegattas) {
-                    for (RaceDTO race : regatta.races) {
-                        if (race != null && race.getRaceIdentifier().equals(singleSelectedRace)) {
-                            this.selectedRaceDTO = race;
-                            refreshRaceData();
-                            break;
-                        }
+            for (RegattaDTO regatta : savedEvents) {
+                for (RaceDTO race : regatta.races) {
+                    if (race != null && race.getRaceIdentifier().equals(singleSelectedRace)) {
+                        this.selectedRaceDTO = race;
+                        refreshRaceData();
+                        break;
                     }
                 }
             }
