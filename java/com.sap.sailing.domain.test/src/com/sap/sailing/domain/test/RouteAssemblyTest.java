@@ -39,7 +39,7 @@ public class RouteAssemblyTest extends AbstractTracTracLiveTest {
             @Override
             public Iterable<TypeController> getTypeControllersAndStart() {
                 final TypeController routeListener[] = new TypeController[1];
-                routeListener[0] = RouteData.subscribe(getEvent().getRaceList().iterator().next(),
+                routeListener[0] = RouteData.subscribe(getTracTracEvent().getRaceList().iterator().next(),
                         new ICallbackData<Route, RouteData>() {
                             private boolean first = true;
 

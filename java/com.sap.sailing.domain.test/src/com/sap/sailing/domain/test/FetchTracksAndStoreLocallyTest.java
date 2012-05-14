@@ -157,7 +157,7 @@ public class FetchTracksAndStoreLocallyTest extends OnlineTracTracBasedTest {
         for (Map.Entry<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> competitorAndTrack : tracks.entrySet()) {
             Competitor competitor = competitorAndTrack.getKey();
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = competitorAndTrack.getValue();
-            storeTrack(competitor, track, getEvent().getName()+"-"+trackedRace.getRace().getName());
+            storeTrack(competitor, track, getTracTracEvent().getName()+"-"+trackedRace.getRace().getName());
         }
     }
 

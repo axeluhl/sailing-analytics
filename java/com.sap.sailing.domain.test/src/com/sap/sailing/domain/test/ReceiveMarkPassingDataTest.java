@@ -46,7 +46,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
      */
     @Before
     public void setupListener() {
-        final Race race = getEvent().getRaceList().iterator().next();
+        final Race race = getTracTracEvent().getRaceList().iterator().next();
         Receiver receiver = new Receiver() {
             @Override
             public Iterable<TypeController> getTypeControllersAndStart() {
@@ -93,8 +93,8 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         List<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(receiver);
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
-                new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateEvent(getEvent())),
-                getEvent(), EmptyWindStore.INSTANCE, /* startOfTracking */ null, /* endOfTracking */ null,
+                new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateEvent(getTracTracEvent())),
+                getTracTracEvent(), EmptyWindStore.INSTANCE, /* startOfTracking */ null, /* endOfTracking */ null,
                 new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {}

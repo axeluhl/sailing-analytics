@@ -112,7 +112,7 @@ public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, Ra
     }
 
     private String toString(RaceDTO race) {
-        return race.getEvent().name+" - "+race.name+(race.currentlyTracked ? " ("+stringConstants.tracked()+")" : "");
+        return race.getRegatta().name+" - "+race.name+(race.currentlyTracked ? " ("+stringConstants.tracked()+")" : "");
     }
 
     @Override

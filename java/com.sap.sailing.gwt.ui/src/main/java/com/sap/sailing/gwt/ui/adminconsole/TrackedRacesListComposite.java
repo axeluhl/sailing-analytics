@@ -42,20 +42,19 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.DeprecatedRegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattaDisplayer}, e.g., with
@@ -155,7 +154,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                return raceDTO.getDeprecatedRegatta().getRegatta().name;
+                return raceDTO.getRegatta().name;
             }
         };
         regattaNameColumn.setSortable(true);
@@ -163,8 +162,8 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         columnSortHandler.setComparator(regattaNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO t1, RaceDTO t2) {
-                RegattaDTO eventOne = t1.getEvent();
-                RegattaDTO eventTwo = t2.getEvent();
+                RegattaDTO eventOne = t1.getRegatta();
+                RegattaDTO eventTwo = t2.getRegatta();
                 boolean ascending = isSortedAscending();
                 if (eventOne.name.equals(eventTwo.name)) {
                     return 0;
@@ -192,8 +191,8 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         columnSortHandler.setComparator(deprecatedRegattaNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO t1, RaceDTO t2) {
-                DeprecatedRegattaDTO regattaOne = t1.getDeprecatedRegatta();
-                DeprecatedRegattaDTO regattaTwo = t2.getDeprecatedRegatta();
+                RegattaDTO regattaOne = t1.getRegatta();
+                RegattaDTO regattaTwo = t2.getRegatta();
                 boolean ascending = isSortedAscending();
                 if (regattaOne.boatClass.name.equals(regattaTwo.boatClass.name)) {
                     return 0;
@@ -375,7 +374,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
     public void selectRaceByIdentifier(RaceIdentifier raceIdentifier) {
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
-                RegattaDTO event = race.getEvent();
+                RegattaDTO event = race.getRegatta();
                 if (event.name.equals(raceIdentifier.getRegattaName()) && race.name.equals(raceIdentifier.getRaceName())) {
                     dontFireNextSelectionChangeEvent = true;
                     selectionModel.setSelected(race, true);
@@ -439,7 +438,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
-                        + race.getEvent().name + ": " + caught.getMessage());
+                        + race.getRegatta().name + ": " + caught.getMessage());
             }
 
             @Override
@@ -459,7 +458,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
-                                + race.getEvent().name + ": " + caught.getMessage());
+                                + race.getRegatta().name + ": " + caught.getMessage());
                     }
 
                     @Override
@@ -481,7 +480,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    if (!raceDTO.getEvent().name.toUpperCase().contains(textAsUppercase)
+                    if (!raceDTO.getRegatta().name.toUpperCase().contains(textAsUppercase)
                             && !raceDTO.getDeprecatedRegatta().boatClass.name.toUpperCase().contains(textAsUppercase)
                             && !raceDTO.name.toUpperCase().contains(textAsUppercase)) {
                         failed = true;
