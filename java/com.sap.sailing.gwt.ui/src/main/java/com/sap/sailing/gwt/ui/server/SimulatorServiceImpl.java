@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
@@ -131,6 +132,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         course.add(se);
         Distance dist = nw.getDistance(se);
         Speed requiredSpeed10 = dist.inTime(600000);
+        logger.info(requiredSpeed10.getKilometersPerHour() + "km/h," + requiredSpeed10.getKnots() + "kn," 
+        + requiredSpeed10.getMetersPerSecond() + "m/s");
         RectangularBoundary bd = new RectangularBoundary(nw, se);
         List<Position> lattice = bd.extractLattice(5, 5);
 
@@ -140,12 +143,15 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             lattice.add(nw);
             lattice.add(se);
         }
-
+        
+      
         // WindField wf = new WindFieldImpl(bd, params.getWindSpeed(), params.getWindBearing());
         // I am creating the WindField such as the course goes mainly against the wind (as it should)
         // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
-        WindField wf = new WindFieldImpl(bd, requiredSpeed10.getKilometersPerHour(), bd.getSouth().getDegrees());
-
+        //WindField wf = new WindFieldImpl(bd, requiredSpeed10.getKilometersPerHour(), bd.getSouth().getDegrees());
+        KnotSpeedImpl knotSpeedImpl = new KnotSpeedImpl(params.getWindSpeed());
+        WindField wf = new WindFieldImpl(bd, knotSpeedImpl.getKilometersPerHour(), bd.getSouth().getDegrees());
+        
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
         if (lattice != null) {
@@ -182,7 +188,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         // WindField wf = new WindFieldImpl(bd, params.getWindSpeed(), params.getWindBearing());
         // I am creating the WindField such as the course goes mainly against the wind (as it should)
         // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
-        WindField wf = new WindFieldImpl(bd, requiredSpeed10.getKilometersPerHour(), bd.getSouth().getDegrees());
+        KnotSpeedImpl knotSpeedImpl = new KnotSpeedImpl(params.getWindSpeed());
+        WindField wf = new WindFieldImpl(bd, knotSpeedImpl.getKilometersPerHour(), bd.getSouth().getDegrees());
+        
 
         PathDTO[] pathDTO = new PathDTO[1];
         List<WindDTO> path = getOptimumPath(course, wf);

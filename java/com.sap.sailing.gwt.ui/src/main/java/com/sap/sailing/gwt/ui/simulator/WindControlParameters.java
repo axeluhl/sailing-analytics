@@ -2,10 +2,11 @@ package com.sap.sailing.gwt.ui.simulator;
 
 
 public class WindControlParameters {
-    public double windSpeed = 7.2;
-    public double windBearing = 0;
+    public double windSpeedInKnots;
+    public double windBearing;
     
-    public WindControlParameters() {
-        
+    public WindControlParameters(double speedInKnots, double bearing) {
+        windSpeedInKnots = speedInKnots;
+        windBearing = bearing;
     }
 }

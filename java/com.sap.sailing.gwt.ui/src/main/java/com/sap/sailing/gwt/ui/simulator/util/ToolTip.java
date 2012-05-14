@@ -49,26 +49,29 @@ public class ToolTip {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other != null) {
-            ToolTip otherPoint = (ToolTip) other;
-
-            boolean value = (otherPoint.getX() >= this.getX() - toolTipTolerance && otherPoint.getX() <= this.getX()
-                    + toolTipTolerance)
-                    && (otherPoint.getY() >= this.getY() - toolTipTolerance && otherPoint.getY() <= this.getY()
-                            + toolTipTolerance);
-            return value;
-        }
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ToolTip other = (ToolTip) obj;
+        if (other.x <= x + toolTipTolerance && other.x >= x - toolTipTolerance 
+                && other.y <= y + toolTipTolerance && other.y >= y - toolTipTolerance)
+            return true;
+      
         return false;
     }
 
     @Override
     public int hashCode() {
-        return (int) (x + y);
+       return (int)x + (int)y;
     }
 
     @Override
     public String toString() {
         return "(" + x + "," + y + ")";
     }
+    
 }

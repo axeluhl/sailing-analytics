@@ -24,12 +24,12 @@ import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 public class SimulatorMap extends AbsolutePanel implements RequiresDataInitialization {
 
     private MapWidget mapw;
-    private boolean dataInitialized = false;
-    private boolean overlaysInitialized = false;
-    private WindFieldGenParamsDTO windParams = new WindFieldGenParamsDTO();
-    private WindFieldCanvasOverlay windFieldCanvasOverlay = null;
-    private PathCanvasOverlay pathCanvasOverlay = null;
-    private RaceCourseCanvasOverlay raceCourseCanvasOverlay = null;
+    private boolean dataInitialized;
+    private boolean overlaysInitialized;
+    private WindFieldGenParamsDTO windParams;
+    private WindFieldCanvasOverlay windFieldCanvasOverlay;
+    private PathCanvasOverlay pathCanvasOverlay;
+    private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
 
     private final SimulatorServiceAsync simulatorSvc;
     private final StringMessages stringMessages;
@@ -46,7 +46,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages) {
         this.simulatorSvc = simulatorSvc;
         this.stringMessages = stringMessages;
+        
         dataInitialized = false;
+        overlaysInitialized = false;
+        windParams = new WindFieldGenParamsDTO();
+        windFieldCanvasOverlay = null;
+        pathCanvasOverlay = null;
+        raceCourseCanvasOverlay = null;
+        
         initializeData();
         //createOverlays();
     }
@@ -110,7 +117,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
         windParams.setWindBearing(wControls.windBearing);
-        windParams.setWindSpeed(wControls.windSpeed);
+        windParams.setWindSpeed(wControls.windSpeedInKnots);
 
         simulatorSvc.getWindField(windParams, new AsyncCallback<WindFieldDTO>() {
             @Override
@@ -145,7 +152,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
         windParams.setWindBearing(wControls.windBearing);
-        windParams.setWindSpeed(wControls.windSpeed);
+        windParams.setWindSpeed(wControls.windSpeedInKnots);
 
         simulatorSvc.getPaths(windParams, new AsyncCallback<PathDTO[]>() {
             @Override

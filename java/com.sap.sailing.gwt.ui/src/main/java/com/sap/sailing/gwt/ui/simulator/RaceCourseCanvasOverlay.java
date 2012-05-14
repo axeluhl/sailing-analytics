@@ -20,10 +20,10 @@ import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
  */
 public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
-    public LatLng startPoint = null;
-    public LatLng endPoint = null;
-    private Marker startMarker = null;
-    private Marker endMarker = null;
+    public LatLng startPoint;
+    public LatLng endPoint;
+    private Marker startMarker;
+    private Marker endMarker;
 
     private RaceCourseMapMouseMoveHandler raceCourseMapMouseMoveHandler = new RaceCourseMapMouseMoveHandler();
 
@@ -45,6 +45,10 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     public RaceCourseCanvasOverlay() {
         super();
+        startPoint = null;
+        endPoint = null;
+        startMarker = null;
+        endMarker = null;
     }
 
     public void reset() {

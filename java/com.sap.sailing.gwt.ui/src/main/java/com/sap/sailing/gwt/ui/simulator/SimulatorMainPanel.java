@@ -4,6 +4,8 @@ import java.util.logging.Logger;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -18,16 +20,23 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimePanel;
+import com.sap.sailing.gwt.ui.client.TimePanelSettings;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO.WindPattern;
+import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 
 public class SimulatorMainPanel extends SplitLayoutPanel {
 
-    private FlowPanel leftPanel = new FlowPanel();
-    private FlowPanel rightPanel = new FlowPanel();
+    private FlowPanel leftPanel;
+    private FlowPanel rightPanel;
 
     private Button updateButton;
     private Button courseInputButton;
@@ -36,22 +45,27 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private RadioButton replayButton;
     private RadioButton windDisplayButton;
 
-    private WindControlParameters wControls = new WindControlParameters();
+    private WindControlParameters wControls;
 
-    private ListBox patternSelector = new ListBox();
-    private ListBox boatSelector = new ListBox();
+    private ListBox patternSelector;
+    private ListBox boatSelector;
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
-
-    /**
-     * Temporary place holders for parameters
-     */
-    private final double windSpeed = 7.2;
-    private final double windBearing = 45;
 
     private SimulatorMap simulatorMap;
     private final StringMessages stringMessages;
     private final SimulatorServiceAsync simulatorSvc;
+
+    private class WindSpeedCapture implements ValueChangeHandler<Double> {
+
+        @Override
+        public void onValueChange(ValueChangeEvent<Double> arg0) {
+            logger.info("Slider value : " + arg0.getValue());
+            wControls.windSpeedInKnots = arg0.getValue();
+            update();
+        }
+
+    }
 
     public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages) {
         // splitPanel = new SplitLayoutPanel();
@@ -59,7 +73,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         this.stringMessages = stringMessages;
         this.simulatorSvc = svc;
-
+        leftPanel = new FlowPanel();
+        rightPanel = new FlowPanel();
+        wControls = new WindControlParameters(7.2, 0);
+        patternSelector = new ListBox();
+        boatSelector = new ListBox();
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.simulator(), stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         this.addNorth(logoAndTitlePanel, 68);
@@ -74,7 +92,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         rightPanel.getElement().getStyle().setBackgroundColor("#e0e0e0");
         this.add(rightPanel);
         // rightPanel.getElement().getStyle().setFloat(Style.Float.RIGHT);
-       
+
     }
 
     private void createOptionsPanelTop() {
@@ -98,44 +116,26 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         controlPanel.setSize("100%", "92%");
         controlPanel.setTitle("Control Settings");
         controlPanel.getElement().getStyle().setBackgroundColor(" #e0e0e0");
-        String windSetup = stringMessages.wind() + " " + stringMessages.setup();
-        Label windSetupLabel = new Label(windSetup);
-
-        controlPanel.add(windSetupLabel);
-
-        Label pattern = new Label(stringMessages.pattern());
-        controlPanel.add(pattern);
-
-        simulatorSvc.getWindPatterns(new AsyncCallback<WindPattern[]>() {
-
-            @Override
-            public void onFailure(Throwable message) {
-                Window.alert("Failed to initialize wind patterns\n" + message);
-
-            }
-
-            @Override
-            public void onSuccess(WindPattern[] patterns) {
-                for (int i = 0; i < patterns.length; ++i) {
-                    patternSelector.addItem(patterns[i].toString());
-                }
-            }
-
-        });
-        controlPanel.add(patternSelector);
+        createWindSetup(controlPanel);
+        createSailingSetup(controlPanel);
         leftPanel.add(controlPanel);
 
     }
 
-    private void createSailingSetup(Panel controlPanel) {
+    private void createWindSetup(Panel controlPanel) {
+        VerticalPanel windPanel = new VerticalPanel();
 
-        String sailingSetup = stringMessages.sailing() + " " + stringMessages.setup();
-        Label sailingSetupLabel = new Label(sailingSetup);
+        controlPanel.add(windPanel);
+        windPanel.setSize("100%", "50%");
+        String windSetup = stringMessages.wind() + " " + stringMessages.setup();
+        Label windSetupLabel = new Label(windSetup);
 
-        controlPanel.add(sailingSetupLabel);
+        windPanel.add(windSetupLabel);
 
-        Label boatClassLabel = new Label(stringMessages.boatClass());
-        controlPanel.add(boatClassLabel);
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        Label pattern = new Label(stringMessages.pattern());
+        hp.add(pattern);
 
         simulatorSvc.getWindPatterns(new AsyncCallback<WindPattern[]>() {
 
@@ -153,8 +153,89 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             }
 
         });
-        controlPanel.add(patternSelector);
-        leftPanel.add(controlPanel);
+        hp.add(patternSelector);
+        windPanel.add(hp);
+        hp.setSize("80%", "10%");
+
+        addSlider(windPanel, stringMessages.strength(), 1, 10, new WindSpeedCapture());
+
+    }
+
+    private void addSlider(Panel parentPanel, String labelName, double minValue, double maxValue,
+            final ValueChangeHandler<Double> handler) {
+        VerticalPanel vp = new VerticalPanel();
+        vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
+        Label label = new Label(labelName);
+        vp.add(label);
+
+        final SliderBar sliderBar = new SliderBar(minValue, maxValue);
+
+        sliderBar.setStepSize(1, false);
+        sliderBar.setNumTicks((int) (maxValue - minValue));
+        sliderBar.setNumTickLabels(1);
+        sliderBar.setTitle(labelName);
+        sliderBar.setEnabled(true);
+        sliderBar.addValueChangeHandler(handler);
+        /*
+         * sliderBar.addValueChangeHandler(new ValueChangeHandler<Double>() {
+         * 
+         * @Override public void onValueChange(ValueChangeEvent<Double> arg0) { logger.info("Slider value : " +
+         * arg0.getValue()); }
+         * 
+         * });
+         */
+        sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
+            @Override
+            public String formatLabel(SliderBar slider, double value) {
+                return String.valueOf(Math.round(value));
+            }
+        });
+        // sliderBar.setMinValue(1.0, false);
+        // sliderBar.setMaxValue(10.0, false);
+        sliderBar.setCurrentValue(1.0);
+        vp.add(sliderBar);
+        sliderBar.setWidth("60%");
+
+        parentPanel.add(vp);
+        vp.setWidth("80%");
+    }
+
+    private void createSailingSetup(Panel controlPanel) {
+
+        VerticalPanel sailingPanel = new VerticalPanel();
+        controlPanel.add(sailingPanel);
+        sailingPanel.setSize("100%", "50%");
+        String sailingSetup = stringMessages.sailing() + " " + stringMessages.setup();
+        Label sailingSetupLabel = new Label(sailingSetup);
+
+        sailingPanel.add(sailingSetupLabel);
+
+        Label boatClassLabel = new Label(stringMessages.boatClass());
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        hp.add(boatClassLabel);
+
+        simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTO[]>() {
+
+            @Override
+            public void onFailure(Throwable message) {
+                Window.alert("Failed to initialize boat classes\n" + message);
+
+            }
+
+            @Override
+            public void onSuccess(BoatClassDTO[] boatClasses) {
+                for (int i = 0; i < boatClasses.length; ++i) {
+                    boatSelector.addItem(boatClasses[i].toString());
+                }
+            }
+
+        });
+        hp.add(boatSelector);
+
+        sailingPanel.add(hp);
+        hp.setSize("80%", "10%");
 
     }
 
@@ -174,17 +255,21 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         rightPanel.add(mapOptions);
 
         initDisplayOptions(mapOptions);
-        
+
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages);
-        
-        //FlowPanel mapPanel = new FlowPanel();
-        //mapPanel.setTitle("Map");
-        //mapPanel.setSize("100%", "92%");
-        //mapPanel.add(mapw);
-        //mapw.setSize("100%", "100%");
-      
-        simulatorMap.setSize("100%", "92%");
+
+        // FlowPanel mapPanel = new FlowPanel();
+        // mapPanel.setTitle("Map");
+        // mapPanel.setSize("100%", "92%");
+        // mapPanel.add(mapw);
+        // mapw.setSize("100%", "100%");
+
+        simulatorMap.setSize("100%", "82%");
         rightPanel.add(simulatorMap);
+
+        Timer timer = new Timer(PlayModes.Replay, 1000l);
+        TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
+        rightPanel.add(timePanel);
     }
 
     private void initUpdateButton() {
@@ -193,17 +278,20 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
-
-                if (windDisplayButton.getValue()) {
-                    simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls);
-                } else if (summaryButton.getValue()) {
-                    simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, wControls);
-                } else if (replayButton.getValue()) {
-                    simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls);
-                }
-
+                update();
             }
         });
+
+    }
+
+    private void update() {
+        if (windDisplayButton.getValue()) {
+            simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls);
+        } else if (summaryButton.getValue()) {
+            simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, wControls);
+        } else if (replayButton.getValue()) {
+            simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls);
+        }
 
     }
 

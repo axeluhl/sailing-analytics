@@ -15,7 +15,7 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 	private double xRes;
 	private double yRes;
 	
-	private double windSpeed;
+	private double windSpeedInKnots;
 	private double windBearing;
 	
 	public PositionDTO getNorthWest() {
@@ -43,10 +43,10 @@ public class WindFieldGenParamsDTO implements IsSerializable {
 		this.yRes = yRes;
 	}
 	public double getWindSpeed() {
-		return windSpeed;
+		return windSpeedInKnots;
 	}
 	public void setWindSpeed(double windSpeed) {
-		this.windSpeed = windSpeed;
+		this.windSpeedInKnots = windSpeed;
 	}
 	public double getWindBearing() {
 		return windBearing;

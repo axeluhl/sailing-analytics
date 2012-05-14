@@ -30,18 +30,19 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
     protected WindFieldDTO wl;
 
     /* The points where ToolTip is to be displayed */
-    protected Map<ToolTip, WindDTO> windFieldPoints = new HashMap<ToolTip, WindDTO>();
+    protected Map<ToolTip, WindDTO> windFieldPoints;
     protected String arrowColor = "Blue";
     protected String arrowHeadColor = "Blue";
-    protected  WindFieldMouseMoveHandler mmHandler = null;
+    protected  WindFieldMouseMoveHandler mmHandler;
     
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     public WindFieldCanvasOverlay() {
         super();
-        if (mmHandler == null) {
-            mmHandler = new WindFieldMouseMoveHandler(getCanvas());
-         }
+        windFieldPoints = new HashMap<ToolTip, WindDTO>();
+      
+         mmHandler = new WindFieldMouseMoveHandler(getCanvas());
+         
          mmHandler.setWindFieldPoints(windFieldPoints);
          getCanvas().addMouseMoveHandler(mmHandler);
     }
