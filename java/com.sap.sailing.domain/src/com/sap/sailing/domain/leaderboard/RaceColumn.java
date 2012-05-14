@@ -16,7 +16,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  */
 public interface RaceColumn extends Named {
     /**
-     * This does not update the {@link #getRaceIdentifier() race identifier}. 
+     * This does also update the {@link #getRaceIdentifier() race identifier} by setting it to <code>null</code> if <code>race</code>
+     * is <code>null</code>, and <code>race.getRaceIdentifier()</code> otherwise.
      */
     void setTrackedRace(TrackedRace race);
 
@@ -53,6 +54,13 @@ public interface RaceColumn extends Named {
      * Constructs a key for maps storing corrections such as score corrections and max points reasons.
      */
     Pair<Competitor, RaceColumn> getKey(Competitor competitor);
+
+    /**
+     * Releases the {@link TrackedRace} previously set by {@link #setTrackedRace(TrackedRace)} but leaves the
+     * {@link #getRaceIdentifier() race identifier} untouched. Therefore, the {@link TrackedRace} may be garbage
+     * collected but may be re-resolved for this column using the race identifier at a later time.
+     */
+    void releaseTrackedRace();
     
     
 }

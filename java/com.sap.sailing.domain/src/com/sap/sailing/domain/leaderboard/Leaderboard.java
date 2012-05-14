@@ -226,7 +226,6 @@ public interface Leaderboard extends Named {
      * If a leaderboard has corrections for a column then that column shall be considered for discarding and counts
      * for determining the number of races so far. Also, if a tracked race is connected to the column and has
      * started already, the column is to be considered for discarding. 
-     * @param timePoint TODO
      */
     boolean considerForDiscarding(RaceColumn raceInLeaderboard, TimePoint timePoint);
     

@@ -31,6 +31,7 @@ public class RaceInLeaderboardImpl implements RaceColumn {
     @Override
     public void setTrackedRace(TrackedRace trackedRace) {
         this.trackedRace = trackedRace;
+        this.setRaceIdentifier(trackedRace == null ? null : trackedRace.getRaceIdentifier());
     }
 
     @Override
@@ -48,18 +49,23 @@ public class RaceInLeaderboardImpl implements RaceColumn {
         return new Pair<Competitor, RaceColumn>(competitor, this);
     }
 
-	@Override
-	public void setIsMedalRace(boolean isMedalRace) {
-		this.medalRace = isMedalRace;
-	}
+    @Override
+    public void setIsMedalRace(boolean isMedalRace) {
+        this.medalRace = isMedalRace;
+    }
 
     @Override
     public RaceIdentifier getRaceIdentifier() {
         return raceIdentifier;
     }
-    
+
     @Override
     public void setRaceIdentifier(RaceIdentifier raceIdentifier) {
         this.raceIdentifier = raceIdentifier;
+    }
+
+    @Override
+    public void releaseTrackedRace() {
+        trackedRace = null;
     }
 }
