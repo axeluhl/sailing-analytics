@@ -13,8 +13,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -44,8 +42,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.MultiChartPanel;
-import com.sap.sailing.gwt.ui.leaderboard.MultiChartSettings;
-import com.sap.sailing.gwt.ui.raceboard.CollapsableComponentViewer.ViewerPanelTypes;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -54,7 +50,6 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.ComponentViewer;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceMap;
-import com.sap.sailing.gwt.ui.shared.racemap.RaceMapSettings;
 
 /**
  * A panel showing a list of components visualizing a race from the events announced by calls to {@link #fillEvents(List)}.
@@ -101,21 +96,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
      */
     private SideBySideComponentViewer leaderboardAndMapViewer;
 
-    /**
-     * The leaderboard viewer in <code>CASCADE</code> view mode. <code>null</code> if in <code>ONESCREEN</code> view mode
-     */
-    private CollapsableComponentViewer<LeaderboardSettings> leaderboardViewer = null;
-
-    /**
-     * The wind chart viewer in <code>CASCADE</code> view mode. <code>null</code> if in <code>ONESCREEN</code> view mode
-     */
-    private CollapsableComponentViewer<WindChartSettings> windChartViewer = null;
-
-    /**
-     * The competitor chart viewer in <code>CASCADE</code> view mode. <code>null</code> if in <code>ONESCREEN</code> view mode
-     */
-    private CollapsableComponentViewer<MultiChartSettings> competitorChartViewer = null;
-
     private final AsyncActionsExecutor asyncActionsExecutor;
     
     private final RaceTimesInfoProvider raceTimesInfoProvider;
@@ -150,9 +130,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         componentsNavigationPanel.addStyleName("raceBoardNavigation");
 
         switch (this.viewMode) {
-            case CASCADE:
-                createCascadingView(leaderboardName, leaderboardGroupName, mainPanel);
-                break;
             case ONESCREEN:
                 createOneScreenView(leaderboardName, leaderboardGroupName, mainPanel);                
                 getElement().getStyle().setMarginLeft(12, Unit.PX);
@@ -197,22 +174,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
             mainPanel.add(componentViewer.getViewerWidget());
         }
 
-        //TODO binding of settings to the user agent
-//        MenuBar mainMenu = new MenuBar();
-//        mainMenu.setStyleName("raceBoardNavigation-navigationitem");
-//        MenuBar settingsMenu = new MenuBar(true);
-//        mainMenu.addItem("Settings", settingsMenu);
-//        
-//        addSettingsMenuItem(settingsMenu, leaderboardPanel);
-//        addSettingsMenuItem(settingsMenu, raceMap);
-//        addSettingsMenuItem(settingsMenu, windChart);
-//        addSettingsMenuItem(settingsMenu, competitorChart);
-//
-//        mainMenu.getElement().getStyle().setFloat(Style.Float.LEFT);
-//        mainMenu.getElement().getStyle().setPadding(3, Style.Unit.PX);
-//        mainMenu.getElement().getStyle().setMargin(3, Style.Unit.PX);
-//
-//        componentsNavigationPanel.add(mainMenu);
         settingsPanel = new FlowPanel();
         settingsPanel.addStyleName("raceBoardNavigation-settingsButtonPanel");
         Label settingsLabel = new Label("Settings: ");
@@ -261,57 +222,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         }
     }
     
-    private void createCascadingView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
-        boolean showLeaderboard = true;
-        boolean showMap = true;
-        boolean showCompetitorCharts = true;
-        // create the default leaderboard and select the right race
-        if(showLeaderboard) {
-            leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
-            leaderboardViewer = new CollapsableComponentViewer<LeaderboardSettings>(
-                    leaderboardPanel, "100%", "100%", stringMessages, ViewerPanelTypes.SCROLL_PANEL);
-            componentViewers.add(leaderboardViewer);
-        }
-
-        // create the race map
-        if(showMap) {
-            RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages);
-            CollapsableComponentViewer<RaceMapSettings> raceMapViewer = new CollapsableComponentViewer<RaceMapSettings>(
-                    raceMap, "auto", "500px", stringMessages);
-
-            raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
-            raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
-            componentViewers.add(raceMapViewer);
-        }
-
-        windChart = createWindChart(asyncActionsExecutor);
-        windChartViewer = new CollapsableComponentViewer<WindChartSettings>(
-                windChart, "auto", "400px", stringMessages);
-        raceTimesInfoProvider.addRaceTimesInfoProviderListener(windChart);
-        windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        componentViewers.add(windChartViewer);
-        if (showCompetitorCharts) {
-            // DON'T DELETE -> this is temporary for testing of different chart types
-//            ChartPanel competitorCharts = new ChartPanel(sailingService, competitorSelectionModel, raceSelectionProvider,
-//                    timer, DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, stringMessages, errorReporter);
-//            CollapsableComponentViewer<ChartSettings> chartViewer = new CollapsableComponentViewer<ChartSettings>(
-//                    competitorCharts, "auto", "400px", stringMessages);
-
-            competitorChart = new MultiChartPanel(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
-                    timer, stringMessages, errorReporter, false, true);
-            competitorChartViewer = new CollapsableComponentViewer<MultiChartSettings>(
-                    competitorChart, "auto", "400px", stringMessages);
-
-            competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-            componentViewers.add(competitorChartViewer);
-        }
-
-        for (ComponentViewer componentViewer : componentViewers) {
-            mainPanel.add(componentViewer.getViewerWidget());
-            addComponentViewerAsAnchorToNavigationMenu(componentViewer);
-        }
-    }
-
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName) {
         LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
                 .createNewSettingsForPlayMode(timer.getPlayMode(), /* nameOfRaceToSort */
@@ -376,9 +286,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
      */
     public void setLeaderboardVisible(boolean visible) {
         switch (viewMode) {
-        case CASCADE:
-            leaderboardViewer.getViewerWidget().setOpen(visible);
-            break;
         case ONESCREEN:
             setComponentVisible(leaderboardAndMapViewer, leaderboardPanel, visible);
             break;
@@ -395,9 +302,6 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
      */
     public void setWindChartVisible(boolean visible) {
         switch (viewMode) {
-        case CASCADE:
-            windChartViewer.getViewerWidget().setOpen(visible);
-            break;
         case ONESCREEN:
             setComponentVisible(leaderboardAndMapViewer, windChart, visible);
             break;
@@ -414,28 +318,12 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
      */
     public void setCompetitorChartVisible(boolean visible) {
         switch (viewMode) {
-        case CASCADE:
-            competitorChartViewer.getViewerWidget().setOpen(visible);
-            break;
         case ONESCREEN:
             setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
             break;
         }
     }
     
-    private void addComponentViewerAsAnchorToNavigationMenu(final ComponentViewer componentViewer) {
-        Anchor menuEntry = new Anchor(componentViewer.getViewerName());
-        menuEntry.addStyleName("raceBoardNavigation-navigationitem");
-        
-        menuEntry.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                Window.scrollTo(Window.getScrollLeft(), componentViewer.getViewerWidget().getAbsoluteTop() - scrollOffset);
-            }
-        });
-        componentsNavigationPanel.add(menuEntry);
-    }
-
     public Widget getNavigationWidget() {
         return componentsNavigationPanel; 
     }
