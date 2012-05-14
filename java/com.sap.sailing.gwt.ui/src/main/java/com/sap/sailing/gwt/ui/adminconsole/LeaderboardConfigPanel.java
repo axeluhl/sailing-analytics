@@ -41,22 +41,22 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
 
-public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener,
+public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplayer, RaceSelectionChangeListener,
         TrackedRaceChangedListener {
 
     private final TrackedRacesListComposite trackedRacesListComposite;
@@ -306,11 +306,11 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
             @Override
             public SafeHtml getValue(RaceInLeaderboardDTO raceInLeaderboardDTO) {
                 if(raceInLeaderboardDTO.getRaceIdentifier() != null) {
-                    EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier();
+                    RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier();
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName="
-                            + selectedLeaderboard.name + "&raceName=" + raceIdentifier.getRaceName() + "&eventName="
-                            + raceIdentifier.getEventName()
+                            + selectedLeaderboard.name + "&raceName=" + raceIdentifier.getRaceName() + "&regattaName="
+                            + raceIdentifier.getRegattaName()
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.cell(link, raceInLeaderboardDTO.getRaceColumnName());
                 } else {
@@ -586,9 +586,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                     }
 
                     @Override
-                    public void onSuccess(Pair<String, String> eventAndRaceName) {
-                        if (eventAndRaceName != null) {
-                            selectRaceInList(eventAndRaceName.getA(), eventAndRaceName.getB());
+                    public void onSuccess(Pair<String, String> regattaAndRaceName) {
+                        if (regattaAndRaceName != null) {
+                            selectRaceInList(regattaAndRaceName.getA(), regattaAndRaceName.getB());
                         } else {
                             trackedRacesListComposite.clearSelection();
                         }
@@ -596,8 +596,8 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                 });
     }
 
-    private void selectRaceInList(String eventName, String raceName) {
-        EventNameAndRaceName raceIdentifier = new EventNameAndRaceName(eventName, raceName);  
+    private void selectRaceInList(String regattaName, String raceName) {
+        RegattaNameAndRaceName raceIdentifier = new RegattaNameAndRaceName(regattaName, raceName);  
         trackedRacesListComposite.selectRaceByIdentifier(raceIdentifier);
     }
 
@@ -754,15 +754,15 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     @Override
-    public void fillEvents(List<EventDTO> result) {
-        trackedRacesListComposite.fillEvents(result);
+    public void fillRegattas(List<RegattaDTO> result) {
+        trackedRacesListComposite.fillRegattas(result);
     }
 
     @Override
-    public void changeTrackingRace(EventNameAndRaceName eventNameAndRaceName, boolean isTracked) {
+    public void changeTrackingRace(RegattaNameAndRaceName regattaNameAndRaceName, boolean isTracked) {
         for (RaceInLeaderboardDTO race : raceColumnList.getList()) {
-            if (race.getRaceColumnName().equals(eventNameAndRaceName.getRaceName())) {
-                race.setRaceIdentifier(eventNameAndRaceName);
+            if (race.getRaceColumnName().equals(regattaNameAndRaceName.getRaceName())) {
+                race.setRaceIdentifier(regattaNameAndRaceName);
             }
         }
         raceColumnList.refresh();
@@ -848,7 +848,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     @Override
-    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         // if no leaderboard column is selected, ignore the race selection change
         RaceInLeaderboardDTO selectedRaceInLeaderboard = getSelectedRaceInLeaderboard();
         if (selectedRaceInLeaderboard != null) {
@@ -861,7 +861,7 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
     }
 
     private void linkTrackedRaceToSelectedRaceColumn(final RaceInLeaderboardDTO selectedRaceInLeaderboard,
-            final EventAndRaceIdentifier selectedRace) {
+            final RegattaAndRaceIdentifier selectedRace) {
         sailingService.connectTrackedRaceToLeaderboardColumn(getSelectedLeaderboardName(), selectedRaceInLeaderboard
                 .getRaceColumnName(), selectedRace,
                 new AsyncCallback<Boolean>() {

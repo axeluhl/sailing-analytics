@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.Wind;
 
@@ -9,7 +9,7 @@ public abstract class AbstractWindOperation extends AbstractRaceOperation<Void> 
     private final WindSource windSource;
     private final Wind wind;
     
-    public AbstractWindOperation(EventAndRaceIdentifier raceIdentifier, WindSource windSource, Wind wind) {
+    public AbstractWindOperation(RegattaAndRaceIdentifier raceIdentifier, WindSource windSource, Wind wind) {
         super(raceIdentifier);
         this.windSource = windSource;
         this.wind = wind;

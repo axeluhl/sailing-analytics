@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -21,7 +21,7 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.EventImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -48,13 +48,13 @@ import difflib.PatchFailedException;
 /**
  * {@link RaceDefinition} objects created by this factory are created using the SwissTiming "Race ID"
  * as the {@link RaceDefinition#getName() race name}. This at the same time defines the name of the
- * single {@link Event} created per {@link RaceDefinition}.
+ * single {@link Regatta} created per {@link RaceDefinition}.
  * 
  * @author Axel Uhl (d043530)
  *
  */
 public class DomainFactoryImpl implements DomainFactory {
-    private final Map<String, Event> raceIDToEventCache;
+    private final Map<String, Regatta> raceIDToEventCache;
     private final Map<Iterable<String>, ControlPoint> controlPointCache;
     private final Map<String, BoatClass> olympicClassesByID;
     private final BoatClass unknownBoatClass;
@@ -62,7 +62,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
-        raceIDToEventCache = new HashMap<String, Event>();
+        raceIDToEventCache = new HashMap<String, Regatta>();
         controlPointCache = new HashMap<Iterable<String>, ControlPoint>();
         olympicClassesByID = new HashMap<String, BoatClass>();
         /*
@@ -89,10 +89,10 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Event getOrCreateEvent(String raceID) {
-        Event result = raceIDToEventCache.get(raceID);
+    public Regatta getOrCreateEvent(String raceID) {
+        Regatta result = raceIDToEventCache.get(raceID);
         if (result == null) {
-            result = new EventImpl(raceID, null);
+            result = new RegattaImpl(raceID, null);
             raceIDToEventCache.put(raceID, result);
         }
         return result;
@@ -120,13 +120,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition createRaceDefinition(Event event, Race race, StartList startList, Course course) {
+    public RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, Course course) {
         com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
         BoatClass boatClass = getOrCreateBoatClassFromRaceID(race.getRaceID());
         Iterable<Competitor> competitors = createCompetitorList(startList, boatClass);
         RaceDefinition result = new RaceDefinitionImpl(race.getRaceID(), domainCourse,
                 boatClass, competitors);
-        event.addRace(result);
+        regatta.addRace(result);
         return result;
     }
 
@@ -228,18 +228,18 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public void removeRace(String raceID) {
-        Event event = getOrCreateEvent(raceID);
+        Regatta regatta = getOrCreateEvent(raceID);
         Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
-        if (event != null) {
-            for (RaceDefinition race : event.getAllRaces()) {
+        if (regatta != null) {
+            for (RaceDefinition race : regatta.getAllRaces()) {
                 if (race.getName().equals(raceID)) {
                     toRemove.add(race);
                 }
             }
             for (RaceDefinition raceToRemove : toRemove) {
-                event.removeRace(raceToRemove);
+                regatta.removeRace(raceToRemove);
             }
-            if (Util.isEmpty(event.getAllRaces())) {
+            if (Util.isEmpty(regatta.getAllRaces())) {
                 raceIDToEventCache.remove(raceID);
             }
         }

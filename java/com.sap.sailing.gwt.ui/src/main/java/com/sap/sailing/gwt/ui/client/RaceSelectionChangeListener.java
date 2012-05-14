@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.List;
 
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 
 /**
@@ -18,6 +18,6 @@ public interface RaceSelectionChangeListener {
      * 
      * @param selectedRaces a non-<code>null</code> list which is empty if nothing is selected
      */
-    void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces);
+    void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces);
 
 }

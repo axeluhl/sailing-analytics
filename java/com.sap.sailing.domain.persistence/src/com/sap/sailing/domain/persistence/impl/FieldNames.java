@@ -3,7 +3,13 @@ package com.sap.sailing.domain.persistence.impl;
 public enum FieldNames {
     // general:
     TIME_AS_MILLIS, KNOT_SPEED, DEGREE_BEARING, LAT_DEG, LNG_DEG,
-    EVENT_NAME, RACE_NAME,
+    
+    /**
+     * TODO this will have to be renamed to REGATTA_NAME, but compatibility concerns keep us from doing so at the moment
+     */
+    EVENT_NAME,
+    
+    RACE_NAME,
     
     // wind:
     WIND_SOURCE_NAME, WIND_SOURCE_ID, WIND,

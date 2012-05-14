@@ -45,7 +45,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
@@ -175,7 +175,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private CompetitorSelectionProvider competitorSelection;
 
-    private List<EventAndRaceIdentifier> selectedRaces;
+    private List<RegattaAndRaceIdentifier> selectedRaces;
 
     /**
      * Used to check if the first initial zoom to the buoy markers was already done.
@@ -320,7 +320,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     @Override
-    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
         this.selectedRaces = selectedRaces;

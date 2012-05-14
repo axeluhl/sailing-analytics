@@ -1,13 +1,13 @@
 package com.sap.sailing.domain.persistence;
 
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -20,9 +20,9 @@ public interface MongoObjectFactory {
     /**
      * Registers for changes of the wind coming from <code>windSource</code> on the <code>trackedRace</code>. Each
      * update received will be appended to the MongoDB and can later be retrieved. The key used to identify the race is
-     * the {@link RaceDefinition#getName() race name} and the {@link Event#getName() event name}.
+     * the {@link RaceDefinition#getName() race name} and the {@link Regatta#getName() regatta name}.
      */
-    void addWindTrackDumper(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource);
+    void addWindTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace, WindSource windSource);
 
     /**
      * Stores the configuration data of <code>leaderboard</code> in the Mongo DB associated with this

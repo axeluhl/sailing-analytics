@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -52,7 +52,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private Label raceBoardHeader;
     private RaceBoardPanel raceBoardPanel;
     private FlowPanel timePanel;
-    private EventAndRaceIdentifier currentRace;
+    private RegattaAndRaceIdentifier currentRace;
     private boolean raceBoardIsWidget;
     
     public TVViewPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
@@ -73,7 +73,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         timePanel = null;
         
         timer.play();
-        raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, new ArrayList<EventAndRaceIdentifier>(), 1000l);
+        raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 1000l);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
         
         leaderboardPanel = createLeaderboardPanel(leaderboardName);
@@ -113,9 +113,9 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         }
     }
     
-    private RaceBoardPanel createRaceBoardPanel(String leaderboardName, EventAndRaceIdentifier raceToShow) {
+    private RaceBoardPanel createRaceBoardPanel(String leaderboardName, RegattaAndRaceIdentifier raceToShow) {
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        List<EventAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
+        List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, timer, raceSelectionModel, leaderboardName, null,
                 errorReporter, stringMessages, userAgentType, RaceBoardViewModes.ONESCREEN, raceTimesInfoProvider);
@@ -217,11 +217,11 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         }
     }
     
-    private EventAndRaceIdentifier getFirstStartedAndUnfinishedRace() {
-        EventAndRaceIdentifier firstStartedAndUnfinishedRace = null;
+    private RegattaAndRaceIdentifier getFirstStartedAndUnfinishedRace() {
+        RegattaAndRaceIdentifier firstStartedAndUnfinishedRace = null;
         Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-            EventAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
+            RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
             RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
             if (raceIdentifier != null && raceTimes != null && raceTimes.startOfTracking != null
                     && raceTimes.endOfRace == null) {

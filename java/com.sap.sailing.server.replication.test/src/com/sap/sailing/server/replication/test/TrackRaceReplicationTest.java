@@ -19,8 +19,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
@@ -41,7 +41,7 @@ import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     private TrackedRace masterTrackedRace;
-    private EventAndRaceIdentifier raceIdentifier;
+    private RegattaAndRaceIdentifier raceIdentifier;
     private RacesHandle racesHandle;
     private final boolean[] notifier = new boolean[1];
     private RaceTrackingConnectivityParameters trackingParams;
@@ -115,7 +115,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         master.apply(new CreateLeaderboard(leaderboardName, new int[0]));
         final String columnName = "R1";
         RaceInLeaderboard masterColumn = master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false));
-        master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, new EventNameAndRaceName(
+        master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, new RegattaNameAndRaceName(
                 "Academy Tracking 2011 (STG)", "weym470may122011")));
         startTracking();
         assertNotNull(masterColumn.getTrackedRace()); // ensure the re-assignment worked on the master

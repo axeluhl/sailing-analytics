@@ -6,14 +6,14 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.EventListener;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
-import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
@@ -23,7 +23,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -272,13 +272,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public DynamicTrackedEvent getTrackedEvent() {
-        return new DynamicTrackedEvent() {
+    public DynamicTrackedRegatta getTrackedEvent() {
+        return new DynamicTrackedRegatta() {
             private static final long serialVersionUID = 2651590861333064588L;
 
             @Override
-            public Event getEvent() {
-                return new Event() {
+            public Regatta getRegatta() {
+                return new Regatta() {
                     private static final long serialVersionUID = -4908774269425170811L;
 
                     @Override
@@ -321,19 +321,19 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public void addEventListener(EventListener listener) {
+                    public void addRegattaListener(RegattaListener listener) {
                         // TODO Auto-generated method stub
                         
                     }
 
                     @Override
-                    public void removeEventListener(EventListener listener) {
+                    public void removeRegattaListener(RegattaListener listener) {
                         // TODO Auto-generated method stub
                         
                     }
 
                     @Override
-                    public EventIdentifier getEventIdentifier() {
+                    public RegattaIdentifier getRegattaIdentifier() {
                         // TODO Auto-generated method stub
                         return null;
                     }
@@ -452,7 +452,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public EventAndRaceIdentifier getRaceIdentifier() {
+    public RegattaAndRaceIdentifier getRaceIdentifier() {
         // TODO Auto-generated method stub
         return null;
     }

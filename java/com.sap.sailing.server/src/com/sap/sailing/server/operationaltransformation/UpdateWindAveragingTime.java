@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -9,7 +9,7 @@ public class UpdateWindAveragingTime extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = -3143003305202654846L;
     private final long newMillisecondsOverWhichToAverageWind;
     
-    public UpdateWindAveragingTime(EventAndRaceIdentifier raceIdentifier, long newMillisecondsOverWhichToAverageWind) {
+    public UpdateWindAveragingTime(RegattaAndRaceIdentifier raceIdentifier, long newMillisecondsOverWhichToAverageWind) {
         super(raceIdentifier);
         this.newMillisecondsOverWhichToAverageWind = newMillisecondsOverWhichToAverageWind;
     }

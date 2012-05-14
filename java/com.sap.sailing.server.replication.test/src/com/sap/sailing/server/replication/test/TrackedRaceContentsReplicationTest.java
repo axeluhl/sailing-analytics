@@ -18,7 +18,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -28,8 +28,8 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.EventName;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -39,7 +39,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -49,16 +49,16 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.server.operationaltransformation.AddEvent;
+import com.sap.sailing.server.operationaltransformation.AddRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
-import com.sap.sailing.server.operationaltransformation.TrackEvent;
+import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 
 public class TrackedRaceContentsReplicationTest extends AbstractServerReplicationTest {
     private Competitor competitor;
     private DynamicTrackedRace trackedRace;
-    private EventNameAndRaceName raceIdentifier;
-    private DynamicTrackedEvent trackedEvent;
+    private RegattaNameAndRaceName raceIdentifier;
+    private DynamicTrackedRegatta trackedRegatta;
     
     @Before
     public void setUp() throws Exception {
@@ -73,19 +73,19 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
                 new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
         final String baseEventName = "Test Event";
-        AddEvent addEventOperation = new AddEvent(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true);
-        Event event = master.apply(addEventOperation);
+        AddRegatta addEventOperation = new AddRegatta(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true);
+        Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
         RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Collections.singletonList(competitor));
-        AddRaceDefinition addRaceOperation = new AddRaceDefinition(new EventName(event.getName()), race);
+        AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy1")));
         masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy2")));
         masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
         masterCourse.removeWaypoint(1);
-        raceIdentifier = new EventNameAndRaceName(event.getName(), raceName);
-        trackedEvent = master.apply(new TrackEvent(raceIdentifier));
+        raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
+        trackedRegatta = master.apply(new TrackRegatta(raceIdentifier));
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory()),
@@ -159,7 +159,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         MongoWindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                 MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
-        WindTrack windTrack = windStore.getWindTrack(trackedEvent, trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
+        WindTrack windTrack = windStore.getWindTrack(trackedRegatta, trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
                 /* delayForWindEstimationCacheInvalidation */ 10000);
         final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));

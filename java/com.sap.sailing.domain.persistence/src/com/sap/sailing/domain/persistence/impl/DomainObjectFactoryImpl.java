@@ -15,12 +15,12 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -83,20 +83,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public RaceIdentifier loadRaceIdentifier(DBObject dbObject) {
         RaceIdentifier result = null;
-        String eventName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
+        String regattaName = (String) dbObject.get(FieldNames.EVENT_NAME.name());
         String raceName = (String) dbObject.get(FieldNames.RACE_NAME.name());
-        if (eventName != null && raceName != null) {
-            result = new EventNameAndRaceName(eventName, raceName);
+        if (regattaName != null && raceName != null) {
+            result = new RegattaNameAndRaceName(regattaName, raceName);
         }
         return result;
     }
     
     @Override
-    public WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage) {
+    public WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage) {
         WindTrack result = new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().getBaseConfidence(), windSource.getType().useSpeed());
         try {
             BasicDBObject query = new BasicDBObject();
-            query.put(FieldNames.EVENT_NAME.name(), event.getName());
+            query.put(FieldNames.EVENT_NAME.name(), regatta.getName());
             query.put(FieldNames.RACE_NAME.name(), race.getName());
             query.put(FieldNames.WIND_SOURCE_NAME.name(), windSource.name());
             DBCollection windTracks = database.getCollection(CollectionNames.WIND_TRACKS.name());
@@ -270,12 +270,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Event event, RaceDefinition race,
+    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
             long millisecondsOverWhichToAverageWind) {
         Map<WindSource, WindTrack> result = new HashMap<WindSource, WindTrack>();
         try {
             BasicDBObject query = new BasicDBObject();
-            query.put(FieldNames.EVENT_NAME.name(), event.getName());
+            // TODO EVENT_NAME has to become REGATTA_NAME, but we'd need a DB migration script for this for legacy instances
+            query.put(FieldNames.EVENT_NAME.name(), regatta.getName());
             query.put(FieldNames.RACE_NAME.name(), race.getName());
             DBCollection windTracks = database.getCollection(CollectionNames.WIND_TRACKS.name());
             for (DBObject o : windTracks.find(query)) {

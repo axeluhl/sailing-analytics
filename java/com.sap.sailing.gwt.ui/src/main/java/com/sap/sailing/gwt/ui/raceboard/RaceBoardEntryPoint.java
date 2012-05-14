@@ -10,10 +10,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
@@ -23,18 +22,18 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.DeprecatedRegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
 
-    private String eventName;
+    private String regattaName;
     private String raceName;
     private String leaderboardName;
     private String leaderboardGroupName;
@@ -43,7 +42,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
-        eventName = Window.Location.getParameter("eventName");
+        regattaName = Window.Location.getParameter("regattaName");
         raceName = Window.Location.getParameter("raceName");
         String leaderboardNameParamValue = Window.Location.getParameter("leaderboardName");
         String leaderboardGroupNameParamValue = Window.Location.getParameter("leaderboardGroupName");
@@ -66,12 +65,12 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         if (leaderboardGroupNameParamValue != null && !leaderboardGroupNameParamValue.isEmpty()) {
             leaderboardGroupName = leaderboardGroupNameParamValue; 
         }
-        if (eventName == null || eventName.isEmpty() || raceName == null || raceName.isEmpty()) {
+        if (regattaName == null || regattaName.isEmpty() || raceName == null || raceName.isEmpty()) {
             createErrorPage("This page requires a valid event name and race name.");
             return;
         }
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
-        final ParallelExecutionCallback<List<EventDTO>> listEventsCallback = new ParallelExecutionCallback<List<EventDTO>>();  
+        final ParallelExecutionCallback<List<RegattaDTO>> listEventsCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
         final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();  
         final ParallelExecutionCallback<UserDTO> getUserCallback = new ParallelExecutionCallback<UserDTO>();  
         if (leaderboardGroupName != null) {
@@ -106,7 +105,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         userManagementService.getUser(getUserCallback);
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<EventDTO> events, UserDTO user) {
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<RegattaDTO> regattas, UserDTO user) {
         if (!leaderboardNames.contains(leaderboardName)) {
           createErrorPage(stringMessages.noSuchLeaderboard());
           return;
@@ -124,35 +123,32 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 return;
             }
         }
-        selectedRace = findRace(eventName, raceName, events);
+        selectedRace = findRace(regattaName, raceName, regattas);
         if (selectedRace == null) {
-            createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + eventName);
+            createErrorPage("Could not obtain a race with name " + raceName + " for an regatta with name " + regattaName);
             return;
         }
 
         RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        List<EventAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
+        List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
                 RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, new RaceTimesInfoProvider(sailingService, this, singletonList, 1000l));
-        raceBoardPanel.fillEvents(events);
+        raceBoardPanel.fillRegattas(regattas);
 
         switch (viewMode) {
-            case CASCADE:
-                createRaceBoardInCascadeMode(raceBoardPanel);
-                break;
             case ONESCREEN:
                 createRaceBoardInOneScreenMode(raceBoardPanel);
                 break;
         }
     }  
 
-    private RaceDTO findRace(String eventName, String raceName, List<EventDTO> events) {
-        for (EventDTO eventDTO : events) {
-            if (eventDTO.name.equals(eventName)) {
-                for (RegattaDTO regattaDTO : eventDTO.regattas) {
-                    for (RaceDTO raceDTO: regattaDTO.races) {
+    private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
+        for (RegattaDTO regattaDTO : regattas) {
+            if (regattaDTO.name.equals(regattaName)) {
+                for (DeprecatedRegattaDTO deprecatedRegattaDTO : regattaDTO.deprecatedRegattas) {
+                    for (RaceDTO raceDTO: deprecatedRegattaDTO.races) {
                         if (raceDTO.name.equals(raceName)) {
                             return raceDTO;
                         }
@@ -163,28 +159,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return null;
     }
 
-    private void createRaceBoardInCascadeMode(RaceBoardPanel raceBoardPanel) {
-        FlowPanel breadcrumbPanel = createBreadcrumbPanel();
-        FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
-        FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        
-        FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
-        contentOuterPanel.addStyleName("contentOuterPanel");
-        contentOuterPanel.add(raceBoardPanel);
-
-        //FlowPanel footerShadowPanel = new FlowPanel();
-        // footerShadowPanel.addStyleName("footerShadowPanel");
-        
-        RootPanel.get().add(breadcrumbPanel);        
-        RootPanel.get().add(contentOuterPanel);
-        
-        // Don't change this order because of the inner logic in html of "position fixed"-elements
-        RootPanel.get().add(logoAndTitlePanel);                 // position:fixed        
-        RootPanel.get().add(timePanel);                     // position:fixed
-        //RootPanel.get().add(footerShadowPanel);                 // position:fixed
-        raceBoardPanel.setScrollOffset(logoAndTitlePanel.getOffsetHeight());
-    }
-    
     private FlowPanel createBreadcrumbPanel() {
         FlowPanel raceBoardHeaderPanel = new FlowPanel();
         raceBoardHeaderPanel.addStyleName("RaceBoardHeaderPanel");
