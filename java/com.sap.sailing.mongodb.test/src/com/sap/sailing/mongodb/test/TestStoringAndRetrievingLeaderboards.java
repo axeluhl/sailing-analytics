@@ -19,7 +19,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
@@ -84,8 +84,8 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName);
         // attach tracked race to leaderboard to ensure that competitor object is assigned properly
-        RaceInLeaderboard loadedColumn1 = loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false);
-        RaceInLeaderboard loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false);
+        RaceColumn loadedColumn1 = loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false);
+        RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false);
         assertEquals(leaderboardName, loadedLeaderboard.getName());
         assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
         assertEquals(correctedPoints, (int) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1));
@@ -110,8 +110,8 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName);
         // attach tracked race to leaderboard to ensure that competitor object is assigned properly
-        RaceInLeaderboard loadedColumn1 = loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false);
-        RaceInLeaderboard loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false);
+        RaceColumn loadedColumn1 = loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false);
+        RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false);
         assertEquals(leaderboardName, loadedLeaderboard.getName());
         assertFalse(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
         assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2));
@@ -138,8 +138,8 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName);
         // attach tracked race to leaderboard to ensure that competitor object is assigned properly
-        RaceInLeaderboard loadedColumn1 = loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false);
-        RaceInLeaderboard loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false);
+        RaceColumn loadedColumn1 = loadedLeaderboard.addRace(raceWithOneCompetitor1, raceColumnName1, /* medalRace, ignored */ false);
+        RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false);
         assertEquals(leaderboardName, loadedLeaderboard.getName());
         assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
         assertEquals(correctedPoints, (int) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1));

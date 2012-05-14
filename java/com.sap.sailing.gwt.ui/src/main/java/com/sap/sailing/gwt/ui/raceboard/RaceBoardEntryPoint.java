@@ -22,11 +22,10 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.DeprecatedRegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
@@ -147,11 +146,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
         for (RegattaDTO regattaDTO : regattas) {
             if (regattaDTO.name.equals(regattaName)) {
-                for (DeprecatedRegattaDTO deprecatedRegattaDTO : regattaDTO.deprecatedRegattas) {
-                    for (RaceDTO raceDTO: deprecatedRegattaDTO.races) {
-                        if (raceDTO.name.equals(raceName)) {
-                            return raceDTO;
-                        }
+                for (RaceDTO raceDTO : regattaDTO.races) {
+                    if (raceDTO.name.equals(raceName)) {
+                        return raceDTO;
                     }
                 }
             }

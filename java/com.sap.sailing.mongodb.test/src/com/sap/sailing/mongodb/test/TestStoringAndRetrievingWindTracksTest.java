@@ -70,16 +70,16 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     @Test
     public void testStoreAFewWindEntries() throws UnknownHostException, MongoException, InterruptedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Regatta domainEvent = domainFactory.getOrCreateEvent(getEvent());
+        Regatta domainEvent = domainFactory.getOrCreateEvent(getTracTracEvent());
         DynamicTrackedRegatta trackedRegatta = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
-        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, getEvent(),
+        Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
                 EmptyWindStore.INSTANCE, /* startOfTracking */ null, /* endOfTracking */ null, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
                 }, ReceiverType.RACECOURSE);
         addListenersForStoredDataAndStartController(typeControllers);
-        RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getEvent().getRaceList().iterator().next());
+        RaceDefinition race = domainFactory.getAndWaitForRaceDefinition(getTracTracEvent().getRaceList().iterator().next());
         DynamicTrackedRace trackedRace = trackedRegatta.createTrackedRace(race, /* millisecondsOverWhichToAverageWind */
                 EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageSpeed */
                 30000, 10000, new DynamicRaceDefinitionSet() {

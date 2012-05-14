@@ -21,7 +21,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.tracking.Positioned;
@@ -118,7 +118,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBList dbRaceColumns = new BasicDBList();
         result.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
-        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             BasicDBObject dbRaceColumn = new BasicDBObject();
             dbRaceColumn.put(FieldNames.LEADERBOARD_COLUMN_NAME.name(), raceColumn.getName());
             dbRaceColumn.put(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name(), raceColumn.isMedalRace());
@@ -153,7 +153,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
-        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             BasicDBObject dbCorrectionForRace = new BasicDBObject();
             for (Competitor competitor : leaderboard.getCompetitors()) {
                 if (scoreCorrection.isScoreCorrected(competitor, raceColumn)) {

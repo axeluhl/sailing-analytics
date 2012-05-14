@@ -80,7 +80,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     protected void setUp(String regattaName, String raceId, ReceiverType... receiverTypes) throws MalformedURLException,
             IOException, InterruptedException, URISyntaxException {
         setUpWithoutLaunchingController(regattaName, raceId);
-        assertEquals(getExpectedEventName(), getEvent().getName());
+        assertEquals(getExpectedEventName(), getTracTracEvent().getName());
         completeSetupLaunchingControllerAndWaitForRaceDefinition(receiverTypes);
     }
 
@@ -89,7 +89,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws InterruptedException {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getEvent(), EmptyWindStore.INSTANCE,
+        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), EmptyWindStore.INSTANCE,
                 /* startOfTracking */ null, /* endOfTracking */ null, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
@@ -98,7 +98,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
-        Race tractracRace = getEvent().getRaceList().iterator().next();
+        Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
         // now we expect that there is no RaceDefinition for the TracTrac race yet:
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
         race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace);
@@ -131,7 +131,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
-        domainEvent = domainFactory.getOrCreateEvent(getEvent());
+        domainEvent = domainFactory.getOrCreateEvent(getTracTracEvent());
         trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
     }
     

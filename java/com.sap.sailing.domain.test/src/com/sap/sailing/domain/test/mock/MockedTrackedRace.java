@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -340,6 +341,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public String getBaseName() {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public Iterable<? extends Series> getSeries() {
                         // TODO Auto-generated method stub
                         return null;
                     }

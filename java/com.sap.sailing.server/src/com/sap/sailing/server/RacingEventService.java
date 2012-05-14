@@ -28,7 +28,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -168,7 +168,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
      * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its
-     * {@link RaceInLeaderboard#getTrackedRace()}.
+     * {@link RaceColumn#getTrackedRace()}.
      * 
      * @param regatta
      *            the event to remove
@@ -243,7 +243,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void renameLeaderboard(String oldName, String newName);
 
-    RaceInLeaderboard addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
+    RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
 
     void moveLeaderboardColumnUp(String leaderboardName, String columnName);
 

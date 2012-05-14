@@ -7,7 +7,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -47,7 +47,7 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
             MillisecondsTimePoint timePoint = new MillisecondsTimePoint(date);
             Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
             if (competitor != null) {
-                RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(getColumnName());
+                RaceColumn raceColumn = leaderboard.getRaceColumnByName(getColumnName());
                 if (correctedScore == null) {
                     leaderboard.getScoreCorrection().uncorrectScore(competitor, raceColumn);
                     newNetPoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);

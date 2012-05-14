@@ -54,7 +54,7 @@ import difflib.PatchFailedException;
 public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private RaceDefinition race;
     private Course course;
-    private Regatta domainEvent;
+    private Regatta domainRegatta;
     private DynamicTrackedRegatta trackedRegatta;
     private final RouteData[] routeData = new RouteData[1];
     private DomainFactory domainFactory;
@@ -67,10 +67,10 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
-        domainEvent = domainFactory.getOrCreateEvent(getEvent());
-        trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
+        domainRegatta = domainFactory.getOrCreateEvent(getTracTracEvent());
+        trackedRegatta = new DynamicTrackedRegattaImpl(domainRegatta);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getEvent(), /* millisecondsOverWhichToAverageWind */
+        receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getTracTracEvent(), /* millisecondsOverWhichToAverageWind */
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {}
@@ -86,7 +86,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             }
         });
         addListenersForStoredDataAndStartController(receivers);
-        Race tractracRace = getEvent().getRaceList().iterator().next();
+        Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
         // now we expect that there is no 
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
         race = domainFactory.getAndWaitForRaceDefinition(tractracRace);

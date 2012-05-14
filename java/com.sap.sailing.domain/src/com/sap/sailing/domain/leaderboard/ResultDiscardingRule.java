@@ -15,5 +15,5 @@ import com.sap.sailing.domain.common.TimePoint;
  *
  */
 public interface ResultDiscardingRule extends Serializable {
-    Set<RaceInLeaderboard> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard, TimePoint timePoint);
+    Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard, TimePoint timePoint);
 }

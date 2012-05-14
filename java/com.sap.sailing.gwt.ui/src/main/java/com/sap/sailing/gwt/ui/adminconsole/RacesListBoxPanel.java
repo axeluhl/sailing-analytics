@@ -15,16 +15,15 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.DeprecatedRegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, RaceSelectionChangeListener {
     private final List<RaceDTO> raceList;
@@ -72,11 +71,9 @@ public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, Ra
     public void fillRegattas(List<RegattaDTO> result) {
         raceList.clear();
         raceListBox.clear();
-        for (RegattaDTO event : result) {
-            for (DeprecatedRegattaDTO regatta : event.deprecatedRegattas) {
-                for (RaceDTO race : regatta.races) {
-                    raceList.add(race);
-                }
+        for (RegattaDTO regatta : result) {
+            for (RaceDTO race : regatta.races) {
+                raceList.add(race);
             }
         }
         Collections.sort(raceList, new Comparator<RaceDTO>() {
@@ -115,7 +112,7 @@ public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, Ra
     }
 
     private String toString(RaceDTO race) {
-        return race.getEvent().name+" - "+race.name+(race.currentlyTracked ? " ("+stringConstants.tracked()+")" : "");
+        return race.getRegatta().name+" - "+race.name+(race.currentlyTracked ? " ("+stringConstants.tracked()+")" : "");
     }
 
     @Override
