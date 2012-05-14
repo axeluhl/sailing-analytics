@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.operationaltransformation.Peer;
 import com.sap.sailing.operationaltransformation.Peer.Role;
@@ -62,7 +62,7 @@ public class OperationalTransformationTest {
 
     @Test
     public void testAddColumnToLeaderboardOnClientAndRemoveLeaderboardOnServer() throws InterruptedException {
-        RacingEventServiceOperation<RaceInLeaderboard> addLeaderboardColumn = new AddColumnToLeaderboard(
+        RacingEventServiceOperation<RaceColumn> addLeaderboardColumn = new AddColumnToLeaderboard(
                 "newColumn", DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
         server.apply(addLeaderboardColumn);
         RacingEventServiceOperation<Void> removeDefaultLeaderboard = new RemoveLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
@@ -75,10 +75,10 @@ public class OperationalTransformationTest {
 
     @Test
     public void testAddOneColumnOnEachSideThenMoveOneUpOnServerAndRemoveLeaderboardOnClient() throws InterruptedException {
-        RacingEventServiceOperation<RaceInLeaderboard> addLeaderboardColumnOnServer = new AddColumnToLeaderboard(
+        RacingEventServiceOperation<RaceColumn> addLeaderboardColumnOnServer = new AddColumnToLeaderboard(
                 "newColumn1", DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
         server.apply(addLeaderboardColumnOnServer);
-        RacingEventServiceOperation<RaceInLeaderboard> addLeaderboardColumnOnReplica = new AddColumnToLeaderboard(
+        RacingEventServiceOperation<RaceColumn> addLeaderboardColumnOnReplica = new AddColumnToLeaderboard(
                 "newColumn2", DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
         replica.apply(addLeaderboardColumnOnReplica);
         replica.waitForNotRunning();

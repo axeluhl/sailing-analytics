@@ -8,7 +8,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -139,7 +139,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void linkTrackedRace(){
-        service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, new EventNameAndRaceName(EVENT_NAME, TRACKED_RACE),
+        service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, new RegattaNameAndRaceName(EVENT_NAME, TRACKED_RACE),
                 new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {

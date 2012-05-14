@@ -8,24 +8,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 
 public class RaceSelectionModel implements RaceSelectionProvider {
-    private final List<EventAndRaceIdentifier> selection;
+    private final List<RegattaAndRaceIdentifier> selection;
     
-    private final List<EventAndRaceIdentifier> allRaces;
+    private final List<RegattaAndRaceIdentifier> allRaces;
     
     private final Set<RaceSelectionChangeListener> listeners;
     
     public RaceSelectionModel() {
-        this.selection = new ArrayList<EventAndRaceIdentifier>();
-        this.allRaces = new ArrayList<EventAndRaceIdentifier>();
+        this.selection = new ArrayList<RegattaAndRaceIdentifier>();
+        this.allRaces = new ArrayList<RegattaAndRaceIdentifier>();
         listeners = new HashSet<RaceSelectionChangeListener>();
     }
 
     @Override
-    public List<EventAndRaceIdentifier> getSelectedRaces() {
+    public List<RegattaAndRaceIdentifier> getSelectedRaces() {
         return Collections.unmodifiableList(selection);
     }
 
@@ -40,7 +40,7 @@ public class RaceSelectionModel implements RaceSelectionProvider {
     }
     
     @Override
-    public void setSelection(List<EventAndRaceIdentifier> newSelection, RaceSelectionChangeListener... listenersNotToNotify) {
+    public void setSelection(List<RegattaAndRaceIdentifier> newSelection, RaceSelectionChangeListener... listenersNotToNotify) {
         boolean notify = !selection.equals(newSelection);
         selection.clear();
         selection.addAll(newSelection);
@@ -50,7 +50,7 @@ public class RaceSelectionModel implements RaceSelectionProvider {
     }
 
     private void notifyListeners(RaceSelectionChangeListener[] listenersNotToNotify) {
-        List<EventAndRaceIdentifier> selectedRaces = getSelectedRaces();
+        List<RegattaAndRaceIdentifier> selectedRaces = getSelectedRaces();
         for (RaceSelectionChangeListener listener : listeners) {
             if (listenersNotToNotify == null || !Arrays.asList(listenersNotToNotify).contains(listener)) {
                 listener.onRaceSelectionChange(selectedRaces);
@@ -64,13 +64,13 @@ public class RaceSelectionModel implements RaceSelectionProvider {
      * <code>newAllRaces</code> are removed from the selection. If this happens, the selection listeners are notified.
      */
     @Override
-    public void setAllRaces(List<EventAndRaceIdentifier> newAllRaces, RaceSelectionChangeListener... listenersNotToNotify) {
+    public void setAllRaces(List<RegattaAndRaceIdentifier> newAllRaces, RaceSelectionChangeListener... listenersNotToNotify) {
         allRaces.clear();
-        for (EventAndRaceIdentifier r : newAllRaces) {
+        for (RegattaAndRaceIdentifier r : newAllRaces) {
             allRaces.add(r);
         }
         boolean notify = false;
-        for (Iterator<EventAndRaceIdentifier> i=selection.iterator(); i.hasNext(); ) {
+        for (Iterator<RegattaAndRaceIdentifier> i=selection.iterator(); i.hasNext(); ) {
             RaceIdentifier selectedRace = i.next();
             if (!allRaces.contains(selectedRace)) {
                 notify = true;
@@ -83,7 +83,7 @@ public class RaceSelectionModel implements RaceSelectionProvider {
     }
 
     @Override
-    public List<EventAndRaceIdentifier> getAllRaces() {
+    public List<RegattaAndRaceIdentifier> getAllRaces() {
         return Collections.unmodifiableList(allRaces);
     }
 

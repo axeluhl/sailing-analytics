@@ -125,7 +125,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     }
 
     
-    protected Event getEvent() {
+    protected Event getTracTracEvent() {
         return event;
     }
 

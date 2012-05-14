@@ -20,17 +20,17 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventDisplayer;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeZoomModel;
@@ -39,7 +39,6 @@ import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
@@ -53,15 +52,15 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceMap;
 
 /**
- * A panel showing a list of components visualizing a race from the events announced by calls to {@link #fillEvents(List)}.
+ * A panel showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.
  * The race selection is provided by a {@link RaceSelectionProvider} for which this is a {@link RaceSelectionChangeListener listener}.
  * {@link RaceIdentifier}-based race selection changes are converted to {@link RaceDTO} objects using the {@link #racesByIdentifier}
- * map maintained during {@link #fillEvents(List)}. The race selection provider is expected to be single selection only.
+ * map maintained during {@link #fillRegattas(List)}. The race selection provider is expected to be single selection only.
  * 
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
+public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -69,7 +68,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private RaceBoardViewModes viewMode;
     
     /**
-     * Updated upon each {@link #fillEvents(List)}
+     * Updated upon each {@link #fillRegattas(List)}
      */
     private final Map<RaceIdentifier, RaceDTO> racesByIdentifier;
     
@@ -87,7 +86,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final UserAgentTypes userAgentType;
     private final CompetitorSelectionModel competitorSelectionModel;
     private final TimeZoomModel timeZoomModel; 
-    private final EventAndRaceIdentifier selectedRaceIdentifier;
+    private final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
     private LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
@@ -369,21 +368,19 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     }
 
     @Override
-    public void fillEvents(List<EventDTO> events) {
+    public void fillRegattas(List<RegattaDTO> regattas) {
         racesByIdentifier.clear();
-        for (EventDTO event : events) {
-            for (RegattaDTO regatta : event.regattas) {
-                for (RaceDTO race : regatta.races) {
-                    if (race != null && race.getRaceIdentifier() != null) {
-                        racesByIdentifier.put(race.getRaceIdentifier(), race);
-                    }
+        for (RegattaDTO regatta : regattas) {
+            for (RaceDTO race : regatta.races) {
+                if (race != null && race.getRaceIdentifier() != null) {
+                    racesByIdentifier.put(race.getRaceIdentifier(), race);
                 }
             }
         }
     }
 
     @Override
-    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
     }
 }
 

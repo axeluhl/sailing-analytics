@@ -1,8 +1,0 @@
-<configure xmlns="http://pylonshq.com/pyramid">
-
-  <include package="pyramid_zcml" />
-
-  <include package=".adapter"/>
-  <include package=".browser"/>
-
-</configure>

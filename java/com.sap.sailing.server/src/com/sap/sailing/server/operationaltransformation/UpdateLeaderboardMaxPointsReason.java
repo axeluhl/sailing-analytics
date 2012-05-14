@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -47,7 +47,7 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
             if (competitor != null) {
-                RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(getColumnName());
+                RaceColumn raceColumn = leaderboard.getRaceColumnByName(getColumnName());
                 if (raceColumn == null) {
                     throw new IllegalArgumentException("Didn't find race "+getColumnName()+" in leaderboard "+getLeaderboardName());
                 }

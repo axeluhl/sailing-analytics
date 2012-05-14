@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -43,7 +43,7 @@ public interface TrackedRace extends Serializable {
     
     RaceDefinition getRace();
     
-    EventAndRaceIdentifier getRaceIdentifier();
+    RegattaAndRaceIdentifier getRaceIdentifier();
     
     /**
      * Computes the estimated start time for this race (not to be confused with the {@link #getStartOfTracking()} time point
@@ -301,7 +301,7 @@ public interface TrackedRace extends Serializable {
      */
     Tack getTack(Competitor competitor, TimePoint timePoint);
 
-    TrackedEvent getTrackedEvent();
+    TrackedRegatta getTrackedEvent();
 
     /**
      * Computes a default wind direction based on the direction of the first leg at time <code>at</code>, with a default

@@ -11,11 +11,11 @@ import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.util.InvalidDateException;
@@ -48,50 +48,42 @@ public class Action {
         return service;
     }
 
-    public HashMap<String, Event> getEvents() {
-        final HashMap<String, Event> result = new HashMap<String, Event>();
-
-        for (final Event event : this.service.getAllEvents()) {
-            result.put(event.getName(), event);
+    public HashMap<String, Regatta> getRegattas() {
+        final HashMap<String, Regatta> result = new HashMap<String, Regatta>();
+        for (final Regatta regatta : this.service.getAllRegattas()) {
+            result.put(regatta.getName(), regatta);
         }
-
         return result;
     }
 
-    public Event getEvent() throws IOException {
+    public Regatta getRegatta() throws IOException {
         /*
-         * EVENT
+         * REGATTA
          */
-        final String eventName = getAttribute("event");
-
-        if (eventName == null) {
-            say("Use the event= parameter to specify the event");
-
+        final String regattaName = getAttribute("regatta");
+        if (regattaName == null) {
+            say("Use the regatta= parameter to specify the regatta");
             return null;
         }
-
-        final Event event = getEvent(eventName);
-
-        if (event == null) {
-            say("Event " + eventName + " not found.");
-
+        final Regatta regatta = getEvent(regattaName);
+        if (regatta == null) {
+            say("Regatta " + regattaName + " not found.");
             return null;
         }
-
-        return event;
+        return regatta;
     }
 
-    public Event getEvent(String name) {
-        for (final Event event : this.service.getAllEvents()) {
-            if (name.equals(event.getName())) {
-                return event;
+    public Regatta getEvent(String name) {
+        for (final Regatta regatta : this.service.getAllRegattas()) {
+            if (name.equals(regatta.getName())) {
+                return regatta;
             }
         }
 
         return null;
     }
 
-    public RaceDefinition getRace(Event event) throws IOException {
+    public RaceDefinition getRace(Regatta regatta) throws IOException {
         /*
          * Get the race
          */
@@ -106,7 +98,7 @@ public class Action {
         /*
          * RACE
          */
-        final RaceDefinition race = getRace(event, raceName);
+        final RaceDefinition race = getRace(regatta, raceName);
 
         if (race == null) {
             say("Race " + raceName + " not found.");
@@ -117,19 +109,19 @@ public class Action {
         return race;
     }
 
-    public HashMap<String, RaceDefinition> getRaces(Event event) {
+    public HashMap<String, RaceDefinition> getRaces(Regatta regatta) {
         final HashMap<String, RaceDefinition> result = new HashMap<String, RaceDefinition>();
 
-        for (final RaceDefinition race : event.getAllRaces()) {
+        for (final RaceDefinition race : regatta.getAllRaces()) {
             result.put(race.getName(), race);
         }
 
         return result;
     }
 
-    public RaceDefinition getRace(Event event, String name) {
-        if ((event != null) && (name != null)) {
-            for (RaceDefinition race : event.getAllRaces()) {
+    public RaceDefinition getRace(Regatta regatta, String name) {
+        if ((regatta != null) && (name != null)) {
+            for (RaceDefinition race : regatta.getAllRaces()) {
                 if (name.equals(race.getName())) {
                     return race;
                 }
@@ -139,9 +131,9 @@ public class Action {
         return null;
     }
 
-    public TrackedRace getTrackedRace(Event event, RaceDefinition race) throws IOException {
-        DynamicTrackedEvent trackedEvent = getService().getOrCreateTrackedEvent(event);
-        TrackedRace trackedRace = trackedEvent == null ? null : trackedEvent.getExistingTrackedRace(race);
+    public TrackedRace getTrackedRace(Regatta regatta, RaceDefinition race) throws IOException {
+        DynamicTrackedRegatta trackedRegatta = getService().getOrCreateTrackedRegatta(regatta);
+        TrackedRace trackedRace = trackedRegatta == null ? null : trackedRegatta.getExistingTrackedRace(race);
         return trackedRace;
     }
 

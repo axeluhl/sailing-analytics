@@ -15,12 +15,12 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
-import com.sap.sailing.domain.common.EventFetcher;
-import com.sap.sailing.domain.common.EventIdentifier;
-import com.sap.sailing.domain.common.EventName;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaFetcher;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
@@ -28,14 +28,14 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
-import com.sap.sailing.domain.tracking.TrackedEvent;
-import com.sap.sailing.domain.tracking.TrackedEventRegistry;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -48,40 +48,40 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
  * live GPS boat location, waypoint, coarse and mark passing data.<p>
  * 
- * If a race/event is already being tracked, another {@link #addTracTracRace(URL, URI, URI, WindStore, long)} or
- * {@link #addEvent(URL, URI, URI, WindStore, long)} call will have no effect, even if a different
+ * If a race/regatta is already being tracked, another {@link #addTracTracRace(URL, URI, URI, WindStore, long)} or
+ * {@link #addRegatta(URL, URI, URI, WindStore, long)} call will have no effect, even if a different
  * {@link WindStore} is requested.<p>
  * 
- * When the tracking of a race/event is {@link #stopTracking(Event, RaceDefinition) stopped}, the next
+ * When the tracking of a race/regatta is {@link #stopTracking(Regatta, RaceDefinition) stopped}, the next
  * time it's started to be tracked, a new {@link TrackedRace} at least will be constructed. This also
- * means that when a {@link TrackedEvent} exists that still holds other {@link TrackedRace}s, the
- * no longer tracked {@link TrackedRace} will be removed from the {@link TrackedEvent}.
+ * means that when a {@link TrackedRegatta} exists that still holds other {@link TrackedRace}s, the
+ * no longer tracked {@link TrackedRace} will be removed from the {@link TrackedRegatta}.
  * corresponding information is removed also from the {@link DomainFactory}'s caches to ensure that
  * clean, fresh data is received should another tracking request be issued later.
  * 
  * @author Axel Uhl (d043530)
  *
  */
-public interface RacingEventService extends TrackedEventRegistry, EventFetcher, RaceFetcher {
+public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RaceFetcher {
     /**
-     * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
+     * @return a thread-safe copy of the regattas currently known by the service; it's safe for callers to iterate over
      *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
      */
-    Iterable<Event> getAllEvents();
+    Iterable<Regatta> getAllRegattas();
 
-    Event getEventByName(String name);
+    Regatta getRegattaByName(String name);
     
     @Override
-    Event getEvent(EventName eventName);
+    Regatta getRegatta(RegattaName regattaName);
     
-    Event getEvent(EventIdentifier eventIdentifier);
+    Regatta getRegatta(RegattaIdentifier regattaIdentifier);
 
     @Override
-    RaceDefinition getRace(EventAndRaceIdentifier raceIdentifier);
+    RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier);
 
-    TrackedRace getTrackedRace(Event event, RaceDefinition r);
+    TrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
     
-    TrackedRace getTrackedRace(EventAndRaceIdentifier raceIdentifier);
+    TrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
      * Obtains an unmodifiable map of the leaderboard configured in this service keyed by their names.
@@ -95,9 +95,9 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
     Leaderboard getLeaderboardByName(String name);
 
     /**
-     * Defines the event and for each race listed in the JSON document that is not already being tracked by this service
+     * Defines the regatta and for each race listed in the JSON document that is not already being tracked by this service
      * creates a {@link TracTracRaceTracker} that starts tracking the respective race. The {@link RaceDefinition}s obtained this
-     * way are all grouped into the single {@link Event} produced for the event listed in the JSON response. Note that
+     * way are all grouped into the single {@link Regatta} produced for the event listed in the JSON response. Note that
      * the many race trackers will have their TracTrac <code>Event</code> each, all with the same name, meaning the same
      * event but being distinct.
      * 
@@ -109,7 +109,7 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
      *            if a race definition is not received for a race of this event within this time, the race tracker for
      *            that race is stopped; use -1 to wait forever
      */
-    Event addEvent(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
+    Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, ParseException,
             org.json.simple.parser.ParseException, Exception;
 
@@ -117,11 +117,11 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
      * If not already tracking the URL/URI/URI combination, adds a single race tracker and starts tracking the race,
      * using the race's parameter URL which delivers the single configuration text file for that race. While the result
      * of passing this URL to the TracTrac <code>KeyValue.setup</code> is a TracTrac <code>Event</code>, those events
-     * only manage a single race. In our domain model, we group those races into a single instance of our {@link Event}
+     * only manage a single race. In our domain model, we group those races into a single instance of our {@link Regatta}
      * class.
      * <p>
      * 
-     * If this is the first race of an event, the {@link Event} is created as well. If the {@link RaceDefinition} for
+     * If this is the first race of an event, the {@link Regatta} is created as well. If the {@link RaceDefinition} for
      * the race already exists, it isn't created again. Also, if a {@link TracTracRaceTracker} for the given race already
      * exists, it is not added again.
      * <p>
@@ -148,44 +148,44 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
-     * Stops tracking all races of the event specified. This will also stop tracking wind for all races of this event.
-     * See {@link #stopTrackingWind(Event, RaceDefinition)}. If there were multiple calls to
+     * Stops tracking all races of the regatta specified. This will also stop tracking wind for all races of this regatta.
+     * See {@link #stopTrackingWind(Regatta, RaceDefinition)}. If there were multiple calls to
      * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} with an equal combination of URLs/URIs, the {@link TracTracRaceTracker}
      * already tracking the race was re-used. The trackers will be stopped by this call regardless of how many calls
      * were made that ensured they were tracking.
      */
-    void stopTracking(Event event) throws MalformedURLException, IOException, InterruptedException;
+    void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
     
     /**
-     * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Event, RaceDefinition) tracked race} from
-     * this service. If it was the last {@link RaceDefinition} in its {@link Event}, the <code>event</code> is removed
-     * as well and will no longer be returned by {@link #getAllEvents()}. The wind tracking is stopped for
+     * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race} from
+     * this service. If it was the last {@link RaceDefinition} in its {@link Regatta}, the <code>regatta</code> is removed
+     * as well and will no longer be returned by {@link #getAllRegattas()}. The wind tracking is stopped for
      * <code>race</code>.
      * <p>
      * 
      * Any {@link RaceTracker} for which <code>race</race> is the last race tracked that is still reachable
-     * from {@link #getAllEvents()} will be {@link RaceTracker#stop() stopped}.
+     * from {@link #getAllRegattas()} will be {@link RaceTracker#stop() stopped}.
      * 
      * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
-     * {@link #getTrackedRace(Event, RaceDefinition) corresponding} {@link TrackedRace} as its
-     * {@link RaceInLeaderboard#getTrackedRace()}.
+     * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its
+     * {@link RaceColumn#getTrackedRace()}.
      * 
-     * @param event
+     * @param regatta
      *            the event to remove
      * @param race
      *            the race to remove
      */
-    void removeRace(Event event, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
+    void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
     
     /**
      * Stops all {@link RaceTracker}s currently tracking <code>race</code>. Note that if the same tracker also may have
      * been tracking other races. Other races of the same event that are currently tracked will continue to be tracked.
      * If wind tracking for the race is currently running, it will be stopped (see also
-     * {@link #stopTrackingWind(Event, RaceDefinition)}). The <code>race</code> (and the other races tracked by the
+     * {@link #stopTrackingWind(Regatta, RaceDefinition)}). The <code>race</code> (and the other races tracked by the
      * same tracker) as well as the corresponding {@link TrackedRace}s will continue to exist, e.g., when asking
-     * {@link #getTrackedRace(Event, RaceDefinition)}.
+     * {@link #getTrackedRace(Regatta, RaceDefinition)}.
      */
-    void stopTracking(Event event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
+    void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
 
     /**
      * @param port
@@ -196,16 +196,16 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
      * @throws SocketException
      *             thrown, e.g., in case there is already another listener on the port requested
      */
-    void startTrackingWind(Event event, RaceDefinition race, boolean correctByDeclination) throws SocketException;
+    void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws SocketException;
 
-    void stopTrackingWind(Event event, RaceDefinition race) throws SocketException, IOException;
+    void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException;
 
     /**
      * The {@link Triple#getC() third component} of the triples returned is a wind tracker-specific
      * comment where a wind tracker may provide information such as its type name or, if applicable,
      * connectivity information such as the network port on which it receives wind information.
      */
-    Iterable<Triple<Event, RaceDefinition, String>> getWindTrackedRaces();
+    Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces();
 
     /**
      * For the JSON URL of an account / event, lists the paramURLs that can be used for {@link #addTracTracRace(URL, URI, URI, WindStore, long)}
@@ -243,7 +243,7 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
      */
     void renameLeaderboard(String oldName, String newName);
 
-    RaceInLeaderboard addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
+    RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace);
 
     void moveLeaderboardColumnUp(String leaderboardName, String columnName);
 
@@ -266,9 +266,9 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
     
     void storeSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
-    void stopTrackingAndRemove(Event event) throws MalformedURLException, IOException, InterruptedException;
+    void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
-    void removeEvent(Event event) throws MalformedURLException, IOException, InterruptedException;
+    void removeEvent(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier);
     
@@ -329,18 +329,18 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
     RacesHandle addRace(RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
-    TrackedRace createTrackedRace(EventAndRaceIdentifier raceIdentifier, WindStore windStore,
+    TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
-    Event getOrCreateEvent(String eventName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
+    Regatta getOrCreateRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
 
     /**
-     * Adds <code>raceDefinition</code> to the {@link Event} such that it will appear in {@link Event#getAllRaces()}
-     * and {@link Event#getRaceByName(String)}.
+     * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
+     * and {@link Regatta#getRaceByName(String)}.
      * 
-     * @param addToEvent identifier of an event that must exist already
+     * @param addToRegatta identifier of an regatta that must exist already
      */
-    void addRace(EventIdentifier addToEvent, RaceDefinition raceDefinition);
+    void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition);
 
     void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames);
     
@@ -366,12 +366,12 @@ public interface RacingEventService extends TrackedEventRegistry, EventFetcher, 
      * Dual, reading operation for {@link #serializeForInitialReplication(ObjectOutputStream)}. In other words, when
      * this operation returns, this service instance is in a state "equivalent" to that of the service instance that
      * produced the stream contents in its {@link #serializeForInitialReplication(ObjectOutputStream)}. "Equivalent"
-     * here means that a replica will have equal sets of events, tracked events, leaderboards and leaderboard groups but
+     * here means that a replica will have equal sets of regattas, tracked regattas, leaderboards and leaderboard groups but
      * will not have any active trackers for wind or positions because it relies on these elements to be sent through
      * the replication channel.
      * <p>
      * 
-     * Tracked events read from the stream are observed (see {@link RaceListener}) by this object for automatic updates
+     * Tracked regattas read from the stream are observed (see {@link RaceListener}) by this object for automatic updates
      * to the default leaderboard and for automatic linking to leaderboard columns. It is assumed that no explicit
      * replication of these operations will happen based on the changes performed on the replication master.<p>
      * 

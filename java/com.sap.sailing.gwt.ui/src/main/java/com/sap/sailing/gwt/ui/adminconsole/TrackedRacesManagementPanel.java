@@ -10,19 +10,18 @@ import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
 public class TrackedRacesManagementPanel extends AbstractEventManagementPanel implements RaceSelectionChangeListener {
-    private EventAndRaceIdentifier singleSelectedRace;
+    private RegattaAndRaceIdentifier singleSelectedRace;
     
     private RaceDTO selectedRaceDTO;
     
@@ -35,13 +34,13 @@ public class TrackedRacesManagementPanel extends AbstractEventManagementPanel im
     private final DateTimeFormatRenderer durationFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_MEDIUM), TimeZone.createTimeZone(0));
 
-    private List<EventDTO> savedEvents;
+    private List<RegattaDTO> savedEvents;
     
     private final Grid raceDataGrid;
     
     public TrackedRacesManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            EventRefresher eventRefresher, StringMessages stringConstants) {
-        super(sailingService, eventRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
+            RegattaRefresher regattaRefresher, StringMessages stringConstants) {
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -71,25 +70,23 @@ public class TrackedRacesManagementPanel extends AbstractEventManagementPanel im
     }
 
     @Override
-    public void fillEvents(List<EventDTO> result) {
-        trackedRacesListComposite.fillEvents(result);
+    public void fillRegattas(List<RegattaDTO> result) {
+        trackedRacesListComposite.fillRegattas(result);
         savedEvents = result;
     }
     
-    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         if (selectedRaces.size() == 1) {
             singleSelectedRace = selectedRaces.get(0);
             selectedRacePanel.setCaptionText(singleSelectedRace.getRaceName());
             selectedRacePanel.setVisible(true);
             
-            for (EventDTO event : savedEvents) {
-                for (RegattaDTO regatta : event.regattas) {
-                    for (RaceDTO race : regatta.races) {
-                        if (race != null && race.getRaceIdentifier().equals(singleSelectedRace)) {
-                            this.selectedRaceDTO = race;
-                            refreshRaceData();
-                            break;
-                        }
+            for (RegattaDTO regatta : savedEvents) {
+                for (RaceDTO race : regatta.races) {
+                    if (race != null && race.getRaceIdentifier().equals(singleSelectedRace)) {
+                        this.selectedRaceDTO = race;
+                        refreshRaceData();
+                        break;
                     }
                 }
             }

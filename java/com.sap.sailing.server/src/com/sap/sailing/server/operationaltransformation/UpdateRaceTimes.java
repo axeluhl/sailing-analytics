@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -12,7 +12,7 @@ public class UpdateRaceTimes extends AbstractRaceOperation<Void> {
     private final TimePoint endOfTracking;
     private final TimePoint startTimeReceived;
     
-    public UpdateRaceTimes(EventAndRaceIdentifier raceIdentifier, TimePoint startOfTracking, TimePoint endOfTracking,
+    public UpdateRaceTimes(RegattaAndRaceIdentifier raceIdentifier, TimePoint startOfTracking, TimePoint endOfTracking,
             TimePoint startTimeReceived) {
         super(raceIdentifier);
         this.startOfTracking = startOfTracking;

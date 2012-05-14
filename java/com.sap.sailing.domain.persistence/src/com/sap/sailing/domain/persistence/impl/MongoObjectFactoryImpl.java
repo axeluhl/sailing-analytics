@@ -10,7 +10,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
@@ -21,11 +21,11 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.tracking.Positioned;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -73,9 +73,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void addWindTrackDumper(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource) {
+    public void addWindTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace, WindSource windSource) {
         WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-        windTrack.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, this, database));
+        windTrack.addListener(new MongoWindListener(trackedRegatta, trackedRace, windSource, this, database));
     }
 
     public DBCollection getWindTrackCollection() {
@@ -84,9 +84,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeWindTrackEntry(Event event, RaceDefinition race, WindSource windSource, Wind wind) {
+    public DBObject storeWindTrackEntry(Regatta regatta, RaceDefinition race, WindSource windSource, Wind wind) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.EVENT_NAME.name(), event.getName());
+        result.put(FieldNames.EVENT_NAME.name(), regatta.getName());
         result.put(FieldNames.RACE_NAME.name(), race.getName());
         result.put(FieldNames.WIND_SOURCE_NAME.name(), windSource.name());
         if (windSource.getId() != null) {
@@ -99,7 +99,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject) {
         if (raceIdentifier != null) {
-            dbObject.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getEventName());
+            dbObject.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getRegattaName());
             dbObject.put(FieldNames.RACE_NAME.name(), raceIdentifier.getRaceName());
         }
     }
@@ -118,7 +118,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBList dbRaceColumns = new BasicDBList();
         result.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
-        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             BasicDBObject dbRaceColumn = new BasicDBObject();
             dbRaceColumn.put(FieldNames.LEADERBOARD_COLUMN_NAME.name(), raceColumn.getName());
             dbRaceColumn.put(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name(), raceColumn.isMedalRace());
@@ -153,7 +153,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
-        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             BasicDBObject dbCorrectionForRace = new BasicDBObject();
             for (Competitor competitor : leaderboard.getCompetitors()) {
                 if (scoreCorrection.isScoreCorrected(competitor, raceColumn)) {

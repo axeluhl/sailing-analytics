@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -10,7 +10,7 @@ public class SetWindSourcesToExclude extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 7639288885720509529L;
     private final Iterable<WindSource> windSourcesToExclude;
     
-    public SetWindSourcesToExclude(EventAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude) {
+    public SetWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude) {
         super(raceIdentifier);
         this.windSourcesToExclude = windSourcesToExclude;
     }

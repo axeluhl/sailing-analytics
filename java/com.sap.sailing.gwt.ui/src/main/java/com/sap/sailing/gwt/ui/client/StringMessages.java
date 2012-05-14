@@ -92,7 +92,7 @@ public interface StringMessages extends Messages {
     String trackNewEvent();
     String trackableRaces();
     String trackWind();
-    String eventName();
+    String regattaName();
     String event();
     String startTime();
     String regatta();

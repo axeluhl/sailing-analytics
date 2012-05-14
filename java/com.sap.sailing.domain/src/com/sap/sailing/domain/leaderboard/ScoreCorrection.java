@@ -33,7 +33,7 @@ public interface ScoreCorrection extends Serializable {
      * {@link #isScoreCorrected(Competitor, TrackedRace)} to detect the difference.
      * @param numberOfCompetitors TODO
      */
-    Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint, int numberOfCompetitors);
+    Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, int numberOfCompetitors);
 
     /**
      * Note the difference between what this method does and a more naive comparison of uncorrected and corrected score.
@@ -44,6 +44,6 @@ public interface ScoreCorrection extends Serializable {
      * @return if an explicit score correction was made for the combination of <code>competitor</code> and
      *         <code>raceColumn</code>
      */
-    boolean isScoreCorrected(Competitor competitor, RaceInLeaderboard raceColumn);
+    boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn);
 
 }

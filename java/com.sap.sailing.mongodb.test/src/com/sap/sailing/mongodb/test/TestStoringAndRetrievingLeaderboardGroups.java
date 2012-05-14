@@ -6,11 +6,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
@@ -132,7 +132,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final ArrayList<Leaderboard> leaderboards = new ArrayList<>();
         
         final Leaderboard leaderboard = new LeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces));
-        final RaceInLeaderboard race = leaderboard.addRaceColumn(columnName, false);
+        final RaceColumn race = leaderboard.addRaceColumn(columnName, false);
         leaderboards.add(leaderboard);
         
         final LeaderboardGroup group = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
@@ -148,9 +148,9 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         Assert.assertEquals(newLeaderboardName, loadedLeaderboardName);
         
         //RaceIdentifier change test
-        final String eventName = "Event";
+        final String regattaName = "Event";
         final String raceName = "Race";
-        leaderboard.getRaceColumnByName(columnName).setRaceIdentifier(new EventNameAndRaceName(eventName, raceName));
+        leaderboard.getRaceColumnByName(columnName).setRaceIdentifier(new RegattaNameAndRaceName(regattaName, raceName));
         mongoObjectFactory.storeLeaderboard(leaderboard);
         
         //Check if the leaderboard updated correctly

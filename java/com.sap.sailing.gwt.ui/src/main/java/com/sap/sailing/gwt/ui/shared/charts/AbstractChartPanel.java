@@ -30,7 +30,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -99,7 +99,8 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         
         chart = createChart(dataToShow);
         
-        List<EventAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+        List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+
         if(!selectedRaces.isEmpty()) {
             loadData(true);
         }
@@ -262,7 +263,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
 
     private RaceIdentifier getSelectedRace() {
         RaceIdentifier result = null;
-        List<EventAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+        List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             result = selectedRaces.iterator().next();
         }
@@ -508,7 +509,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
     }
     
     @Override
-    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         setChartData(null);
         clearChart();
         loadData(true);
