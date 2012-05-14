@@ -28,7 +28,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
@@ -36,7 +36,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class LeaderboardOfflineTest {
     private Set<TrackedRace> testRaces;
-    private Map<TrackedRace, RaceInLeaderboard> raceColumnsInLeaderboard;
+    private Map<TrackedRace, RaceColumn> raceColumnsInLeaderboard;
     private Competitor competitor;
     
     @Before
@@ -55,7 +55,7 @@ public class LeaderboardOfflineTest {
 
     public void setupRaces(int numberOfStartedRaces, int numberOfNotStartedRaces) {
         testRaces = new HashSet<TrackedRace>();
-        raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceInLeaderboard>();
+        raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
         for (int i=0; i<numberOfStartedRaces; i++) {
             TrackedRace r = new MockedTrackedRaceWithFixedRank(competitor, i+1, /* started */ true);
             testRaces.add(r); // hash set should take care of more or less randomly permuting the races
@@ -110,7 +110,7 @@ public class LeaderboardOfflineTest {
     @Test
     public void testMaxPointsDiscard() throws NoWindException {
         testRaces = new HashSet<TrackedRace>();
-        raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceInLeaderboard>();
+        raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
         Competitor c2 = createCompetitor("Marcus Baur");
         Competitor c3 = createCompetitor("Robert Stanjek");
         for (int i=0; i<3; i++) {
@@ -124,10 +124,10 @@ public class LeaderboardOfflineTest {
                 new int[] { 1 }));
         int i=0;
         int bestScore = Integer.MAX_VALUE;
-        RaceInLeaderboard bestScoringRaceColumn = null;
+        RaceColumn bestScoringRaceColumn = null;
         for (TrackedRace race : testRaces) {
             i++;
-            RaceInLeaderboard raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */ false);
+            RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */ false);
             raceColumnsInLeaderboard.put(race, raceColumn);
             if (race.getRank(competitor) < bestScore) {
                 bestScore = race.getRank(competitor);
@@ -163,7 +163,7 @@ public class LeaderboardOfflineTest {
         }
         List<Integer> ranksOfNonMedalStartedRaces = new ArrayList<Integer>();
         TimePoint now = MillisecondsTimePoint.now();
-        for (RaceInLeaderboard column : raceColumnsInLeaderboard.values()) {
+        for (RaceColumn column : raceColumnsInLeaderboard.values()) {
             if (!column.isMedalRace() && column.getTrackedRace() != null && column.getTrackedRace().hasStarted(now)) {
                 ranksOfNonMedalStartedRaces.add(column.getTrackedRace().getRank(competitor, now));
             }
@@ -174,8 +174,8 @@ public class LeaderboardOfflineTest {
         int medalRacePoints = getMedalRacePoints(competitor, now);
         int numberOfRacesFromWhichToDiscard = ranksOfNonMedalStartedRaces.size();
         for (TrackedRace race : testRaces) {
-            RaceInLeaderboard raceColumn = raceColumnsInLeaderboard.get(race);
-            Pair<Competitor, RaceInLeaderboard> key = new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn);
+            RaceColumn raceColumn = raceColumnsInLeaderboard.get(race);
+            Pair<Competitor, RaceColumn> key = new Pair<Competitor, RaceColumn>(competitor, raceColumn);
             if (race.hasStarted(now)) {
                 int rank = race.getRank(competitor, now);
                 assertEquals(rank, leaderboard.getTrackedPoints(competitor, raceColumn, now));

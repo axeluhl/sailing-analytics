@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -13,7 +14,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface RaceInLeaderboard extends LeaderboardColumn {
+public interface RaceColumn extends Named {
     /**
      * This does not update the {@link #getRaceIdentifier() race identifier}. 
      */
@@ -51,7 +52,7 @@ public interface RaceInLeaderboard extends LeaderboardColumn {
     /**
      * Constructs a key for maps storing corrections such as score corrections and max points reasons.
      */
-    Pair<Competitor, RaceInLeaderboard> getKey(Competitor competitor);
+    Pair<Competitor, RaceColumn> getKey(Competitor competitor);
     
     
 }

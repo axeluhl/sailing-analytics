@@ -80,7 +80,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -255,7 +255,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.competitors = new ArrayList<CompetitorDTO>();
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
-            for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 RegattaAndRaceIdentifier raceIdentifier = null;
                 if (raceColumn.getTrackedRace() != null) {
                     TrackedRace trackedRace = raceColumn.getTrackedRace();
@@ -274,7 +274,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 row.carriedPoints = leaderboard.hasCarriedPoints(competitor) ? leaderboard.getCarriedPoints(competitor) : null;
                 result.competitors.add(competitorDTO);
                 Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
-                for (final RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+                for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     final Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
                     RunnableFuture<LeaderboardEntryDTO> future = new FutureTask<LeaderboardEntryDTO>(new Callable<LeaderboardEntryDTO>() {
                         @Override
@@ -317,7 +317,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             List<String> raceColumnNames = new ArrayList<String>();
-            for (RaceInLeaderboard column : leaderboard.getRaceColumns()) {
+            for (RaceColumn column : leaderboard.getRaceColumns()) {
                 raceColumnNames.add(column.getName());
             }
             int i=0;
@@ -1203,8 +1203,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         for (Leaderboard leaderboard : leaderboards.values()) {
-            Iterable<RaceInLeaderboard> races = leaderboard.getRaceColumns();
-            for (RaceInLeaderboard raceInLeaderboard : races) {
+            Iterable<RaceColumn> races = leaderboard.getRaceColumns();
+            for (RaceColumn raceInLeaderboard : races) {
                 TrackedRace trackedRace = raceInLeaderboard.getTrackedRace();
                 RaceDefinition trackedRaceDef = trackedRace != null ? trackedRace.getRace() : null;
                 if (trackedRaceDef != null && trackedRaceDef.getName().equals(race.name)) {
@@ -1228,7 +1228,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         LeaderboardDTO dto = new LeaderboardDTO();
         dto.name = leaderboard.getName();
         dto.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
-        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             RegattaAndRaceIdentifier raceIdentifier = null;
             StrippedRaceDTO race = null;
             if(raceColumn.getTrackedRace() != null) {
@@ -1367,7 +1367,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Pair<String, String> result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace();
                 if (trackedRace != null) {

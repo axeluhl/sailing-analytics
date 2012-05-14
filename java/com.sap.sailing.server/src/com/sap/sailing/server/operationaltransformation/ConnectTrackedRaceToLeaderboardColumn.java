@@ -2,7 +2,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -33,7 +33,7 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
         boolean success = false;
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         if (leaderboard != null) {
-            RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(getColumnName());
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(getColumnName());
             if (raceColumn != null) {
                 TrackedRace trackedRace = toState.getExistingTrackedRace(raceToConnect);
                 if (trackedRace != null) {

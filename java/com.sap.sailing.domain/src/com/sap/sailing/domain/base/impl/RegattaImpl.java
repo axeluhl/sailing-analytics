@@ -2,29 +2,43 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
-import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 
 public class RegattaImpl extends NamedImpl implements Regatta {
     private static final long serialVersionUID = 6509564189552478869L;
     private final Set<RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
+    private final Iterable<? extends Series> series;
     
+    /**
+     * Constructs a regatta with a single default series with empty race column list, and a single default fleet.
+     */
     public RegattaImpl(String baseName, BoatClass boatClass) {
+        this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isFleetsOrdered */true,
+                Collections.singletonList(new FleetImpl("Default")), new ArrayList<RaceColumn>())));
+    }
+    
+    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series) {
         super(baseName+(boatClass==null?"":" ("+boatClass.getName()+")"));
         races = new HashSet<RaceDefinition>();
         regattaListeners = new HashSet<RegattaListener>();
         this.boatClass = boatClass;
+        this.series = series;
     }
     
     @Override
@@ -41,6 +55,11 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         regattaListeners = new HashSet<>();
+    }
+
+    @Override
+    public Iterable<? extends Series> getSeries() {
+        return series;
     }
 
     @Override

@@ -148,7 +148,7 @@ public interface SailingServiceAsync {
      *            result ({@link LeaderboardEntryDTO#legDetails} will be <code>null</code> for all
      *            {@link LeaderboardEntryDTO} objects contained). Otherwise, the {@link LeaderboardEntryDTO#legDetails}
      *            list will contain one entry per leg of the race {@link Course} for those race columns whose
-     *            {@link RaceInLeaderboard#getType() name} is contained in
+     *            {@link RaceColumn#getType() name} is contained in
      *            <code>namesOfRacesForWhichToLoadLegDetails</code>. For all other columns,
      *            {@link LeaderboardEntryDTO#legDetails} is <code>null</code>.
      */

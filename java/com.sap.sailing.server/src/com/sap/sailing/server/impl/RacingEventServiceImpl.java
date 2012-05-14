@@ -46,7 +46,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
@@ -210,10 +210,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public RaceInLeaderboard addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
+    public RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            RaceInLeaderboard result = leaderboard.addRaceColumn(columnName, medalRace);
+            RaceColumn result = leaderboard.addRaceColumn(columnName, medalRace);
             updateStoredLeaderboard(leaderboard);
             return result;
         } else {
@@ -667,15 +667,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     /**
      * Based on the <code>trackedRace</code>'s {@link TrackedRace#getRaceIdentifier() race identifier}, the tracked race
-     * is (re-)associated to all {@link RaceInLeaderboard race columns} that currently have no
-     * {@link RaceInLeaderboard#getTrackedRace() tracked race assigned} and whose
-     * {@link RaceInLeaderboard#getRaceIdentifier() race identifier} equals that of <code>trackedRace</code>.
+     * is (re-)associated to all {@link RaceColumn race columns} that currently have no
+     * {@link RaceColumn#getTrackedRace() tracked race assigned} and whose
+     * {@link RaceColumn#getRaceIdentifier() race identifier} equals that of <code>trackedRace</code>.
      */
     private void linkRaceToConfiguredLeaderboardColumns(TrackedRace trackedRace) {
         boolean leaderboardHasChanged = false;
         RaceIdentifier trackedRaceIdentifier = trackedRace.getRaceIdentifier();
         for (Leaderboard leaderboard : getLeaderboards().values()) {
-            for (RaceInLeaderboard column : leaderboard.getRaceColumns()) {
+            for (RaceColumn column : leaderboard.getRaceColumns()) {
                 if (trackedRaceIdentifier.equals(column.getRaceIdentifier()) && column.getTrackedRace() == null) {
                     column.setTrackedRace(trackedRace);
                     leaderboardHasChanged = true;
@@ -806,7 +806,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             for (Leaderboard leaderboard : getLeaderboards().values()) {
                 boolean changed = false;
-                for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     if (raceColumn.getTrackedRace() == trackedRace) {
                         raceColumn.setTrackedRace(null); // but leave the RaceIdentifier on the race column untouched, e.g., for later re-load
                         changed = true;

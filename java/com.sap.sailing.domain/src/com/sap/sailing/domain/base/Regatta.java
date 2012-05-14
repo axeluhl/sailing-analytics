@@ -14,6 +14,13 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
  */
 public interface Regatta extends Named {
     /**
+     * A regatta consists of one or more series.
+     * 
+     * @return an unmodifiable iterable sequence of the series of which this regatta consists.
+     */
+    Iterable<? extends Series> getSeries();
+    
+    /**
      * Please note that the {@link RaceDefinition}s of the {@link Regatta} are not necessarily in sync with the
      * {@link TrackedRace}s of the {@link TrackedRegatta} whose {@link TrackedRegatta#getRegatta() regatta} is this regatta.
      * For example, it may be the case that a {@link RaceDefinition} is returned by this method for which no
