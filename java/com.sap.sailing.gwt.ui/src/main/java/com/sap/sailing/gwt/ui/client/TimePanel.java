@@ -16,8 +16,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
@@ -135,8 +133,8 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         vp.add(s);
         s.add(sliderBar);
 
-        HorizontalPanel controlsPanel = new HorizontalPanel();
-        controlsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        FlowPanel controlsPanel = new FlowPanel();
+        
         controlsPanel.setStyleName("timePanel-controls");
         controlsPanel.setSize("100%", "25px");
         vp.add(controlsPanel);
