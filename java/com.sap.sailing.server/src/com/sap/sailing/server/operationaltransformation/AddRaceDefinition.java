@@ -7,12 +7,12 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class AddRaceDefinition extends AbstractRacingEventServiceOperation<Void> {
     private static final long serialVersionUID = -2282997511967012426L;
-    private final RegattaIdentifier eventIdentifier;
+    private final RegattaIdentifier regattaIdentifier;
     private final RaceDefinition raceDefinition;
     
-    public AddRaceDefinition(RegattaIdentifier eventIdentifier, RaceDefinition raceDefinition) {
+    public AddRaceDefinition(RegattaIdentifier regattaIdentifier, RaceDefinition raceDefinition) {
         super();
-        this.eventIdentifier = eventIdentifier;
+        this.regattaIdentifier = regattaIdentifier;
         this.raceDefinition = raceDefinition;
     }
 
@@ -30,7 +30,7 @@ public class AddRaceDefinition extends AbstractRacingEventServiceOperation<Void>
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
-        toState.addRace(eventIdentifier, raceDefinition);
+        toState.addRace(regattaIdentifier, raceDefinition);
         return null;
     }
 

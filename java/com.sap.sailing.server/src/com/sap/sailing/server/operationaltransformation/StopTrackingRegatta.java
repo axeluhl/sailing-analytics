@@ -19,9 +19,9 @@ public class StopTrackingRegatta extends AbstractRacingEventServiceOperation<Voi
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws MalformedURLException, IOException, InterruptedException {
-        Regatta event = toState.getRegatta(regattaIdentifier);
-        if (event != null) {
-            toState.stopTracking(event);
+        Regatta regatta = toState.getRegatta(regattaIdentifier);
+        if (regatta != null) {
+            toState.stopTracking(regatta);
         }
         return null;
     }

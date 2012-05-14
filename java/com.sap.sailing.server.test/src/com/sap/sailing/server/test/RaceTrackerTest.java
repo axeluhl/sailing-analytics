@@ -115,13 +115,13 @@ public class RaceTrackerTest {
 
     /**
      * This test asserts that tracking the same race twice doesn't create another tracker and in particular no
-     * new tracked event / tracked race.
+     * new tracked regatta / tracked race.
      * @throws Exception 
      */
     @Test
     public void testTrackingSameRaceWithoutStopping() throws Exception {
-        TrackedRegatta oldTrackedEvent = raceHandle.getTrackedEvent();
-        TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
+        TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedEvent();
+        TrackedRace oldTrackedRace = getTrackedRace(oldTrackedRegatta);
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
         TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedEvent();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);

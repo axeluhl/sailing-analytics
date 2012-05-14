@@ -462,8 +462,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     @Override
     public void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition) {
-        Regatta event = getRegatta(addToRegatta);
-        event.addRace(raceDefinition); // will trigger the raceAdded operation because this service is listening on all its events
+        Regatta regatta = getRegatta(addToRegatta);
+        regatta.addRace(raceDefinition); // will trigger the raceAdded operation because this service is listening on all its regattass
     }
     
     @Override
@@ -891,12 +891,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public TrackedRace getTrackedRace(Regatta e, RaceDefinition r) {
-        return getOrCreateTrackedRegatta(e).getTrackedRace(r);
+    public TrackedRace getTrackedRace(Regatta regatta, RaceDefinition race) {
+        return getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
     }
     
-    private TrackedRace getExistingTrackedRace(Regatta e, RaceDefinition r) {
-        return getOrCreateTrackedRegatta(e).getExistingTrackedRace(r);
+    private TrackedRace getExistingTrackedRace(Regatta regatta, RaceDefinition race) {
+        return getOrCreateTrackedRegatta(regatta).getExistingTrackedRace(race);
     }
     
     @Override

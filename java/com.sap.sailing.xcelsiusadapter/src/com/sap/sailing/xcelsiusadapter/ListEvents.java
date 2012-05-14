@@ -34,13 +34,13 @@ public class ListEvents extends Action {
     public void perform() throws Exception {
         final Document table = getTable("data");
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm zzz");
-        final HashMap<String, Regatta> events = getEvents();
-        for (final String regattaName : events.keySet()) {
-            final Regatta event = events.get(regattaName);
-            final HashMap<String, RaceDefinition> races = getRaces(event);
+        final HashMap<String, Regatta> regattas = getRegattas();
+        for (final String regattaName : regattas.keySet()) {
+            final Regatta regatta = regattas.get(regattaName);
+            final HashMap<String, RaceDefinition> races = getRaces(regatta);
             for (final String raceName : races.keySet()) {
                 RaceDefinition race = races.get(raceName);
-                final TrackedRace trackedRace = getTrackedRace(event, race);
+                final TrackedRace trackedRace = getTrackedRace(regatta, race);
                 if (trackedRace != null) {
                     addRow();
                     addColumn(race.getBoatClass().getName());

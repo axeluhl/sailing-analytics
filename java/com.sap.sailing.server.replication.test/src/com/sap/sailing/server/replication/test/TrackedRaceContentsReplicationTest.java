@@ -74,17 +74,17 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
         final String baseEventName = "Test Event";
         AddRegatta addEventOperation = new AddRegatta(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true);
-        Regatta event = master.apply(addEventOperation);
+        Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
         RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Collections.singletonList(competitor));
-        AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(event.getName()), race);
+        AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy1")));
         masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy2")));
         masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
         masterCourse.removeWaypoint(1);
-        raceIdentifier = new RegattaNameAndRaceName(event.getName(), raceName);
+        raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
         trackedRegatta = master.apply(new TrackRegatta(raceIdentifier));
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),

@@ -13,8 +13,8 @@ public class CourseChangeReplicator implements CourseListener {
     private final RegattaAndRaceIdentifier raceIdentifier;
     private final RacingEventServiceImpl replicator;
     
-    public CourseChangeReplicator(RacingEventServiceImpl replicator, Regatta event, RaceDefinition raceDefinition) {
-        raceIdentifier = new RegattaNameAndRaceName(event.getName(), raceDefinition.getName());
+    public CourseChangeReplicator(RacingEventServiceImpl replicator, Regatta regatta, RaceDefinition raceDefinition) {
+        raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceDefinition.getName());
         this.replicator = replicator;
     }
 

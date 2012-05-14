@@ -15,7 +15,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 public class RaceTrackerMock implements RaceTracker{
     
     private Long id;
-    private Regatta event;
+    private Regatta regatta;
     private Set<RaceDefinition> raceDefinitions;
     private boolean isTracking;
     
@@ -25,10 +25,10 @@ public class RaceTrackerMock implements RaceTracker{
     
     
     
-    public RaceTrackerMock(Long id, Regatta event, Set<RaceDefinition> raceDefinitions, boolean isTracking) {
+    public RaceTrackerMock(Long id, Regatta regatta, Set<RaceDefinition> raceDefinitions, boolean isTracking) {
         super();
         this.id = id;
-        this.event = event;
+        this.regatta = regatta;
         this.raceDefinitions = raceDefinitions;
         this.isTracking = isTracking;
     }
@@ -52,7 +52,7 @@ public class RaceTrackerMock implements RaceTracker{
 
     @Override
     public Regatta getRegatta() {
-        return event;
+        return regatta;
     }
 
     @Override

@@ -48,50 +48,42 @@ public class Action {
         return service;
     }
 
-    public HashMap<String, Regatta> getEvents() {
+    public HashMap<String, Regatta> getRegattas() {
         final HashMap<String, Regatta> result = new HashMap<String, Regatta>();
-
-        for (final Regatta event : this.service.getAllRegattas()) {
-            result.put(event.getName(), event);
+        for (final Regatta regatta : this.service.getAllRegattas()) {
+            result.put(regatta.getName(), regatta);
         }
-
         return result;
     }
 
-    public Regatta getEvent() throws IOException {
+    public Regatta getRegatta() throws IOException {
         /*
-         * EVENT
+         * REGATTA
          */
-        final String regattaName = getAttribute("event");
-
+        final String regattaName = getAttribute("regatta");
         if (regattaName == null) {
-            say("Use the event= parameter to specify the event");
-
+            say("Use the regatta= parameter to specify the regatta");
             return null;
         }
-
-        final Regatta event = getEvent(regattaName);
-
-        if (event == null) {
-            say("Event " + regattaName + " not found.");
-
+        final Regatta regatta = getEvent(regattaName);
+        if (regatta == null) {
+            say("Regatta " + regattaName + " not found.");
             return null;
         }
-
-        return event;
+        return regatta;
     }
 
     public Regatta getEvent(String name) {
-        for (final Regatta event : this.service.getAllRegattas()) {
-            if (name.equals(event.getName())) {
-                return event;
+        for (final Regatta regatta : this.service.getAllRegattas()) {
+            if (name.equals(regatta.getName())) {
+                return regatta;
             }
         }
 
         return null;
     }
 
-    public RaceDefinition getRace(Regatta event) throws IOException {
+    public RaceDefinition getRace(Regatta regatta) throws IOException {
         /*
          * Get the race
          */
@@ -106,7 +98,7 @@ public class Action {
         /*
          * RACE
          */
-        final RaceDefinition race = getRace(event, raceName);
+        final RaceDefinition race = getRace(regatta, raceName);
 
         if (race == null) {
             say("Race " + raceName + " not found.");
@@ -117,19 +109,19 @@ public class Action {
         return race;
     }
 
-    public HashMap<String, RaceDefinition> getRaces(Regatta event) {
+    public HashMap<String, RaceDefinition> getRaces(Regatta regatta) {
         final HashMap<String, RaceDefinition> result = new HashMap<String, RaceDefinition>();
 
-        for (final RaceDefinition race : event.getAllRaces()) {
+        for (final RaceDefinition race : regatta.getAllRaces()) {
             result.put(race.getName(), race);
         }
 
         return result;
     }
 
-    public RaceDefinition getRace(Regatta event, String name) {
-        if ((event != null) && (name != null)) {
-            for (RaceDefinition race : event.getAllRaces()) {
+    public RaceDefinition getRace(Regatta regatta, String name) {
+        if ((regatta != null) && (name != null)) {
+            for (RaceDefinition race : regatta.getAllRaces()) {
                 if (name.equals(race.getName())) {
                     return race;
                 }
@@ -139,8 +131,8 @@ public class Action {
         return null;
     }
 
-    public TrackedRace getTrackedRace(Regatta event, RaceDefinition race) throws IOException {
-        DynamicTrackedRegatta trackedRegatta = getService().getOrCreateTrackedRegatta(event);
+    public TrackedRace getTrackedRace(Regatta regatta, RaceDefinition race) throws IOException {
+        DynamicTrackedRegatta trackedRegatta = getService().getOrCreateTrackedRegatta(regatta);
         TrackedRace trackedRace = trackedRegatta == null ? null : trackedRegatta.getExistingTrackedRace(race);
         return trackedRace;
     }

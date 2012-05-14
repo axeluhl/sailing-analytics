@@ -48,11 +48,11 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  * An OSGi service that can be used to track boat races using a TracTrac connector that pushes
  * live GPS boat location, waypoint, coarse and mark passing data.<p>
  * 
- * If a race/event is already being tracked, another {@link #addTracTracRace(URL, URI, URI, WindStore, long)} or
+ * If a race/regatta is already being tracked, another {@link #addTracTracRace(URL, URI, URI, WindStore, long)} or
  * {@link #addRegatta(URL, URI, URI, WindStore, long)} call will have no effect, even if a different
  * {@link WindStore} is requested.<p>
  * 
- * When the tracking of a race/event is {@link #stopTracking(Regatta, RaceDefinition) stopped}, the next
+ * When the tracking of a race/regatta is {@link #stopTracking(Regatta, RaceDefinition) stopped}, the next
  * time it's started to be tracked, a new {@link TrackedRace} at least will be constructed. This also
  * means that when a {@link TrackedRegatta} exists that still holds other {@link TrackedRace}s, the
  * no longer tracked {@link TrackedRace} will be removed from the {@link TrackedRegatta}.
@@ -64,7 +64,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RaceFetcher {
     /**
-     * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
+     * @return a thread-safe copy of the regattas currently known by the service; it's safe for callers to iterate over
      *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
      */
     Iterable<Regatta> getAllRegattas();
@@ -74,12 +74,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     @Override
     Regatta getRegatta(RegattaName regattaName);
     
-    Regatta getRegatta(RegattaIdentifier eventIdentifier);
+    Regatta getRegatta(RegattaIdentifier regattaIdentifier);
 
     @Override
     RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier);
 
-    TrackedRace getTrackedRace(Regatta event, RaceDefinition r);
+    TrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
     
     TrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
@@ -148,17 +148,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
-     * Stops tracking all races of the event specified. This will also stop tracking wind for all races of this event.
+     * Stops tracking all races of the regatta specified. This will also stop tracking wind for all races of this regatta.
      * See {@link #stopTrackingWind(Regatta, RaceDefinition)}. If there were multiple calls to
      * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} with an equal combination of URLs/URIs, the {@link TracTracRaceTracker}
      * already tracking the race was re-used. The trackers will be stopped by this call regardless of how many calls
      * were made that ensured they were tracking.
      */
-    void stopTracking(Regatta event) throws MalformedURLException, IOException, InterruptedException;
+    void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
     
     /**
      * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race} from
-     * this service. If it was the last {@link RaceDefinition} in its {@link Regatta}, the <code>event</code> is removed
+     * this service. If it was the last {@link RaceDefinition} in its {@link Regatta}, the <code>regatta</code> is removed
      * as well and will no longer be returned by {@link #getAllRegattas()}. The wind tracking is stopped for
      * <code>race</code>.
      * <p>
@@ -170,12 +170,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its
      * {@link RaceInLeaderboard#getTrackedRace()}.
      * 
-     * @param event
+     * @param regatta
      *            the event to remove
      * @param race
      *            the race to remove
      */
-    void removeRace(Regatta event, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
+    void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
     
     /**
      * Stops all {@link RaceTracker}s currently tracking <code>race</code>. Note that if the same tracker also may have
@@ -185,7 +185,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * same tracker) as well as the corresponding {@link TrackedRace}s will continue to exist, e.g., when asking
      * {@link #getTrackedRace(Regatta, RaceDefinition)}.
      */
-    void stopTracking(Regatta event, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
+    void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException;
 
     /**
      * @param port
@@ -266,7 +266,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     void storeSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
-    void stopTrackingAndRemove(Regatta event) throws MalformedURLException, IOException, InterruptedException;
+    void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     void removeEvent(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
@@ -338,9 +338,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
      * and {@link Regatta#getRaceByName(String)}.
      * 
-     * @param addToEvent identifier of an event that must exist already
+     * @param addToRegatta identifier of an regatta that must exist already
      */
-    void addRace(RegattaIdentifier addToEvent, RaceDefinition raceDefinition);
+    void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition);
 
     void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames);
     
@@ -366,12 +366,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Dual, reading operation for {@link #serializeForInitialReplication(ObjectOutputStream)}. In other words, when
      * this operation returns, this service instance is in a state "equivalent" to that of the service instance that
      * produced the stream contents in its {@link #serializeForInitialReplication(ObjectOutputStream)}. "Equivalent"
-     * here means that a replica will have equal sets of events, tracked events, leaderboards and leaderboard groups but
+     * here means that a replica will have equal sets of regattas, tracked regattas, leaderboards and leaderboard groups but
      * will not have any active trackers for wind or positions because it relies on these elements to be sent through
      * the replication channel.
      * <p>
      * 
-     * Tracked events read from the stream are observed (see {@link RaceListener}) by this object for automatic updates
+     * Tracked regattas read from the stream are observed (see {@link RaceListener}) by this object for automatic updates
      * to the default leaderboard and for automatic linking to leaderboard columns. It is assumed that no explicit
      * replication of these operations will happen based on the changes performed on the replication master.<p>
      * 

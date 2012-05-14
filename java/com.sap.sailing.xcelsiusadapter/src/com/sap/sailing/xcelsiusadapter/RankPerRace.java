@@ -39,9 +39,9 @@ public class RankPerRace extends Action {
 
     public void perform() throws Exception {
         // Get data from request
-        final Regatta event = getEvent();
-        final RaceDefinition race = getRace(event);
-        final TrackedRace trackedRace = getTrackedRace(event, race);
+        final Regatta regatta = getRegatta();
+        final RaceDefinition race = getRace(regatta);
+        final TrackedRace trackedRace = getTrackedRace(regatta, race);
         if (trackedRace != null) {
             final TimePoint time = getTimePoint(trackedRace);
             // Prepare document

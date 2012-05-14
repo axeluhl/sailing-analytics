@@ -79,19 +79,19 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true);
         final String baseEventName = "Test Event";
         AddRegatta addEventOperation = new AddRegatta(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true);
-        Regatta event = master.apply(addEventOperation);
+        Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
         RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass,
                 new ArrayList<Competitor>());
-        AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(event.getName()), race);
+        AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy1")));
         masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy2")));
         masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
         masterCourse.removeWaypoint(1);
         Thread.sleep(1000); // wait 1s for JMS to deliver the message and the message to be applied
-        Regatta replicaEvent = replica.getRegatta(new RegattaName(event.getName()));
+        Regatta replicaEvent = replica.getRegatta(new RegattaName(regatta.getName()));
         assertNotNull(replicaEvent);
         RaceDefinition replicaRace = replicaEvent.getRaceByName(raceName);
         assertNotNull(replicaRace);

@@ -20,7 +20,7 @@ public abstract class Servlet extends HttpServlet {
 
     protected static final String PARAM_ACTION = "action";
     
-    protected static final String PARAM_NAME_EVENTNAME = "eventname";
+    protected static final String PARAM_NAME_REGATTANAME = "regattaname";
 
     protected static final String PARAM_NAME_RACENAME = "racename";
 
@@ -40,16 +40,16 @@ public abstract class Servlet extends HttpServlet {
         return racingEventServiceTracker.getService();
     }
 
-    protected Regatta getEvent(HttpServletRequest req) {
-        Regatta event = getService().getRegattaByName(req.getParameter(PARAM_NAME_EVENTNAME));
-        return event;
+    protected Regatta getRegatta(HttpServletRequest req) {
+        Regatta regatta = getService().getRegattaByName(req.getParameter(PARAM_NAME_REGATTANAME));
+        return regatta;
     }
 
     protected RaceDefinition getRaceDefinition(HttpServletRequest req) {
-        Regatta event = getEvent(req);
-        if (event != null) {
+        Regatta regatta = getRegatta(req);
+        if (regatta != null) {
             String racename = req.getParameter(PARAM_NAME_RACENAME);
-            for (RaceDefinition race : event.getAllRaces()) {
+            for (RaceDefinition race : regatta.getAllRaces()) {
                 if (race.getName().equals(racename)) {
                     return race;
                 }
@@ -58,9 +58,9 @@ public abstract class Servlet extends HttpServlet {
         return null;
     }
 
-    protected RaceDefinition getRaceDefinition(Regatta event, HttpServletRequest req) {
+    protected RaceDefinition getRaceDefinition(Regatta regatta, HttpServletRequest req) {
         String racename = req.getParameter(PARAM_NAME_RACENAME);
-        for (RaceDefinition race : event.getAllRaces()) {
+        for (RaceDefinition race : regatta.getAllRaces()) {
             if (race.getName().equals(racename)) {
                 return race;
             }
@@ -86,11 +86,11 @@ public abstract class Servlet extends HttpServlet {
     }
 
 	protected TrackedRace getTrackedRace(HttpServletRequest req) {
-	    Regatta event = getEvent(req);
+	    Regatta regatta = getRegatta(req);
 	    RaceDefinition race = getRaceDefinition(req);
 	    TrackedRace trackedRace = null;
-	    if (event != null && race != null) {
-	        trackedRace = getService().getOrCreateTrackedRegatta(event).getTrackedRace(race);
+	    if (regatta != null && race != null) {
+	        trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
 	    }
 	    return trackedRace;
 	}
