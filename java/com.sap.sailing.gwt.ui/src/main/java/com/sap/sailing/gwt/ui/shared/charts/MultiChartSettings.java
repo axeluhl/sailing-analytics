@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sailing.gwt.ui.shared.charts;
 
 import com.sap.sailing.domain.common.DetailType;
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sailing.gwt.ui.shared.charts;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;

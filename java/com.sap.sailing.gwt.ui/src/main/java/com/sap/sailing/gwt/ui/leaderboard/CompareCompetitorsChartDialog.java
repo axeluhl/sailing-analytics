@@ -29,6 +29,8 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.shared.charts.MultiChartPanel;
+import com.sap.sailing.gwt.ui.shared.charts.MultiChartSettings;
 import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
 

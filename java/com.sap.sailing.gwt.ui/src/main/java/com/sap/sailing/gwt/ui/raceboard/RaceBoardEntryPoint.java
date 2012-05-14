@@ -10,7 +10,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
@@ -139,9 +138,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         raceBoardPanel.fillEvents(events);
 
         switch (viewMode) {
-            case CASCADE:
-                createRaceBoardInCascadeMode(raceBoardPanel);
-                break;
             case ONESCREEN:
                 createRaceBoardInOneScreenMode(raceBoardPanel);
                 break;
@@ -163,28 +159,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         return null;
     }
 
-    private void createRaceBoardInCascadeMode(RaceBoardPanel raceBoardPanel) {
-        FlowPanel breadcrumbPanel = createBreadcrumbPanel();
-        FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
-        FlowPanel timePanel = createTimePanel(raceBoardPanel);
-        
-        FlowPanel contentOuterPanel = new FlowPanel(); // outer div which centered page content
-        contentOuterPanel.addStyleName("contentOuterPanel");
-        contentOuterPanel.add(raceBoardPanel);
-
-        //FlowPanel footerShadowPanel = new FlowPanel();
-        // footerShadowPanel.addStyleName("footerShadowPanel");
-        
-        RootPanel.get().add(breadcrumbPanel);        
-        RootPanel.get().add(contentOuterPanel);
-        
-        // Don't change this order because of the inner logic in html of "position fixed"-elements
-        RootPanel.get().add(logoAndTitlePanel);                 // position:fixed        
-        RootPanel.get().add(timePanel);                     // position:fixed
-        //RootPanel.get().add(footerShadowPanel);                 // position:fixed
-        raceBoardPanel.setScrollOffset(logoAndTitlePanel.getOffsetHeight());
-    }
-    
     private FlowPanel createBreadcrumbPanel() {
         FlowPanel raceBoardHeaderPanel = new FlowPanel();
         raceBoardHeaderPanel.addStyleName("RaceBoardHeaderPanel");
