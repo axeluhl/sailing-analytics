@@ -105,7 +105,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         userManagementService.getUser(getUserCallback);
     }
 
-    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<RegattaDTO> events, UserDTO user) {
+    private void checkUrlParameters(List<String> leaderboardNames, LeaderboardGroupDTO leaderboardGroup, List<RegattaDTO> regattas, UserDTO user) {
         if (!leaderboardNames.contains(leaderboardName)) {
           createErrorPage(stringMessages.noSuchLeaderboard());
           return;
@@ -123,9 +123,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 return;
             }
         }
-        selectedRace = findRace(regattaName, raceName, events);
+        selectedRace = findRace(regattaName, raceName, regattas);
         if (selectedRace == null) {
-            createErrorPage("Could not obtain a race with name " + raceName + " for an event with name " + regattaName);
+            createErrorPage("Could not obtain a race with name " + raceName + " for an regatta with name " + regattaName);
             return;
         }
 
@@ -135,7 +135,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         Timer timer = new Timer(PlayModes.Replay, 1000l);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
                 RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, new RaceTimesInfoProvider(sailingService, this, singletonList, 1000l));
-        raceBoardPanel.fillRegattas(events);
+        raceBoardPanel.fillRegattas(regattas);
 
         switch (viewMode) {
             case ONESCREEN:
@@ -144,11 +144,11 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
     }  
 
-    private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> events) {
-        for (RegattaDTO eventDTO : events) {
-            if (eventDTO.name.equals(regattaName)) {
-                for (DeprecatedRegattaDTO regattaDTO : eventDTO.regattas) {
-                    for (RaceDTO raceDTO: regattaDTO.races) {
+    private RaceDTO findRace(String regattaName, String raceName, List<RegattaDTO> regattas) {
+        for (RegattaDTO regattaDTO : regattas) {
+            if (regattaDTO.name.equals(regattaName)) {
+                for (DeprecatedRegattaDTO deprecatedRegattaDTO : regattaDTO.deprecatedRegattas) {
+                    for (RaceDTO raceDTO: deprecatedRegattaDTO.races) {
                         if (raceDTO.name.equals(raceName)) {
                             return raceDTO;
                         }

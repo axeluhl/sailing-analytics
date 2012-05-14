@@ -18,7 +18,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
  *
  */
 public interface DomainObjectFactory {
-    WindTrack loadWindTrack(Regatta event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
+    WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 
     Leaderboard loadLeaderboard(String name);
 

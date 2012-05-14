@@ -18,12 +18,12 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     private static final long serialVersionUID = 6509564189552478869L;
     private final Set<RaceDefinition> races;
     private final BoatClass boatClass;
-    private transient Set<RegattaListener> eventListeners;
+    private transient Set<RegattaListener> regattaListeners;
     
     public RegattaImpl(String baseName, BoatClass boatClass) {
         super(baseName+(boatClass==null?"":" ("+boatClass.getName()+")"));
         races = new HashSet<RaceDefinition>();
-        eventListeners = new HashSet<RegattaListener>();
+        regattaListeners = new HashSet<RegattaListener>();
         this.boatClass = boatClass;
     }
     
@@ -40,7 +40,7 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        eventListeners = new HashSet<>();
+        regattaListeners = new HashSet<>();
     }
 
     @Override
@@ -69,13 +69,13 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     @Override
     public void addRace(RaceDefinition race) {
         if (getBoatClass() != null && race.getBoatClass() != getBoatClass()) {
-            throw new IllegalArgumentException("Boat class "+race.getBoatClass()+" doesn't match event's boat class "+getBoatClass());
+            throw new IllegalArgumentException("Boat class "+race.getBoatClass()+" doesn't match regatta's boat class "+getBoatClass());
         }
         synchronized (races) {
             races.add(race);
         }
-        synchronized (eventListeners) {
-            for (RegattaListener l : eventListeners) {
+        synchronized (regattaListeners) {
+            for (RegattaListener l : regattaListeners) {
                 l.raceAdded(this, race);
             }
         }
@@ -86,8 +86,8 @@ public class RegattaImpl extends NamedImpl implements Regatta {
         synchronized (races) {
             races.remove(race);
         }
-        synchronized (eventListeners) {
-            for (RegattaListener l : eventListeners) {
+        synchronized (regattaListeners) {
+            for (RegattaListener l : regattaListeners) {
                 l.raceRemoved(this, race);
             }
         }
@@ -111,15 +111,15 @@ public class RegattaImpl extends NamedImpl implements Regatta {
 
     @Override
     public void addRegattaListener(RegattaListener listener) {
-        synchronized (eventListeners) {
-            eventListeners.add(listener);
+        synchronized (regattaListeners) {
+            regattaListeners.add(listener);
         }
     }
 
     @Override
     public void removeRegattaListener(RegattaListener listener) {
-        synchronized (eventListeners) {
-            eventListeners.remove(listener);
+        synchronized (regattaListeners) {
+            regattaListeners.remove(listener);
         }
     }
 

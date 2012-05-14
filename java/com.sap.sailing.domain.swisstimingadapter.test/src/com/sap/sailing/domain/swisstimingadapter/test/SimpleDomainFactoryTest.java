@@ -31,7 +31,7 @@ public class SimpleDomainFactoryTest {
     @Test
     public void testCourseConfigForBuoy() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Regatta event = new RegattaImpl("TestEvent", /* boatClass */ null);
+        Regatta regatta = new RegattaImpl("TestEvent", /* boatClass */ null);
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
@@ -39,7 +39,7 @@ public class SimpleDomainFactoryTest {
         Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"));
         List<Mark> marks = Arrays.asList(mark1, mark2);
         Course course = new CourseImpl("1234", marks);
-        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, startList, course);
+        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course);
         ArrayList<Waypoint> waypoints1 = new ArrayList<Waypoint>();
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {
             waypoints1.add(waypoint);
@@ -55,7 +55,7 @@ public class SimpleDomainFactoryTest {
     @Test
     public void testCourseConfigForGate() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Regatta event = new RegattaImpl("TestEvent", /* boatClass */ null);
+        Regatta regatta = new RegattaImpl("TestEvent", /* boatClass */ null);
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
@@ -63,7 +63,7 @@ public class SimpleDomainFactoryTest {
         Mark mark2 = new MarkImpl("M1", 0, Arrays.asList("D3", "D4"));
         List<Mark> marks = Arrays.asList(mark1, mark2);
         Course course = new CourseImpl("1234", marks);
-        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(event, race, startList, course);
+        RaceDefinition raceDefinition = domainFactory.createRaceDefinition(regatta, race, startList, course);
         assertEquals(2, Util.size(raceDefinition.getCourse().getWaypoints()));
         ArrayList<Waypoint> waypoints1 = new ArrayList<Waypoint>();
         for (Waypoint waypoint : raceDefinition.getCourse().getWaypoints()) {

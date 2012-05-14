@@ -586,9 +586,9 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     }
 
                     @Override
-                    public void onSuccess(Pair<String, String> eventAndRaceName) {
-                        if (eventAndRaceName != null) {
-                            selectRaceInList(eventAndRaceName.getA(), eventAndRaceName.getB());
+                    public void onSuccess(Pair<String, String> regattaAndRaceName) {
+                        if (regattaAndRaceName != null) {
+                            selectRaceInList(regattaAndRaceName.getA(), regattaAndRaceName.getB());
                         } else {
                             trackedRacesListComposite.clearSelection();
                         }

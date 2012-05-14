@@ -52,7 +52,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceMap;
 
 /**
- * A panel showing a list of components visualizing a race from the events announced by calls to {@link #fillRegattas(List)}.
+ * A panel showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.
  * The race selection is provided by a {@link RaceSelectionProvider} for which this is a {@link RaceSelectionChangeListener listener}.
  * {@link RaceIdentifier}-based race selection changes are converted to {@link RaceDTO} objects using the {@link #racesByIdentifier}
  * map maintained during {@link #fillRegattas(List)}. The race selection provider is expected to be single selection only.
@@ -366,11 +366,11 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> events) {
+    public void fillRegattas(List<RegattaDTO> regattas) {
         racesByIdentifier.clear();
-        for (RegattaDTO event : events) {
-            for (DeprecatedRegattaDTO regatta : event.regattas) {
-                for (RaceDTO race : regatta.races) {
+        for (RegattaDTO regatta : regattas) {
+            for (DeprecatedRegattaDTO deprecatedRegatta : regatta.deprecatedRegattas) {
+                for (RaceDTO race : deprecatedRegatta.races) {
                     if (race != null && race.getRaceIdentifier() != null) {
                         racesByIdentifier.put(race.getRaceIdentifier(), race);
                     }

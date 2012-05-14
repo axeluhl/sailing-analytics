@@ -20,7 +20,7 @@ public interface MongoObjectFactory {
     /**
      * Registers for changes of the wind coming from <code>windSource</code> on the <code>trackedRace</code>. Each
      * update received will be appended to the MongoDB and can later be retrieved. The key used to identify the race is
-     * the {@link RaceDefinition#getName() race name} and the {@link Regatta#getName() event name}.
+     * the {@link RaceDefinition#getName() race name} and the {@link Regatta#getName() regatta name}.
      */
     void addWindTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace, WindSource windSource);
 

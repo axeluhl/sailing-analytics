@@ -30,7 +30,7 @@ public abstract class AbstractRaceTrackerImpl implements RaceTracker {
         return trackedRegatta;
     }
 
-    protected void setTrackedEvent(DynamicTrackedRegatta trackedRegatta) {
+    protected void setTrackedRegatta(DynamicTrackedRegatta trackedRegatta) {
         this.trackedRegatta = trackedRegatta;
     }
 }

@@ -65,8 +65,8 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             }
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
-        Regatta event = domainFactory.getOrCreateEvent(getEvent());
-        DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(event);
+        Regatta regatta = domainFactory.getOrCreateEvent(getEvent());
+        DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         trackedRegatta.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {

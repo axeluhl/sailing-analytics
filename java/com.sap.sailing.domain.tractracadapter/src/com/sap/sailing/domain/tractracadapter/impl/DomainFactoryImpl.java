@@ -83,16 +83,16 @@ public class DomainFactoryImpl implements DomainFactory {
     private final Map<String, Team> teamCache = new HashMap<String, Team>();
     
     /**
-     * Caches events by their name and their boat class's name
+     * Caches regattas by their name and their boat class's name
      */
-    private final Map<Pair<String, String>, com.sap.sailing.domain.base.Regatta> eventCache =
+    private final Map<Pair<String, String>, com.sap.sailing.domain.base.Regatta> regattaCache =
             new HashMap<Pair<String, String>, com.sap.sailing.domain.base.Regatta>();
     
     /**
      * A cache based on weak references to the TracTrac event, allowing for quick Event lookup as long as the
      * TracTrac event remains referenced. This is intended to reduce the number of times the dominant boat
-     * class needs to be determined for an event. Synchronization for additions / removals is tied to the
-     * synchronization for {@link #eventCache}.
+     * class needs to be determined for an regatta. Synchronization for additions / removals is tied to the
+     * synchronization for {@link #regattaCache}.
      */
     private final WeakIdentityHashMap<com.tractrac.clientmodule.Event, Regatta> weakEventCache = new WeakIdentityHashMap<>();
     
@@ -244,7 +244,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Regatta getOrCreateEvent(com.tractrac.clientmodule.Event event) {
-        synchronized (eventCache) {
+        synchronized (regattaCache) {
             // FIXME Dialog with Lasse by Skype on 2011-06-17:
             //            [6:20:04 PM] Axel Uhl: Lasse, can Event.getCompetitorClassList() ever produce more than one result?
             //            [6:20:20 PM] Axel Uhl: Or is it similar to Event.getRaceList() which always delivers one Race?
@@ -267,10 +267,10 @@ public class DomainFactoryImpl implements DomainFactory {
                 BoatClass boatClass = getDominantBoatClass(competitorClassList);
                 Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass == null ? null
                         : boatClass.getName());
-                result = eventCache.get(key);
+                result = regattaCache.get(key);
                 if (result == null) {
                     result = new RegattaImpl(event.getName(), boatClass);
-                    eventCache.put(key, result);
+                    regattaCache.put(key, result);
                     weakEventCache.put(event, result);
                 }
             }
@@ -336,26 +336,26 @@ public class DomainFactoryImpl implements DomainFactory {
             BoatClass boatClass = getDominantBoatClass(competitorClassList);
             Pair<String, String> key = new Pair<String, String>(tractracEvent.getName(), boatClass == null ? null
                     : boatClass.getName());
-            synchronized (eventCache) {
-                Regatta event = eventCache.get(key);
-                if (event != null) {
+            synchronized (regattaCache) {
+                Regatta regatta = regattaCache.get(key);
+                if (regatta != null) {
                     // The following fixes bug 202: when tracking of multiple races of the same event has been started, this may not
                     // remove any race; however, the event may already have been created by another tracker whose race hasn't
                     // arrived yet and therefore the races list is still empty; therefore, only remove the event if its
                     // race list became empty by the removal performed here.
-                    int oldSize = Util.size(event.getAllRaces());
-                    event.removeRace(raceDefinition);
-                    if (oldSize > 0 && Util.size(event.getAllRaces()) == 0) {
-                        eventCache.remove(key);
+                    int oldSize = Util.size(regatta.getAllRaces());
+                    regatta.removeRace(raceDefinition);
+                    if (oldSize > 0 && Util.size(regatta.getAllRaces()) == 0) {
+                        regattaCache.remove(key);
                         weakEventCache.remove(tractracEvent);
                     }
-                    TrackedRegatta trackedRegatta = trackedRegattaRegistry.getTrackedRegatta(event);
+                    TrackedRegatta trackedRegatta = trackedRegattaRegistry.getTrackedRegatta(regatta);
                     if (trackedRegatta != null) {
-                        // see above; only remove tracked event if it *became* empty because of the tracked race removal here
+                        // see above; only remove tracked regatta if it *became* empty because of the tracked race removal here
                         int oldSizeOfTrackedRaces = Util.size(trackedRegatta.getTrackedRaces());
                         trackedRegatta.removeTrackedRace(raceDefinition);
                         if (oldSizeOfTrackedRaces > 0 && Util.size(trackedRegatta.getTrackedRaces()) == 0) {
-                            trackedRegattaRegistry.removeTrackedRegatta(event);
+                            trackedRegattaRegistry.removeTrackedRegatta(regatta);
                         }
                     }
                 }
@@ -377,8 +377,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
                 } else {
-                    logger.warning("Not adding race "+raceDefinition+" to event "+trackedRegatta.getRegatta()+
-                            " because boat class "+raceDefinition.getBoatClass()+" doesn't match event's boat class "+
+                    logger.warning("Not adding race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta()+
+                            " because boat class "+raceDefinition.getBoatClass()+" doesn't match regatta's boat class "+
                             trackedRegatta.getRegatta().getBoatClass());
                 }
                 TrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, windStore,

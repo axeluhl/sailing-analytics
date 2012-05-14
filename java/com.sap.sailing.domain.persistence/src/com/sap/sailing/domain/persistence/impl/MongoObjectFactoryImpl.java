@@ -84,9 +84,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeWindTrackEntry(Regatta event, RaceDefinition race, WindSource windSource, Wind wind) {
+    public DBObject storeWindTrackEntry(Regatta regatta, RaceDefinition race, WindSource windSource, Wind wind) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.EVENT_NAME.name(), event.getName());
+        result.put(FieldNames.EVENT_NAME.name(), regatta.getName());
         result.put(FieldNames.RACE_NAME.name(), race.getName());
         result.put(FieldNames.WIND_SOURCE_NAME.name(), windSource.name());
         if (windSource.getId() != null) {

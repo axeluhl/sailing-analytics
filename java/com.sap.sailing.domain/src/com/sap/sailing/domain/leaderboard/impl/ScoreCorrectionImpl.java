@@ -15,7 +15,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 /**
  * Implements the basic logic of assigning a maximum score to a competitor in a race if that competitor was
  * disqualified, did not start or did not finish. The maximum score is determined by counting the number of competitors
- * listed in the event to which the race belongs.
+ * listed in the regatta to which the race belongs.
  * <p>
  * 
  * @author Axel Uhl (d043530)

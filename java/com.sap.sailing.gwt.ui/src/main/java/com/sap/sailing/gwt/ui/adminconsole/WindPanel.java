@@ -90,7 +90,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, RegattaRefresher eventRefresher, final StringMessages stringMessages) {
+            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -152,7 +152,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
             }
         };
         grid = new Grid(4, 2); // first row: event/race selection; second row: wind source selection; third row: wind display
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, eventRefresher,
+        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
                 raceSelectionProvider, stringMessages, false);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         grid.setWidget(0, 0, trackedRacesListComposite);

@@ -86,9 +86,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
     private ArrayList<LeaderboardGroupDTO> availableLeaderboardGroups;
     private ArrayList<LeaderboardDTO> availableLeaderboards;
 
-    public LeaderboardGroupConfigPanel(SailingServiceAsync sailingService, RegattaRefresher eventRefresher,
+    public LeaderboardGroupConfigPanel(SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
-        super(sailingService, eventRefresher, errorReporter, stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, stringMessages);
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         availableLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         availableLeaderboards = new ArrayList<LeaderboardDTO>();

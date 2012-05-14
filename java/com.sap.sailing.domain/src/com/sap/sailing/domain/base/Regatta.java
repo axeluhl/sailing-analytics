@@ -15,7 +15,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 public interface Regatta extends Named {
     /**
      * Please note that the {@link RaceDefinition}s of the {@link Regatta} are not necessarily in sync with the
-     * {@link TrackedRace}s of the {@link TrackedRegatta} whose {@link TrackedRegatta#getRegatta() event} is this event.
+     * {@link TrackedRace}s of the {@link TrackedRegatta} whose {@link TrackedRegatta#getRegatta() regatta} is this regatta.
      * For example, it may be the case that a {@link RaceDefinition} is returned by this method for which no
      * {@link TrackedRace} exists in the corresponding {@link TrackedRegatta}. This could be the case, e.g., during
      * the initialization of the tracker as well as during removing a race from the server.<p>
@@ -26,10 +26,10 @@ public interface Regatta extends Named {
     Iterable<RaceDefinition> getAllRaces();
     
     /**
-     * Please note that the set of {@link RaceDefinition}s contained by this event may not match up with the 
-     * {@link TrackedRace}s of the {@link TrackedRegatta} corresponding to this event. See also {@link #getAllRaces()}.
+     * Please note that the set of {@link RaceDefinition}s contained by this regatta may not match up with the 
+     * {@link TrackedRace}s of the {@link TrackedRegatta} corresponding to this regatta. See also {@link #getAllRaces()}.
      * 
-     * @return <code>null</code>, if this event does not contain a race (see {@link #getAllRaces}) whose
+     * @return <code>null</code>, if this regatta does not contain a race (see {@link #getAllRaces}) whose
      * {@link RaceDefinition#getName()} equals <code>raceName</code>
      */
     RaceDefinition getRaceByName(String raceName);
@@ -49,7 +49,7 @@ public interface Regatta extends Named {
     RegattaIdentifier getRegattaIdentifier();
 
     /**
-     * A regatta name may be composed, e.g., from an overall event name and the boat class name. A factory or constructor
+     * A regatta name may be composed, e.g., from an overall regatta name and the boat class name. A factory or constructor
      * may require the base name to which the boat class name will be appended. This method emits the base name.
      */
     String getBaseName();

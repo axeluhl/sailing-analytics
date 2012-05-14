@@ -10,8 +10,8 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 
 /**
- * Manages a set of {@link TrackedRace} objects that belong to the same {@link Regatta} (regatta, sailing event for a
- * single boat class). It therefore represents the entry point into the tracking-related objects for such an event.
+ * Manages a set of {@link TrackedRace} objects that belong to the same {@link Regatta} (regatta, sailing regatta for a
+ * single boat class). It therefore represents the entry point into the tracking-related objects for such an regatta.
  * Allows clients to find a {@link TrackedRace} by the {@link RaceDefinition} for which it holds the tracking data.
  * <p>
  * 
@@ -32,7 +32,7 @@ public interface TrackedRegatta extends Serializable {
 
     /**
      * Creates a {@link TrackedRace} based on the parameter specified and {@link #addTrackedRace(TrackedRace) adds} it
-     * to this tracked event. Afterwards, calling {@link #getTrackedRace(RaceDefinition) getTrackedRace(raceDefinition)}
+     * to this tracked regatta. Afterwards, calling {@link #getTrackedRace(RaceDefinition) getTrackedRace(raceDefinition)}
      * will return the result of this method call.
      * 
      * @param raceDefinitionSetToUpdate
@@ -45,7 +45,7 @@ public interface TrackedRegatta extends Serializable {
 
     /**
      * Obtains the tracked race for <code>race</code>. Blocks until the tracked race has been created
-     * and added to this tracked event (see {@link #addTrackedRace(TrackedRace)}).
+     * and added to this tracked regatta (see {@link #addTrackedRace(TrackedRace)}).
      */
     TrackedRace getTrackedRace(RaceDefinition race);
 

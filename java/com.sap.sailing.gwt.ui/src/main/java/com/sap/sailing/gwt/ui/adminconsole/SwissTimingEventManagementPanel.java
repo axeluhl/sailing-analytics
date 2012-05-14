@@ -68,8 +68,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher eventRefresher, StringMessages stringConstants) {
-        super(sailingService, eventRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
+            RegattaRefresher regattaRefresher, StringMessages stringConstants) {
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
         this.errorReporter = errorReporter;
 
         VerticalPanel mainPanel = new VerticalPanel();
@@ -352,7 +352,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
                     @Override 
                     public void onSuccess(Void result) {
-                        eventRefresher.fillRegattas();
+                        regattaRefresher.fillRegattas();
                     }
                 });
             }

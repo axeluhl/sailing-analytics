@@ -54,9 +54,9 @@ public interface SailingService extends RemoteService {
 
     void stopTrackingEvent(RegattaIdentifier eventIdentifier) throws Exception;
 
-    void stopTrackingRace(RegattaAndRaceIdentifier eventAndRaceIdentifier) throws Exception;
+    void stopTrackingRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) throws Exception;
     
-    void removeAndUntrackRace(RegattaAndRaceIdentifier eventAndRaceidentifier) throws Exception;
+    void removeAndUntrackRace(RegattaAndRaceIdentifier regattaAndRaceidentifier) throws Exception;
 
     WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources);
 
@@ -95,7 +95,7 @@ public interface SailingService extends RemoteService {
 
     List<LeaderboardDTO> getLeaderboards();
     
-    List<LeaderboardDTO> getLeaderboardsByEvent(RegattaDTO event);
+    List<LeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
 

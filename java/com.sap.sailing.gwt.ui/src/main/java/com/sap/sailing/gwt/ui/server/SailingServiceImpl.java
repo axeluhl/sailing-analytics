@@ -420,23 +420,23 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public List<RegattaDTO> listEvents() throws IllegalArgumentException {
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
-        for (Regatta event : getService().getAllRegattas()) {
-            List<CompetitorDTO> competitorList = getCompetitorDTOs(event.getCompetitors());
-            List<DeprecatedRegattaDTO> regattasList = getRegattaDTOs(event);
-            RegattaDTO eventDTO = new RegattaDTO(event.getName(), regattasList, competitorList);
-            for (DeprecatedRegattaDTO regatta : regattasList) {
-                regatta.setRegatta(eventDTO);
+        for (Regatta regatta : getService().getAllRegattas()) {
+            List<CompetitorDTO> competitorList = getCompetitorDTOs(regatta.getCompetitors());
+            List<DeprecatedRegattaDTO> regattasList = getRegattaDTOs(regatta);
+            RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), regattasList, competitorList);
+            for (DeprecatedRegattaDTO deprecatedRegatta : regattasList) {
+                deprecatedRegatta.setRegatta(regattaDTO);
             }
-            if (!eventDTO.regattas.isEmpty()) {
-                result.add(eventDTO);
+            if (!regattaDTO.deprecatedRegattas.isEmpty()) {
+                result.add(regattaDTO);
             }
         }
         return result;
     }
 
-    private List<DeprecatedRegattaDTO> getRegattaDTOs(Regatta event) {
+    private List<DeprecatedRegattaDTO> getRegattaDTOs(Regatta regatta) {
         Map<BoatClass, Set<RaceDefinition>> racesByBoatClass = new HashMap<BoatClass, Set<RaceDefinition>>();
-        for (RaceDefinition r : event.getAllRaces()) {
+        for (RaceDefinition r : regatta.getAllRaces()) {
             Set<RaceDefinition> racesForBoatClass = racesByBoatClass.get(r.getBoatClass());
             if (racesForBoatClass == null) {
                 racesForBoatClass = new HashSet<RaceDefinition>();
@@ -446,24 +446,24 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         List<DeprecatedRegattaDTO> result = new ArrayList<DeprecatedRegattaDTO>();
         for (Map.Entry<BoatClass, Set<RaceDefinition>> e : racesByBoatClass.entrySet()) {
-            List<RaceDTO> raceDTOsInBoatClass = getRaceDTOs(event, e.getValue());
+            List<RaceDTO> raceDTOsInBoatClass = getRaceDTOs(regatta, e.getValue());
             if (!raceDTOsInBoatClass.isEmpty()) {
-                DeprecatedRegattaDTO regatta = new DeprecatedRegattaDTO(new BoatClassDTO(e.getKey() == null ? "" : e.getKey().getName(), e
+                DeprecatedRegattaDTO deprecatedRegatta = new DeprecatedRegattaDTO(new BoatClassDTO(e.getKey() == null ? "" : e.getKey().getName(), e
                         .getKey().getHullLength().getMeters()), raceDTOsInBoatClass);
                 for (RaceDTO race : raceDTOsInBoatClass) {
-                    race.setRegatta(regatta);
+                    race.setRegatta(deprecatedRegatta);
                 }
-                result.add(regatta);
+                result.add(deprecatedRegatta);
             }
         }
         return result;
     }
 
-    private List<RaceDTO> getRaceDTOs(Regatta event, Set<RaceDefinition> races) {
+    private List<RaceDTO> getRaceDTOs(Regatta regatta, Set<RaceDefinition> races) {
         List<RaceDTO> result = new ArrayList<RaceDTO>();
         for (RaceDefinition r : races) {
             RaceDTO raceDTO = new RaceDTO(r.getName(), getCompetitorDTOs(r.getCompetitors()), getService().isRaceBeingTracked(r));
-            TrackedRace trackedRace = getService().getExistingTrackedRace(new RegattaNameAndRaceName(event.getName(), r.getName()));
+            TrackedRace trackedRace = getService().getExistingTrackedRace(new RegattaNameAndRaceName(regatta.getName(), r.getName()));
             if (trackedRace != null) {
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
@@ -552,26 +552,26 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public void stopTrackingEvent(RegattaIdentifier eventIdentifier) throws Exception {
-        getService().apply(new StopTrackingRegatta(eventIdentifier));
+    public void stopTrackingEvent(RegattaIdentifier regattaIdentifier) throws Exception {
+        getService().apply(new StopTrackingRegatta(regattaIdentifier));
     }
 
-    private RaceDefinition getRaceByName(Regatta event, String raceName) {
-        if (event != null) {
-            return event.getRaceByName(raceName);
+    private RaceDefinition getRaceByName(Regatta regatta, String raceName) {
+        if (regatta != null) {
+            return regatta.getRaceByName(raceName);
         } else {
             return null;
         }
     }
     
     @Override
-    public void stopTrackingRace(RegattaAndRaceIdentifier eventAndRaceIdentifier) throws Exception {
-        getService().apply(new StopTrackingRace(eventAndRaceIdentifier));
+    public void stopTrackingRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) throws Exception {
+        getService().apply(new StopTrackingRace(regattaAndRaceIdentifier));
     }
     
     @Override
-    public void removeAndUntrackRace(RegattaAndRaceIdentifier eventAndRaceidentifier) {
-        getService().apply(new RemoveAndUntrackRace(eventAndRaceidentifier));
+    public void removeAndUntrackRace(RegattaAndRaceIdentifier regattatAndRaceidentifier) {
+        getService().apply(new RemoveAndUntrackRace(regattatAndRaceidentifier));
     }
     
     /**
@@ -580,14 +580,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * taking any effect.
      */
     private void startTrackingWind(RacesHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
-        Regatta event = raceHandle.getRegatta();
-        if (event != null) {
+        Regatta regatta = raceHandle.getRegatta();
+        if (regatta != null) {
             for (RaceDefinition race : raceHandle.getRaces(timeoutInMilliseconds)) {
                 if (race != null) {
-                    getService().startTrackingWind(event, race, correctByDeclination);
+                    getService().startTrackingWind(regatta, race, correctByDeclination);
                 } else {
-                    log("RaceDefinition wasn't received within " + timeoutInMilliseconds + "ms for a race in event "
-                            + event.getName() + ". Aborting wait; no wind tracking for this race.");
+                    log("RaceDefinition wasn't received within " + timeoutInMilliseconds + "ms for a race in regatta "
+                            + regatta.getName() + ". Aborting wait; no wind tracking for this race.");
                 }
             }
         }
@@ -1181,10 +1181,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public List<LeaderboardDTO> getLeaderboardsByEvent(RegattaDTO event) {
+    public List<LeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta) {
         List<LeaderboardDTO> results = new ArrayList<LeaderboardDTO>();
-        for (DeprecatedRegattaDTO regatta : event.regattas) {
-            for (RaceDTO race : regatta.races) {
+        for (DeprecatedRegattaDTO deprecatedRegatta : regatta.deprecatedRegattas) {
+            for (RaceDTO race : deprecatedRegatta.races) {
                 List<LeaderboardDTO> leaderboard = getLeaderboardsByRace(race);
                 if (leaderboard != null && !leaderboard.isEmpty()) {
                     results.addAll(leaderboard);
@@ -1679,16 +1679,16 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier) {
-        Regatta event = getService().getRegattaByName(raceIdentifier.getRegattaName());
-        RaceDefinition race = getRaceByName(event, raceIdentifier.getRaceName());
+        Regatta regatta = getService().getRegattaByName(raceIdentifier.getRegattaName());
+        RaceDefinition race = getRaceByName(regatta, raceIdentifier.getRaceName());
         return race;
     }
 
     @Override
     public TrackedRace getTrackedRace(RegattaAndRaceIdentifier regattaNameAndRaceName) {
-        Regatta event = getService().getRegattaByName(regattaNameAndRaceName.getRegattaName());
-        RaceDefinition race = getRaceByName(event, regattaNameAndRaceName.getRaceName());
-        TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(event).getTrackedRace(race);
+        Regatta regatta = getService().getRegattaByName(regattaNameAndRaceName.getRegattaName());
+        RaceDefinition race = getRaceByName(regatta, regattaNameAndRaceName.getRaceName());
+        TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
         return trackedRace;
     }
 
@@ -1698,8 +1698,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public Regatta getRegatta(RegattaName eventIdentifier) {
-        return getService().getRegattaByName(eventIdentifier.getRegattaName());
+    public Regatta getRegatta(RegattaName regattaIdentifier) {
+        return getService().getRegattaByName(regattaIdentifier.getRegattaName());
     }
     
     /**

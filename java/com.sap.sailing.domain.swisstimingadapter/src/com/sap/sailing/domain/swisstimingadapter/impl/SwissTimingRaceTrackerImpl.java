@@ -57,7 +57,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final RaceSpecificMessageLoader messageLoader;
     private final DomainFactory domainFactory;
     private final Triple<String, String, Integer> id;
-    private final Regatta event;
+    private final Regatta regatta;
     private final WindStore windStore;
 
     private RaceDefinition race;
@@ -79,8 +79,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.windStore = windStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
-        event = domainFactory.getOrCreateEvent(raceID);
-        setTrackedEvent(trackedRegattaRegistry.getOrCreateTrackedRegatta(event));
+        regatta = domainFactory.getOrCreateEvent(raceID);
+        setTrackedRegatta(trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta));
         connector.trackRace(raceID);
     }
 
@@ -136,7 +136,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
 
     @Override
     public Regatta getRegatta() {
-        return event;
+        return regatta;
     }
 
     @Override
@@ -248,7 +248,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         assert course != null;
         // now we can create the RaceDefinition and most other things
         Race swissTimingRace = messageLoader.getRace(raceID);
-        race = domainFactory.createRaceDefinition(event, swissTimingRace, startList, course);
+        race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
         trackedRace = getTrackedRegatta().createTrackedRace(race, windStore,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
@@ -264,7 +264,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     
     /**
      * Checks if {@link #getRegatta()} still contains the {@link RaceDefinition} obtained when calling
-     * {@link TrackedRace#getRace()} on {@link #trackedRace} and if the {@link #getTrackedRegatta() tracked event} for
+     * {@link TrackedRace#getRace()} on {@link #trackedRace} and if the {@link #getTrackedRegatta() tracked regatta} for
      * {@link #getRegatta()} still contains {@link #trackedRace}. This is the precondition for updating the
      * {@link #trackedRace} with data received from the trackers.
      */

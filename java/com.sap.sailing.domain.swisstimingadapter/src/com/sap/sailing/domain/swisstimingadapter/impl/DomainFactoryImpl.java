@@ -120,13 +120,13 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition createRaceDefinition(Regatta event, Race race, StartList startList, Course course) {
+    public RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, Course course) {
         com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
         BoatClass boatClass = getOrCreateBoatClassFromRaceID(race.getRaceID());
         Iterable<Competitor> competitors = createCompetitorList(startList, boatClass);
         RaceDefinition result = new RaceDefinitionImpl(race.getRaceID(), domainCourse,
                 boatClass, competitors);
-        event.addRace(result);
+        regatta.addRace(result);
         return result;
     }
 
@@ -228,18 +228,18 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public void removeRace(String raceID) {
-        Regatta event = getOrCreateEvent(raceID);
+        Regatta regatta = getOrCreateEvent(raceID);
         Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
-        if (event != null) {
-            for (RaceDefinition race : event.getAllRaces()) {
+        if (regatta != null) {
+            for (RaceDefinition race : regatta.getAllRaces()) {
                 if (race.getName().equals(raceID)) {
                     toRemove.add(race);
                 }
             }
             for (RaceDefinition raceToRemove : toRemove) {
-                event.removeRace(raceToRemove);
+                regatta.removeRace(raceToRemove);
             }
-            if (Util.isEmpty(event.getAllRaces())) {
+            if (Util.isEmpty(regatta.getAllRaces())) {
                 raceIDToEventCache.remove(raceID);
             }
         }

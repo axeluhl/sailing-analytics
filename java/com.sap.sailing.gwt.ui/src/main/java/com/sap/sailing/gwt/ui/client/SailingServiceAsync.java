@@ -67,11 +67,10 @@ public interface SailingServiceAsync {
     void stopTrackingRace(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Void> asyncCallback);
     
     /**
-     * Untracks the race and removes it from the event. It will also be removed in all leaderboards
-     * @param eventAndRaceidentifier The identifier for the event name, and the race name to remove
-     * @throws Exception
+     * Untracks the race and removes it from the regatta. It will also be removed in all leaderboards
+     * @param regattaAndRaceidentifier The identifier for the regatta name, and the race name to remove
      */
-    void removeAndUntrackRace(RegattaAndRaceIdentifier eventAndRaceidentifier, AsyncCallback<Void> callback);
+    void removeAndUntrackRace(RegattaAndRaceIdentifier regattaAndRaceidentifier, AsyncCallback<Void> callback);
 
     void getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources,
             AsyncCallback<WindInfoForRaceDTO> callback);
@@ -169,9 +168,9 @@ public interface SailingServiceAsync {
     
     /**
      * Does the same as {@link SailingServiceAsync#getLeaderboards(AsyncCallback) getLeaderboards} but returns only
-     * leaderboards which have the given event as race
+     * leaderboards which have the given regatta as race
      */
-    void getLeaderboardsByEvent(RegattaDTO event, AsyncCallback<List<LeaderboardDTO>> callback);
+    void getLeaderboardsByEvent(RegattaDTO regatta, AsyncCallback<List<LeaderboardDTO>> callback);
     
     void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<LeaderboardDTO>> callback);
     

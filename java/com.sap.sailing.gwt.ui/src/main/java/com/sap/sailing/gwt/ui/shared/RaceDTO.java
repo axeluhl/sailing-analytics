@@ -22,7 +22,7 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
     public Date timePointOfNewestEvent;
     public Date endOfRace;
     
-    private DeprecatedRegattaDTO regatta;
+    private DeprecatedRegattaDTO deprecatedRegatta;
     
     public RaceDTO() {}
 
@@ -32,19 +32,19 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
         this.currentlyTracked = currentlyTracked;
     }
 
-    public DeprecatedRegattaDTO getRegatta() {
-        return regatta;
+    public DeprecatedRegattaDTO getDeprecatedRegatta() {
+        return deprecatedRegatta;
     }
 
     public void setRegatta(DeprecatedRegattaDTO regatta) {
-        this.regatta = regatta;
+        this.deprecatedRegatta = regatta;
     }
     
     public RegattaAndRaceIdentifier getRaceIdentifier() {
-        return new RegattaNameAndRaceName(regatta.getRegatta().name, name);
+        return new RegattaNameAndRaceName(deprecatedRegatta.getRegatta().name, name);
     }
     
     public RegattaDTO getEvent() {
-        return regatta.getRegatta();
+        return deprecatedRegatta.getRegatta();
     }
 }

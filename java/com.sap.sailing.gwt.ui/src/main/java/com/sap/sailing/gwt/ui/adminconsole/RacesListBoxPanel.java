@@ -29,12 +29,12 @@ import com.sap.sailing.gwt.ui.shared.DeprecatedRegattaDTO;
 public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, RaceSelectionChangeListener {
     private final List<RaceDTO> raceList;
     private final ListBox raceListBox;
-    private final RegattaRefresher eventRefresher;
+    private final RegattaRefresher regattaRefresher;
     private final StringMessages stringConstants;
     private final RaceSelectionProvider raceSelectionProvider;
     
-    public RacesListBoxPanel(RegattaRefresher eventRefresher, RaceSelectionProvider raceSelectionProvider, StringMessages stringConstants) {
-        this.eventRefresher = eventRefresher;
+    public RacesListBoxPanel(RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider, StringMessages stringConstants) {
+        this.regattaRefresher = regattaRefresher;
         this.stringConstants = stringConstants;
         this.raceSelectionProvider = raceSelectionProvider;
         raceListBox = new ListBox();
@@ -61,7 +61,7 @@ public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, Ra
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                RacesListBoxPanel.this.eventRefresher.fillRegattas();
+                RacesListBoxPanel.this.regattaRefresher.fillRegattas();
             }
         });
         labelAndRefreshButton.add(btnRefresh);
@@ -73,7 +73,7 @@ public class RacesListBoxPanel extends FormPanel implements RegattaDisplayer, Ra
         raceList.clear();
         raceListBox.clear();
         for (RegattaDTO event : result) {
-            for (DeprecatedRegattaDTO regatta : event.regattas) {
+            for (DeprecatedRegattaDTO regatta : event.deprecatedRegattas) {
                 for (RaceDTO race : regatta.races) {
                     raceList.add(race);
                 }

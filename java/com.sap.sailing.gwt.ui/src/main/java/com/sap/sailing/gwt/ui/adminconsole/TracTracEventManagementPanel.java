@@ -75,8 +75,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final List<TracTracRaceRecordDTO> availableTracTracRaces;
     
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher eventRefresher, StringMessages stringConstants) {
-        super(sailingService, eventRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
+            RegattaRefresher regattaRefresher, StringMessages stringConstants) {
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
         this.errorReporter = errorReporter;
         availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
 
@@ -464,7 +464,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                     @Override
                     public void onSuccess(Void result) {
-                        eventRefresher.fillRegattas();
+                        regattaRefresher.fillRegattas();
                     }
                 });
             }

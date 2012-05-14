@@ -40,8 +40,8 @@ public class TrackedRacesManagementPanel extends AbstractEventManagementPanel im
     private final Grid raceDataGrid;
     
     public TrackedRacesManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher eventRefresher, StringMessages stringConstants) {
-        super(sailingService, eventRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
+            RegattaRefresher regattaRefresher, StringMessages stringConstants) {
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
 
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
@@ -83,7 +83,7 @@ public class TrackedRacesManagementPanel extends AbstractEventManagementPanel im
             selectedRacePanel.setVisible(true);
             
             for (RegattaDTO event : savedEvents) {
-                for (DeprecatedRegattaDTO regatta : event.regattas) {
+                for (DeprecatedRegattaDTO regatta : event.deprecatedRegattas) {
                     for (RaceDTO race : regatta.races) {
                         if (race != null && race.getRaceIdentifier().equals(singleSelectedRace)) {
                             this.selectedRaceDTO = race;

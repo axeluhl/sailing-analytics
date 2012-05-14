@@ -26,7 +26,7 @@ public interface DomainFactory {
 
     Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass);
 
-    RaceDefinition createRaceDefinition(Regatta event, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
+    RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
 
     Buoy getOrCreateBuoy(String trackerID);
     

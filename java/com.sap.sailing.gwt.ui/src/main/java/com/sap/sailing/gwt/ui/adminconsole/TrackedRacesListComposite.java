@@ -87,7 +87,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final RegattaRefresher eventRefresher;
+    private final RegattaRefresher regattaRefresher;
     private final RaceSelectionProvider raceSelectionProvider;
 
     private Button btnUntrack = null;
@@ -112,14 +112,14 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final RegattaRefresher eventRefresher, RaceSelectionProvider raceSelectionProvider,
+            final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
             StringMessages stringConstants, boolean hasMultiSelection) {
-        if (eventRefresher == null) {
-            throw new IllegalArgumentException("eventRefresher must not be null");
+        if (regattaRefresher == null) {
+            throw new IllegalArgumentException("regattaRefresher must not be null");
         }
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.eventRefresher = eventRefresher;
+        this.regattaRefresher = regattaRefresher;
         this.multiSelection = hasMultiSelection;
         this.raceSelectionProvider = raceSelectionProvider;
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
@@ -155,7 +155,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                return raceDTO.getRegatta().getRegatta().name;
+                return raceDTO.getDeprecatedRegatta().getRegatta().name;
             }
         };
         regattaNameColumn.setSortable(true);
@@ -184,7 +184,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         TextColumn<RaceDTO> deprecatedRegattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                return raceDTO.getRegatta().boatClass.name;
+                return raceDTO.getDeprecatedRegatta().boatClass.name;
             }
         };
         deprecatedRegattaNameColumn.setSortable(true);
@@ -192,8 +192,8 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         columnSortHandler.setComparator(deprecatedRegattaNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO t1, RaceDTO t2) {
-                DeprecatedRegattaDTO regattaOne = t1.getRegatta();
-                DeprecatedRegattaDTO regattaTwo = t2.getRegatta();
+                DeprecatedRegattaDTO regattaOne = t1.getDeprecatedRegatta();
+                DeprecatedRegattaDTO regattaTwo = t2.getDeprecatedRegatta();
                 boolean ascending = isSortedAscending();
                 if (regattaOne.boatClass.name.equals(regattaTwo.boatClass.name)) {
                     return 0;
@@ -354,7 +354,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                eventRefresher.fillRegattas();
+                regattaRefresher.fillRegattas();
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
@@ -413,7 +413,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
         List<RegattaAndRaceIdentifier> newAllRaceIdentifiers = new ArrayList<RegattaAndRaceIdentifier>();
         for (RegattaDTO event : events) {
-            for (DeprecatedRegattaDTO regatta : event.regattas) {
+            for (DeprecatedRegattaDTO regatta : event.deprecatedRegattas) {
                 for (RaceDTO race : regatta.races) {
                     if (race != null) {
                         newAllRaces.add(race);
@@ -446,7 +446,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
 
             @Override
             public void onSuccess(Void result) {
-                eventRefresher.fillRegattas();
+                regattaRefresher.fillRegattas();
                 for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                     listener.changeTrackingRace(regattaNameAndRaceName, false);
                 }
@@ -466,7 +466,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
 
                     @Override
                     public void onSuccess(Void result) {
-                        eventRefresher.fillRegattas();
+                        regattaRefresher.fillRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
                             listener.changeTrackingRace(regattaNameAndRaceName, false);
                         }
@@ -484,7 +484,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
                     if (!raceDTO.getEvent().name.toUpperCase().contains(textAsUppercase)
-                            && !raceDTO.getRegatta().boatClass.name.toUpperCase().contains(textAsUppercase)
+                            && !raceDTO.getDeprecatedRegatta().boatClass.name.toUpperCase().contains(textAsUppercase)
                             && !raceDTO.name.toUpperCase().contains(textAsUppercase)) {
                         failed = true;
                         break;
