@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.charts.MultiChartPanel;
 import com.sap.sailing.gwt.ui.shared.charts.MultiChartSettings;
@@ -57,7 +58,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         raceSelectionProvider.setAllRaces(races);
         
         multiChartPanel = new MultiChartPanel(sailingService, new AsyncActionsExecutor(), competitorSelectionProvider, raceSelectionProvider,
-                timer, stringConstants, errorReporter, false, false);
+                timer, new TimeZoomModel(), stringConstants, errorReporter, false, false);
         multiChartPanel.setSize("100%", "100%");
         
         FlowPanel contentPanel = new FlowPanel();
