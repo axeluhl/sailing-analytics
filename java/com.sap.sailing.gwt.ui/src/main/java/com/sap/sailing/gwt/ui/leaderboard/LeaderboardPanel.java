@@ -452,7 +452,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             LeaderboardEntryDTO entry = object.fieldsByRaceName.get(getRaceColumnName());
             if (entry != null) {
                 // don't show points if max points / penalty
-                if (entry.reasonForMaxPoints.equals("NONE")) {
+                if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
                         html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
                         html.appendHtmlConstant(entry.totalPoints == 0 ? "" : ""+entry.totalPoints);
