@@ -51,13 +51,15 @@ public class LeaderboardImpl implements Named, Leaderboard {
     private class EntryImpl implements Entry {
         private final int trackedPoints;
         private final int netPoints;
+        private final boolean isNetPointsCorrected;
         private final int totalPoints;
         private final MaxPointsReason maxPointsReason;
         private final boolean discarded;
-        private EntryImpl(int trackedPoints, int netPoints, int totalPoints, MaxPointsReason maxPointsReason, boolean discarded) {
+        private EntryImpl(int trackedPoints, int netPoints, boolean isNetPointsCorrected, int totalPoints, MaxPointsReason maxPointsReason, boolean discarded) {
             super();
             this.trackedPoints = trackedPoints;
             this.netPoints = netPoints;
+            this.isNetPointsCorrected = isNetPointsCorrected;
             this.totalPoints = totalPoints;
             this.maxPointsReason = maxPointsReason;
             this.discarded = discarded;
@@ -69,6 +71,10 @@ public class LeaderboardImpl implements Named, Leaderboard {
         @Override
         public int getNetPoints() {
             return netPoints;
+        }
+        @Override
+        public boolean isNetPointsCorrected() {
+            return isNetPointsCorrected;
         }
         @Override
         public int getTotalPoints() {
@@ -247,9 +253,9 @@ public class LeaderboardImpl implements Named, Leaderboard {
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race,
                 timePoint, Util.size(getCompetitors()));
         boolean discarded = isDiscarded(competitor, race, timePoint);
-        return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), discarded ? 0
-                : correctedResults.getCorrectedScore() * (race.isMedalRace() ? 2 : 1),
-                correctedResults.getMaxPointsReason(), discarded);
+        return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), correctedResults.isCorrected(),
+                discarded ? 0
+                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded);
     }
     
     @Override
@@ -273,8 +279,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
                 }
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 Entry entry = new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(),
-                        discarded ? 0 : correctedResults.getCorrectedScore() * (raceColumn.isMedalRace() ? 2 : 1),
-                                correctedResults.getMaxPointsReason(), discarded);
+                        correctedResults.isCorrected(), discarded ? 0 : correctedResults.getCorrectedScore()
+                                * (raceColumn.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded);
                 result.put(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn), entry);
             }
         }

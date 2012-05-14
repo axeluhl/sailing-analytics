@@ -224,7 +224,9 @@ public class LeaderboardConfigPanel extends FormPanel implements EventDisplayer,
                             });
                     dialog.show();
                 } else if ("ACTION_EDIT_SCORES".equals(value)) {
-                    Window.open("/gwt/LeaderboardEditing.html?name=" + object.name, "_blank", null);
+                    String debugParam = Window.Location.getParameter("gwt.codesvr");
+                    Window.open("/gwt/LeaderboardEditing.html?name=" + object.name
+                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""), "_blank", null);
                 }
             }
         });

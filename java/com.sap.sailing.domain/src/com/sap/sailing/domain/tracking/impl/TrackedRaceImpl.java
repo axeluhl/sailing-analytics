@@ -607,24 +607,43 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public synchronized int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public synchronized Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
         try {
-            synchronized (competitorRankings) {
-                List<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
-                if (rankedCompetitors == null) {
-                    RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
-                    rankedCompetitors = new ArrayList<Competitor>();
-                    for (Competitor c : getRace().getCompetitors()) {
-                        rankedCompetitors.add(c);
-                    }
-                    Collections.sort(rankedCompetitors, comparator);
-                    competitorRankings.put(timePoint, rankedCompetitors);
-                }
-                return rankedCompetitors.indexOf(competitor) + 1;
+            Competitor result = null;
+            List<Competitor> ranks = getRanks(timePoint);
+            if (ranks != null && !ranks.isEmpty()) {
+                result = ranks.iterator().next();
             }
+            return result;
         } catch (NoWindError e) {
             throw e.getCause();
         }
+    }
+    
+    @Override
+    public synchronized int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        try {
+            return getRanks(timePoint).indexOf(competitor) + 1;
+        } catch (NoWindError e) {
+            throw e.getCause();
+        }
+    }
+    
+    private List<Competitor> getRanks(TimePoint timePoint) {
+        synchronized (competitorRankings) {
+            List<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
+            if (rankedCompetitors == null) {
+                RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
+                rankedCompetitors = new ArrayList<Competitor>();
+                for (Competitor c : getRace().getCompetitors()) {
+                    rankedCompetitors.add(c);
+                }
+                Collections.sort(rankedCompetitors, comparator);
+                competitorRankings.put(timePoint, rankedCompetitors);
+            }
+            return rankedCompetitors;
+        }
+
     }
 
     @Override
@@ -826,7 +845,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public void setWindSourcesToExclude(Iterable<WindSource> windSourcesToExclude) {
+    public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
         this.windSourcesToExclude.clear();
         for (WindSource windSourceToExclude : windSourcesToExclude) {
             this.windSourcesToExclude.add(windSourceToExclude);

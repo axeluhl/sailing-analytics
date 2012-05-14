@@ -8,16 +8,19 @@ public class CompetitorDTO extends NamedDTO implements IsSerializable {
     public String countryName;
     public String sailID;
     public String id;
+    public BoatClassDTO boatClass;
     
-    public CompetitorDTO() {}
-
-    public CompetitorDTO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode, String countryName, String sailID, String id) {
+    CompetitorDTO() {}
+    
+    public CompetitorDTO(String name, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
+            String countryName, String sailID, String id, BoatClassDTO boatClass) {
         super(name);
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
         this.threeLetterIocCountryCode = threeLetterIocCountryCode;
         this.countryName = countryName;
         this.sailID = sailID;
         this.id = id;
+        this.boatClass = boatClass;
     }
 
     @Override

@@ -46,10 +46,10 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
         loadRace("e876c3a0-9da8-11e0-85be-406186cbf87c"); // 505 Race 3
         column = leaderboard.addRace(getTrackedRace(), "Test Race 2", /* medalRace */ false);
         key = new Pair<Competitor, RaceInLeaderboard>(hasso, column);
-        // In Race 3, Hasso ranked 33th
-        assertEquals(54, leaderboard.getTotalPoints(hasso, now));
-        assertEquals(33, leaderboard.getContent(now).get(key).getTotalPoints());
-        assertEquals(33, leaderboard.getEntry(hasso, column, now).getTotalPoints());
+        // In Race 3, Hasso ranked 31st
+        assertEquals(52, leaderboard.getTotalPoints(hasso, now));
+        assertEquals(31, leaderboard.getContent(now).get(key).getTotalPoints());
+        assertEquals(31, leaderboard.getEntry(hasso, column, now).getTotalPoints());
         loadRace("7c666e50-9dde-11e0-85be-406186cbf87c"); // 505 Race 4
         column = leaderboard.addRace(getTrackedRace(), "Test Race 3", /* medalRace */ false);
         key = new Pair<Competitor, RaceInLeaderboard>(hasso, column);

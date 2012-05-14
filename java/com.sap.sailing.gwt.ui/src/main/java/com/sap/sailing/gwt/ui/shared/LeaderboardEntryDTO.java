@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.MaxPointsReason;
 
 /**
  * Holds a single competitor's scoring details for a single race. It may optionally contain
@@ -16,9 +17,14 @@ public class LeaderboardEntryDTO implements IsSerializable {
     /**
      * Either <code>null</code> in case no max points, or one of "DNS", "DNF", "OCS", "DND", "RAF", "BFD", "DNC", or "DSQ"
      */
-    public String reasonForMaxPoints;
+    public MaxPointsReason reasonForMaxPoints;
     
     public int netPoints;
+    
+    /**
+     * Tells if the net points have been overridden by a score correction. Can be used to render differently in editing environment.
+     */
+    public boolean netPointsCorrected;
     
     public int totalPoints;
     

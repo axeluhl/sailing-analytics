@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -180,8 +182,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         });
         windSourceSelectionPanel.add(showConfigAnchor);
         grid.setWidget(1, 0, windSourceSelectionPanel);
-        windChart = new WindChart(sailingService, raceSelectionProvider, new Timer(
-                PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, asyncActionsExecutor, errorReporter, false, false);
+        WindChartSettings windChartSettings = new WindChartSettings(false, true, new HashSet<WindSourceType>(Arrays.asList(WindSourceType.values())));
+        windChart = new WindChart(sailingService, raceSelectionProvider, new Timer(PlayModes.Replay), windChartSettings, stringMessages, asyncActionsExecutor, errorReporter, false);
         windChart.onResize();
         grid.setWidget(2, 0, windChart.getEntryWidget());
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);

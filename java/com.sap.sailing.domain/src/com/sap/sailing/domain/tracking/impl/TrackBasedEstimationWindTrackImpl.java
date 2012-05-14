@@ -355,6 +355,11 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
+    public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+        clearCache();
+    }
+
+    @Override
     public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         clearCache();
     }

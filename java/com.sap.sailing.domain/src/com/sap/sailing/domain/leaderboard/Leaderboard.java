@@ -39,6 +39,10 @@ public interface Leaderboard extends Named {
         int getTotalPoints() throws NoWindException;
         MaxPointsReason getMaxPointsReason();
         boolean isDiscarded() throws NoWindException;
+        /**
+         * Tells if the net points have been corrected by a {@link ScoreCorrection}
+         */
+        boolean isNetPointsCorrected();
     }
     
     /**

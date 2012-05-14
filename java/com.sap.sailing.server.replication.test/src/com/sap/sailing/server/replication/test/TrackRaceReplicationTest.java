@@ -5,9 +5,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
@@ -19,7 +21,9 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
 import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
@@ -140,6 +144,21 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
         Thread.sleep(1000);
         assertEquals(now, replicaTrackedRace.getStartOfRace());
+    }
+
+    @Test
+    public void testWindSourcesToExcludeReplication() throws InterruptedException, Exception {
+        startTracking();
+        Thread.sleep(1000);
+        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+        assertTrue(Util.isEmpty(masterTrackedRace.getWindSourcesToExclude()));
+        assertTrue(Util.isEmpty(replicaTrackedRace.getWindSourcesToExclude()));
+        masterTrackedRace.setWindSourcesToExclude(Collections.singleton(new WindSourceImpl(WindSourceType.WEB)));
+        assertEquals(1, Util.size(masterTrackedRace.getWindSourcesToExclude()));
+        assertEquals(WindSourceType.WEB, masterTrackedRace.getWindSourcesToExclude().iterator().next().getType());
+        Thread.sleep(1000);
+        assertEquals(1, Util.size(replicaTrackedRace.getWindSourcesToExclude()));
+        assertEquals(WindSourceType.WEB, replicaTrackedRace.getWindSourcesToExclude().iterator().next().getType());
     }
 
     @After

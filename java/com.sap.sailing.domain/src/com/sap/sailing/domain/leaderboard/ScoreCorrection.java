@@ -21,6 +21,7 @@ public interface ScoreCorrection extends Serializable {
     public interface Result {
         int getCorrectedScore();
         MaxPointsReason getMaxPointsReason();
+        boolean isCorrected();
     }
     
     /**

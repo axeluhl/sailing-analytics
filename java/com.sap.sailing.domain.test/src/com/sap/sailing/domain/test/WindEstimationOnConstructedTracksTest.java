@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,14 +20,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.base.impl.NationalityImpl;
-import com.sap.sailing.domain.base.impl.PersonImpl;
-import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -85,15 +78,6 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
             fixTimePoint = new MillisecondsTimePoint(fixTimePoint.asMillis()+1);
         }
         getTrackedRace().updateMarkPassings(competitor, markPassingForCompetitor);
-    }
-
-    private CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
-                new PersonImpl(competitorName, new NationalityImpl("GER"),
-                /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
-                new NationalityImpl("NED"),
-                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */true), null));
     }
 
     private void setBearingForCompetitor(Competitor competitor, TimePoint timePoint, double bearingDeg) {

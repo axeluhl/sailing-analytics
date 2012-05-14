@@ -46,6 +46,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
@@ -466,7 +467,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
                     }
-                    html.appendEscaped(entry.reasonForMaxPoints);
+                    html.appendEscaped(entry.reasonForMaxPoints == MaxPointsReason.NONE ? "" : entry.reasonForMaxPoints.name());
                     if (entry.discarded) {
                         html.appendHtmlConstant("</del>");
                     }
