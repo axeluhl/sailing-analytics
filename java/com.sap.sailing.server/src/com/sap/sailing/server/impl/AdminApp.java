@@ -164,15 +164,15 @@ public class AdminApp extends Servlet {
     }
     
     private void setAveraging(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Regatta event = getEvent(req);
-        if (event == null) {
+        Regatta regatta = getEvent(req);
+        if (regatta == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Event not found");
         } else {
             RaceDefinition race = getRaceDefinition(req);
             if (race == null) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
             } else {
-                DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(event).getTrackedRace(race);
+                DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
                 String windAveragingIntervalInMIllis = req.getParameter(PARAM_NAME_WIND_AVERAGING_INTERVAL_MILLIS);
                 if (windAveragingIntervalInMIllis != null) {
                     trackedRace.setMillisecondsOverWhichToAverageWind(Long.valueOf(windAveragingIntervalInMIllis));

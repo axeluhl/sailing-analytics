@@ -46,8 +46,8 @@ public class Activator implements BundleActivator, ServiceListener {
         for (Triple<Regatta, RaceDefinition, String> windTracker : service.getWindTrackedRaces()) {
             service.stopTrackingWind(windTracker.getA(), windTracker.getB());
         }
-        for (Regatta event : service.getAllRegattas()) {
-            service.stopTracking(event);
+        for (Regatta regatta : service.getAllRegattas()) {
+            service.stopTracking(regatta);
         }
     }
 
