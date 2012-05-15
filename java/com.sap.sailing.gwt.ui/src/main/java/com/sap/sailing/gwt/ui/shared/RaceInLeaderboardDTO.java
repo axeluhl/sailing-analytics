@@ -78,7 +78,6 @@ public class RaceInLeaderboardDTO implements IsSerializable {
     }
     
     /**
-     * @param fleetName TODO
      * @return The start of race, or the start of tracking if the start of race is <code>null</code>, or
      *         <code>null</code> if no start date is available.
      */

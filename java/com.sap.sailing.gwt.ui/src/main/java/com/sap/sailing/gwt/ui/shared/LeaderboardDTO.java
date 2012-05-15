@@ -284,7 +284,11 @@ public class LeaderboardDTO implements IsSerializable {
     public boolean raceIsTracked(String raceColumnName) {
         for (RaceInLeaderboardDTO race : races) {
             if (race.getRaceColumnName().equals(raceColumnName)) {
-                return race.isTrackedRace(fleetName);
+                for (String fleetName : race.getFleetNames()) {
+                    if (race.isTrackedRace(fleetName)) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -295,7 +299,7 @@ public class LeaderboardDTO implements IsSerializable {
         return getRaceInLeaderboardByName(raceColumnName).isMedalRace();
     }
 
-    public void addRace(String raceColumnName, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
+    public void addRace(String raceColumnName, String fleetName, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
@@ -304,7 +308,7 @@ public class LeaderboardDTO implements IsSerializable {
     	races.add(raceInLeaderboardDTO);
     }
 
-    public void addRaceAt(String raceColumnName, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, int index) {
+    public void addRaceAt(String raceColumnName, String fleetName, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, int index) {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
@@ -370,12 +374,15 @@ public class LeaderboardDTO implements IsSerializable {
     public Date getStartDate() {
         Date leaderboardStart = null;
         for (RaceInLeaderboardDTO race : getRaceList()) {
-            Date raceStart = race.getStartDate(fleetName);
-            if (raceStart != null) {
-                if (leaderboardStart == null) {
-                    leaderboardStart = new Date();
+            for (String fleetName : race.getFleetNames()) {
+                Date raceStart = race.getStartDate(fleetName);
+                if (raceStart != null) {
+                    if (leaderboardStart == null) {
+                        leaderboardStart = new Date();
+                    } else {
+                        leaderboardStart = leaderboardStart.before(raceStart) ? leaderboardStart : raceStart;
+                    }
                 }
-                leaderboardStart = leaderboardStart.before(raceStart) ? leaderboardStart : raceStart;
             }
         }
         return leaderboardStart;

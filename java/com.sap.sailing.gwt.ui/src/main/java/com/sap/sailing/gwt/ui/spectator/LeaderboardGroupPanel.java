@@ -138,7 +138,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     }
                 };
                 leaderboardsTable.addColumn(leaderboardColumn, leaderboard.name);
-                leaderboard.addRaceAt(stringConstants.overview(), false, null, 0);
+                leaderboard.addRaceAt(stringConstants.overview(), fleetName, false, null, 0);
                 maxRacesNum = maxRacesNum < leaderboard.getRaceList().size() ? leaderboard
                         .getRaceList().size() : maxRacesNum;
             }

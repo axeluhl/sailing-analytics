@@ -711,8 +711,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                                         // selectedLeaderboard.raceNamesAndMedalRaceAndTracked.put(columnNameAndMedalRace.getA(),
                                         // new Pair<Boolean, Boolean>(/* medal race */ columnNameAndMedalRace.getB(),
                                         // /* tracked */ false));
-                                        selectedLeaderboard.addRace(result.getRaceColumnName(), result.isMedalRace(),
-                                                null, null);
+                                        selectedLeaderboard.addRace(result.getRaceColumnName(), fleetName,
+                                                result.isMedalRace(), null, null);
                                         selectedLeaderboard.invalidateCompetitorOrdering();
                                     }
                                 });

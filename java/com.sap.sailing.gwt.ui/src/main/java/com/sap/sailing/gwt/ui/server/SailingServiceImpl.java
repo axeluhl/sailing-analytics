@@ -260,7 +260,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta().getName(), trackedRace.getRace().getName());
                 }
-                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, /* StrippedRaceDTO */ null);
+                result.addRace(raceColumn.getName(), fleetName, raceColumn.isMedalRace(), raceIdentifier, /* StrippedRaceDTO */ null);
             }
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -1228,7 +1228,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 }
             }
-            dto.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
+            dto.addRace(raceColumn.getName(), fleetName, raceColumn.isMedalRace(), raceIdentifier, race);
         }
         dto.hasCarriedPoints = leaderboard.hasCarriedPoints();
         dto.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
