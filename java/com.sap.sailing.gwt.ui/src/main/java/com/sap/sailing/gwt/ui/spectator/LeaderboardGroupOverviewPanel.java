@@ -423,10 +423,10 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             @Override
             public SafeHtml getValue(RaceInLeaderboardDTO race) {
                 SafeHtml name = null;
-                if (race.getRaceIdentifier() != null) {
+                if (race.getRaceIdentifier(fleetName) != null) {
                     LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                     LeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
-                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier();
+                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleetName);
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName()
                             + "&regattaName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
@@ -442,7 +442,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         TextColumn<RaceInLeaderboardDTO> racesStartDateColumn = new TextColumn<RaceInLeaderboardDTO>() {
             @Override
             public String getValue(RaceInLeaderboardDTO race) {
-                Date raceStart = race.getStartDate();
+                Date raceStart = race.getStartDate(fleetName);
                 return raceStart == null ? LeaderboardGroupOverviewPanel.this.stringMessages.untracked()
                         : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(raceStart);
             }

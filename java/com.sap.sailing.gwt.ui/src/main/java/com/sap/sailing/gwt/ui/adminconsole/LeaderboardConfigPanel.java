@@ -305,8 +305,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         Column<RaceInLeaderboardDTO, SafeHtml> raceLinkColumn = new Column<RaceInLeaderboardDTO, SafeHtml>(raceAnchorCell) {
             @Override
             public SafeHtml getValue(RaceInLeaderboardDTO raceInLeaderboardDTO) {
-                if(raceInLeaderboardDTO.getRaceIdentifier() != null) {
-                    RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier();
+                if(raceInLeaderboardDTO.getRaceIdentifier(fleetName) != null) {
+                    RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceInLeaderboardDTO.getRaceIdentifier(fleetName);
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName="
                             + selectedLeaderboard.name + "&raceName=" + raceIdentifier.getRaceName() + "&regattaName="
@@ -337,7 +337,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         TextColumn<RaceInLeaderboardDTO> isLinkedRaceColumn = new TextColumn<RaceInLeaderboardDTO>() {
             @Override
             public String getValue(RaceInLeaderboardDTO race) {
-                boolean isTrackedRace = race.isTrackedRace();
+                boolean isTrackedRace = race.isTrackedRace(fleetName);
                 return isTrackedRace ? stringMessages.yes() : stringMessages.no();
             }
         };
@@ -468,7 +468,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     @Override
                     public void onSuccess(Void arg0) {
                         trackedRacesListComposite.clearSelection();
-                        getSelectedRaceInLeaderboard().setRaceIdentifier(null);
+                        getSelectedRaceInLeaderboard().setRaceIdentifier(fleetName, null);
                         raceColumnList.refresh();
                     }
                 });
@@ -762,7 +762,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     public void changeTrackingRace(RegattaNameAndRaceName regattaNameAndRaceName, boolean isTracked) {
         for (RaceInLeaderboardDTO race : raceColumnList.getList()) {
             if (race.getRaceColumnName().equals(regattaNameAndRaceName.getRaceName())) {
-                race.setRaceIdentifier(regattaNameAndRaceName);
+                race.setRaceIdentifier(fleetName, regattaNameAndRaceName);
             }
         }
         raceColumnList.refresh();
@@ -877,7 +877,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     public void onSuccess(Boolean success) {
                         if (success) {
                             // TODO consider enabling the Unlink button
-                            selectedRaceInLeaderboard.setRaceIdentifier(selectedRace);
+                            selectedRaceInLeaderboard.setRaceIdentifier(fleetName, selectedRace);
                             raceColumnList.refresh();
                         }
                     }

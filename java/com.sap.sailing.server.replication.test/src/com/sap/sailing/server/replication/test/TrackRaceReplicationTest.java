@@ -106,7 +106,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         Leaderboard replicaDefaultLeaderboard = replica.getLeaderboardByName(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
         RaceColumn column = replicaDefaultLeaderboard.getRaceColumnByName(replicaTrackedRace.getRace().getName());
         assertNotNull(column);
-        assertSame(replicaTrackedRace, column.getTrackedRace());
+        assertSame(replicaTrackedRace, column.getTrackedRace(fleet));
     }
 
     @Test
@@ -115,10 +115,10 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         master.apply(new CreateLeaderboard(leaderboardName, new int[0]));
         final String columnName = "R1";
         RaceColumn masterColumn = master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false));
-        master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, new RegattaNameAndRaceName(
+        master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, fleet.getName(), new RegattaNameAndRaceName(
                 "Academy Tracking 2011 (STG)", "weym470may122011")));
         startTracking();
-        assertNotNull(masterColumn.getTrackedRace()); // ensure the re-assignment worked on the master
+        assertNotNull(masterColumn.getTrackedRace(fleet)); // ensure the re-assignment worked on the master
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertNotNull(replicaTrackedRace);
@@ -129,7 +129,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicaLeaderboard);
         RaceColumn column = replicaLeaderboard.getRaceColumnByName(columnName);
         assertNotNull(column);
-        assertSame(replicaTrackedRace, column.getTrackedRace());
+        assertSame(replicaTrackedRace, column.getTrackedRace(fleet));
     }
     
     @Test

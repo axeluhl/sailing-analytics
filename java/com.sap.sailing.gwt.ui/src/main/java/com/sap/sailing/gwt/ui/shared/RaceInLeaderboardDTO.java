@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -8,9 +11,16 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 public class RaceInLeaderboardDTO implements IsSerializable {
     private String raceColumnName;
     private boolean medalRace;
-    private RegattaAndRaceIdentifier trackedRaceIdentifier;
-    private StrippedRaceDTO race;
+    private Iterable<String> fleetNames;
+    private Map<String, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
+    private Map<String, StrippedRaceDTO> racesPerFleet;
 
+    public RaceInLeaderboardDTO() {
+        trackedRaceIdentifiersPerFleet = new HashMap<String, RegattaAndRaceIdentifier>();
+        racesPerFleet = new HashMap<String, StrippedRaceDTO>();
+        fleetNames = new ArrayList<String>();
+    }
+    
     public String getRaceColumnName() {
         return raceColumnName;
     }
@@ -27,12 +37,12 @@ public class RaceInLeaderboardDTO implements IsSerializable {
         this.medalRace = medalRace;
     }
 
-    public boolean isTrackedRace() {
-        return trackedRaceIdentifier != null;
+    public boolean isTrackedRace(String fleetName) {
+        return trackedRaceIdentifiersPerFleet.get(fleetName) != null;
     }
 
-    public void setRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
-        this.trackedRaceIdentifier = raceIdentifier;
+    public void setRaceIdentifier(String fleetName, RegattaAndRaceIdentifier raceIdentifier) {
+        this.trackedRaceIdentifiersPerFleet.put(fleetName, raceIdentifier);
     }
 
     /**
@@ -40,32 +50,42 @@ public class RaceInLeaderboardDTO implements IsSerializable {
      *         data can be obtained from the server in great detail, as opposed to non-tracked races for which only
      *         result points may have been entered manually.
      */
-    public RegattaAndRaceIdentifier getRaceIdentifier() {
-        return trackedRaceIdentifier;
+    public RegattaAndRaceIdentifier getRaceIdentifier(String fleetName) {
+        return trackedRaceIdentifiersPerFleet.get(fleetName);
     }
 
     /**
      * Returns an object with data (e.g. start date or places) for the RaceInLeaderboardDTO. Is <code>null</code>, if
-     * the method {@link RaceInLeaderboardDTO#isTrackedRace()} returns <code>false</code>.
+     * the method {@link RaceInLeaderboardDTO#isTrackedRace(String)} returns <code>false</code>.
+     * @param fleetName TODO
      * 
      * @return An Object with additional data, or <code>null</code> if the race isn't tracked
      */
-    public StrippedRaceDTO getRace() {
-        return race;
+    public StrippedRaceDTO getRace(String fleetName) {
+        return racesPerFleet.get(fleetName);
     }
 
-    public void setRace(StrippedRaceDTO race) {
-        this.race = race;
+    public void setRace(String fleetName, StrippedRaceDTO race) {
+        this.racesPerFleet.put(fleetName, race);
+    }
+    
+    public Iterable<String> getFleetNames() {
+        return fleetNames;
+    }
+    
+    public void setFleetNames(Iterable<String> fleetNames) {
+        this.fleetNames = fleetNames;
     }
     
     /**
+     * @param fleetName TODO
      * @return The start of race, or the start of tracking if the start of race is <code>null</code>, or
      *         <code>null</code> if no start date is available.
      */
-    public Date getStartDate() {
+    public Date getStartDate(String fleetName) {
         Date start = null;
-        if (race != null) {
-            start = race.getStartDate();
+        if (racesPerFleet.get(fleetName) != null) {
+            start = racesPerFleet.get(fleetName).getStartDate();
         }
         return start;
     }
@@ -75,8 +95,12 @@ public class RaceInLeaderboardDTO implements IsSerializable {
      */
     public PlacemarkOrderDTO getPlaces() {
         PlacemarkOrderDTO places = null;
-        if (race != null) {
-            places = race.places;
+        for (StrippedRaceDTO race : racesPerFleet.values()) {
+            if (places == null) {
+                places = race.places;
+            } else {
+                places.add(race.places);
+            }
         }
         return places;
     }
@@ -85,20 +109,28 @@ public class RaceInLeaderboardDTO implements IsSerializable {
      * @return <code>true</code> if the startOfTracking is after the current date and there's no end of the race
      */
     public boolean isLive() {
-        if (trackedRaceIdentifier != null && race != null) {
-            return race.endOfRace == null && (race.startOfTracking != null ? new Date().after(race.startOfTracking) : false);
-        } else {
-            return false;
+        for (String fleetName : getFleetNames()) {
+            final StrippedRaceDTO strippedRaceDTO = racesPerFleet.get(fleetName);
+            if (trackedRaceIdentifiersPerFleet.get(fleetName) != null
+                    && strippedRaceDTO != null
+                    && strippedRaceDTO.endOfRace == null
+                    && (strippedRaceDTO.startOfTracking != null ? new Date().after(strippedRaceDTO.startOfTracking) : false)) {
+                return true;
+            }
         }
+        return false;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((fleetNames == null) ? 0 : fleetNames.hashCode());
         result = prime * result + (medalRace ? 1231 : 1237);
         result = prime * result + ((raceColumnName == null) ? 0 : raceColumnName.hashCode());
-        result = prime * result + ((trackedRaceIdentifier == null) ? 0 : trackedRaceIdentifier.hashCode());
+        result = prime * result + ((racesPerFleet == null) ? 0 : racesPerFleet.hashCode());
+        result = prime * result
+                + ((trackedRaceIdentifiersPerFleet == null) ? 0 : trackedRaceIdentifiersPerFleet.hashCode());
         return result;
     }
 
@@ -111,6 +143,11 @@ public class RaceInLeaderboardDTO implements IsSerializable {
         if (getClass() != obj.getClass())
             return false;
         RaceInLeaderboardDTO other = (RaceInLeaderboardDTO) obj;
+        if (fleetNames == null) {
+            if (other.fleetNames != null)
+                return false;
+        } else if (!fleetNames.equals(other.fleetNames))
+            return false;
         if (medalRace != other.medalRace)
             return false;
         if (raceColumnName == null) {
@@ -118,11 +155,17 @@ public class RaceInLeaderboardDTO implements IsSerializable {
                 return false;
         } else if (!raceColumnName.equals(other.raceColumnName))
             return false;
-        if (trackedRaceIdentifier == null) {
-            if (other.trackedRaceIdentifier != null)
+        if (racesPerFleet == null) {
+            if (other.racesPerFleet != null)
                 return false;
-        } else if (!trackedRaceIdentifier.equals(other.trackedRaceIdentifier))
+        } else if (!racesPerFleet.equals(other.racesPerFleet))
+            return false;
+        if (trackedRaceIdentifiersPerFleet == null) {
+            if (other.trackedRaceIdentifiersPerFleet != null)
+                return false;
+        } else if (!trackedRaceIdentifiersPerFleet.equals(other.trackedRaceIdentifiersPerFleet))
             return false;
         return true;
     }
+
 }

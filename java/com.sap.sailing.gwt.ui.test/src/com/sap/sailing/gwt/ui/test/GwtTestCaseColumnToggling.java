@@ -131,7 +131,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                         RaceInLeaderboardDTO race = new RaceInLeaderboardDTO();
                         race.setRaceColumnName(COLUMN1_NAME);
                         race.setMedalRace(false);
-                        race.setRaceIdentifier(null);
+                        race.setRaceIdentifier(fleetName, null);
                         leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(race));
                         linkTrackedRace();
                     }

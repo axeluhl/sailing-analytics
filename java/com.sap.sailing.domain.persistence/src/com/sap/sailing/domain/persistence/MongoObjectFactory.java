@@ -1,14 +1,13 @@
 package com.sap.sailing.domain.persistence;
 
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 
 /**
  * Offers methods to construct {@link DBObject MongoDB objects} from domain objects.
@@ -37,8 +36,6 @@ public interface MongoObjectFactory {
 
     void renameLeaderboard(String oldName, String newName);
 
-    void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject);
-    
     /**
      * Stores the group, if it doesn't exist or updates it.<br />
      * Leaderboards in the group, which aren't stored in the database, will be stored.

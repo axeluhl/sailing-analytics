@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.NoWindException;
@@ -50,6 +51,14 @@ public interface Leaderboard extends Named {
      * leaderboard.
      */
     Iterable<Competitor> getCompetitors();
+    
+    /**
+     * Returns the first fleet found in the sequence of this leaderboard's {@link #getRaceColumns() race columns}'
+     * {@link RaceColumn#getFleets() fleets} whose name equals <code>fleetName</code>. If no such fleet is found,
+     * <code>null</code> is returned. If <code>fleetName</code> is <code>null</code>, the leaderboard may return
+     * a default fleet if it has one, or <code>null</code> otherwise.
+     */
+    Fleet getFleet(String fleetName);
     
     Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
     
@@ -109,21 +118,6 @@ public interface Leaderboard extends Named {
     boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
 
     /**
-     * Adds a tracked race to this leaderboard. If a {@link RaceColumn} with name <code>columnName</code> already
-     * exists in this leaderboard, <code>race</code> is {@link RaceColumn#setTrackedRace(TrackedRace) set as its
-     * tracked race} and <code>medalRace</code> is ignored. Otherwise, a new
-     * {@link RaceColumn} column, with <code>race</code> as its tracked race, is created and added to this
-     * leaderboard.
-     * 
-     * @param medalRace
-     *            tells if the column to add represents a medal race which has double score and cannot be discarded;
-     *            ignored if the column named <code>columnName</code> already exists
-     * 
-     * @return the race column in the leaderboard used to represent the tracked <code>race</code>
-     */
-    RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace);
-
-    /**
      * Sums up the {@link #getTotalPoints(Competitor, TrackedRace, TimePoint) total points} of <code>competitor</code>
      * across all races tracked by this leaderboard.
      */
@@ -148,15 +142,6 @@ public interface Leaderboard extends Named {
     void setName(String newName);
 
     /**
-     * Adds a new {@link RaceColumn} that has no {@link TrackedRace} associated yet to this leaderboard.
-     * @param medalRace
-     *            tells if the column to add represents a medal race which has double score and cannot be discarded
-     * 
-     * @return the race column in the leaderboard used to represent the tracked <code>race</code>
-     */
-    RaceColumn addRaceColumn(String name, boolean medalRace);
-    
-    /**
      * Retrieves all race columns that were added, either by {@link #addRace(TrackedRace, String, boolean)} or
      * {@link #addRaceColumn(String, boolean)}.
      */
@@ -168,18 +153,6 @@ public interface Leaderboard extends Named {
      */
     RaceColumn getRaceColumnByName(String name);
     
-    /**
-     * Moves the column with the name <code>name</code> up. 
-     * @param name The name of the column to move.
-     */
-    void moveRaceColumnUp(String name);
-    
-    /**
-     * Moves the column with the name <code>name</code> down. 
-     * @param name The name of the column to move.
-     */
-    void moveRaceColumnDown(String name);
-
     /**
      * A leaderboard can carry over points from races that are not tracked by this leaderboard in detail,
      * so for which no {@link RaceColumn} column is present in this leaderboard. These scores are
@@ -203,8 +176,6 @@ public interface Leaderboard extends Named {
     boolean hasCarriedPoints();
     
     boolean hasCarriedPoints(Competitor competitor);
-
-    void removeRaceColumn(String columnName);
 
     SettableScoreCorrection getScoreCorrection();
 

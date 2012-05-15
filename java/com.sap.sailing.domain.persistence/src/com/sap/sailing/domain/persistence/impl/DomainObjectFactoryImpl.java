@@ -3,6 +3,7 @@ package com.sap.sailing.domain.persistence.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -15,15 +16,16 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -155,14 +157,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
         }
         ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
+        // TODO should this be a FlexibleLeaderboard or a RegattaLeaderboard?
         LeaderboardImplWithDelayedCarriedPoints result = new LeaderboardImplWithDelayedCarriedPoints(
                 (String) o.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule);
         BasicDBList dbRaceColumns = (BasicDBList) o.get(FieldNames.LEADERBOARD_COLUMNS.name());
         for (Object dbRaceColumnAsObject : dbRaceColumns) {
             BasicDBObject dbRaceColumn = (BasicDBObject) dbRaceColumnAsObject;
+            Map<String, RaceIdentifier> raceIdentifiers = loadRaceIdentifiers(dbRaceColumn);
+            RaceIdentifier defaultFleetRaceIdentifier = raceIdentifiers.get(null);
+            if (defaultFleetRaceIdentifier != null) {
+                Fleet defaultFleet = result.getFleet(null);
+                if (defaultFleet != null) {
+                    raceIdentifiers.put(defaultFleet.getName(), defaultFleetRaceIdentifier);
+                } else {
+                    raceIdentifiers.remove(null); // leaderboard has no default fleet; don't know what to do with default RaceIdentifier
+                    logger.warning("Discarding RaceIdentifier "+defaultFleetRaceIdentifier+" for default fleet for leaderboard "+result.getName()+
+                            " because no default fleet was found in leaderboard");
+                }
+            }
+            List<Fleet> fleets = new ArrayList<Fleet>();
+            for (String fleetName : )
+            for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
+                
+            }
             RaceColumn raceColumn = result.addRaceColumn((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()),
                     (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
-            raceColumn.setRaceIdentifier(loadRaceIdentifier(dbRaceColumn));
         }
         DBObject carriedPoints = (DBObject) o.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
         if (carriedPoints != null) {
@@ -194,6 +213,33 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (competitorDisplayNames != null) {
             for (String escapedCompetitorName : competitorDisplayNames.keySet()) {
                 result.setDisplayName(MongoUtils.unescapeDollarAndDot(escapedCompetitorName), (String) competitorDisplayNames.get(escapedCompetitorName));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Expects a DBObject under the key {@link FieldNames#RACE_IDENTIFIERS} whose keys are the fleet names and whose
+     * values are the race identifiers as DBObjects (see {@link #loadRaceIdentifier(DBObject)}). If legacy DB instances
+     * have a {@link RaceIdentifier} that is not associated with a fleet name, it may be stored directly in the
+     * <code>dbRaceColumn</code>. In this case, it is returned with <code>null</code> as the fleet name key.
+     * 
+     * @return a map with fleet names as key and the corresponding fleet's race identifier as value; the special
+     *         <code>null</code> key is used to identify a "default fleet" for backward compatibility with stored
+     *         leaderboards which don't know about fleets yet; this key should be mapped to the leaderboard's default
+     *         fleet.
+     */
+    private Map<String, RaceIdentifier> loadRaceIdentifiers(BasicDBObject dbRaceColumn) {
+        Map<String, RaceIdentifier> result = new HashMap<String, RaceIdentifier>();
+        // try to load a deprecated single race identifier to associate with the default fleet:
+        RaceIdentifier singleLegacyRaceIdentifier = loadRaceIdentifier(dbRaceColumn);
+        if (singleLegacyRaceIdentifier != null) {
+            result.put(null, singleLegacyRaceIdentifier);
+        }
+        DBObject raceIdentifiersPerFleet = (DBObject) dbRaceColumn.get(FieldNames.RACE_IDENTIFIERS.name());
+        if (raceIdentifiersPerFleet != null) {
+            for (String fleetName : raceIdentifiersPerFleet.keySet()) {
+                result.put(fleetName, loadRaceIdentifier((DBObject) raceIdentifiersPerFleet.get(fleetName)));
             }
         }
         return result;

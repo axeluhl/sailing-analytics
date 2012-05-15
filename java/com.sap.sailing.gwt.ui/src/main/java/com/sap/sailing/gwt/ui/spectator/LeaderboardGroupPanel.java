@@ -196,8 +196,8 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 link += "&viewMode=" + viewMode;
             b.append(ANCHORTEMPLATE.anchor(link, displayName, STYLE_NAME_PREFIX + "ActiveLeaderboard"));
         } else {
-            if (race.getRaceIdentifier() != null) {
-                RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier();
+            if (race.getRaceIdentifier(fleetName) != null) {
+                RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleetName);
                 String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name + "&raceName=" + raceId.getRaceName()
                         + "&regattaName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + group.name + "&root=" + root);
                 if(debugParam != null && !debugParam.isEmpty())
@@ -216,8 +216,8 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-            if (race.getRaceIdentifier() != null) {
-                RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier();
+            if (race.getRaceIdentifier(fleetName) != null) {
+                RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleetName);
                 String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
                         + "&raceName=" + raceId.getRaceName() + "&root=" + root + raceId.getRaceName() + "&regattaName="
                         + raceId.getRegattaName() + "&leaderboardGroupName=" + group.name);

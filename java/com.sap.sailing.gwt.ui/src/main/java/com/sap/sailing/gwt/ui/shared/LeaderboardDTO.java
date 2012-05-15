@@ -284,7 +284,7 @@ public class LeaderboardDTO implements IsSerializable {
     public boolean raceIsTracked(String raceColumnName) {
         for (RaceInLeaderboardDTO race : races) {
             if (race.getRaceColumnName().equals(raceColumnName)) {
-                return race.isTrackedRace();
+                return race.isTrackedRace(fleetName);
             }
         }
         return false;
@@ -299,8 +299,8 @@ public class LeaderboardDTO implements IsSerializable {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
-        raceInLeaderboardDTO.setRaceIdentifier(trackedRaceIdentifier);
-        raceInLeaderboardDTO.setRace(race);
+        raceInLeaderboardDTO.setRaceIdentifier(fleetName, trackedRaceIdentifier);
+        raceInLeaderboardDTO.setRace(fleetName, race);
     	races.add(raceInLeaderboardDTO);
     }
 
@@ -308,7 +308,7 @@ public class LeaderboardDTO implements IsSerializable {
         RaceInLeaderboardDTO raceInLeaderboardDTO = new RaceInLeaderboardDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
         raceInLeaderboardDTO.setMedalRace(medalRace);
-        raceInLeaderboardDTO.setRaceIdentifier(trackedRaceIdentifier);
+        raceInLeaderboardDTO.setRaceIdentifier(fleetName, trackedRaceIdentifier);
         races.add(index, raceInLeaderboardDTO);
     }
 
@@ -370,7 +370,7 @@ public class LeaderboardDTO implements IsSerializable {
     public Date getStartDate() {
         Date leaderboardStart = null;
         for (RaceInLeaderboardDTO race : getRaceList()) {
-            Date raceStart = race.getStartDate();
+            Date raceStart = race.getStartDate(fleetName);
             if (raceStart != null) {
                 if (leaderboardStart == null) {
                     leaderboardStart = new Date();
