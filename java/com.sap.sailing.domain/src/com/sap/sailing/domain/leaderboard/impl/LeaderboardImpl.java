@@ -107,7 +107,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     
     @Override
     public RaceColumn addRaceColumn(String name, boolean medalRace) {
-        RaceInLeaderboardImpl column = createRaceColumn(name, medalRace);
+        RaceColumnImpl column = createRaceColumn(name, medalRace);
         races.add(column);
         return column;
     }
@@ -145,8 +145,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
         return column;
     }
 
-    protected RaceInLeaderboardImpl createRaceColumn(String columnName, boolean medalRace) {
-        return new RaceInLeaderboardImpl(columnName, medalRace);
+    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace) {
+        return new RaceColumnImpl(columnName, medalRace);
     }
 
     private Iterable<TrackedRace> getTrackedRaces() {

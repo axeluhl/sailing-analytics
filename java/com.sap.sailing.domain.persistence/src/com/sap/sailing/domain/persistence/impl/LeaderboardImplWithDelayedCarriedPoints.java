@@ -11,7 +11,7 @@ import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
-import com.sap.sailing.domain.leaderboard.impl.RaceInLeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.RaceColumnImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -42,7 +42,7 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
      * 
      * @author Axel Uhl (D043530)
      */
-    private class RaceInLeaderboardForDelayedCarriedPoints extends RaceInLeaderboardImpl {
+    private class RaceInLeaderboardForDelayedCarriedPoints extends RaceColumnImpl {
         private static final long serialVersionUID = -1243132535406059096L;
 
         public RaceInLeaderboardForDelayedCarriedPoints(Leaderboard leaderboard, String name, boolean medalRace) {
@@ -76,7 +76,7 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
     }
 
     @Override
-    protected RaceInLeaderboardImpl createRaceColumn(String columnName, boolean medalRace) {
+    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace) {
         return new RaceInLeaderboardForDelayedCarriedPoints(this, columnName, medalRace);
     }
 
