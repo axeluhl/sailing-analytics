@@ -183,7 +183,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         TextColumn<RaceDTO> deprecatedRegattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                return raceDTO.getDeprecatedRegatta().boatClass.name;
+                return raceDTO.getRegatta().boatClass.name;
             }
         };
         deprecatedRegattaNameColumn.setSortable(true);
@@ -481,7 +481,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
                     if (!raceDTO.getRegatta().name.toUpperCase().contains(textAsUppercase)
-                            && !raceDTO.getDeprecatedRegatta().boatClass.name.toUpperCase().contains(textAsUppercase)
+                            && !raceDTO.getRegatta().boatClass.name.toUpperCase().contains(textAsUppercase)
                             && !raceDTO.name.toUpperCase().contains(textAsUppercase)) {
                         failed = true;
                         break;
