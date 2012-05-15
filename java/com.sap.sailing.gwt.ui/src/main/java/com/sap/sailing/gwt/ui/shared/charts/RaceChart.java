@@ -1,0 +1,137 @@
+package com.sap.sailing.gwt.ui.shared.charts;
+
+import java.util.Date;
+import java.util.Map;
+
+import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Legend;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEventHandler;
+import org.moxieapps.gwt.highcharts.client.events.SeriesLegendItemClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.SeriesLegendItemClickEventHandler;
+import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
+import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
+import com.sap.sailing.gwt.ui.client.RaceTimesCalculationUtil;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sailing.gwt.ui.client.TimeZoomChangeListener;
+import com.sap.sailing.gwt.ui.client.TimeZoomProvider;
+import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+
+public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProviderListener, RaceSelectionChangeListener,
+    TimeListener, TimeZoomChangeListener {
+    protected Chart chart;
+
+    protected final Timer timer;
+    protected final TimeZoomProvider timeZoomProvider; 
+    
+    protected Date minTimepoint;
+    protected Date maxTimepoint;
+    
+    protected boolean ignoreClickOnce;
+
+    protected RaceIdentifier selectedRaceIdentifier;
+    protected RaceTimesInfoDTO lastRaceTimesInfo;
+
+    protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
+
+    protected final StringMessages stringMessages;
+    protected final ErrorReporter errorReporter;
+    protected final AsyncActionsExecutor asyncActionsExecutor;
+    protected final SailingServiceAsync sailingService;
+
+    public RaceChart(SailingServiceAsync sailingService, Timer timer, TimeZoomProvider timeZoomProvider, final StringMessages stringMessages, 
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
+        this.sailingService = sailingService;
+        this.timer = timer;
+        this.timeZoomProvider = timeZoomProvider;
+        this.stringMessages = stringMessages;
+        this.asyncActionsExecutor = asyncActionsExecutor;
+        this.errorReporter = errorReporter;
+    }
+    
+    @Override
+    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
+        this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaceIdentifier);
+        
+        Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.caluclateRaceMinMax(timer, this.lastRaceTimesInfo);
+        
+        this.minTimepoint = raceMinMax.getA();
+        this.maxTimepoint = raceMinMax.getB();
+    }
+
+    protected void onSelectionChange(ChartSelectionEvent chartSelectionEvent) {
+        try {
+            long xAxisMin = chartSelectionEvent.getXAxisMinAsLong();
+            long xAxisMax = chartSelectionEvent.getXAxisMaxAsLong();
+            timeZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
+            
+            ignoreClickOnce = true;
+        } catch (Throwable t) {
+            timeZoomProvider.resetTimeZoom(this);
+            //Redrawing, or the chart wouldn't rezoom
+            chart.redraw();
+        }
+    }
+
+    protected void onClick(ChartClickEvent chartClickEvent) {
+        if (ignoreClickOnce) {
+            ignoreClickOnce = false;
+        } else {
+            timer.setPlayMode(PlayModes.Replay);
+            timer.setTime(chartClickEvent.getXAxisValueAsLong());
+        }
+    }
+
+    public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        chart.getXAxis().setExtremes(zoomStartTimepoint.getTime(), zoomEndTimepoint.getTime(), true, true);
+        // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
+        // chart.showResetZoom();
+    }
+
+    public void onTimeZoomReset() {
+//        chart.getXAxis().setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), true, true);
+    }
+
+    /**
+     * When using this method to enable the use of checkboxes only for hiding / showing a series, callers need to ensure
+     * that all series have {@link PlotOptions#setSelected(boolean)} set to <code>true</code> for all series that are
+     * added to the chart and hence visible. Otherwise, the checkbox won't initially be in sync with the series'
+     * visibility state.
+     */
+    protected void useCheckboxesToShowAndHide(final Chart chart) {
+        chart.setLegend(new Legend().setEnabled(true).setBorderWidth(0).setSymbolPadding(20)); // make room for checkbox
+        chart.setSeriesPlotOptions(new SeriesPlotOptions().setSeriesCheckboxClickEventHandler(new SeriesCheckboxClickEventHandler() {
+                    @Override
+                    public boolean onClick(SeriesCheckboxClickEvent seriesCheckboxClickEvent) {
+                        if (seriesCheckboxClickEvent.isChecked()) {
+                            chart.getSeries(seriesCheckboxClickEvent.getSeriesId()).show();
+                        } else {
+                            chart.getSeries(seriesCheckboxClickEvent.getSeriesId()).hide();
+                        }
+                        return false; // don't toggle the select state of the series
+                    }
+                }).setShowCheckbox(true).
+                setSeriesLegendItemClickEventHandler(new SeriesLegendItemClickEventHandler() {
+                    @Override
+                    public boolean onClick(SeriesLegendItemClickEvent seriesLegendItemClickEvent) {
+                        // disable toggling visibility by clicking the legend item; force user to use checkbox instead
+                        return false;
+                    }
+                }));
+    }
+}

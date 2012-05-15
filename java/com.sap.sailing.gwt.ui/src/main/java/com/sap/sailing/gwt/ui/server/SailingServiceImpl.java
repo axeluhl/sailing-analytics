@@ -35,6 +35,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -423,6 +424,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             List<CompetitorDTO> competitorList = getCompetitorDTOs(regatta.getCompetitors());
             RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), competitorList);
             regattaDTO.races = getRaceDTOs(regatta);
+            BoatClass boatClass = regatta.getBoatClass();
+            if(boatClass != null) {
+                regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
+            }
             if (!regattaDTO.races.isEmpty()) {
                 for (RaceDTO race : regattaDTO.races) {
                     race.setRegatta(regattaDTO);
