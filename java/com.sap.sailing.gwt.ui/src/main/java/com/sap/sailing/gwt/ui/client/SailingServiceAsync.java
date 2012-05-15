@@ -143,7 +143,7 @@ public interface SailingServiceAsync {
      * filled in. The column details are filled for the races whose named are provided in
      * <code>namesOfRacesForWhichToLoadLegDetails</code>.
      * 
-     * @param namesOfRacesForWhichToLoadLegDetails
+     * @param namesOfRaceColumnsForWhichToLoadLegDetails
      *            if <code>null</code>, no {@link LeaderboardEntryDTO#legDetails leg details} will be present in the
      *            result ({@link LeaderboardEntryDTO#legDetails} will be <code>null</code> for all
      *            {@link LeaderboardEntryDTO} objects contained). Otherwise, the {@link LeaderboardEntryDTO#legDetails}
@@ -153,7 +153,7 @@ public interface SailingServiceAsync {
      *            {@link LeaderboardEntryDTO#legDetails} is <code>null</code>.
      */
     void getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRacesForWhichToLoadLegDetails, AsyncCallback<LeaderboardDTO> callback);
+            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, AsyncCallback<LeaderboardDTO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 

@@ -90,7 +90,7 @@ public interface SailingService extends RemoteService {
     public List<String> getLeaderboardNames() throws Exception;
     
     LeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
-            Collection<String> namesOfRacesForWhichToLoadLegDetails)
+            Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails)
             throws NoWindException;
 
     List<LeaderboardDTO> getLeaderboards();
