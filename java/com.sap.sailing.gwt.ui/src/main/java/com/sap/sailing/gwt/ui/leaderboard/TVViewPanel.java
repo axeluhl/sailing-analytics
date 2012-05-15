@@ -102,10 +102,12 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private void updateRaceTimesInfoProvider() {
         boolean providerChanged = false;
         for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-            RaceIdentifier raceIdentifier = race.getRaceIdentifier(fleetName);
-            if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
-                raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
-                providerChanged = true;
+            for (String fleetName : race.getFleetNames()) {
+                RaceIdentifier raceIdentifier = race.getRaceIdentifier(fleetName);
+                if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
+                    raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
+                    providerChanged = true;
+                }
             }
         }
         if (providerChanged) {
@@ -221,12 +223,15 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         RegattaAndRaceIdentifier firstStartedAndUnfinishedRace = null;
         Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
         for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-            RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleetName);
-            RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
-            if (raceIdentifier != null && raceTimes != null && raceTimes.startOfTracking != null
-                    && raceTimes.endOfRace == null) {
-                firstStartedAndUnfinishedRace = raceIdentifier;
-                break;
+            for (String fleetName : race.getFleetNames()) {
+                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleetName);
+                if (raceIdentifier != null) {
+                    RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
+                    if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.endOfRace == null) {
+                        firstStartedAndUnfinishedRace = raceIdentifier;
+                        break;
+                    }
+                }
             }
         }
         return firstStartedAndUnfinishedRace;

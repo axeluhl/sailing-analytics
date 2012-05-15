@@ -1036,8 +1036,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private RaceInLeaderboardDTO getRaceByName(String raceName) {
         if (getLeaderboard() != null) {
             for (RaceInLeaderboardDTO race : getLeaderboard().getRaceList()) {
-                if (race.getRaceIdentifier(fleetName) != null && raceName.equals(race.getRaceIdentifier(fleetName).getRaceName())) {
-                    return race;
+                for (String fleetName : race.getFleetNames()) {
+                    if (race.getRaceIdentifier(fleetName) != null
+                            && raceName.equals(race.getRaceIdentifier(fleetName).getRaceName())) {
+                        return race;
+                    }
                 }
             }
         }
@@ -1058,9 +1061,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private RaceColumn<?> getRaceColumnByRaceName(String raceName) {
         for (int i=0; i<getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
-            if (column instanceof RaceColumn<?>
-                    && ((RaceColumn<?>) column).getRace().getRaceIdentifier(fleetName).getRaceName().equals(raceName)) {
-                return (RaceColumn<?>) column;
+            if (column instanceof RaceColumn<?>) {
+                RaceInLeaderboardDTO raceInLeaderboard = ((RaceColumn<?>) column).getRace();
+                for (String fleetName : raceInLeaderboard.getFleetNames()) {
+                    final RegattaAndRaceIdentifier raceIdentifier = raceInLeaderboard.getRaceIdentifier(fleetName);
+                    if (raceIdentifier != null && raceIdentifier.getRaceName().equals(raceName)) {
+                        return (RaceColumn<?>) column;
+                    }
+                }
             }
         }
         return null;
@@ -1288,7 +1296,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         if (preSelectedRace != null) {
             for (Iterator<RaceInLeaderboardDTO> i=columnsToAddImplicitly.iterator(); i.hasNext(); ) {
                 RaceInLeaderboardDTO next = i.next();
-                if (!preSelectedRace.equals(next.getRaceIdentifier(fleetName))) {
+                if (!next.containsRace(preSelectedRace)) {
                     i.remove();
                 }
             }
@@ -1386,7 +1394,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void correctColumnData(RaceColumn<?> raceColumn) {
         RaceInLeaderboardDTO race = raceColumn.getRace();
         int columnIndex = getRaceColumnPosition(raceColumn);
-        if (raceColumn.isExpansionEnabled() != race.isTrackedRace(fleetName)
+        if (raceColumn.isExpansionEnabled() != race.hasTrackedRaces()
                 || race.isMedalRace() != raceColumn.isMedalRace()) {
             if (raceColumn.isExpanded()) {
                 raceColumn.toggleExpansion(); // remove children from table
@@ -1531,7 +1539,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     protected RaceColumn<?> createRaceColumn(RaceInLeaderboardDTO raceInLeaderboard) {
-        TextRaceColumn textRaceColumn = new TextRaceColumn(raceInLeaderboard, raceInLeaderboard.isTrackedRace(fleetName), RACE_COLUMN_HEADER_STYLE,
+        TextRaceColumn textRaceColumn = new TextRaceColumn(raceInLeaderboard, raceInLeaderboard.hasTrackedRaces(), RACE_COLUMN_HEADER_STYLE,
                 RACE_COLUMN_STYLE);
         return textRaceColumn;
     }
@@ -1694,8 +1702,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private List<RegattaAndRaceIdentifier> getTrackedRacesIdentifiers() {
         List<RegattaAndRaceIdentifier> result = new ArrayList<RegattaAndRaceIdentifier>();
         for (RaceInLeaderboardDTO raceColumn : getLeaderboard().getRaceList()) {
-            if (raceColumn.getRaceIdentifier(fleetName) != null) {
-                result.add(raceColumn.getRaceIdentifier(fleetName));
+            for (String fleetName : raceColumn.getFleetNames()) {
+                if (raceColumn.getRaceIdentifier(fleetName) != null) {
+                    result.add(raceColumn.getRaceIdentifier(fleetName));
+                }
             }
         }
         return result;

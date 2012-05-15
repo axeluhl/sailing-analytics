@@ -3,9 +3,12 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public class RaceInLeaderboardDTO implements IsSerializable {
@@ -165,6 +168,16 @@ public class RaceInLeaderboardDTO implements IsSerializable {
         } else if (!trackedRaceIdentifiersPerFleet.equals(other.trackedRaceIdentifiersPerFleet))
             return false;
         return true;
+    }
+
+    public boolean containsRace(RaceIdentifier preSelectedRace) {
+        return trackedRaceIdentifiersPerFleet.values().contains(preSelectedRace);
+    }
+
+    public boolean hasTrackedRaces() {
+        Set<RegattaAndRaceIdentifier> raceIdentifiers = new HashSet<RegattaAndRaceIdentifier>(trackedRaceIdentifiersPerFleet.values());
+        raceIdentifiers.remove(null);
+        return !raceIdentifiers.isEmpty();
     }
 
 }
