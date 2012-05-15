@@ -6,14 +6,14 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class RaceInLeaderboardImpl implements RaceColumn {
+public class RaceColumnImpl implements RaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
     private TrackedRace trackedRace;
     private boolean medalRace;
     private String name;
     private RaceIdentifier raceIdentifier;
     
-    public RaceInLeaderboardImpl(String name, boolean medalRace) {
+    public RaceColumnImpl(String name, boolean medalRace) {
         this.name = name;
         this.medalRace = medalRace;
     }
