@@ -45,7 +45,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private RadioButton summaryButton;
     private RadioButton replayButton;
     private RadioButton windDisplayButton;
-
+    private TimePanel<TimePanelSettings> timePanel;
+    
     private WindControlParameters wControls;
 
     private ListBox patternSelector;
@@ -275,13 +276,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     //TODO Get the right dates and times
     private void addTimePanel(Panel parentPanel) {
         Timer timer = new Timer(PlayModes.Replay, 1000l);
-        TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
+        timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
         Date now = new Date();
         
         logger.info("Now " + now);
         Date maxTime = new Date(now.getTime()+100000);
         logger.info("MaxTime " + maxTime);
         timePanel.setMinMax(now, maxTime, false);
+        timePanel.setVisible(false);
         rightPanel.add(timePanel);
     }
     
@@ -328,6 +330,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
+                timePanel.setVisible(false);
                 simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, wControls);
             }
 
@@ -339,6 +342,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
+                timePanel.setVisible(true);
                 simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls);
             }
 
@@ -350,7 +354,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
-
+                timePanel.setVisible(true);
                 simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls);
             }
 
