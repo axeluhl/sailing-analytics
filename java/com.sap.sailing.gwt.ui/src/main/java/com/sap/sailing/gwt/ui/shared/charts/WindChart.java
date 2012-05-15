@@ -30,7 +30,6 @@ import org.moxieapps.gwt.highcharts.client.labels.YAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -39,34 +38,27 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RaceTimesCalculationUtil;
-import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sailing.gwt.ui.client.TimeZoomProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
-import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
-public class WindChart extends SimpleChartPanel implements Component<WindChartSettings>, RaceSelectionChangeListener, 
-    RaceTimesInfoProviderListener, TimeListener, RequiresResize {
+public class WindChart extends RaceChart implements Component<WindChartSettings>, RequiresResize {
     public static final long DEFAULT_RESOLUTION_IN_MILLISECONDS = 10000;
 
     private static final int LINE_WIDTH = 1;
-    private final StringMessages stringMessages;
     private final Set<WindSourceType> windSourceTypesToDisplay;
     private long resolutionInMilliseconds;
     private boolean showWindSpeedSeries;
@@ -78,26 +70,10 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     private final Map<WindSource, Series> windSourceDirectionSeries;
     private final Map<WindSource, Series> windSourceSpeedSeries;
     
-    private final ErrorReporter errorReporter;
-    private final AsyncActionsExecutor asyncActionsExecutor;
-    private final SailingServiceAsync sailingService;
-    private final Chart chart;
-    private boolean ignoreClickOnce;
-    private final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
-    
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
-    
-    private Date minTimepoint;
-    private Date maxTimepoint;
-    private Date minSelectedTimepoint;
-    private Date maxSelectedTimepoint;
-    
-    private RaceIdentifier selectedRaceIdentifier;
-    private RaceTimesInfoDTO lastRaceTimesInfo;
-    
+        
     private final ColorMap<WindSource> colorMap;
-    private boolean isZoomed = false;
 
     /**
      * @param raceSelectionProvider
@@ -106,13 +82,9 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
      *            server and displayed in this chart. If no race is selected, the chart is cleared.
      */
     public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
-            WindChartSettings settings, final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, boolean compactChart) {
-        super(timer);
-        this.sailingService = sailingService;
-        this.asyncActionsExecutor = asyncActionsExecutor;
-        this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
+            TimeZoomProvider timeZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
+        super(sailingService, timer, timeZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.windSourceDirectionSeries = new HashMap<WindSource, Series>();
         this.windSourceSpeedSeries = new HashMap<WindSource, Series>();
         this.colorMap = new ColorMap<WindSource>();
@@ -160,12 +132,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
             chart.setClickEventHandler(new ChartClickEventHandler() {
                 @Override
                 public boolean onClick(ChartClickEvent chartClickEvent) {
-                    if (ignoreClickOnce) {
-                        ignoreClickOnce = false;
-                    } else {
-                        WindChart.this.timer.setPlayMode(PlayModes.Replay);
-                        WindChart.this.timer.setTime(chartClickEvent.getXAxisValueAsLong());
-                    }
+                    WindChart.this.onClick(chartClickEvent);
                     return true;
                 }
             });
@@ -173,20 +140,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
             chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
                 @Override
                 public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
-                    try {
-                        long xAxisMin = chartSelectionEvent.getXAxisMinAsLong();
-                        long xAxisMax = chartSelectionEvent.getXAxisMaxAsLong();
-                        WindChart.this.minSelectedTimepoint = new Date(xAxisMin);
-                        WindChart.this.maxSelectedTimepoint = new Date(xAxisMax);
-                        WindChart.this.isZoomed = true;
-                        ignoreClickOnce = true;
-                    } catch (Throwable t) {
-                        WindChart.this.minSelectedTimepoint = null;
-                        WindChart.this.maxSelectedTimepoint = null;
-                        WindChart.this.isZoomed = false;
-                        //Redrawing, or the chart wouldn't rezoom
-                        chart.redraw();
-                    }
+                    WindChart.this.onSelectionChange(chartSelectionEvent);
                     return true;
                 }
             });
@@ -222,6 +176,7 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         }
         showVisibleSeries();
         timer.addTimeListener(this);
+        timeZoomProvider.addTimeZoomChangeListener(this);
     }
 
     @Override
@@ -486,6 +441,8 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
                                 xAxis.setMax(maxTimepoint.getTime());
                                 xAxis.setStartOnTick(false);
                                 xAxis.setEndOnTick(false);
+                                long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / 10;
+                                xAxis.setTickInterval(tickInterval);
                                 
                                 updateStripChartSeries(result, append);
                             } else {
@@ -522,16 +479,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
         }
     }
 
-    @Override
-    public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
-        this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaceIdentifier);
-        
-        Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.caluclateRaceMinMax(timer, this.lastRaceTimesInfo);
-        
-        this.minTimepoint = raceMinMax.getA();
-        this.maxTimepoint = raceMinMax.getB();
-    }
-
     /**
      * If in live mode, fetches what's missing since the last fix and <code>date</code>. If nothing has been loaded yet,
      * loads from the beginning up to <code>date</code>. If in replay mode, checks if anything has been loaded at all. If not,
@@ -564,18 +511,6 @@ public class WindChart extends SimpleChartPanel implements Component<WindChartSe
     
     private boolean needsDataLoading() {
         return isVisible();
-    }
-
-    public Date getMinSelectedTimepoint() {
-        return minSelectedTimepoint;
-    }
-
-    public Date getMaxSelectedTimepoint() {
-        return maxSelectedTimepoint;
-    }
-
-    public boolean isZoomed() {
-        return isZoomed;
     }
 
 }

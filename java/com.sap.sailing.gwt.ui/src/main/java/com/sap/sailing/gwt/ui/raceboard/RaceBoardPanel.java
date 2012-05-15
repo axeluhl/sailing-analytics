@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -84,6 +85,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     private final RaceSelectionProvider raceSelectionProvider;
     private final UserAgentTypes userAgentType;
     private final CompetitorSelectionModel competitorSelectionModel;
+    private final TimeZoomModel timeZoomModel; 
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
     private LeaderboardPanel leaderboardPanel;
@@ -122,6 +124,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         setWidget(mainPanel);
 
         this.timer = timer;
+        timeZoomModel = new TimeZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
 
@@ -155,7 +158,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         List<Component<?>> components = new ArrayList<Component<?>>();
 
         competitorChart = new MultiChartPanel(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
-                    timer, stringMessages, errorReporter, true, true);
+                    timer, timeZoomModel, stringMessages, errorReporter, true, true);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);
         competitorChart.setVisible(false);
@@ -233,7 +236,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
 
     private WindChart createWindChart(AsyncActionsExecutor asyncActionsExecutor) {
         WindChartSettings windChartSettings = new WindChartSettings(false, true, new HashSet<WindSourceType>(Arrays.asList(WindSourceType.values())));
-        return new WindChart(sailingService, raceSelectionProvider, timer, windChartSettings,
+        return new WindChart(sailingService, raceSelectionProvider, timer, timeZoomModel, windChartSettings,
                 stringMessages, asyncActionsExecutor, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN);
     }
 
