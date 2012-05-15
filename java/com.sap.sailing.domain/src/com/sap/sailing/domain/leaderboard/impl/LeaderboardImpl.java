@@ -139,8 +139,6 @@ public class LeaderboardImpl implements Named, Leaderboard {
         RaceColumn column = getRaceColumnByName(columnName);
         if (column == null) {
             column = createRaceColumn(columnName, medalRace);
-            column.setTrackedRace(race);
-            column.setRaceIdentifier(race.getRaceIdentifier());
             races.add(column);
         }
         column.setTrackedRace(race);
@@ -265,6 +263,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
         for (RaceColumn raceColumn : getRaceColumns()) {
             for (Competitor competitor : getCompetitors()) {
                 int trackedPoints;
+                // TODO when a column has more than one race, keyed by fleet, find the one for competitor
                 if (raceColumn.getTrackedRace() != null && raceColumn.getTrackedRace().hasStarted(timePoint)) {
                     trackedPoints = raceColumn.getTrackedRace().getRank(competitor, timePoint);
                 } else {
