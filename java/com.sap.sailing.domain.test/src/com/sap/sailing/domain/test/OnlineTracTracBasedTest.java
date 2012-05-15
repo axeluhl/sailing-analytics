@@ -19,7 +19,7 @@ import org.junit.Before;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -27,9 +27,9 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
@@ -52,8 +52,8 @@ import com.tractrac.clientmodule.Race;
  */
 public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     private DomainFactoryImpl domainFactory;
-    private Event domainEvent;
-    private DynamicTrackedEvent trackedEvent;
+    private Regatta domainEvent;
+    private DynamicTrackedRegatta trackedRegatta;
     private RaceDefinition race;
     private DynamicTrackedRace trackedRace;
 
@@ -77,10 +77,10 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         // to select a race
     }
 
-    protected void setUp(String eventName, String raceId, ReceiverType... receiverTypes) throws MalformedURLException,
+    protected void setUp(String regattaName, String raceId, ReceiverType... receiverTypes) throws MalformedURLException,
             IOException, InterruptedException, URISyntaxException {
-        setUpWithoutLaunchingController(eventName, raceId);
-        assertEquals(getExpectedEventName(), getEvent().getName());
+        setUpWithoutLaunchingController(regattaName, raceId);
+        assertEquals(getExpectedEventName(), getTracTracEvent().getName());
         completeSetupLaunchingControllerAndWaitForRaceDefinition(receiverTypes);
     }
 
@@ -89,7 +89,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws InterruptedException {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        for (Receiver r : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), EmptyWindStore.INSTANCE,
+        for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), EmptyWindStore.INSTANCE,
                 /* startOfTracking */ null, /* endOfTracking */ null, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
@@ -98,7 +98,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
-        Race tractracRace = getEvent().getRaceList().iterator().next();
+        Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
         // now we expect that there is no RaceDefinition for the TracTrac race yet:
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
         race = getDomainFactory().getAndWaitForRaceDefinition(tractracRace);
@@ -123,16 +123,16 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     }
 
 
-    protected void setUpWithoutLaunchingController(String eventName, String raceId) throws FileNotFoundException, MalformedURLException,
+    protected void setUpWithoutLaunchingController(String regattaName, String raceId) throws FileNotFoundException, MalformedURLException,
             URISyntaxException {
-        super.setUp(new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+eventName+"/clientparams.php?event="+eventName+"&race="+raceId),
+        super.setUp(new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId),
                 tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
                         tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED));
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
-        domainEvent = domainFactory.getOrCreateEvent(getEvent());
-        trackedEvent = new DynamicTrackedEventImpl(domainEvent);
+        domainEvent = domainFactory.getOrCreateEvent(getTracTracEvent());
+        trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
     }
     
     protected Competitor getCompetitorByName(String nameRegexp) {
@@ -201,12 +201,12 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         return domainFactory;
     }
 
-    protected Event getDomainEvent() {
+    protected Regatta getDomainEvent() {
         return domainEvent;
     }
 
-    protected DynamicTrackedEvent getTrackedEvent() {
-        return trackedEvent;
+    protected DynamicTrackedRegatta getTrackedEvent() {
+        return trackedRegatta;
     }
 
     protected Object getSemaphor() {

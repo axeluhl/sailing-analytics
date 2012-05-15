@@ -19,7 +19,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RacesHandle;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -61,12 +61,12 @@ public class RaceTrackerTest {
     
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
-        service.stopTracking(raceHandle.getEvent());
+        service.stopTracking(raceHandle.getRegatta());
     }
 
-    private TrackedRace getTrackedRace(TrackedEvent trackedEvent) throws InterruptedException {
+    private TrackedRace getTrackedRace(TrackedRegatta trackedRegatta) throws InterruptedException {
         final TrackedRace[] trackedRaces = new TrackedRace[1];
-        trackedEvent.addRaceListener(new RaceListener() {
+        trackedRegatta.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
                 synchronized (trackedRaces) {
@@ -96,12 +96,12 @@ public class RaceTrackerTest {
     
     @Test
     public void testStopTracking() throws Exception {
-        TrackedEvent oldTrackedEvent = raceHandle.getTrackedEvent();
+        TrackedRegatta oldTrackedEvent = raceHandle.getTrackedEvent();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
         RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
-        service.removeEvent(raceHandle.getEvent());
+        service.removeEvent(raceHandle.getRegatta());
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
-        TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
+        TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedEvent();
         assertNotSame(oldTrackedEvent, newTrackedEvent);
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
@@ -109,28 +109,28 @@ public class RaceTrackerTest {
             assertNotSame(oldTrackedRace, newTrackedRace);
             assertNotSame(oldRaceDefinition, newTrackedRace.getRace());
         } finally {
-            service.stopTracking(myRaceHandle.getEvent());
+            service.stopTracking(myRaceHandle.getRegatta());
         }
     }
 
     /**
      * This test asserts that tracking the same race twice doesn't create another tracker and in particular no
-     * new tracked event / tracked race.
+     * new tracked regatta / tracked race.
      * @throws Exception 
      */
     @Test
     public void testTrackingSameRaceWithoutStopping() throws Exception {
-        TrackedEvent oldTrackedEvent = raceHandle.getTrackedEvent();
-        TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
+        TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedEvent();
+        TrackedRace oldTrackedRace = getTrackedRace(oldTrackedRegatta);
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
-        TrackedEvent newTrackedEvent = myRaceHandle.getTrackedEvent();
+        TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedEvent();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
         try {
             assertSame(oldTrackedRace, newTrackedRace);
             assertSame(raceHandle.getRaceTracker(), myRaceHandle.getRaceTracker());
         } finally {
-            service.stopTracking(myRaceHandle.getEvent());
+            service.stopTracking(myRaceHandle.getRegatta());
         }
     }
 }

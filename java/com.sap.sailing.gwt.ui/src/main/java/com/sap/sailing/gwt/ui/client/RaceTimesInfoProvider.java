@@ -11,7 +11,7 @@ import java.util.Set;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
@@ -30,7 +30,7 @@ public class RaceTimesInfoProvider {
     /**
      * The <code>raceIdentifiers</code> has to be <code>not-null</code>, but can be empty.
      */
-    public RaceTimesInfoProvider(SailingServiceAsync sailingService, ErrorReporter errorReporter, Collection<EventAndRaceIdentifier> raceIdentifiers, long requestInterval) {
+    public RaceTimesInfoProvider(SailingServiceAsync sailingService, ErrorReporter errorReporter, Collection<RegattaAndRaceIdentifier> raceIdentifiers, long requestInterval) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.raceIdentifiers = new HashSet<RaceIdentifier>(raceIdentifiers);

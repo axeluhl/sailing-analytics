@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoWindStore;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -48,26 +48,26 @@ public class MongoWindStoreImpl extends EmptyWindStore implements MongoWindStore
      * additions to the wind track will be written to the MongoDB.
      */
     @Override
-    public WindTrack getWindTrack(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource,
+    public WindTrack getWindTrack(TrackedRegatta trackedRegatta, TrackedRace trackedRace, WindSource windSource,
             long millisecondsOverWhichToAverage, long delayForWindEstimationCacheInvalidation) {
         WindTrack result;
         if (windSource.canBeStored()) {
-            result = domainObjectFactory.loadWindTrack(trackedEvent.getEvent(), trackedRace.getRace(), windSource,
+            result = domainObjectFactory.loadWindTrack(trackedRegatta.getRegatta(), trackedRace.getRace(), windSource,
                     millisecondsOverWhichToAverage);
-            result.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, mongoObjectFactory, db));
+            result.addListener(new MongoWindListener(trackedRegatta, trackedRace, windSource, mongoObjectFactory, db));
         } else {
-            result = super.getWindTrack(trackedEvent, trackedRace, windSource, millisecondsOverWhichToAverage, delayForWindEstimationCacheInvalidation);
+            result = super.getWindTrack(trackedRegatta, trackedRace, windSource, millisecondsOverWhichToAverage, delayForWindEstimationCacheInvalidation);
         }
         return result;
     }
 
     @Override
-    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(TrackedEvent trackedEvent,
+    public Map<? extends WindSource, ? extends WindTrack> loadWindTracks(TrackedRegatta trackedRegatta,
             TrackedRace trackedRace, long millisecondsOverWhichToAverageWind) {
         Map<? extends WindSource, ? extends WindTrack> result = domainObjectFactory.loadWindTracks(
-                trackedEvent.getEvent(), trackedRace.getRace(), millisecondsOverWhichToAverageWind);
+                trackedRegatta.getRegatta(), trackedRace.getRace(), millisecondsOverWhichToAverageWind);
         for (Entry<? extends WindSource, ? extends WindTrack> e : result.entrySet()) {
-            e.getValue().addListener(new MongoWindListener(trackedEvent, trackedRace, e.getKey(), mongoObjectFactory, db));
+            e.getValue().addListener(new MongoWindListener(trackedRegatta, trackedRace, e.getKey(), mongoObjectFactory, db));
         }
         return result;
     }

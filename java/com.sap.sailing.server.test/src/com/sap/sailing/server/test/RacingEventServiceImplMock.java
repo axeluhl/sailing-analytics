@@ -3,7 +3,7 @@ package com.sap.sailing.server.test;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
@@ -13,19 +13,19 @@ public class RacingEventServiceImplMock extends RacingEventServiceImpl {
         super();
     }
 
-    public Map<String, Event> getEventsByNameMap() {
-        return eventsByName;
+    public Map<String, Regatta> getEventsByNameMap() {
+        return regattasByName;
     }
 
-    public Map<Event, Set<RaceTracker>> getRaceTrackersByEventMap() {
-        return raceTrackersByEvent;
+    public Map<Regatta, Set<RaceTracker>> getRaceTrackersByEventMap() {
+        return raceTrackersByRegatta;
     }
 
     public Map<Object, RaceTracker> getRaceTrackersByIDMap() {
         return raceTrackersByID;
     }
 
-    public Map<String, Event> getEventsByName() {
-        return eventsByName;
+    public Map<String, Regatta> getEventsByName() {
+        return regattasByName;
     }
 }

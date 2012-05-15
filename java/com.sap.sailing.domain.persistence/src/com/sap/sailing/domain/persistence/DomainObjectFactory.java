@@ -3,7 +3,7 @@ package com.sap.sailing.domain.persistence;
 import java.util.Map;
 
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
@@ -18,7 +18,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
  *
  */
 public interface DomainObjectFactory {
-    WindTrack loadWindTrack(Event event, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
+    WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 
     Leaderboard loadLeaderboard(String name);
 
@@ -41,7 +41,7 @@ public interface DomainObjectFactory {
      */
     Iterable<Leaderboard> getLeaderboardsNotInGroup();
 
-    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Event event, RaceDefinition race,
+    Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
             long millisecondsOverWhichToAverageWind);
 
 }

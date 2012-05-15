@@ -6,7 +6,7 @@ import java.text.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingFactoryImpl;
-import com.sap.sailing.domain.tracking.TrackedEventRegistry;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public interface SwissTimingFactory {
@@ -49,7 +49,7 @@ public interface SwissTimingFactory {
 
     SwissTimingConfiguration createSwissTimingConfiguration(String name, String hostname, int port, boolean canSendRequests);
 
-    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedEventRegistry trackedEventRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
+    SwissTimingRaceTracker createRaceTracker(String raceID, String hostname, int port, boolean canSendRequests, WindStore windStore, RaceSpecificMessageLoader messageLoader, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) throws InterruptedException, UnknownHostException, IOException, ParseException;
 
     Race createRace(String raceId, String description, TimePoint startTime);
 

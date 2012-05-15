@@ -8,8 +8,8 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
-import com.sap.sailing.domain.common.EventIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -18,7 +18,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -44,7 +44,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 public interface SailingService extends RemoteService {
     List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception;
     
-    List<EventDTO> listEvents();
+    List<RegattaDTO> listEvents();
 
     Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
 
@@ -52,11 +52,11 @@ public interface SailingService extends RemoteService {
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception;
 
-    void stopTrackingEvent(EventIdentifier eventIdentifier) throws Exception;
+    void stopTrackingEvent(RegattaIdentifier eventIdentifier) throws Exception;
 
-    void stopTrackingRace(EventAndRaceIdentifier eventAndRaceIdentifier) throws Exception;
+    void stopTrackingRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) throws Exception;
     
-    void removeAndUntrackRace(EventAndRaceIdentifier eventAndRaceidentifier) throws Exception;
+    void removeAndUntrackRace(RegattaAndRaceIdentifier regattaAndRaceidentifier) throws Exception;
 
     WindInfoForRaceDTO getWindInfo(RaceIdentifier raceIdentifier, Date from, Date to, WindSource[] windSources);
 
@@ -95,7 +95,7 @@ public interface SailingService extends RemoteService {
 
     List<LeaderboardDTO> getLeaderboards();
     
-    List<LeaderboardDTO> getLeaderboardsByEvent(EventDTO event);
+    List<LeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
 
@@ -177,9 +177,9 @@ public interface SailingService extends RemoteService {
             Date toDate, long stepSize, DetailType detailType) 
             throws NoWindException;
 
-    void setRaceIsKnownToStartUpwind(EventAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
+    void setRaceIsKnownToStartUpwind(RegattaAndRaceIdentifier raceIdentifier, boolean raceIsKnownToStartUpwind);
 
-    void setWindSourcesToExclude(EventAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
+    void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
     
     ReplicationStateDTO getReplicaInfo();
 

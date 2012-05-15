@@ -1,7 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.server.RacingEventService;
@@ -12,7 +12,7 @@ public class RecordCompetitorGPSFix extends AbstractRaceOperation<Void> {
     private final Competitor competitor;
     private final GPSFixMoving gpsFix;
     
-    public RecordCompetitorGPSFix(EventAndRaceIdentifier raceIdentifier, Competitor competitor, GPSFixMoving gpsFix) {
+    public RecordCompetitorGPSFix(RegattaAndRaceIdentifier raceIdentifier, Competitor competitor, GPSFixMoving gpsFix) {
         super(raceIdentifier);
         this.competitor = competitor;
         this.gpsFix = gpsFix;

@@ -23,7 +23,7 @@ public class RaceRecord {
     private static final String LIVE_URI_PROPERTY = "live-uri";
     private static final String STORED_URI_PROPERTY = "stored-uri";
     
-    private final String eventName;
+    private final String regattaName;
     private final String name;
     private final String replayURL;
     private final String ID;
@@ -34,10 +34,10 @@ public class RaceRecord {
     private final URI liveURI;
     private final URI storedURI;
     
-    public RaceRecord(URL jsonURL, String eventName, String name, String replayURL, String ID,
+    public RaceRecord(URL jsonURL, String regattaName, String name, String replayURL, String ID,
             String trackingstarttime, String trackingendtime, String racestarttime) throws URISyntaxException, IOException {
         super();
-        this.eventName = eventName;
+        this.regattaName = regattaName;
         this.name = name;
         this.replayURL = replayURL;
         this.ID = ID;
@@ -101,7 +101,7 @@ public class RaceRecord {
     }
 
     public String getEventName() {
-        return eventName;
+        return regattaName;
     }
 
     public String getReplayURL() {

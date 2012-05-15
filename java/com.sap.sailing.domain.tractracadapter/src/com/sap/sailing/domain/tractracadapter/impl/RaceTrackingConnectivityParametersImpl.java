@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.TrackedEventRegistry;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 
@@ -36,10 +36,10 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     }
 
     @Override
-    public RaceTracker createRaceTracker(TrackedEventRegistry trackedEventRegistry) throws MalformedURLException,
+    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException,
             FileNotFoundException, URISyntaxException {
         RaceTracker tracker = domainFactory.createRaceTracker(paramURL, liveURI, storedURI, startOfTracking,
-                endOfTracking, windStore, trackedEventRegistry);
+                endOfTracking, windStore, trackedRegattaRegistry);
         return tracker;
     }
 

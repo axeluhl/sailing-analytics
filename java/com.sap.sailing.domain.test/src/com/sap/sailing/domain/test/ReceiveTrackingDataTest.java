@@ -12,10 +12,10 @@ import org.junit.Test;
 
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -23,7 +23,7 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -65,9 +65,9 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             }
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
-        Event event = domainFactory.getOrCreateEvent(getEvent());
-        DynamicTrackedEvent trackedEvent = new DynamicTrackedEventImpl(event);
-        trackedEvent.addRaceListener(new RaceListener() {
+        Regatta regatta = domainFactory.getOrCreateEvent(getTracTracEvent());
+        DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
+        trackedRegatta.addRaceListener(new RaceListener() {
             @Override
             public void raceAdded(TrackedRace trackedRace) {
                 System.out.println("Subscribing raw position listener for race "+trackedRace);
@@ -77,7 +77,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             public void raceRemoved(TrackedRace trackedRace) {
             }
         });
-        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedEvent, getEvent(), /* start of tracking */ null,
+        for (Receiver receiver : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), /* start of tracking */ null,
                 /* end of tracking */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
@@ -87,7 +87,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                 listeners.add(raceListener);
             }
         }
-        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedEvent, getEvent(),
+        addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
                 /* start of tracking */ null, /* end of tracking */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {

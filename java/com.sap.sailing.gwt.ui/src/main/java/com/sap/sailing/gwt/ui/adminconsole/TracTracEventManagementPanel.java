@@ -36,11 +36,11 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 
@@ -65,7 +65,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final TextBox storedURIBox;
     private final IntegerBox livePortIntegerbox;
     private final TextBox hostnameTextbox;
-    private final TextBox eventNameTextbox;
+    private final TextBox regattaNameTextbox;
     private final TextBox filterEventsTextbox;
     private final ListDataProvider<TracTracRaceRecordDTO> raceList;
     private final CellTable<TracTracRaceRecordDTO> raceTable;
@@ -75,8 +75,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final List<TracTracRaceRecordDTO> availableTracTracRaces;
     
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            EventRefresher eventRefresher, StringMessages stringConstants) {
-        super(sailingService, eventRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
+            RegattaRefresher regattaRefresher, StringMessages stringConstants) {
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
         this.errorReporter = errorReporter;
         availableTracTracRaces = new ArrayList<TracTracRaceRecordDTO>();
 
@@ -145,18 +145,18 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         });
         grid.setWidget(3, 1, hostnameTextbox);
         
-        Label lblEventName = new Label(stringConstants.eventName() + ":");
+        Label lblEventName = new Label(stringConstants.regattaName() + ":");
         grid.setWidget(4, 0, lblEventName);
         
-        eventNameTextbox = new TextBox();
-        eventNameTextbox.setText("event_2011...");
-        eventNameTextbox.addKeyUpHandler(new KeyUpHandler() {
+        regattaNameTextbox = new TextBox();
+        regattaNameTextbox.setText("event_2011...");
+        regattaNameTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
                 updateJsonUrl();
             }
         });
-        grid.setWidget(4, 1, eventNameTextbox);
+        grid.setWidget(4, 1, regattaNameTextbox);
         
         Label lblLivePort = new Label(stringConstants.ports() + ":");
         grid.setWidget(5, 0, lblLivePort);
@@ -230,10 +230,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         storedURIBox.setTitle(stringConstants.leaveEmptyForDefault());
         horizontalPanel.add(storedURIBox);
         
-        TextColumn<TracTracRaceRecordDTO> eventNameColumn = new TextColumn<TracTracRaceRecordDTO>() {
+        TextColumn<TracTracRaceRecordDTO> regattaNameColumn = new TextColumn<TracTracRaceRecordDTO>() {
             @Override
             public String getValue(TracTracRaceRecordDTO object) {
-                return object.eventName;
+                return object.regattaName;
             }
         };
         TextColumn<TracTracRaceRecordDTO> raceNameColumn = new TextColumn<TracTracRaceRecordDTO>() {
@@ -300,7 +300,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<TracTracRaceRecordDTO>(/* pageSize */ 200, tableRes);
-        raceTable.addColumn(eventNameColumn, stringConstants.event());
+        raceTable.addColumn(regattaNameColumn, stringConstants.event());
         raceTable.addColumn(raceNameColumn, stringConstants.race());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.startTime());
         raceTable.setWidth("300px");
@@ -378,7 +378,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     private void updateJsonUrl() {
-        jsonURLBox.setValue("http://" + hostnameTextbox.getValue() + "/events/" + eventNameTextbox.getValue()
+        jsonURLBox.setValue("http://" + hostnameTextbox.getValue() + "/events/" + regattaNameTextbox.getValue()
                 + "/jsonservice.php");
     }
 
@@ -464,7 +464,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
 
                     @Override
                     public void onSuccess(Void result) {
-                        eventRefresher.fillEvents();
+                        regattaRefresher.fillRegattas();
                     }
                 });
             }
@@ -476,7 +476,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                 .getItemText(previousConfigurationsComboBox.getSelectedIndex()));
         if (ttConfig != null) {
             hostnameTextbox.setValue("");
-            eventNameTextbox.setValue("");
+            regattaNameTextbox.setValue("");
             livePortIntegerbox.setText("");
             storedPortIntegerbox.setText("");
             jsonURLBox.setValue(ttConfig.jsonURL);
@@ -486,8 +486,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     @Override
-    public void fillEvents(List<EventDTO> result) {
-        trackedRacesListComposite.fillEvents(result);
+    public void fillRegattas(List<RegattaDTO> result) {
+        trackedRacesListComposite.fillRegattas(result);
     }
     
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
@@ -495,7 +495,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         raceList.getList().clear();
         if (text != null && !text.isEmpty()) {
             for (TracTracRaceRecordDTO triple : availableTracTracRaces) {
-                boolean failed = textContainingStringsToCheck(wordsToFilter, triple.eventName, triple.name);
+                boolean failed = textContainingStringsToCheck(wordsToFilter, triple.regattaName, triple.name);
                 if (!failed) {
                     raceList.getList().add(triple);
                 }
