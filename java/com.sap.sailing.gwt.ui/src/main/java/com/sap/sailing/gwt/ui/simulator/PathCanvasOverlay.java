@@ -35,7 +35,11 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
     protected void drawWindField() {
         logger.fine("In PathCanvasOverlay.drawWindField");
         List<WindDTO> windDTOList = wl.getMatrix();
-
+        drawWindField(windDTOList);
+    }
+    
+    protected void drawWindField(final List<WindDTO> windDTOList) {
+            
         if (windDTOList != null && windDTOList.size() > 0) {
             Iterator<WindDTO> windDTOIter = windDTOList.iterator();
             int index = 0;

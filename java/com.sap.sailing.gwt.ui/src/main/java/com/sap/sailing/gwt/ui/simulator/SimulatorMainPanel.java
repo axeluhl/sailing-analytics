@@ -51,13 +51,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private ListBox patternSelector;
     private ListBox boatSelector;
-
+    
+    private final Timer timer;
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     private SimulatorMap simulatorMap;
     private final StringMessages stringMessages;
     private final SimulatorServiceAsync simulatorSvc;
-
+    
     private class WindSpeedCapture implements ValueChangeHandler<Double> {
 
         @Override
@@ -80,6 +81,10 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         wControls = new WindControlParameters(1, 0);
         patternSelector = new ListBox();
         boatSelector = new ListBox();
+        timer = new Timer(PlayModes.Replay, 1000l);
+        timer.setPlaySpeedFactor(30);
+        resetTimer();
+        
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.simulator(), stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         this.addNorth(logoAndTitlePanel, 68);
@@ -258,7 +263,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         initDisplayOptions(mapOptions);
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages);
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages,timer);
 
         // FlowPanel mapPanel = new FlowPanel();
         // mapPanel.setTitle("Map");
@@ -275,16 +280,29 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     
     //TODO Get the right dates and times
     private void addTimePanel(Panel parentPanel) {
-        Timer timer = new Timer(PlayModes.Replay, 1000l);
+        
         timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
-        Date now = new Date();
+        Date now = timer.getTime();
         
         logger.info("Now " + now);
-        Date maxTime = new Date(now.getTime()+100000);
+        Date maxTime = new Date(now.getTime()+10*60*1000);
         logger.info("MaxTime " + maxTime);
         timePanel.setMinMax(now, maxTime, false);
         timePanel.setVisible(false);
         rightPanel.add(timePanel);
+    }
+    
+    private void resetTimer() {
+        Date startDate = new Date(0); 
+        timer.setTime(startDate.getTime());
+      /*  timePanel.reset();
+        Date now = timer.getTime();
+        
+        logger.info("Now " + now);
+        Date maxTime = new Date(now.getTime()+10*60*1000);
+        logger.info("MaxTime " + maxTime);
+        timePanel.setMinMax(now, maxTime, false);*/
+        
     }
     
     private void initUpdateButton() {
@@ -300,6 +318,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     private void update() {
+        resetTimer();
+       
         if (windDisplayButton.getValue()) {
             simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls);
         } else if (summaryButton.getValue()) {
@@ -342,6 +362,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
+                resetTimer();
                 timePanel.setVisible(true);
                 simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls);
             }
@@ -354,6 +375,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
+                resetTimer();
                 timePanel.setVisible(true);
                 simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls);
             }
