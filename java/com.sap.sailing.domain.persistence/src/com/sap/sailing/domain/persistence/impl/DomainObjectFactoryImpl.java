@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -157,10 +158,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
         }
         ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
-        // TODO should this be a FlexibleLeaderboard or a RegattaLeaderboard?
+        // TODO should this be a FlexibleLeaderboard or a RegattaLeaderboard? See bug 636
         LeaderboardImplWithDelayedCarriedPoints result = new LeaderboardImplWithDelayedCarriedPoints(
                 (String) o.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule);
         BasicDBList dbRaceColumns = (BasicDBList) o.get(FieldNames.LEADERBOARD_COLUMNS.name());
+        // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage them here:
+        Map<String, Fleet> fleetsByName = new HashMap<String, Fleet>();
         for (Object dbRaceColumnAsObject : dbRaceColumns) {
             BasicDBObject dbRaceColumn = (BasicDBObject) dbRaceColumnAsObject;
             Map<String, RaceIdentifier> raceIdentifiers = loadRaceIdentifiers(dbRaceColumn);
@@ -176,12 +179,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
             List<Fleet> fleets = new ArrayList<Fleet>();
-            for (String fleetName : )
-            for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
-                
+            for (String fleetName : raceIdentifiers.keySet()) {
+                Fleet fleet = fleetsByName.get(fleetName);
+                if (fleet == null) {
+                    fleet = new FleetImpl(fleetName);
+                    fleetsByName.put(fleetName, fleet);
+                }
+                fleets.add(fleet);
             }
             RaceColumn raceColumn = result.addRaceColumn((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()),
-                    (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
+                    (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()), fleets.toArray(new Fleet[0]));
+            for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
+                raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
+            }
         }
         DBObject carriedPoints = (DBObject) o.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
         if (carriedPoints != null) {

@@ -27,6 +27,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     //Test data.
     private final String LEADERBOARD_NAME = "test";
+    private static final String DEFAULT_FLEET_NAME = "Default";
     private final String COLUMN1_NAME = "r1";
     private final String EVENT_NAME = "Sailing Team Germany (STG)";
     protected static final boolean tractracTunnel = true; // Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
@@ -131,15 +132,15 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                         RaceInLeaderboardDTO race = new RaceInLeaderboardDTO();
                         race.setRaceColumnName(COLUMN1_NAME);
                         race.setMedalRace(false);
-                        race.setRaceIdentifier(fleetName, null);
                         leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(race));
                         linkTrackedRace();
                     }
                 });
     }
     
-    private void linkTrackedRace(){
-        service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, new RegattaNameAndRaceName(EVENT_NAME, TRACKED_RACE),
+    private void linkTrackedRace() {
+        service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, DEFAULT_FLEET_NAME,
+                new RegattaNameAndRaceName(EVENT_NAME, TRACKED_RACE),
                 new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {

@@ -21,6 +21,7 @@ public class TestColumnSwapping {
 
     private LeaderboardDTO lb = null;
     private static final String LEADERBOARDNAME = "test";
+    private static final String DEFAULT_FLEET_NAME = "Default";
     private SailingServiceImpl service;
     private LeaderboardDTO leaderboardOriginalDTO;
     private LeaderboardDTO leaderboardDTO;
@@ -49,9 +50,9 @@ public class TestColumnSwapping {
         try {
             // get Leaderboard with name and current date
             leaderboardOriginalDTO = new LeaderboardDTO();
-            leaderboardOriginalDTO.addRace("Race1", fleetName, true, null, null);
-            leaderboardOriginalDTO.addRace("Race3", fleetName, true, null, null);
-            leaderboardOriginalDTO.addRace("Race2", fleetName, true, null, null);
+            leaderboardOriginalDTO.addRace("Race1", DEFAULT_FLEET_NAME, true, null, null);
+            leaderboardOriginalDTO.addRace("Race3", DEFAULT_FLEET_NAME, true, null, null);
+            leaderboardOriginalDTO.addRace("Race2", DEFAULT_FLEET_NAME, true, null, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -100,9 +101,9 @@ public class TestColumnSwapping {
     public void testLeaderBoardDTOMethods() {
         lb = new LeaderboardDTO();
         assertNotNull("Leaderboard != NULL", lb);
-        lb.addRace("1", fleetName, false, null, null);
-        lb.addRace("2", fleetName, false, null, null);
-        lb.addRace("3", fleetName, true, null, null);
+        lb.addRace("1", DEFAULT_FLEET_NAME, false, null, null);
+        lb.addRace("2", DEFAULT_FLEET_NAME, false, null, null);
+        lb.addRace("3", DEFAULT_FLEET_NAME, true, null, null);
         lb.moveRaceDown("1");
         String[] s = new String[] { "2", "1", "3" };
         for (int i = 0; i < lb.getRaceList().size(); i++)
