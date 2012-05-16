@@ -1216,35 +1216,41 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             RegattaAndRaceIdentifier raceIdentifier = null;
             StrippedRaceDTO race = null;
-            if (raceColumn.getTrackedRace(fleet) != null) {
-                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta().getName(), trackedRace.getRace().getName());
-                if (withAdditionalData) {
-                    // Getting the places of the race
-                    Pair<Placemark, Placemark> startAndFinish = getStartFinishPlacemarksForTrackedRace(trackedRace);
-                    PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
-                    if (startAndFinish.getA() != null) {
-                        racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
+            for (Fleet fleet : raceColumn.getFleets()) {
+                if (raceColumn.getTrackedRace(fleet) != null) {
+                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta().getName(), trackedRace.getRace().getName());
+                    if (withAdditionalData) {
+                        // Getting the places of the race
+                        PlacemarkOrderDTO racePlaces = getRacePlaces(trackedRace);
+                        // Creating raceDTO and getting the dates
+                        race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
+                        race.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
+                        race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
+                        race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                     }
-                    if (startAndFinish.getB() != null) {
-                        racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
-                    }
-                    if (racePlaces.isEmpty()) {
-                        racePlaces = null;
-                    }
-                    // Creating raceDTO and getting the dates
-                    race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
-                    race.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
-                    race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace
-                            .getStartOfTracking().asDate();
-                    race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 }
+                leaderboardDTO.addRace(raceColumn.getName(), fleet.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
             }
-            leaderboardDTO.addRace(raceColumn.getName(), fleetName, raceColumn.isMedalRace(), raceIdentifier, race);
         }
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
         leaderboardDTO.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
         return leaderboardDTO;
+    }
+
+    private PlacemarkOrderDTO getRacePlaces(TrackedRace trackedRace) {
+        Pair<Placemark, Placemark> startAndFinish = getStartFinishPlacemarksForTrackedRace(trackedRace);
+        PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
+        if (startAndFinish.getA() != null) {
+            racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
+        }
+        if (startAndFinish.getB() != null) {
+            racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
+        }
+        if (racePlaces.isEmpty()) {
+            racePlaces = null;
+        }
+        return racePlaces;
     }
     
     private Pair<Placemark, Placemark> getStartFinishPlacemarksForTrackedRace(TrackedRace race) {
