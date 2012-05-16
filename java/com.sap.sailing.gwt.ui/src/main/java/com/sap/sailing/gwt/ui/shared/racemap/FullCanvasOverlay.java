@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.geom.Point;
 
@@ -13,14 +15,15 @@ import com.google.gwt.maps.client.geom.Point;
 public abstract class FullCanvasOverlay extends CanvasOverlay {
 
     /* x coordinate where the widget is placed */
-    protected int widgetPosLeft = 0;
+    private int widgetPosLeft = 0;
     /* y coordinate where the widget is placed */
-    protected int widgetPosTop = 0;
+    private int widgetPosTop = 0;
 
     public String pointColor = "Red";
     
     public String textColor = "Black";
     
+    protected static Logger logger = Logger.getLogger("com.sap.sailing");
     /* Set the canvas to be the size of the map and set it to the top left corner of the map */
     protected void setCanvasSettings() {
         int canvasWidth = getMap().getSize().getWidth();
@@ -33,15 +36,16 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
    
         Point sw = getMap().convertLatLngToDivPixel(getMap().getBounds().getSouthWest());
         Point ne = getMap().convertLatLngToDivPixel(getMap().getBounds().getNorthEast());
-        widgetPosLeft = Math.min(sw.getX(), ne.getX());
-        widgetPosTop = Math.min(sw.getY(), ne.getY());
+        setWidgetPosLeft(Math.min(sw.getX(), ne.getX()));
+        setWidgetPosTop(Math.min(sw.getY(), ne.getY()));
           
-        getPane().setWidgetPosition(getCanvas(), widgetPosLeft, widgetPosTop);
+        getPane().setWidgetPosition(getCanvas(), getWidgetPosLeft(), getWidgetPosTop());
         
     }
     
     @Override
     protected void redraw(boolean force) {
+        logger.info("In FullCanvasOverlay.redraw" + force);
         /*
          * Reset the canvas only if the pixel coordinates need to be recomputed
          */
@@ -134,5 +138,21 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
         context2d.closePath();
         context2d.stroke();
         
+    }
+
+    public int getWidgetPosLeft() {
+        return widgetPosLeft;
+    }
+
+    public void setWidgetPosLeft(int widgetPosLeft) {
+        this.widgetPosLeft = widgetPosLeft;
+    }
+
+    public int getWidgetPosTop() {
+        return widgetPosTop;
+    }
+
+    public void setWidgetPosTop(int widgetPosTop) {
+        this.widgetPosTop = widgetPosTop;
     }
 }
