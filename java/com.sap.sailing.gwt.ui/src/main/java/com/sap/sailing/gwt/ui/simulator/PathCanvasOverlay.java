@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
+import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -76,10 +78,15 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
             int numPoints = windDTOList.size();
             String title = "Path at " + numPoints + " points.";
             long totalTime = windDTOList.get(numPoints-1).timepoint - windDTOList.get(0).timepoint;
+            LatLng start = LatLng.newInstance(windDTOList.get(0).position.latDeg, windDTOList.get(0).position.latDeg);
+            LatLng end = LatLng.newInstance(windDTOList.get(numPoints-1).position.latDeg, windDTOList.get(numPoints-1).position.latDeg);
+            double distance = start.distanceFrom(end)/Mile.METERS_PER_NAUTICAL_MILE;
+            //MeterDistance meterDistance = new MeterDistance(distance);
             Date timeDiffDate = new Date(totalTime);
             TimeZone gmt = TimeZone.createTimeZone(0);
-            title += "\nTime " + DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(timeDiffDate, gmt);
-            
+            title += " " + NumberFormat.getFormat("0.00").format(distance) + " nmi";
+            title += " in " + DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(timeDiffDate, gmt);
+           
             logger.info(title);
             getCanvas().setTitle(title);
         }

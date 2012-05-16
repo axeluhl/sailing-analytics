@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.logging.Logger;
+
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.event.MapClickHandler;
 import com.google.gwt.maps.client.event.MapDoubleClickHandler;
@@ -9,6 +11,7 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.Overlay;
+import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
 
 /**
@@ -174,7 +177,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
             Point e = map.convertLatLngToDivPixel(currentPoint);
             drawLine(s.getX() - widgetPosLeft, s.getY() - widgetPosTop, e.getX() - widgetPosLeft, e.getY()
                     - widgetPosTop, 1, color);
-
+            double distanceInNmi = startPoint.distanceFrom(currentPoint)/Mile.METERS_PER_NAUTICAL_MILE;
+            canvas.setTitle("Distance (nmi)  " + NumberFormat.getFormat("0.00").format(distanceInNmi));
         }
     }
 
