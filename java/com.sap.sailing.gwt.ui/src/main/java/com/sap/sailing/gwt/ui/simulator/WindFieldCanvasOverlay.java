@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
@@ -15,7 +16,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ToolTip;
-import com.sap.sailing.gwt.ui.simulator.util.WindFieldMouseMoveHandler;
+import com.sap.sailing.gwt.ui.simulator.util.WindFieldMapMouseMoveHandler;
 
 /**
  * A google map overlay based on a HTML5 canvas for drawing a wind field. The overlay covers the whole map and displays
@@ -33,7 +34,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
     protected Map<ToolTip, WindDTO> windFieldPoints;
     protected String arrowColor = "Blue";
     protected String arrowHeadColor = "Blue";
-    protected  WindFieldMouseMoveHandler mmHandler;
+    protected  WindFieldMapMouseMoveHandler mmHandler;
     
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
@@ -41,10 +42,11 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         super();
         windFieldPoints = new HashMap<ToolTip, WindDTO>();
       
-         mmHandler = new WindFieldMouseMoveHandler(getCanvas());
+         mmHandler = new WindFieldMapMouseMoveHandler(this);
          
          mmHandler.setWindFieldPoints(windFieldPoints);
-         getCanvas().addMouseMoveHandler(mmHandler);
+        // getCanvas().addMouseMoveHandler(mmHandler);
+         //getMap().addMapMouseMoveHandler(mmHandler);
     }
 
     public void setWindField(WindFieldDTO wl) {
@@ -56,7 +58,18 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         this.arrowHeadColor = arrowHeadColor;
     }
 
+    @Override
+    protected void initialize(MapWidget map) {
+       super.initialize(map);
+       map.addMapMouseMoveHandler(mmHandler);
+    }
 
+    @Override
+    protected void remove() {
+        getMap().removeMapMouseMoveHandler(mmHandler);
+        super.remove();
+    }
+    
     @Override
     protected Overlay copy() {
         return new WindFieldCanvasOverlay();
@@ -75,7 +88,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
     }
 
     private void clear() {
-        canvas.getContext2d().clearRect(widgetPosLeft, widgetPosTop, canvas.getCoordinateSpaceWidth(),
+        canvas.getContext2d().clearRect(getWidgetPosLeft(), getWidgetPosTop(), canvas.getCoordinateSpaceWidth(),
                 canvas.getCoordinateSpaceHeight());
         windFieldPoints.clear();
         mmHandler.clear();
@@ -111,8 +124,8 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay {
         LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
         Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
 
-        int x = canvasPositionInPx.getX() - this.widgetPosLeft;
-        int y = canvasPositionInPx.getY() - this.widgetPosTop;
+        int x = canvasPositionInPx.getX() - this.getWidgetPosLeft();
+        int y = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
         windFieldPoints.put(new ToolTip(x, y), windDTO);
 

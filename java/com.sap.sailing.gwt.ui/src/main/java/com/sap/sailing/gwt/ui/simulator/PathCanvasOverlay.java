@@ -98,14 +98,14 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
         LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
         Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
 
-        int x1 = canvasPositionInPx.getX() - this.widgetPosLeft;
-        int y1 = canvasPositionInPx.getY() - this.widgetPosTop;
+        int x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
+        int y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
         position = p2.position;
         positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
         canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
-        int x2 = canvasPositionInPx.getX() - this.widgetPosLeft;
-        int y2 = canvasPositionInPx.getY() - this.widgetPosTop;
+        int x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
+        int y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
         this.pointColor = pathColor;
         drawPoint(x1, y1);

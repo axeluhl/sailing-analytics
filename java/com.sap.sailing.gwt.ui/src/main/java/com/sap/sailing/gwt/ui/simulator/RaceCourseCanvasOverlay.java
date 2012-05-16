@@ -85,7 +85,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         }
         if (startPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(startPoint);
-            drawPointWithText(point.getX() - widgetPosLeft, point.getY() - widgetPosTop, "Start");
+            drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "Start");
             startMarker = new Marker(startPoint);
             map.addOverlay(startMarker);
 
@@ -99,7 +99,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         }
         if (endPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(endPoint);
-            drawPointWithText(point.getX() - widgetPosLeft, point.getY() - widgetPosTop, "End");
+            drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "End");
             endMarker = new Marker(endPoint);
             map.addOverlay(endMarker);
 
@@ -175,8 +175,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         if (startPoint != null) {
             Point s = map.convertLatLngToDivPixel(startPoint);
             Point e = map.convertLatLngToDivPixel(currentPoint);
-            drawLine(s.getX() - widgetPosLeft, s.getY() - widgetPosTop, e.getX() - widgetPosLeft, e.getY()
-                    - widgetPosTop, 1, color);
+            drawLine(s.getX() - getWidgetPosLeft(), s.getY() - getWidgetPosTop(), e.getX() - getWidgetPosLeft(), e.getY()
+                    - getWidgetPosTop(), 1, color);
             double distanceInNmi = startPoint.distanceFrom(currentPoint)/Mile.METERS_PER_NAUTICAL_MILE;
             canvas.setTitle("Distance (nmi)  " + NumberFormat.getFormat("0.00").format(distanceInNmi));
         }
