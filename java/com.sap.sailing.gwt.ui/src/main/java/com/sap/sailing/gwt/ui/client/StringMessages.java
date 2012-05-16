@@ -239,6 +239,7 @@ public interface StringMessages extends Messages {
     String noLeaderboardGroupWithNameFound(String groupName);
     String overview();
     String welcomeToSailingAnalytics();
+    String welcomeToSailingAnalyticsBody();
     String home();
     String clickAndDragToZoomIn();
     String windSpeed();

@@ -35,6 +35,7 @@ import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -423,17 +424,29 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             @Override
             public SafeHtml getValue(RaceColumnDTO race) {
                 SafeHtml name = null;
-                if (race.getRaceIdentifier(fleetName) != null) {
-                    LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
-                    LeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
-                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleetName);
-                    String debugParam = Window.Location.getParameter("gwt.codesvr");
-                    String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName()
-                            + "&regattaName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
-                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                    name = ANCHORTEMPLATE.anchor(link, raceId.getRaceName());
-                } else {
-                    name = new SafeHtmlBuilder().appendHtmlConstant(race.getRaceColumnName()).toSafeHtml();
+                Iterable<String> fleetNames = race.getFleetNames();
+                boolean singleFleet = Util.size(fleetNames) < 2;
+                for (String fleetName : fleetNames) {
+                    String raceDisplayName;
+                    if (singleFleet) {
+                        raceDisplayName = race.getRaceColumnName();
+                    } else {
+                        raceDisplayName = race.getRaceColumnName() + "("+fleetName+")";
+                    }
+                    if (race.getRaceIdentifier(fleetName) != null) {
+                        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+                        LeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
+                        RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleetName);
+                        String debugParam = Window.Location.getParameter("gwt.codesvr");
+                        String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName="
+                                + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
+                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name
+                                + "&root=overview"
+                                + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                        name = ANCHORTEMPLATE.anchor(link, raceDisplayName);
+                    } else {
+                        name = new SafeHtmlBuilder().appendHtmlConstant(raceDisplayName).toSafeHtml();
+                    }
                 }
                 return name;
             }
@@ -442,9 +455,19 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         TextColumn<RaceColumnDTO> racesStartDateColumn = new TextColumn<RaceColumnDTO>() {
             @Override
             public String getValue(RaceColumnDTO race) {
-                Date raceStart = race.getStartDate(fleetName);
-                return raceStart == null ? LeaderboardGroupOverviewPanel.this.stringMessages.untracked()
-                        : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(raceStart);
+                StringBuilder result = new StringBuilder();
+                boolean first = true;
+                for (String fleetName : race.getFleetNames()) {
+                    Date raceStart = race.getStartDate(fleetName);
+                    if (first) {
+                        first = false;
+                    } else {
+                        result.append(", ");
+                    }
+                    result.append(raceStart == null ? LeaderboardGroupOverviewPanel.this.stringMessages.untracked()
+                            : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(raceStart));
+                }
+                return result.toString();
             }
         };
         
