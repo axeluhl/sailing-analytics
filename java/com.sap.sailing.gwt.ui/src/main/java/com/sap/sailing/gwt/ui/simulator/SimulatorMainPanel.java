@@ -7,7 +7,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
@@ -23,6 +22,7 @@ import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -58,6 +58,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private SimulatorMap simulatorMap;
     private final StringMessages stringMessages;
     private final SimulatorServiceAsync simulatorSvc;
+    private final ErrorReporter errorReporter;
     
     private class WindSpeedCapture implements ValueChangeHandler<Double> {
 
@@ -70,12 +71,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     }
 
-    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages) {
-        // splitPanel = new SplitLayoutPanel();
+    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter) {
+        
         super();
-
-        this.stringMessages = stringMessages;
+        
         this.simulatorSvc = svc;
+        this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
+        
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
         wControls = new WindControlParameters(1, 0);
@@ -151,8 +154,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onFailure(Throwable message) {
-                Window.alert("Failed to initialize wind patterns\n" + message);
-
+                errorReporter.reportError("Failed to initialize wind patterns\n" + message.getMessage());
             }
 
             @Override
@@ -230,8 +232,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onFailure(Throwable message) {
-                Window.alert("Failed to initialize boat classes\n" + message);
-
+                errorReporter.reportError("Failed to initialize boat classes\n" + message.getMessage());
             }
 
             @Override
@@ -266,7 +267,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         initDisplayOptions(mapOptions);
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages,timer);
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, timer);
 
         // FlowPanel mapPanel = new FlowPanel();
         // mapPanel.setTitle("Map");

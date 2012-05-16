@@ -13,11 +13,11 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
@@ -36,8 +36,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     private final SimulatorServiceAsync simulatorSvc;
     private final StringMessages stringMessages;
+    private final ErrorReporter errorReporter;
     private final Timer timer;
-    
+
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     private final int xRes = 5;
@@ -47,11 +48,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         SUMMARY, REPLAY, WINDDISPLAY
     }
 
-    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, Timer timer) {
+    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
+            Timer timer) {
         this.simulatorSvc = simulatorSvc;
         this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
         this.timer = timer;
-        
+
         dataInitialized = false;
         overlaysInitialized = false;
         windParams = new WindFieldGenParamsDTO();
@@ -59,9 +62,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         pathCanvasOverlay = null;
         replayPathCanvasOverlay = null;
         raceCourseCanvasOverlay = null;
-        
+
         initializeData();
-        //createOverlays();
+        // createOverlays();
     }
 
     private void loadMapsAPI() {
@@ -74,19 +77,19 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         Maps.loadMapsApi("", "2", false, new Runnable() {
             public void run() {
                 mapw = new MapWidget();
-                //mapw.setUI(SimulatorMapOptions.newInstance());
+                // mapw.setUI(SimulatorMapOptions.newInstance());
                 mapw.setZoomLevel(15);
-               // mapw.setSize("100%", "650px");
+                // mapw.setSize("100%", "650px");
                 // mapw.setSize("100%", "80%");
-               
+
                 mapw.addControl(new LargeMapControl3D(), new ControlPosition(ControlAnchor.TOP_RIGHT, /* offsetX */0, /* offsetY */
-                        30));
+                30));
                 mapw.addControl(new MenuMapTypeControl());
                 mapw.addControl(new ScaleControl(), new ControlPosition(ControlAnchor.BOTTOM_RIGHT, /* offsetX */10, /* offsetY */
-                        20));
+                20));
                 // Add the map to the HTML host page
                 mapw.setScrollWheelZoomEnabled(true);
-                //mapw.setContinuousZoom(true);
+                // mapw.setContinuousZoom(true);
                 mapw.setTitle(stringMessages.simulator() + " " + stringMessages.map());
                 PositionDTO kiel = new PositionDTO(54.332700439830454, 10.133256912231445);
 
@@ -94,7 +97,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 mapw.panTo(position);
                 SimulatorMap.this.add(mapw, 0, 0);
                 mapw.setSize("100%", "100%");
-                
+
                 dataInitialized = true;
             }
         });
@@ -103,7 +106,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private void initializeOverlays() {
         raceCourseCanvasOverlay = new RaceCourseCanvasOverlay();
         mapw.addOverlay(raceCourseCanvasOverlay);
-       
+
         windFieldCanvasOverlay = new WindFieldCanvasOverlay();
         // mapw.addOverlay(windFieldCanvasOverlay);
         pathCanvasOverlay = new PathCanvasOverlay();
@@ -129,7 +132,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         simulatorSvc.getWindField(windParams, new AsyncCallback<WindFieldDTO>() {
             @Override
             public void onFailure(Throwable message) {
-                Window.alert("Failed servlet call to SimulatorService\n" + message);
+                errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
             }
 
             @Override
@@ -164,7 +167,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         simulatorSvc.getPaths(windParams, new AsyncCallback<PathDTO[]>() {
             @Override
             public void onFailure(Throwable message) {
-                Window.alert("Failed servlet call to SimulatorService\n" + message);
+                errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
             }
 
             @Override
@@ -208,16 +211,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         pathCanvasOverlay.displayWindAlongPath = true;
         mapw.addOverlay(pathCanvasOverlay);
         generatePath(wControls, true);
-        //pathCanvasOverlay.redraw(true);
+        // pathCanvasOverlay.redraw(true);
     }
 
     private void refreshReplayView(WindControlParameters wControls) {
         mapw.removeOverlay(pathCanvasOverlay);
-        mapw.addOverlay(windFieldCanvasOverlay);     
+        mapw.addOverlay(windFieldCanvasOverlay);
         replayPathCanvasOverlay.displayWindAlongPath = false;
         mapw.addOverlay(replayPathCanvasOverlay);
         generateWindField(wControls);
-        generatePath(wControls,false);
+        generatePath(wControls, false);
     }
 
     private void refreshWindDisplayView(WindControlParameters wControls) {
@@ -248,7 +251,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 break;
             }
         } else {
-            Window.alert("No course set, please initialize the course with Start-End Input");
+            Window.alert("No course set, please initialize the course with Start-End input");
         }
     }
 

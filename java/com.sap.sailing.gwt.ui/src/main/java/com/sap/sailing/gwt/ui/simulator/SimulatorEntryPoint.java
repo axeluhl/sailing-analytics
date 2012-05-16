@@ -20,7 +20,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private void createUi() {
         //initMap();
 
-        SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc,stringMessages);
+        SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc,stringMessages, this);
         RootLayoutPanel.get().add(mainPanel);
     }
 
