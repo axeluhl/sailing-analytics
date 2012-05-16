@@ -84,11 +84,13 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public void moveRaceColumnUp(String name) {
         RaceColumn race = null;
         for (RaceColumn r : races) {
-            if (r.getName().equals(name))
+            if (r.getName().equals(name)) {
                 race = r;
+            }
         }
-        if (race == null)
+        if (race == null) {
             return;
+        }
         int index = 0;
         index = races.lastIndexOf(race);
         index--;
@@ -102,15 +104,18 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public void moveRaceColumnDown(String name) {
         RaceColumn race = null;
         for (RaceColumn r : races) {
-            if (r.getName().equals(name))
+            if (r.getName().equals(name)) {
                 race = r;
+            }
         }
-        if (race == null)
+        if (race == null) {
             return;
+        }
         int index = 0;
         index = races.lastIndexOf(race);
-        if (index == -1)
+        if (index == -1) {
             return;
+        }
         index++;
         if (index < races.size()) {
             races.remove(race);
