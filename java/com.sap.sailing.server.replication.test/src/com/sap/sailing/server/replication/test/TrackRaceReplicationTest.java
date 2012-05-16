@@ -37,7 +37,7 @@ import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
-import com.sap.sailing.server.operationaltransformation.CreateLeaderboard;
+import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
@@ -113,7 +113,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testReassignmentToLeaderboardReplication() throws Exception {
         final String leaderboardName = "Test Leaderboard";
-        Leaderboard masterLeaderboard = master.apply(new CreateLeaderboard(leaderboardName, new int[0]));
+        Leaderboard masterLeaderboard = master.apply(new CreateFlexibleLeaderboard(leaderboardName, new int[0]));
         final String columnName = "R1";
         RaceColumn masterColumn = master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false));
         final Fleet defaultFleet = masterLeaderboard.getFleet(null);

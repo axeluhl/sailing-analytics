@@ -60,7 +60,6 @@ public class RaceInLeaderboardDTO implements IsSerializable {
     /**
      * Returns an object with data (e.g. start date or places) for the RaceInLeaderboardDTO. Is <code>null</code>, if
      * the method {@link RaceInLeaderboardDTO#isTrackedRace(String)} returns <code>false</code>.
-     * @param fleetName TODO
      * 
      * @return An Object with additional data, or <code>null</code> if the race isn't tracked
      */

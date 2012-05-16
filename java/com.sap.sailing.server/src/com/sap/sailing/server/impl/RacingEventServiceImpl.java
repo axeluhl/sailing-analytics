@@ -175,7 +175,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         courseListeners = new HashMap<RaceDefinition, CourseChangeReplicator>();
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
-        addLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
+        addFlexibleLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
         loadStoredLeaderboardsAndGroups();
     }
     
@@ -198,7 +198,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public Leaderboard addLeaderboard(String name, int[] discardThresholds) {
+    public Leaderboard addFlexibleLeaderboard(String name, int[] discardThresholds) {
         Leaderboard result = new FlexibleLeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 discardThresholds));
         synchronized (leaderboardsByName) {

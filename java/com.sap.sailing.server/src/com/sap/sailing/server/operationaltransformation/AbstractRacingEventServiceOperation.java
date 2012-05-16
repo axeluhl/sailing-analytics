@@ -48,12 +48,12 @@ public abstract class AbstractRacingEventServiceOperation<ResultType> implements
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformAddLeaderboardClientOp(CreateLeaderboard addLeaderboard) {
+    public RacingEventServiceOperation<?> transformAddLeaderboardClientOp(CreateFlexibleLeaderboard addLeaderboard) {
         return addLeaderboard;
     }
 
     @Override
-    public RacingEventServiceOperation<?> transformAddLeaderboardServerOp(CreateLeaderboard addLeaderboard) {
+    public RacingEventServiceOperation<?> transformAddLeaderboardServerOp(CreateFlexibleLeaderboard addLeaderboard) {
         return addLeaderboard;
     }
 
