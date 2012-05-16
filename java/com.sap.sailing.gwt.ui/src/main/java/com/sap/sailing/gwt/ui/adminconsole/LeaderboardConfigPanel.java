@@ -587,7 +587,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
                     @Override
                     public void onSuccess(Map<String, RegattaAndRaceIdentifier> regattaAndRaceNamesPerFleet) {
-                        if (regattaAndRaceNamesPerFleet != null) {
+                        if (regattaAndRaceNamesPerFleet != null && !regattaAndRaceNamesPerFleet.isEmpty()) {
                             selectRaceInList(regattaAndRaceNamesPerFleet.get(selectedFleetName).getRegattaName(),
                                     regattaAndRaceNamesPerFleet.get(selectedFleetName).getRaceName());
                         } else {

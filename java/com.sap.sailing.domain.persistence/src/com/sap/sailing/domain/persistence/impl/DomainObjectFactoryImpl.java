@@ -123,7 +123,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.LEADERBOARD_NAME.name(), name);
             for (DBObject o : leaderboardCollection.find(query)) {
-                result = loadFlexibleLeaderboard(o);
+                result = loadLeaderboard(o);
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
@@ -139,7 +139,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
             for (DBObject o : leaderboardCollection.find()) {
-                result.add(loadFlexibleLeaderboard(o));
+                result.add(loadLeaderboard(o));
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
@@ -149,7 +149,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Leaderboard loadFlexibleLeaderboard(DBObject o) {
+    private Leaderboard loadLeaderboard(DBObject o) {
         SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
         BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) o.get(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name());
         int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
@@ -172,10 +172,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 if (defaultFleet != null) {
                     raceIdentifiers.put(defaultFleet.getName(), defaultFleetRaceIdentifier);
                 } else {
-                    raceIdentifiers.remove(null); // leaderboard has no default fleet; don't know what to do with default RaceIdentifier
+                    // leaderboard has no default fleet; don't know what to do with default RaceIdentifier
                     logger.warning("Discarding RaceIdentifier "+defaultFleetRaceIdentifier+" for default fleet for leaderboard "+result.getName()+
                             " because no default fleet was found in leaderboard");
                 }
+                raceIdentifiers.remove(null);
             }
             List<Fleet> fleets = new ArrayList<Fleet>();
             for (String fleetName : raceIdentifiers.keySet()) {
@@ -299,7 +300,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (Object object : dbLeaderboardIds) {
             ObjectId dbLeaderboardId = (ObjectId) object;
             DBObject dbLeaderboard = leaderboardCollection.findOne(dbLeaderboardId);
-            leaderboards.add(loadFlexibleLeaderboard(dbLeaderboard));
+            leaderboards.add(loadLeaderboard(dbLeaderboard));
         }
         
         return new LeaderboardGroupImpl(name, description, leaderboards);
@@ -315,7 +316,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
                     + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0; }");
             for (DBObject o : leaderboardCollection.find(query)) {
-                result.add(loadFlexibleLeaderboard(o));
+                result.add(loadLeaderboard(o));
             }
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");

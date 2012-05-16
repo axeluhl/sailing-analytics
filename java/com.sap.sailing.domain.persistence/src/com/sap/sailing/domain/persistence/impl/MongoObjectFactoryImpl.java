@@ -103,7 +103,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
             if (raceIdentifier != null) {
                 DBObject raceIdentifierForFleet = new BasicDBObject();
-                storeRaceIdentifier(dbObject, raceIdentifier);
+                storeRaceIdentifier(raceIdentifierForFleet, raceIdentifier);
                 raceIdentifiersPerFleet.put(fleet.getName(), raceIdentifierForFleet);
             }
         }
