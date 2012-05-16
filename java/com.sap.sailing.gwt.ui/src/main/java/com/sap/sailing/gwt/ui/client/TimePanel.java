@@ -88,8 +88,8 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         this.stringMessages = stringMessages;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
-        FlowPanel vp = new FlowPanel();
-        vp.setSize("100%", "100%");
+        FlowPanel fp = new FlowPanel();
+        fp.setSize("100%", "100%");
         
         SimplePanel s = new SimplePanel();
         s.getElement().getStyle().setMarginLeft(55, Unit.PX);
@@ -130,14 +130,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
         });
         
-        vp.add(s);
+        fp.add(s);
         s.add(sliderBar);
 
         FlowPanel controlsPanel = new FlowPanel();
         
         controlsPanel.setStyleName("timePanel-controls");
         controlsPanel.setSize("100%", "25px");
-        vp.add(controlsPanel);
+        fp.add(controlsPanel);
         
         // play button control
         FlowPanel playControlPanel = new FlowPanel();
@@ -267,7 +267,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         settingsAnchor.setStyleName("timePanelSettings");
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
         controlsPanel.add(settingsAnchor);
-        setWidget(vp);
+        setWidget(fp);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
     }
 
