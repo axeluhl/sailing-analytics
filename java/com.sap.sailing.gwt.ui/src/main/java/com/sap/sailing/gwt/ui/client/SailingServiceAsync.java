@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
@@ -159,7 +159,7 @@ public interface SailingServiceAsync {
 
     /**
      * Creates a {@link LeaderboardDTO} for each leaderboard known by the server and fills in the name, race master data
-     * in the form of {@link RaceInLeaderboardDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints
+     * in the form of {@link RaceColumnDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints
      * carried points} and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No
      * data about the points is filled into the result object. No data about the competitor display names is filled in;
      * instead, an empty map is used for {@link LeaderboardDTO#competitorDisplayNames}.

@@ -35,7 +35,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         boolean containsRace = false;
         leaderboardsLoop:
         for (LeaderboardDTO leaderboard : leaderboards) {
-            for (RaceInLeaderboardDTO raceInLeaderboard : leaderboard.getRaceList()) {
+            for (RaceColumnDTO raceInLeaderboard : leaderboard.getRaceList()) {
                 if (raceInLeaderboard.getRaceIdentifier(fleetName) != null && raceInLeaderboard.getRaceIdentifier(fleetName).equals(race)) {
                     containsRace = true;
                     break leaderboardsLoop;

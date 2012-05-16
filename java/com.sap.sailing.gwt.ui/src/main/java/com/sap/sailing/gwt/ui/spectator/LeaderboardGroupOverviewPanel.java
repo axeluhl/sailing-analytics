@@ -43,7 +43,7 @@ import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 
 /**
@@ -85,9 +85,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     private SingleSelectionModel<LeaderboardDTO> leaderboardsSelectionModel;
     
     private FlowPanel leaderboardDetailsPanel;
-    private CellTable<RaceInLeaderboardDTO> racesTable;
-    private NoSelectionModel<RaceInLeaderboardDTO> racesSelectionModel;
-    private ListDataProvider<RaceInLeaderboardDTO> racesDataProvider;
+    private CellTable<RaceColumnDTO> racesTable;
+    private NoSelectionModel<RaceColumnDTO> racesSelectionModel;
+    private ListDataProvider<RaceColumnDTO> racesDataProvider;
     
     private List<LeaderboardGroupDTO> availableGroups;
 
@@ -357,7 +357,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             public String getValue(LeaderboardDTO leaderboard) {
                 StringBuilder sb = new StringBuilder();
                 boolean first = true;
-                for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
+                for (RaceColumnDTO race : leaderboard.getRaceList()) {
                     if (!first) {
                         sb.append(", ");
                     }
@@ -410,18 +410,18 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         leaderboardDetailsLabel.getElement().getStyle().setPadding(5, Unit.PX);
         leaderboardDetailsPanel.add(leaderboardDetailsLabel);
         
-        TextColumn<RaceInLeaderboardDTO> racesLocationColumn = new TextColumn<RaceInLeaderboardDTO>() {
+        TextColumn<RaceColumnDTO> racesLocationColumn = new TextColumn<RaceColumnDTO>() {
             @Override
-            public String getValue(RaceInLeaderboardDTO race) {
+            public String getValue(RaceColumnDTO race) {
                 PlacemarkOrderDTO racePlaces = race.getPlaces();
                 return racePlaces == null ? LeaderboardGroupOverviewPanel.this.stringMessages.locationNotAvailable() : racePlaces.placemarksAsString();
             }
         };
         
         AnchorCell racesNameAnchorCell = new AnchorCell();
-        Column<RaceInLeaderboardDTO, SafeHtml> racesNameColumn = new Column<RaceInLeaderboardDTO, SafeHtml>(racesNameAnchorCell) {
+        Column<RaceColumnDTO, SafeHtml> racesNameColumn = new Column<RaceColumnDTO, SafeHtml>(racesNameAnchorCell) {
             @Override
-            public SafeHtml getValue(RaceInLeaderboardDTO race) {
+            public SafeHtml getValue(RaceColumnDTO race) {
                 SafeHtml name = null;
                 if (race.getRaceIdentifier(fleetName) != null) {
                     LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
@@ -439,18 +439,18 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
         };
         
-        TextColumn<RaceInLeaderboardDTO> racesStartDateColumn = new TextColumn<RaceInLeaderboardDTO>() {
+        TextColumn<RaceColumnDTO> racesStartDateColumn = new TextColumn<RaceColumnDTO>() {
             @Override
-            public String getValue(RaceInLeaderboardDTO race) {
+            public String getValue(RaceColumnDTO race) {
                 Date raceStart = race.getStartDate(fleetName);
                 return raceStart == null ? LeaderboardGroupOverviewPanel.this.stringMessages.untracked()
                         : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(raceStart);
             }
         };
         
-        racesTable = new CellTable<RaceInLeaderboardDTO>(200, tableResources);
+        racesTable = new CellTable<RaceColumnDTO>(200, tableResources);
         racesTable.setWidth("100%");
-        racesSelectionModel = new NoSelectionModel<RaceInLeaderboardDTO>();
+        racesSelectionModel = new NoSelectionModel<RaceColumnDTO>();
         racesTable.setSelectionModel(racesSelectionModel);
         
         racesTable.addColumn(racesLocationColumn, this.stringMessages.location());
@@ -458,7 +458,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         racesTable.addColumn(racesStartDateColumn, this.stringMessages.startDate());
         leaderboardDetailsPanel.add(racesTable);
         
-        racesDataProvider = new ListDataProvider<RaceInLeaderboardDTO>();
+        racesDataProvider = new ListDataProvider<RaceColumnDTO>();
         racesDataProvider.addDataDisplay(racesTable);
         
         return collapsableDetailsPanel;

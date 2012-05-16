@@ -129,7 +129,7 @@ import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -1203,7 +1203,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     /**
      * Creates a {@link LeaderboardDTO} for <code>leaderboard</code> and fills in the name, race master data
-     * in the form of {@link RaceInLeaderboardDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints carried points}
+     * in the form of {@link RaceColumnDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints carried points}
      * and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
      * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
      * is used for {@link LeaderboardDTO#competitorDisplayNames}.<br />
@@ -1219,7 +1219,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             if (raceColumn.getTrackedRace(fleet) != null) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta().getName(), trackedRace.getRace().getName());
-                
                 if (withAdditionalData) {
                     // Getting the places of the race
                     Pair<Placemark, Placemark> startAndFinish = getStartFinishPlacemarksForTrackedRace(trackedRace);
@@ -1233,7 +1232,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     if (racePlaces.isEmpty()) {
                         racePlaces = null;
                     }
-                    //Creating raceDTO and getting the dates
+                    // Creating raceDTO and getting the dates
                     race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
                     race.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                     race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace

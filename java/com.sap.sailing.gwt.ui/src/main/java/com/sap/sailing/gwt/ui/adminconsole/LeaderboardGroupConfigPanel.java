@@ -45,7 +45,7 @@ import com.sap.sailing.gwt.ui.client.URLFactory;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
 
@@ -203,7 +203,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
             public String getValue(LeaderboardDTO leaderboard) {
                 String result = "";
                 boolean first = true;
-                for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
+                for (RaceColumnDTO race : leaderboard.getRaceList()) {
                     if (!first) {
                         result += "; ";
                     }
@@ -308,7 +308,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
             public String getValue(LeaderboardDTO leaderboard) {
                 String result = "";
                 boolean first = true;
-                for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
+                for (RaceColumnDTO race : leaderboard.getRaceList()) {
                     if (!first) {
                         result += "; ";
                     }

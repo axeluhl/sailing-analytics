@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,14 +12,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
-public class RaceInLeaderboardDTO implements IsSerializable {
+public class RaceColumnDTO implements IsSerializable {
     private String raceColumnName;
     private boolean medalRace;
-    private Iterable<String> fleetNames;
+    private List<String> fleetNames;
     private Map<String, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
     private Map<String, StrippedRaceDTO> racesPerFleet;
 
-    public RaceInLeaderboardDTO() {
+    public RaceColumnDTO() {
         trackedRaceIdentifiersPerFleet = new HashMap<String, RegattaAndRaceIdentifier>();
         racesPerFleet = new HashMap<String, StrippedRaceDTO>();
         fleetNames = new ArrayList<String>();
@@ -59,7 +60,7 @@ public class RaceInLeaderboardDTO implements IsSerializable {
 
     /**
      * Returns an object with data (e.g. start date or places) for the RaceInLeaderboardDTO. Is <code>null</code>, if
-     * the method {@link RaceInLeaderboardDTO#isTrackedRace(String)} returns <code>false</code>.
+     * the method {@link RaceColumnDTO#isTrackedRace(String)} returns <code>false</code>.
      * 
      * @return An Object with additional data, or <code>null</code> if the race isn't tracked
      */
@@ -73,10 +74,6 @@ public class RaceInLeaderboardDTO implements IsSerializable {
     
     public Iterable<String> getFleetNames() {
         return fleetNames;
-    }
-    
-    public void setFleetNames(Iterable<String> fleetNames) {
-        this.fleetNames = fleetNames;
     }
     
     /**
@@ -143,7 +140,7 @@ public class RaceInLeaderboardDTO implements IsSerializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        RaceInLeaderboardDTO other = (RaceInLeaderboardDTO) obj;
+        RaceColumnDTO other = (RaceColumnDTO) obj;
         if (fleetNames == null) {
             if (other.fleetNames != null)
                 return false;
@@ -177,6 +174,10 @@ public class RaceInLeaderboardDTO implements IsSerializable {
         Set<RegattaAndRaceIdentifier> raceIdentifiers = new HashSet<RegattaAndRaceIdentifier>(trackedRaceIdentifiersPerFleet.values());
         raceIdentifiers.remove(null);
         return !raceIdentifiers.isEmpty();
+    }
+
+    public void addFleetName(String fleetName) {
+        fleetNames.add(fleetName);
     }
 
 }

@@ -9,27 +9,27 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
-public class RaceInLeaderboardDialog extends DataEntryDialog<RaceInLeaderboardDTO> {
+public class RaceInLeaderboardDialog extends DataEntryDialog<RaceColumnDTO> {
 
     private final TextBox raceNameBox;
     private final CheckBox isMedalRace;
 
-    private RaceInLeaderboardDTO raceInLeaderboard;
+    private RaceColumnDTO raceInLeaderboard;
 
-    private static class RaceDialogValidator implements Validator<RaceInLeaderboardDTO> {
+    private static class RaceDialogValidator implements Validator<RaceColumnDTO> {
 
         private StringMessages stringConstants;
-        private Collection<RaceInLeaderboardDTO> existingRaces;
+        private Collection<RaceColumnDTO> existingRaces;
 
-        public RaceDialogValidator(StringMessages stringConstants, Collection<RaceInLeaderboardDTO> existingRaces) {
+        public RaceDialogValidator(StringMessages stringConstants, Collection<RaceColumnDTO> existingRaces) {
             this.stringConstants = stringConstants;
             this.existingRaces = existingRaces;
         }
 
         @Override
-        public String getErrorMessage(RaceInLeaderboardDTO valueToValidate) {
+        public String getErrorMessage(RaceColumnDTO valueToValidate) {
             String errorMessage;
             String racename = valueToValidate.getRaceColumnName();
             Boolean isMedalRace = valueToValidate.isMedalRace();
@@ -37,7 +37,7 @@ public class RaceInLeaderboardDialog extends DataEntryDialog<RaceInLeaderboardDT
             boolean medalRaceNotNull = isMedalRace != null;
 
             boolean unique = true;
-            for (RaceInLeaderboardDTO dao : existingRaces) {
+            for (RaceColumnDTO dao : existingRaces) {
                 if (dao.getRaceColumnName().equals(valueToValidate.getRaceColumnName())) {
                     unique = false;
                 }
@@ -57,9 +57,9 @@ public class RaceInLeaderboardDialog extends DataEntryDialog<RaceInLeaderboardDT
 
     }
 
-    public RaceInLeaderboardDialog(Collection<RaceInLeaderboardDTO> existingRaces,
-            RaceInLeaderboardDTO raceInLeaderboard, StringMessages stringConstants,
-            AsyncCallback<RaceInLeaderboardDTO> callback) {
+    public RaceInLeaderboardDialog(Collection<RaceColumnDTO> existingRaces,
+            RaceColumnDTO raceInLeaderboard, StringMessages stringConstants,
+            AsyncCallback<RaceColumnDTO> callback) {
         super(stringConstants.name(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(stringConstants, existingRaces), callback);
         this.raceInLeaderboard = raceInLeaderboard;
@@ -69,7 +69,7 @@ public class RaceInLeaderboardDialog extends DataEntryDialog<RaceInLeaderboardDT
     }
 
     @Override
-    protected RaceInLeaderboardDTO getResult() {
+    protected RaceColumnDTO getResult() {
         raceInLeaderboard.setRaceColumnName(raceNameBox.getValue());
         raceInLeaderboard.setMedalRace(isMedalRace.getValue());
         return raceInLeaderboard;
