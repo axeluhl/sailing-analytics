@@ -339,7 +339,8 @@ public class LeaderboardDTO implements IsSerializable {
      * @param fleetName
      *            must not be null
      */
-    public void createRaceColumnAt(String raceColumnName, String fleetName, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, int index) {
+    public void createRaceColumnAt(String raceColumnName, String fleetName, boolean medalRace,
+            RegattaAndRaceIdentifier trackedRaceIdentifier, int index) {
         assert fleetName != null;
         RaceColumnDTO raceInLeaderboardDTO = new RaceColumnDTO();
         raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
@@ -347,6 +348,13 @@ public class LeaderboardDTO implements IsSerializable {
         raceInLeaderboardDTO.addFleetName(fleetName);
         raceInLeaderboardDTO.setRaceIdentifier(fleetName, trackedRaceIdentifier);
         races.add(index, raceInLeaderboardDTO);
+    }
+    
+    public void createEmptyRaceColumn(String raceColumnName, boolean medalRace) {
+        RaceColumnDTO raceInLeaderboardDTO = new RaceColumnDTO();
+        raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
+        raceInLeaderboardDTO.setMedalRace(medalRace);
+        races.add(raceInLeaderboardDTO);
     }
 
     public void removeRace(String raceColumnName) {

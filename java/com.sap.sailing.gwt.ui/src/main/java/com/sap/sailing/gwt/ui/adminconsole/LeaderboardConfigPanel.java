@@ -687,7 +687,6 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         final String leaderboardName = getSelectedLeaderboardName();
         final RaceColumnDialog raceDialog = new RaceColumnDialog(raceColumnAndFleetNameList.getList(),
                 raceInLeaderboard, stringMessages, new AsyncCallback<Pair<RaceColumnDTO, String>>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                     }
@@ -696,7 +695,6 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     public void onSuccess(final Pair<RaceColumnDTO, String> result) {
                         sailingService.addColumnToLeaderboard(result.getA().getRaceColumnName(), leaderboardName,
                                 result.getA().isMedalRace(), new AsyncCallback<Void>() {
-
                                     @Override
                                     public void onFailure(Throwable caught) {
                                         errorReporter.reportError("Error trying to add column "

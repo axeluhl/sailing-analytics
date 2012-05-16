@@ -256,6 +256,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace());
                 for (Fleet fleet : raceColumn.getFleets()) {
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
