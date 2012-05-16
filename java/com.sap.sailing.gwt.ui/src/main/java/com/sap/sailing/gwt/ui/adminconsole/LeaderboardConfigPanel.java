@@ -321,6 +321,12 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 }
             }
         };
+        TextColumn<Pair<RaceColumnDTO, String>> fleetNameColumn = new TextColumn<Pair<RaceColumnDTO, String>>() {
+            @Override
+            public String getValue(Pair<RaceColumnDTO, String> object) {
+                return object.getB();
+            }
+        };
 
         Column<Pair<RaceColumnDTO, String>, Boolean> isMedalRaceCheckboxColumn = new Column<Pair<RaceColumnDTO, String>, Boolean>(
                 new CheckboxCell()) {
@@ -367,6 +373,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
         raceColumnTable = new CellTable<Pair<RaceColumnDTO, String>>(/* pageSize */200, tableRes);
         raceColumnTable.addColumn(raceLinkColumn, stringMessages.name());
+        raceColumnTable.addColumn(fleetNameColumn, stringMessages.fleet());
         raceColumnTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
         raceColumnTable.addColumn(isLinkedRaceColumn, stringMessages.islinked());
         raceColumnTable.addColumn(raceActionColumn, stringMessages.actions());

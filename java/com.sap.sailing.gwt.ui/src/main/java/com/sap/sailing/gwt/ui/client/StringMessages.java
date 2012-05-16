@@ -301,4 +301,5 @@ public interface StringMessages extends Messages {
     String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
     String showWindSpeedSeries();
     String showWindDirectionSeries();
+    String fleet();
 }
