@@ -1,9 +1,13 @@
 package com.sap.sailing.gwt.ui.simulator;
 
+
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -67,9 +71,16 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
                         dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                         drawArrow(windDTONext, dbi.getRadians(), length, width, ++index);
                     }
-                }
+                }   
             }
-            String title = "Path at " + windDTOList.size() + " points.";
+            int numPoints = windDTOList.size();
+            String title = "Path at " + numPoints + " points.";
+            long totalTime = windDTOList.get(numPoints-1).timepoint - windDTOList.get(0).timepoint;
+            Date timeDiffDate = new Date(totalTime);
+            TimeZone gmt = TimeZone.createTimeZone(0);
+            title += "\nTime " + DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(timeDiffDate, gmt);
+            
+            logger.info(title);
             getCanvas().setTitle(title);
         }
     }

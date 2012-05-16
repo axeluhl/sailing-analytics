@@ -83,6 +83,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         boatSelector = new ListBox();
         timer = new Timer(PlayModes.Replay, 1000l);
         timer.setPlaySpeedFactor(30);
+        timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
         resetTimer();
         
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.simulator(), stringMessages);
@@ -93,7 +94,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         createOptionsPanelTop();
         createOptionsPanel();
         createMapOptionsPanel();
-
+        
+        rightPanel.add(timePanel);
+        
         this.addWest(leftPanel, 400);
         // leftPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
         rightPanel.getElement().getStyle().setBackgroundColor("#e0e0e0");
@@ -273,35 +276,24 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         simulatorMap.setSize("100%", "82%");
         rightPanel.add(simulatorMap);
-
-        addTimePanel(rightPanel);
         
     }
+    
+
     
     //TODO Get the right dates and times
-    private void addTimePanel(Panel parentPanel) {
-        
-        timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
-        Date now = timer.getTime();
-        
-        logger.info("Now " + now);
-        Date maxTime = new Date(now.getTime()+10*60*1000);
-        logger.info("MaxTime " + maxTime);
-        timePanel.setMinMax(now, maxTime, false);
-        timePanel.setVisible(false);
-        rightPanel.add(timePanel);
-    }
-    
     private void resetTimer() {
         Date startDate = new Date(0); 
         timer.setTime(startDate.getTime());
-      /*  timePanel.reset();
-        Date now = timer.getTime();
-        
-        logger.info("Now " + now);
-        Date maxTime = new Date(now.getTime()+10*60*1000);
-        logger.info("MaxTime " + maxTime);
-        timePanel.setMinMax(now, maxTime, false);*/
+        if (timePanel != null) {
+            timePanel.reset();
+       
+            Date now = timer.getTime();
+            Date maxTime = new Date(now.getTime()+10*60*1000);
+       
+            timePanel.setMinMax(now, maxTime, false);
+            timePanel.setVisible(false);
+        }
         
     }
     
@@ -321,10 +313,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         resetTimer();
        
         if (windDisplayButton.getValue()) {
+            timePanel.setVisible(true);
             simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls);
         } else if (summaryButton.getValue()) {
+            timePanel.setVisible(false);
             simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, wControls);
         } else if (replayButton.getValue()) {
+            timePanel.setVisible(true);
             simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls);
         }
 
