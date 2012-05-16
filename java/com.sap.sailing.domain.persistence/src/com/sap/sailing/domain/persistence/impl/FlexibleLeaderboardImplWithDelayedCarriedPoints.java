@@ -32,7 +32,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public class LeaderboardImplWithDelayedCarriedPoints extends FlexibleLeaderboardImpl {
+public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLeaderboardImpl {
     private static final long serialVersionUID = -8933075542228571746L;
     private final Map<String, Integer> carriedPointsByCompetitorName;
     private final Map<String, Map<RaceColumn, MaxPointsReason>> maxPointsReasonsByCompetitorName;
@@ -41,14 +41,14 @@ public class LeaderboardImplWithDelayedCarriedPoints extends FlexibleLeaderboard
 
     /**
      * A wrapper for {@link RaceColumn} that, when its {@link #setTrackedRace(Fleet, TrackedRace)} method is called,
-     * additionally calls {@link LeaderboardImplWithDelayedCarriedPoints#assignLeftOvers(TrackedRace)}.
+     * additionally calls {@link FlexibleLeaderboardImplWithDelayedCarriedPoints#assignLeftOvers(TrackedRace)}.
      * 
      * @author Axel Uhl (D043530)
      */
-    private class RaceInLeaderboardForDelayedCarriedPoints extends RaceColumnImpl {
+    private class RaceColumnForDelayedCarriedPoints extends RaceColumnImpl {
         private static final long serialVersionUID = -1243132535406059096L;
 
-        public RaceInLeaderboardForDelayedCarriedPoints(Leaderboard leaderboard, String name, boolean medalRace, Fleet... fleets) {
+        public RaceColumnForDelayedCarriedPoints(Leaderboard leaderboard, String name, boolean medalRace, Fleet... fleets) {
             super(name, medalRace, fleets==null ? Collections.singletonList(defaultFleet) : Arrays.asList(fleets));
         }
 
@@ -61,7 +61,7 @@ public class LeaderboardImplWithDelayedCarriedPoints extends FlexibleLeaderboard
         }
     }
     
-    public LeaderboardImplWithDelayedCarriedPoints(String name, SettableScoreCorrection scoreCorrection,
+    public FlexibleLeaderboardImplWithDelayedCarriedPoints(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(name, scoreCorrection, resultDiscardingRule);
         carriedPointsByCompetitorName = new HashMap<String, Integer>();
@@ -80,7 +80,7 @@ public class LeaderboardImplWithDelayedCarriedPoints extends FlexibleLeaderboard
 
     @Override
     protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace, Fleet... fleets) {
-        return new RaceInLeaderboardForDelayedCarriedPoints(this, columnName, medalRace, fleets);
+        return new RaceColumnForDelayedCarriedPoints(this, columnName, medalRace, fleets);
     }
 
     public void setCarriedPoints(String competitorName, int carriedPoints) {

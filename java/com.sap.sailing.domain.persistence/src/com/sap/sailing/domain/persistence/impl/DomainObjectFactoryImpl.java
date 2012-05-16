@@ -123,7 +123,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.LEADERBOARD_NAME.name(), name);
             for (DBObject o : leaderboardCollection.find(query)) {
-                result = loadLeaderboard(o);
+                result = loadFlexibleLeaderboard(o);
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
@@ -139,7 +139,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
             for (DBObject o : leaderboardCollection.find()) {
-                result.add(loadLeaderboard(o));
+                result.add(loadFlexibleLeaderboard(o));
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
@@ -149,7 +149,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Leaderboard loadLeaderboard(DBObject o) {
+    private Leaderboard loadFlexibleLeaderboard(DBObject o) {
         SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
         BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) o.get(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name());
         int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
@@ -158,8 +158,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
         }
         ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
-        // TODO should this be a FlexibleLeaderboard or a RegattaLeaderboard? See bug 636
-        LeaderboardImplWithDelayedCarriedPoints result = new LeaderboardImplWithDelayedCarriedPoints(
+        FlexibleLeaderboardImplWithDelayedCarriedPoints result = new FlexibleLeaderboardImplWithDelayedCarriedPoints(
                 (String) o.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule);
         BasicDBList dbRaceColumns = (BasicDBList) o.get(FieldNames.LEADERBOARD_COLUMNS.name());
         // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage them here:
@@ -300,7 +299,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (Object object : dbLeaderboardIds) {
             ObjectId dbLeaderboardId = (ObjectId) object;
             DBObject dbLeaderboard = leaderboardCollection.findOne(dbLeaderboardId);
-            leaderboards.add(loadLeaderboard(dbLeaderboard));
+            leaderboards.add(loadFlexibleLeaderboard(dbLeaderboard));
         }
         
         return new LeaderboardGroupImpl(name, description, leaderboards);
@@ -316,7 +315,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
                     + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0; }");
             for (DBObject o : leaderboardCollection.find(query)) {
-                result.add(loadLeaderboard(o));
+                result.add(loadFlexibleLeaderboard(o));
             }
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");

@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
  * @author Axel Uhl (D043530)
  *
  */
-public class RaceInLeaderboardDialog extends DataEntryDialog<Pair<RaceColumnDTO, String>> {
+public class RaceColumnDialog extends DataEntryDialog<Pair<RaceColumnDTO, String>> {
     private final static String DEFAULT_FLEET_NAME = "Default";
     
     private final TextBox raceNameBox;
@@ -66,7 +66,7 @@ public class RaceInLeaderboardDialog extends DataEntryDialog<Pair<RaceColumnDTO,
 
     }
 
-    public RaceInLeaderboardDialog(Collection<Pair<RaceColumnDTO, String>> existingRaces,
+    public RaceColumnDialog(Collection<Pair<RaceColumnDTO, String>> existingRaces,
             RaceColumnDTO raceInLeaderboard, StringMessages stringConstants,
             AsyncCallback<Pair<RaceColumnDTO, String>> callback) {
         super(stringConstants.name(), null, stringConstants.ok(), stringConstants.cancel(),
