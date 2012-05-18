@@ -3,10 +3,14 @@ package com.sap.sailing.gwt.ui.simulator;
 import java.util.logging.Logger;
 
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.maps.client.InfoWindow;
+import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.event.MapClickHandler;
 import com.google.gwt.maps.client.event.MapDoubleClickHandler;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
+import com.google.gwt.maps.client.event.MarkerMouseOutHandler;
+import com.google.gwt.maps.client.event.MarkerMouseOverHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Marker;
@@ -32,7 +36,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
-    class RaceCourseMapMouseMoveHandler implements MapMouseMoveHandler {
+    private class RaceCourseMapMouseMoveHandler implements MapMouseMoveHandler {
 
         @Override
         public void onMouseMove(MapMouseMoveEvent event) {
@@ -46,6 +50,20 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     }
 
+    private class RaceCourseMarkerMouseOverHandler implements MarkerMouseOverHandler {
+
+        @Override
+        public void onMouseOver(MarkerMouseOverEvent event) {
+            Double distanceInNmi = startPoint.distanceFrom(endPoint)/ Mile.METERS_PER_NAUTICAL_MILE;
+            final String sDistance = NumberFormat.getFormat("0.00").format(distanceInNmi);
+            InfoWindowContent content = new InfoWindowContent("Race Target "
+                    + sDistance + " from Start");
+            map.getInfoWindow().open(endMarker, content);
+            
+        }
+        
+    }
+    
     public RaceCourseCanvasOverlay() {
         super();
         startPoint = null;
@@ -80,28 +98,59 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     private void setStartPoint(LatLng startPoint) {
         this.startPoint = startPoint;
-        if (startMarker != null) {
-            map.removeOverlay(startMarker);
-        }
+
         if (startPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(startPoint);
             drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "Start");
-            startMarker = new Marker(startPoint);
-            map.addOverlay(startMarker);
+            if (startMarker != null) {
+                startMarker.setLatLng(startPoint);
+            } else {
+                startMarker = new Marker(startPoint);
+                map.addOverlay(startMarker);
+                /*
+                 * startMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler () {
+                 * 
+                 * @Override public void onMouseOver(MarkerMouseOverEvent event) { InfoWindowContent content = new
+                 * InfoWindowContent("Start"); map.getInfoWindow().open(startMarker, content); }
+                 * 
+                 * });
+                 * 
+                 * startMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler () {
+                 * 
+                 * @Override public void onMouseOut(MarkerMouseOutEvent event) { map.getInfoWindow().close(); }
+                 * 
+                 * });
+                 */
+            }
 
         }
     }
 
     private void setEndPoint(LatLng endPoint) {
         this.endPoint = endPoint;
-        if (endMarker != null) {
-            map.removeOverlay(endMarker);
-        }
+
         if (endPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(endPoint);
             drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "End");
-            endMarker = new Marker(endPoint);
-            map.addOverlay(endMarker);
+           
+            
+            if (endMarker != null) {
+                endMarker.setLatLng(endPoint);
+            } else {
+                endMarker = new Marker(endPoint);
+                map.addOverlay(endMarker);
+                
+                endMarker.addMarkerMouseOverHandler(new RaceCourseMarkerMouseOverHandler());
+
+                endMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
+
+                    @Override
+                    public void onMouseOut(MarkerMouseOutEvent event) {
+                        map.getInfoWindow().close();
+                    }
+
+                });
+            }
 
         }
     }
@@ -154,7 +203,6 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     @Override
     protected void redraw(boolean force) {
-
         if (startPoint != null && endPoint != null) {
             setCanvasSettings();
             // drawCanvas();
@@ -175,9 +223,9 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         if (startPoint != null) {
             Point s = map.convertLatLngToDivPixel(startPoint);
             Point e = map.convertLatLngToDivPixel(currentPoint);
-            drawLine(s.getX() - getWidgetPosLeft(), s.getY() - getWidgetPosTop(), e.getX() - getWidgetPosLeft(), e.getY()
-                    - getWidgetPosTop(), 1, color);
-            double distanceInNmi = startPoint.distanceFrom(currentPoint)/Mile.METERS_PER_NAUTICAL_MILE;
+            drawLine(s.getX() - getWidgetPosLeft(), s.getY() - getWidgetPosTop(), e.getX() - getWidgetPosLeft(),
+                    e.getY() - getWidgetPosTop(), 1, color);
+            double distanceInNmi = startPoint.distanceFrom(currentPoint) / Mile.METERS_PER_NAUTICAL_MILE;
             canvas.setTitle("Distance (nmi)  " + NumberFormat.getFormat("0.00").format(distanceInNmi));
         }
     }
