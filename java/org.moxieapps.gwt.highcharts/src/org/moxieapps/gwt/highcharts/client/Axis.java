@@ -16,6 +16,8 @@
 
 package org.moxieapps.gwt.highcharts.client;
 
+import org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEventHandler;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.json.client.JSONObject;
@@ -45,6 +47,12 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
          * Default axis type showing the values in a linear structure.
          */
         LINEAR("linear"),
+
+        /**
+         * Scale the axis tick values logarithmically instead of linearly.
+         * @since 1.2.0
+         */
+        LOGARITHMIC("logarithmic"),
 
         /**
          * In a datetime axis, the numbers are given in milliseconds, and tick
@@ -124,6 +132,8 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
     // The unique id for this axis, that we can use to access the native axis instance later if changes
     // come into the axis after it is rendered
     private String id;
+    
+    private AxisSetExtremesEventHandler axisSetExtremesEventHandler;
 
     /**
      * Use the {@link Chart#getXAxis()} or {@link Chart#getYAxis()} methods to get access
@@ -135,6 +145,36 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
         this.chart = chart;
         id = Document.get().createUniqueId();
         setOption("id", id);
+    }
+    
+    /**
+     * Set a callback handler that will be invoked whenever the minimum and maximum is set for the axis, either by calling the 
+     * {@link #setExtremes(Number, Number)} method or by selecting an area in the chart.
+     * 
+     * Additional information about the new extremes value (such as the new minimum and maximum) can be
+     * found via the {@link org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent} instance
+     * that is passed to the handler's {@link org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEventHandler#onSetExtremes(org.moxieapps.gwt.highcharts.client.events.AxisSetExtremesEvent)} method.
+     *
+     * @param axisSetExtremesEventHandler The handler that should be invoked whenever a set extremes event occurs.
+     * @return A reference to this {@link Axis} instance for convenient method chaining.
+     *
+     * @since 1.3.0
+     */
+    public T setAxisSetExtremesEventHandler(AxisSetExtremesEventHandler axisSetExtremesEventHandler) {
+        this.axisSetExtremesEventHandler = axisSetExtremesEventHandler;
+        return getThis();
+    }
+
+    /**
+     * Returns the custom event handler that has been set on the axis, or null if no event
+     * handler has been set.
+     *
+     * @return The custom event handler that has been applied, or null if it has not been set.
+     *
+     * @since 1.3.0
+     */
+    public AxisSetExtremesEventHandler getAxisSetExtremesEventHandler() {
+        return this.axisSetExtremesEventHandler;
     }
 
     /**
@@ -302,10 +342,10 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
             if (nativeAxis != null) {
                 if (animation == null || animation.getOptions() == null) {
                     final boolean animationFlag = animation != null;
-                    nativeSetExtremes(nativeAxis, min, max, redraw, animationFlag);
+                    nativeSetExtremes(nativeAxis, min.doubleValue(), max.doubleValue(), redraw, animationFlag);
                 } else {
                     final JavaScriptObject animationOptions = animation.getOptions().getJavaScriptObject();
-                    nativeSetExtremes(nativeAxis, min, max, redraw, animationOptions);
+                    nativeSetExtremes(nativeAxis, min.doubleValue(), max.doubleValue(), redraw, animationOptions);
                 }
             }
         } else {
@@ -352,6 +392,10 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
 
     protected JavaScriptObject getNativeAxis() {
         return chart.get(this.id);
+    }
+    
+    /* package */ String getId() {
+        return this.id;
     }
 
     // Save some typing in the getExtremes() method
@@ -513,7 +557,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
     private Number min;
 
     /**
-     * Convenience method for setting the 'max' option for the axis.  Equivalent to:
+     * Convenience method for setting the 'min' option for the axis.  Equivalent to:
      * <pre><code>
      *     axis.setOption("min", 10);
      * </code></pre>
@@ -525,7 +569,7 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * To change the min/max value of the chart after render time use the {@link #setExtremes(Number, Number)}
      * method instead.
      *
-     * @param min The maximum value of the axis, or null to automatically calculate the maximum.
+     * @param min The minimum value of the axis, or null to automatically calculate the minimum.
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setMin(Number min) {
@@ -925,10 +969,16 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
     }
 
     /**
-     * Convenience method for setting the 'title/text' axis option.  Equivalent to:
+     * Convenience method for setting the 'title/text' axis option, before or after
+     * the chart is rendered.  Before the chart is rendered this is equivalent to:
      * <pre><code>
      *     axis.setOption("/title/text", "A Fine Axis Indeed");
      * </code></pre>
+     * After the chart is rendered this is equivalent to a direct JS call like
+     * <pre><code>
+     *     Axis.setTitle({text: "A Fine Axis Indeed"});
+     * </code></pre>
+     *
      * The actual text of the axis title. It can contain basic HTML text markup like
      * &lt;b&gt;, &lt;i&gt; and spans with style. Defaults to null for the x-axis
      * and "Y-values" for the y-axis.
@@ -942,14 +992,55 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setAxisTitleText(String title) {
-        return this.setOption("/title/text", title);
+        return this.setAxisTitleText(title, true);
     }
 
     /**
-     * Convenience method for setting the 'title/text' axis option.  Equivalent to:
+     * Convenience method for setting the 'title/text' axis option, before or after
+     * the chart is rendered (explicitly controlling whether or not the new title will
+     * be immediately drawn in the case of being called after the chart is rendered).
+     * Before the chart is rendered this is equivalent to:
+     * <pre><code>
+     *     axis.setOption("/title/text", "A Fine Axis Indeed");
+     * </code></pre>
+     * After the chart is rendered this is equivalent to a JS call like:
+     * <pre><code>
+     *     Axis.setTitle({text: "A Fine Axis Indeed"}, true);
+     * </code></pre>
+     *
+     * The actual text of the axis title. It can contain basic HTML text markup like
+     * &lt;b&gt;, &lt;i&gt; and spans with style. Defaults to null for the x-axis
+     * and "Y-values" for the y-axis.
+     * <p/>
+     * Note that for more control over the title, utilize the {@link #setAxisTitle(AxisTitle)}
+     * method instead.
+     * <p/>
+     * Also note that to hide an axis title completely, simply set the text to null.
+     *
+     * @param title Sets the title of axis, or null to hide the title.
+     * @param redraw Whether to redraw the chart now or hold until the next {@link org.moxieapps.gwt.highcharts.client.BaseChart#redraw()}
+     * @return A reference to this {@link Axis} instance for convenient method chaining.
+     * @since 1.2.0
+     */
+    public T setAxisTitleText(String title, boolean redraw) {
+        if(getNativeAxis() != null) {
+            this.setAxisTitle(new AxisTitle().setText(title), redraw);
+        } else {
+            this.setOption("/title/text", title);
+        }
+        return getThis();
+    }
+
+    /**
+     * Convenience method for setting the 'title/text' axis option, before or after
+     * the chart is rendered.  Before the chart is rendered this is equivalent to:
      * <pre><code>
      *     axis.setOption("/title/text", "A Fine Axis Indeed");
      *     axis.setOption("/title/align", AxisTitle.Align.HIGH);
+     * </code></pre>
+     * After the chart is rendered this is equivalent to a JS call like:
+     * <pre><code>
+     *     Axis.setTitle({text: "A Fine Axis Indeed", align: "high"});
      * </code></pre>
      * <p/>
      * Note that if you call this method it will overwrite any existing
@@ -964,6 +1055,40 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
      * @return A reference to this {@link Axis} instance for convenient method chaining.
      */
     public T setAxisTitle(AxisTitle title) {
+        return this.setAxisTitle(title, true);
+    }
+
+    /**
+     * Convenience method for setting the 'title/text' axis option, before or after
+     * the chart is rendered (explicitly controlling whether or not the new title will
+     * be immediately drawn in the case of being called after the chart is rendered).
+     * Before the chart is rendered this is equivalent to:
+     * <pre><code>
+     *     axis.setOption("/title/text", "A Fine Axis Indeed");
+     *     axis.setOption("/title/align", AxisTitle.Align.HIGH);
+     * </code></pre>
+     * After the chart is rendered this is equivalent to a JS call like:
+     * <pre><code>
+     *     Axis.setTitle({text: "A Fine Axis Indeed", align: "high"});
+     * </code></pre>
+     * <p/>
+     * Note that if you call this method it will overwrite any existing
+     * settings that have already been applied to the title (e.g. if you
+     * had previously called the {@link #setAxisTitleText(String)} method that change
+     * will get overwritten by this call.)
+     * <p/>
+     * Note that if you only want to change the text of the axis, you can simply
+     * use the {@link #setAxisTitleText(String)} method instead.
+     *
+     * @param title Sets the axis title options, or null to hide the title.
+     * @param redraw Whether to redraw the chart now or hold until the next {@link org.moxieapps.gwt.highcharts.client.BaseChart#redraw()}
+     * @return A reference to this {@link Axis} instance for convenient method chaining.
+     * @since 1.2.0
+     */
+    public T setAxisTitle(AxisTitle title, boolean redraw) {
+        if(getNativeAxis() != null) {
+            nativeSetTitle(getNativeAxis(), title != null ? title.getOptions().getJavaScriptObject() : null, redraw);
+        }
         return this.setOption("/title", title != null ? title.getOptions() : null);
     }
 
@@ -1065,11 +1190,11 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
         return instance;
     }
 
-    private static native void nativeSetExtremes(JavaScriptObject axis, Number min, Number max, boolean redraw, boolean animation) /*-{
+    private static native void nativeSetExtremes(JavaScriptObject axis, double min, double max, boolean redraw, boolean animation) /*-{
         axis.setExtremes(min, max, redraw, animation);
     }-*/;
 
-    private static native void nativeSetExtremes(JavaScriptObject axis, Number min, Number max, boolean redraw, JavaScriptObject animationOptions) /*-{
+    private static native void nativeSetExtremes(JavaScriptObject axis, double min, double max, boolean redraw, JavaScriptObject animationOptions) /*-{
         axis.setExtremes(min, max, redraw, animationOptions);
     }-*/;
 
@@ -1091,5 +1216,9 @@ public abstract class Axis<T extends Axis> extends Configurable<T> {
 
     private native void nativeRemovePlotBand(JavaScriptObject axis, String id)/*-{
         axis.removePlotBand(id);
+    }-*/;
+
+    private native void nativeSetTitle(JavaScriptObject axis, JavaScriptObject titleOptions, boolean redraw)/*-{
+        axis.setTitle(titleOptions, redraw);
     }-*/;
 }
