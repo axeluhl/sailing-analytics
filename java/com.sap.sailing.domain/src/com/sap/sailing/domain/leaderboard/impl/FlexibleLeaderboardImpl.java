@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.impl.FleetImpl;
@@ -21,6 +22,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  *
  */
 public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements FlexibleLeaderboard {
+    private static Logger logger = Logger.getLogger(FlexibleLeaderboardImpl.class.getName());
+    
     protected static final Fleet defaultFleet = new FleetImpl("Default");
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<RaceColumn> races;
@@ -33,8 +36,14 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     
     @Override
     public RaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets) {
-        RaceColumnImpl column = createRaceColumn(name, medalRace, fleets);
-        races.add(column);
+        RaceColumn column = getRaceColumnByName(name);
+        if (column != null) {
+            final String msg = "Trying to create race column with duplicate name "+name+" in leaderboard +"+getName();
+            logger.severe(msg);
+        } else {
+            column = createRaceColumn(name, medalRace, fleets);
+            races.add(column);
+        }
         return column;
     }
     
@@ -71,13 +80,17 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     }
 
     protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace, Fleet... fleets) {
+        return new RaceColumnImpl(columnName, medalRace, turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
+    }
+
+    protected Iterable<Fleet> turnNullOrEmptyFleetsIntoDefaultFleet(Fleet... fleets) {
         Iterable<Fleet> theFleets;
         if (fleets == null || fleets.length == 0) {
             theFleets = Collections.singleton(defaultFleet);
         } else {
             theFleets = Arrays.asList(fleets);
         }
-        return new RaceColumnImpl(columnName, medalRace, theFleets);
+        return theFleets;
     }
 
     @Override

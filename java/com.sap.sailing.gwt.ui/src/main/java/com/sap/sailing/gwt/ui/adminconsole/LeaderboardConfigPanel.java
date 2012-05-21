@@ -591,6 +591,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                             RegattaAndRaceIdentifier raceIdentifier = regattaAndRaceNamesPerFleet.get(selectedFleetName);
                             if (raceIdentifier != null) {
                                 selectRaceInList(raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
+                            } else {
+                                trackedRacesListComposite.clearSelection();
                             }
                         } else {
                             trackedRacesListComposite.clearSelection();

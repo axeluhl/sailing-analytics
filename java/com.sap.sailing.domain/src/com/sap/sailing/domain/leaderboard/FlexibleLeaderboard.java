@@ -28,6 +28,10 @@ public interface FlexibleLeaderboard extends Leaderboard {
     /**
      * Adds a new {@link RaceColumn} that has no {@link TrackedRace} associated yet to this leaderboard.
      * 
+     * @param name
+     *            the name for the new race column such that none of the columns in {@link #getRaceColumns()}
+     *            has that name yet; otherwise, an message will be logged, no race column will be added and
+     *            the existing column will be returned for robustness reasons
      * @param medalRace
      *            tells if the column to add represents a medal race which has double score and cannot be discarded
      * @param fleets

@@ -187,6 +187,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
                 fleets.add(fleet);
             }
+            if (fleets.isEmpty()) {
+                fleets.add(result.getFleet(null));
+            }
             RaceColumn raceColumn = result.addRaceColumn((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()),
                     (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()), fleets.toArray(new Fleet[0]));
             for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {

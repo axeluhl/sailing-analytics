@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.persistence.impl;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -48,8 +46,8 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
     private class RaceColumnForDelayedCarriedPoints extends RaceColumnImpl {
         private static final long serialVersionUID = -1243132535406059096L;
 
-        public RaceColumnForDelayedCarriedPoints(Leaderboard leaderboard, String name, boolean medalRace, Fleet... fleets) {
-            super(name, medalRace, fleets==null ? Collections.singletonList(defaultFleet) : Arrays.asList(fleets));
+        public RaceColumnForDelayedCarriedPoints(Leaderboard leaderboard, String name, boolean medalRace, Iterable<Fleet> fleets) {
+            super(name, medalRace, fleets);
         }
 
         @Override
@@ -80,7 +78,7 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
 
     @Override
     protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace, Fleet... fleets) {
-        return new RaceColumnForDelayedCarriedPoints(this, columnName, medalRace, fleets);
+        return new RaceColumnForDelayedCarriedPoints(this, columnName, medalRace, turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
     }
 
     public void setCarriedPoints(String competitorName, int carriedPoints) {
