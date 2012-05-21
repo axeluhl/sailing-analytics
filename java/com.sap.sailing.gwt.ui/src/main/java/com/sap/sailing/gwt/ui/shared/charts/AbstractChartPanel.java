@@ -11,6 +11,7 @@ import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
@@ -30,8 +31,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
@@ -72,7 +73,6 @@ implements CompetitorSelectionChangeListener, RequiresResize {
     private final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
     private final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
     private final boolean allowTimeAdjust;
-    private final RaceSelectionProvider raceSelectionProvider;
     private long stepSize = 5000;
     private DetailType dataToShow;
     private final CompetitorSelectionProvider competitorSelectionProvider;
@@ -82,35 +82,26 @@ implements CompetitorSelectionChangeListener, RequiresResize {
             Timer timer, TimeZoomProvider timeZoomProvider, final StringMessages stringMessages, ErrorReporter errorReporter, DetailType dataToShow,
             boolean compactChart, boolean allowTimeAdjust) {
         super(sailingService, timer, timeZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
-    	dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
-        markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
     	this.competitorSelectionProvider = competitorSelectionProvider;
-    	competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         this.dataToShow = dataToShow;
-        chartData = null;
         this.compactChart = compactChart;
-        this.raceSelectionProvider = raceSelectionProvider;
         this.allowTimeAdjust = allowTimeAdjust;
-        raceSelectionProvider.addRaceSelectionChangeListener(this);
+        dataSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
+        markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
+        chartData = null;
         setSize("100%", "100%");
 
         noCompetitorsSelectedLabel = new Label(stringMessages.selectAtLeastOneCompetitor() + ".");
         noCompetitorsSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         
         chart = createChart(dataToShow);
-        
-        List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
-
-        if(!selectedRaces.isEmpty()) {
-            loadData(true);
-        }
+     
+        competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
+        raceSelectionProvider.addRaceSelectionChangeListener(this);
         timer.addTimeListener(this);
         timeZoomProvider.addTimeZoomChangeListener(this);
     }
 
-    protected void selectRace(final RaceIdentifier selectedRace) {
-    }
-    
     /**
      * Creates a new chart for the given {@link DetailType} <code>dataToShow</code> and also 
      * clears the {@link #chartData}, the {@link #dataSeriesByCompetitor} and the {@link #markPassingSeriesByCompetitor}.
@@ -123,6 +114,9 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                 .setHeight100()
                 .setMarginLeft(65)
                 .setMarginRight(65)
+                .setBorderColor(new Color("#A6A6A6"))
+                .setBorderWidth(1)
+//                .setBackgroundColor(new Color("#C6C6C6"))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
@@ -155,7 +149,8 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         chart.getYAxis().setReversed((dataToShow == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || 
                                       dataToShow == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true : false);
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
-                .setAxisTitleText(stringMessages.time());
+                .setAxisTitleText(stringMessages.time())
+                .setTickInterval(1000 * 60 * 10);
         String decimalPlaces = "";
         for (int i = 0; i < dataToShow.getPrecision(); i++) {
             if (i == 0) {
@@ -210,33 +205,33 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         if (needsDataLoading()) {
             if (showBusyIndicator) {
                 setWidget(chart);
-                chart.showLoading("Loading competitor data...");
+                showLoading("Loading competitor data...");
             }
             if (chartData == null || chartData.getDetailType() != getDataToShow()) {
                 chartData = new MultiCompetitorRaceDataDTO(getDataToShow());
             }
             
-            Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
+//            Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
             final ArrayList<Pair<Date, CompetitorDTO>> dataQuery = new ArrayList<Pair<Date, CompetitorDTO>>();
             for (CompetitorDTO competitor : getVisibleCompetitors()) {
                 Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
                 Date competitorDateOfNewestData = chartData.contains(competitor) ? chartData.getCompetitorData(competitor).getDateOfNewestData() : null;
                 if (!chartData.contains(competitor)) {
                     dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
-                } else if (competitorDateOfNewestData.before(chartDataDateOfNewestData) || competitorDateOfNewestData.before(toDate)) {
+                } else if (competitorDateOfNewestData.before(chartDataDateOfNewestData) || competitorDateOfNewestData.before(maxTimepoint)) {
                     dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime() + getStepSize()), competitor));
                 }
             }
             
             GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
-                        getSelectedRace(), dataQuery, toDate, getStepSize(), getDataToShow(),
+                        selectedRaceIdentifier, dataQuery, maxTimepoint, getStepSize(), getDataToShow(),
                     new AsyncCallback<MultiCompetitorRaceDataDTO>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
                                 errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": " + caught.toString(),
                                         timer.getPlayMode() == PlayModes.Live);
-                                chart.hideLoading();
+                                hideLoading();
                         }
 
                         @Override
@@ -251,23 +246,17 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                                     }
                                 }
                             }
+                            chart.getXAxis().setMin(minTimepoint.getTime());
+                            chart.getXAxis().setMax(maxTimepoint.getTime());
+
                             drawChartData();
                             chart.hideLoading();
                         }
                     });
                     asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
         } else {
-            setWidget(noCompetitorsSelectedLabel);
+            setWidget(noCompetitorsSelectedLabel);            
         }
-    }
-
-    private RaceIdentifier getSelectedRace() {
-        RaceIdentifier result = null;
-        List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
-        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            result = selectedRaces.iterator().next();
-        }
-        return result;
     }
 
     @Override
@@ -510,9 +499,16 @@ implements CompetitorSelectionChangeListener, RequiresResize {
     
     @Override
     public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        setChartData(null);
+        if (selectedRaces != null && !selectedRaces.isEmpty()) {
+            selectedRaceIdentifier = selectedRaces.iterator().next();
+        } else {
+            selectedRaceIdentifier = null;
+        }
+
         clearChart();
-        loadData(true);
+        if(selectedRaceIdentifier != null) {
+            loadData(true);
+        }
     }
 
     /**
@@ -555,6 +551,15 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         return new Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
     }
 
+    @Override 
+    public void setVisible(boolean isVisible) {
+        super.setVisible(isVisible);
+        
+        if(isVisible) {
+            loadData(true);
+        }
+    }
+    
     @Override
     public void timeChanged(Date date) {
         if (getChartData() != null) {
@@ -579,9 +584,5 @@ implements CompetitorSelectionChangeListener, RequiresResize {
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
         timeChanged(timer.getTime());
-    }
-    
-    public void triggerDataLoading() {
-        loadData(true);
     }
 }

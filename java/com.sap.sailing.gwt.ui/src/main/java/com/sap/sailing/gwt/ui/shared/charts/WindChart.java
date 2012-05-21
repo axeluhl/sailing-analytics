@@ -19,7 +19,6 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
-import org.moxieapps.gwt.highcharts.client.XAxis;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -35,7 +34,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
@@ -97,6 +95,9 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 .setMarginRight(65)
                 .setWidth100()
                 .setHeight100()
+                .setBorderColor(new Color("#A6A6A6"))
+                .setBorderWidth(1)
+//                .setBackgroundColor(new Color("#C6C6C6"))
                 .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(
@@ -127,26 +128,26 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             }
         }));
         
-        chart.setBackgroundColor(new Color("#ebebec"));
-        
-            chart.setClickEventHandler(new ChartClickEventHandler() {
-                @Override
-                public boolean onClick(ChartClickEvent chartClickEvent) {
-                    WindChart.this.onClick(chartClickEvent);
-                    return true;
-                }
-            });
-           
-            chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
-                @Override
-                public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
-                    WindChart.this.onSelectionChange(chartSelectionEvent);
-                    return true;
-                }
-            });
+        chart.setClickEventHandler(new ChartClickEventHandler() {
+            @Override
+            public boolean onClick(ChartClickEvent chartClickEvent) {
+                WindChart.this.onClick(chartClickEvent);
+                return true;
+            }
+        });
+       
+        chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
+            @Override
+            public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
+                WindChart.this.onSelectionChange(chartSelectionEvent);
+                return true;
+            }
+        });
 
-        chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
-                .setAxisTitleText(stringMessages.time());
+        chart.getXAxis().setType(Axis.Type.DATE_TIME)
+                        .setMaxZoom(60 * 1000) // 1 minute
+                        .setAxisTitleText(stringMessages.time())
+                        .setTickInterval(1000 * 60 * 10);
         chart.getYAxis(0).setAxisTitleText(stringMessages.fromDeg()).setStartOnTick(false).setShowFirstLabel(false)
                 .setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {
                     @Override
@@ -169,12 +170,13 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         
         setWidget(chart);
         setSize("100%", "100%");
-        updateSettings(settings);
-        if (raceSelectionProvider != null) {
-            raceSelectionProvider.addRaceSelectionChangeListener(this);
-            onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        }
-        showVisibleSeries();
+        
+        resolutionInMilliseconds = settings.getResolutionInMilliseconds();
+        showWindDirectionsSeries = settings.isShowWindDirectionsSeries();
+        showWindSpeedSeries = settings.isShowWindSpeedSeries();
+        windSourceTypesToDisplay.addAll(settings.getWindSourceTypesToDisplay());
+
+        raceSelectionProvider.addRaceSelectionChangeListener(this);
         timer.addTimeListener(this);
         timeZoomProvider.addTimeZoomChangeListener(this);
     }
@@ -189,8 +191,18 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         return this;
     }
 
+    @Override 
+    public void setVisible(boolean isVisible) {
+        super.setVisible(isVisible);
+        
+        if(isVisible) {
+            timeChanged(timer.getTime());
+        }
+    }
+    
     private void showVisibleSeries() {
-        Set<Series> visibleSeries = new HashSet<Series>(Arrays.asList(chart.getSeries()));
+        List<Series> currentSeries = Arrays.asList(chart.getSeries());
+        Set<Series> visibleSeries = new HashSet<Series>(currentSeries);
         
         if(showWindDirectionsSeries) {
             for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
@@ -398,7 +410,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         timeOfEarliestRequestInMillis = null;
         timeOfLatestRequestInMillis = null;
         
-        loadData(selectedRaceIdentifier, minTimepoint, maxTimepoint, /* append */false);
+        loadData(minTimepoint, maxTimepoint, /* append */false);
     }
 
     /**
@@ -422,12 +434,12 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
      *            if <code>true</code>, the results retrieved from the server will be appended to the wind chart instead
      *            of overwriting the existing series.
      */
-    private void loadData(final RaceIdentifier raceIdentifier, final Date from, final Date to, final boolean append) {
-        if (raceIdentifier == null) {
+    private void loadData(final Date from, final Date to, final boolean append) {
+        if (selectedRaceIdentifier == null) {
             clearChart();
         } else if (needsDataLoading() && from != null && to != null) {
-            chart.showLoading("Loading wind data...");
-            GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, raceIdentifier,
+            showLoading("Loading wind data...");
+            GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
                     // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
                     // Consider incremental updates for new data only.
                     from, to, resolutionInMilliseconds,
@@ -435,29 +447,20 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         @Override
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {
-                                XAxis xAxis = chart.getXAxis();
-                                
-                                xAxis.setMin(minTimepoint.getTime());
-                                xAxis.setMax(maxTimepoint.getTime());
-                                xAxis.setStartOnTick(false);
-                                xAxis.setEndOnTick(false);
-                                long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / 10;
-                                xAxis.setTickInterval(tickInterval);
-                                
                                 updateStripChartSeries(result, append);
                             } else {
                                 if (!append) {
                                     clearChart(); // no wind known for untracked race
                                 }
                             }
-                            chart.hideLoading();
+                            hideLoading();
                         }
 
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorFetchingWindInformationForRace() + " "
-                                    + raceIdentifier + ": " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
-                            chart.hideLoading();
+                                    + selectedRaceIdentifier + ": " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
+                            hideLoading();
                         }
                     });
             asyncActionsExecutor.execute(getWindInfoAction);
@@ -471,9 +474,14 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
     @Override
     public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            // show wind of first selected race
             selectedRaceIdentifier = selectedRaces.iterator().next();
+        } else {
+            selectedRaceIdentifier = null;
+        }
+        
+        if(selectedRaceIdentifier != null) {
             clearCacheAndReload();
+            showVisibleSeries();
         } else {
             clearChart();
         }
@@ -486,27 +494,32 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
      */
     @Override
     public void timeChanged(Date date) {
-        if (timer.getPlayMode() == PlayModes.Live) {
-            // is date before first cache entry or is cache empty?
-            if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > date.getTime()) {
-                loadData(selectedRaceIdentifier, minTimepoint, date, /* append */ true);
-            } else if (timeOfLatestRequestInMillis < date.getTime()) {
-                loadData(selectedRaceIdentifier, new Date(timeOfLatestRequestInMillis), maxTimepoint, /* append */true);
+        switch(timer.getPlayMode()) {
+            case Live:
+            {
+                // is date before first cache entry or is cache empty?
+                if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > date.getTime()) {
+                    loadData(minTimepoint, date, /* append */ true);
+                } else if (timeOfLatestRequestInMillis < date.getTime()) {
+                    loadData(new Date(timeOfLatestRequestInMillis), maxTimepoint, /* append */true);
+                }
+                // otherwise the cache spans across date and so we don't need to load anything
+                break;
             }
-            // otherwise the cache spans across date and so we don't need to load anything
-        } else {
-            // assuming play mode is replay / non-live
-            if (timeOfLatestRequestInMillis == null) {
-                loadData(selectedRaceIdentifier, minTimepoint, maxTimepoint, /* append */false); // replace old series
+            case Replay:
+            {
+                // assuming play mode is replay / non-live
+                if (timeOfLatestRequestInMillis == null) {
+                    loadData(minTimepoint, maxTimepoint, /* append */false); // replace old series
+                }
+                break;
             }
         }
-    }
+     }
 
     @Override
     public void onResize() {
-        if(isVisible()) {
-            chart.setSizeToMatchContainer();
-        }
+        chart.setSizeToMatchContainer();
     }
     
     private boolean needsDataLoading() {

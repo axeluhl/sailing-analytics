@@ -159,14 +159,17 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
 
         competitorChart = new MultiChartPanel(sailingService, asyncActionsExecutor, competitorSelectionModel, raceSelectionProvider,
                     timer, timeZoomModel, stringMessages, errorReporter, true, true);
+        competitorChart.setVisible(false);
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(competitorChart);
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);
-        competitorChart.setVisible(false);
 
-        windChart = createWindChart(asyncActionsExecutor);
+        WindChartSettings windChartSettings = new WindChartSettings(false, true, new HashSet<WindSourceType>(Arrays.asList(WindSourceType.values())));
+        windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeZoomModel, windChartSettings,
+                stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
+        windChart.setVisible(false);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(windChart);
         windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
-        windChart.setVisible(false);
         components.add(windChart);
         
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, components);  
@@ -234,12 +237,6 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                 userAgentType);
      }
 
-    private WindChart createWindChart(AsyncActionsExecutor asyncActionsExecutor) {
-        WindChartSettings windChartSettings = new WindChartSettings(false, true, new HashSet<WindSourceType>(Arrays.asList(WindSourceType.values())));
-        return new WindChart(sailingService, raceSelectionProvider, timer, timeZoomModel, windChartSettings,
-                stringMessages, asyncActionsExecutor, errorReporter, viewMode == RaceBoardViewModes.ONESCREEN);
-    }
-
     private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,
             final Component<?> component) {
         final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(),
@@ -258,13 +255,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                 boolean visible = toggleButton.isDown();
                 setComponentVisible(componentViewer, component, visible);
 
-                // Forcing a chart time line update and a load of the data, or it wouldn't be displayed if the chart is
-                // set to visible
-                if (visible && component instanceof WindChart) {
-                    windChart.timeChanged(timer.getTime());
-                } else if (visible && component instanceof AbstractChartPanel) {
-                    competitorChart.triggerDataLoading();
-                } else if (visible && component instanceof LeaderboardPanel) {
+                if (visible && component instanceof LeaderboardPanel) {
                     leaderboardPanel.timeChanged(timer.getTime());
                 }
             }

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Legend;
+import org.moxieapps.gwt.highcharts.client.XAxis;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import org.moxieapps.gwt.highcharts.client.events.SeriesCheckboxClickEvent;
@@ -54,6 +55,10 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     protected final AsyncActionsExecutor asyncActionsExecutor;
     protected final SailingServiceAsync sailingService;
 
+    protected boolean isLoading = false;
+    
+    private int NUMBER_OF_TICKS = 9;
+    
     public RaceChart(SailingServiceAsync sailingService, Timer timer, TimeZoomProvider timeZoomProvider, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
@@ -69,9 +74,35 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
         this.lastRaceTimesInfo = raceTimesInfos.get(selectedRaceIdentifier);
         
         Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.caluclateRaceMinMax(timer, this.lastRaceTimesInfo);
+        boolean updateMinMax = false;
         
-        this.minTimepoint = raceMinMax.getA();
-        this.maxTimepoint = raceMinMax.getB();
+        if(chart != null) {
+            if(minTimepoint == null || maxTimepoint == null) {
+                minTimepoint = raceMinMax.getA();
+                maxTimepoint = raceMinMax.getB();
+                updateMinMax = true;
+            } else {
+                if(minTimepoint.getTime() != raceMinMax.getA().getTime() || maxTimepoint.getTime() != raceMinMax.getB().getTime()) {
+                    minTimepoint = raceMinMax.getA();
+                    maxTimepoint = raceMinMax.getB();
+                    updateMinMax = true;
+                }
+            }
+        }
+        if(updateMinMax) {
+            chart.getXAxis().setMin(minTimepoint.getTime());
+            chart.getXAxis().setMax(maxTimepoint.getTime());
+        }
+    }
+
+    protected void showLoading(String message) {
+        chart.showLoading(message);
+        isLoading = true;
+    }
+
+    protected void hideLoading() {
+        chart.hideLoading();
+        isLoading = false;
     }
 
     protected void onSelectionChange(ChartSelectionEvent chartSelectionEvent) {
@@ -79,7 +110,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
             long xAxisMin = chartSelectionEvent.getXAxisMinAsLong();
             long xAxisMax = chartSelectionEvent.getXAxisMaxAsLong();
             timeZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
-            
+
             ignoreClickOnce = true;
         } catch (Throwable t) {
             timeZoomProvider.resetTimeZoom(this);
@@ -89,22 +120,29 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     }
 
     protected void onClick(ChartClickEvent chartClickEvent) {
-        if (ignoreClickOnce) {
-            ignoreClickOnce = false;
-        } else {
-            timer.setPlayMode(PlayModes.Replay);
-            timer.setTime(chartClickEvent.getXAxisValueAsLong());
+        if(!isLoading) {
+            if (ignoreClickOnce) {
+                ignoreClickOnce = false;
+            } else {
+                timer.setPlayMode(PlayModes.Replay);
+                timer.setTime(chartClickEvent.getXAxisValueAsLong());
+            }
         }
     }
 
+    protected void changeMinMaxInterval(Date minIntervalTimepoint, Date maxIntervalTimepoint, long numTicks) {
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setExtremes(minIntervalTimepoint.getTime(), maxIntervalTimepoint.getTime(), true, true);
+    }
+    
     public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
-        chart.getXAxis().setExtremes(zoomStartTimepoint.getTime(), zoomEndTimepoint.getTime(), true, true);
+        changeMinMaxInterval(zoomStartTimepoint, zoomEndTimepoint, NUMBER_OF_TICKS);
         // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
         // chart.showResetZoom();
     }
 
     public void onTimeZoomReset() {
-//        chart.getXAxis().setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), true, true);
+        changeMinMaxInterval(minTimepoint, maxTimepoint, NUMBER_OF_TICKS);
     }
 
     /**
