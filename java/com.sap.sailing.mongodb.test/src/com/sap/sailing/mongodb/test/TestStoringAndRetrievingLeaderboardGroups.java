@@ -158,11 +158,15 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         
         //Check if the leaderboard updated correctly
         final Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboard.getName());
-        Assert.assertEquals(race.getRaceIdentifier(fleet), loadedLeaderboard.getRaceColumnByName(columnName).getRaceIdentifier(fleet));
+        final RaceColumn loadedRaceColumnByName = loadedLeaderboard.getRaceColumnByName(columnName);
+        Fleet loadedFleet = loadedRaceColumnByName.getFleetByName(fleet.getName());
+        Assert.assertEquals(race.getRaceIdentifier(fleet), loadedRaceColumnByName.getRaceIdentifier(loadedFleet));
         
-        //Check if the group received the changes
+        // Check if the group received the changes
         loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName);
-        RaceIdentifier loadedIdentifier = loadedGroup.getLeaderboards().iterator().next().getRaceColumnByName(columnName).getRaceIdentifier(fleet);
+        final RaceColumn loadedRaceColumnFromGroupByName = loadedGroup.getLeaderboards().iterator().next().getRaceColumnByName(columnName);
+        Fleet loadedGroupFleet = loadedRaceColumnFromGroupByName.getFleetByName(fleet.getName());
+        RaceIdentifier loadedIdentifier = loadedRaceColumnFromGroupByName.getRaceIdentifier(loadedGroupFleet);
         Assert.assertEquals(race.getRaceIdentifier(fleet), loadedIdentifier);
     }
 
