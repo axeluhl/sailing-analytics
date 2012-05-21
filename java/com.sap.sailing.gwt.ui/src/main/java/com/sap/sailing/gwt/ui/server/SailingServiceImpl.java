@@ -261,7 +261,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     if (trackedRace != null) {
-                        raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta()
+                        raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
                     }
                     result.addRace(raceColumn.getName(), fleet.getName(), raceColumn.isMedalRace(),
@@ -1220,7 +1220,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             for (Fleet fleet : raceColumn.getFleets()) {
                 if (raceColumn.getTrackedRace(fleet) != null) {
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                    raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta().getName(), trackedRace.getRace().getName());
+                    raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
                     if (withAdditionalData) {
                         // Getting the places of the race
                         PlacemarkOrderDTO racePlaces = getRacePlaces(trackedRace);

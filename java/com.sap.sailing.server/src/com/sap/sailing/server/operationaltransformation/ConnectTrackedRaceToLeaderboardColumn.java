@@ -41,7 +41,7 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
                 if (trackedRace != null) {
                     raceColumn.setTrackedRace(raceColumn.getFleetByName(fleetName), trackedRace);
                 } else {
-                    raceColumn.setRaceIdentifier(raceToConnect);
+                    raceColumn.setRaceIdentifier(raceColumn.getFleetByName(fleetName), raceToConnect);
                 }
             }
             success = true;
