@@ -492,8 +492,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public DynamicTrackedRegatta getTrackedEvent() {
-        return (DynamicTrackedRegatta) super.getTrackedEvent();
+    public DynamicTrackedRegatta getTrackedRegatta() {
+        return (DynamicTrackedRegatta) super.getTrackedRegatta();
     }
 
     @Override

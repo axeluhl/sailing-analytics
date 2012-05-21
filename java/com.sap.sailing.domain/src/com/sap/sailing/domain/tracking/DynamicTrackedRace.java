@@ -57,7 +57,7 @@ public interface DynamicTrackedRace extends TrackedRace {
 
     void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind);
     
-    DynamicTrackedRegatta getTrackedEvent();
+    DynamicTrackedRegatta getTrackedRegatta();
 
     /**
      * If and only if <code>raceIsKnownToStartUpwind</code> is <code>true</code>, this tracked race is allowed to use

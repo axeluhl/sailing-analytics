@@ -301,7 +301,7 @@ public interface TrackedRace extends Serializable {
      */
     Tack getTack(Competitor competitor, TimePoint timePoint);
 
-    TrackedRegatta getTrackedEvent();
+    TrackedRegatta getTrackedRegatta();
 
     /**
      * Computes a default wind direction based on the direction of the first leg at time <code>at</code>, with a default

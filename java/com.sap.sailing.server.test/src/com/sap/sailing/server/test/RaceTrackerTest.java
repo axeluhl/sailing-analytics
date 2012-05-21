@@ -91,17 +91,17 @@ public class RaceTrackerTest {
         Set<RaceDefinition> races = raceHandle.getRaces();
         assertNotNull(races);
         assertFalse(races.isEmpty());
-        assertNotNull(getTrackedRace(raceHandle.getTrackedEvent()));
+        assertNotNull(getTrackedRace(raceHandle.getTrackedRegatta()));
     }
     
     @Test
     public void testStopTracking() throws Exception {
-        TrackedRegatta oldTrackedEvent = raceHandle.getTrackedEvent();
+        TrackedRegatta oldTrackedEvent = raceHandle.getTrackedRegatta();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
         RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
         service.removeEvent(raceHandle.getRegatta());
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
-        TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedEvent();
+        TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedRegatta();
         assertNotSame(oldTrackedEvent, newTrackedEvent);
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
@@ -120,10 +120,10 @@ public class RaceTrackerTest {
      */
     @Test
     public void testTrackingSameRaceWithoutStopping() throws Exception {
-        TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedEvent();
+        TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedRegatta();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedRegatta);
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
-        TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedEvent();
+        TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedRegatta();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
         try {
