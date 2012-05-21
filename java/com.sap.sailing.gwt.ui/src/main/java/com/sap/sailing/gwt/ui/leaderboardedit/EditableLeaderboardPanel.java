@@ -30,7 +30,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 /**
  * An editable version of the {@link LeaderboardPanel} which allows a user to enter carried / accumulated
@@ -147,7 +147,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     private class EditableRaceColumn extends RaceColumn<LeaderboardRowDTO> implements RowUpdateWhiteboardOwner<LeaderboardRowDTO> {
         private RowUpdateWhiteboard<LeaderboardRowDTO> currentRowUpdateWhiteboard;
         
-        public EditableRaceColumn(RaceInLeaderboardDTO race, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> cellList) {
+        public EditableRaceColumn(RaceColumnDTO race, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> cellList) {
             super(race,
                     /* expandable */ false, // we don't want leg expansion when editing scores
                     new CompositeCellRememberingRenderingContextAndObject(cellList),
@@ -367,11 +367,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     @Override
-    protected RaceColumn<?> createRaceColumn(RaceInLeaderboardDTO race) {
+    protected RaceColumn<?> createRaceColumn(RaceColumnDTO race) {
         return new EditableRaceColumn(race, getCellList(race));
     }
 
-    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getCellList(RaceInLeaderboardDTO race) {
+    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getCellList(RaceColumnDTO race) {
         List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> list =
                 new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
         list.add(new MaxPointsDropDownCellProvider(race.getRaceColumnName()));

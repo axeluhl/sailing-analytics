@@ -239,6 +239,7 @@ public interface StringMessages extends Messages {
     String noLeaderboardGroupWithNameFound(String groupName);
     String overview();
     String welcomeToSailingAnalytics();
+    String welcomeToSailingAnalyticsBody();
     String home();
     String clickAndDragToZoomIn();
     String windSpeed();
@@ -300,4 +301,5 @@ public interface StringMessages extends Messages {
     String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
     String showWindSpeedSeries();
     String showWindDirectionSeries();
+    String fleet();
 }

@@ -93,7 +93,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             // e.g., in case we have an untracked race and the number of competitors is estimated incorrectly
             Integer correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
             if (correctedNonMaxedScore == null) {
-                result = getMaxPoints(raceColumn.getTrackedRace(), numberOfCompetitorsInLeaderboard);
+                result = getMaxPoints(raceColumn.getTrackedRace(competitor), numberOfCompetitorsInLeaderboard);
             } else {
                 result = correctedNonMaxedScore;
             }

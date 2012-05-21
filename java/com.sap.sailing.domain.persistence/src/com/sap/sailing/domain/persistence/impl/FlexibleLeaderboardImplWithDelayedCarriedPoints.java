@@ -5,12 +5,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.domain.leaderboard.impl.LeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.RaceColumnImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -29,7 +30,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
+public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLeaderboardImpl {
     private static final long serialVersionUID = -8933075542228571746L;
     private final Map<String, Integer> carriedPointsByCompetitorName;
     private final Map<String, Map<RaceColumn, MaxPointsReason>> maxPointsReasonsByCompetitorName;
@@ -37,28 +38,28 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
     private final Map<String, String> displayNamesByCompetitorName;
 
     /**
-     * A wrapper for {@link RaceColumn} that, when its {@link #setTrackedRace(TrackedRace)} method is called,
-     * additionally calls {@link LeaderboardImplWithDelayedCarriedPoints#assignLeftOvers(TrackedRace)}.
+     * A wrapper for {@link RaceColumn} that, when its {@link #setTrackedRace(Fleet, TrackedRace)} method is called,
+     * additionally calls {@link FlexibleLeaderboardImplWithDelayedCarriedPoints#assignLeftOvers(TrackedRace)}.
      * 
      * @author Axel Uhl (D043530)
      */
-    private class RaceInLeaderboardForDelayedCarriedPoints extends RaceColumnImpl {
+    private class RaceColumnForDelayedCarriedPoints extends RaceColumnImpl {
         private static final long serialVersionUID = -1243132535406059096L;
 
-        public RaceInLeaderboardForDelayedCarriedPoints(Leaderboard leaderboard, String name, boolean medalRace) {
-            super(name, medalRace);
+        public RaceColumnForDelayedCarriedPoints(Leaderboard leaderboard, String name, boolean medalRace, Iterable<Fleet> fleets) {
+            super(name, medalRace, fleets);
         }
 
         @Override
-        public void setTrackedRace(TrackedRace trackedRace) {
-            super.setTrackedRace(trackedRace);
+        public void setTrackedRace(Fleet fleet, TrackedRace trackedRace) {
+            super.setTrackedRace(fleet, trackedRace);
             if (trackedRace != null) {
                 assignLeftOvers(trackedRace);
             }
         }
     }
     
-    public LeaderboardImplWithDelayedCarriedPoints(String name, SettableScoreCorrection scoreCorrection,
+    public FlexibleLeaderboardImplWithDelayedCarriedPoints(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(name, scoreCorrection, resultDiscardingRule);
         carriedPointsByCompetitorName = new HashMap<String, Integer>();
@@ -69,15 +70,15 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
     
     private void assertNoTrackedRaceAssociatedYet() {
         for (RaceColumn raceColumn : getRaceColumns()) {
-            if (raceColumn.getTrackedRace() != null) {
+            if (raceColumn.hasTrackedRaces()) {
                 throw new IllegalStateException("Can't enqueue competitor name-based state while tracked races are already associated with leaderboard");
             }
         }
     }
 
     @Override
-    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace) {
-        return new RaceInLeaderboardForDelayedCarriedPoints(this, columnName, medalRace);
+    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace, Fleet... fleets) {
+        return new RaceColumnForDelayedCarriedPoints(this, columnName, medalRace, turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
     }
 
     public void setCarriedPoints(String competitorName, int carriedPoints) {
@@ -106,13 +107,13 @@ public class LeaderboardImplWithDelayedCarriedPoints extends LeaderboardImpl {
     }
 
     /**
-     * Performs the regular {@link LeaderboardImpl#addRace(TrackedRace, String, boolean)} and then checks if
+     * Performs the regular {@link FlexibleLeaderboardImpl#addRace(TrackedRace, String, boolean)} and then checks if
      * there are any carried points etc. left over to assign to the competitor objects (see
      * {@link #assignLeftOvers(TrackedRace)}).
      */
     @Override
-    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace) {
-        RaceColumn result = super.addRace(race, columnName, medalRace);
+    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
+        RaceColumn result = super.addRace(race, columnName, medalRace, fleet);
         assignLeftOvers(race);
         return result;
     }

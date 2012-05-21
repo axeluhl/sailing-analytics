@@ -135,5 +135,9 @@ public class PlacemarkOrderDTO extends NamedDTO implements IsSerializable {
         }
         return sb.toString();
     }
+
+    public void add(PlacemarkOrderDTO places) {
+        placemarks.addAll(places.getPlacemarks());
+    }
     
 }

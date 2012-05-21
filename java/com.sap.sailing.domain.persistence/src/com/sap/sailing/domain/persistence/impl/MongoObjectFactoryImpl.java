@@ -10,8 +10,9 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.Bearing;
@@ -25,8 +26,8 @@ import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.tracking.Positioned;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 
@@ -96,8 +97,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    @Override
-    public void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject) {
+    private void storeRaceIdentifiers(RaceColumn raceColumn, DBObject dbObject) {
+        BasicDBObject raceIdentifiersPerFleet = new BasicDBObject();
+        for (Fleet fleet : raceColumn.getFleets()) {
+            RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+            if (raceIdentifier != null) {
+                DBObject raceIdentifierForFleet = new BasicDBObject();
+                storeRaceIdentifier(raceIdentifierForFleet, raceIdentifier);
+                raceIdentifiersPerFleet.put(fleet.getName(), raceIdentifierForFleet);
+            }
+        }
+        dbObject.put(FieldNames.RACE_IDENTIFIERS.name(), raceIdentifiersPerFleet);
+    }
+
+    private void storeRaceIdentifier(DBObject dbObject, RaceIdentifier raceIdentifier) {
         if (raceIdentifier != null) {
             dbObject.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getRegattaName());
             dbObject.put(FieldNames.RACE_NAME.name(), raceIdentifier.getRaceName());
@@ -122,7 +135,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             BasicDBObject dbRaceColumn = new BasicDBObject();
             dbRaceColumn.put(FieldNames.LEADERBOARD_COLUMN_NAME.name(), raceColumn.getName());
             dbRaceColumn.put(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name(), raceColumn.isMedalRace());
-            storeRaceIdentifier(raceColumn.getRaceIdentifier(), dbRaceColumn);
+            storeRaceIdentifiers(raceColumn, dbRaceColumn);
             dbRaceColumns.add(dbRaceColumn);
         }
         if (leaderboard.hasCarriedPoints()) {

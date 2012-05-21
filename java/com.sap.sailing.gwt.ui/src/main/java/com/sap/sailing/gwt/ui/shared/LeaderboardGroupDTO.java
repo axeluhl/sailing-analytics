@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
 
@@ -35,10 +36,13 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         boolean containsRace = false;
         leaderboardsLoop:
         for (LeaderboardDTO leaderboard : leaderboards) {
-            for (RaceInLeaderboardDTO raceInLeaderboard : leaderboard.getRaceList()) {
-                if (raceInLeaderboard.getRaceIdentifier() != null && raceInLeaderboard.getRaceIdentifier().equals(race)) {
-                    containsRace = true;
-                    break leaderboardsLoop;
+            for (RaceColumnDTO raceInLeaderboard : leaderboard.getRaceList()) {
+                for (String fleetName : raceInLeaderboard.getFleetNames()) {
+                    final RegattaAndRaceIdentifier raceIdentifierForFleet = raceInLeaderboard.getRaceIdentifier(fleetName);
+                    if (raceIdentifierForFleet != null && raceIdentifierForFleet.equals(race)) {
+                        containsRace = true;
+                        break leaderboardsLoop;
+                    }
                 }
             }
         }
