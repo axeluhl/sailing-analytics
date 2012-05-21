@@ -258,7 +258,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 RegattaAndRaceIdentifier raceIdentifier = null;
                 if (raceColumn.getTrackedRace() != null) {
                     TrackedRace trackedRace = raceColumn.getTrackedRace();
-                    raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta().getName(), trackedRace.getRace().getName());
+                    raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
                 }
                 result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, null);
             }
@@ -1209,7 +1209,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             StrippedRaceDTO race = null;
             if (raceColumn.getTrackedRace() != null) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace();
-                raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta().getName(), trackedRace.getRace().getName());
+                raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
                 
                 if (withAdditionalData) {
                     //Getting the places of the race
@@ -1348,7 +1348,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             if (raceColumn != null) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace();
                 if (trackedRace != null) {
-                    result = new Pair<String, String>(trackedRace.getTrackedEvent().getRegatta().getName(),
+                    result = new Pair<String, String>(trackedRace.getTrackedRegatta().getRegatta().getName(),
                             trackedRace.getRace().getName());
                 }
             }

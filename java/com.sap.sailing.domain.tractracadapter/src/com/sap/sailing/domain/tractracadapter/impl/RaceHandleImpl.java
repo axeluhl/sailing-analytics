@@ -39,7 +39,7 @@ public class RaceHandleImpl implements RacesHandle {
     }
     
     @Override
-    public DynamicTrackedRegatta getTrackedEvent() {
+    public DynamicTrackedRegatta getTrackedRegatta() {
         return trackedRegatta;
     }
 
