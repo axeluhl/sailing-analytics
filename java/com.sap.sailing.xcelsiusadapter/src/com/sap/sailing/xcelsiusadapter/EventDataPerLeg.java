@@ -33,7 +33,7 @@ public class EventDataPerLeg extends Action {
 
 	public void perform() throws Exception {	
         		
-        final Event event = getEvent(); // Get event data from request (get value for event name from URL parameter event)     
+        final Regatta event = getRegatta(); // Get event data from request (get value for event name from URL parameter event)     
         // if the event does not exist a tag <message> will be returned with a text message from function getEvent(). 
         if(event == null){ 
         	return; 
@@ -68,7 +68,7 @@ public class EventDataPerLeg extends Action {
            
             
             addNamedElementWithValue(race_node, "start_time_ms", raceStarted.asMillis()); // add the starttime to the race
-            addNamedElementWithValue(race_node, "assumed_end_ms", trackedRace.getAssumedEnd().asMillis()); // add the assumed enddtime
+            addNamedElementWithValue(race_node, "assumed_end_ms", trackedRace.getEndOfRace().asMillis()); // add the assumed enddtime
             
            
             

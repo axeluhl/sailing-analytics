@@ -24,14 +24,14 @@ public class EventList extends Action {
 		 final Document table = getTable("data");
 		
 		
-		for(Event event : getEvents().values()){
-			if(event == null){ 
+		for(Regatta regatta : getRegattas().values()){
+			if(regatta == null){ 
 	        	continue; 
 	        }
 			
 			
 			addRow();
-			addColumn(event.getName());
+			addColumn(regatta.getName());
 	        
 		}
 		say(table);// output doc to client

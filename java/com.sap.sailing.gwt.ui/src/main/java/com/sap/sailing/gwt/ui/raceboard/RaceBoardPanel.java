@@ -42,7 +42,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
-import com.sap.sailing.gwt.ui.shared.charts.AbstractChartPanel;
 import com.sap.sailing.gwt.ui.shared.charts.MultiChartPanel;
 import com.sap.sailing.gwt.ui.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.shared.charts.WindChartSettings;
