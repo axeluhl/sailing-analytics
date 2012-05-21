@@ -1,14 +1,15 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import com.google.gwt.dom.client.Style.FontWeight;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
@@ -21,12 +22,14 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
+import com.sap.sailing.gwt.ui.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
     //Initializing the lists to prevent a null pointer exception in the first validation call
     private List<Pair<CheckBox, ManeuverType>> checkboxAndManeuverType = new ArrayList<Pair<CheckBox, ManeuverType>>();
     private List<Pair<CheckBox, ZoomTypes>> checkboxAndZoomType = new ArrayList<Pair<CheckBox,ZoomTypes>>();
+    private List<Pair<CheckBox, HelpLineTypes>> checkboxAndHelpLineType = new ArrayList<Pair<CheckBox,HelpLineTypes>>();
     private CheckBox zoomOnlyToSelectedCompetitors = new CheckBox();
     private CheckBox checkBoxDouglasPeuckerPoints = new CheckBox();
     private CheckBox showOnlySelectedCompetitors = new CheckBox();
@@ -46,17 +49,19 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
         HorizontalPanel labelAndTailLengthBoxPanel = new HorizontalPanel();
-        labelAndTailLengthBoxPanel.add(new Label(stringMessages.tailLength()));
+        labelAndTailLengthBoxPanel.setSpacing(5);
+        Label tailLengthLabel = new Label(stringMessages.tailLength() + ":");
+        labelAndTailLengthBoxPanel.add(tailLengthLabel);
+        labelAndTailLengthBoxPanel.setCellVerticalAlignment(tailLengthLabel, HasVerticalAlignment.ALIGN_MIDDLE);
         tailLengthBox = dialog.createLongBox((int) (initialSettings.getTailLengthInMilliseconds() / 1000), 4);
         labelAndTailLengthBoxPanel.add(tailLengthBox);
+        labelAndTailLengthBoxPanel.setCellVerticalAlignment(tailLengthBox, HasVerticalAlignment.ALIGN_MIDDLE);
         vp.add(labelAndTailLengthBoxPanel);
         showOnlySelectedCompetitors = dialog.createCheckbox(stringMessages.showOnlySelected());
         showOnlySelectedCompetitors.setValue(initialSettings.isShowOnlySelectedCompetitors());
         vp.add(showOnlySelectedCompetitors);
 
-        Label zoomLabel = new Label(stringMessages.zoom());
-        zoomLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        zoomLabel.getElement().getStyle().setPaddingTop(1, Unit.EM);
+        Label zoomLabel = dialog.createHeadlineLabel(stringMessages.zoom());
         vp.add(zoomLabel);
         
         HorizontalPanel labelAndZoomSettingsPanel = new HorizontalPanel();
@@ -66,7 +71,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         disableOnlySelectedWhenAreFalse = new ArrayList<CheckBox>();
         for (ZoomTypes zoomType : ZoomTypes.values()) {
             if (zoomType != ZoomTypes.NONE) {
-                CheckBox cb = dialog.createCheckbox(ZoomTypeFormatter.format(zoomType, stringMessages));
+                CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatZoomType(zoomType, stringMessages));
                 cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), true);
                 checkboxAndZoomType.add(new Pair<CheckBox, ZoomTypes>(cb, zoomType));
                 zoomSettingsBoxesPanel.add(cb);
@@ -92,9 +97,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         //Run zoomSettingsChanged to set the checkboxes to their correct state
         zoomSettingsChanged();
         
-        Label maneuversLabel = new Label(stringMessages.maneuverTypes());
-        maneuversLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        maneuversLabel.getElement().getStyle().setPaddingTop(1, Unit.EM);
+        Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypes());
         vp.add(maneuversLabel);
         for (ManeuverType maneuverType : ManeuverType.values()) {
             CheckBox checkbox = dialog.createCheckbox(ManeuverTypeFormatter.format(maneuverType, stringMessages));
@@ -105,6 +108,19 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         checkBoxDouglasPeuckerPoints = dialog.createCheckbox(stringMessages.douglasPeuckerPoints());
         checkBoxDouglasPeuckerPoints.setValue(initialSettings.isShowDouglasPeuckerPoints());
         vp.add(checkBoxDouglasPeuckerPoints);
+        
+        Label helpLinesLabel = dialog.createHeadlineLabel(stringMessages.helpLines());
+        vp.add(helpLinesLabel);
+        
+        VerticalPanel helpLineSettingsBoxesPanel = new VerticalPanel();
+        for (HelpLineTypes helpLineType : HelpLineTypes.values()) {
+                CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatHelpLineType(helpLineType, stringMessages));
+                cb.setValue(initialSettings.getHelpLinesSettings().containsHelpLine(helpLineType), true);
+                checkboxAndHelpLineType.add(new Pair<CheckBox, HelpLineTypes>(cb, helpLineType));
+                helpLineSettingsBoxesPanel.add(cb);
+        }
+        vp.add(helpLineSettingsBoxesPanel);
+        
         return vp;
     }
     
@@ -132,6 +148,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             result.showManeuverType(p.getB(), p.getA().getValue());
         }
         result.setZoomSettings(getZoomSettings());
+        result.setHelpLinesSettings(getHelpLinesSettings());
         result.setShowDouglasPeuckerPoints(checkBoxDouglasPeuckerPoints.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitors.getValue());
         result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);
@@ -151,6 +168,16 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             zoomTypes.add(ZoomTypes.NONE);
         }
         return new RaceMapZoomSettings(zoomTypes, zoomOnlyToSelectedCompetitors.getValue());
+    }
+
+    private RaceMapHelpLinesSettings getHelpLinesSettings() {
+        Set<HelpLineTypes> helpLineTypes = new HashSet<HelpLineTypes>();
+        for (Pair<CheckBox, HelpLineTypes> pair : checkboxAndHelpLineType) {
+            if (pair.getA().getValue()) {
+                helpLineTypes.add(pair.getB());
+            }
+        }
+        return new RaceMapHelpLinesSettings(helpLineTypes);
     }
 
     @Override

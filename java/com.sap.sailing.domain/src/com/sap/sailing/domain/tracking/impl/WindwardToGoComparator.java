@@ -13,9 +13,10 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 
 /**
  * Compares competitor tracks based on the windward distance they still have to go and/or leg completion times at a
- * given point in time. Two tracks of different competitors may end up being ranked equal by this comparator. So
- * take care and don't use this comparator class when inserting into an {@link SortedSet} when you want something
- * like a ranking. It may overwrite existing entries. Use {@link Collections#sort(java.util.List, Comparator)} instead.
+ * given point in time for the same leg. Two tracks of different competitors may end up being ranked equal by this
+ * comparator. So take care and don't use this comparator class when inserting into an {@link SortedSet} when you want
+ * something like a ranking. It may overwrite existing entries. Use {@link Collections#sort(java.util.List, Comparator)}
+ * instead.
  */
 public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor> {
     private final TrackedLeg trackedLeg;
@@ -28,6 +29,7 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
     
     @Override
     public int compare(TrackedLegOfCompetitor o1, TrackedLegOfCompetitor o2) {
+        assert o1.getLeg() == o2.getLeg();
         try {
             int result;
             if (o1.hasFinishedLeg(timePoint)) {

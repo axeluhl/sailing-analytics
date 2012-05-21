@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -21,8 +21,8 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
 
     private int received;
 
-    public RawPositionReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedEvent);
+    public RawPositionReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta);
     }
     
     /**

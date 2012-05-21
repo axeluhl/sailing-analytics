@@ -43,7 +43,7 @@ public class ManeuverDetectionOnMdM2011SemifinalTest extends OnlineTracTracBased
     
     @Override
     protected String getExpectedEventName() {
-        return "Sailing Team Germany";
+        return "Academy Tracking 2011";
     }
 
     @Before

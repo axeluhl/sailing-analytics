@@ -14,7 +14,9 @@ public class RaceMapSettings {
     private boolean showOnlySelectedCompetitors = false;
     
     private RaceMapZoomSettings zoomSettings;
-    
+
+    private RaceMapHelpLinesSettings helpLinesSettings;
+
     private long tailLengthInMilliseconds = 100000l;
 
     public RaceMapSettings() {
@@ -25,6 +27,7 @@ public class RaceMapSettings {
         maneuverTypesToShow.add(ManeuverType.MARK_PASSING);
         
         this.zoomSettings = new RaceMapZoomSettings();
+        this.helpLinesSettings = new RaceMapHelpLinesSettings();
     }
 
     public long getTailLengthInMilliseconds() {
@@ -69,6 +72,14 @@ public class RaceMapSettings {
     
     public void setZoomSettings(RaceMapZoomSettings zoomSettings) {
         this.zoomSettings = zoomSettings;
+    }
+
+    public RaceMapHelpLinesSettings getHelpLinesSettings() {
+        return helpLinesSettings;
+    }
+
+    public void setHelpLinesSettings(RaceMapHelpLinesSettings helpLinesSettings) {
+        this.helpLinesSettings = helpLinesSettings;
     }
 
 }

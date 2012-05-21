@@ -131,7 +131,14 @@ e) Rebuild the base target platform by running the script
 createLocalBaseP2repository.sh
 (com.sap.sailing.targetplatform/scripts)
 
-f) Reload the target platform in the IDE
+f) Test the new overall target platform by settings the race-analysis-p2-ide-p2admin.target as target platform
+   in the IDE
+   
+g) The admin of the central p2 repository must now replace the content of the central server
+   /home/trac/p2-repositories/sailing with the content of the new local base p2 repository
+   (com.sap.sailing.targetplatform/base/gen/p2)
+ 
+g) Reload the target platform in the IDE
 
 2. Adding a library from an internal SAP repository (e.g. Nexus)
 

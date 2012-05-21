@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Server Replication
+Bundle-SymbolicName: com.sap.sailing.server.replication
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.sap.sailing.server.replication.impl.Activator
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Export-Package: com.sap.sailing.server.replication,
+ com.sap.sailing.server.replication.impl;x-friends:="com.sap.sailing.server.replication.test"
+Require-Bundle: com.sap.sailing.server,
+ com.sap.sailing.domain.common,
+ com.sap.sailing.domain,
+ com.sap.sailing.operationaltransformation
+Bundle-ClassPath: .
+Web-ContextPath: /replication
+Import-Package: javax.jms;version="1.1.0",
+ javax.management.j2ee.statistics;version="1.1.0",
+ javax.servlet;version="2.5.0",
+ javax.servlet.http;version="2.5.0",
+ org.apache.activemq;version="5.4.3",
+ org.apache.activemq.broker;version="5.4.3",
+ org.apache.kahadb.index;version="5.4.3",
+ org.osgi.framework;version="1.6.0",
+ org.osgi.util.tracker;version="1.5.0"

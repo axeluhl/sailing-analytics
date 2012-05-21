@@ -2,16 +2,16 @@ package com.sap.sailing.server.operationaltransformation;
 
 import java.io.IOException;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class RemoveAndUntrackRace extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 4260421466093529004L;
 
-    public RemoveAndUntrackRace(EventAndRaceIdentifier raceIdentifier) {
+    public RemoveAndUntrackRace(RegattaAndRaceIdentifier raceIdentifier) {
         super(raceIdentifier);
     }
 
@@ -29,12 +29,12 @@ public class RemoveAndUntrackRace extends AbstractRaceOperation<Void> {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
-        Event event = toState.getEvent(getRaceIdentifier());
-        if (event!= null) {
-            RaceDefinition race = event.getRaceByName(getRaceIdentifier().getRaceName());
+        Regatta regatta = toState.getRegatta(getRaceIdentifier());
+        if (regatta!= null) {
+            RaceDefinition race = regatta.getRaceByName(getRaceIdentifier().getRaceName());
             if (race != null) {
                 try {
-                    toState.removeRace(event, race);
+                    toState.removeRace(regatta, race);
                 } catch (IOException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }

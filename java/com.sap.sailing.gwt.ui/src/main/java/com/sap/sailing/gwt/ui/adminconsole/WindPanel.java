@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,24 +38,27 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventDisplayer;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.charts.WindChart;
+import com.sap.sailing.gwt.ui.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 
 /**
@@ -64,7 +69,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
  * @author Axel Uhl (d043530)
  *
  */
-public class WindPanel extends FormPanel implements EventDisplayer, WindShower, RaceSelectionChangeListener {
+public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower, RaceSelectionChangeListener {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final Grid grid;
@@ -77,7 +82,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private final TextColumn<WindDTO> windDirectionInDegColumn;
     private final TextColumn<WindDTO> dampenedSpeedInKnotsColumn;
     private final TextColumn<WindDTO> dampenedWindDirectionInDegColumn;
-    private final TrackedEventsComposite trackedEventsComposite;
+    private final TrackedRacesListComposite trackedRacesListComposite;
     private final RaceSelectionProvider raceSelectionProvider;
     private final WindSourcesToExcludeSelector windSourcesToExcludeSelector;
     private final Map<WindSource, ListDataProvider<WindDTO>> windLists;
@@ -86,7 +91,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, EventRefresher eventRefresher, final StringMessages stringMessages) {
+            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -96,8 +101,8 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         removeColumn = new IdentityColumn<WindDTO>(new ActionCell<WindDTO>(stringMessages.remove(), new Delegate<WindDTO>() {
             @Override
             public void execute(final WindDTO wind) {
-                List<EventAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
-                final EventAndRaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size()-1);
+                List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+                final RegattaAndRaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size()-1);
                 sailingService.removeWind(raceIdentifier, wind, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {
@@ -148,10 +153,10 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
             }
         };
         grid = new Grid(4, 2); // first row: event/race selection; second row: wind source selection; third row: wind display
-        trackedEventsComposite = new TrackedEventsComposite(sailingService, errorReporter, eventRefresher,
+        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
                 raceSelectionProvider, stringMessages, false);
         raceSelectionProvider.addRaceSelectionChangeListener(this);
-        grid.setWidget(0, 0, trackedEventsComposite);
+        grid.setWidget(0, 0, trackedRacesListComposite);
         windSettingPanel = new WindSettingPanel(sailingService, errorReporter, raceSelectionProvider, this);
         grid.setWidget(0, 1, windSettingPanel);
         HorizontalPanel windSourceSelectionPanel = new HorizontalPanel();
@@ -180,15 +185,15 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
         });
         windSourceSelectionPanel.add(showConfigAnchor);
         grid.setWidget(1, 0, windSourceSelectionPanel);
-        windChart = new WindChart(sailingService, raceSelectionProvider, new Timer(
-                PlayModes.Replay), new WindChartSettings(WindSourceType.values()), stringMessages, asyncActionsExecutor, errorReporter, false, false);
+        WindChartSettings windChartSettings = new WindChartSettings(false, true, new HashSet<WindSourceType>(Arrays.asList(WindSourceType.values())));
+        windChart = new WindChart(sailingService, raceSelectionProvider, new Timer(PlayModes.Replay), new TimeZoomModel(), windChartSettings, stringMessages, asyncActionsExecutor, errorReporter, false);
         windChart.onResize();
         grid.setWidget(2, 0, windChart.getEntryWidget());
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);
     }
 
-    private void clearOrShowWindBasedOnRaceSelection(List<EventAndRaceIdentifier> selectedRaces) {
+    private void clearOrShowWindBasedOnRaceSelection(List<RegattaAndRaceIdentifier> selectedRaces) {
         if (selectedRaces.isEmpty()) {
             clearWindDisplay(); // no wind known for untracked race
         } else {
@@ -197,13 +202,13 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     }
 
     @Override
-    public void fillEvents(List<EventDTO> result) {
-        trackedEventsComposite.fillEvents(result);
+    public void fillRegattas(List<RegattaDTO> result) {
+        trackedRacesListComposite.fillRegattas(result);
     }
 
     @Override
-    public void showWind(final EventAndRaceIdentifier raceIdentifier) {
-        sailingService.getWindInfo(raceIdentifier,
+    public void showWind(final RegattaAndRaceIdentifier raceIdentifier) {
+        sailingService.getAveragedWindInfo(raceIdentifier,
         // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
                 null, null, // use race start and time of newest event as default time period
                 WindChart.DEFAULT_RESOLUTION_IN_MILLISECONDS,
@@ -228,7 +233,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
                 });
     }
     
-    private void updateWindSourcesToExclude(WindInfoForRaceDTO result, EventAndRaceIdentifier raceIdentifier) {
+    private void updateWindSourcesToExclude(WindInfoForRaceDTO result, RegattaAndRaceIdentifier raceIdentifier) {
         windSourcesToExcludeSelector.update(raceIdentifier, result.windTrackInfoByWindSource.keySet(), result.windSourcesToExclude);
     }
 
@@ -338,9 +343,9 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     }
 
     private void setRaceIsKnownToStartUpwind(final Runnable runOnSuccess) {
-        List<EventAndRaceIdentifier> selection = raceSelectionProvider.getSelectedRaces();
+        List<RegattaAndRaceIdentifier> selection = raceSelectionProvider.getSelectedRaces();
         if (selection != null && !selection.isEmpty()) {
-            final EventAndRaceIdentifier selectedRace = selection.get(0);
+            final RegattaAndRaceIdentifier selectedRace = selection.get(0);
             sailingService.setRaceIsKnownToStartUpwind(selectedRace,
                     raceIsKnownToStartUpwindBox.getValue(), new AsyncCallback<Void>() {
                         @Override
@@ -359,7 +364,7 @@ public class WindPanel extends FormPanel implements EventDisplayer, WindShower, 
     }
 
     @Override
-    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         clearOrShowWindBasedOnRaceSelection(selectedRaces);
     }
 }

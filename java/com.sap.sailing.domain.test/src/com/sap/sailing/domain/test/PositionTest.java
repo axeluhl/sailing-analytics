@@ -138,6 +138,19 @@ public class PositionTest {
     }
 
     @Test
+    public void simpleProjectionTest5() {
+        Position p1 = new DegreePosition(1, 0);
+        Position p2 = new DegreePosition(1, -0.0001);
+        final Bearing bearingFromP1ToP2 = p1.getBearingGreatCircle(p2);
+        assertEquals(270, bearingFromP1ToP2.getDegrees(), 0.00001);
+        final Bearing bearing45DegNorth = new DegreeBearingImpl(bearingFromP1ToP2.getDegrees()+45);
+        Position pNorth = p1.translateGreatCircle(bearing45DegNorth, p1.getDistance(p2).scale(1./Math.sqrt(2.)));
+        assertEquals(bearing45DegNorth.getDegrees(), p1.getBearingGreatCircle(pNorth).getDegrees(), 0.0000001);
+        Distance alongTrackDistanceFromP1ToPNorth = pNorth.alongTrackDistance(p1, bearingFromP1ToP2);
+        assertEquals(0.5*p1.getDistance(p2).getMeters(), alongTrackDistanceFromP1ToPNorth.getMeters(), 0.001);
+    }
+
+    @Test
     public void testZeroCrossTrackError() {
         Position p1 = new DegreePosition(20, 15);
         Position p2 = new DegreePosition(15, 15);

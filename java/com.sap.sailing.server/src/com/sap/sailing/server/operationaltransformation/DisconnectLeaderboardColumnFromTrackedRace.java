@@ -1,7 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -18,10 +18,9 @@ public class DisconnectLeaderboardColumnFromTrackedRace extends AbstractLeaderbo
     public Void internalApplyTo(RacingEventService toState) {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         if (leaderboard != null) {
-            RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(getColumnName());
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(getColumnName());
             if (raceColumn != null) {
                 raceColumn.setTrackedRace(null);
-                raceColumn.setRaceIdentifier(null);
                 toState.updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Didn't find race "+getColumnName()+" in leaderboard "+getLeaderboardName());

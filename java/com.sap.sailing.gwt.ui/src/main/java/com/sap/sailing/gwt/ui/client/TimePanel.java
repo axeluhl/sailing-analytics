@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -15,13 +16,11 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
@@ -89,8 +88,12 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         this.stringMessages = stringMessages;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
-        VerticalPanel vp = new VerticalPanel();
+        FlowPanel vp = new FlowPanel();
         vp.setSize("100%", "100%");
+        
+        SimplePanel s = new SimplePanel();
+        s.getElement().getStyle().setMarginLeft(55, Unit.PX);
+        s.getElement().getStyle().setMarginRight(55, Unit.PX);
 
         playButtonImg = resources.timesliderPlayActiveIcon();
         pauseButtonImg = resources.timesliderPauseIcon();
@@ -127,10 +130,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
         });
         
-        vp.add(sliderBar);
+        vp.add(s);
+        s.add(sliderBar);
 
-        HorizontalPanel controlsPanel = new HorizontalPanel();
-        controlsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        FlowPanel controlsPanel = new FlowPanel();
+        
         controlsPanel.setStyleName("timePanel-controls");
         controlsPanel.setSize("100%", "25px");
         vp.add(controlsPanel);
@@ -183,14 +187,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         timeControlPanel.add(timeLabel);
         controlsPanel.add(timeControlPanel);
         dateLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        dateLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        dateLabel.getElement().setClassName("dateLabel");
         timeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        timeLabel.getElement().getStyle().setPaddingBottom(3, Style.Unit.PX);
-        timeLabel.getElement().getStyle().setPaddingTop(3, Style.Unit.PX);
-        timeLabel.getElement().getStyle().setPaddingLeft(100, Style.Unit.PX);
-        timeLabel.getElement().getStyle().setPaddingRight(3, Style.Unit.PX);
         timeLabel.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
-
+        timeLabel.getElement().setClassName("timeLabel");
+        
         FlowPanel playModeControlPanel = new FlowPanel();
         playModeControlPanel.setStyleName("timePanel-controls-playmode");
         playModeControlPanel.add(playModeImage);
@@ -200,7 +201,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playModeControlPanel .add(playModeLabel);
         controlsPanel.add(playModeControlPanel );
         playModeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        playModeLabel.getElement().getStyle().setPadding(5, Style.Unit.PX);
+        playModeLabel.getElement().setClassName("playModeLabel");
         
         // play speed controls
         FlowPanel playSpeedControlPanel = new FlowPanel();
@@ -210,6 +211,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playSpeedBox = new IntegerBox();
         playSpeedBox.setVisibleLength(3);
         playSpeedBox.setWidth("25px");
+        playSpeedBox.setHeight("11px");
         playSpeedBox.setValue(1);
         playSpeedBox.setTitle(stringMessages.playSpeedHelp());
         Image playSpeedImage = new Image(playSpeedImg);
@@ -262,6 +264,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         ImageResource settingsIcon = resources.settingsIcon();
         Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(settingsIcon).getSafeHtml());
         settingsAnchor.setTitle(stringMessages.settings());
+        settingsAnchor.setStyleName("timePanelSettings");
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
         controlsPanel.add(settingsAnchor);
         setWidget(vp);

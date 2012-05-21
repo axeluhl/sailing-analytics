@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common;
 
-public interface Position {
+import java.io.Serializable;
+
+public interface Position extends Serializable {
     double getLatRad();
 
     double getLngRad();

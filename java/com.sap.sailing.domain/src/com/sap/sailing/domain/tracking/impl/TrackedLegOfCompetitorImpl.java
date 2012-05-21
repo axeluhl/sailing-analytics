@@ -20,6 +20,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -196,18 +197,19 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
      * 
      * @param at the wind estimation is performed for this point in time
      */
-    private Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
+    @Override
+    public Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException {
         if (getTrackedLeg().isUpOrDownwindLeg(at)) {
             Wind wind = getWind(pos1.translateGreatCircle(pos1.getBearingGreatCircle(pos2), pos1.getDistance(pos2).scale(0.5)), at);
             if (wind == null) {
-                return pos1.getDistance(pos2);
+                return pos2.alongTrackDistance(pos1, getTrackedLeg().getLegBearing(at));
             } else {
                 Position projectionToLineThroughPos2 = pos1.projectToLineThrough(pos2, wind.getBearing());
                 return projectionToLineThroughPos2.getDistance(pos2);
             }
         } else {
-            // cross leg, return true distance
-            return pos1.getDistance(pos2);
+            // reaching leg, return distance projected onto leg's bearing
+            return pos2.alongTrackDistance(pos1, getTrackedLeg().getLegBearing(at));
         }
     }
     
@@ -337,7 +339,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
 
     @Override
     public Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException {
-        Competitor leader = getTrackedLeg().getRanks(timePoint).keySet().iterator().next();
+        // FIXME bug 607 it seems the following fetches the leader of this leg, not the overall leader; validate!!! Use getTrackedRace().getRanks() instead
+        Competitor leader = getTrackedRace().getOverallLeader(timePoint);
         TrackedLegOfCompetitor leaderLeg = getTrackedRace().getCurrentLeg(leader, timePoint);
         Distance result = null;
         Position leaderPosition = getTrackedRace().getTrack(leader).getEstimatedPosition(timePoint, /* extrapolate */ false);
@@ -354,18 +357,49 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     if (leaderLeg == null || leg != leaderLeg.getLeg()) {
                         // add distance to next mark
                         Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
-                        Distance distanceToNextMark = getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
+                        Distance distanceToNextMark = getTrackedRace().getTrackedLeg(getCompetitor(), leg)
+                                .getWindwardDistance(currentPosition, nextMarkPosition, timePoint);
                         result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                        currentPosition = nextMarkPosition;
                     } else {
                         // we're now in the same leg with leader; compute windward distance to leader
                         result = new MeterDistance(result.getMeters()
-                                + getWindwardDistance(leaderPosition, currentPosition, timePoint).getMeters());
+                                + getTrackedRace().getTrackedLeg(getCompetitor(), leg)
+                                        .getWindwardDistance(currentPosition, leaderPosition, timePoint).getMeters());
                         break;
                     }
                 }
             }
         }
         return result;
+    }
+
+    @Override
+    public Distance getAverageCrossTrackError(TimePoint timePoint) throws NoWindException {
+        double distanceInMeters = 0;
+        int count = 0;
+        GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(competitor);
+        GPSFixMoving fix = null;
+        final TrackedLeg trackedLeg = getTrackedLeg();
+        final MarkPassing legStartMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getFrom());
+        if (legStartMarkPassing != null) {
+            TimePoint legStart = legStartMarkPassing.getTimePoint();
+            final MarkPassing legEndMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getTo());
+            synchronized (track) {
+                Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
+                while (fixIter.hasNext()
+                        && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
+                                legEndMarkPassing.getTimePoint()) < 0) && fix.getTimePoint().compareTo(timePoint) < 0))) {
+                    fix = fixIter.next();
+                    if (fix.getTimePoint().compareTo(timePoint) < 0) {
+                        Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
+                        distanceInMeters += xte.getMeters();
+                        count++;
+                    }
+                }
+            }
+        }
+        return count == 0 ? null : new MeterDistance(distanceInMeters / count);
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -31,18 +31,17 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
     @Override
     public Boolean internalApplyTo(RacingEventService toState) {
         boolean success = false;
-        TrackedRace trackedRace = toState.getExistingTrackedRace(raceToConnect);
-        if (trackedRace != null) {
-            Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
-            if (leaderboard != null) {
-                RaceInLeaderboard raceColumn = leaderboard.getRaceColumnByName(getColumnName());
-                if (raceColumn != null) {
+        Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
+        if (leaderboard != null) {
+            RaceColumn raceColumn = leaderboard.getRaceColumnByName(getColumnName());
+            if (raceColumn != null) {
+                TrackedRace trackedRace = toState.getExistingTrackedRace(raceToConnect);
+                if (trackedRace != null) {
                     raceColumn.setTrackedRace(trackedRace);
-                    raceColumn.setRaceIdentifier(trackedRace.getRaceIdentifier());
-                    success = true;
-                    toState.updateStoredLeaderboard(leaderboard);
                 }
             }
+            success = true;
+            toState.updateStoredLeaderboard(leaderboard);
         }
         return success;
     }

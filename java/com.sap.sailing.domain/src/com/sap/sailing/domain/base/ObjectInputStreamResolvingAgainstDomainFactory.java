@@ -22,11 +22,13 @@ public abstract class ObjectInputStreamResolvingAgainstDomainFactory extends Obj
     
     /**
      * Package protected on purpose; instances to be created using
-     * {@link DomainFactory#createObjectInputStreamResolvingAgainstThisFactory(InputStream)}.
+     * {@link DomainFactory#createObjectInputStreamResolvingAgainstThisFactory(InputStream)}. This constructor
+     * {@link #enableResolveObject(boolean) enables resolving} by default.
      */
     protected ObjectInputStreamResolvingAgainstDomainFactory(InputStream in, DomainFactory domainFactory) throws IOException {
         super(in);
         this.domainFactory = domainFactory;
+        enableResolveObject(true);
     }
 
     @Override
@@ -37,6 +39,20 @@ public abstract class ObjectInputStreamResolvingAgainstDomainFactory extends Obj
     @Override
     protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
         String className = classDesc.getName();
-        return Thread.currentThread().getContextClassLoader().loadClass(className);
+        // see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6554519
+        // If using loadClass(...) on the class loader directly, an exception is thrown:
+        // StreamCorruptedException: invalid type code 00
+        return Class.forName(className, /* initialize */ true, Thread.currentThread().getContextClassLoader());
+    }
+    
+    @Override
+    protected Object resolveObject(Object o) {
+        Object result;
+        if (o instanceof IsManagedByDomainFactory) {
+            result = ((IsManagedByDomainFactory) o).resolve(getDomainFactory());
+        } else {
+            result = o;
+        }
+        return result;
     }
 }

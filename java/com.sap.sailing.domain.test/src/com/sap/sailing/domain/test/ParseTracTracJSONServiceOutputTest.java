@@ -75,7 +75,7 @@ public class ParseTracTracJSONServiceOutputTest {
     public void testWeymouthOnline() throws MalformedURLException, IOException, java.text.ParseException, ParseException, URISyntaxException {
         JSONService jsonService = DomainFactory.INSTANCE.parseJSONURL(new URL(
                 "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/jsonservice.php"));
-        assertEquals("Sailing Team Germany", jsonService.getEventName());
+        assertEquals("Academy Tracking 2011", jsonService.getEventName());
         List<RaceRecord> races = jsonService.getRaceRecords();
         assertTrue(races.size()>=28);
         int found = 0;

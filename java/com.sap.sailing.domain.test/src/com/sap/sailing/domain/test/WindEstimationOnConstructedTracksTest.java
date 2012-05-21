@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,14 +20,8 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.base.impl.NationalityImpl;
-import com.sap.sailing.domain.base.impl.PersonImpl;
-import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
@@ -87,15 +80,6 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         getTrackedRace().updateMarkPassings(competitor, markPassingForCompetitor);
     }
 
-    private CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
-                new PersonImpl(competitorName, new NationalityImpl("Germany", "GER"),
-                /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
-                new NationalityImpl("The Netherlands", "NED"),
-                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */true), null));
-    }
-
     private void setBearingForCompetitor(Competitor competitor, TimePoint timePoint, double bearingDeg) {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> competitorTrack = getTrackedRace().getTrack(competitor);
         competitorTrack.addGPSFix(new GPSFixMovingImpl(new DegreePosition(54.4680424, 10.234451), timePoint,
@@ -116,7 +100,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         MillisecondsTimePoint now = new MillisecondsTimePoint(new GregorianCalendar(2012, 03, 14).getTime());
         getTrackedRace().recordWind(new WindImpl(null, now, new KnotSpeedWithBearingImpl(/* speedInKnots */ 12, new DegreeBearingImpl(180.))),
                 new WindSourceImpl(WindSourceType.WEB));
-        // produces estimated bearing of 170deg; result should be averaged between 107 (estimation) and 180 (web) deg
+        // produces estimated bearing of 170deg; result should be averaged between 170 (estimation) and 180 (web) deg
         setBearingForCompetitor(competitors.get(0), now, 305);
         setBearingForCompetitor(competitors.get(1), now, 35);
         WindWithConfidence<Pair<Position, TimePoint>> combinedWindDirectionMinClusterSizeOne = getTrackedRace()
@@ -132,7 +116,9 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         assertTrue(combinedDegreesNow > 170 && combinedDegreesNow < 180);
         // we expect the combined direction now to be closer to the estimation as compared to before because the estimation is more confident
         // since the minimum cluster size is 2 instead of 1
-        assertTrue(combinedDegreesNow < combinedDegreesMinClusterSizeOne);
+        assertTrue("expected combinedDegreesNow ("+combinedDegreesNow+
+                ") < combinedDegreesMinClusterSizeOne ("+combinedDegreesMinClusterSizeOne+")",
+                combinedDegreesNow < combinedDegreesMinClusterSizeOne);
     }
 
     @Test

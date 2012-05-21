@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
@@ -15,10 +17,11 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public interface ScoreCorrection {
+public interface ScoreCorrection extends Serializable {
     public interface Result {
         int getCorrectedScore();
         MaxPointsReason getMaxPointsReason();
+        boolean isCorrected();
     }
     
     /**
@@ -30,7 +33,7 @@ public interface ScoreCorrection {
      * {@link #isScoreCorrected(Competitor, TrackedRace)} to detect the difference.
      * @param numberOfCompetitors TODO
      */
-    Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint, int numberOfCompetitors);
+    Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, int numberOfCompetitors);
 
     /**
      * Note the difference between what this method does and a more naive comparison of uncorrected and corrected score.
@@ -41,6 +44,6 @@ public interface ScoreCorrection {
      * @return if an explicit score correction was made for the combination of <code>competitor</code> and
      *         <code>raceColumn</code>
      */
-    boolean isScoreCorrected(Competitor competitor, RaceInLeaderboard raceColumn);
+    boolean isScoreCorrected(Competitor competitor, RaceColumn raceColumn);
 
 }

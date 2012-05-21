@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.MaxPointsReason;
 
 /**
  * Holds a single competitor's scoring details for a single race. It may optionally contain
@@ -16,15 +17,22 @@ public class LeaderboardEntryDTO implements IsSerializable {
     /**
      * Either <code>null</code> in case no max points, or one of "DNS", "DNF", "OCS", "DND", "RAF", "BFD", "DNC", or "DSQ"
      */
-    public String reasonForMaxPoints;
+    public MaxPointsReason reasonForMaxPoints;
     
     public int netPoints;
+    
+    /**
+     * Tells if the net points have been overridden by a score correction. Can be used to render differently in editing environment.
+     */
+    public boolean netPointsCorrected;
     
     public int totalPoints;
     
     public boolean discarded;
     
     public Double windwardDistanceToOverallLeaderInMeters;
+    
+    public Double averageCrossTrackErrorInMeters;
     
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
@@ -40,6 +48,7 @@ public class LeaderboardEntryDTO implements IsSerializable {
         result = prime * result + (discarded ? 1231 : 1237);
         result = prime * result + ((legDetails == null) ? 0 : legDetails.hashCode());
         result = prime * result + netPoints;
+        result = prime * result + ((averageCrossTrackErrorInMeters == null) ? 0 : averageCrossTrackErrorInMeters.hashCode());
         result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
         result = prime * result + ((windwardDistanceToOverallLeaderInMeters == null) ? 0 : windwardDistanceToOverallLeaderInMeters.hashCode());
         result = prime * result + totalPoints;
@@ -73,6 +82,11 @@ public class LeaderboardEntryDTO implements IsSerializable {
             if (other.windwardDistanceToOverallLeaderInMeters != null)
                 return false;
         } else if (!windwardDistanceToOverallLeaderInMeters.equals(other.windwardDistanceToOverallLeaderInMeters))
+            return false;
+        if (averageCrossTrackErrorInMeters == null) {
+            if (other.averageCrossTrackErrorInMeters != null)
+                return false;
+        } else if (!averageCrossTrackErrorInMeters.equals(other.averageCrossTrackErrorInMeters))
             return false;
         if (totalPoints != other.totalPoints)
             return false;

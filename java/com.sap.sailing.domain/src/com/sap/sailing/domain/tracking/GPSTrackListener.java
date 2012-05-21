@@ -2,8 +2,8 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.Serializable;
 
-public interface GPSTrackListener<ItemType> extends Serializable {
-    void gpsFixReceived(GPSFix fix, ItemType item);
+public interface GPSTrackListener<ItemType, FixType extends GPSFix> extends Serializable {
+    void gpsFixReceived(FixType fix, ItemType item);
 
     void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 }

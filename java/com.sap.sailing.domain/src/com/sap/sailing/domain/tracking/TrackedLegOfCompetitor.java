@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 
@@ -151,5 +152,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * used for ranking.
      */
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
+
+    Distance getAverageCrossTrackError(TimePoint timePoint) throws NoWindException;
+
+    Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
 
 }

@@ -16,7 +16,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -24,7 +24,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class LeaderboardImpl implements Named, Leaderboard {
     private static final long serialVersionUID = -328091952760083438L;
-    private final List<RaceInLeaderboard> races;
+    private final List<RaceColumn> races;
     private final SettableScoreCorrection scoreCorrection;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
     private String name;
@@ -51,13 +51,15 @@ public class LeaderboardImpl implements Named, Leaderboard {
     private class EntryImpl implements Entry {
         private final int trackedPoints;
         private final int netPoints;
+        private final boolean isNetPointsCorrected;
         private final int totalPoints;
         private final MaxPointsReason maxPointsReason;
         private final boolean discarded;
-        private EntryImpl(int trackedPoints, int netPoints, int totalPoints, MaxPointsReason maxPointsReason, boolean discarded) {
+        private EntryImpl(int trackedPoints, int netPoints, boolean isNetPointsCorrected, int totalPoints, MaxPointsReason maxPointsReason, boolean discarded) {
             super();
             this.trackedPoints = trackedPoints;
             this.netPoints = netPoints;
+            this.isNetPointsCorrected = isNetPointsCorrected;
             this.totalPoints = totalPoints;
             this.maxPointsReason = maxPointsReason;
             this.discarded = discarded;
@@ -69,6 +71,10 @@ public class LeaderboardImpl implements Named, Leaderboard {
         @Override
         public int getNetPoints() {
             return netPoints;
+        }
+        @Override
+        public boolean isNetPointsCorrected() {
+            return isNetPointsCorrected;
         }
         @Override
         public int getTotalPoints() {
@@ -93,15 +99,15 @@ public class LeaderboardImpl implements Named, Leaderboard {
         }
         this.name = name;
         this.carriedPoints = new HashMap<Competitor, Integer>();
-        this.races = new ArrayList<RaceInLeaderboard>();
+        this.races = new ArrayList<RaceColumn>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
     }
     
     @Override
-    public RaceInLeaderboard addRaceColumn(String name, boolean medalRace) {
-        RaceInLeaderboardImpl column = createRaceColumn(name, medalRace);
+    public RaceColumn addRaceColumn(String name, boolean medalRace) {
+        RaceColumnImpl column = createRaceColumn(name, medalRace);
         races.add(column);
         return column;
     }
@@ -112,14 +118,14 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public Iterable<RaceInLeaderboard> getRaceColumns() {
-        return Collections.unmodifiableCollection(new ArrayList<RaceInLeaderboard>(races));
+    public Iterable<RaceColumn> getRaceColumns() {
+        return Collections.unmodifiableCollection(new ArrayList<RaceColumn>(races));
     }
     
     @Override
-    public RaceInLeaderboard getRaceColumnByName(String columnName) {
-        RaceInLeaderboard result = null;
-        for (RaceInLeaderboard r : races) {
+    public RaceColumn getRaceColumnByName(String columnName) {
+        RaceColumn result = null;
+        for (RaceColumn r : races) {
             if (r.getName().equals(columnName)) {
                 result = r;
                 break;
@@ -129,25 +135,23 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public RaceInLeaderboard addRace(TrackedRace race, String columnName, boolean medalRace) {
-        RaceInLeaderboard column = getRaceColumnByName(columnName);
+    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace) {
+        RaceColumn column = getRaceColumnByName(columnName);
         if (column == null) {
             column = createRaceColumn(columnName, medalRace);
-            column.setTrackedRace(race);
-            column.setRaceIdentifier(race.getRaceIdentifier());
             races.add(column);
         }
         column.setTrackedRace(race);
         return column;
     }
 
-    protected RaceInLeaderboardImpl createRaceColumn(String columnName, boolean medalRace) {
-        return new RaceInLeaderboardImpl(this, columnName, medalRace);
+    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace) {
+        return new RaceColumnImpl(columnName, medalRace);
     }
 
     private Iterable<TrackedRace> getTrackedRaces() {
         Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
-        for (RaceInLeaderboard r : races) {
+        for (RaceColumn r : races) {
             TrackedRace trackedRace = r.getTrackedRace();
             if (trackedRace != null) {
                 trackedRaces.add(trackedRace);
@@ -198,20 +202,20 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
 
     @Override
-    public int getTrackedPoints(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException {
+    public int getTrackedPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
         return race.getTrackedRace() == null ? 0 : race.getTrackedRace().hasStarted(timePoint) ? race.getTrackedRace()
                 .getRank(competitor, timePoint) : 0;
     }
 
     @Override
-    public int getNetPoints(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) throws NoWindException {
+    public int getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
         return getScoreCorrection().getCorrectedScore(getTrackedPoints(competitor, raceColumn, timePoint), competitor,
                 raceColumn, timePoint, Util.size(getCompetitors())).getCorrectedScore();
     }
     
     
     @Override
-    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint)
+    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint)
             throws NoWindException {
         return raceColumn.getTrackedRace() == null ? MaxPointsReason.NONE : getScoreCorrection().getCorrectedScore(
                 getTrackedPoints(competitor, raceColumn, timePoint), competitor, raceColumn, timePoint, Util.size(getCompetitors()))
@@ -219,14 +223,14 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
     
     @Override
-    public boolean isDiscarded(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) {
+    public boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         return !raceColumn.isMedalRace()
                 && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, timePoint).contains(
                         raceColumn);
     }
 
     @Override
-    public int getTotalPoints(Competitor competitor, RaceInLeaderboard raceColumn, TimePoint timePoint) throws NoWindException {
+    public int getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
         return isDiscarded(competitor, raceColumn, timePoint) ?
                 0 :
                 (raceColumn.isMedalRace() ? 2 : 1) * getNetPoints(competitor, raceColumn, timePoint);
@@ -235,30 +239,31 @@ public class LeaderboardImpl implements Named, Leaderboard {
     @Override
     public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         int result = getCarriedPoints(competitor);
-        for (RaceInLeaderboard r : getRaceColumns()) {
+        for (RaceColumn r : getRaceColumns()) {
             result += getTotalPoints(competitor, r, timePoint);
         }
         return result;
     }
 
     @Override
-    public Entry getEntry(Competitor competitor, RaceInLeaderboard race, TimePoint timePoint) throws NoWindException {
+    public Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
         int trackedPoints = getTrackedPoints(competitor, race, timePoint);
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race,
                 timePoint, Util.size(getCompetitors()));
         boolean discarded = isDiscarded(competitor, race, timePoint);
-        return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), discarded ? 0
-                : correctedResults.getCorrectedScore() * (race.isMedalRace() ? 2 : 1),
-                correctedResults.getMaxPointsReason(), discarded);
+        return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), correctedResults.isCorrected(),
+                discarded ? 0
+                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded);
     }
     
     @Override
-    public Map<Pair<Competitor, RaceInLeaderboard>, Entry> getContent(TimePoint timePoint) throws NoWindException {
-        Map<Pair<Competitor, RaceInLeaderboard>, Entry> result = new HashMap<Pair<Competitor, RaceInLeaderboard>, Entry>();
-        Map<Competitor, Set<RaceInLeaderboard>> discardedRaces = new HashMap<Competitor, Set<RaceInLeaderboard>>();
-        for (RaceInLeaderboard raceColumn : getRaceColumns()) {
+    public Map<Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException {
+        Map<Pair<Competitor, RaceColumn>, Entry> result = new HashMap<Pair<Competitor, RaceColumn>, Entry>();
+        Map<Competitor, Set<RaceColumn>> discardedRaces = new HashMap<Competitor, Set<RaceColumn>>();
+        for (RaceColumn raceColumn : getRaceColumns()) {
             for (Competitor competitor : getCompetitors()) {
                 int trackedPoints;
+                // TODO when a column has more than one race, keyed by fleet, find the one for competitor
                 if (raceColumn.getTrackedRace() != null && raceColumn.getTrackedRace().hasStarted(timePoint)) {
                     trackedPoints = raceColumn.getTrackedRace().getRank(competitor, timePoint);
                 } else {
@@ -266,16 +271,16 @@ public class LeaderboardImpl implements Named, Leaderboard {
                 }
                 Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, raceColumn,
                         timePoint, Util.size(getCompetitors()));
-                Set<RaceInLeaderboard> discardedRacesForCompetitor = discardedRaces.get(competitor);
+                Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
                     discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, timePoint);
                     discardedRaces.put(competitor, discardedRacesForCompetitor);
                 }
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 Entry entry = new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(),
-                        discarded ? 0 : correctedResults.getCorrectedScore() * (raceColumn.isMedalRace() ? 2 : 1),
-                                correctedResults.getMaxPointsReason(), discarded);
-                result.put(new Pair<Competitor, RaceInLeaderboard>(competitor, raceColumn), entry);
+                        correctedResults.isCorrected(), discarded ? 0 : correctedResults.getCorrectedScore()
+                                * (raceColumn.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded);
+                result.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
         }
         return result;
@@ -323,7 +328,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     }
 
     @Override
-    public boolean considerForDiscarding(RaceInLeaderboard raceInLeaderboard, TimePoint timePoint) {
+    public boolean considerForDiscarding(RaceColumn raceInLeaderboard, TimePoint timePoint) {
         return !raceInLeaderboard.isMedalRace()
                 && (raceInLeaderboard.getTrackedRace() != null && raceInLeaderboard.getTrackedRace().hasStarted(
                         timePoint)) || getScoreCorrection().hasCorrectionFor(raceInLeaderboard);
@@ -341,8 +346,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
 
 	@Override
 	public void moveRaceColumnUp(String name) {
-		RaceInLeaderboard race = null;
-		for (RaceInLeaderboard r : races){
+		RaceColumn race = null;
+		for (RaceColumn r : races){
 			if (r.getName().equals(name))
 				race = r;
 		}
@@ -359,8 +364,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
 
 	@Override
 	public void moveRaceColumnDown(String name) {
-		RaceInLeaderboard race = null;
-		for (RaceInLeaderboard r : races){
+		RaceColumn race = null;
+		for (RaceColumn r : races){
 			if (r.getName().equals(name))
 				race = r;
 		}
@@ -379,8 +384,8 @@ public class LeaderboardImpl implements Named, Leaderboard {
 
 	@Override
 	public void updateIsMedalRace(String raceName, boolean isMedalRace) {
-		RaceInLeaderboard race = null;
-		for (RaceInLeaderboard r : races){
+		RaceColumn race = null;
+		for (RaceColumn r : races){
 			if (r.getName().equals(raceName))
 				race = r;
 		}

@@ -4,11 +4,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.shared.LegTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
@@ -50,7 +51,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             // in case the race is not tracked anymore we reset the timer
             reset();
         } else { 
-            if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && raceTimesInfo.timePointOfNewestEvent != null) {
+            if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && 
+                    (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null)) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
                 // leg markers
                 boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
@@ -80,14 +82,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         long liveTimePointInMillis = System.currentTimeMillis() - livePlayDelayInMillis;
         RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
         return lastRaceTimesInfo != null &&
-                lastRaceTimesInfo.timePointOfNewestEvent != null &&
-                liveTimePointInMillis < lastRaceTimesInfo.timePointOfNewestEvent.getTime() + eventTimeoutTolerance &&
+                lastRaceTimesInfo.newestTrackingEvent != null &&
+                liveTimePointInMillis < lastRaceTimesInfo.newestTrackingEvent.getTime() + eventTimeoutTolerance &&
                 lastRaceTimesInfo.startOfTracking != null &&
                 liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime();
     }
     
     @Override
-    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         if (selectedRaces != null && !selectedRaces.isEmpty()) {
             selectedRace = selectedRaces.iterator().next();
             if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
@@ -116,58 +118,16 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * was <code>null</code> before, or extended to a later point in time.
      */
     private void initMinMax(RaceTimesInfoDTO newRaceTimesInfo) {
-        Date min = null;
-        Date max = null;
-
-        switch (timer.getPlayMode()) {
-        case Live:
-            if (newRaceTimesInfo.startOfRace != null) {
-                long extensionTime = calculateRaceExtensionTime(newRaceTimesInfo.startOfRace, newRaceTimesInfo.timePointOfNewestEvent);
-                
-                min = new Date(newRaceTimesInfo.startOfRace.getTime() - extensionTime);
-            } else if (newRaceTimesInfo.startOfTracking != null) {
-                min = newRaceTimesInfo.startOfTracking;
-            }
-            
-            if (newRaceTimesInfo.timePointOfNewestEvent != null) {
-                max = newRaceTimesInfo.timePointOfNewestEvent;
-            }
-            break;
-        case Replay:
-            long extensionTime = calculateRaceExtensionTime(newRaceTimesInfo.startOfRace, newRaceTimesInfo.endOfRace);
-            
-            if (newRaceTimesInfo.startOfRace != null) {
-                min = new Date(newRaceTimesInfo.startOfRace.getTime() - extensionTime);
-            } else if (newRaceTimesInfo.startOfTracking != null) {
-                min = newRaceTimesInfo.startOfTracking;
-            }
-            
-            if (newRaceTimesInfo.endOfRace != null) {
-                max = new Date(newRaceTimesInfo.endOfRace.getTime() + extensionTime);
-            } else if (newRaceTimesInfo.timePointOfNewestEvent != null) {
-                max = newRaceTimesInfo.timePointOfNewestEvent;
-            }
-            break;
-        }
+        Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.caluclateRaceMinMax(timer, newRaceTimesInfo);
+        
+        Date min = raceMinMax.getA();
+        Date max = raceMinMax.getB();
+        
         // never reduce max if it was already set
         if (min != null && max != null && (getMax() == null || getMax().before(max))) {
             setMinMax(min, max, /* fireEvent */ false); // no event because we guarantee time to be between min and max
         }
     }
-    
-    private long calculateRaceExtensionTime(Date startTime, Date endTime) {
-        if (startTime == null || endTime == null) {
-            return 5 * 60 * 1000; //5 minutes
-        }
-        
-        long minExtensionTime = 60 * 1000; // 1 minute
-        long maxExtensionTime = 10 * 60 * 1000; // 10 minutes
-        double extensionTimeFactor = 0.1; // 10 percent of the overall race length
-        long extensionTime = (long) ((endTime.getTime() - startTime.getTime()) * extensionTimeFactor);
-        
-        return extensionTime < minExtensionTime ? minExtensionTime : extensionTime > maxExtensionTime ? maxExtensionTime : extensionTime;
-    }
-     
     
     /**
      * When in {@link PlayModes#Replay} mode, tries to put the {@link #timer} to the time point when the last leg was
@@ -185,15 +145,15 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         // initialize timer position
         switch (timer.getPlayMode()) {
         case Live:
-            if (newRaceTimesInfo.timePointOfNewestEvent != null) {
-                timer.setTime(newRaceTimesInfo.timePointOfNewestEvent.getTime());
+            if (newRaceTimesInfo.newestTrackingEvent != null) {
+                timer.setTime(newRaceTimesInfo.newestTrackingEvent.getTime());
             }
             timer.play();
             break;
         case Replay:
             // set time to end of race
-            if (newRaceTimesInfo.getLastLegTimes() != null) {
-                timer.setTime(newRaceTimesInfo.getLastLegTimes().firstPassingDate.getTime());
+            if (newRaceTimesInfo.getLastMarkPassingTimes() != null) {
+                timer.setTime(newRaceTimesInfo.getLastMarkPassingTimes().firstPassingDate.getTime());
             } else  if (newRaceTimesInfo.endOfRace != null) {
                 timer.setTime(newRaceTimesInfo.endOfRace.getTime());
             } else  if (newRaceTimesInfo.startOfRace != null) {
@@ -205,32 +165,41 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
 
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
-        List<LegTimesInfoDTO> legTimepoints = newRaceTimesInfo.getLegTimes();
+        List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
         boolean requiresMarkerUpdate = true;
         
         // updating the sliderbar markers requires a lot of time, therefore we need to do this only if required
-        if(lastRaceTimesInfo != null  && lastRaceTimesInfo.legTimes.size() == newRaceTimesInfo.legTimes.size()) {
+        if(lastRaceTimesInfo != null  && lastRaceTimesInfo.markPassingTimes.size() == newRaceTimesInfo.markPassingTimes.size()) {
             requiresMarkerUpdate = false;
-            for(int i = 0; i < newRaceTimesInfo.legTimes.size(); i++) {
-                if(newRaceTimesInfo.legTimes.get(i).firstPassingDate.getTime() != lastRaceTimesInfo.legTimes.get(i).firstPassingDate.getTime()) {
+            int numberOfLegs = newRaceTimesInfo.markPassingTimes.size();
+            for(int i = 0; i < numberOfLegs; i++) {
+                if(newRaceTimesInfo.markPassingTimes.get(i).firstPassingDate.getTime() != lastRaceTimesInfo.markPassingTimes.get(i).firstPassingDate.getTime()) {
                     requiresMarkerUpdate = true;
                     break;
                 }
             }
+            if((lastRaceTimesInfo.endOfRace == null && newRaceTimesInfo.endOfRace != null) ||
+               (lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace == null) ||
+               lastRaceTimesInfo.endOfRace != null && newRaceTimesInfo.endOfRace != null && lastRaceTimesInfo.endOfRace.getTime() != newRaceTimesInfo.endOfRace.getTime()) {
+                requiresMarkerUpdate = true;
+            }
         }
         if (requiresMarkerUpdate && sliderBar.isMinMaxInitialized()) {
             sliderBar.clearMarkers();
-            for (LegTimesInfoDTO legTimepointDTO : legTimepoints) {
-              sliderBar.addMarker(legTimepointDTO.name, new Double(legTimepointDTO.firstPassingDate.getTime()));
+            for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
+              sliderBar.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
             }
-            sliderBar.redraw();
+            if(newRaceTimesInfo.endOfRace != null) {
+                sliderBar.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
+            }
+                
+            sliderBar.redraw(); 
         }
         lastRaceTimesInfo = newRaceTimesInfo;
     }
     
     @Override
     public void raceTimesInfosReceived(Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos) {
-      // raceTimesInfo can be null if the race is not tracked anymore
-      updateTimeInfo(raceTimesInfos.get(selectedRace));
+        updateTimeInfo(raceTimesInfos.get(selectedRace));
     }
 }

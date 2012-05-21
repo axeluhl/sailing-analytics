@@ -11,5 +11,4 @@ public class ObjectInputStreamResolvingAgainstDomainFactoryImpl extends ObjectIn
             throws IOException {
         super(in, domainFactory);
     }
-
 }

@@ -41,13 +41,13 @@ public class CombinedWindAsNavigableSet extends VirtualWindFixesAsNavigableSet {
     /**
      * Time point up to and including which the GPS fixes are considered in the race's tracks. Returns the value of
      * {@link #to} unless it is <code>null</code>. In this case, the time point of the
-     * {@link TrackedRace#getAssumedEnd() assumed end of race},
+     * {@link TrackedRace#getEndOfRace() assumed end of race},
      * {@link #ceilingToResolution(Wind) ceiled to the resolution of this set} will be returned instead. If no valid
      * time of a newest event can be obtained from the race, <code>MillisecondsTimePoint(1)</code> is returned instead.
      */
     protected TimePoint getTo() {
-        return getToInternal() == null ? getTrackedRace().getAssumedEnd() == null ? new MillisecondsTimePoint(1)
-                : ceilingToResolution(getTrackedRace().getAssumedEnd()) : getToInternal();
+        return getToInternal() == null ? getTrackedRace().getEndOfRace() == null ? new MillisecondsTimePoint(1)
+                : ceilingToResolution(getTrackedRace().getEndOfRace()) : getToInternal();
     }
 
 }

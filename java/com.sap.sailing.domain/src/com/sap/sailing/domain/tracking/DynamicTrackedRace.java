@@ -8,7 +8,11 @@ import com.sap.sailing.domain.common.WindSource;
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
     
+    void recordFix(Buoy buoy, GPSFix fix);
+    
     void recordWind(Wind wind, WindSource windSource);
+
+    void removeWind(Wind wind, WindSource windSource);
 
     /**
      * The raw, updating feed of a single competitor participating in this race
@@ -20,8 +24,6 @@ public interface DynamicTrackedRace extends TrackedRace {
      * new track will be created in case no track was present for <code>buoy</code> so far.
      */
     DynamicGPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
-
-    // TODO need another listener protocol for general changes in ranking and leg completion
 
     /**
      * Updates all mark passings for <code>competitor</code> for this race. The
@@ -55,7 +57,7 @@ public interface DynamicTrackedRace extends TrackedRace {
 
     void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind);
     
-    DynamicTrackedEvent getTrackedEvent();
+    DynamicTrackedRegatta getTrackedEvent();
 
     /**
      * If and only if <code>raceIsKnownToStartUpwind</code> is <code>true</code>, this tracked race is allowed to use

@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -14,7 +15,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 public class RaceTrackerMock implements RaceTracker{
     
     private Long id;
-    private Event event;
+    private Regatta regatta;
     private Set<RaceDefinition> raceDefinitions;
     private boolean isTracking;
     
@@ -24,10 +25,10 @@ public class RaceTrackerMock implements RaceTracker{
     
     
     
-    public RaceTrackerMock(Long id, Event event, Set<RaceDefinition> raceDefinitions, boolean isTracking) {
+    public RaceTrackerMock(Long id, Regatta regatta, Set<RaceDefinition> raceDefinitions, boolean isTracking) {
         super();
         this.id = id;
-        this.event = event;
+        this.regatta = regatta;
         this.raceDefinitions = raceDefinitions;
         this.isTracking = isTracking;
     }
@@ -50,8 +51,8 @@ public class RaceTrackerMock implements RaceTracker{
     }
 
     @Override
-    public Event getEvent() {
-        return event;
+    public Regatta getRegatta() {
+        return regatta;
     }
 
     @Override
@@ -65,7 +66,7 @@ public class RaceTrackerMock implements RaceTracker{
     }
 
     @Override
-    public DynamicTrackedEvent getTrackedEvent() {
+    public DynamicTrackedRegatta getTrackedRegatta() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -78,6 +79,12 @@ public class RaceTrackerMock implements RaceTracker{
     @Override
     public Object getID() {
         return id;
+    }
+
+    @Override
+    public Set<RegattaAndRaceIdentifier> getRaceIdentifiers() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

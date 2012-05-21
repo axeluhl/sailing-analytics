@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
 
 public class WaypointImpl implements Waypoint {
@@ -38,6 +39,16 @@ public class WaypointImpl implements Waypoint {
     @Override
     public Integer getId() {
         return id;
+    }
+
+    @Override
+    public Waypoint resolve(DomainFactory domainFactory) {
+        Waypoint result = domainFactory.getExistingWaypointById(getId());
+        if (result == null) {
+            domainFactory.cacheWaypoint(this);
+            result = this;
+        }
+        return result;
     }
     
 }

@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -28,7 +28,10 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
+import com.sap.sailing.gwt.ui.shared.charts.MultiChartPanel;
+import com.sap.sailing.gwt.ui.shared.charts.MultiChartSettings;
 import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 import com.sap.sailing.gwt.ui.shared.components.ComponentToolbar;
 
@@ -48,14 +51,14 @@ public class CompareCompetitorsChartDialog extends DialogBox {
     private final CollapsablePanel collapsablePanel;
     
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService,
-            List<EventAndRaceIdentifier> races, final CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
+            List<RegattaAndRaceIdentifier> races, final CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             StringMessages stringConstants, ErrorReporter errorReporter) {
         super(false);
         raceSelectionProvider = new RaceSelectionModel();
         raceSelectionProvider.setAllRaces(races);
         
         multiChartPanel = new MultiChartPanel(sailingService, new AsyncActionsExecutor(), competitorSelectionProvider, raceSelectionProvider,
-                timer, stringConstants, errorReporter, false, false);
+                timer, new TimeZoomModel(), stringConstants, errorReporter, false, false);
         multiChartPanel.setSize("100%", "100%");
         
         FlowPanel contentPanel = new FlowPanel();
@@ -118,7 +121,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         HorizontalPanel raceChooserPanel = new HorizontalPanel();
         raceChooserPanel.setSpacing(5);
         boolean first = true;
-        for (final EventAndRaceIdentifier selectedRace : raceSelectionProvider.getAllRaces()) {
+        for (final RegattaAndRaceIdentifier selectedRace : raceSelectionProvider.getAllRaces()) {
             RadioButton raceSelectionRadioButton = new RadioButton("chooseRace");
             raceSelectionRadioButton.setText(selectedRace.toString());
             raceChooserPanel.add(raceSelectionRadioButton);
@@ -138,7 +141,7 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         
     }
 
-    private void selectRace(final EventAndRaceIdentifier selectedRace) {
+    private void selectRace(final RegattaAndRaceIdentifier selectedRace) {
         if(selectedRace != null)
             collapsablePanel.getHeaderTextAccessor().setText(selectedRace.getRaceName());
         else

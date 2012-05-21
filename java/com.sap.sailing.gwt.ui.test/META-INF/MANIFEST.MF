@@ -12,7 +12,8 @@ Require-Bundle: com.sap.sailing.gwt.ui,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain.tractracadapter
 Bundle-ClassPath: .
-Import-Package: javax.servlet;version="2.5.0",
+Import-Package: javax.jms;version="1.1.0",
+ javax.servlet;version="2.5.0",
  javax.servlet.http;version="2.5.0",
  junit.framework;version="4.8.1",
  org.json.simple,

@@ -92,7 +92,7 @@ public interface StringMessages extends Messages {
     String trackNewEvent();
     String trackableRaces();
     String trackWind();
-    String eventName();
+    String regattaName();
     String event();
     String startTime();
     String regatta();
@@ -284,4 +284,20 @@ public interface StringMessages extends Messages {
     String degreesBoatToTheWind();
     String racesInLeaderboard();
     String leaderboardsInGroup();
+    String replication();
+    String errorFetchingReplicaData(String message);
+    String averageCrossTrackErrorInMeters();
+    String enterMaster();
+    String errorStartingReplication(String hostname, String message);
+    String helpLines();
+    String startLine();
+    String finishLine();
+    String advantageLine();
+    String courseMiddleLine();
+    String jmsPortNumber();
+    String servletPortNumber();
+    String registeredAt(String string);
+    String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
+    String showWindSpeedSeries();
+    String showWindDirectionSeries();
 }

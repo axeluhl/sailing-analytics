@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,7 +19,6 @@ import org.junit.Before;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
-import com.sap.tractrac.clientmodule.util.Base64;
 import com.tractrac.clientmodule.Event;
 import com.tractrac.clientmodule.data.DataController;
 import com.tractrac.clientmodule.data.DataController.Listener;
@@ -38,8 +36,6 @@ import com.tractrac.clientmodule.setup.KeyValue;
 public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest implements Listener {
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
-    private static final String START_SIMULATOR_URL = "http://sapsimulation.tracdev.dk/start.php";
-    private static final String KILL_URL = "http://sapsimulation.tracdev.dk/kill.php";
     private Event event;
     private final Collection<Receiver> receivers;
     
@@ -55,9 +51,22 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
      */
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
-        setUp(new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/clientparams.php?event=event_20110505_SailingTea&race=bd8c778e-7c65-11e0-8236-406186cbf87c"),
-            tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
-                    tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED));
+        final String eventID = "event_20110505_SailingTea";
+        final String raceID = "bd8c778e-7c65-11e0-8236-406186cbf87c";
+        setUp(getParamURL(eventID, raceID), getLiveURI(), getStoredURI());
+    }
+
+    public static URI getStoredURI() throws URISyntaxException {
+        return tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED);
+    }
+
+    public static URI getLiveURI() throws URISyntaxException {
+        return tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE);
+    }
+
+    public static URL getParamURL(final String eventID, final String raceID) throws MalformedURLException {
+        return new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/clientparams.php?event="+eventID+
+                "&race="+raceID);
     }
     
     protected void setUp(URL paramUrl, URI liveUri, URI storedUri) throws FileNotFoundException, MalformedURLException {
@@ -101,11 +110,12 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     }
     
     @After
-    public void tearDown() throws MalformedURLException, IOException {
-        killAllRunningSimulations();
+    public void tearDown() throws MalformedURLException, IOException, InterruptedException {
+        Thread.sleep(500); // wait a bit before stopping the controller; in earlier versions we did a web request to stop the
+        // simulator here; then, the ioThread joined flawlessly; aggressively stopping the controller doesn't let the ioThread join
         controller.stop(/* abortStored */ true);
         try {
-            ioThread.join();
+            ioThread.join(3000); // just wait a little bit, then give up
         } catch (InterruptedException ex) {
             Assert.fail(ex.getMessage());
         }
@@ -115,31 +125,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest impl
     }
 
     
-    protected void startRaceSimulation(int speedMultiplier, int raceNumber)
-            throws MalformedURLException, IOException, InterruptedException {
-        URL url = new URL(
-                START_SIMULATOR_URL+"?racenumber="+raceNumber+"&speed="+
-                speedMultiplier+"&replaytime=sample");
-        URLConnection conn = url.openConnection();
-        authorize(conn);
-        conn.getContent(new Class[] { String.class });
-        Thread.sleep(2000); // wait 2s to ensure server has cleaned up properly
-    }
-
-    private void killAllRunningSimulations() throws IOException,
-            MalformedURLException {
-        URL url = new URL(KILL_URL);
-        URLConnection conn = url.openConnection();
-        authorize(conn);
-        conn.getContent(new Class[] { String.class });
-    }
-
-    private void authorize(URLConnection conn) {
-        conn.setRequestProperty("Authorization", "Basic "+
-                Base64.encode("SAP:ext2Boat".getBytes()));
-    }
-
-    protected Event getEvent() {
+    protected Event getTracTracEvent() {
         return event;
     }
 

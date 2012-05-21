@@ -172,4 +172,12 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="com.sap.sailing.server.replication"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

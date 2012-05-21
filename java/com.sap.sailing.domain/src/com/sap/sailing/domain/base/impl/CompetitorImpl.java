@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
@@ -35,4 +36,9 @@ public class CompetitorImpl extends NamedImpl implements Competitor {
         return boat;
     }
 
+    @Override
+    public Competitor resolve(DomainFactory domainFactory) {
+        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getName(), getTeam(), getBoat());
+        return result;
+    }
 }

@@ -77,17 +77,22 @@ public class RaceRankComparator implements Comparator<Competitor> {
                 // TrackedLegOfCompetitor comparison also correctly uses finish times for a leg
                 // in case we have the final leg, so both competitors finished the race.
                 if (o1Leg == null) {
-                    // both must already finished race; sort by race finish time: earlier time means smaller
-                    // (better)
-                    // rank
+                    // both must already have finished race; sort by race finish time: earlier time means smaller
+                    // (better) rank
                     result = o1LastMarkPassingBeforeTimePoint.getTimePoint().compareTo(
                             o2LastMarkPassingBeforeTimePoint.getTimePoint());
                 } else {
                     if (o2Leg == null) {
                         result = 1; // o1Leg != null, so o1 has started leg already, o2 hasn't
                     } else {
-                        result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()), timePoint)
-                                .compare(o1Leg, o2Leg);
+                        if (o1Leg.getLeg() != o2Leg.getLeg()) {
+                            // strange: both have the same number of mark passings but are in different legs; something is
+                            // broken, but we can only try our best:
+                            result = trackedRace.getRace().getCourse().getLegs().indexOf(o1Leg.getLeg()) -
+                                    trackedRace.getRace().getCourse().getLegs().indexOf(o2Leg.getLeg());
+                        } else {
+                            result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()), timePoint).compare(o1Leg, o2Leg);
+                        }
                     }
                 }
             }

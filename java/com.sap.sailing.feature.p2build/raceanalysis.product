@@ -44,6 +44,8 @@
       <property name="expedition.udp.port" value="2010" />
       <property name="mongo.port" value="10200" />
       <property name="osgi.noShutdown" value="true" />
+      <property name="replication.brokerURL" value="tcp://localhost:61616" />
+      <property name="replication.persistenceDir" value="." />
    </configurations>
 
 </product>
