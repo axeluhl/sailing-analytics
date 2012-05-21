@@ -53,6 +53,7 @@ import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 
@@ -183,7 +184,8 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         TextColumn<RaceDTO> deprecatedRegattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                return raceDTO.getRegatta().boatClass.name;
+                final BoatClassDTO boatClass = raceDTO.getRegatta().boatClass;
+                return boatClass == null ? "" : boatClass.name;
             }
         };
         deprecatedRegattaNameColumn.setSortable(true);
