@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.persistence;
 
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.WindSource;
@@ -52,4 +53,16 @@ public interface MongoObjectFactory {
      */
     void renameLeaderboardGroup(String oldName, String newName);
 
+    /**
+     * Stores the event with its name, venue and the venue's course areas. The regattas obtained by
+     * {@link Event#getRegattas()} are <em>not</em> stored by this call. They need to be stored separately
+     * by calls to {@link #storeRegatta} where a reference to their owning event is stored. 
+     */
+    void storeEvent(Event event);
+    
+    /**
+     * Stores the regatta together with its name, {@link Series} definitions and an optional link to the
+     * {@link Event} to which the regatta belongs.
+     */
+    void storeRegatta(Regatta regatta);
 }

@@ -10,4 +10,8 @@ import com.sap.sailing.domain.common.Named;
  */
 public interface Venue extends Named {
     Iterable<CourseArea> getCourseAreas();
+    
+    void addCourseArea(CourseArea courseArea);
+    
+    void removeCourseArea(CourseArea courseArea);
 }

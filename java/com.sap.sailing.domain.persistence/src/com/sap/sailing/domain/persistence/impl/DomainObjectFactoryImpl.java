@@ -16,13 +16,19 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.base.impl.CourseAreaImpl;
+import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -361,6 +367,54 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadWindTrack", t);
         }
         return result;
+    }
+
+    @Override
+    public Event loadEvent(String name) {
+        Event result;
+        BasicDBObject query = new BasicDBObject();
+        query.put(FieldNames.EVENT_NAME.name(), name);
+        DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
+        DBObject eventDBObject = eventCollection.findOne(query);
+        if (eventDBObject != null) {
+            result = loadEvent(eventDBObject);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    /**
+     * An event doesn't store its regattas; it's the regatta that stores a reference to its event; the regatta
+     * needs to add itself to the event when loaded or instantiated.
+     */
+    private Event loadEvent(DBObject eventDBObject) {
+        String name = (String) eventDBObject.get(FieldNames.EVENT_NAME.name());
+        Venue venue = loadVenue((DBObject) eventDBObject.get(FieldNames.VENUE.name()));
+        Event result = new EventImpl(name, venue);
+        return result;
+    }
+
+    private Venue loadVenue(DBObject dbObject) {
+        String name = (String) dbObject.get(FieldNames.VENUE_NAME.name());
+        BasicDBList dbCourseAreas = (BasicDBList) dbObject.get(FieldNames.COURSE_AREAS.name());
+        Venue result = new VenueImpl(name);
+        for (Object courseAreaDBObject : dbCourseAreas) {
+            CourseArea courseArea = loadCourseArea((DBObject) courseAreaDBObject);
+            result.addCourseArea(courseArea);
+        }
+        return result;
+    }
+
+    private CourseArea loadCourseArea(DBObject courseAreaDBObject) {
+        String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
+        return new CourseAreaImpl(name);
+    }
+
+    @Override
+    public Regatta loadRegatta(String name) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -10,11 +10,14 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -253,7 +256,36 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), newName));
         leaderboardGroupCollection.update(query, update);
     }
-    
-    
+
+    @Override
+    public void storeEvent(Event event) {
+        DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
+        DBObject query = new BasicDBObject();
+        query.put(FieldNames.EVENT_NAME.name(), event.getName());
+        DBObject eventDBObject = new BasicDBObject();
+        eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
+        DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
+        eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
+        eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false);
+    }
+
+    private DBObject getVenueAsDBObject(Venue venue) {
+        DBObject result = new BasicDBObject();
+        result.put(FieldNames.VENUE_NAME.name(), venue.getName());
+        BasicDBList courseAreaList = new BasicDBList();
+        result.put(FieldNames.COURSE_AREAS.name(), courseAreaList);
+        for (CourseArea courseArea : venue.getCourseAreas()) {
+            DBObject dbCourseArea = new BasicDBObject();
+            courseAreaList.add(dbCourseArea);
+            dbCourseArea.put(FieldNames.COURSE_AREA_NAME.name(), courseArea.getName());
+        }
+        return result;
+    }
+
+    @Override
+    public void storeRegatta(Regatta regatta) {
+        // TODO Auto-generated method stub
+        
+    }
 
 }

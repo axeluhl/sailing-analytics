@@ -13,6 +13,12 @@ public enum FieldNames {
     
     RACE_NAME,
     
+    VENUE,
+    VENUE_NAME,
+    
+    COURSE_AREAS,
+    COURSE_AREA_NAME,
+    
     // wind:
     WIND_SOURCE_NAME, WIND_SOURCE_ID, WIND,
     

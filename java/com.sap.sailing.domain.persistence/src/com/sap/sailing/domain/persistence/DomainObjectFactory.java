@@ -3,8 +3,9 @@ package com.sap.sailing.domain.persistence;
 import java.util.Map;
 
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -44,4 +45,7 @@ public interface DomainObjectFactory {
     Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
             long millisecondsOverWhichToAverageWind);
 
+    Event loadEvent(String name);
+    
+    Regatta loadRegatta(String name);
 }

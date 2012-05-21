@@ -11,6 +11,11 @@ import com.sap.sailing.domain.common.Named;
  * 
  */
 public interface Event extends Named {
+    /**
+     * @return a non-<code>null</code> venue for this event
+     */
+    Venue getVenue();
+    
     Iterable<Regatta> getRegattas();
     
     void addRegatta(Regatta regatta);

@@ -14,15 +14,30 @@ public enum CollectionNames {
     WIND_TRACKS,
     
     /**
-     * The collection identified by this
+     * Stores the leaderboards with their names, score corrections, competitor display name overrides, race
+     * columns and their fleets as well as the per-fleet tracked race assignments.
      */
     LEADERBOARDS,
     
+    /**
+     * Stores the leaderboard group configurations with references to the {@link #LEADERBOARDS} collection
+     */
     LEADERBOARD_GROUPS,
     
+    /**
+     * Top-level event information about events such as Kiel Week 2011, or IDM Travemünde 2011, including name and
+     * course areas.
+     */
     EVENTS,
     
+    /**
+     * Stores regatta definitions including their series layout and fleets and race columns. Regattas can reference
+     * the event from the {@link #EVENTS} collection to which they belong.
+     */
     REGATTAS,
     
+    /**
+     * Stores boat class-specific master data such as the class's hull length, logo, name, number of sailors, etc.
+     */
     BOAT_CLASSES;
 }
