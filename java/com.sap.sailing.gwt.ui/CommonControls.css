@@ -234,26 +234,50 @@
 }
 
 .timePanel-controls {
-	margin: 15px 0 0 0;
+	margin: 15px 0 8px 0;
 }
 
 .timePanel-controls-play {
+    float:left;
+    padding: 0 10px 0 0;
 }
 
 .timePanel-controls-playSpeed {
 	vertical-align: middle;
-	padding: 5px;
 	line-height: 25px;
+	float:left;
+	padding: 3px 0 0 0;
 }
 
 .timePanel-label {
+        float:left;
 }
 
 .timePanel-controls-time {
+    float:left;
+    padding: 5px 0 0 0;    
+}
+
+.timePanel-controls-time .dateLabel,
+.timePanel-controls-time .timeLabel {
+    padding: 0 20px 0 0;    	
 }
 
 .timePanel-controls-timeDelay {
+        float:left;
+}
 
+.timePanel-controls-playmode{
+    float:left;
+    padding: 5px 0 0 0;
+}
+
+.timePanel-controls-playmode .playModeLabel{
+    padding: 0 20px 0 0;   	
+}
+
+.timePanelSettings{
+	float: right;
 }
 
 .LogoAndTitlePanel {

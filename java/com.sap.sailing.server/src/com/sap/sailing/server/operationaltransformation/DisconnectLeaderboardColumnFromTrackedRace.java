@@ -21,7 +21,6 @@ public class DisconnectLeaderboardColumnFromTrackedRace extends AbstractLeaderbo
             RaceColumn raceColumn = leaderboard.getRaceColumnByName(getColumnName());
             if (raceColumn != null) {
                 raceColumn.setTrackedRace(null);
-                raceColumn.setRaceIdentifier(null);
                 toState.updateStoredLeaderboard(leaderboard);
             } else {
                 throw new IllegalArgumentException("Didn't find race "+getColumnName()+" in leaderboard "+getLeaderboardName());

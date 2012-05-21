@@ -35,6 +35,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -242,7 +243,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public LeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
-            final Collection<String> namesOfRacesForWhichToLoadLegDetails)
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDTO result = null;
@@ -279,8 +280,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                 public LeaderboardEntryDTO call() {
                                     try {
                                         return getLeaderboardEntryDTO(entry, raceColumn.getTrackedRace(), competitor, timePoint,
-                                                namesOfRacesForWhichToLoadLegDetails != null
-                                                        && namesOfRacesForWhichToLoadLegDetails.contains(raceColumn.getName()));
+                                                namesOfRaceColumnsForWhichToLoadLegDetails != null
+                                                        && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()));
                                     } catch (NoWindException e) {
                                         throw new NoWindError(e);
                                     }
@@ -305,7 +306,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
-        logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRacesForWhichToLoadLegDetails+") took "+
+        logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
@@ -422,7 +423,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             List<CompetitorDTO> competitorList = getCompetitorDTOs(regatta.getCompetitors());
             RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), competitorList);
             regattaDTO.races = getRaceDTOs(regatta);
+            BoatClass boatClass = regatta.getBoatClass();
+            if(boatClass != null) {
+                regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
+            }
             if (!regattaDTO.races.isEmpty()) {
+                for (RaceDTO race : regattaDTO.races) {
+                    race.setRegatta(regattaDTO);
+                }
                 result.add(regattaDTO);
             }
         }
@@ -1199,7 +1207,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             RegattaAndRaceIdentifier raceIdentifier = null;
             StrippedRaceDTO race = null;
-            if(raceColumn.getTrackedRace() != null) {
+            if (raceColumn.getTrackedRace() != null) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace();
                 raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta().getName(), trackedRace.getRace().getName());
                 
@@ -1332,6 +1340,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public Pair<String, String> getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName,
             String raceColumnName) {
+        // TODO method needs to be changed such that the link between RaceColumn+Fleet and the TrackedRace becomes clear to the client
         Pair<String, String> result = null;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {

@@ -40,7 +40,6 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
                     raceColumn.setTrackedRace(trackedRace);
                 }
             }
-            raceColumn.setRaceIdentifier(raceToConnect);
             success = true;
             toState.updateStoredLeaderboard(leaderboard);
         }

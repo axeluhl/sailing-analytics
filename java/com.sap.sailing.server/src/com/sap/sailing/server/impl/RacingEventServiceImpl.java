@@ -808,7 +808,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 boolean changed = false;
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     if (raceColumn.getTrackedRace() == trackedRace) {
-                        raceColumn.setTrackedRace(null); // but leave the RaceIdentifier on the race column untouched, e.g., for later re-load
+                        raceColumn.releaseTrackedRace(); // but leave the RaceIdentifier on the race column untouched, e.g., for later re-load
                         changed = true;
                     }
                 }

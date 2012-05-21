@@ -32,10 +32,6 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
         this.currentlyTracked = currentlyTracked;
     }
 
-    public RegattaDTO getDeprecatedRegatta() {
-        return regatta;
-    }
-
     public void setRegatta(RegattaDTO regatta) {
         this.regatta = regatta;
     }

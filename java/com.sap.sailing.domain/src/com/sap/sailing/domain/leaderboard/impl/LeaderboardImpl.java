@@ -107,7 +107,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
     
     @Override
     public RaceColumn addRaceColumn(String name, boolean medalRace) {
-        RaceInLeaderboardImpl column = createRaceColumn(name, medalRace);
+        RaceColumnImpl column = createRaceColumn(name, medalRace);
         races.add(column);
         return column;
     }
@@ -139,16 +139,14 @@ public class LeaderboardImpl implements Named, Leaderboard {
         RaceColumn column = getRaceColumnByName(columnName);
         if (column == null) {
             column = createRaceColumn(columnName, medalRace);
-            column.setTrackedRace(race);
-            column.setRaceIdentifier(race.getRaceIdentifier());
             races.add(column);
         }
         column.setTrackedRace(race);
         return column;
     }
 
-    protected RaceInLeaderboardImpl createRaceColumn(String columnName, boolean medalRace) {
-        return new RaceInLeaderboardImpl(columnName, medalRace);
+    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace) {
+        return new RaceColumnImpl(columnName, medalRace);
     }
 
     private Iterable<TrackedRace> getTrackedRaces() {
@@ -265,6 +263,7 @@ public class LeaderboardImpl implements Named, Leaderboard {
         for (RaceColumn raceColumn : getRaceColumns()) {
             for (Competitor competitor : getCompetitors()) {
                 int trackedPoints;
+                // TODO when a column has more than one race, keyed by fleet, find the one for competitor
                 if (raceColumn.getTrackedRace() != null && raceColumn.getTrackedRace().hasStarted(timePoint)) {
                     trackedPoints = raceColumn.getTrackedRace().getRank(competitor, timePoint);
                 } else {
