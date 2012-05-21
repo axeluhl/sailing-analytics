@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.common.Named;
+
 /**
  * An event is a group of {@link Regatta regattas} carried out at a common venue within a common time frame. For
  * example, Kiel Week is an event, and the International German Championship held, e.g., in Travemünde, is an event,
@@ -8,6 +10,6 @@ package com.sap.sailing.domain.base;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Event {
+public interface Event extends Named {
     Iterable<Regatta> getRegattas();
 }
