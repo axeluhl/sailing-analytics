@@ -1,9 +1,12 @@
 package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
@@ -19,10 +22,12 @@ import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.RaceColumnInSeries;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -69,11 +74,53 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName());
         assertEquals(regattaBaseName, loadedRegatta.getBaseName());
+        Iterator<? extends Series> seriesIter = loadedRegatta.getSeries().iterator();
+        Series loadedQualifyingSeries = seriesIter.next();
+        assertFalse(loadedQualifyingSeries.isFleetsOrdered());
+        assertEquals(numberOfQualifyingRaces, Util.size(loadedQualifyingSeries.getRaceColumns()));
+        Series loadedFinalSeries = seriesIter.next();
+        assertTrue(loadedFinalSeries.isFleetsOrdered());
+        assertEquals(numberOfFinalRaces, Util.size(loadedFinalSeries.getRaceColumns()));
+        Series loadedMedalSeries = seriesIter.next();
+        assertEquals(1, Util.size(loadedMedalSeries.getRaceColumns()));
     }
 
     @Test
     public void testLoadStoreRegattaWithFleetsEnsuringIdenticalFleetsInSeriesAndRaceColumns() {
+        final int numberOfQualifyingRaces = 5;
+        final int numberOfFinalRaces = 7;
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        Regatta regatta = createRegatta(numberOfQualifyingRaces, numberOfFinalRaces, regattaBaseName, boatClass);
+        MongoObjectFactory mof = MongoFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        mof.storeRegatta(regatta);
         
+        DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName());
+        assertEquals(regattaBaseName, loadedRegatta.getBaseName());
+        Iterator<? extends Series> seriesIter = loadedRegatta.getSeries().iterator();
+        Series loadedQualifyingSeries = seriesIter.next();
+        int i=1;
+        for (RaceColumn raceColumn : loadedQualifyingSeries.getRaceColumns()) {
+            assertTrue(raceColumn instanceof RaceColumnInSeries);
+            assertEquals("Q"+i, raceColumn.getName());
+            assertTrue(Util.equals(loadedQualifyingSeries.getFleets(), raceColumn.getFleets()));
+            i++;
+        }
+        Series loadedFinalSeries = seriesIter.next();
+        i=1;
+        for (RaceColumn raceColumn : loadedFinalSeries.getRaceColumns()) {
+            assertTrue(raceColumn instanceof RaceColumnInSeries);
+            assertEquals("F"+i, raceColumn.getName());
+            assertTrue(Util.equals(loadedFinalSeries.getFleets(), raceColumn.getFleets()));
+            i++;
+        }
+        Series loadedMedalSeries = seriesIter.next();
+        for (RaceColumn raceColumn : loadedMedalSeries.getRaceColumns()) {
+            assertTrue(raceColumn instanceof RaceColumnInSeries);
+            assertEquals("M", raceColumn.getName());
+            assertTrue(Util.equals(loadedMedalSeries.getFleets(), raceColumn.getFleets()));
+        }
     }
 
 
@@ -108,9 +155,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         List<Fleet> medalFleets = new ArrayList<Fleet>();
         medalFleets.add(new FleetImpl("Medal"));
         List<String> medalRaceColumnNames = new ArrayList<String>();
-        for (int i=1; i<=numberOfFinalRaces; i++) {
-            medalRaceColumnNames.add("M");
-        }
+        medalRaceColumnNames.add("M");
         Series medalSeries = new SeriesImpl("Medal", /* isFleetsOrdered */ true, /* isMedal */ true, medalFleets, medalRaceColumnNames);
         series.add(medalSeries);
 
