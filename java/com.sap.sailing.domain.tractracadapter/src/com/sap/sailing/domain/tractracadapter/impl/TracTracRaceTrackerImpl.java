@@ -116,7 +116,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException {
-        this(tractracEvent, domainFactory.getOrCreateEvent(tractracEvent), domainFactory, paramURL, liveURI, storedURI,
+        this(tractracEvent, domainFactory.getOrCreateRegatta(tractracEvent), domainFactory, paramURL, liveURI, storedURI,
                 startOfTracking, endOfTracking, windStore, trackedRegattaRegistry);
     }
     
@@ -162,7 +162,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             // domainEvent *after* calling removeRace
             domainFactory.removeRace(tractracEvent, tractracRace, trackedRegattaRegistry);
         }
-        this.regatta = domainFactory.getOrCreateEvent(tractracEvent);
+        this.regatta = domainFactory.getOrCreateRegatta(tractracEvent);
         setTrackedRegatta(trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta));
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();

@@ -89,7 +89,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Regatta getOrCreateEvent(String raceID) {
+    public Regatta getOrCreateRegatta(String raceID) {
         Regatta result = raceIDToEventCache.get(raceID);
         if (result == null) {
             result = new RegattaImpl(raceID, null);
@@ -228,7 +228,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public void removeRace(String raceID) {
-        Regatta regatta = getOrCreateEvent(raceID);
+        Regatta regatta = getOrCreateRegatta(raceID);
         Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
         if (regatta != null) {
             for (RaceDefinition race : regatta.getAllRaces()) {

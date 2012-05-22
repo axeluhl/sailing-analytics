@@ -140,7 +140,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     protected DynamicTrackedRace getTrackedRace(Race race) {
         DynamicTrackedRace result = null;
         RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race);
-        com.sap.sailing.domain.base.Regatta domainEvent = getDomainFactory().getOrCreateEvent(getTracTracEvent());
+        com.sap.sailing.domain.base.Regatta domainEvent = getDomainFactory().getOrCreateRegatta(getTracTracEvent());
         if (domainEvent.getRaceByName(raceDefinition.getName()) != null) {
             result = trackedRegatta.getTrackedRace(raceDefinition);
         }

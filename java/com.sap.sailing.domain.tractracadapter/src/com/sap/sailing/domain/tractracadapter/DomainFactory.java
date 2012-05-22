@@ -85,7 +85,7 @@ public interface DomainFactory {
      * an equal name with a boat class with an equal name as the <code>event</code>'s
      * boat class exists yet.
      */
-    com.sap.sailing.domain.base.Regatta getOrCreateEvent(Event event);
+    com.sap.sailing.domain.base.Regatta getOrCreateRegatta(Event event);
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -222,7 +222,7 @@ public interface DomainFactory {
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding
      * {@link RaceDefinition} exists, from the {@link TrackedRegatta}. If removing the race from the event, the event is
-     * removed from the event cache such that {@link #getOrCreateEvent(Event)} will have to create a new one. Similarly,
+     * removed from the event cache such that {@link #getOrCreateRegatta(Event)} will have to create a new one. Similarly,
      * if the {@link TrackedRace} that was removed from the {@link TrackedRegatta} was the last one, the
      * {@link TrackedRegatta} is removed such that {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)}
      * will have to create a new one.

@@ -20,7 +20,7 @@ import difflib.PatchFailedException;
 public interface DomainFactory {
     final static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
-    Regatta getOrCreateEvent(String raceID);
+    Regatta getOrCreateRegatta(String raceID);
 
     Nationality getOrCreateNationality(String nationalityName);
 
