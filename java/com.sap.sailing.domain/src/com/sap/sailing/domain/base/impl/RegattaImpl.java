@@ -16,7 +16,6 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 
 public class RegattaImpl extends NamedImpl implements Regatta {
     private static final long serialVersionUID = 6509564189552478869L;
@@ -30,7 +29,7 @@ public class RegattaImpl extends NamedImpl implements Regatta {
      */
     public RegattaImpl(String baseName, BoatClass boatClass) {
         this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isFleetsOrdered */true,
-                Collections.singletonList(new FleetImpl("Default")), new ArrayList<RaceColumn>())));
+                /* isMedal */ false, Collections.singletonList(new FleetImpl("Default")), /* race column names */ new ArrayList<String>())));
     }
     
     public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series) {
