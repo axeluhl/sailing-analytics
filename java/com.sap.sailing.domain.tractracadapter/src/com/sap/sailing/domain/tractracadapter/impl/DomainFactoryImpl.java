@@ -94,7 +94,7 @@ public class DomainFactoryImpl implements DomainFactory {
      * class needs to be determined for an regatta. Synchronization for additions / removals is tied to the
      * synchronization for {@link #regattaCache}.
      */
-    private final WeakIdentityHashMap<com.tractrac.clientmodule.Event, Regatta> weakEventCache = new WeakIdentityHashMap<>();
+    private final WeakIdentityHashMap<com.tractrac.clientmodule.Event, Regatta> weakRegattaCache = new WeakIdentityHashMap<>();
     
     private final Map<Race, RaceDefinition> raceCache = new HashMap<Race, RaceDefinition>();
 
@@ -258,7 +258,7 @@ public class DomainFactoryImpl implements DomainFactory {
             
             // try a quick look-up in the weak cache using the TracTrac event as key; only if that delivers no result,
             // compute the dominant boat class which requires a lot more effort
-            Regatta result = weakEventCache.get(event);
+            Regatta result = weakRegattaCache.get(event);
             if (result == null) {
                 Collection<CompetitorClass> competitorClassList = new ArrayList<CompetitorClass>();
                 for (com.tractrac.clientmodule.Competitor c : event.getCompetitorList()) {
@@ -271,7 +271,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (result == null) {
                     result = new RegattaImpl(event.getName(), boatClass);
                     regattaCache.put(key, result);
-                    weakEventCache.put(event, result);
+                    weakRegattaCache.put(event, result);
                 }
             }
             return result;
@@ -347,7 +347,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     regatta.removeRace(raceDefinition);
                     if (oldSize > 0 && Util.size(regatta.getAllRaces()) == 0) {
                         regattaCache.remove(key);
-                        weakEventCache.remove(tractracEvent);
+                        weakRegattaCache.remove(tractracEvent);
                     }
                     TrackedRegatta trackedRegatta = trackedRegattaRegistry.getTrackedRegatta(regatta);
                     if (trackedRegatta != null) {

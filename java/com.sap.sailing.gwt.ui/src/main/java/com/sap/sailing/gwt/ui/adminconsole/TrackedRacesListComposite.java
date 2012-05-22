@@ -113,7 +113,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
-            StringMessages stringConstants, boolean hasMultiSelection) {
+            StringMessages stringMessages, boolean hasMultiSelection) {
         if (regattaRefresher == null) {
             throw new IllegalArgumentException("regattaRefresher must not be null");
         }
@@ -130,7 +130,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         setWidget(panel);
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
-        Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
+        Label lblFilterEvents = new Label(stringMessages.filterRacesByName() + ":");
         lblFilterEvents.setWordWrap(false);
         filterPanel.setSpacing(5);
         filterPanel.add(lblFilterEvents);
@@ -144,7 +144,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         });
         filterPanel.add(filterRacesTextbox);
 
-        noTrackedRacesLabel = new Label(stringConstants.noRacesYet());
+        noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
 
@@ -181,16 +181,16 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
             }
         });
 
-        TextColumn<RaceDTO> deprecatedRegattaNameColumn = new TextColumn<RaceDTO>() {
+        TextColumn<RaceDTO> boatClassNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
                 final BoatClassDTO boatClass = raceDTO.getRegatta().boatClass;
                 return boatClass == null ? "" : boatClass.name;
             }
         };
-        deprecatedRegattaNameColumn.setSortable(true);
+        boatClassNameColumn.setSortable(true);
 
-        columnSortHandler.setComparator(deprecatedRegattaNameColumn, new Comparator<RaceDTO>() {
+        columnSortHandler.setComparator(boatClassNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO t1, RaceDTO t2) {
                 RegattaDTO regattaOne = t1.getRegatta();
@@ -290,11 +290,11 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
             }
         };
 
-        raceTable.addColumn(regattaNameColumn, stringConstants.event());
-        raceTable.addColumn(deprecatedRegattaNameColumn, stringConstants.regatta());
-        raceTable.addColumn(raceNameColumn, stringConstants.race());
-        raceTable.addColumn(raceStartColumn, stringConstants.startTime());
-        raceTable.addColumn(raceTrackedColumn, stringConstants.tracked());
+        raceTable.addColumn(regattaNameColumn, stringMessages.regatta());
+        raceTable.addColumn(boatClassNameColumn, stringMessages.boatClass());
+        raceTable.addColumn(raceNameColumn, stringMessages.race());
+        raceTable.addColumn(raceStartColumn, stringMessages.startTime());
+        raceTable.addColumn(raceTrackedColumn, stringMessages.tracked());
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
         raceTable.setVisible(false);
@@ -326,7 +326,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
-        btnRemoveRace = new Button(stringConstants.remove());
+        btnRemoveRace = new Button(stringMessages.remove());
         btnRemoveRace.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -337,7 +337,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         });
         btnRemoveRace.setEnabled(false);
         trackedRacesButtonPanel.add(btnRemoveRace);
-        btnUntrack = new Button(stringConstants.stopTracking());
+        btnUntrack = new Button(stringMessages.stopTracking());
         btnUntrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
@@ -351,7 +351,7 @@ public class TrackedRacesListComposite extends FormPanel implements RegattaDispl
         btnUntrack.setEnabled(false);
         trackedRacesButtonPanel.add(btnUntrack);
 
-        btnRefresh = new Button(stringConstants.refresh());
+        btnRefresh = new Button(stringMessages.refresh());
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
