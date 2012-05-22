@@ -9,6 +9,6 @@ import com.sap.sailing.domain.common.Named;
  * @author Axel Uhl (D043530)
  *
  */
-public interface RaceArea extends Named {
+public interface CourseArea extends Named {
 
 }

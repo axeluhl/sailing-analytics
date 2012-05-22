@@ -1,14 +1,14 @@
 package com.sap.sailing.domain.persistence;
 
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 
 /**
  * Offers methods to construct {@link DBObject MongoDB objects} from domain objects.
@@ -37,8 +37,6 @@ public interface MongoObjectFactory {
 
     void renameLeaderboard(String oldName, String newName);
 
-    void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject);
-    
     /**
      * Stores the group, if it doesn't exist or updates it.<br />
      * Leaderboards in the group, which aren't stored in the database, will be stored.
@@ -55,4 +53,16 @@ public interface MongoObjectFactory {
      */
     void renameLeaderboardGroup(String oldName, String newName);
 
+    /**
+     * Stores the event with its name, venue and the venue's course areas. The regattas obtained by
+     * {@link Event#getRegattas()} are <em>not</em> stored by this call. They need to be stored separately
+     * by calls to {@link #storeRegatta} where a reference to their owning event is stored. 
+     */
+    void storeEvent(Event event);
+    
+    /**
+     * Stores the regatta together with its name, {@link Series} definitions and an optional link to the
+     * {@link Event} to which the regatta belongs.
+     */
+    void storeRegatta(Regatta regatta);
 }

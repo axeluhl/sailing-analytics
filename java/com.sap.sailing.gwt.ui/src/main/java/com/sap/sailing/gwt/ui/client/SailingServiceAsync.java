@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
@@ -159,7 +159,7 @@ public interface SailingServiceAsync {
 
     /**
      * Creates a {@link LeaderboardDTO} for each leaderboard known by the server and fills in the name, race master data
-     * in the form of {@link RaceInLeaderboardDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints
+     * in the form of {@link RaceColumnDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints
      * carried points} and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No
      * data about the points is filled into the result object. No data about the competitor display names is filled in;
      * instead, an empty map is used for {@link LeaderboardDTO#competitorDisplayNames}.
@@ -196,16 +196,19 @@ public interface SailingServiceAsync {
 
     void removeLeaderboardColumn(String leaderboardName, String columnName, AsyncCallback<Void> callback);
 
-    /**
-     * @param asyncCallback receives <code>true</code> if connecting was successful
-     */
-    void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
+    void connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName, String fleetName,
             RaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
 
+    /**
+     * The key set of the map returned contains all fleets of the race column identified by the combination of
+     * <code>leaderboardName</code> and <code>raceColumnName</code>. If a value is <code>null</code>, there is no
+     * tracked race currently linked to the fleet in the race column; otherwise, the value is the {@link RaceIdentifier}
+     * of the tracked race currently connected for the fleet whose name is the key. The map returned is never <code>null</code>.
+     */
     void getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName,
-            AsyncCallback<Pair<String, String>> callback);
+            AsyncCallback<Map<String, RegattaAndRaceIdentifier>> callback);
 
-    void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName,
+    void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> callback);
 
     void updateLeaderboardCarryValue(String leaderboardName, String competitorID, Integer carriedPoints, AsyncCallback<Void> callback);

@@ -59,7 +59,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         return tractracEvent;
     }
     
-    protected DynamicTrackedRegatta getTrackedEvent() {
+    protected DynamicTrackedRegatta getTrackedRegatta() {
         return trackedRegatta;
     }
     

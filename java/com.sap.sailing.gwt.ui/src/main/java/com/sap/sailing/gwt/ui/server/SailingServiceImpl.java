@@ -39,6 +39,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -128,7 +129,7 @@ import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -148,7 +149,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
-import com.sap.sailing.server.operationaltransformation.CreateLeaderboard;
+import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.DisconnectLeaderboardColumnFromTrackedRace;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDown;
@@ -255,12 +256,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                RegattaAndRaceIdentifier raceIdentifier = null;
-                if (raceColumn.getTrackedRace() != null) {
-                    TrackedRace trackedRace = raceColumn.getTrackedRace();
-                    raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta().getName(), trackedRace.getRace().getName());
+                result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace());
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    RegattaAndRaceIdentifier raceIdentifier = null;
+                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    if (trackedRace != null) {
+                        raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
+                                .getName(), trackedRace.getRace().getName());
+                    }
+                    result.addRace(raceColumn.getName(), fleet.getName(), raceColumn.isMedalRace(),
+                            raceIdentifier, /* StrippedRaceDTO */ null);
                 }
-                result.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, null);
             }
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -279,7 +285,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         @Override
                                 public LeaderboardEntryDTO call() {
                                     try {
-                                        return getLeaderboardEntryDTO(entry, raceColumn.getTrackedRace(), competitor, timePoint,
+                                        return getLeaderboardEntryDTO(entry, raceColumn.getTrackedRace(competitor), competitor, timePoint,
                                                 namesOfRaceColumnsForWhichToLoadLegDetails != null
                                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()));
                                     } catch (NoWindException e) {
@@ -1144,7 +1150,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public LeaderboardDTO createLeaderboard(String leaderboardName, int[] discardThresholds) {
-        return createStrippedLeaderboardDTO(getService().apply(new CreateLeaderboard(leaderboardName, discardThresholds)), false);
+        return createStrippedLeaderboardDTO(getService().apply(new CreateFlexibleLeaderboard(leaderboardName, discardThresholds)), false);
     }
 
     @Override
@@ -1181,11 +1187,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         for (Leaderboard leaderboard : leaderboards.values()) {
             Iterable<RaceColumn> races = leaderboard.getRaceColumns();
             for (RaceColumn raceInLeaderboard : races) {
-                TrackedRace trackedRace = raceInLeaderboard.getTrackedRace();
-                RaceDefinition trackedRaceDef = trackedRace != null ? trackedRace.getRace() : null;
-                if (trackedRaceDef != null && trackedRaceDef.getName().equals(race.name)) {
-                    results.add(createStrippedLeaderboardDTO(leaderboard, false));
-                    break;
+                for (Fleet fleet : raceInLeaderboard.getFleets()) {
+                    TrackedRace trackedRace = raceInLeaderboard.getTrackedRace(fleet);
+                    if (trackedRace != null) {
+                        RaceDefinition trackedRaceDef = trackedRace.getRace();
+                        if (trackedRaceDef.getName().equals(race.name)) {
+                            results.add(createStrippedLeaderboardDTO(leaderboard, false));
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -1194,49 +1204,54 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     /**
      * Creates a {@link LeaderboardDTO} for <code>leaderboard</code> and fills in the name, race master data
-     * in the form of {@link RaceInLeaderboardDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints carried points}
+     * in the form of {@link RaceColumnDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints carried points}
      * and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
      * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
      * is used for {@link LeaderboardDTO#competitorDisplayNames}.<br />
      * If <code>withAdditionalData</code> is <code>true</code>, additional data (like location and race dates) will be loaded.
      */
     private LeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withAdditionalData) {
-        LeaderboardDTO dto = new LeaderboardDTO();
-        dto.name = leaderboard.getName();
-        dto.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+        LeaderboardDTO leaderboardDTO = new LeaderboardDTO();
+        leaderboardDTO.name = leaderboard.getName();
+        leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             RegattaAndRaceIdentifier raceIdentifier = null;
             StrippedRaceDTO race = null;
-            if (raceColumn.getTrackedRace() != null) {
-                TrackedRace trackedRace = raceColumn.getTrackedRace();
-                raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedEvent().getRegatta().getName(), trackedRace.getRace().getName());
-                
-                if (withAdditionalData) {
-                    //Getting the places of the race
-                    Pair<Placemark, Placemark> startAndFinish = getStartFinishPlacemarksForTrackedRace(trackedRace);
-                    PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
-                    if (startAndFinish.getA() != null) {
-                        racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
+            for (Fleet fleet : raceColumn.getFleets()) {
+                if (raceColumn.getTrackedRace(fleet) != null) {
+                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
+                    if (withAdditionalData) {
+                        // Getting the places of the race
+                        PlacemarkOrderDTO racePlaces = getRacePlaces(trackedRace);
+                        // Creating raceDTO and getting the dates
+                        race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
+                        race.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
+                        race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
+                        race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                     }
-                    if (startAndFinish.getB() != null) {
-                        racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
-                    }
-                    if (racePlaces.isEmpty()) {
-                        racePlaces = null;
-                    }
-                    //Creating raceDTO and getting the dates
-                    race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
-                    race.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
-                    race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace
-                            .getStartOfTracking().asDate();
-                    race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 }
+                leaderboardDTO.addRace(raceColumn.getName(), fleet.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
             }
-            dto.addRace(raceColumn.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
         }
-        dto.hasCarriedPoints = leaderboard.hasCarriedPoints();
-        dto.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
-        return dto;
+        leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
+        leaderboardDTO.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+        return leaderboardDTO;
+    }
+
+    private PlacemarkOrderDTO getRacePlaces(TrackedRace trackedRace) {
+        Pair<Placemark, Placemark> startAndFinish = getStartFinishPlacemarksForTrackedRace(trackedRace);
+        PlacemarkOrderDTO racePlaces = new PlacemarkOrderDTO();
+        if (startAndFinish.getA() != null) {
+            racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getA()));
+        }
+        if (startAndFinish.getB() != null) {
+            racePlaces.getPlacemarks().add(convertToPlacemarkDTO(startAndFinish.getB()));
+        }
+        if (racePlaces.isEmpty()) {
+            racePlaces = null;
+        }
+        return racePlaces;
     }
     
     private Pair<Placemark, Placemark> getStartFinishPlacemarksForTrackedRace(TrackedRace race) {
@@ -1333,23 +1348,24 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName, RaceIdentifier raceIdentifier) {
-        return getService().apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, raceColumnName, raceIdentifier));
+    public boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName, String fleetName, RaceIdentifier raceIdentifier) {
+        return getService().apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, raceColumnName, fleetName, raceIdentifier));
     }
 
     @Override
-    public Pair<String, String> getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName,
-            String raceColumnName) {
-        // TODO method needs to be changed such that the link between RaceColumn+Fleet and the TrackedRace becomes clear to the client
-        Pair<String, String> result = null;
+    public Map<String, RegattaAndRaceIdentifier> getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName) {
+        Map<String, RegattaAndRaceIdentifier> result = new HashMap<String, RegattaAndRaceIdentifier>();
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
-                TrackedRace trackedRace = raceColumn.getTrackedRace();
-                if (trackedRace != null) {
-                    result = new Pair<String, String>(trackedRace.getTrackedEvent().getRegatta().getName(),
-                            trackedRace.getRace().getName());
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    if (trackedRace != null) {
+                        result.put(fleet.getName(), trackedRace.getRaceIdentifier());
+                    } else {
+                        result.put(fleet.getName(), null);
+                    }
                 }
             }
         }
@@ -1357,8 +1373,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName) {
-        getService().apply(new DisconnectLeaderboardColumnFromTrackedRace(leaderboardName, raceColumnName));
+    public void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName, String fleetName) {
+        getService().apply(new DisconnectLeaderboardColumnFromTrackedRace(leaderboardName, raceColumnName, fleetName));
     }
 
     @Override

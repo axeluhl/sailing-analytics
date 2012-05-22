@@ -62,14 +62,7 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root, viewModeParamValue);
             groupPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
-            groupPanel.setWelcomeWidget(new SimpleWelcomeWidget( stringMessages.welcomeToSailingAnalytics(),
-                            "Understanding what happens out on the race course isn't always easy. To help solve this challenge and" +
-                            " bring the excitement of sailing to the fans, we have developed a leader board based on SAP analytics.\n" +
-                            " Through analyzing GPS data together with integrated wind measurements from sensors out on the race course," +
-                            " the leader board displays information such as in-race ranking, average speeds, distance travelled, ETA" +
-                            " (estimated time of arrival at the next mark rounding), gaps to leader, gains and losses per leg.\n\n" +
-                            "Check out the results for yourself to see who triumphed - and how they did it."));
-
+            groupPanel.setWelcomeWidget(new SimpleWelcomeWidget( stringMessages.welcomeToSailingAnalytics(), stringMessages.welcomeToSailingAnalyticsBody()));
             SimplePanel feedbackPanel = new SimplePanel();
             feedbackPanel.getElement().getStyle().setProperty("clear", "right");
             feedbackPanel.addStyleName("feedbackPanel");

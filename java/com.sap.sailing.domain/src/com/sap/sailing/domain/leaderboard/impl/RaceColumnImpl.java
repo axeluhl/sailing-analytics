@@ -1,21 +1,23 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
-import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.impl.AbstractRaceColumn;
+import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 
-public class RaceColumnImpl implements RaceColumn {
+public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceColumn {
     private static final long serialVersionUID = -7801617988982540470L;
-    private TrackedRace trackedRace;
-    private boolean medalRace;
-    private String name;
-    private RaceIdentifier raceIdentifier;
     
-    public RaceColumnImpl(String name, boolean medalRace) {
-        this.name = name;
+    /**
+     * All fleets for which this column can contain a race. This is the maximum set of keys possible for
+     * {@link #trackedRaces} and {@link #raceIdentifiers}.
+     */
+    private final Iterable<Fleet> fleets;
+    private boolean medalRace;
+    
+    public RaceColumnImpl(String name, boolean medalRace, Iterable<Fleet> fleets) {
+        super(name);
         this.medalRace = medalRace;
+        this.fleets = fleets;
     }
     
     @Override
@@ -24,48 +26,13 @@ public class RaceColumnImpl implements RaceColumn {
     }
 
     @Override
-    public TrackedRace getTrackedRace() {
-        return trackedRace;
-    }
-
-    @Override
-    public void setTrackedRace(TrackedRace trackedRace) {
-        this.trackedRace = trackedRace;
-        this.setRaceIdentifier(trackedRace == null ? null : trackedRace.getRaceIdentifier());
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String newName) {
-        this.name = newName;
-    }
-
-    @Override
-    public Pair<Competitor, RaceColumn> getKey(Competitor competitor) {
-        return new Pair<Competitor, RaceColumn>(competitor, this);
-    }
-
-    @Override
     public void setIsMedalRace(boolean isMedalRace) {
         this.medalRace = isMedalRace;
     }
 
     @Override
-    public RaceIdentifier getRaceIdentifier() {
-        return raceIdentifier;
+    public Iterable<Fleet> getFleets() {
+        return fleets;
     }
 
-    @Override
-    public void setRaceIdentifier(RaceIdentifier raceIdentifier) {
-        this.raceIdentifier = raceIdentifier;
-    }
-
-    @Override
-    public void releaseTrackedRace() {
-        trackedRace = null;
-    }
 }

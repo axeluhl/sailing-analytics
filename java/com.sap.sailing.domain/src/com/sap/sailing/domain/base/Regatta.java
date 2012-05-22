@@ -26,9 +26,6 @@ public interface Regatta extends Named {
      * For example, it may be the case that a {@link RaceDefinition} is returned by this method for which no
      * {@link TrackedRace} exists in the corresponding {@link TrackedRegatta}. This could be the case, e.g., during
      * the initialization of the tracker as well as during removing a race from the server.<p>
-     * 
-     * Callers iterating over the result that anticipate concurrent modifications shall synchronize the iteration
-     * on the result.
      */
     Iterable<RaceDefinition> getAllRaces();
     

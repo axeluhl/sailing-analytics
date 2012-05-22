@@ -118,7 +118,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             }
 
             @Override
-            public DynamicTrackedRegatta getTrackedEvent() {
+            public DynamicTrackedRegatta getTrackedRegatta() {
                 return SwissTimingRaceTrackerImpl.this.getTrackedRegatta();
             }
 

@@ -33,7 +33,7 @@ public interface RacesHandle {
      */
     Set<RaceDefinition> getRaces(long timeoutInMilliseconds);
 
-    DynamicTrackedRegatta getTrackedEvent();
+    DynamicTrackedRegatta getTrackedRegatta();
 
     /**
      * The tracker managing the tracking of the race to which this is a handle.

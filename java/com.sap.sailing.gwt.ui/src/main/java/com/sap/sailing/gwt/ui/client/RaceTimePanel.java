@@ -152,7 +152,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             break;
         case Replay:
             // set time to end of race
-            if (newRaceTimesInfo.getLastMarkPassingTimes() != null) {
+            if (newRaceTimesInfo.getLastMarkPassingTimes() != null && newRaceTimesInfo.getLastMarkPassingTimes().firstPassingDate != null) {
                 timer.setTime(newRaceTimesInfo.getLastMarkPassingTimes().firstPassingDate.getTime());
             } else  if (newRaceTimesInfo.endOfRace != null) {
                 timer.setTime(newRaceTimesInfo.endOfRace.getTime());
@@ -173,7 +173,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             requiresMarkerUpdate = false;
             int numberOfLegs = newRaceTimesInfo.markPassingTimes.size();
             for(int i = 0; i < numberOfLegs; i++) {
-                if(newRaceTimesInfo.markPassingTimes.get(i).firstPassingDate.getTime() != lastRaceTimesInfo.markPassingTimes.get(i).firstPassingDate.getTime()) {
+                if(newRaceTimesInfo.markPassingTimes.get(i).firstPassingDate != lastRaceTimesInfo.markPassingTimes.get(i).firstPassingDate) {
                     requiresMarkerUpdate = true;
                     break;
                 }
@@ -187,7 +187,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         if (requiresMarkerUpdate && sliderBar.isMinMaxInitialized()) {
             sliderBar.clearMarkers();
             for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
-              sliderBar.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
+                if(markPassingTimesDTO.firstPassingDate != null) {
+                    sliderBar.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
+                }
             }
             if(newRaceTimesInfo.endOfRace != null) {
                 sliderBar.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));

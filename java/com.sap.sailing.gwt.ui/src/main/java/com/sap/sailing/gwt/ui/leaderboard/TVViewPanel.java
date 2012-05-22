@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewModes;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 
@@ -101,11 +101,13 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     
     private void updateRaceTimesInfoProvider() {
         boolean providerChanged = false;
-        for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-            RaceIdentifier raceIdentifier = race.getRaceIdentifier();
-            if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
-                raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
-                providerChanged = true;
+        for (RaceColumnDTO race : leaderboard.getRaceList()) {
+            for (String fleetName : race.getFleetNames()) {
+                RaceIdentifier raceIdentifier = race.getRaceIdentifier(fleetName);
+                if (raceIdentifier != null && !raceTimesInfoProvider.containsRaceIdentifier(raceIdentifier)) {
+                    raceTimesInfoProvider.addRaceIdentifier(raceIdentifier, false);
+                    providerChanged = true;
+                }
             }
         }
         if (providerChanged) {
@@ -127,7 +129,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             if (leaderboard != null) {
                 //Resetting the settings of the leaderboard panel to prevent, that some race columns get lost
                 List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
-                for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
+                for (RaceColumnDTO race : leaderboard.getRaceList()) {
                     namesOfRaceColumnsToShow.add(race.getRaceColumnName());
                 }
                 LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
@@ -220,13 +222,16 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private RegattaAndRaceIdentifier getFirstStartedAndUnfinishedRace() {
         RegattaAndRaceIdentifier firstStartedAndUnfinishedRace = null;
         Map<RaceIdentifier, RaceTimesInfoDTO> raceTimesInfos = raceTimesInfoProvider.getRaceTimesInfos();
-        for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
-            RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
-            RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
-            if (raceIdentifier != null && raceTimes != null && raceTimes.startOfTracking != null
-                    && raceTimes.endOfRace == null) {
-                firstStartedAndUnfinishedRace = raceIdentifier;
-                break;
+        for (RaceColumnDTO race : leaderboard.getRaceList()) {
+            for (String fleetName : race.getFleetNames()) {
+                RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier(fleetName);
+                if (raceIdentifier != null) {
+                    RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
+                    if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.endOfRace == null) {
+                        firstStartedAndUnfinishedRace = raceIdentifier;
+                        break;
+                    }
+                }
             }
         }
         return firstStartedAndUnfinishedRace;

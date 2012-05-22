@@ -3,6 +3,7 @@ package com.sap.sailing.domain.persistence.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -15,15 +16,28 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.base.impl.CourseAreaImpl;
+import com.sap.sailing.domain.base.impl.EventImpl;
+import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -155,14 +169,43 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
         }
         ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
-        LeaderboardImplWithDelayedCarriedPoints result = new LeaderboardImplWithDelayedCarriedPoints(
+        FlexibleLeaderboardImplWithDelayedCarriedPoints result = new FlexibleLeaderboardImplWithDelayedCarriedPoints(
                 (String) o.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule);
         BasicDBList dbRaceColumns = (BasicDBList) o.get(FieldNames.LEADERBOARD_COLUMNS.name());
+        // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage them here:
+        Map<String, Fleet> fleetsByName = new HashMap<String, Fleet>();
         for (Object dbRaceColumnAsObject : dbRaceColumns) {
             BasicDBObject dbRaceColumn = (BasicDBObject) dbRaceColumnAsObject;
+            Map<String, RaceIdentifier> raceIdentifiers = loadRaceIdentifiers(dbRaceColumn);
+            RaceIdentifier defaultFleetRaceIdentifier = raceIdentifiers.get(null);
+            if (defaultFleetRaceIdentifier != null) {
+                Fleet defaultFleet = result.getFleet(null);
+                if (defaultFleet != null) {
+                    raceIdentifiers.put(defaultFleet.getName(), defaultFleetRaceIdentifier);
+                } else {
+                    // leaderboard has no default fleet; don't know what to do with default RaceIdentifier
+                    logger.warning("Discarding RaceIdentifier "+defaultFleetRaceIdentifier+" for default fleet for leaderboard "+result.getName()+
+                            " because no default fleet was found in leaderboard");
+                }
+                raceIdentifiers.remove(null);
+            }
+            List<Fleet> fleets = new ArrayList<Fleet>();
+            for (String fleetName : raceIdentifiers.keySet()) {
+                Fleet fleet = fleetsByName.get(fleetName);
+                if (fleet == null) {
+                    fleet = new FleetImpl(fleetName);
+                    fleetsByName.put(fleetName, fleet);
+                }
+                fleets.add(fleet);
+            }
+            if (fleets.isEmpty()) {
+                fleets.add(result.getFleet(null));
+            }
             RaceColumn raceColumn = result.addRaceColumn((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()),
-                    (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()));
-            raceColumn.setRaceIdentifier(loadRaceIdentifier(dbRaceColumn));
+                    (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name()), fleets.toArray(new Fleet[0]));
+            for (Map.Entry<String, RaceIdentifier> e : raceIdentifiers.entrySet()) {
+                raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
+            }
         }
         DBObject carriedPoints = (DBObject) o.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
         if (carriedPoints != null) {
@@ -194,6 +237,33 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (competitorDisplayNames != null) {
             for (String escapedCompetitorName : competitorDisplayNames.keySet()) {
                 result.setDisplayName(MongoUtils.unescapeDollarAndDot(escapedCompetitorName), (String) competitorDisplayNames.get(escapedCompetitorName));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Expects a DBObject under the key {@link FieldNames#RACE_IDENTIFIERS} whose keys are the fleet names and whose
+     * values are the race identifiers as DBObjects (see {@link #loadRaceIdentifier(DBObject)}). If legacy DB instances
+     * have a {@link RaceIdentifier} that is not associated with a fleet name, it may be stored directly in the
+     * <code>dbRaceColumn</code>. In this case, it is returned with <code>null</code> as the fleet name key.
+     * 
+     * @return a map with fleet names as key and the corresponding fleet's race identifier as value; the special
+     *         <code>null</code> key is used to identify a "default fleet" for backward compatibility with stored
+     *         leaderboards which don't know about fleets yet; this key should be mapped to the leaderboard's default
+     *         fleet.
+     */
+    private Map<String, RaceIdentifier> loadRaceIdentifiers(DBObject dbRaceColumn) {
+        Map<String, RaceIdentifier> result = new HashMap<String, RaceIdentifier>();
+        // try to load a deprecated single race identifier to associate with the default fleet:
+        RaceIdentifier singleLegacyRaceIdentifier = loadRaceIdentifier(dbRaceColumn);
+        if (singleLegacyRaceIdentifier != null) {
+            result.put(null, singleLegacyRaceIdentifier);
+        }
+        DBObject raceIdentifiersPerFleet = (DBObject) dbRaceColumn.get(FieldNames.RACE_IDENTIFIERS.name());
+        if (raceIdentifiersPerFleet != null) {
+            for (String fleetName : raceIdentifiersPerFleet.keySet()) {
+                result.put(fleetName, loadRaceIdentifier((DBObject) raceIdentifiersPerFleet.get(fleetName)));
             }
         }
         return result;
@@ -253,7 +323,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<Leaderboard> getLeaderboardsNotInGroup() {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-        
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
             //Don't change the query object, unless you know what you're doing
@@ -301,6 +370,139 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded wind data. Check MongoDB settings.");
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadWindTrack", t);
         }
+        return result;
+    }
+
+    @Override
+    public Event loadEvent(String name) {
+        Event result;
+        BasicDBObject query = new BasicDBObject();
+        query.put(FieldNames.EVENT_NAME.name(), name);
+        DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
+        DBObject eventDBObject = eventCollection.findOne(query);
+        if (eventDBObject != null) {
+            result = loadEvent(eventDBObject);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    /**
+     * An event doesn't store its regattas; it's the regatta that stores a reference to its event; the regatta
+     * needs to add itself to the event when loaded or instantiated.
+     */
+    private Event loadEvent(DBObject eventDBObject) {
+        String name = (String) eventDBObject.get(FieldNames.EVENT_NAME.name());
+        Venue venue = loadVenue((DBObject) eventDBObject.get(FieldNames.VENUE.name()));
+        Event result = new EventImpl(name, venue);
+        return result;
+    }
+
+    private Venue loadVenue(DBObject dbObject) {
+        String name = (String) dbObject.get(FieldNames.VENUE_NAME.name());
+        BasicDBList dbCourseAreas = (BasicDBList) dbObject.get(FieldNames.COURSE_AREAS.name());
+        Venue result = new VenueImpl(name);
+        for (Object courseAreaDBObject : dbCourseAreas) {
+            CourseArea courseArea = loadCourseArea((DBObject) courseAreaDBObject);
+            result.addCourseArea(courseArea);
+        }
+        return result;
+    }
+
+    private CourseArea loadCourseArea(DBObject courseAreaDBObject) {
+        String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
+        return new CourseAreaImpl(name);
+    }
+
+    @Override
+    public Regatta loadRegatta(String name) {
+        DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), name);
+        DBCollection regattaCollection = database.getCollection(CollectionNames.REGATTAS.name());
+        DBObject dbRegatta = regattaCollection.findOne(query);
+        Regatta result = null;
+        if (dbRegatta != null) {
+            String regattaName = (String) dbRegatta.get(FieldNames.REGATTA_NAME.name());
+            String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
+            assert regattaName.equals(name);
+            String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
+            BoatClass boatClass = null;
+            if (boatClassName != null) {
+                boolean typicallyStartsUpwind = (Boolean) dbRegatta.get(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name());
+                boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass(boatClassName, typicallyStartsUpwind);
+            }
+            BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
+            Iterable<Series> series = loadSeries(dbSeries);
+            result = new RegattaImpl(baseName, boatClass, series);
+        }
+        return result;
+    }
+
+    private Iterable<Series> loadSeries(BasicDBList dbSeries) {
+        List<Series> result = new ArrayList<Series>();
+        for (Object o : dbSeries) {
+            DBObject oneDBSeries = (DBObject) o;
+            Series series = loadSeries(oneDBSeries);
+            result.add(series);
+        }
+        return result;
+    }
+
+    private Series loadSeries(DBObject dbSeries) {
+        String name = (String) dbSeries.get(FieldNames.SERIES_NAME.name());
+        boolean isFleetsOrdered = (Boolean) dbSeries.get(FieldNames.SERIES_IS_FLEETS_ORDERED.name());
+        boolean isMedal = (Boolean) dbSeries.get(FieldNames.SERIES_IS_MEDAL.name());
+        final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
+        Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
+        BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
+        Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
+        Series series = new SeriesImpl(name, isFleetsOrdered, isMedal, fleetsByName.values(), raceColumnNames);
+        loadRaceColumnRaceLinks(dbRaceColumns, series);
+        return series;
+    }
+
+    /**
+     * @param fleetsByName used to ensure the {@link RaceColumn#getFleets()} points to the same {@link Fleet} objects also
+     * used in the {@link Series#getFleets()} collection.
+     */
+    private Iterable<String> loadRaceColumnNames(BasicDBList dbRaceColumns, Map<String, Fleet> fleetsByName) {
+        List<String> result = new ArrayList<String>();
+        for (Object o : dbRaceColumns) {
+            DBObject dbRaceColumn = (DBObject) o;
+            result.add((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()));
+        }
+        return result;
+    }
+
+    private void loadRaceColumnRaceLinks(BasicDBList dbRaceColumns, Series series) {
+        for (Object o : dbRaceColumns) {
+            DBObject dbRaceColumn = (DBObject) o;
+            String name = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
+            Map<String, RaceIdentifier> raceIdentifiersPerFleetName = loadRaceIdentifiers(dbRaceColumn);
+            for (Map.Entry<String, RaceIdentifier> e : raceIdentifiersPerFleetName.entrySet()) {
+                // null key for "default" fleet is not acceptable here
+                if (e.getKey() == null) {
+                    logger.warning("Ignoring null fleet name while loading RaceColumn " + name);
+                } else {
+                    series.getRaceColumnByName(name).setRaceIdentifier(series.getFleetByName(e.getKey()), e.getValue());
+                }
+            }
+        }
+    }
+
+    private Map<String, Fleet> loadFleets(BasicDBList dbFleets) {
+        Map<String, Fleet> result = new HashMap<String, Fleet>();
+        for (Object o : dbFleets) {
+            DBObject dbFleet = (DBObject) o;
+            Fleet fleet = loadFleet(dbFleet);
+            result.put(fleet.getName(), fleet);
+        }
+        return result;
+    }
+
+    private Fleet loadFleet(DBObject dbFleet) {
+        String name = (String) dbFleet.get(FieldNames.FLEET_NAME.name());
+        Fleet result = new FleetImpl(name);
         return result;
     }
 

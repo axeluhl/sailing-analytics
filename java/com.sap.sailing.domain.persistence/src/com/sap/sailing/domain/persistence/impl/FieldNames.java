@@ -4,12 +4,33 @@ public enum FieldNames {
     // general:
     TIME_AS_MILLIS, KNOT_SPEED, DEGREE_BEARING, LAT_DEG, LNG_DEG,
     
+    FLEET, RACE_IDENTIFIERS,
+    
     /**
      * TODO this will have to be renamed to REGATTA_NAME, but compatibility concerns keep us from doing so at the moment
      */
     EVENT_NAME,
     
+    REGATTA_NAME,
+    REGATTA_BASE_NAME,
+    REGATTA_SERIES,
+    SERIES_NAME,
+    SERIES_IS_MEDAL,
+    SERIES_IS_FLEETS_ORDERED,
+    SERIES_FLEETS,
+    SERIES_RACE_COLUMNS,
+    FLEET_NAME,
+    
     RACE_NAME,
+    
+    VENUE,
+    VENUE_NAME,
+    
+    COURSE_AREAS,
+    COURSE_AREA_NAME,
+    
+    BOAT_CLASS_NAME,
+    BOAT_CLASS_TYPICALLY_STARTS_UPWIND,
     
     // wind:
     WIND_SOURCE_NAME, WIND_SOURCE_ID, WIND,
