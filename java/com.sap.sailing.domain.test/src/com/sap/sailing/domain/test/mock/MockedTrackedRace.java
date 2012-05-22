@@ -273,7 +273,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public DynamicTrackedRegatta getTrackedEvent() {
+    public DynamicTrackedRegatta getTrackedRegatta() {
         return new DynamicTrackedRegatta() {
             private static final long serialVersionUID = 2651590861333064588L;
 

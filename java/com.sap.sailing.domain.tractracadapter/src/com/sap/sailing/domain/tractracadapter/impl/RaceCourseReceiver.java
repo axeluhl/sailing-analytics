@@ -81,7 +81,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             // Therefore, don't create TrackedRace again because it already exists.
             try {
                 getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), event.getB().getPoints());
-                if (getTrackedEvent().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
+                if (getTrackedRegatta().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
                     createTrackedRace(existingRaceDefinitionForRace);
                 }
             } catch (PatchFailedException e) {
@@ -91,13 +91,13 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
             // create race definition and add to event
-            getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(getTrackedEvent(), event.getC(), course,
+            getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(getTrackedRegatta(), event.getC(), course,
                     windStore, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
         }
     }
 
     private void createTrackedRace(RaceDefinition race) {
-        getTrackedEvent().createTrackedRace(race,
+        getTrackedRegatta().createTrackedRace(race,
                 windStore, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);

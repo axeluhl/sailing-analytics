@@ -270,7 +270,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     abstract protected TrackedLeg createTrackedLeg(Leg leg);
 
     public RegattaAndRaceIdentifier getRaceIdentifier() {
-        return new RegattaNameAndRaceName(getTrackedEvent().getRegatta().getName(), getRace().getName());
+        return new RegattaNameAndRaceName(getTrackedRegatta().getRegatta().getName(), getRace().getName());
     }
 
     @Override
@@ -1117,7 +1117,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public TrackedRegatta getTrackedEvent() {
+    public TrackedRegatta getTrackedRegatta() {
         return trackedRegatta;
     }
 

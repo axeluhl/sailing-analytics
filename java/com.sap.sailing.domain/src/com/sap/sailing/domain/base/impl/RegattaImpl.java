@@ -64,7 +64,9 @@ public class RegattaImpl extends NamedImpl implements Regatta {
 
     @Override
     public Iterable<RaceDefinition> getAllRaces() {
-        return races;
+        synchronized (races) {
+            return new ArrayList<RaceDefinition>(races);
+        }
     }
     
     @Override
@@ -74,15 +76,12 @@ public class RegattaImpl extends NamedImpl implements Regatta {
 
     @Override
     public RaceDefinition getRaceByName(String raceName) {
-        Iterable<RaceDefinition> allRaces = getAllRaces();
-        synchronized (allRaces) {
-            for (RaceDefinition r : getAllRaces()) {
-                if (r.getName().equals(raceName)) {
-                    return r;
-                }
+        for (RaceDefinition r : getAllRaces()) {
+            if (r.getName().equals(raceName)) {
+                return r;
             }
-            return null;
         }
+        return null;
     }
     
     @Override

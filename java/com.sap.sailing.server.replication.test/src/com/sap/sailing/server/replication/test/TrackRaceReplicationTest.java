@@ -17,6 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -36,7 +37,7 @@ import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
-import com.sap.sailing.server.operationaltransformation.CreateLeaderboard;
+import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 
 public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
@@ -106,19 +107,20 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         Leaderboard replicaDefaultLeaderboard = replica.getLeaderboardByName(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
         RaceColumn column = replicaDefaultLeaderboard.getRaceColumnByName(replicaTrackedRace.getRace().getName());
         assertNotNull(column);
-        assertSame(replicaTrackedRace, column.getTrackedRace());
+        assertSame(replicaTrackedRace, column.getTrackedRace(replicaDefaultLeaderboard.getFleet(null)));
     }
 
     @Test
     public void testReassignmentToLeaderboardReplication() throws Exception {
         final String leaderboardName = "Test Leaderboard";
-        master.apply(new CreateLeaderboard(leaderboardName, new int[0]));
+        Leaderboard masterLeaderboard = master.apply(new CreateFlexibleLeaderboard(leaderboardName, new int[0]));
         final String columnName = "R1";
         RaceColumn masterColumn = master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false));
-        master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, new RegattaNameAndRaceName(
-                "Academy Tracking 2011 (STG)", "weym470may122011")));
+        final Fleet defaultFleet = masterLeaderboard.getFleet(null);
+        master.apply(new ConnectTrackedRaceToLeaderboardColumn(leaderboardName, columnName, defaultFleet.getName(),
+                new RegattaNameAndRaceName("Academy Tracking 2011 (STG)", "weym470may122011")));
         startTracking();
-        assertNotNull(masterColumn.getTrackedRace()); // ensure the re-assignment worked on the master
+        assertNotNull(masterColumn.getTrackedRace(defaultFleet)); // ensure the re-assignment worked on the master
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         assertNotNull(replicaTrackedRace);
@@ -129,7 +131,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicaLeaderboard);
         RaceColumn column = replicaLeaderboard.getRaceColumnByName(columnName);
         assertNotNull(column);
-        assertSame(replicaTrackedRace, column.getTrackedRace());
+        assertSame(replicaTrackedRace, column.getTrackedRace(defaultFleet));
     }
     
     @Test

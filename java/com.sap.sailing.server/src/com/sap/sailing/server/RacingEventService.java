@@ -15,6 +15,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -168,7 +169,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
      * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its
-     * {@link RaceColumn#getTrackedRace()}.
+     * {@link RaceColumn#getTrackedRace(Fleet)}.
      * 
      * @param regatta
      *            the event to remove
@@ -230,7 +231,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @return the leaderboard created
      */
-    Leaderboard addLeaderboard(String name, int[] discardThresholds);
+    Leaderboard addFlexibleLeaderboard(String name, int[] discardThresholds);
 
     void removeLeaderboard(String leaderboardName);
     

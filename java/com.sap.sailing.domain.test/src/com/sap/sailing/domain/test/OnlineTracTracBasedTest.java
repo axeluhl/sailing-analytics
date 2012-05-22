@@ -114,7 +114,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         for (Receiver receiver : receivers) {
             receiver.join();
         }
-        trackedRace = getTrackedEvent().getTrackedRace(race);
+        trackedRace = getTrackedRegatta().getTrackedRace(race);
     }
 
 
@@ -205,7 +205,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         return domainEvent;
     }
 
-    protected DynamicTrackedRegatta getTrackedEvent() {
+    protected DynamicTrackedRegatta getTrackedRegatta() {
         return trackedRegatta;
     }
 

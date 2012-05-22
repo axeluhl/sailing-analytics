@@ -6,6 +6,9 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class RegattaDTO extends NamedDTO implements IsSerializable {
+    /**
+     * May be <code>null</code> in case the boat class is not known
+     */
     public BoatClassDTO boatClass;
     public List<RaceDTO> races;
     public List<CompetitorDTO> competitors;

@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.operationaltransformation.Transformer;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
-import com.sap.sailing.server.operationaltransformation.CreateLeaderboard;
+import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDown;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
@@ -56,9 +56,9 @@ public interface RacingEventServiceOperation<ResultType> extends Operation<Racin
 
     RacingEventServiceOperation<?> transformRenameLeaderboardColumnServerOp(RenameLeaderboardColumn renameLeaderboardColumnServerOp);
 
-    RacingEventServiceOperation<?> transformAddLeaderboardClientOp(CreateLeaderboard addLeaderboard);
+    RacingEventServiceOperation<?> transformAddLeaderboardClientOp(CreateFlexibleLeaderboard addLeaderboard);
 
-    RacingEventServiceOperation<?> transformAddLeaderboardServerOp(CreateLeaderboard addLeaderboard);
+    RacingEventServiceOperation<?> transformAddLeaderboardServerOp(CreateFlexibleLeaderboard addLeaderboard);
 
     RacingEventServiceOperation<?> transformRemoveLeaderboardClientOp(RemoveLeaderboard removeLeaderboard);
 

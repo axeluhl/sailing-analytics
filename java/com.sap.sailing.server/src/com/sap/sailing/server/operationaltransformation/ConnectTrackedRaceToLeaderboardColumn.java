@@ -10,10 +10,12 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardColumnOperation<Boolean> {
     private static final long serialVersionUID = -1336511401516212508L;
     private final RaceIdentifier raceToConnect;
+    private final String fleetName;
     
-    public ConnectTrackedRaceToLeaderboardColumn(String leaderboardName, String columnName, RaceIdentifier raceToConnect) {
+    public ConnectTrackedRaceToLeaderboardColumn(String leaderboardName, String columnName, String fleetName, RaceIdentifier raceToConnect) {
         super(leaderboardName, columnName);
         this.raceToConnect = raceToConnect;
+        this.fleetName = fleetName;
     }
 
     @Override
@@ -37,7 +39,9 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
             if (raceColumn != null) {
                 TrackedRace trackedRace = toState.getExistingTrackedRace(raceToConnect);
                 if (trackedRace != null) {
-                    raceColumn.setTrackedRace(trackedRace);
+                    raceColumn.setTrackedRace(raceColumn.getFleetByName(fleetName), trackedRace);
+                } else {
+                    raceColumn.setRaceIdentifier(raceColumn.getFleetByName(fleetName), raceToConnect);
                 }
             }
             success = true;

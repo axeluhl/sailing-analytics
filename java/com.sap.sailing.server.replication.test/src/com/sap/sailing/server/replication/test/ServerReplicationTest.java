@@ -26,7 +26,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.operationaltransformation.AddRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
-import com.sap.sailing.server.operationaltransformation.CreateLeaderboard;
+import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 
 public class ServerReplicationTest extends AbstractServerReplicationTest {
@@ -45,7 +45,7 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         final String leaderboardName = "My new leaderboard";
         assertNull(replica.getLeaderboardByName(leaderboardName));
         final int[] discardThresholds = new int[] { 17, 23 };
-        CreateLeaderboard createTestLeaderboard = new CreateLeaderboard(leaderboardName, discardThresholds);
+        CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, discardThresholds);
         assertNull(master.getLeaderboardByName(leaderboardName));
         master.apply(createTestLeaderboard);
         final Leaderboard masterLeaderboard = master.getLeaderboardByName(leaderboardName);
