@@ -10,12 +10,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -202,9 +200,11 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(RaceBoardPanel raceBoardPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(raceName, stringMessages);
+        RaceBoardLogoAndTitlePanel logoAndTitlePanel = new RaceBoardLogoAndTitlePanel(selectedRace, stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
+
+        FlowPanel globalNavigationPanel = new GlobalNavigationPanel(stringMessages, true, leaderboardName, leaderboardGroupName);
+        logoAndTitlePanel.add(globalNavigationPanel);
         
         return logoAndTitlePanel;
     }
@@ -213,16 +213,17 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         DockLayoutPanel p = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(p);
         
-        FlowPanel breadcrumbPanel = createBreadcrumbPanel();
+        FlowPanel toolbarPanel = new FlowPanel();
+        
         //TODO Quickfix for touch devices
-        Widget settingsWidget = raceBoardPanel.getSettingsWidget();
-        breadcrumbPanel.add(settingsWidget);
-        //
+        toolbarPanel.add(raceBoardPanel.getNavigationWidget());
+        toolbarPanel.add(raceBoardPanel.getSettingsWidget());
+
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
         p.addNorth(logoAndTitlePanel, 68);        
-        p.addNorth(breadcrumbPanel, 40);
+        p.addNorth(toolbarPanel, 40);
         p.addSouth(timePanel, 122);                     
         p.add(raceBoardPanel);
     }    

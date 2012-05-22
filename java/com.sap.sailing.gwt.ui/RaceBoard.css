@@ -105,9 +105,27 @@ input.opencoloumn {
 	width: 100%;
 }
 
+.globalNavigation {
+    position:absolute;
+    top:0;
+    right:0;
+}
+
+.globalNavigation-home {
+	background-color: gray;	
+}
+
+.globalNavigation-leaderBoard {
+	background-color: gray;	
+}
+
+.globalNavigation-leaderBoardGroup {
+	background-color: gray;	
+}
+
 .raceBoardNavigation {
-	float: right;
-	margin:-23px 0 0 0;
+	float: left;
+	margin: 3px;;
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
@@ -156,6 +174,6 @@ input.opencoloumn {
 
 .raceBoardNavigation-settingsButtonPanel {
 	float: right;
-	margin: -26px 0 0 0;
+	margin: 3px;;
 }
 
