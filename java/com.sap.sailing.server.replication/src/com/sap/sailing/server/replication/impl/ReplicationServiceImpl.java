@@ -66,7 +66,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private final Map<ReplicationMasterDescriptor, String> replicaUUIDs;
     
     public ReplicationServiceImpl(final ReplicationInstancesManager replicationInstancesManager,
-            final MessageBrokerManager messageBrokerManager) {
+            final MessageBrokerManager messageBrokerManager) throws Exception {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
         this.messageBrokerManager = messageBrokerManager;

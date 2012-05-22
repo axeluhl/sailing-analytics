@@ -455,7 +455,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         String storedURI = storedURIBox.getValue();
         for (final TracTracRaceRecordDTO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
-                sailingService.track(rr, liveURI, storedURI, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
+                sailingService.trackWithTracTrac(/* regattaToAddTo */ null, // TODO allow user to optionally select a pre-defined regatta
+                        rr, liveURI, storedURI, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register race " + rr.name + " for tracking: "

@@ -49,12 +49,21 @@ public interface SailingServiceAsync {
     void listTracTracRacesInEvent(String eventJsonURL, AsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>> callback);
 
     /**
-     * @param liveURI may be <code>null</code> or the empty string in which case the server will
-     * use the {@link TracTracRaceRecordDTO#liveURI} from the <code>rr</code> race record.
-     * @param storedURImay be <code>null</code> or the empty string in which case the server will
-     * use the {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
+     * @param regattaToAddTo
+     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
+     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
+     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
+     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
+     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
+     * @param liveURI
+     *            may be <code>null</code> or the empty string in which case the server will use the
+     *            {@link TracTracRaceRecordDTO#liveURI} from the <code>rr</code> race record.
+     * @param storedURImay
+     *            be <code>null</code> or the empty string in which case the server will use the
+     *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
      */
-    void track(TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
+    void trackWithTracTrac(RegattaIdentifier regattaToAddTo,
+            TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
             AsyncCallback<Void> callback);
 
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDTO>> callback);
@@ -235,8 +244,17 @@ public interface SailingServiceAsync {
 
     void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests, AsyncCallback<Void> asyncCallback);
 
-    void trackWithSwissTiming(SwissTimingRaceRecordDTO rr, String hostname, int port, boolean canSendRequests,
-            boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
+    /**
+     * @param regattaToAddTo
+     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
+     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
+     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
+     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
+     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
+     */
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, SwissTimingRaceRecordDTO rr, String hostname, int port,
+            boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination,
+            AsyncCallback<Void> asyncCallback);
 
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
     
