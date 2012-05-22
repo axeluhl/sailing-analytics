@@ -490,7 +490,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             WindStore windStore, long timeoutInMilliseconds) throws Exception {
         RaceTracker tracker = raceTrackersByID.get(params.getTrackerID());
         if (tracker == null) {
-            Regatta regatta = getRegatta(regattaToAddTo);
+            Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
             if (regatta == null) {
                 // create tracker and use an existing or create a default regatta
                 tracker = params.createRaceTracker(this);
@@ -1134,7 +1134,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     <T> void replicate(RacingEventServiceOperation<T> operation) {
         for (OperationExecutionListener listener : operationExecutionListeners) {
-            listener.executed(operation);
+            listener.executed(operation); // TODO consider exception handling
         }
     }
 

@@ -42,6 +42,8 @@ public abstract class AbstractServerReplicationTest {
     protected RacingEventServiceImpl master;
     private MessageBrokerManager brokerMgr;
     private File brokerPersistenceDir;
+    private ReplicaDescriptor replicaDescriptor;
+    private ReplicationServiceImpl masterReplicator;
     
     /**
      * Sets up master and replica, starts the JMS message broker and registers the replica with the master.
@@ -54,7 +56,7 @@ public abstract class AbstractServerReplicationTest {
         master = new RacingEventServiceImpl(mongoDBService);
         replica = new RacingEventServiceImpl(mongoDBService);
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
-        final String IN_VM_BROKER_URL = "vm://localhost-jms-connection";
+        final String IN_VM_BROKER_URL = "vm://localhost-jms-connection?broker.useJmx=false";
         final String activeMQPersistenceParentDir = System.getProperty("java.io.tmpdir");
         final String brokerName = "local_in-VM_test_broker";
         brokerPersistenceDir = new File(activeMQPersistenceParentDir, brokerName);
@@ -63,8 +65,8 @@ public abstract class AbstractServerReplicationTest {
                 IN_VM_BROKER_URL, activeMQPersistenceParentDir));
         brokerMgr.startMessageBroker(/* useJmx */ false);
         brokerMgr.createAndStartConnection();
-        ReplicationService masterReplicator = new ReplicationServiceImpl(rim, brokerMgr, master);
-        ReplicaDescriptor replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost());
+        masterReplicator = new ReplicationServiceImpl(rim, brokerMgr, master);
+        replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost());
         masterReplicator.registerReplica(replicaDescriptor);
         ReplicationMasterDescriptor masterDescriptor = new ReplicationMasterDescriptor() {
             @Override
@@ -106,6 +108,7 @@ public abstract class AbstractServerReplicationTest {
 
     @After
     public void tearDown() throws Exception {
+        masterReplicator.unregisterReplica(replicaDescriptor);
         brokerMgr.closeSessions();
         brokerMgr.closeConnections();
         brokerMgr.stopMessageBroker();
