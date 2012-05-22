@@ -92,6 +92,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
     private final CompetitorSelectionModel competitorSelectionModel;
     private final EventAndRaceIdentifier selectedRaceIdentifier;
 
+    private AudioTool audioTool;
     private LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiChartPanel competitorChart;
@@ -221,6 +222,7 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         settingsLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
         settingsPanel.add(settingsLabel);
 
+        addAudioToolMenuButton(audioTool);
         addSettingsMenuButton(settingsPanel, leaderboardPanel);
         addSettingsMenuButton(settingsPanel, raceMap);
         addSettingsMenuButton(settingsPanel, windChart);
@@ -244,6 +246,22 @@ public class RaceBoardPanel extends FormPanel implements EventDisplayer, RaceSel
         }
     }
     
+    private void addAudioToolMenuButton(final AudioTool component) {
+ //       if(component.hasSettings()) {
+            Button settingsButton = new Button("Audio Tool");
+            settingsButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                   new AudioTool();
+                }
+            });
+            settingsButton.addStyleName("raceBoardNavigation-settingsButton");
+            settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+            settingsButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
+            
+            settingsPanel.add(settingsButton);
+//        }
+    }
     private <SettingsType> void addSettingsMenuButton(FlowPanel settingsPanel, final Component<SettingsType> component) {
         if(component.hasSettings()) {
             Button settingsButton = new Button(component.getLocalizedShortName());
