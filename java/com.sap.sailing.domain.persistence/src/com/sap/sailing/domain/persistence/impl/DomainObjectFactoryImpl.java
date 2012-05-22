@@ -51,7 +51,6 @@ import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
-import com.sap.sailing.domain.leaderboard.impl.RaceColumnImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -452,41 +451,43 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Series loadSeries(DBObject dbSeries) {
         String name = (String) dbSeries.get(FieldNames.SERIES_NAME.name());
         boolean isFleetsOrdered = (Boolean) dbSeries.get(FieldNames.SERIES_IS_FLEETS_ORDERED.name());
+        boolean isMedal = (Boolean) dbSeries.get(FieldNames.SERIES_IS_MEDAL.name());
         final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
         Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
-        Iterable<? extends RaceColumn> raceColumns = loadRaceColumns(dbRaceColumns, fleetsByName);
-        Series result = new SeriesImpl(name, isFleetsOrdered, fleetsByName.values(), raceColumns);
-        return result;
+        Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
+        Series series = new SeriesImpl(name, isFleetsOrdered, isMedal, fleetsByName.values(), raceColumnNames);
+        loadRaceColumnRaceLinks(dbRaceColumns, series);
+        return series;
     }
 
     /**
      * @param fleetsByName used to ensure the {@link RaceColumn#getFleets()} points to the same {@link Fleet} objects also
      * used in the {@link Series#getFleets()} collection.
      */
-    private Iterable<? extends RaceColumn> loadRaceColumns(BasicDBList dbRaceColumns, Map<String, Fleet> fleetsByName) {
-        List<RaceColumn> result = new ArrayList<RaceColumn>();
+    private Iterable<String> loadRaceColumnNames(BasicDBList dbRaceColumns, Map<String, Fleet> fleetsByName) {
+        List<String> result = new ArrayList<String>();
         for (Object o : dbRaceColumns) {
             DBObject dbRaceColumn = (DBObject) o;
-            result.add(loadRaceColumn(dbRaceColumn, fleetsByName));
+            result.add((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()));
         }
         return result;
     }
 
-    private RaceColumn loadRaceColumn(DBObject dbRaceColumn, Map<String, Fleet> fleetsByName) {
-        String name = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
-        boolean medalRace = (Boolean) dbRaceColumn.get(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name());
-        RaceColumn raceColumn = new RaceColumnImpl(name, medalRace, fleetsByName.values());
-        Map<String, RaceIdentifier> raceIdentifiersPerFleetName = loadRaceIdentifiers(dbRaceColumn);
-        for (Map.Entry<String, RaceIdentifier> e : raceIdentifiersPerFleetName.entrySet()) {
-            // null key for "default" fleet is not acceptable here
-            if (e.getKey() == null) {
-                logger.warning("Ignoring null fleet name while loading RaceColumn "+name);
-            } else {
-                raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
+    private void loadRaceColumnRaceLinks(BasicDBList dbRaceColumns, Series series) {
+        for (Object o : dbRaceColumns) {
+            DBObject dbRaceColumn = (DBObject) o;
+            String name = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
+            Map<String, RaceIdentifier> raceIdentifiersPerFleetName = loadRaceIdentifiers(dbRaceColumn);
+            for (Map.Entry<String, RaceIdentifier> e : raceIdentifiersPerFleetName.entrySet()) {
+                // null key for "default" fleet is not acceptable here
+                if (e.getKey() == null) {
+                    logger.warning("Ignoring null fleet name while loading RaceColumn " + name);
+                } else {
+                    series.getRaceColumnByName(name).setRaceIdentifier(series.getFleetByName(e.getKey()), e.getValue());
+                }
             }
         }
-        return raceColumn;
     }
 
     private Map<String, Fleet> loadFleets(BasicDBList dbFleets) {

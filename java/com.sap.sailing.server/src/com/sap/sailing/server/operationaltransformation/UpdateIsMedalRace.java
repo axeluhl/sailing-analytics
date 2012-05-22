@@ -1,5 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -28,8 +29,8 @@ public class UpdateIsMedalRace extends AbstractLeaderboardColumnOperation<Void> 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
-        if (leaderboard != null) {
-            leaderboard.updateIsMedalRace(getColumnName(), isMedalRace);
+        if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
+            ((FlexibleLeaderboard) leaderboard).updateIsMedalRace(getColumnName(), isMedalRace);
             toState.updateStoredLeaderboard(leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named " + getLeaderboardName() + " not found");

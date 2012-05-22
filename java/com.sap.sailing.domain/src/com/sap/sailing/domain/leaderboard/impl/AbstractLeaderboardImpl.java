@@ -331,18 +331,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     @Override
-    public void updateIsMedalRace(String raceName, boolean isMedalRace) {
-        RaceColumn race = null;
-        for (RaceColumn r : getRaceColumns()) {
-            if (r.getName().equals(raceName))
-                race = r;
-        }
-        if (race != null) {
-            race.setIsMedalRace(isMedalRace);
-        }
-    }
-    
-    @Override
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
         this.resultDiscardingRule = discardingRule;
     }

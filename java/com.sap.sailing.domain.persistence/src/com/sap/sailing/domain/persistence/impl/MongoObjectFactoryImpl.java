@@ -317,6 +317,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbSeries = new BasicDBObject();
         dbSeries.put(FieldNames.SERIES_NAME.name(), s.getName());
         dbSeries.put(FieldNames.SERIES_IS_FLEETS_ORDERED.name(), s.isFleetsOrdered());
+        dbSeries.put(FieldNames.SERIES_IS_MEDAL.name(), s.isMedal());
         BasicDBList dbFleets = new BasicDBList();
         for (Fleet fleet : s.getFleets()) {
             dbFleets.add(storeFleet(fleet));

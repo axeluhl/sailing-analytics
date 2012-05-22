@@ -200,8 +200,6 @@ public interface Leaderboard extends Named {
      */
     boolean considerForDiscarding(RaceColumn raceInLeaderboard, TimePoint timePoint);
     
-    void updateIsMedalRace(String raceName, boolean isMedalRace);
-    
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
 
     Competitor getCompetitorByIdAsString(String idAsString);

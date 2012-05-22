@@ -62,4 +62,6 @@ public interface FlexibleLeaderboard extends Leaderboard {
 
     void removeRaceColumn(String columnName);
 
+    void updateIsMedalRace(String raceName, boolean isMedalRace);
+    
 }

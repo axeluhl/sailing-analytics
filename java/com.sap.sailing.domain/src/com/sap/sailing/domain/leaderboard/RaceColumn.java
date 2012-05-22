@@ -27,7 +27,7 @@ public interface RaceColumn extends Named {
     /**
      * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}
      */
-    Iterable<Fleet> getFleets();
+    Iterable<? extends Fleet> getFleets();
     
     Fleet getFleetByName(String fleetName);
     
@@ -84,8 +84,6 @@ public interface RaceColumn extends Named {
      * A "medal race" cannot be discarded. It's score is doubled during score aggregation.
      */
     boolean isMedalRace();
-    
-    void setIsMedalRace(boolean isMedalRace);
     
     void setName(String newName);
     
