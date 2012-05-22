@@ -84,7 +84,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     }
 
     private void startTrackingOnMaster() throws Exception {
-        racesHandle = master.addRace(trackingParams, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
+        racesHandle = master.addRace(/* regattaToAddTo */ null, trackingParams, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
     }
 
     private void waitForTrackRaceReplicationTrigger() throws InterruptedException {

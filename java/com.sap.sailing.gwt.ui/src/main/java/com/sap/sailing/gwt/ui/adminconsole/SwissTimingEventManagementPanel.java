@@ -342,7 +342,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         int port = portIntegerbox.getValue();
         for (final SwissTimingRaceRecordDTO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
-                sailingService.trackWithSwissTiming(rr, hostname, port, /* canSendRequests */false, 
+                sailingService.trackWithSwissTiming(/* regattaToAddTo */ null, // TODO allow user to select a pre-defined regatta
+                        rr, hostname, port, /* canSendRequests */false, 
                         trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
