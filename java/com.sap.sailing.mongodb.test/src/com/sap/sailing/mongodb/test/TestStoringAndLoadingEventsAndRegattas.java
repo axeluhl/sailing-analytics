@@ -3,6 +3,8 @@ package com.sap.sailing.mongodb.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ import com.sap.sailing.domain.base.impl.RaceColumnInSeries;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
+import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -123,6 +127,30 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         }
     }
 
+    @Test
+    public void testStorageOfRaceIdentifiersOnRaceColumnInSeries() {
+        final int numberOfQualifyingRaces = 5;
+        final int numberOfFinalRaces = 7;
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        Regatta regatta = createRegatta(numberOfQualifyingRaces, numberOfFinalRaces, regattaBaseName, boatClass);
+        Series qualifyingSeries = regatta.getSeries().iterator().next();
+        RaceColumn q2 = qualifyingSeries.getRaceColumnByName("Q2");
+        final RegattaNameAndRaceName q2TrackedRaceIdentifier = new RegattaNameAndRaceName(regatta.getName(), "Q2 TracTrac");
+        q2.setRaceIdentifier(qualifyingSeries.getFleetByName("Yellow"), q2TrackedRaceIdentifier);
+        MongoObjectFactory mof = MongoFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        mof.storeRegatta(regatta);
+        
+        DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName());
+        Series loadedQualifyingSeries = loadedRegatta.getSeries().iterator().next();
+        RaceColumn loadedQ2 = loadedQualifyingSeries.getRaceColumnByName("Q2");
+        RaceIdentifier loadedQ2TrackedRaceIdentifier = loadedQ2.getRaceIdentifier(loadedQualifyingSeries.getFleetByName("Yellow"));
+        assertEquals(q2TrackedRaceIdentifier, loadedQ2TrackedRaceIdentifier);
+        assertNotSame(q2TrackedRaceIdentifier, loadedQ2TrackedRaceIdentifier);
+        assertNull(loadedQualifyingSeries.getRaceColumnByName("Q1").getRaceIdentifier(loadedQualifyingSeries.getFleetByName("Yellow")));
+        assertNull(loadedQualifyingSeries.getRaceColumnByName("Q2").getRaceIdentifier(loadedQualifyingSeries.getFleetByName("Blue")));
+    }
 
     private Regatta createRegatta(final int numberOfQualifyingRaces, final int numberOfFinalRaces,
             final String regattaBaseName, BoatClass boatClass) {
