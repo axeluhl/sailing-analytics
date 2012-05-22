@@ -19,6 +19,7 @@ import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -29,9 +30,9 @@ import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -107,13 +108,43 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException {
+        this(KeyValue.setup(paramURL), domainFactory, paramURL, liveURI, storedURI, startOfTracking, endOfTracking, windStore,
+                trackedRegattaRegistry);
+    }
+    
+    private TracTracRaceTrackerImpl(Event tractracEvent, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
+            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
+            FileNotFoundException {
+        this(tractracEvent, domainFactory.getOrCreateEvent(tractracEvent), domainFactory, paramURL, liveURI, storedURI,
+                startOfTracking, endOfTracking, windStore, trackedRegattaRegistry);
+    }
+    
+    /**
+     * Use this constructor if the {@link Regatta} in which to arrange the {@link RaceDefinition}s created by this
+     * tracker is already known up-front, particularly if it has a specific configuration to use. Other constructors
+     * may create a default {@link Regatta} with only a single default {@link Series} and {@link Fleet} which may not
+     * always be what you want.
+     */
+    protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
+            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
+            FileNotFoundException {
+        this(KeyValue.setup(paramURL), regatta, domainFactory, paramURL, liveURI, storedURI, startOfTracking,
+                endOfTracking, windStore, trackedRegattaRegistry);
+    }
+    
+    private TracTracRaceTrackerImpl(Event tractracEvent, Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
+            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
+            FileNotFoundException {
         super();
+        this.tractracEvent = tractracEvent;
         urls = createID(paramURL, liveURI, storedURI);
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
         this.domainFactory = domainFactory;
         // Read event data from configuration file
-        tractracEvent = KeyValue.setup(paramURL);
         controlPointPositionPoller = scheduleControlPointPositionPoller(paramURL);
         // can happen that TracTrac event is null (occurs when there is no Internet connection)
         // so lets raise some meaningful exception
@@ -131,7 +162,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             // domainEvent *after* calling removeRace
             domainFactory.removeRace(tractracEvent, tractracRace, trackedRegattaRegistry);
         }
-        regatta = domainFactory.getOrCreateEvent(tractracEvent);
+        this.regatta = domainFactory.getOrCreateEvent(tractracEvent);
         setTrackedRegatta(trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta));
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
