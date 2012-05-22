@@ -56,7 +56,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
     private final Event tractracEvent;
-    private final com.sap.sailing.domain.base.Regatta domainEvent;
+    private final com.sap.sailing.domain.base.Regatta regatta;
     private final Thread ioThread;
     private final DataController controller;
     private final Set<Receiver> receivers;
@@ -131,8 +131,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             // domainEvent *after* calling removeRace
             domainFactory.removeRace(tractracEvent, tractracRace, trackedRegattaRegistry);
         }
-        domainEvent = domainFactory.getOrCreateEvent(tractracEvent);
-        setTrackedRegatta(trackedRegattaRegistry.getOrCreateTrackedRegatta(domainEvent));
+        regatta = domainFactory.getOrCreateEvent(tractracEvent);
+        setTrackedRegatta(trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta));
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
@@ -219,7 +219,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     
     @Override
     public com.sap.sailing.domain.base.Regatta getRegatta() {
-        return domainEvent;
+        return regatta;
     }
     
     /**
