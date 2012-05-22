@@ -243,7 +243,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Regatta getOrCreateEvent(com.tractrac.clientmodule.Event event) {
+    public Regatta getOrCreateRegatta(com.tractrac.clientmodule.Event event) {
         synchronized (regattaCache) {
             // FIXME Dialog with Lasse by Skype on 2011-06-17:
             //            [6:20:04 PM] Axel Uhl: Lasse, can Event.getCompetitorClassList() ever produce more than one result?

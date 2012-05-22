@@ -79,7 +79,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.windStore = windStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
-        regatta = domainFactory.getOrCreateEvent(raceID);
+        regatta = domainFactory.getOrCreateRegatta(raceID);
         setTrackedRegatta(trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta));
         connector.trackRace(raceID);
     }
