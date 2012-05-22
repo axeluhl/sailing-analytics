@@ -57,7 +57,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
             Double distanceInNmi = startPoint.distanceFrom(endPoint)/ Mile.METERS_PER_NAUTICAL_MILE;
             final String sDistance = NumberFormat.getFormat("0.00").format(distanceInNmi);
             InfoWindowContent content = new InfoWindowContent("Race Target "
-                    + sDistance + " from Start");
+                    + sDistance + " nmi from Start");
             map.getInfoWindow().open(endMarker, content);
             
         }
