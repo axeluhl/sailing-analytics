@@ -128,6 +128,16 @@
 	width: 12px;
 }
 
+.gwt-SplitLayoutPanel-HDragger {
+  background: #e7e7e7 url(images/thumb_vertical.png) center center no-repeat;
+  cursor: col-resize;
+}
+
+.gwt-SplitLayoutPanel-VDragger {
+  background: #e7e7e7 url(images/thumb_horz.png) center center no-repeat;
+  cursor: row-resize;
+}
+
 .gwt-ToggleButton-up-hovering, .gwt-ToggleButton-down-hovering {
 	background: url(images/btn-cta-orangeleft-down.png) center top repeat-x;
 	color: #fff;
