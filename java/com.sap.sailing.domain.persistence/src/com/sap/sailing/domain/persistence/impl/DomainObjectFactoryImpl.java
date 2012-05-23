@@ -450,13 +450,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Series loadSeries(DBObject dbSeries) {
         String name = (String) dbSeries.get(FieldNames.SERIES_NAME.name());
-        boolean isFleetsOrdered = (Boolean) dbSeries.get(FieldNames.SERIES_IS_FLEETS_ORDERED.name());
         boolean isMedal = (Boolean) dbSeries.get(FieldNames.SERIES_IS_MEDAL.name());
         final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
         Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
         Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
-        Series series = new SeriesImpl(name, isFleetsOrdered, isMedal, fleetsByName.values(), raceColumnNames);
+        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames);
         loadRaceColumnRaceLinks(dbRaceColumns, series);
         return series;
     }
@@ -502,7 +501,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Fleet loadFleet(DBObject dbFleet) {
         String name = (String) dbFleet.get(FieldNames.FLEET_NAME.name());
-        Fleet result = new FleetImpl(name);
+        Integer ordering = (Integer) dbFleet.get(FieldNames.FLEET_ORDERING.name());
+        Fleet result;
+        if (ordering != null) {
+            result = new FleetImpl(name, ordering);
+        } else {
+            result = new FleetImpl(name);
+        }
         return result;
     }
 

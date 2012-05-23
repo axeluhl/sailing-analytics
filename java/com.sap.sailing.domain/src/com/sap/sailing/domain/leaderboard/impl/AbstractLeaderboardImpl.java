@@ -322,16 +322,20 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
         this.resultDiscardingRule = discardingRule;
     }
 
-    protected List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint, final boolean isFleetsOrdered) throws NoWindException {
-        final Map<Competitor, Pair<Integer, Integer>> netPointsAndFleetIndex = new HashMap<Competitor, Pair<Integer, Integer>>();
+    /**
+     * All competitors with non-zero net points are added to the result which is then sorted by net points in ascending
+     * order. The fleet is the primary ordering criterion, followed by the net points.
+     */
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+        final Map<Competitor, Pair<Integer, Fleet>> netPointsAndFleet = new HashMap<Competitor, Pair<Integer, Fleet>>();
         for (Competitor competitor : getCompetitors()) {
             int netPoints = getNetPoints(competitor, raceColumn, timePoint);
             if (netPoints != 0) {
-                netPointsAndFleetIndex.put(competitor, new Pair<Integer, Integer>(netPoints,
-                        Util.indexOf(raceColumn.getFleets(), raceColumn.getFleetOfCompetitor(competitor))));
+                netPointsAndFleet.put(competitor, new Pair<Integer, Fleet>(netPoints, raceColumn.getFleetOfCompetitor(competitor)));
             }
         }
-        List<Competitor> result = new ArrayList<Competitor>(netPointsAndFleetIndex.keySet());
+        List<Competitor> result = new ArrayList<Competitor>(netPointsAndFleet.keySet());
         Collections.sort(result, new Comparator<Competitor>() {
             @Override
             public int compare(Competitor o1, Competitor o2) {
@@ -339,18 +343,32 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
                 if (o1 == o2) {
                     comparisonResult = 0;
                 } else {
-                    comparisonResult = 0;
-                    if (isFleetsOrdered) {
-                        comparisonResult = netPointsAndFleetIndex.get(o1).getB() - netPointsAndFleetIndex.get(o2).getB();
-                    }
+                    comparisonResult = netPointsAndFleet.get(o1).getB().compareTo(netPointsAndFleet.get(o2).getB());
                     if (comparisonResult == 0) {
-                        comparisonResult = netPointsAndFleetIndex.get(o1).getA() - netPointsAndFleetIndex.get(o2).getA();
+                        comparisonResult = netPointsAndFleet.get(o1).getA() - netPointsAndFleet.get(o2).getA();
                     }
                 }
                 return comparisonResult;
             }
         });
         return result;
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        Map<Competitor, List<Integer>> scores;
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            if (hasScoreCorrectionForAllUntrackedFleets(raceColumn)) {
+                // the column counts for sorting
+                
+            }
+        }
+        return null;
+    }
+
+    private boolean hasScoreCorrectionForAllUntrackedFleets(RaceColumn raceColumn) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -316,7 +317,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private DBObject storeSeries(Series s) {
         DBObject dbSeries = new BasicDBObject();
         dbSeries.put(FieldNames.SERIES_NAME.name(), s.getName());
-        dbSeries.put(FieldNames.SERIES_IS_FLEETS_ORDERED.name(), s.isFleetsOrdered());
         dbSeries.put(FieldNames.SERIES_IS_MEDAL.name(), s.isMedal());
         BasicDBList dbFleets = new BasicDBList();
         for (Fleet fleet : s.getFleets()) {
@@ -333,6 +333,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private DBObject storeFleet(Fleet fleet) {
         DBObject dbFleet = new BasicDBObject(FieldNames.FLEET_NAME.name(), fleet.getName());
+        if (fleet instanceof FleetImpl) {
+            dbFleet.put(FieldNames.FLEET_ORDERING.name(), ((FleetImpl) fleet).getOrdering());
+        }
         return dbFleet;
     }
 

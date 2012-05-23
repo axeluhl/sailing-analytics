@@ -12,14 +12,12 @@ import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class SeriesImpl extends NamedImpl implements Series {
     private static final long serialVersionUID = -1640404303144907381L;
-    private final boolean isFleetsOrdered;
     private final Map<String, Fleet> fleetsByName;
     private final Iterable<RaceColumnInSeriesImpl> raceColumns;
     private boolean isMedal;
     
-    public SeriesImpl(String name, boolean isFleetsOrdered, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames) {
+    public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames) {
         super(name);
-        this.isFleetsOrdered = isFleetsOrdered;
         this.fleetsByName = new HashMap<String, Fleet>();
         for (Fleet fleet : fleets) {
             this.fleetsByName.put(fleet.getName(), fleet);
@@ -31,10 +29,6 @@ public class SeriesImpl extends NamedImpl implements Series {
         }
         this.raceColumns = myRaceColumns;
         this.isMedal = isMedal;
-    }
-
-    public boolean isFleetsOrdered() {
-        return isFleetsOrdered;
     }
 
     public Iterable<? extends Fleet> getFleets() {
