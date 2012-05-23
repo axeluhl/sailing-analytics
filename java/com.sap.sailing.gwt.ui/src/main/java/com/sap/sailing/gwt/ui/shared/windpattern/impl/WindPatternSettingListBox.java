@@ -1,0 +1,69 @@
+package com.sap.sailing.gwt.ui.shared.windpattern.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
+
+public class WindPatternSettingListBox implements Named, WindPatternSetting<String>, IsSerializable {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 5396311857725053774L;
+    private String name;
+    private List<String> values;
+    
+    /**
+     * Required for serialization
+     */
+    public WindPatternSettingListBox() {
+        
+    }
+    
+    public WindPatternSettingListBox(String name) {
+        this.name = name;
+        this.values = new ArrayList<String>();
+    }
+    
+    @Override
+    public DisplayWidgetType getDisplayWidgetType() {
+       return DisplayWidgetType.LISTBOX;
+    }
+
+    @Override
+    public String getMin() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getMax() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getDefault() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<String> getValues() {
+       return values;
+    }
+    
+    @Override
+    public String getName() {
+        return name;
+    }
+    
+    @Override 
+    public String toString() {
+        return getName() + " " + getDisplayWidgetType() +  " " + getValues();
+        
+    }
+}

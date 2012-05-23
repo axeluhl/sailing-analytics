@@ -1,0 +1,52 @@
+package com.sap.sailing.gwt.ui.shared.windpattern.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
+
+public class WindPatternDisplayManagerImpl implements  WindPatternDisplayManager {
+    
+   
+    
+    public WindPatternDisplayManagerImpl() {
+        
+    }
+    
+    @Override
+    public List<WindPatternDTO> getWindPatterns() {
+        List<WindPatternDTO> list = new ArrayList<WindPatternDTO>();
+        for (WindPattern w : WindPattern.values()) {
+            list.add(new WindPatternDTO(w.name()));
+        }
+        return list;
+    }
+
+    @Override
+    public WindPatternDisplay getDisplay(WindPattern windPattern) {
+        WindPatternDisplay display = new WindPatternDisplayImpl();
+        
+        switch(windPattern) {
+            case CONSTANT :          
+                WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("speed", 1,10,1);
+                display.addSetting(windSpeedSetting);      
+                break;
+            case OSCILLATING :
+                WindPatternSetting<Double> speed = new WindPatternSettingSliderBar("speed", 1,10,1);
+                display.addSetting(speed);   
+                WindPatternSetting<Double> noise = new WindPatternSettingSliderBar("noise", 0,1,0);
+                display.addSetting(noise);
+                WindPatternSetting<String> names = new WindPatternSettingListBox("names");
+                names.getValues().add("A");
+                names.getValues().add("B");
+                display.addSetting(names);
+                break;
+        }
+        return display;
+    }
+    
+    
+}
