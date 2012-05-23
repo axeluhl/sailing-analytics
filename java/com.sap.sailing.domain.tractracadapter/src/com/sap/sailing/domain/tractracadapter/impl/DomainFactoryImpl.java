@@ -273,6 +273,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     result = new RegattaImpl(event.getName(), boatClass);
                     regattaCache.put(key, result);
                     weakRegattaCache.put(event, result);
+                    logger.info("Created regatta "+result.getName());
                 }
             }
             return result;

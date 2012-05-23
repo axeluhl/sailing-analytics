@@ -727,6 +727,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (regatta != null) {
             if (regatta.getName() != null) {
                 regattasByName.remove(regatta.getName());
+                regattaTrackingCache.remove(regatta);
                 regatta.removeRegattaListener(this);
             }
             for (RaceDefinition race : regatta.getAllRaces()) {
@@ -810,7 +811,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public synchronized void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException,
             IOException, InterruptedException {
-        logger.info("Removing the race + " + race + "...");
+        logger.info("Removing the race " + race + "...");
         stopAllTrackersForWhichRaceIsLastReachable(regatta, race);
         stopTrackingWind(regatta, race);
         TrackedRace trackedRace = getExistingTrackedRace(regatta, race);
@@ -840,6 +841,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // remove the race from the regatta
         regatta.removeRace(race);
         if (Util.isEmpty(regatta.getAllRaces())) {
+            logger.info("Removing regatta "+regatta.getName()+" from service "+this);
             regattasByName.remove(regatta.getName());
             regatta.removeRegattaListener(this);
         }
@@ -925,6 +927,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         synchronized (regattaTrackingCache) {
             DynamicTrackedRegatta result = regattaTrackingCache.get(regatta);
             if (result == null) {
+                logger.info("Creating DynamicTrackedRegattaImpl for regatta "+regatta.getName());
                 result = new DynamicTrackedRegattaImpl(regatta);
                 replicate(new TrackRegatta(regatta.getRegattaIdentifier()));
                 regattaTrackingCache.put(regatta, result);
@@ -941,6 +944,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public void removeTrackedRegatta(Regatta regatta) {
+        logger.info("Removing regatta "+regatta.getName()+" from regattaTrackingCache");
         regattaTrackingCache.remove(regatta);
     }
 
