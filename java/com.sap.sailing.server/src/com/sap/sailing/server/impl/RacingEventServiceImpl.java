@@ -801,7 +801,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public synchronized void removeEvent(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
+    public synchronized void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
         for (RaceDefinition race : regatta.getAllRaces()) {
             removeRace(regatta, race);
         }
