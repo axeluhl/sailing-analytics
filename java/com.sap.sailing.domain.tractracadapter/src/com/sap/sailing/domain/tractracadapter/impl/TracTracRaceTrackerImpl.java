@@ -28,6 +28,7 @@ import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -64,7 +65,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final DomainFactory domainFactory;
     private final WindStore windStore;
     private final Set<RaceDefinition> races;
-    
+    private final DynamicTrackedRegatta trackedRegatta;
+
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
      */
@@ -116,7 +118,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException {
-        this(tractracEvent, domainFactory.getOrCreateRegatta(tractracEvent), domainFactory, paramURL, liveURI, storedURI,
+        this(tractracEvent, null, domainFactory, paramURL, liveURI, storedURI,
                 startOfTracking, endOfTracking, windStore, trackedRegattaRegistry);
     }
     
@@ -134,6 +136,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 endOfTracking, windStore, trackedRegattaRegistry);
     }
     
+    /**
+     * 
+     * @param regatta if <code>null</code>, then <code>domainFactory.getOrCreateRegatta(tractracEvent)</code> will be used to
+     * obtain a default regatta
+     */
     private TracTracRaceTrackerImpl(Event tractracEvent, Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
@@ -157,13 +164,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // Start live and stored data streams
         ioThread = new Thread(controller, "I/O for event "+tractracEvent.getName()+", race URL "+paramURL);
         for (Race tractracRace : tractracEvent.getRaceList()) {
-            // removeRace may detach the domain event from the domain factory if that
+            // removeRace may detach the domain regatta from the domain factory if that
             // removed the last race; therefore, it's important to getOrCreate the
-            // domainEvent *after* calling removeRace
+            // domain regatta *after* calling removeRace
             domainFactory.removeRace(tractracEvent, tractracRace, trackedRegattaRegistry);
         }
-        this.regatta = regatta;
-        setTrackedRegatta(trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta));
+        this.regatta = regatta == null ? domainFactory.getOrCreateRegatta(tractracEvent) : regatta;
+        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
@@ -174,6 +181,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             }
         }
         addListenersForStoredDataAndStartController(typeControllers);
+    }
+
+    @Override
+    public DynamicTrackedRegatta getTrackedRegatta() {
+        return trackedRegatta;
     }
 
     static Triple<URL, URI, URI> createID(URL paramURL, URI liveURI, URI storedURI) {

@@ -64,6 +64,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private Course course;
     private StartList startList;
     private DynamicTrackedRace trackedRace;
+    private final DynamicTrackedRegatta trackedRegatta;
 
     private boolean loggedIgnore;
     
@@ -88,8 +89,13 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.windStore = windStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
-        setTrackedRegatta(trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta));
+        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
         connector.trackRace(raceID);
+    }
+
+    @Override
+    public DynamicTrackedRegatta getTrackedRegatta() {
+        return trackedRegatta;
     }
 
     static Triple<String, String, Integer> createID(String raceID, String hostname, int port) {

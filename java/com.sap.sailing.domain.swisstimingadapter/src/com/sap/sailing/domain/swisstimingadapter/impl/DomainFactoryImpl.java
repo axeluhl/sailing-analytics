@@ -7,24 +7,25 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
@@ -54,6 +55,7 @@ import difflib.PatchFailedException;
  *
  */
 public class DomainFactoryImpl implements DomainFactory {
+    private final static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
     private final Map<String, Regatta> raceIDToEventCache;
     private final Map<Iterable<String>, ControlPoint> controlPointCache;
     private final Map<String, BoatClass> olympicClassesByID;
@@ -93,6 +95,7 @@ public class DomainFactoryImpl implements DomainFactory {
         Regatta result = raceIDToEventCache.get(raceID);
         if (result == null) {
             result = new RegattaImpl(raceID, null);
+            logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
             raceIDToEventCache.put(raceID, result);
         }
         return result;
@@ -124,6 +127,7 @@ public class DomainFactoryImpl implements DomainFactory {
         com.sap.sailing.domain.base.Course domainCourse = createCourse(race.getDescription(), course);
         BoatClass boatClass = getOrCreateBoatClassFromRaceID(race.getRaceID());
         Iterable<Competitor> competitors = createCompetitorList(startList, boatClass);
+        logger.info("Creating RaceDefinitionImpl for race "+race.getRaceID());
         RaceDefinition result = new RaceDefinitionImpl(race.getRaceID(), domainCourse,
                 boatClass, competitors);
         regatta.addRace(result);

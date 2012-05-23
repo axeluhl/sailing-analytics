@@ -273,7 +273,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     result = new RegattaImpl(event.getName(), boatClass);
                     regattaCache.put(key, result);
                     weakRegattaCache.put(event, result);
-                    logger.info("Created regatta "+result.getName());
+                    logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+") because none found for key "+key);
                 }
             }
             return result;
@@ -328,6 +328,7 @@ public class DomainFactoryImpl implements DomainFactory {
             raceDefinition = getExistingRaceDefinitionForRace(tractracRace);
             if (raceDefinition != null) { // otherwise, this domain factory doesn't seem to know about the race
                 raceCache.remove(tractracRace);
+                logger.info("Removed race "+raceDefinition.getName()+" from TracTrac DomainFactoryImpl");
             }
         }
         if (raceDefinition != null) {
@@ -348,6 +349,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     int oldSize = Util.size(regatta.getAllRaces());
                     regatta.removeRace(raceDefinition);
                     if (oldSize > 0 && Util.size(regatta.getAllRaces()) == 0) {
+                        logger.info("Removing regatta "+regatta.getName()+" ("+regatta.hashCode()+") from TracTrac DomainFactoryImpl");
                         regattaCache.remove(key);
                         weakRegattaCache.remove(tractracEvent);
                     }
@@ -373,6 +375,7 @@ public class DomainFactoryImpl implements DomainFactory {
             RaceDefinition raceDefinition = raceCache.get(race);
             if (raceDefinition == null) {
                 Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getCompetitorsAndDominantBoatClass(race);
+                logger.info("Creating RaceDefinitionImpl for race "+race.getName());
                 raceDefinition = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
                         competitorsAndDominantBoatClass.getA());
                 // add to domain Event only if boat class matches

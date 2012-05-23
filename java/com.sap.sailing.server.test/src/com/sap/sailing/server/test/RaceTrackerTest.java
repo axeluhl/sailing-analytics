@@ -64,10 +64,14 @@ public class RaceTrackerTest {
         logger.info("Calling raceHandle.getRaces()");
         Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained races: "+races);
+        assertTrue(!races.isEmpty());
+        // TODO the following assertion fails; this suggests that the race obtained above hasn't properly been entered into the regatta. Why???
+        assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
     }
     
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
+        logger.info("calling stopTrackingAndRemove("+raceHandle.getRegatta().getName()+" ("+raceHandle.getRegatta().hashCode()+"))");
         service.stopTrackingAndRemove(raceHandle.getRegatta());
     }
 
@@ -106,6 +110,7 @@ public class RaceTrackerTest {
     @Test
     public void testStopTracking() throws Exception {
         logger.entering(getClass().getName(), "testStopTracking");
+        assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
         TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedRegatta();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedRegatta);
         RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
