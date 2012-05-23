@@ -134,14 +134,14 @@
 }
 
 .titleLabel {
-	position: relative;
-	margin: 0 auto;
+	position: absolute;
 	width: 400px;
-	text-align: center;
-	font-family: 'UbuntuRegular', Arial, Verdana, sans-serif;
-	font-size: 18px;
+	text-align: right;
+	font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
+	font-size: 16px;
 	color: #fff;
-	margin-top: 22px;	
+  right: 5px;
+  top: 41px;
 }
 
 
