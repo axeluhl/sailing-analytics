@@ -281,18 +281,19 @@
 }
 
 .LogoAndTitlePanel {
-	height: 68px;
-	font-family: Arial, Verdana, sans-serif;
-	position: fixed;
-	width: 100%;
-	top: 0;
-	background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
-	background-position: center top, 0 0;
-	background-repeat: no-repeat, repeat-x;
-	box-shadow: 0 0 20px #858585;
-	-moz-box-shadow: 0 0 20px #858585;
-	-webkit-box-shadow: 0 0 20px #858585;
+    height: 68px;
+    font-family: Arial, Verdana, sans-serif;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    background-image: url(images/header_bg_modern_eventname.png), url(images/white_gradient_header.png), url(images/header_bg_modern.png);
+    background-position: right top, center top, 0 0;
+    background-repeat: no-repeat, no-repeat, repeat-x;
+    box-shadow: 0 0 20px #858585;
+    -moz-box-shadow: 0 0 20px #858585;
+    -webkit-box-shadow: 0 0 20px #858585;
 }
+
 
 .LogoAndTitlePanel:after {
 	content: " ";
