@@ -1,10 +1,8 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +10,11 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -22,7 +23,6 @@ import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.TimeZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
@@ -145,9 +146,6 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     }
     
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
-        componentsNavigationPanel = new FlowPanel();
-        componentsNavigationPanel.addStyleName("raceBoardNavigation");
-
         // create the default leaderboard and select the right race
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
         RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages);
@@ -163,8 +161,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);
 
-        WindChartSettings windChartSettings = new WindChartSettings(false, true, new HashSet<WindSourceType>(Arrays.asList(WindSourceType.values())));
-        windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeZoomModel, windChartSettings,
+        windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
         windChart.setVisible(false);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(windChart);
@@ -191,10 +188,9 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         addSettingsMenuButton(settingsPanel, windChart);
         addSettingsMenuButton(settingsPanel, competitorChart);
 
-        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel);
-        //addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, raceMap);
-        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, windChart);
-        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, competitorChart);
+        addComponentAsCheckboxToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel);
+        addComponentAsCheckboxToNavigationMenu(leaderboardAndMapViewer, windChart);
+        addComponentAsCheckboxToNavigationMenu(leaderboardAndMapViewer, competitorChart);
         
     }
 
@@ -236,10 +232,39 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                 userAgentType);
      }
 
-    private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,
+    private void addComponentAsCheckboxToNavigationMenu(final ComponentViewer componentViewer,
+            final Component<?> component) {
+        final CheckBox checkBox= new CheckBox(component.getLocalizedShortName());
+        checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
+        
+        checkBox.setValue(component.isVisible());
+        checkBox.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
+
+        checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> newValue) {
+                // make the map invisible is this is not supported yet due to problems with disabling the center element
+                // of a DockPanel
+                if (component instanceof RaceMap)
+                    return;
+
+                boolean visible = checkBox.getValue();
+                setComponentVisible(componentViewer, component, visible);
+
+                if (visible && component instanceof TimeListener) {
+                    // trigger the component to update its data
+                    ((TimeListener) component).timeChanged(timer.getTime());
+                }
+            }
+        });
+
+        componentsNavigationPanel.add(checkBox);
+    }
+    
+    public void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,
             final Component<?> component) {
         final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(),
-                component.getLocalizedShortName());
+                "\u2713 " + component.getLocalizedShortName());
         toggleButton.getElement().getStyle().setFloat(Style.Float.LEFT);
         toggleButton.setDown(component.isVisible());
         toggleButton.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
@@ -254,8 +279,9 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                 boolean visible = toggleButton.isDown();
                 setComponentVisible(componentViewer, component, visible);
 
-                if (visible && component instanceof LeaderboardPanel) {
-                    leaderboardPanel.timeChanged(timer.getTime());
+                if (visible && component instanceof TimeListener) {
+                    // trigger the component to update its data
+                    ((TimeListener) component).timeChanged(timer.getTime());
                 }
             }
         });
