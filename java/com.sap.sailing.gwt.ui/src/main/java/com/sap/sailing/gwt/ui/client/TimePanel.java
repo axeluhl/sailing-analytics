@@ -28,8 +28,10 @@ import com.sap.sailing.gwt.ui.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
+import com.sap.sailing.gwt.ui.shared.controls.slider.TimeSlider;
 
-public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, PlayStateListener, RequiresResize {
+public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener,  TimeZoomChangeListener,
+    PlayStateListener, RequiresResize {
     protected final Timer timer;
     
     /**
@@ -105,7 +107,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playModeInactiveImg = resources.timesliderPlayStateLiveInactiveIcon();
         playModeImage = new Image(playModeInactiveImg);
 
-        sliderBar = new SliderBar();
+        sliderBar = new TimeSlider();
         sliderBar.setEnabled(true);
         sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
             final DateTimeFormat formatter = DateTimeFormat.getFormat("HH:mm"); 
@@ -306,6 +308,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
      */
     public void setMinMax(Date min, Date max, boolean fireEvent) {
         assert min != null && max != null;
+                
         boolean changed = false;
         int numTicks = 8;
         if (!max.equals(this.max)) {
@@ -379,6 +382,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             speedUpButton.setEnabled(true);
             break;
         }
+    }
+    
+    @Override
+    public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+    }
+
+    @Override
+    public void onTimeZoomReset() {
     }
     
     protected boolean isLiveModeToBeMadePossible() {

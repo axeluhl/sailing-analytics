@@ -210,37 +210,37 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * The elements used to display labels above the ticks.
      */
-    private List<Element> tickLabelElements = new ArrayList<Element>();
+    protected List<Element> tickLabelElements = new ArrayList<Element>();
 
     /**
      * The elements used to display the marker labels.
      */
-    private List<Element> markerLabelElements = new ArrayList<Element>();
+    protected List<Element> markerLabelElements = new ArrayList<Element>();
 
     /**
      * The formatter used to generate label text.
      */
-    private LabelFormatter tickLabelFormatter;
+    protected LabelFormatter tickLabelFormatter;
 
     /**
      * The line that the knob moves over.
      */
-    private Element lineElement;
+    protected Element lineElement;
 
     /**
      * The offset between the edge of the shell and the line.
      */
-    private int lineLeftOffset = 0;
+    protected int lineLeftOffset = 0;
 
     /**
      * The maximum slider value.
      */
-    private Double maxValue;
+    protected Double maxValue;
 
     /**
      * The minimum slider value.
      */
-    private Double minValue;
+    protected Double minValue;
 
     /**
      * The number of labels to show.
@@ -250,7 +250,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * The number of tick marks to show.
      */
-    private int numTicks = 0;
+    protected int numTicks = 0;
 
     /**
      * A bit indicating whether or not we are currently sliding the slider bar due to keyboard events.
@@ -265,7 +265,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * A bit indicating whether or not the slider is enabled
      */
-    private boolean enabled = true;
+    protected boolean enabled = true;
 
     /**
      * The images used with the sliding bar.
@@ -280,7 +280,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * The elements used to display tick marks, which are the vertical lines along the slider bar.
      */
-    private List<Element> tickElements = new ArrayList<Element>();
+    protected List<Element> tickElements = new ArrayList<Element>();
 
     /**
      * The elements used to display additional markers on the slider bar.
@@ -863,7 +863,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * Draw the labels along the line.
      */
-    private void drawTickLabels() {
+    protected void drawTickLabels() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
 
@@ -921,7 +921,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * Draw the tick along the line.
      */
-    private void drawTicks() {
+    protected void drawTicks() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
 
@@ -1099,7 +1099,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the mouse event
      */
     private void slideKnob(Event event) {
-        //Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
+        // Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
         int x = DOM.eventGetClientX(event) + Window.getScrollLeft();
         if (x > 0) {
             int lineWidth = lineElement.getOffsetWidth();

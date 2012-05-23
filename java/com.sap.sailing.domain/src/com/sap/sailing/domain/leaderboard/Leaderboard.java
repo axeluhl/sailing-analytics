@@ -137,7 +137,7 @@ public interface Leaderboard extends Named {
      * <p>
      * 
      * The sorting order considers this leaderboard's scoring scheme including the semantics of
-     * {@link Series#isFleetsOrdered() ordered fleets} and {@link RaceColumn#isMedalRace() medal races}. The ordering
+     * {@link Fleet#compareTo(Fleet) ordered fleets} and {@link RaceColumn#isMedalRace() medal races}. The ordering
      * does not consider result discarding because when sorting for a race column it is of interest how the competitor
      * performed in that race and not how the score affected the overall regatta score. Therefore, it is based on
      * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)} and not on

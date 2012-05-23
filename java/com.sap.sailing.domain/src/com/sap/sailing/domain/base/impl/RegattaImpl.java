@@ -30,8 +30,8 @@ public class RegattaImpl extends NamedImpl implements Regatta {
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet.
      */
     public RegattaImpl(String baseName, BoatClass boatClass) {
-        this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isFleetsOrdered */true,
-                /* isMedal */ false, Collections.singletonList(new FleetImpl("Default")), /* race column names */ new ArrayList<String>())));
+        this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */ false,
+                Collections.singletonList(new FleetImpl("Default")), /* race column names */ new ArrayList<String>())));
     }
     
     public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series) {

@@ -180,12 +180,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint)
             throws NoWindException {
-        return getCompetitorsFromBestToWorst(raceColumn, timePoint, /* isFleetsOrdered */ false);
+        return getCompetitorsFromBestToWorst(raceColumn, timePoint);
     }
 
-    @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

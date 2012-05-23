@@ -76,6 +76,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     } 
     
     @Override
+    public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+    }
+
+    @Override
+    public void onTimeZoomReset() {
+    }
+
+    @Override
     protected boolean isLiveModeToBeMadePossible() {
         long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
         long eventTimeoutTolerance = 30 * 1000; // 30s 
