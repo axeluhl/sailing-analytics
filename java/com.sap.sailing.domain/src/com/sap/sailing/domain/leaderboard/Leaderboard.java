@@ -71,19 +71,20 @@ public interface Leaderboard extends Named {
 
     /**
      * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.common.TimePoint)} with the
-     * additional logic that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started}
-     * yet, 0 points will be allotted to the race for all competitors.
+     * additional logic that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started} yet
+     * or no {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked
+     * race for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.
      * 
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
      *            a race that is contained in the {@link #getRaceColumns()} result
      */
-    int getTrackedPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
-     * {@link #getTrackedPoints(Competitor, TrackedRace, TimePoint)} but may be corrected by disqualifications or calls
+     * {@link #getTrackedRank(Competitor, TrackedRace, TimePoint)} but may be corrected by disqualifications or calls
      * by the jury for the particular race that differ from the tracking results.
      * 
      * @param competitor
@@ -96,7 +97,7 @@ public interface Leaderboard extends Named {
     /**
      * Tells if and why a competitor received maximum points for a race.
      */
-    MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
@@ -132,14 +133,6 @@ public interface Leaderboard extends Named {
      * for the entire leaderboard, the {@link #getCarriedPoints(Competitor) carried-over points} need to be added.
      */
     Map<Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException;
-
-    /**
-     * A leaderboard can be renamed. If a leaderboard is managed in a structure that keys leaderboards by name,
-     * that structure's rules have to be obeyed to ensure the structure's consistency. For example,
-     * <code>RacingEventService</code> has a <code>renameLeaderboard</code> method that ensures the internal
-     * structure's consistency and invokes this method.
-     */
-    void setName(String newName);
 
     /**
      * Retrieves all race columns that were added, either by {@link #addRace(TrackedRace, String, boolean)} or

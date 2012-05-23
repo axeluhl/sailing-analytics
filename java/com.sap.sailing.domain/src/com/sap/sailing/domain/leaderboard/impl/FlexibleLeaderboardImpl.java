@@ -28,11 +28,31 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     protected static final Fleet defaultFleet = new FleetImpl("Default");
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
+    private String name;
 
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(name, scoreCorrection, resultDiscardingRule);
+        super(scoreCorrection, resultDiscardingRule);
+        if (name == null) {
+            throw new IllegalArgumentException("A leaderboard's name must not be null");
+        }
+        this.name = name;
         this.races = new ArrayList<FlexibleRaceColumn>();
+    }
+    
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param newName must not be <code>null</code>
+     */
+    public void setName(String newName) {
+        if (newName == null) {
+            throw new IllegalArgumentException("A leaderboard's name must not be null");
+        }
+        this.name = newName;
     }
     
     @Override

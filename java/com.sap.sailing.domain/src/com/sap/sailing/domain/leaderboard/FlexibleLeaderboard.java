@@ -64,4 +64,12 @@ public interface FlexibleLeaderboard extends Leaderboard {
 
     void updateIsMedalRace(String raceName, boolean isMedalRace);
     
+    /**
+     * A leaderboard can be renamed. If a leaderboard is managed in a structure that keys leaderboards by name,
+     * that structure's rules have to be obeyed to ensure the structure's consistency. For example,
+     * <code>RacingEventService</code> has a <code>renameLeaderboard</code> method that ensures the internal
+     * structure's consistency and invokes this method.
+     */
+    void setName(String newName);
+
 }

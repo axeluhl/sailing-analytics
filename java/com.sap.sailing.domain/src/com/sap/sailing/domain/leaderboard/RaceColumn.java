@@ -57,7 +57,9 @@ public interface RaceColumn extends Named {
     
     /**
      * Tries to find a tracked race whose {@link RaceDefinition#getCompetitors() competitors} contain <code>competitor</code>. If
-     * no such {@link TrackedRace} is currently associated with this race column, <code>null</code> is returned.
+     * no such {@link TrackedRace} is currently associated with this race column, <code>null</code> is returned. No two
+     * {@link TrackedRace}s may result because a single competitor can be part of only one fleet and therefore not occur
+     * twice in a single {@link RaceColumn}.
      */
     TrackedRace getTrackedRace(Competitor competitor);
     
