@@ -57,6 +57,8 @@ public interface DynamicTrackedRace extends TrackedRace {
 
     void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind);
     
+    void setDelayToLiveInMillis(long delayToLiveInMillis);
+    
     DynamicTrackedRegatta getTrackedRegatta();
 
     /**

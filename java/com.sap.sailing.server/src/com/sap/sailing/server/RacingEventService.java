@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -29,7 +30,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -266,6 +266,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
+    long getDelayToLiveInMillis();
+
+    void setDelayToLiveInMillis(long delayToLiveInMillis);
+
     /**
      * @param regattaToAddTo
      *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
@@ -353,7 +357,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
     Regatta getOrCreateRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
 

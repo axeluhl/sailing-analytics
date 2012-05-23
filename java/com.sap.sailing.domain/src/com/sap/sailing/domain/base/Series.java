@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 
 /**
  * A series is a part of a {@link Regatta}. Rounds are ordered within the regatta, and rules for who is assigned to
