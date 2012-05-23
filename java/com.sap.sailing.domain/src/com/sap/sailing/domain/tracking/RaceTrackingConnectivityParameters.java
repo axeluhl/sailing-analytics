@@ -36,4 +36,8 @@ public interface RaceTrackingConnectivityParameters {
      */
     Object getTrackerID();
 
+    /** 
+     * Gets the configured delay time to the 'live' timepoint for this tracker
+     */
+    public long getDelayToLiveInMillis();
 }

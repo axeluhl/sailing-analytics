@@ -18,7 +18,7 @@ public interface DynamicTrackedRegatta extends TrackedRegatta {
      *            {@link DynamicRaceDefinitionSet}.
      */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
 }

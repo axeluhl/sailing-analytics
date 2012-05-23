@@ -84,7 +84,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
-
+    
     private final RaceDefinition race;
 
     private final TrackedRegatta trackedRegatta;
@@ -189,14 +189,19 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private transient CombinedWindTrackImpl combinedWindTrack;
 
+    /**
+     * The time delay to the current point in time in milliseconds.  
+     */
+    protected long delayToLiveInMillis;
+    
     public TrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        this(trackedRegatta, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+        this(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
         /* delay for wind estimation cache invalidation */millisecondsOverWhichToAverageWind / 2);
     }
 
     public TrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
         this.updateCount = 0;
@@ -206,6 +211,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Wind>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
+        this.delayToLiveInMillis = delayToLiveInMillis; 
         this.startToNextMarkCacheInvalidationListeners = new HashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = new HashMap<Competitor, Util.Triple<TimePoint, TimePoint, List<Maneuver>>>();
         this.buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
