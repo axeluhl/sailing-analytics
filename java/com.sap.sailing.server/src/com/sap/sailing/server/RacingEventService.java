@@ -266,6 +266,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
+    long getDelayToLiveInMillis();
+
+    void setDelayToLiveInMillis(long delayToLiveInMillis);
+
     /**
      * @param regattaToAddTo
      *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
@@ -353,7 +357,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
     Regatta getOrCreateRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
 

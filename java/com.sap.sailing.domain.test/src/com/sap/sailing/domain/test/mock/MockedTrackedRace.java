@@ -409,7 +409,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
-                    long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+                    long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                     DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
                 // TODO Auto-generated method stub
                 return null;
@@ -601,5 +601,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public long getDelayToLiveInMillis() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public void setDelayToLiveInMillis(long delayToLiveInMillis) {
+        // TODO Auto-generated method stub
+        
     }
 }

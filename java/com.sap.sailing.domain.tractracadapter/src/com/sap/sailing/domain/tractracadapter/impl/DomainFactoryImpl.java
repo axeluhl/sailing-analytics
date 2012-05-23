@@ -283,14 +283,15 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, TimePoint startOfTracking,
-            TimePoint endOfTracking, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types) {
+            TimePoint endOfTracking, long delayToLiveInMillis, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types) {
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
             case RACECOURSE:
                 result.add(new RaceCourseReceiver(
                         this, trackedRegatta, tractracEvent, windStore,
-                        raceDefinitionSetToUpdate, WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND));
+                        raceDefinitionSetToUpdate, delayToLiveInMillis, 
+                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -315,8 +316,8 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
-            com.tractrac.clientmodule.Event tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        return getUpdateReceivers(trackedRegatta, tractracEvent, windStore, startOfTracking, endOfTracking,
+            com.tractrac.clientmodule.Event tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        return getUpdateReceivers(trackedRegatta, tractracEvent, windStore, startOfTracking, endOfTracking, delayToLiveInMillis,
                 raceDefinitionSetToUpdate, ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS,
                 ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
@@ -369,7 +370,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Pair<RaceDefinition, TrackedRace> getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
-            Race race, Course course, WindStore windStore, long millisecondsOverWhichToAverageWind,
+            Race race, Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(race);
@@ -387,7 +388,7 @@ public class DomainFactoryImpl implements DomainFactory {
                             trackedRegatta.getRegatta().getBoatClass());
                 }
                 TrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, windStore,
-                        millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+                        delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                 synchronized (raceCache) {
                     raceCache.put(race, raceDefinition);
                     raceCache.notifyAll();
@@ -400,9 +401,9 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     private TrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        return trackedRegatta.createTrackedRace(race,
-                windStore, millisecondsOverWhichToAverageWind,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
+        return trackedRegatta.createTrackedRace(race, 
+                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
     }
@@ -468,17 +469,17 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
-            TimePoint endOfTracking, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
+            TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, startOfTracking, endOfTracking,
+        return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                 windStore, trackedRegattaRegistry);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore,
             TrackedRegattaRegistry trackedRegattaRegistry) throws MalformedURLException, FileNotFoundException, URISyntaxException {
-        return new TracTracRaceTrackerImpl(regatta, this, paramURL, liveURI, storedURI, startOfTracking, endOfTracking,
+        return new TracTracRaceTrackerImpl(regatta, this, paramURL, liveURI, storedURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                 windStore, trackedRegattaRegistry);
     }
 
@@ -494,8 +495,8 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI,
-            URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore) {
-        return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, startOfTracking, endOfTracking, windStore, this);
+            URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore) {
+        return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, startOfTracking, endOfTracking, delayToLiveInMillis, windStore, this);
     }
 
 }

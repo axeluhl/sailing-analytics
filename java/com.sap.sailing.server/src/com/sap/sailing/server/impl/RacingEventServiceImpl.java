@@ -153,6 +153,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     private final Set<OperationExecutionListener> operationExecutionListeners;
 
+    /**
+     * The globally used configuration of the time delay (in milliseconds) to the 'live' timepoint used for each new tracked race.  
+     */
+    private long delayToLiveInMillis;
+    
     public RacingEventServiceImpl() {
         this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE.getDefaultMongoObjectFactory());
     }
@@ -173,6 +178,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         leaderboardsByName = new HashMap<String, Leaderboard>();
         operationExecutionListeners = new HashSet<OperationExecutionListener>();
         courseListeners = new HashMap<RaceDefinition, CourseChangeReplicator>();
+        delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
@@ -453,7 +459,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             int port, boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         return addRace(
                 regattaToAddTo,
-                swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port, raceID, canSendRequests,
+                swissTimingDomainFactory.createTrackingConnectivityParameters(hostname, port, raceID, canSendRequests, delayToLiveInMillis,
                         swissTimingFactory, swissTimingDomainFactory, windStore, swissTimingAdapterPersistence), windStore, timeoutInMilliseconds);
     }
 
@@ -464,7 +470,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 /* regattaToAddTo */ null,
                 getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         /* startOfTracking */ null,
-                        /* endOfTracking */null, windStore), windStore, timeoutInMilliseconds);
+                        /* endOfTracking */null, delayToLiveInMillis, windStore), windStore, timeoutInMilliseconds);
     }
     
     @Override
@@ -556,10 +562,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     @Override
     public synchronized TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
-        return trackedRegatta.createTrackedRace(race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        return trackedRegatta.createTrackedRace(race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 /* raceDefinitionSetToUpdate */ null);
     }
     
@@ -568,7 +574,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
             WindStore windStore, long timeoutInMilliseconds) throws Exception {
         return addRace(regattaToAddTo, getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
-                        endOfTracking, windStore), windStore, timeoutInMilliseconds);
+                        endOfTracking, delayToLiveInMillis, windStore), windStore, timeoutInMilliseconds);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedRegatta trackedRegatta) {
@@ -611,6 +617,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         public void raceAdded(TrackedRace trackedRace) {
             // replicate the addition of the tracked race:
             CreateTrackedRace op = new CreateTrackedRace(trackedRace.getRaceIdentifier(), trackedRace.getWindStore(),
+                    trackedRace.getDelayToLiveInMillis(),
                     trackedRace.getMillisecondsOverWhichToAverageWind(), trackedRace.getMillisecondsOverWhichToAverageSpeed());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
@@ -1188,6 +1195,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);
         }
+    }
+
+    @Override
+    public long getDelayToLiveInMillis() {
+        return delayToLiveInMillis;
+    }
+
+    @Override
+    public void setDelayToLiveInMillis(long delayToLiveInMillis) {
+        this.delayToLiveInMillis = delayToLiveInMillis;
     }
 
 }
