@@ -188,6 +188,4 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         // TODO Auto-generated method stub
         return null;
     }
-    
-    
 }

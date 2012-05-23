@@ -106,7 +106,9 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl {
 
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        // TODO how to count columns where only some but not all fleets have a tracked race? Probably check if there are score corrections for the untracked fleets?
         // TODO Auto-generated method stub
+        
         return null;
     }
 
