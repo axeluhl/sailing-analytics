@@ -112,11 +112,25 @@ input.opencoloumn {
 }
 
 .globalNavigation-home {
-	background-color: gray;	
+	background: #7c7b7c;	
+  border-radius: 0px 0px 4px 4px; 
+  -moz-border-radius: 0px 0px 4px 4px; 
+  -webkit-border-radius: 0px 0px 4px 4px;
+  margin: 0 10px 0 0;
+  padding: 0 6px;
 }
 
+.globalNavigation-home a{
+  color: #fff;
+  text-decoration: none;
+}  
+
 .globalNavigation-leaderBoard {
-	background-color: gray;	
+	background: #7c7b7c;	
+border-radius: 0px 0px 4px 4px; 
+-moz-border-radius: 0px 0px 4px 4px; 
+-webkit-border-radius: 0px 0px 4px 4px;
+  padding: 0 6px;
 }
 
 .globalNavigation-leaderBoardGroup {
