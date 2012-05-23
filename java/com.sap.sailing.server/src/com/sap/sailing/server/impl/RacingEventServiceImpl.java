@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
@@ -48,7 +49,6 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
@@ -284,9 +284,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 throw new IllegalArgumentException("Leaderboard with name "+newName+" already exists");
             }
             Leaderboard toRename = leaderboardsByName.remove(oldName);
-            toRename.setName(newName);
-            leaderboardsByName.put(newName, toRename);
-            mongoObjectFactory.renameLeaderboard(oldName, newName);
+            if (toRename instanceof FlexibleLeaderboard) {
+                ((FlexibleLeaderboard) toRename).setName(newName);
+                leaderboardsByName.put(newName, toRename);
+                mongoObjectFactory.renameLeaderboard(oldName, newName);
+            } else {
+                throw new IllegalArgumentException("Leaderboard with name "+newName+" is not a FlexibleLeaderboard and therefore cannot be renamed");
+            }
         }
     }
     

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;

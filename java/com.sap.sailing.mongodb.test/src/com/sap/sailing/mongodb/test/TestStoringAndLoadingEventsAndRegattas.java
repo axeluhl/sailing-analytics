@@ -18,20 +18,20 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
-import com.sap.sailing.domain.base.impl.RaceColumnInSeries;
+import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -106,7 +106,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Series loadedQualifyingSeries = seriesIter.next();
         int i=1;
         for (RaceColumn raceColumn : loadedQualifyingSeries.getRaceColumns()) {
-            assertTrue(raceColumn instanceof RaceColumnInSeries);
+            assertTrue(raceColumn instanceof RaceColumnInSeriesImpl);
             assertEquals("Q"+i, raceColumn.getName());
             assertTrue(Util.equals(loadedQualifyingSeries.getFleets(), raceColumn.getFleets()));
             i++;
@@ -114,14 +114,14 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Series loadedFinalSeries = seriesIter.next();
         i=1;
         for (RaceColumn raceColumn : loadedFinalSeries.getRaceColumns()) {
-            assertTrue(raceColumn instanceof RaceColumnInSeries);
+            assertTrue(raceColumn instanceof RaceColumnInSeriesImpl);
             assertEquals("F"+i, raceColumn.getName());
             assertTrue(Util.equals(loadedFinalSeries.getFleets(), raceColumn.getFleets()));
             i++;
         }
         Series loadedMedalSeries = seriesIter.next();
         for (RaceColumn raceColumn : loadedMedalSeries.getRaceColumns()) {
-            assertTrue(raceColumn instanceof RaceColumnInSeries);
+            assertTrue(raceColumn instanceof RaceColumnInSeriesImpl);
             assertEquals("M", raceColumn.getName());
             assertTrue(Util.equals(loadedMedalSeries.getFleets(), raceColumn.getFleets()));
         }

@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 
 public class SeriesImpl extends NamedImpl implements Series {
     private static final long serialVersionUID = -1640404303144907381L;
     private final boolean isFleetsOrdered;
     private final Map<String, Fleet> fleetsByName;
-    private final Iterable<RaceColumnInSeries> raceColumns;
+    private final Iterable<RaceColumnInSeriesImpl> raceColumns;
     private boolean isMedal;
     
     public SeriesImpl(String name, boolean isFleetsOrdered, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames) {
@@ -24,9 +24,9 @@ public class SeriesImpl extends NamedImpl implements Series {
         for (Fleet fleet : fleets) {
             this.fleetsByName.put(fleet.getName(), fleet);
         }
-        List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
+        List<RaceColumnInSeriesImpl> myRaceColumns = new ArrayList<RaceColumnInSeriesImpl>();
         for (String raceColumnName : raceColumnNames) {
-            RaceColumnInSeries raceColumn = new RaceColumnInSeries(raceColumnName, this);
+            RaceColumnInSeriesImpl raceColumn = new RaceColumnInSeriesImpl(raceColumnName, this);
             myRaceColumns.add(raceColumn);
         }
         this.raceColumns = myRaceColumns;

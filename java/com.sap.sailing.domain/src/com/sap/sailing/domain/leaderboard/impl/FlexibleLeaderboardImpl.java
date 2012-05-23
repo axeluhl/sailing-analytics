@@ -6,11 +6,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -28,11 +31,31 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     protected static final Fleet defaultFleet = new FleetImpl("Default");
     private static final long serialVersionUID = -5708971849158747846L;
     private final List<FlexibleRaceColumn> races;
+    private String name;
 
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(name, scoreCorrection, resultDiscardingRule);
+        super(scoreCorrection, resultDiscardingRule);
+        if (name == null) {
+            throw new IllegalArgumentException("A leaderboard's name must not be null");
+        }
+        this.name = name;
         this.races = new ArrayList<FlexibleRaceColumn>();
+    }
+    
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param newName must not be <code>null</code>
+     */
+    public void setName(String newName) {
+        if (newName == null) {
+            throw new IllegalArgumentException("A leaderboard's name must not be null");
+        }
+        this.name = newName;
     }
     
     @Override
@@ -153,5 +176,18 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             race.setIsMedalRace(isMedalRace);
         }
     }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint)
+            throws NoWindException {
+        return getCompetitorsFromBestToWorst(raceColumn, timePoint, /* isFleetsOrdered */ false);
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
     
 }

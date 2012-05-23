@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Series;
 
 /**
@@ -9,11 +10,11 @@ import com.sap.sailing.domain.base.Series;
  * @author Axel Uhl (D043530)
  *
  */
-public class RaceColumnInSeries extends AbstractRaceColumn {
+public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceColumnInSeries {
     private static final long serialVersionUID = -2199678838624406645L;
     private final Series series;
 
-    public RaceColumnInSeries(String name, Series series) {
+    public RaceColumnInSeriesImpl(String name, Series series) {
         super(name);
         this.series = series;
     }
@@ -27,4 +28,10 @@ public class RaceColumnInSeries extends AbstractRaceColumn {
     public boolean isMedalRace() {
         return series.isMedal();
     }
+
+    @Override
+    public Series getSeries() {
+        return series;
+    }
+
 }
