@@ -19,6 +19,8 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
@@ -120,12 +122,12 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             }
         }));
         
-//        chart.setClickEventHandler(new ChartClickEventHandler() {
-//            @Override
-//            public boolean onClick(ChartClickEvent chartClickEvent) {
-//                return WindChart.this.onClick(chartClickEvent);
-//            }
-//        });
+        chart.setClickEventHandler(new ChartClickEventHandler() {
+            @Override
+            public boolean onClick(ChartClickEvent chartClickEvent) {
+                return WindChart.this.onClick(chartClickEvent);
+            }
+        });
        
         chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
             @Override
@@ -164,7 +166,6 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                  .getXAxis().setAxisTitle(null);
         }
         
-        setWidget(chart);
         setSize("100%", "100%");
         
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -442,6 +443,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         if (selectedRaceIdentifier == null) {
             clearChart();
         } else if (needsDataLoading() && from != null && to != null) {
+            setWidget(chart);
             showLoading("Loading wind data...");
             GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
                     // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
@@ -517,6 +519,8 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                 // assuming play mode is replay / non-live
                 if (timeOfLatestRequestInMillis == null) {
                     loadData(minTimepoint, maxTimepoint, /* append */false); // replace old series
+                } else {
+                    chart.redraw();
                 }
                 break;
             }
