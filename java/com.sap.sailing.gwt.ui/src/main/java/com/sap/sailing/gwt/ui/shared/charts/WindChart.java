@@ -136,8 +136,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
 
         chart.getXAxis().setType(Axis.Type.DATE_TIME)
                         .setMaxZoom(60 * 1000) // 1 minute
-                        .setAxisTitleText(stringMessages.time())
-                        .setTickInterval(1000 * 60 * 10);
+                        .setAxisTitleText(stringMessages.time());
         chart.getXAxis().setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
             @Override
             public String format(AxisLabelsData axisLabelsData) {
@@ -322,7 +321,6 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             
             
             for (WindDTO wind : windTrackInfo.windFixes) {
-                Date windDate = new Date(wind.originTimepoint.longValue());
                 if (timeOfEarliestRequestInMillis == null || wind.timepoint<timeOfEarliestRequestInMillis) {
                     timeOfEarliestRequestInMillis = wind.originTimepoint;
                 }

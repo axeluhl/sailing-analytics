@@ -261,8 +261,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         componentsNavigationPanel.add(checkBox);
     }
     
-
-    private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,
+    public void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,
             final Component<?> component) {
         final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(),
                 "\u2713 " + component.getLocalizedShortName());
