@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Window;
@@ -61,8 +60,6 @@ public class GlobalNavigationPanel extends FlowPanel {
         
         HTML linkHtml = new HTML(ANCHORTEMPLATE.anchor(URLFactory.INSTANCE.encode(url), linkName));
         linkHtml.addStyleName(STYLE_NAME_PREFIX + styleNameExtension);
-        linkHtml.getElement().getStyle().setFloat(Style.Float.LEFT);
-        linkHtml.getElement().getStyle().setPadding(5, Style.Unit.PX);
         add(linkHtml);
     }
 }
