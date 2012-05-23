@@ -1,12 +1,10 @@
-package com.sap.sailing.domain.leaderboard;
+package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -30,6 +28,13 @@ public interface RaceColumn extends Named {
     Iterable<? extends Fleet> getFleets();
     
     Fleet getFleetByName(String fleetName);
+    
+    /**
+     * By looking at the tracked races linked to this race column, identify the {@link Fleet} in which <code>competitor</code>
+     * races in this column. If the competitor is not found, caused by no tracked races being associated with this race column
+     * in which <code>competitor</code> competes, <code>null</code> is returned.
+     */
+    Fleet getFleetOfCompetitor(Competitor competitor);
     
     /**
      * This does also update the {@link #getRaceIdentifier(Fleet) race identifier} by setting it to <code>null</code> if <code>race</code>

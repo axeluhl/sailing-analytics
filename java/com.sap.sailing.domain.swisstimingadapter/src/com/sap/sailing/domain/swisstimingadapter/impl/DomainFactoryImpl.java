@@ -255,10 +255,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, boolean canSendRequests,
+    public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
+            boolean canSendRequests, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore,
             RaceSpecificMessageLoader messageLoader) {
-        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, canSendRequests,
+        return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, canSendRequests, delayToLiveInMillis, 
                 swissTimingFactory, domainFactory, windStore, messageLoader);
     }
 

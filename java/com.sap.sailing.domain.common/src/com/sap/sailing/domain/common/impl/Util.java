@@ -30,6 +30,32 @@ public class Util {
         }
     }
     
+    public static <T> int indexOf(Iterable<? extends T> i, T t) {
+        int result;
+        if (i instanceof List<?>) {
+            List<?> list = (List<?>) i;
+            result = list.indexOf(t);
+        } else {
+            boolean found = false;
+            int counter = 0;
+            for (T it : i) {
+                if (it == null && t == null
+                        || it != null && it.equals(t)) {
+                    result = counter;
+                    found = true;
+                    break;
+                }
+                counter++;
+            }
+            if (found) {
+                result = counter;
+            } else {
+                result = -1;
+            }
+        }
+        return result;
+    }
+    
     public static <T> boolean equals(Iterable<? extends T> a, Iterable<? extends T> b) {
         Iterator<? extends T> aIter = a.iterator();
         Iterator<? extends T> bIter = b.iterator();

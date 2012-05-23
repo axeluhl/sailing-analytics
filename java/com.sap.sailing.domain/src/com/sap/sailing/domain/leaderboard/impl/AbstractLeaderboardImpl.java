@@ -1,20 +1,23 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -22,6 +25,12 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public abstract class AbstractLeaderboardImpl implements Leaderboard {
     private static final long serialVersionUID = -328091952760083438L;
+
+    /**
+     * The factor by which a medal race score is multiplied in the overall point scheme
+     */
+    private static final int MEDAL_RACE_FACTOR = 2;
+    
     private final SettableScoreCorrection scoreCorrection;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
     
@@ -204,7 +213,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     public int getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
         return isDiscarded(competitor, raceColumn, timePoint) ?
                 0 :
-                (raceColumn.isMedalRace() ? 2 : 1) * getNetPoints(competitor, raceColumn, timePoint);
+                (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1) * getNetPoints(competitor, raceColumn, timePoint);
     }
     
     @Override
@@ -284,11 +293,11 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     @Override
-    public boolean considerForDiscarding(RaceColumn raceInLeaderboard, TimePoint timePoint) {
-        boolean result = getScoreCorrection().hasCorrectionFor(raceInLeaderboard);
-        if (!result && !raceInLeaderboard.isMedalRace()) {
-            for (Fleet fleet : raceInLeaderboard.getFleets()) {
-                TrackedRace trackedRace = raceInLeaderboard.getTrackedRace(fleet);
+    public boolean considerForDiscarding(RaceColumn raceColumn, TimePoint timePoint) {
+        boolean result = getScoreCorrection().hasCorrectionFor(raceColumn);
+        if (!result && !raceColumn.isMedalRace()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null && trackedRace.hasStarted(timePoint)) {
                     result = true;
                     break;
@@ -312,4 +321,36 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
         this.resultDiscardingRule = discardingRule;
     }
+
+    protected List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint, final boolean isFleetsOrdered) throws NoWindException {
+        final Map<Competitor, Pair<Integer, Integer>> netPointsAndFleetIndex = new HashMap<Competitor, Pair<Integer, Integer>>();
+        for (Competitor competitor : getCompetitors()) {
+            int netPoints = getNetPoints(competitor, raceColumn, timePoint);
+            if (netPoints != 0) {
+                netPointsAndFleetIndex.put(competitor, new Pair<Integer, Integer>(netPoints,
+                        Util.indexOf(raceColumn.getFleets(), raceColumn.getFleetOfCompetitor(competitor))));
+            }
+        }
+        List<Competitor> result = new ArrayList<Competitor>(netPointsAndFleetIndex.keySet());
+        Collections.sort(result, new Comparator<Competitor>() {
+            @Override
+            public int compare(Competitor o1, Competitor o2) {
+                int comparisonResult;
+                if (o1 == o2) {
+                    comparisonResult = 0;
+                } else {
+                    comparisonResult = 0;
+                    if (isFleetsOrdered) {
+                        comparisonResult = netPointsAndFleetIndex.get(o1).getB() - netPointsAndFleetIndex.get(o2).getB();
+                    }
+                    if (comparisonResult == 0) {
+                        comparisonResult = netPointsAndFleetIndex.get(o1).getA() - netPointsAndFleetIndex.get(o2).getA();
+                    }
+                }
+                return comparisonResult;
+            }
+        });
+        return result;
+    }
+
 }

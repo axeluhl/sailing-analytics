@@ -120,7 +120,7 @@ public interface DomainFactory {
      *            available but loses track of the wind, e.g., during server restarts.
      */
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
-            TimePoint endOfTracking, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
+            TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException;
 
     /**
@@ -128,7 +128,7 @@ public interface DomainFactory {
      * a predefined {@link Regatta} is used to hold the resulting races.
      */
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
-            TimePoint endOfTracking, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
+            TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException;
 
     BoatClass getOrCreateBoatClass(CompetitorClass competitorClass);
@@ -157,7 +157,7 @@ public interface DomainFactory {
      *            {@link RaceCourseReceiver} created by this call
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, TimePoint startOfTracking,
-            TimePoint endOfTracking, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
+            TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
@@ -177,7 +177,7 @@ public interface DomainFactory {
      *            {@link DynamicRaceDefinitionSet#addRaceDefinition(RaceDefinition) added} to that object.
      */
     Pair<RaceDefinition, TrackedRace> getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta, Race race,
-            Course course, WindStore windStore, long millisecondsOverWhichToAverageWind,
+            Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
 
     /**
@@ -192,7 +192,7 @@ public interface DomainFactory {
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor);
 
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, WindStore windStore,
-            TimePoint startOfTracking, TimePoint endOfTracking, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types);
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
@@ -227,7 +227,7 @@ public interface DomainFactory {
     Pair<List<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(Race race);
     
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore);
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding
