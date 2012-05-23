@@ -112,12 +112,13 @@ input.opencoloumn {
 }
 
 .globalNavigation-home {
-	background: #7c7b7c;	
+	background: url(images/globalNavigation-home_bg.png) 5px center no-repeat #7c7b7c;	
   border-radius: 0px 0px 4px 4px; 
   -moz-border-radius: 0px 0px 4px 4px; 
   -webkit-border-radius: 0px 0px 4px 4px;
   margin: 0 10px 0 0;
-  padding: 0 6px;
+  padding: 5px 6px 5px 25px;
+  float: left;
 }
 
 .globalNavigation-home a{
@@ -126,11 +127,18 @@ input.opencoloumn {
 }  
 
 .globalNavigation-leaderBoard {
-	background: #7c7b7c;	
-border-radius: 0px 0px 4px 4px; 
--moz-border-radius: 0px 0px 4px 4px; 
--webkit-border-radius: 0px 0px 4px 4px;
-  padding: 0 6px;
+	background: url(images/globalNavigation-leaderBoard_bg.png) 5px center no-repeat #7c7b7c;	
+  border-radius: 0px 0px 4px 4px; 
+  -moz-border-radius: 0px 0px 4px 4px; 
+  -webkit-border-radius: 0px 0px 4px 4px;
+  padding: 5px 6px 5px 25px;
+  margin: 0 10px 0 0;
+  float: left;
+}
+
+.globalNavigation-leaderBoard a {
+  color: #fff;
+  text-decoration: none;
 }
 
 .globalNavigation-leaderBoardGroup {
