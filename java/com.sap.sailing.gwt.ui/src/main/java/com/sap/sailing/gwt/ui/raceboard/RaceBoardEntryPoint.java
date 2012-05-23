@@ -1,7 +1,6 @@
 
 package com.sap.sailing.gwt.ui.raceboard;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,7 +11,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
@@ -25,7 +23,6 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
-import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
     private RaceDTO selectedRace;
@@ -152,35 +149,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             }
         }
         return null;
-    }
-
-    private FlowPanel createBreadcrumbPanel() {
-        FlowPanel raceBoardHeaderPanel = new FlowPanel();
-        raceBoardHeaderPanel.addStyleName("RaceBoardHeaderPanel");
-        
-        List<Pair<String, String>> links = new ArrayList<Pair<String, String>>();
-        String debugParam = Window.Location.getParameter("gwt.codesvr");
-        String root = Window.Location.getParameter("root");
-        if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
-            if (root.equals("overview")) {
-                String link = "/gwt/Spectator.html"
-                        + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
-                links.add(new Pair<String, String>(link, stringMessages.home()));
-            }
-            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName
-                    + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
-            links.add(new Pair<String, String>(link, leaderboardGroupName));
-        }
-        if (leaderboardName != null && !leaderboardName.isEmpty()) {
-            String link = "/gwt/Leaderboard.html?name=" + leaderboardName
-                    + (leaderboardGroupName != null ? "&leaderboardGroupName=" + leaderboardGroupName : "")
-                    + "&root=" + root + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
-            links.add(new Pair<String, String>(link, leaderboardName));
-        }
-        BreadcrumbPanel breadcrumbPanel = new BreadcrumbPanel(links, raceName);
-        raceBoardHeaderPanel.add(breadcrumbPanel);
-        
-        return raceBoardHeaderPanel;
     }
 
     private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
