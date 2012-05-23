@@ -367,6 +367,16 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     private boolean hasScoreCorrectionForAllUntrackedFleets(RaceColumn raceColumn) {
+        boolean allFleetsHaveTrackedRace = true;
+        for (Fleet fleet : raceColumn.getFleets()) {
+            if (raceColumn.getTrackedRace(fleet) == null) {
+                allFleetsHaveTrackedRace = false;
+                break;
+            }
+        }
+        if (!allFleetsHaveTrackedRace) {
+//            for ()
+        }
         // TODO Auto-generated method stub
         return false;
     }
