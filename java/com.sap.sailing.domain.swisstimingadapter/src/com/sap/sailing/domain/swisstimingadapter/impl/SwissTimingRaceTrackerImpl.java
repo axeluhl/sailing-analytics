@@ -64,6 +64,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private Course course;
     private StartList startList;
     private DynamicTrackedRace trackedRace;
+    private final DynamicTrackedRegatta trackedRegatta;
 
     private boolean loggedIgnore;
     
@@ -71,7 +72,16 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
+        this(domainFactory.getOrCreateRegatta(raceID), raceID, hostname, port, windStore, domainFactory, factory,
+                messageLoader, trackedRegattaRegistry, canSendRequests);
+    }
+    
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String hostname, int port, WindStore windStore,
+            DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests) throws InterruptedException,
+            UnknownHostException, IOException, ParseException {
         super();
+        this.regatta = regatta;
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
@@ -79,9 +89,13 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.windStore = windStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
-        regatta = domainFactory.getOrCreateEvent(raceID);
-        setTrackedRegatta(trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta));
+        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
         connector.trackRace(raceID);
+    }
+
+    @Override
+    public DynamicTrackedRegatta getTrackedRegatta() {
+        return trackedRegatta;
     }
 
     static Triple<String, String, Integer> createID(String raceID, String hostname, int port) {

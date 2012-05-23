@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.TimePoint;
@@ -24,6 +25,7 @@ import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -85,7 +87,7 @@ public interface DomainFactory {
      * an equal name with a boat class with an equal name as the <code>event</code>'s
      * boat class exists yet.
      */
-    com.sap.sailing.domain.base.Regatta getOrCreateEvent(Event event);
+    com.sap.sailing.domain.base.Regatta getOrCreateRegatta(Event event);
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -118,6 +120,14 @@ public interface DomainFactory {
      *            available but loses track of the wind, e.g., during server restarts.
      */
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
+            TimePoint endOfTracking, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException;
+
+    /**
+     * Same as {@link #createRaceTracker(URL, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)}, only that
+     * a predefined {@link Regatta} is used to hold the resulting races.
+     */
+    RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking,
             TimePoint endOfTracking, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
             throws MalformedURLException, FileNotFoundException, URISyntaxException;
 
@@ -222,11 +232,11 @@ public interface DomainFactory {
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding
      * {@link RaceDefinition} exists, from the {@link TrackedRegatta}. If removing the race from the event, the event is
-     * removed from the event cache such that {@link #getOrCreateEvent(Event)} will have to create a new one. Similarly,
+     * removed from the event cache such that {@link #getOrCreateRegatta(Event)} will have to create a new one. Similarly,
      * if the {@link TrackedRace} that was removed from the {@link TrackedRegatta} was the last one, the
      * {@link TrackedRegatta} is removed such that {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)}
      * will have to create a new one.
      */
     void removeRace(Event tractracEvent, Race tractracRace, TrackedRegattaRegistry trackedRegattaRegistry);
-    
+
 }

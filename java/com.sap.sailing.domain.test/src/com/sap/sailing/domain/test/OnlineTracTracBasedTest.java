@@ -131,7 +131,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
-        domainEvent = domainFactory.getOrCreateEvent(getTracTracEvent());
+        domainEvent = domainFactory.getOrCreateRegatta(getTracTracEvent());
         trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
     }
     

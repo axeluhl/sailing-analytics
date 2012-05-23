@@ -135,6 +135,7 @@ public class RaceTrackerStartStopTest {
             assertSame(raceTracker1, currentTracker);
         }
     }
+    
     /**
      * This test methods checks if the {@link RacingEventService#removeRace(Regatta, RaceDefinition) removeRace} method works correctly
      */

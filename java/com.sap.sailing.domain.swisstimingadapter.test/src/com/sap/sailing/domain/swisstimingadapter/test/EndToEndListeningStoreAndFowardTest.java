@@ -290,8 +290,9 @@ public class EndToEndListeningStoreAndFowardTest {
 
     private void setUpUsingScript(String[] racesToTrack, String... scriptNames) throws Exception {
         for (String raceToTrack : racesToTrack) {
-            RacesHandle raceHandle = racingEventService.addSwissTimingRace(raceToTrack, "localhost", CLIENT_PORT, /* canSendRequests */
-                    false, emptyWindStore, -1);
+            RacesHandle raceHandle = racingEventService.addSwissTimingRace(/* regattaToAddTo */ null /* use a default regatta */,
+                    raceToTrack, "localhost", /* canSendRequests */
+                    CLIENT_PORT, false, emptyWindStore, -1);
             raceHandles.add(raceHandle);
             if (connector == null) {
                 connector = racingEventService.getSwissTimingFactory().getOrCreateSailMasterConnector("localhost",

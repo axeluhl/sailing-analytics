@@ -35,7 +35,7 @@ public class ReplicationServlet extends Servlet {
 
     private ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
     
-    public ReplicationServlet() {
+    public ReplicationServlet() throws Exception {
         BundleContext context = Activator.getDefaultContext();
         replicationServiceTracker = new ServiceTracker<ReplicationService, ReplicationService>(context, ReplicationService.class.getName(), null);
         replicationServiceTracker.open();

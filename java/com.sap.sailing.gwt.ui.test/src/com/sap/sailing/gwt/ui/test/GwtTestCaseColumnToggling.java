@@ -80,8 +80,11 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void trackRace(){
-        service.track(rrDao, tractracTunnel ? "tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE,
-                tractracTunnel ? "tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED, false, false, new AsyncCallback<Void>() {
+        service.trackWithTracTrac(/* regattaToAddTo */null, rrDao, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
+                + TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
+                + TracTracConnectionConstants.PORT_LIVE, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
+                + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
+                + ":" + TracTracConnectionConstants.PORT_STORED, false, false, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {

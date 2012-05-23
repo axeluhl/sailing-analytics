@@ -48,8 +48,11 @@ public interface SailingService extends RemoteService {
 
     Pair<String, List<TracTracRaceRecordDTO>> listTracTracRacesInEvent(String eventJsonURL) throws Exception;
 
-    void track(TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception;
+    void trackWithTracTrac(RegattaIdentifier regattaToAddTo, TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination) throws Exception;
 
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, SwissTimingRaceRecordDTO rr, String hostname, int port,
+            boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination) throws Exception;
+    
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI) throws Exception;
 
     void stopTrackingEvent(RegattaIdentifier eventIdentifier) throws Exception;
@@ -144,9 +147,6 @@ public interface SailingService extends RemoteService {
 
     void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests);
 
-    void trackWithSwissTiming(SwissTimingRaceRecordDTO rr, String hostname, int port, boolean canSendRequests,
-            boolean trackWind, boolean correctWindByDeclination) throws Exception;
-    
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
     void stressTestLeaderboardByName(String leaderboardName, int times) throws Exception;

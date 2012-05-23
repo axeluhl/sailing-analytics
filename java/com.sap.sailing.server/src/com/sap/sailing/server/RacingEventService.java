@@ -143,9 +143,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Same as {@link #addTracTracRace(URL, URI, URI, WindStore, long)}, only that start and end of tracking are
      * specified which may help reducing the amount of stored data (particularly mark positions) that needs to be
      * loaded.
+     * 
+     * @param regattaToAddTo
+     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
+     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
+     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
+     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
+     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      */
-    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, TimePoint trackingStartTime,
-            TimePoint trackingEndTime, WindStore windStore, long timeoutForReceivingRaceDefinitionInMilliseconds)
+    RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI,
+            TimePoint trackingStartTime, TimePoint trackingEndTime, WindStore windStore, long timeoutForReceivingRaceDefinitionInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -259,8 +266,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
 
-    RacesHandle addSwissTimingRace(String raceID, String hostname, int port, boolean canSendRequests,
-            WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException,
+    /**
+     * @param regattaToAddTo
+     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
+     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
+     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
+     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
+     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
+     */
+    RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname, int port,
+            boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException,
             IOException, ParseException, Exception;
 
     SwissTimingFactory getSwissTimingFactory();
@@ -269,7 +284,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
-    void removeEvent(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
+    void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier);
     
@@ -325,9 +340,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeExpeditionListener(ExpeditionListener listener);
 
     /**
-     * @param windStore must not be <code>null</code>, but can, e.g., be an {@link EmptyWindStore}
+     * @param regattaToAddTo
+     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
+     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
+     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
+     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
+     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
+     * @param windStore
+     *            must not be <code>null</code>, but can, e.g., be an {@link EmptyWindStore}
      */
-    RacesHandle addRace(RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
+    RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
