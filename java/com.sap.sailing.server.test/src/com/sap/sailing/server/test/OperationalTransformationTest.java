@@ -9,9 +9,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.operationaltransformation.Peer;
 import com.sap.sailing.operationaltransformation.Peer.Role;

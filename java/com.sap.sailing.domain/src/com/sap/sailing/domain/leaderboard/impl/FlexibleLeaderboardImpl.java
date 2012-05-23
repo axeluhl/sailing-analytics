@@ -6,11 +6,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -173,5 +176,18 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             race.setIsMedalRace(isMedalRace);
         }
     }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint)
+            throws NoWindException {
+        return getCompetitorsFromBestToWorst(raceColumn, timePoint, /* isFleetsOrdered */ false);
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
     
 }
