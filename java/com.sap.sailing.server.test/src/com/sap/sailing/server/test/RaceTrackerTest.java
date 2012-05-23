@@ -96,14 +96,14 @@ public class RaceTrackerTest {
     
     @Test
     public void testStopTracking() throws Exception {
-        TrackedRegatta oldTrackedEvent = raceHandle.getTrackedRegatta();
-        TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
+        TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedRegatta();
+        TrackedRace oldTrackedRace = getTrackedRace(oldTrackedRegatta);
         RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
-        service.removeEvent(raceHandle.getRegatta());
+        service.removeRegatta(raceHandle.getRegatta());
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
-        TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedRegatta();
-        assertNotSame(oldTrackedEvent, newTrackedEvent);
-        TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
+        TrackedRegatta newTrackedRegatta = myRaceHandle.getTrackedRegatta();
+        assertNotSame(oldTrackedRegatta, newTrackedRegatta);
+        TrackedRace newTrackedRace = getTrackedRace(newTrackedRegatta);
         // expecting a new tracked race to be created when starting over with tracking
         try {
             assertNotSame(oldTrackedRace, newTrackedRace);

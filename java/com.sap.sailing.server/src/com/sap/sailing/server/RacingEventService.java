@@ -284,7 +284,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
-    void removeEvent(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
+    void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier);
     
