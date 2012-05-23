@@ -60,6 +60,8 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     @Override
     public void addTrackedRace(TrackedRace trackedRace) {
         synchronized (trackedRaces) {
+            logger.info("adding tracked race for "+trackedRace.getRace()+" to tracked regatta "+getRegatta().getName()+
+                    " with regatta hash code "+getRegatta().hashCode());
             trackedRaces.put(trackedRace.getRace(), trackedRace);
             Collection<TrackedRace> coll = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
             if (coll == null) {
