@@ -24,7 +24,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     private static final long serialVersionUID = -328091952760083438L;
     private final SettableScoreCorrection scoreCorrection;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
-    private String name;
     
     /**
      * The optional display name mappings for competitors. This allows a user to override the tracking-provided
@@ -90,11 +89,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     /**
      * @param name must not be <code>null</code>
      */
-    public AbstractLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        if (name == null) {
-            throw new IllegalArgumentException("A leaderboard's name must not be null");
-        }
-        this.name = name;
+    public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         this.carriedPoints = new HashMap<Competitor, Integer>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
@@ -180,29 +175,27 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     @Override
-    public int getTrackedPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
         return trackedRace == null ? 0 : trackedRace.hasStarted(timePoint) ? trackedRace.getRank(competitor, timePoint) : 0;
     }
 
     @Override
     public int getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
-        return getScoreCorrection().getCorrectedScore(getTrackedPoints(competitor, raceColumn, timePoint), competitor,
+        return getScoreCorrection().getCorrectedScore(getTrackedRank(competitor, raceColumn, timePoint), competitor,
                 raceColumn, timePoint, Util.size(getCompetitors())).getCorrectedScore();
     }
     
     
     @Override
-    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint)
-            throws NoWindException {
-        return raceColumn.getTrackedRace(competitor) == null ? MaxPointsReason.NONE : getScoreCorrection().getCorrectedScore(
-                getTrackedPoints(competitor, raceColumn, timePoint), competitor, raceColumn, timePoint, Util.size(getCompetitors()))
-                .getMaxPointsReason();
+    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        return raceColumn.getTrackedRace(competitor) == null ? MaxPointsReason.NONE : getScoreCorrection()
+                .getMaxPointsReason(competitor, raceColumn);
     }
     
     @Override
     public boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        return !raceColumn.isMedalRace()
+        return !raceColumn.isMedalRace() && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
                 && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, timePoint).contains(
                         raceColumn);
     }
@@ -225,7 +218,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
 
     @Override
     public Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
-        int trackedPoints = getTrackedPoints(competitor, race, timePoint);
+        int trackedPoints = getTrackedRank(competitor, race, timePoint);
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race,
                 timePoint, Util.size(getCompetitors()));
         boolean discarded = isDiscarded(competitor, race, timePoint);
@@ -264,21 +257,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
         return result;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param newName must not be <code>null</code>
-     */
-    public void setName(String newName) {
-        if (newName == null) {
-            throw new IllegalArgumentException("A leaderboard's name must not be null");
-        }
-        this.name = newName;
-    }
-    
     @Override
     public void setCarriedPoints(Competitor competitor, int carriedPoints) {
         this.carriedPoints.put(competitor, carriedPoints);

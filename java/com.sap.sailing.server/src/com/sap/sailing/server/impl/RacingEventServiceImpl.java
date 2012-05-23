@@ -278,9 +278,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 throw new IllegalArgumentException("Leaderboard with name "+newName+" already exists");
             }
             Leaderboard toRename = leaderboardsByName.remove(oldName);
-            toRename.setName(newName);
-            leaderboardsByName.put(newName, toRename);
-            mongoObjectFactory.renameLeaderboard(oldName, newName);
+            if (toRename instanceof FlexibleLeaderboard) {
+                ((FlexibleLeaderboard) toRename).setName(newName);
+                leaderboardsByName.put(newName, toRename);
+                mongoObjectFactory.renameLeaderboard(oldName, newName);
+            } else {
+                throw new IllegalArgumentException("Leaderboard with name "+newName+" is not a FlexibleLeaderboard and therefore cannot be renamed");
+            }
         }
     }
     

@@ -16,24 +16,33 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
  * @author Axel Uhl (D043530)
  *
  */
-public class RegattaLeaderboard extends AbstractLeaderboardImpl {
-    private static final long serialVersionUID = -8243802111008628779L;
+public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl {
+    private static final long serialVersionUID = 2370461218294770084L;
     private final Regatta regatta;
-    
-    public RegattaLeaderboard(Regatta regatta, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(regatta.getName(), scoreCorrection, resultDiscardingRule);
+
+    public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        super(scoreCorrection, resultDiscardingRule);
         this.regatta = regatta;
+    }
+    
+    private Regatta getRegatta() {
+        return regatta;
+    }
+
+    @Override
+    public String getName() {
+        return getRegatta().getName();
     }
 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
         List<RaceColumn> result = new ArrayList<RaceColumn>();
-        for (Series series : regatta.getSeries()) {
-            for (RaceColumn raceColumnInSeries : series.getRaceColumns()) {
-                result.add(raceColumnInSeries);
+        for (Series series : getRegatta().getSeries()) {
+            for (RaceColumn raceColumn : series.getRaceColumns()) {
+                result.add(raceColumn);
             }
         }
         return result;
     }
+
 }
