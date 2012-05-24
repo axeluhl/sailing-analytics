@@ -5,6 +5,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
@@ -117,7 +119,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(20);
         List<Competitor> medal = competitors.subList(firstMedalCompetitorIndex, firstMedalCompetitorIndex+10);
         Regatta regatta = createRegatta(/* qualifying */ 0, new String[] { "Default" }, /* final */ 1, new String[] { "Default" },
-                /* medal */ true, "testDistributionAcrossFinalFleetsWithDifferentScores",
+                /* medal */ true, "testMedalTakesPrecedence",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */ true));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
@@ -141,6 +143,32 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 assertSame(competitors.get(i), rankedCompetitors.get(i));
             }
         }
+    }
+
+    @Test
+    public void testTieBreakWithTwoVersusOneWins() throws NoWindException {
+        Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
+        List<Competitor> f1 = Arrays.asList(new Competitor[] { c[0], c[1], c[2] });
+        List<Competitor> f2 = Arrays.asList(new Competitor[] { c[0], c[1], c[2] });
+        List<Competitor> f3 = Arrays.asList(new Competitor[] { c[1], c[2], c[0] });
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */3, new String[] { "Default" },
+        /* medal */ false, "testTieBreakWithTwoVersusOneWins",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
+        RaceColumn f2Column = series.get(1).getRaceColumnByName("F2");
+        RaceColumn f3Column = series.get(1).getRaceColumnByName("F3");
+        TrackedRace f1TrackedRace = new MockedTrackedRaceWithStartTimeAndRanks(now, f1);
+        TrackedRace f2TrackedRace = new MockedTrackedRaceWithStartTimeAndRanks(now, f2);
+        TrackedRace f3TrackedRace = new MockedTrackedRaceWithStartTimeAndRanks(now, f3);
+        f1Column.setTrackedRace(f1Column.getFleetByName("Default"), f1TrackedRace);
+        f2Column.setTrackedRace(f2Column.getFleetByName("Default"), f2TrackedRace);
+        f3Column.setTrackedRace(f3Column.getFleetByName("Default"), f3TrackedRace);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later));
+        assertEquals(Arrays.asList(new Competitor[] { c[0], c[1], c[2] }), rankedCompetitors);
     }
 
     private List<Competitor> createCompetitors(int numberOfCompetitorsToCreate) {
