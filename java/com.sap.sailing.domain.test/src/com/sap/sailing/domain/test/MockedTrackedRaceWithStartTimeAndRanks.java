@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
@@ -52,7 +53,8 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public MockedTrackedRaceWithStartTimeAndRanks(TimePoint startTime, List<Competitor> competitorsFromBestToWorst) {
         super();
         this.startTime = startTime;
-        this.competitorsFromBestToWorst = competitorsFromBestToWorst;
+        // copies the list to make sure that later modifications to the list passed to this constructor don't affect the ranking produced by this race
+        this.competitorsFromBestToWorst = new ArrayList<Competitor>(competitorsFromBestToWorst);
         final List<Waypoint> waypoints = Collections.emptyList();
         this.race = new RaceDefinitionImpl("Mocked Race", new CourseImpl("Mock Course", waypoints), /* boat class */ null,
                 competitorsFromBestToWorst);
