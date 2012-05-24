@@ -361,8 +361,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
             result.add(competitor);
         }
         Collections.sort(result, getTotalRankComparator(timePoint));
-        // TODO issues:
-        //  - we don't know which competitors compete in those fleets for which we have no tracked race in a column
         return result;
     }
 

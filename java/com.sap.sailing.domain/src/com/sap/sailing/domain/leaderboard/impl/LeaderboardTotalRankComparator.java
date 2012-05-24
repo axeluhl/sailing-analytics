@@ -75,7 +75,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     o1Scores.add(o1Score);
                     o1ScoreSum += o1Score;
                 }
-                final int o2Score = getLeaderboard().getTotalPoints(o1, raceColumn, timePoint);
+                final int o2Score = getLeaderboard().getTotalPoints(o2, raceColumn, timePoint);
                 if (o2Score != 0) {
                     o2Scores.add(o2Score);
                     o2ScoreSum += o2Score;
@@ -85,6 +85,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                 }
                 if (preemptiveColumnResult == 0) {
                     preemptiveColumnResult = compareByFleet(raceColumn, o1, o2);
+                }
+                if (preemptiveColumnResult != 0) {
+                    return preemptiveColumnResult;
                 }
             }
             // now count the races in which they scored; if they scored in a different number of races, prefer the competitor
