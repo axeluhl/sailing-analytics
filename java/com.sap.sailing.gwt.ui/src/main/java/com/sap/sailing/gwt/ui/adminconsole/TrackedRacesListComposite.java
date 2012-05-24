@@ -387,13 +387,13 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         btnSetDelayToLive.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                showSettingsDialog();
+                showSetDelayToLiveDialog();
             }
         });
         trackedRacesButtonPanel.add(btnSetDelayToLive);
     }
 
-    private void showSettingsDialog() {
+    private void showSetDelayToLiveDialog() {
         TrackedRacesSettings settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS);
         
