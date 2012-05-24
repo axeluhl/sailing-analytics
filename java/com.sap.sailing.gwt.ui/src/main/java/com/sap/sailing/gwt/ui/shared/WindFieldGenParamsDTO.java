@@ -4,11 +4,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class WindFieldGenParamsDTO implements IsSerializable {
         
-        public enum WindPattern {
-            CONSTANT,
-            OSCILLATING
-        }
-	
+      
 	private PositionDTO northWest;
 	private PositionDTO southEast;
 	

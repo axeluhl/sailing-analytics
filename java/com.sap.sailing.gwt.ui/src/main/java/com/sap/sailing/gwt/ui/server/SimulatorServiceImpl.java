@@ -22,9 +22,12 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
-import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO.WindPattern;
 import com.sap.sailing.gwt.ui.shared.WindLatticeDTO;
 import com.sap.sailing.gwt.ui.shared.WindLatticeGenParamsDTO;
+import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager.WindPattern;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
@@ -194,7 +197,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         PathDTO[] pathDTO = new PathDTO[1];
         List<WindDTO> path = getOptimumPath(course, wf);
-        pathDTO[0] = new PathDTO();
+        pathDTO[0] = new PathDTO("Path 1");
         pathDTO[0].setMatrix(path);
         return pathDTO;
     }
@@ -206,6 +209,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 
         Path pth = solver.getOptimumPath();
+        int i = 0;
         List<WindDTO> wList = new ArrayList<WindDTO>();
         for (TimedPositionWithSpeed p : pth.getPathPoints()) {
             // the null in the Wind output is the timestamp - this Wind is time-invariant!
@@ -216,14 +220,16 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             Wind localWind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
             logger.fine(localWind.toString());
             WindDTO w = createWindDTO(localWind);
+            //w.trueWindBearingDeg = 10.0*i;
+            ++i;
             wList.add(w);
         }
         return wList;
 
     }
 
-    public WindPattern[] getWindPatterns() {
-        return WindFieldGenParamsDTO.WindPattern.values();
+    public List<WindPatternDTO> getWindPatterns() {
+        return WindPatternDisplayManager.INSTANCE.getWindPatterns();
     }
 
     public BoatClassDTO[] getBoatClasses() {
@@ -248,5 +254,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         }
         
         return windDTO;
+    }
+
+    @Override
+    public WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern) {
+       return WindPatternDisplayManager.INSTANCE.getDisplay(WindPattern.valueOf(pattern.name));
     }
 }

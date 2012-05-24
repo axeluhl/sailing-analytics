@@ -1,8 +1,12 @@
 package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -31,8 +35,10 @@ import com.sap.sailing.gwt.ui.client.TimePanelSettings;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
-import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO.WindPattern;
+import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
+
 
 public class SimulatorMainPanel extends SplitLayoutPanel {
 
@@ -70,6 +76,32 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         }
 
     }
+    
+    private class PatternSelectorHandler implements ChangeHandler {
+
+        @Override
+        public void onChange(ChangeEvent arg0) {
+            logger.info(patternSelector.getItemText(patternSelector.getSelectedIndex()));
+            WindPatternDTO pattern = new WindPatternDTO(patternSelector.getItemText(patternSelector.getSelectedIndex()));
+            
+            simulatorSvc.getWindPatternDisplay(pattern, new AsyncCallback<WindPatternDisplay>() {
+
+                @Override
+                public void onFailure(Throwable message) {
+                   errorReporter.reportError("Error retreiving wind patterns" + message.getMessage());
+                    
+                }
+
+                @Override
+                public void onSuccess(final WindPatternDisplay display) {
+                    logger.info(display.getSettings().toString());
+                }
+                
+            });
+        
+        }
+        
+    }
 
     public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter) {
         
@@ -83,6 +115,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         rightPanel = new FlowPanel();
         wControls = new WindControlParameters(1, 0);
         patternSelector = new ListBox();
+        patternSelector.addChangeHandler(new PatternSelectorHandler());
+        
         boatSelector = new ListBox();
         timer = new Timer(PlayModes.Replay, 1000l);
         timer.setPlaySpeedFactor(30);
@@ -150,7 +184,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         Label pattern = new Label(stringMessages.pattern());
         hp.add(pattern);
 
-        simulatorSvc.getWindPatterns(new AsyncCallback<WindPattern[]>() {
+        simulatorSvc.getWindPatterns(new AsyncCallback<List<WindPatternDTO>> () {
 
             @Override
             public void onFailure(Throwable message) {
@@ -158,9 +192,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             }
 
             @Override
-            public void onSuccess(WindPattern[] patterns) {
-                for (int i = 0; i < patterns.length; ++i) {
-                    patternSelector.addItem(patterns[i].toString());
+            public void onSuccess(List<WindPatternDTO> patterns) {
+                for (WindPatternDTO p : patterns) {
+                    patternSelector.addItem(p.name);
                 }
             }
 
@@ -175,12 +209,12 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private void addSlider(Panel parentPanel, String labelName, double minValue, double maxValue,
             final ValueChangeHandler<Double> handler) {
-        VerticalPanel vp = new VerticalPanel();
-        vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+       FlowPanel vp = new FlowPanel();
+        //vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
         Label label = new Label(labelName);
         vp.add(label);
-
+        //FlowPanel fp = new FlowPanel();
         final SliderBar sliderBar = new SliderBar(minValue, maxValue);
 
         sliderBar.setStepSize(1, false);
@@ -207,10 +241,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         // sliderBar.setMaxValue(10.0, false);
         sliderBar.setCurrentValue(wControls.windSpeedInKnots);
         vp.add(sliderBar);
-        sliderBar.setWidth("60%");
-
+    //    sliderBar.setWidth("100%");
+        //vp.add(fp);
         parentPanel.add(vp);
-        vp.setWidth("80%");
+        label.getElement().getStyle().setFloat(Style.Float.LEFT);
+        sliderBar.getElement().getStyle().setFloat(Style.Float.RIGHT);
+        sliderBar.setWidth("60%");
+        sliderBar.setHeight("25px");
+    //    vp.setWidth("80%");
     }
 
     private void createSailingSetup(Panel controlPanel) {
