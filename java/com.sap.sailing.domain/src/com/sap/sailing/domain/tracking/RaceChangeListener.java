@@ -32,5 +32,7 @@ public interface RaceChangeListener {
 
     void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived);
 
+    void delayToLiveChanged(long delayToLiveInMillis);
+
     void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude);
 }

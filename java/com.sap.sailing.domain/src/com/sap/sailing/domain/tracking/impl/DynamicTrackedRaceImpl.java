@@ -128,7 +128,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void setDelayToLiveInMillis(long delayToLiveInMillis) {
-        this.delayToLiveInMillis = delayToLiveInMillis; 
+        super.setDelayToLiveInMillis(delayToLiveInMillis);
+        notifyListenersDelayToLiveChanged(delayToLiveInMillis);
     }
     
     @Override
@@ -298,6 +299,22 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
                 logger.throwing(DynamicTrackedRaceImpl.class.getName(),
                         "notifyListenersWindAveragingChanged(long, long)", t);
+            }
+        }
+    }
+
+    private void notifyListenersDelayToLiveChanged(long delayToLiveInMillis) {
+        RaceChangeListener[] listeners;
+        synchronized (getListeners()) {
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.delayToLiveChanged(delayToLiveInMillis);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(),
+                        "notifyListenersDelayToLiveChanged(long)", t);
             }
         }
     }
@@ -473,11 +490,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     @Override
     protected TrackedLeg createTrackedLeg(Leg leg) {
         return new TrackedLegImpl(this, leg, getRace().getCompetitors());
-    }
-
-    @Override
-    public long getDelayToLiveInMillis() {
-        return delayToLiveInMillis;
     }
     
     @Override

@@ -51,4 +51,8 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
     }
 
+    @Override
+    public void delayToLiveChanged(long delayToLiveInMillis) {
+    }
+
 }

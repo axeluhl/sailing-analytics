@@ -91,7 +91,7 @@ public class Timer {
      * The timer is created in stopped state, using "now" as its current time, 1.0 as its {@link #playSpeedFactor
      * acceleration factor} and <code>delayBetweenAutoAdvancesInMilliseconds</code> as the
      * {@link #refreshInterval delay between automatic updates} should the timer be
-     * {@link #resume() started}. The {@link #livePlayDelayInMillis} is set to five seconds (5000ms).
+     * {@link #resume() started}. The {@link #livePlayDelayInMillis} is set to zero seconds.
      */
     public Timer(PlayModes playMode, long refreshInterval) {
         this.refreshInterval = refreshInterval;
@@ -101,7 +101,7 @@ public class Timer {
         playStateListeners = new HashSet<PlayStateListener>();
         playState = PlayStates.Stopped;
         playSpeedFactor = 1.0;
-        livePlayDelayInMillis = 5000l;
+        livePlayDelayInMillis = 0l;
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -234,7 +234,7 @@ public class Timer {
         Scheduler.get().scheduleFixedPeriod(command, (int) refreshInterval);
     }
     
-    public void setDelay(long delayInMilliseconds) {
+    public void setLivePlayDelayInMillis(long delayInMilliseconds) {
         this.livePlayDelayInMillis = delayInMilliseconds;
         if (getPlayState() == PlayStates.Playing) {
             setTime(new Date().getTime() - delayInMilliseconds);

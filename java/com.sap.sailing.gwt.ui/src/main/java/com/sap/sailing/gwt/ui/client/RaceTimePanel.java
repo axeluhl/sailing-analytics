@@ -18,17 +18,22 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private RaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
+    private boolean hasOverwrittenDelayToLive;
     
     public RaceTimePanel(Timer timer, StringMessages stringMessages, RaceTimesInfoProvider raceTimesInfoProvider) {
         super(timer, stringMessages);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
+        hasOverwrittenDelayToLive = false;
     }
     
     @Override
     public void updateSettings(RaceTimePanelSettings newSettings) {
         super.updateSettings(newSettings);
+        if(getSettings().getDelayToLivePlayInSeconds() != newSettings.getDelayToLivePlayInSeconds()) {
+            hasOverwrittenDelayToLive = true;
+        }
         raceTimesInfoProvider.setRequestInterval(newSettings.getRefreshInterval());
     }
 
@@ -50,7 +55,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         if (raceTimesInfo == null) { 
             // in case the race is not tracked anymore we reset the timer
             reset();
-        } else { 
+        } else {
+            // check if the live delay is already been set
+            if(timer.getLivePlayDelayInMillis() != raceTimesInfo.delayToLiveInMs && !hasOverwrittenDelayToLive) {
+                timer.setLivePlayDelayInMillis(raceTimesInfo.delayToLiveInMs);
+            }
+            
             if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && 
                     (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null)) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
