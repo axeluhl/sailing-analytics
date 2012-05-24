@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
@@ -148,27 +149,48 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     @Test
     public void testTieBreakWithTwoVersusOneWins() throws NoWindException {
         Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
-        List<Competitor> f1 = Arrays.asList(new Competitor[] { c[0], c[1], c[2] });
-        List<Competitor> f2 = Arrays.asList(new Competitor[] { c[0], c[1], c[2] });
-        List<Competitor> f3 = Arrays.asList(new Competitor[] { c[1], c[2], c[0] });
+        Competitor[] f1 = new Competitor[] { c[0], c[1], c[2] };
+        Competitor[] f2 = new Competitor[] { c[0], c[1], c[2] };
+        Competitor[] f3 = new Competitor[] { c[1], c[2], c[0] };
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */3, new String[] { "Default" },
         /* medal */ false, "testTieBreakWithTwoVersusOneWins",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
-        TimePoint now = MillisecondsTimePoint.now();
-        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
-        RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
-        RaceColumn f2Column = series.get(1).getRaceColumnByName("F2");
-        RaceColumn f3Column = series.get(1).getRaceColumnByName("F3");
-        TrackedRace f1TrackedRace = new MockedTrackedRaceWithStartTimeAndRanks(now, f1);
-        TrackedRace f2TrackedRace = new MockedTrackedRaceWithStartTimeAndRanks(now, f2);
-        TrackedRace f3TrackedRace = new MockedTrackedRaceWithStartTimeAndRanks(now, f3);
-        f1Column.setTrackedRace(f1Column.getFleetByName("Default"), f1TrackedRace);
-        f2Column.setTrackedRace(f2Column.getFleetByName("Default"), f2TrackedRace);
-        f3Column.setTrackedRace(f3Column.getFleetByName("Default"), f3TrackedRace);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later));
         assertEquals(Arrays.asList(new Competitor[] { c[0], c[1], c[2] }), rankedCompetitors);
+    }
+
+    @Test
+    public void testTieBreakWithTwoVersusOneSeconds() throws NoWindException {
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        Competitor[] f1 = new Competitor[] { c[2], c[0], c[1], c[3] }; // c[0] scores 18 points altogether
+        Competitor[] f2 = new Competitor[] { c[2], c[0], c[1], c[3] }; // c[1] scores 18 points altogether but has only one second rank
+        Competitor[] f3 = new Competitor[] { c[2], c[1], c[0], c[3] };
+        Competitor[] f4 = new Competitor[] { c[3], c[2], c[0], c[1] };
+        Competitor[] f5 = new Competitor[] { c[3], c[2], c[1], c[0] };
+        Competitor[] f6 = new Competitor[] { c[3], c[2], c[1], c[0] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
+        /* medal */ false, "testTieBreakWithTwoVersusOneSeconds",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later));
+        assertTrue(rankedCompetitors.indexOf(c[0]) == rankedCompetitors.indexOf(c[1])-1);
+    }
+
+    private TimePoint createAndAttachTrackedRaces(Series theSeries, String fleetName, Competitor[]... competitorLists) {
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        Iterator<? extends RaceColumn> columnIter = theSeries.getRaceColumns().iterator();
+        for (Competitor[] competitorList : competitorLists) {
+            RaceColumn raceColumn = columnIter.next();
+            TrackedRace trackedRace = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitorList));
+            raceColumn.setTrackedRace(raceColumn.getFleetByName(fleetName), trackedRace);
+        }
+        return later;
     }
 
     private List<Competitor> createCompetitors(int numberOfCompetitorsToCreate) {
