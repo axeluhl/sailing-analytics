@@ -134,9 +134,26 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * with others in the column being better, return "worse" (greater; 1). Otherwise, return 0.
      */
     private int extremeFleetComparison(RaceColumn raceColumn, Fleet fleet) {
-        
-        // TODO Auto-generated method stub
-        return 0;
+        boolean allOthersAreGreater = true;
+        boolean allOthersAreLess = true;
+        boolean othersExist = false;
+        for (Fleet f : raceColumn.getFleets()) {
+            if (f != fleet) {
+                othersExist = true;
+                allOthersAreGreater = allOthersAreGreater && f.compareTo(fleet) > 0;
+                allOthersAreLess = allOthersAreLess && f.compareTo(fleet) < 0;
+            }
+        }
+        int result = 0;
+        if (othersExist) {
+            assert !(allOthersAreGreater && allOthersAreLess);
+            if (allOthersAreGreater) {
+                result = -1;
+            } else if (allOthersAreLess) {
+                result = 1;
+            }
+        }
+        return result;
     }
 
     private int compareByMedalRace(int o1Score, int o2Score) {
