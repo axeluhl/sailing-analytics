@@ -75,7 +75,7 @@ public class RaceTimesInfoProvider {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to obtain the time infos for race "
-                            + raceIdentifier.getRaceName() + ": " + caught.getMessage());
+                            + raceIdentifier.getRaceName() + ": " + caught.getMessage(), /* silentMode */ true);
                 }
 
                 @Override
@@ -157,7 +157,8 @@ public class RaceTimesInfoProvider {
             sailingService.getRaceTimesInfos(raceIdentifiers, new AsyncCallback<List<RaceTimesInfoDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error trying to obtain the race time infos: " + caught.getMessage());
+                    errorReporter.reportError("Error trying to obtain the race time infos: " + caught.getMessage(),
+                            /* silentMode */ true);
                 }
 
                 @Override
