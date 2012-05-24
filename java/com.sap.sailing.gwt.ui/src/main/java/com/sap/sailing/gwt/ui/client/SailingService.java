@@ -184,4 +184,8 @@ public interface SailingService extends RemoteService {
     ReplicationStateDTO getReplicaInfo();
 
     void startReplicatingFromMaster(String masterName, int servletPort, int jmsPort) throws Exception;
+
+    void updateRaceDelayToLive(RegattaAndRaceIdentifier regattaAndRaceIdentifier, long delayToLiveInMs);
+
+    void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
 }

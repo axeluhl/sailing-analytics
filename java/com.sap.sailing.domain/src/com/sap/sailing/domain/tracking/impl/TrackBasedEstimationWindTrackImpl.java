@@ -341,6 +341,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
     }
 
+    @Override
+    public void delayToLiveChanged(long delayToLiveInMillis) {
+    }
+
     private void invalidateForNewWind(Wind wind) {
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
         WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(wind

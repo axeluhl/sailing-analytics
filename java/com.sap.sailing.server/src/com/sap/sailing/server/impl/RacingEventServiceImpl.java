@@ -98,6 +98,7 @@ import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateMarkPassings;
+import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
@@ -649,6 +650,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         @Override
         public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
             replicate(new UpdateRaceTimes(getRaceIdentifier(), startOfTracking, endOfTracking, startTimeReceived));
+        }
+
+        @Override
+        public void delayToLiveChanged(long delayToLiveInMillis) {
+            replicate(new UpdateRaceDelayToLive(getRaceIdentifier(), delayToLiveInMillis));
         }
 
         @Override

@@ -437,7 +437,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     public void updateSettings(T newSettings) {
         boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
         if (delayChanged) {
-            timer.setDelay(1000l * newSettings.getDelayToLivePlayInSeconds());
+            timer.setLivePlayDelayInMillis(1000l * newSettings.getDelayToLivePlayInSeconds());
             if(timer.getPlayMode() == PlayModes.Live) {
                 timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
             }

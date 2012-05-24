@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeZoomModel;
@@ -50,6 +51,8 @@ public class CompareCompetitorsChartDialog extends DialogBox {
     
     private final CollapsablePanel collapsablePanel;
     
+    private final RaceTimesInfoProvider raceTimesInfoProvider;
+
     public CompareCompetitorsChartDialog(SailingServiceAsync sailingService,
             List<RegattaAndRaceIdentifier> races, final CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             StringMessages stringConstants, ErrorReporter errorReporter) {
@@ -57,9 +60,12 @@ public class CompareCompetitorsChartDialog extends DialogBox {
         raceSelectionProvider = new RaceSelectionModel();
         raceSelectionProvider.setAllRaces(races);
         
+        raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, races, 1000l);
+        
         multiChartPanel = new MultiChartPanel(sailingService, new AsyncActionsExecutor(), competitorSelectionProvider, raceSelectionProvider,
                 timer, new TimeZoomModel(), stringConstants, errorReporter, false, false);
         multiChartPanel.setSize("100%", "100%");
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(multiChartPanel);
         
         FlowPanel contentPanel = new FlowPanel();
 

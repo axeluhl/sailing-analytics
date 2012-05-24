@@ -192,7 +192,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     /**
      * The time delay to the current point in time in milliseconds.  
      */
-    protected long delayToLiveInMillis;
+    private long delayToLiveInMillis;
     
     public TrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -1649,4 +1649,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return windTracks.keySet();
     }
 
+    @Override
+    public long getDelayToLiveInMillis() {
+        return delayToLiveInMillis;
+    }
+    
+    public void setDelayToLiveInMillis(long delayToLiveInMillis) {
+        this.delayToLiveInMillis = delayToLiveInMillis; 
+    }
 }

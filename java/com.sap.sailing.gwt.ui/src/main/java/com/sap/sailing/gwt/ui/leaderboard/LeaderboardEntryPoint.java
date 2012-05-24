@@ -61,14 +61,18 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         String tvModeParam = Window.Location.getParameter("tvMode");
         if (tvModeParam != null) {
             Timer timer = new Timer(PlayModes.Replay, 1000l);
+            timer.setLivePlayDelayInMillis(5000l);
+
             TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
                     userAgentType, null, timer, logoAndTitlePanel, mainPanel);
             contentScrollPanel.setWidget(tvViewPanel);
         } else {
+            Timer timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
+            timer.setLivePlayDelayInMillis(5000l);
+
             LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
                     LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false),
-                    /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
-                    new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
+                    /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true), timer,
                     leaderboardName, leaderboardGroupName,
                     LeaderboardEntryPoint.this, stringMessages, userAgentType);
             contentScrollPanel.setWidget(leaderboardPanel);

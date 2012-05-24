@@ -303,4 +303,5 @@ public interface StringMessages extends Messages {
     String showWindDirectionSeries();
     String fleet();
     String boatClass();
+    String setDelayToLive();
 }

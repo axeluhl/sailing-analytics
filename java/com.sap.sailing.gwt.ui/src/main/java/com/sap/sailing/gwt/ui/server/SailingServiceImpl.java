@@ -172,6 +172,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardCarryVa
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
+import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationFactory;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
@@ -451,9 +452,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             if (trackedRace != null) {
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
+                raceDTO.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
                 raceDTO.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
                 raceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+                raceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis(); 
             }
             result.add(raceDTO);
         }
@@ -955,6 +958,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             raceTimesInfo.newestTrackingEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
             raceTimesInfo.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
             raceTimesInfo.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+            raceTimesInfo.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
 
             Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
             synchronized(markPassingsTimes) {
@@ -1413,6 +1417,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace) {
         getService().apply(new UpdateIsMedalRace(leaderboardName, columnName, isMedalRace));
+    }
+
+    @Override
+    public void updateRaceDelayToLive(RegattaAndRaceIdentifier regattaAndRaceIdentifier, long delayToLiveInMs) {
+        getService().apply(new UpdateRaceDelayToLive(regattaAndRaceIdentifier, delayToLiveInMs));
+    }
+
+    @Override
+    public void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs) {
+        for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
+            getService().apply(new UpdateRaceDelayToLive(regattaAndRaceIdentifier, delayToLiveInMs));
+        }
     }
 
     @Override
