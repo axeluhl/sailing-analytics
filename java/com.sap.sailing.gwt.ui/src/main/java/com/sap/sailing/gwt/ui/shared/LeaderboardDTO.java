@@ -319,7 +319,8 @@ public class LeaderboardDTO implements IsSerializable {
      * @param fleetName
      *            must not be null
      */
-    public void addRace(String raceColumnName, String fleetName, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
+    public void addRace(String raceColumnName, String fleetName, boolean medalRace,
+            RegattaAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
         assert fleetName != null;
         RaceColumnDTO raceInLeaderboardDTO = getOrCreateRaceColumn(raceColumnName);
         if (!Util.contains(raceInLeaderboardDTO.getFleetNames(), fleetName)) {

@@ -147,8 +147,7 @@ public interface Leaderboard extends Named {
     
     /**
      * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
-     * {@link Series}, {@link Fleet}s, medal races, discarding rules and score corrections. Only {@link RaceColumn}s for
-     * which there is a {@link TrackedRace} for all {@link Fleet}s are considered for the overall rank.
+     * {@link Series}, {@link Fleet}s, medal races, discarding rules and score corrections.
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 
