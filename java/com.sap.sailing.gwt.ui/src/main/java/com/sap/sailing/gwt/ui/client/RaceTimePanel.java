@@ -57,7 +57,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             reset();
         } else {
             // check if the live delay is already been set
-            if(timer.getLivePlayDelayInMillis() != raceTimesInfo.delayToLiveInMs && !hasOverwrittenDelayToLive) {
+            if (!isUserExplicitlyChangedLivePlayDelay() &&
+                    timer.getLivePlayDelayInMillis() != raceTimesInfo.delayToLiveInMs && !hasOverwrittenDelayToLive) {
                 timer.setLivePlayDelayInMillis(raceTimesInfo.delayToLiveInMs);
             }
             
