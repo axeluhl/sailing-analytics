@@ -181,6 +181,25 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertTrue(rankedCompetitors.indexOf(c[0]) == rankedCompetitors.indexOf(c[1])-1);
     }
 
+    @Test
+    public void testTieBreakWithEqualWinsAndTwoVersusOneSeconds() throws NoWindException {
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        Competitor[] f1 = new Competitor[] { c[2], c[0], c[1], c[3] }; // c[0] scores 15
+        Competitor[] f2 = new Competitor[] { c[2], c[0], c[1], c[3] }; // c[1] scores 15 points altogether but has only one second rank
+        Competitor[] f3 = new Competitor[] { c[2], c[1], c[0], c[3] };
+        Competitor[] f4 = new Competitor[] { c[3], c[2], c[0], c[1] };
+        Competitor[] f5 = new Competitor[] { c[0], c[1], c[2], c[3] };
+        Competitor[] f6 = new Competitor[] { c[1], c[2], c[3], c[0] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
+        /* medal */ false, "testTieBreakWithEqualWinsAndTwoVersusOneSeconds",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later));
+        assertTrue(rankedCompetitors.indexOf(c[0]) == rankedCompetitors.indexOf(c[1])-1);
+    }
+
     private TimePoint createAndAttachTrackedRaces(Series theSeries, String fleetName, Competitor[]... competitorLists) {
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
