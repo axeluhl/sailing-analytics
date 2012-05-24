@@ -37,8 +37,8 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     @Test
     public void testAllTrackedAndStartedWithDifferentScores() {
         List<Competitor> competitors = createCompetitors(10);
-        Regatta regatta = createRegatta(/* qualifying */ 0, /* final */ 1, /* medal */ false, "testAllTrackedAndStartedWithDifferentScores",
-                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */ true));
+        Regatta regatta = createRegatta(/* qualifying */ 0, new String[] { "Yellow", "Green" }, /* final */ 1, new String[] { "Gold", "Silver" },
+                /* medal */ false, "testAllTrackedAndStartedWithDifferentScores", DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */ true));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
@@ -57,14 +57,15 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         return result;
     }
 
-    private Regatta createRegatta(final int numberOfQualifyingRaces, final int numberOfFinalRaces, boolean medalRaceAndSeries,
-            final String regattaBaseName, BoatClass boatClass) {
+    private Regatta createRegatta(final int numberOfQualifyingRaces, String[] qualifyingFleetNames, final int numberOfFinalRaces,
+            String[] finalFleetNames, boolean medalRaceAndSeries, final String regattaBaseName, BoatClass boatClass) {
         series = new ArrayList<Series>();
         
         // -------- qualifying series ------------
         List<Fleet> qualifyingFleets = new ArrayList<Fleet>();
-        qualifyingFleets.add(new FleetImpl("Yellow"));
-        qualifyingFleets.add(new FleetImpl("Blue"));
+        for (String qualifyingFleetName : qualifyingFleetNames) {
+            qualifyingFleets.add(new FleetImpl(qualifyingFleetName));
+        }
         List<String> qualifyingRaceColumnNames = new ArrayList<String>();
         for (int i=1; i<=numberOfQualifyingRaces; i++) {
             qualifyingRaceColumnNames.add("Q"+i);
@@ -75,8 +76,10 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         
         // -------- final series ------------
         List<Fleet> finalFleets = new ArrayList<Fleet>();
-        finalFleets.add(new FleetImpl("Gold", 1));
-        finalFleets.add(new FleetImpl("Silver", 2));
+        int fleetOrdering = 1;
+        for (String finalFleetName : finalFleetNames) {
+            finalFleets.add(new FleetImpl(finalFleetName, fleetOrdering++));
+        }
         List<String> finalRaceColumnNames = new ArrayList<String>();
         for (int i=1; i<=numberOfFinalRaces; i++) {
             finalRaceColumnNames.add("F"+i);
