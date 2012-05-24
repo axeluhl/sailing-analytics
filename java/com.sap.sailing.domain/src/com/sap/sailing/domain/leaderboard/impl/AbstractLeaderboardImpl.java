@@ -356,76 +356,15 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
 
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
-        Map<Competitor, List<Integer>> scores;
-        // TODO which columns to score? Is shallColumnBeUsedForTotalRank the answer?
-        // TODO issues:
-        //  - columns that count may contain competitors that have no score in that column; should they be ranked to the bottom?
-        //  - we don't know which competitors compete in those fleets for which we have no tracked race in a column
-        //  - in a FlexibleLeaderboard, may there be broken constellations in which a competitor belongs to a "better" fleet
-        //    in one column and a worse fleet in another?
-        //  - how to compute the total points if different competitors have different numbers of races where they scored?
-        /*
-         * Approach: for a RegattaLeaderboard there are Series which are ordered; for a FlexibleLeaderboard we don't know about Series.
-         * In a FlexibleLeaderboard, all we have are the columns with their fleets which can be compared but may compare equal; also,
-         * we know if a column is a medal race column. Participants of a medal race always score better than all remaining competitors.
-         * (We only know the medal race participants if the column has a tracked race.)
-         * As soon as we find a column with more than one tracked race with the fleets comparing non-equal, this decides the direct
-         * comparison of all pairs of competitors in different fleets.
-         * 
-         * For a RegattaLeaderboard, if a column in a series has tracked races for all of its fleets, these competitors rank better
-         * than all remaining competitors that appear in prior series. This is probably the generalization of the "medal race" rule
-         * where the medal "series" has one race, and if it's tracked, its participants rank better than all others in prior series
-         * who did not reach the medal race.
-         * 
-         * If none of these rules decide the comparison between two competitors, use their total points, including the doubling rule
-         * for the medal race and the score corrections, max points and discarding rules. Then, if still two competitors score equal,
-         * tie breaking rules have to be applied. The algorithm for this means to sort the scores from best to worst and compare
-         * pairwise. As soon as the first pair differs, we have a decision.
-         */
-        for (RaceColumn raceColumn : getRaceColumns()) {
-            if (shallColumnBeUsedForTotalRank(raceColumn, timePoint)) {
-                // the column counts for sorting
-                
-            }
+        List<Competitor> result = new ArrayList<Competitor>();
+        for (Competitor competitor : getCompetitors()) {
+            result.add(competitor);
         }
-        return null;
+        Collections.sort(result, getTotalRankComparator(timePoint));
+        return result;
     }
 
-    /**
-     * The column has one or more fleets, zero or more of which may have a tracked race associated, each of which may or
-     * may not have started at <code>timePoint</code>. For the competitors who will be racing or have been racing
-     * without a tracked race in the remaining fleets, score corrections may exist. However, we cannot know whether this
-     * is the case for all competitors as the competitors are currently provided by the tracked races which in this case
-     * are missing for at least one fleet.
-     */
-    private boolean shallColumnBeUsedForTotalRank(RaceColumn raceColumn, TimePoint timePoint) {
-        boolean allFleetsHaveTrackedRace = true;
-        Map<Competitor, Fleet> fleetForCompetitor = new HashMap<Competitor, Fleet>();
-        Map<Fleet, Set<Competitor>> competitorsForFleets = new HashMap<Fleet, Set<Competitor>>();
-        for (Fleet fleet : raceColumn.getFleets()) {
-            final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-            if (trackedRace == null || !trackedRace.hasStarted(timePoint)) {
-                allFleetsHaveTrackedRace = false;
-                break;
-            } else {
-                Set<Competitor> competitorsForFleet = new HashSet<Competitor>();
-                for (Competitor c : trackedRace.getRace().getCompetitors()) {
-                    fleetForCompetitor.put(c, fleet);
-                }
-                competitorsForFleets.put(fleet, competitorsForFleet);
-            }
-        }
-        if (!allFleetsHaveTrackedRace) {
-            // look for score corrections for competitors in un-tracked fleet
-            for (Competitor competitor : getCompetitors()) {
-                if (fleetForCompetitor.get(competitor) != null && getScoreCorrection().isScoreCorrected(competitor, raceColumn)) {
-                    return true;
-                }
-            }
-            return false;
-        } else {
-            return true;
-        }
+    protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) {
+        return new LeaderboardTotalRankComparator(this, timePoint);
     }
-
 }
