@@ -61,12 +61,15 @@ public class TrackedRacesManagementPanel extends AbstractEventManagementPanel im
         selectedRacePanel.setContentWidget(vPanel);
         selectedRacePanel.setVisible(false);
         
-        raceDataGrid = new Grid(3,2);
+        raceDataGrid = new Grid(6,2);
         vPanel.add(raceDataGrid);
         
         raceDataGrid.setText(0, 0, "StartTime:");
         raceDataGrid.setText(1, 0, "EndTime:");
         raceDataGrid.setText(2, 0, "Duration:");
+        raceDataGrid.setText(3, 0, "Start of tracking:");
+        raceDataGrid.setText(4, 0, "End of tracking:");
+        raceDataGrid.setText(5, 0, "Delay to live (ms):");
     }
 
     @Override
@@ -117,7 +120,19 @@ public class TrackedRacesManagementPanel extends AbstractEventManagementPanel im
             } else {
                 raceDataGrid.setText(2, 1, "");
             }
-                
+            if(selectedRaceDTO.startOfTracking != null) {
+                raceDataGrid.setText(3, 1, dateFormatter.render(selectedRaceDTO.startOfTracking) + " "
+                        + timeFormatter.render(selectedRaceDTO.startOfTracking));
+            } else {
+                raceDataGrid.setText(3, 1, "");
+            }
+            if(selectedRaceDTO.endOfTracking != null) {
+                raceDataGrid.setText(4, 1, dateFormatter.render(selectedRaceDTO.endOfTracking) + " "
+                        + timeFormatter.render(selectedRaceDTO.endOfTracking));
+            } else {
+                raceDataGrid.setText(4, 1, "");
+            }
+            raceDataGrid.setText(5, 1, "" + selectedRaceDTO.delayToLiveInMs);
         }
     }
 }

@@ -25,10 +25,10 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -49,12 +49,21 @@ public interface SailingServiceAsync {
     void listTracTracRacesInEvent(String eventJsonURL, AsyncCallback<Pair<String, List<TracTracRaceRecordDTO>>> callback);
 
     /**
-     * @param liveURI may be <code>null</code> or the empty string in which case the server will
-     * use the {@link TracTracRaceRecordDTO#liveURI} from the <code>rr</code> race record.
-     * @param storedURImay be <code>null</code> or the empty string in which case the server will
-     * use the {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
+     * @param regattaToAddTo
+     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
+     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
+     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
+     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
+     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
+     * @param liveURI
+     *            may be <code>null</code> or the empty string in which case the server will use the
+     *            {@link TracTracRaceRecordDTO#liveURI} from the <code>rr</code> race record.
+     * @param storedURImay
+     *            be <code>null</code> or the empty string in which case the server will use the
+     *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
      */
-    void track(TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
+    void trackWithTracTrac(RegattaIdentifier regattaToAddTo,
+            TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
             AsyncCallback<Void> callback);
 
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDTO>> callback);
@@ -157,33 +166,17 @@ public interface SailingServiceAsync {
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
-    /**
-     * Creates a {@link LeaderboardDTO} for each leaderboard known by the server and fills in the name, race master data
-     * in the form of {@link RaceColumnDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints
-     * carried points} and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No
-     * data about the points is filled into the result object. No data about the competitor display names is filled in;
-     * instead, an empty map is used for {@link LeaderboardDTO#competitorDisplayNames}.
-     */
-    void getLeaderboards(AsyncCallback<List<LeaderboardDTO>> callback);
+    void getLeaderboards(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
     
-    /**
-     * Does the same as {@link SailingServiceAsync#getLeaderboards(AsyncCallback) getLeaderboards} but returns only
-     * leaderboards which have the given regatta as race
-     */
-    void getLeaderboardsByEvent(RegattaDTO regatta, AsyncCallback<List<LeaderboardDTO>> callback);
+    void getLeaderboardsByEvent(RegattaDTO regatta, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
     
-    void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<LeaderboardDTO>> callback);
+    void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);
 
-    /**
-     * Creates a leaderboard with the name specified by <code>leaderboardName</code> and the initial discarding thesholds
-     * as specified by <code>discardThresholds</code>. The leaderboard returned has the leaderboard name and the master
-     * data about the race columns filled in, but no details about the race points. As such, the result structure
-     * equals that of the result of {@link #getLeaderboards(AsyncCallback)}.
-     */
-    void createLeaderboard(String leaderboardName, int[] discardThresholds, AsyncCallback<LeaderboardDTO> asyncCallback);
+    void createLeaderboard(String leaderboardName, int[] discardThresholds,
+            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
     
@@ -228,6 +221,10 @@ public interface SailingServiceAsync {
 
     void updateIsMedalRace(String leaderboardName, String columnName, boolean isMedalRace, AsyncCallback<Void> callback);
 
+    void updateRaceDelayToLive(RegattaAndRaceIdentifier regattaAndRaceIdentifier, long delayToLiveInMs, AsyncCallback<Void> callback);
+
+    void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs, AsyncCallback<Void> callback);
+
     void getPreviousSwissTimingConfigurations(AsyncCallback<List<SwissTimingConfigurationDTO>> asyncCallback);
 
     void listSwissTimingRaces(String hostname, int port, boolean canSendRequests,
@@ -235,8 +232,17 @@ public interface SailingServiceAsync {
 
     void storeSwissTimingConfiguration(String configName, String hostname, int port, boolean canSendRequests, AsyncCallback<Void> asyncCallback);
 
-    void trackWithSwissTiming(SwissTimingRaceRecordDTO rr, String hostname, int port, boolean canSendRequests,
-            boolean trackWind, boolean correctWindByDeclination, AsyncCallback<Void> asyncCallback);
+    /**
+     * @param regattaToAddTo
+     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
+     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
+     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
+     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
+     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
+     */
+    void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, SwissTimingRaceRecordDTO rr, String hostname, int port,
+            boolean canSendRequests, boolean trackWind, boolean correctWindByDeclination,
+            AsyncCallback<Void> asyncCallback);
 
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage, AsyncCallback<Void> callback);
     

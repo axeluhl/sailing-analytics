@@ -1,12 +1,10 @@
-package com.sap.sailing.domain.leaderboard;
+package com.sap.sailing.domain.base;
 
-import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -27,9 +25,16 @@ public interface RaceColumn extends Named {
     /**
      * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}
      */
-    Iterable<Fleet> getFleets();
+    Iterable<? extends Fleet> getFleets();
     
     Fleet getFleetByName(String fleetName);
+    
+    /**
+     * By looking at the tracked races linked to this race column, identify the {@link Fleet} in which <code>competitor</code>
+     * races in this column. If the competitor is not found, caused by no tracked races being associated with this race column
+     * in which <code>competitor</code> competes, <code>null</code> is returned.
+     */
+    Fleet getFleetOfCompetitor(Competitor competitor);
     
     /**
      * This does also update the {@link #getRaceIdentifier(Fleet) race identifier} by setting it to <code>null</code> if <code>race</code>
@@ -57,7 +62,9 @@ public interface RaceColumn extends Named {
     
     /**
      * Tries to find a tracked race whose {@link RaceDefinition#getCompetitors() competitors} contain <code>competitor</code>. If
-     * no such {@link TrackedRace} is currently associated with this race column, <code>null</code> is returned.
+     * no such {@link TrackedRace} is currently associated with this race column, <code>null</code> is returned. No two
+     * {@link TrackedRace}s may result because a single competitor can be part of only one fleet and therefore not occur
+     * twice in a single {@link RaceColumn}.
      */
     TrackedRace getTrackedRace(Competitor competitor);
     
@@ -84,8 +91,6 @@ public interface RaceColumn extends Named {
      * A "medal race" cannot be discarded. It's score is doubled during score aggregation.
      */
     boolean isMedalRace();
-    
-    void setIsMedalRace(boolean isMedalRace);
     
     void setName(String newName);
     

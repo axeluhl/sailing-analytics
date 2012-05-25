@@ -19,6 +19,7 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public Date endOfTracking;
     public Date endOfRace;
     public Date newestTrackingEvent;
+    public long delayToLiveInMs;
 
     public RaceTimesInfoDTO(RaceIdentifier raceIdentifier) {
         this.raceIdentifier = raceIdentifier;

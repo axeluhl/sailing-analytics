@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -61,5 +62,15 @@ public interface FlexibleLeaderboard extends Leaderboard {
     RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet);
 
     void removeRaceColumn(String columnName);
+
+    void updateIsMedalRace(String raceName, boolean isMedalRace);
+    
+    /**
+     * A leaderboard can be renamed. If a leaderboard is managed in a structure that keys leaderboards by name,
+     * that structure's rules have to be obeyed to ensure the structure's consistency. For example,
+     * <code>RacingEventService</code> has a <code>renameLeaderboard</code> method that ensures the internal
+     * structure's consistency and invokes this method.
+     */
+    void setName(String newName);
 
 }

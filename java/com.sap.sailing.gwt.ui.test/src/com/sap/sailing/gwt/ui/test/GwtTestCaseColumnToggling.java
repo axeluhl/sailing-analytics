@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 
 public class GwtTestCaseColumnToggling extends GWTTestCase {
@@ -80,8 +81,11 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void trackRace(){
-        service.track(rrDao, tractracTunnel ? "tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE,
-                tractracTunnel ? "tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED, false, false, new AsyncCallback<Void>() {
+        service.trackWithTracTrac(/* regattaToAddTo */null, rrDao, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
+                + TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
+                + TracTracConnectionConstants.PORT_LIVE, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
+                + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
+                + ":" + TracTracConnectionConstants.PORT_STORED, false, false, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -98,9 +102,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     private void createLeaderboard(){
         service.createLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
-                new AsyncCallback<LeaderboardDTO>() {
+                new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
-                    public void onSuccess(LeaderboardDTO result) {
+                    public void onSuccess(StrippedLeaderboardDTO result) {
                         System.out.println("Created Leaderboard "+result.name);
                         addColumnToLeaderboard();
                     }

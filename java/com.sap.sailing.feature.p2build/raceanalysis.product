@@ -46,6 +46,7 @@
       <property name="osgi.noShutdown" value="true" />
       <property name="replication.brokerURL" value="tcp://localhost:61616" />
       <property name="replication.persistenceDir" value="." />
+      <property name="replication.useJMX" value="false" />
    </configurations>
 
 </product>

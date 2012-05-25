@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
+import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -26,17 +27,37 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     
     protected static final Fleet defaultFleet = new FleetImpl("Default");
     private static final long serialVersionUID = -5708971849158747846L;
-    private final List<RaceColumn> races;
+    private final List<FlexibleRaceColumn> races;
+    private String name;
 
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(name, scoreCorrection, resultDiscardingRule);
-        this.races = new ArrayList<RaceColumn>();
+        super(scoreCorrection, resultDiscardingRule);
+        if (name == null) {
+            throw new IllegalArgumentException("A leaderboard's name must not be null");
+        }
+        this.name = name;
+        this.races = new ArrayList<FlexibleRaceColumn>();
+    }
+    
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param newName must not be <code>null</code>
+     */
+    public void setName(String newName) {
+        if (newName == null) {
+            throw new IllegalArgumentException("A leaderboard's name must not be null");
+        }
+        this.name = newName;
     }
     
     @Override
     public RaceColumn addRaceColumn(String name, boolean medalRace, Fleet... fleets) {
-        RaceColumn column = getRaceColumnByName(name);
+        FlexibleRaceColumn column = getRaceColumnByName(name);
         if (column != null) {
             final String msg = "Trying to create race column with duplicate name "+name+" in leaderboard +"+getName();
             logger.severe(msg);
@@ -45,6 +66,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             races.add(column);
         }
         return column;
+    }
+    
+    @Override
+    public FlexibleRaceColumn getRaceColumnByName(String columnName) {
+        return (FlexibleRaceColumn) super.getRaceColumnByName(columnName);
     }
     
     @Override
@@ -70,7 +96,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     
     @Override
     public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
-        RaceColumn column = getRaceColumnByName(columnName);
+        FlexibleRaceColumn column = getRaceColumnByName(columnName);
         if (column == null) {
             column = createRaceColumn(columnName, medalRace);
             races.add(column);
@@ -95,8 +121,8 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     @Override
     public void moveRaceColumnUp(String name) {
-        RaceColumn race = null;
-        for (RaceColumn r : races) {
+        FlexibleRaceColumn race = null;
+        for (FlexibleRaceColumn r : races) {
             if (r.getName().equals(name)) {
                 race = r;
             }
@@ -115,8 +141,8 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     @Override
     public void moveRaceColumnDown(String name) {
-        RaceColumn race = null;
-        for (RaceColumn r : races) {
+        FlexibleRaceColumn race = null;
+        for (FlexibleRaceColumn r : races) {
             if (r.getName().equals(name)) {
                 race = r;
             }
@@ -136,4 +162,15 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         }
     }
 
+    @Override
+    public void updateIsMedalRace(String raceName, boolean isMedalRace) {
+        FlexibleRaceColumn race = null;
+        for (FlexibleRaceColumn r : races) {
+            if (r.getName().equals(raceName))
+                race = r;
+        }
+        if (race != null) {
+            race.setIsMedalRace(isMedalRace);
+        }
+    }
 }

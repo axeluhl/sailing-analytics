@@ -49,6 +49,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     protected RaceTimesInfoDTO lastRaceTimesInfo;
 
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
+    protected final DateTimeFormat dateFormatHoursMinutes = DateTimeFormat.getFormat("HH:mm");
 
     protected final StringMessages stringMessages;
     protected final ErrorReporter errorReporter;
@@ -56,6 +57,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     protected final SailingServiceAsync sailingService;
 
     protected boolean isLoading = false;
+    protected boolean isZoomed = false;
     
     private int NUMBER_OF_TICKS = 9;
     
@@ -81,53 +83,67 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
                 minTimepoint = raceMinMax.getA();
                 maxTimepoint = raceMinMax.getB();
                 updateMinMax = true;
-            } else {
-                if(minTimepoint.getTime() != raceMinMax.getA().getTime() || maxTimepoint.getTime() != raceMinMax.getB().getTime()) {
-                    minTimepoint = raceMinMax.getA();
-                    maxTimepoint = raceMinMax.getB();
-                    updateMinMax = true;
-                }
+            } else if(minTimepoint.getTime() != raceMinMax.getA().getTime() || maxTimepoint.getTime() != raceMinMax.getB().getTime()) {
+                minTimepoint = raceMinMax.getA();
+                maxTimepoint = raceMinMax.getB();
+                updateMinMax = true;
             }
         }
         if(updateMinMax) {
             chart.getXAxis().setMin(minTimepoint.getTime());
             chart.getXAxis().setMax(maxTimepoint.getTime());
+            chart.getXAxis().setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), false, false);
+            
+            long diff = (maxTimepoint.getTime() - minTimepoint.getTime()) / 10;
+            chart.getXAxis().setTickInterval(diff);
         }
     }
 
     protected void showLoading(String message) {
-        chart.showLoading(message);
+        if(timer.getPlayMode() != PlayModes.Live) {
+            chart.showLoading(message);
+        }
         isLoading = true;
     }
 
     protected void hideLoading() {
-        chart.hideLoading();
+        if(timer.getPlayMode() != PlayModes.Live) {
+            chart.hideLoading();
+        }
         isLoading = false;
     }
 
-    protected void onSelectionChange(ChartSelectionEvent chartSelectionEvent) {
+    protected boolean onXAxisSelectionChange(ChartSelectionEvent chartSelectionEvent) {
         try {
             long xAxisMin = chartSelectionEvent.getXAxisMinAsLong();
             long xAxisMax = chartSelectionEvent.getXAxisMaxAsLong();
-            timeZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
 
-            ignoreClickOnce = true;
+            if(!isZoomed) {
+                isZoomed = true;
+            }
+            timeZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
         } catch (Throwable t) {
+            // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
             timeZoomProvider.resetTimeZoom(this);
-            //Redrawing, or the chart wouldn't rezoom
+            // Trigger the redrawing... otherwise chart wouldn't reset the zoom
             chart.redraw();
+            isZoomed = false;
         }
+        
+        return true;
     }
 
-    protected void onClick(ChartClickEvent chartClickEvent) {
-        if(!isLoading) {
-            if (ignoreClickOnce) {
-                ignoreClickOnce = false;
-            } else {
+    protected boolean onClick(ChartClickEvent chartClickEvent) {
+        if(!isLoading && !isZoomed) {
+            // when the user zooms into the chart first a AxisSetExtremesEvent is sent and a ChartClickEvent afterwards 
+//            if (ignoreClickOnce) {
+//                ignoreClickOnce = false;
+//            } else {
                 timer.setPlayMode(PlayModes.Replay);
                 timer.setTime(chartClickEvent.getXAxisValueAsLong());
-            }
+//            }
         }
+        return true;
     }
 
     protected void changeMinMaxInterval(Date minIntervalTimepoint, Date maxIntervalTimepoint, long numTicks) {

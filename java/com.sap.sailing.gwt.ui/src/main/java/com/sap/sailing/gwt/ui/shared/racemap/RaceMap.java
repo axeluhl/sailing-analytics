@@ -821,7 +821,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         courseDTO.waypointPositions.get(legOfLeadingCompetitor).lngDeg); 
                 if (courseMiddleLine == null) {
                     PolylineOptions options = PolylineOptions.newInstance(/* clickable must be true for hover sensitivity */ true, /* geodesic */true);
-                    courseMiddleLine = new Polyline(courseMiddleLinePoints, /* color */ "#666666", /* width */ 1, /* opacity */1.0, options);
+                    courseMiddleLine = new Polyline(courseMiddleLinePoints, /* color */ "#6896c6", /* width */ 1, /* opacity */1.0, options);
                     courseMiddleLine.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
                         @Override
                         public void onMouseOver(PolylineMouseOverEvent event) {

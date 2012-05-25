@@ -64,14 +64,25 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private Course course;
     private StartList startList;
     private DynamicTrackedRace trackedRace;
+    private final DynamicTrackedRegatta trackedRegatta;
 
     private boolean loggedIgnore;
+    private final long delayToLiveInMillis;
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests) throws InterruptedException,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
+            UnknownHostException, IOException, ParseException {
+        this(domainFactory.getOrCreateRegatta(raceID), raceID, hostname, port, windStore, domainFactory, factory,
+                messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
+    }
+    
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String hostname, int port, WindStore windStore,
+            DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         super();
+        this.regatta = regatta;
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
@@ -79,9 +90,14 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.windStore = windStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
-        regatta = domainFactory.getOrCreateEvent(raceID);
-        setTrackedRegatta(trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta));
+        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
+        this.delayToLiveInMillis = delayToLiveInMillis;
         connector.trackRace(raceID);
+    }
+
+    @Override
+    public DynamicTrackedRegatta getTrackedRegatta() {
+        return trackedRegatta;
     }
 
     static Triple<String, String, Integer> createID(String raceID, String hostname, int port) {
@@ -249,7 +265,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         // now we can create the RaceDefinition and most other things
         Race swissTimingRace = messageLoader.getRace(raceID);
         race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
-        trackedRace = getTrackedRegatta().createTrackedRace(race, windStore,
+        trackedRace = getTrackedRegatta().createTrackedRace(race, windStore, delayToLiveInMillis,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 new DynamicRaceDefinitionSet() {

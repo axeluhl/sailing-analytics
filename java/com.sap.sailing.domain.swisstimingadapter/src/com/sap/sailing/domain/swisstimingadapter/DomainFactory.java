@@ -20,7 +20,7 @@ import difflib.PatchFailedException;
 public interface DomainFactory {
     final static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
-    Regatta getOrCreateEvent(String raceID);
+    Regatta getOrCreateRegatta(String raceID);
 
     Nationality getOrCreateNationality(String nationalityName);
 
@@ -40,7 +40,8 @@ public interface DomainFactory {
 
     void removeRace(String raceID);
     
-    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, boolean canSendRequests,
+    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, 
+            boolean canSendRequests, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore,
             RaceSpecificMessageLoader messageLoader);
 }

@@ -16,11 +16,15 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
@@ -28,6 +32,8 @@ import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
@@ -42,7 +48,6 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
@@ -248,7 +253,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         leaderboards which don't know about fleets yet; this key should be mapped to the leaderboard's default
      *         fleet.
      */
-    private Map<String, RaceIdentifier> loadRaceIdentifiers(BasicDBObject dbRaceColumn) {
+    private Map<String, RaceIdentifier> loadRaceIdentifiers(DBObject dbRaceColumn) {
         Map<String, RaceIdentifier> result = new HashMap<String, RaceIdentifier>();
         // try to load a deprecated single race identifier to associate with the default fleet:
         RaceIdentifier singleLegacyRaceIdentifier = loadRaceIdentifier(dbRaceColumn);
@@ -318,7 +323,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<Leaderboard> getLeaderboardsNotInGroup() {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-        
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
             //Don't change the query object, unless you know what you're doing
@@ -413,8 +417,98 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public Regatta loadRegatta(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), name);
+        DBCollection regattaCollection = database.getCollection(CollectionNames.REGATTAS.name());
+        DBObject dbRegatta = regattaCollection.findOne(query);
+        Regatta result = null;
+        if (dbRegatta != null) {
+            String regattaName = (String) dbRegatta.get(FieldNames.REGATTA_NAME.name());
+            String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
+            assert regattaName.equals(name);
+            String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
+            BoatClass boatClass = null;
+            if (boatClassName != null) {
+                boolean typicallyStartsUpwind = (Boolean) dbRegatta.get(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name());
+                boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass(boatClassName, typicallyStartsUpwind);
+            }
+            BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
+            Iterable<Series> series = loadSeries(dbSeries);
+            result = new RegattaImpl(baseName, boatClass, series);
+        }
+        return result;
+    }
+
+    private Iterable<Series> loadSeries(BasicDBList dbSeries) {
+        List<Series> result = new ArrayList<Series>();
+        for (Object o : dbSeries) {
+            DBObject oneDBSeries = (DBObject) o;
+            Series series = loadSeries(oneDBSeries);
+            result.add(series);
+        }
+        return result;
+    }
+
+    private Series loadSeries(DBObject dbSeries) {
+        String name = (String) dbSeries.get(FieldNames.SERIES_NAME.name());
+        boolean isMedal = (Boolean) dbSeries.get(FieldNames.SERIES_IS_MEDAL.name());
+        final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
+        Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
+        BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
+        Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
+        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames);
+        loadRaceColumnRaceLinks(dbRaceColumns, series);
+        return series;
+    }
+
+    /**
+     * @param fleetsByName used to ensure the {@link RaceColumn#getFleets()} points to the same {@link Fleet} objects also
+     * used in the {@link Series#getFleets()} collection.
+     */
+    private Iterable<String> loadRaceColumnNames(BasicDBList dbRaceColumns, Map<String, Fleet> fleetsByName) {
+        List<String> result = new ArrayList<String>();
+        for (Object o : dbRaceColumns) {
+            DBObject dbRaceColumn = (DBObject) o;
+            result.add((String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name()));
+        }
+        return result;
+    }
+
+    private void loadRaceColumnRaceLinks(BasicDBList dbRaceColumns, Series series) {
+        for (Object o : dbRaceColumns) {
+            DBObject dbRaceColumn = (DBObject) o;
+            String name = (String) dbRaceColumn.get(FieldNames.LEADERBOARD_COLUMN_NAME.name());
+            Map<String, RaceIdentifier> raceIdentifiersPerFleetName = loadRaceIdentifiers(dbRaceColumn);
+            for (Map.Entry<String, RaceIdentifier> e : raceIdentifiersPerFleetName.entrySet()) {
+                // null key for "default" fleet is not acceptable here
+                if (e.getKey() == null) {
+                    logger.warning("Ignoring null fleet name while loading RaceColumn " + name);
+                } else {
+                    series.getRaceColumnByName(name).setRaceIdentifier(series.getFleetByName(e.getKey()), e.getValue());
+                }
+            }
+        }
+    }
+
+    private Map<String, Fleet> loadFleets(BasicDBList dbFleets) {
+        Map<String, Fleet> result = new HashMap<String, Fleet>();
+        for (Object o : dbFleets) {
+            DBObject dbFleet = (DBObject) o;
+            Fleet fleet = loadFleet(dbFleet);
+            result.put(fleet.getName(), fleet);
+        }
+        return result;
+    }
+
+    private Fleet loadFleet(DBObject dbFleet) {
+        String name = (String) dbFleet.get(FieldNames.FLEET_NAME.name());
+        Integer ordering = (Integer) dbFleet.get(FieldNames.FLEET_ORDERING.name());
+        Fleet result;
+        if (ordering != null) {
+            result = new FleetImpl(name, ordering);
+        } else {
+            result = new FleetImpl(name);
+        }
+        return result;
     }
 
 }

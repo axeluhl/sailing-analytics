@@ -67,15 +67,15 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
-        domainRegatta = domainFactory.getOrCreateEvent(getTracTracEvent());
+        domainRegatta = domainFactory.getOrCreateRegatta(getTracTracEvent());
         trackedRegatta = new DynamicTrackedRegattaImpl(domainRegatta);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getTracTracEvent(), /* millisecondsOverWhichToAverageWind */
+        receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getTracTracEvent(),
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {}
-                },
-                30000) {
+                }, /* delayToLiveInMillis */ 0l, 
+                /* millisecondsOverWhichToAverageWind */ 30000) {
             @Override
             protected void handleEvent(Triple<Route, RouteData, Race> event) {
                 synchronized (routeData) {

@@ -6,13 +6,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.LongBox;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
-public class LeaderboardCreateDialog extends LeaderboardDialog{
+public class LeaderboardCreateDialog extends LeaderboardDialog {
     
-    public LeaderboardCreateDialog(Collection<LeaderboardDTO> existingLeaderboards, StringMessages stringConstants,
-            ErrorReporter errorReporter, AsyncCallback<LeaderboardDTO> callback) {
-        super(new LeaderboardDTO(), stringConstants, errorReporter, new LeaderboardDialog.LeaderboardParameterValidator(stringConstants, existingLeaderboards), callback);
+    public LeaderboardCreateDialog(Collection<StrippedLeaderboardDTO> existingLeaderboards, StringMessages stringConstants,
+            ErrorReporter errorReporter, AsyncCallback<StrippedLeaderboardDTO> callback) {
+        super(new StrippedLeaderboardDTO(), stringConstants, errorReporter, new LeaderboardDialog.LeaderboardParameterValidator(stringConstants, existingLeaderboards), callback);
 
         entryField = createTextBox(null);
 

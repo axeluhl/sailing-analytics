@@ -21,6 +21,9 @@ import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
+import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
@@ -110,6 +113,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
      */
     private Chart createChart(DetailType dataToShow) {
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
+                .setPersistent(true)
                 .setWidth100()
                 .setHeight100()
                 .setMarginLeft(65)
@@ -135,8 +139,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
             chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
                 @Override
                 public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
-                    AbstractChartPanel.this.onSelectionChange(chartSelectionEvent);
-                    return true;
+                    return AbstractChartPanel.this.onXAxisSelectionChange(chartSelectionEvent);
                 }
             });
         }
@@ -148,9 +151,15 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis().setReversed((dataToShow == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || 
                                       dataToShow == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true : false);
-        chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
-                .setAxisTitleText(stringMessages.time())
-                .setTickInterval(1000 * 60 * 10);
+        chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(60 * 1000) // 1 minute
+                .setAxisTitleText(stringMessages.time());
+        chart.getXAxis().setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
+            @Override
+            public String format(AxisLabelsData axisLabelsData) {
+                return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
+            }
+        }));
+        
         String decimalPlaces = "";
         for (int i = 0; i < dataToShow.getPrecision(); i++) {
             if (i == 0) {
@@ -551,15 +560,6 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         return new Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
     }
 
-    @Override 
-    public void setVisible(boolean isVisible) {
-        super.setVisible(isVisible);
-        
-        if(isVisible) {
-            loadData(true);
-        }
-    }
-    
     @Override
     public void timeChanged(Date date) {
         if (getChartData() != null) {

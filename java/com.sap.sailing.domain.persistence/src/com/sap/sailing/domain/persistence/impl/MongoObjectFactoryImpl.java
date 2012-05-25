@@ -13,11 +13,14 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -25,7 +28,6 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.tracking.Positioned;
@@ -135,10 +137,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBList dbRaceColumns = new BasicDBList();
         result.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            BasicDBObject dbRaceColumn = new BasicDBObject();
-            dbRaceColumn.put(FieldNames.LEADERBOARD_COLUMN_NAME.name(), raceColumn.getName());
-            dbRaceColumn.put(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name(), raceColumn.isMedalRace());
-            storeRaceIdentifiers(raceColumn, dbRaceColumn);
+            BasicDBObject dbRaceColumn = storeRaceColumn(raceColumn);
             dbRaceColumns.add(dbRaceColumn);
         }
         if (leaderboard.hasCarriedPoints()) {
@@ -165,6 +164,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         result.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
         leaderboardCollection.update(query, result, /* upsrt */ true, /* multi */ false);
+    }
+
+    private BasicDBObject storeRaceColumn(RaceColumn raceColumn) {
+        BasicDBObject dbRaceColumn = new BasicDBObject();
+        dbRaceColumn.put(FieldNames.LEADERBOARD_COLUMN_NAME.name(), raceColumn.getName());
+        dbRaceColumn.put(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name(), raceColumn.isMedalRace());
+        storeRaceIdentifiers(raceColumn, dbRaceColumn);
+        return dbRaceColumn;
     }
 
     private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
@@ -260,6 +267,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void storeEvent(Event event) {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
+        eventCollection.ensureIndex(FieldNames.EVENT_NAME.name());
         DBObject query = new BasicDBObject();
         query.put(FieldNames.EVENT_NAME.name(), event.getName());
         DBObject eventDBObject = new BasicDBObject();
@@ -284,8 +292,51 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeRegatta(Regatta regatta) {
-        // TODO Auto-generated method stub
-        
+        DBCollection regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
+        regattasCollection.ensureIndex(FieldNames.REGATTA_NAME.name());
+        DBObject dbRegatta = new BasicDBObject();
+        DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
+        dbRegatta.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
+        dbRegatta.put(FieldNames.REGATTA_BASE_NAME.name(), regatta.getBaseName());
+        if (regatta.getBoatClass() != null) {
+            dbRegatta.put(FieldNames.BOAT_CLASS_NAME.name(), regatta.getBoatClass().getName());
+            dbRegatta.put(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name(), regatta.getBoatClass().typicallyStartsUpwind());
+        }
+        dbRegatta.put(FieldNames.REGATTA_SERIES.name(), storeSeries(regatta.getSeries()));
+        regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false);
+    }
+
+    private BasicDBList storeSeries(Iterable<? extends Series> series) {
+        BasicDBList dbSeries = new BasicDBList();
+        for (Series s : series) {
+            dbSeries.add(storeSeries(s));
+        }
+        return dbSeries;
+    }
+
+    private DBObject storeSeries(Series s) {
+        DBObject dbSeries = new BasicDBObject();
+        dbSeries.put(FieldNames.SERIES_NAME.name(), s.getName());
+        dbSeries.put(FieldNames.SERIES_IS_MEDAL.name(), s.isMedal());
+        BasicDBList dbFleets = new BasicDBList();
+        for (Fleet fleet : s.getFleets()) {
+            dbFleets.add(storeFleet(fleet));
+        }
+        dbSeries.put(FieldNames.SERIES_FLEETS.name(), dbFleets);
+        BasicDBList dbRaceColumns = new BasicDBList();
+        for (RaceColumn raceColumn : s.getRaceColumns()) {
+            dbRaceColumns.add(storeRaceColumn(raceColumn));
+        }
+        dbSeries.put(FieldNames.SERIES_RACE_COLUMNS.name(), dbRaceColumns);
+        return dbSeries;
+    }
+
+    private DBObject storeFleet(Fleet fleet) {
+        DBObject dbFleet = new BasicDBObject(FieldNames.FLEET_NAME.name(), fleet.getName());
+        if (fleet instanceof FleetImpl) {
+            dbFleet.put(FieldNames.FLEET_ORDERING.name(), ((FleetImpl) fleet).getOrdering());
+        }
+        return dbFleet;
     }
 
 }

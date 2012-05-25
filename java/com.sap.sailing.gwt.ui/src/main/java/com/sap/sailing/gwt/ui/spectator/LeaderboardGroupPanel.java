@@ -28,9 +28,9 @@ import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 import com.sap.sailing.gwt.ui.shared.panels.WelcomeWidget;
 
@@ -127,7 +127,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             CellTable<Integer> leaderboardsTable = new CellTable<Integer>(200, tableResources);
             leaderboardsTable.setSelectionModel(new NoSelectionModel<Integer>());
             int maxRacesNum = 0;
-            for (final LeaderboardDTO leaderboard : group.leaderboards) {
+            for (final StrippedLeaderboardDTO leaderboard : group.leaderboards) {
                 SafeHtmlCell leaderboardCell = new SafeHtmlCell();
                 Column<Integer, SafeHtml> leaderboardColumn = new Column<Integer, SafeHtml>(leaderboardCell) {
                     @Override
@@ -153,9 +153,9 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             mainPanel.add(leaderboardsTable);
         } else {
             AnchorCell nameAnchorCell = new AnchorCell();
-            Column<LeaderboardDTO, SafeHtml> nameColumn = new Column<LeaderboardDTO, SafeHtml>(nameAnchorCell) {
+            Column<StrippedLeaderboardDTO, SafeHtml> nameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(nameAnchorCell) {
                 @Override
-                public SafeHtml getValue(LeaderboardDTO leaderboard) {
+                public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                             + "&leaderboardGroupName=" + group.name + "&root=" + root
@@ -165,16 +165,16 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             };
 
             SafeHtmlCell racesCell = new SafeHtmlCell();
-            Column<LeaderboardDTO, SafeHtml> racesColumn = new Column<LeaderboardDTO, SafeHtml>(racesCell) {
+            Column<StrippedLeaderboardDTO, SafeHtml> racesColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(racesCell) {
                 @Override
-                public SafeHtml getValue(LeaderboardDTO leaderboard) {
+                public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                     return leaderboardRacesToHtml(leaderboard);
                 }
             };
 
             LeaderboardGroupCompactTableResources tableResources = GWT.create(LeaderboardGroupCompactTableResources.class);
-            CellTable<LeaderboardDTO> leaderboardsTable = new CellTable<LeaderboardDTO>(200, tableResources);
-            leaderboardsTable.setSelectionModel(new NoSelectionModel<LeaderboardDTO>());
+            CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
+            leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
             leaderboardsTable.addColumn(nameColumn, stringConstants.name());
             leaderboardsTable.addColumn(racesColumn, stringConstants.races());
             leaderboardsTable.setRowData(group.leaderboards);
@@ -182,7 +182,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         }
     }
 
-    private SafeHtml raceToRaceBoardLink(LeaderboardDTO leaderboard, RaceColumnDTO race) {
+    private SafeHtml raceToRaceBoardLink(StrippedLeaderboardDTO leaderboard, RaceColumnDTO race) {
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         String raceColumnDisplayName = race.getRaceColumnName();
@@ -225,7 +225,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         return b.toSafeHtml();
     }
     
-    private SafeHtml leaderboardRacesToHtml(LeaderboardDTO leaderboard) {
+    private SafeHtml leaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         for (RaceColumnDTO race : leaderboard.getRaceList()) {

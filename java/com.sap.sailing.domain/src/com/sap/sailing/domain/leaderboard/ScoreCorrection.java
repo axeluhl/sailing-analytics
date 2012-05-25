@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -31,7 +32,9 @@ public interface ScoreCorrection extends Serializable {
      * Note, though, that {@link MaxPointsReason#NONE} can also be the reason for an explicit score correction, e.g., if
      * the tracking results were overruled by the jury. Clients may use
      * {@link #isScoreCorrected(Competitor, TrackedRace)} to detect the difference.
-     * @param numberOfCompetitors TODO
+     * 
+     * @param numberOfCompetitors
+     *            the number of competitors to use as the basis for penalty score calculation ("max points")
      */
     Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, int numberOfCompetitors);
 

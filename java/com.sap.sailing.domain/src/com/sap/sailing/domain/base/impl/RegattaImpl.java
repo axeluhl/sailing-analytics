@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -16,9 +17,9 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 
 public class RegattaImpl extends NamedImpl implements Regatta {
+    private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
     private static final long serialVersionUID = 6509564189552478869L;
     private final Set<RaceDefinition> races;
     private final BoatClass boatClass;
@@ -29,8 +30,8 @@ public class RegattaImpl extends NamedImpl implements Regatta {
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet.
      */
     public RegattaImpl(String baseName, BoatClass boatClass) {
-        this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isFleetsOrdered */true,
-                Collections.singletonList(new FleetImpl("Default")), new ArrayList<RaceColumn>())));
+        this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */ false,
+                Collections.singletonList(new FleetImpl("Default")), /* race column names */ new ArrayList<String>())));
     }
     
     public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series) {
@@ -86,6 +87,7 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     
     @Override
     public void addRace(RaceDefinition race) {
+        logger.info("Adding race "+race.getName()+" to regatta "+getName()+" ("+hashCode()+")");
         if (getBoatClass() != null && race.getBoatClass() != getBoatClass()) {
             throw new IllegalArgumentException("Boat class "+race.getBoatClass()+" doesn't match regatta's boat class "+getBoatClass());
         }
@@ -102,6 +104,7 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     @Override
     public void removeRace(RaceDefinition race) {
         synchronized (races) {
+            logger.info("Removing race "+race.getName()+" from regatta "+getName()+" ("+hashCode()+")");
             races.remove(race);
         }
         synchronized (regattaListeners) {

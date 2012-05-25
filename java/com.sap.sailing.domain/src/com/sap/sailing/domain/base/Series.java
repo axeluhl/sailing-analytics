@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 
 /**
  * A series is a part of a {@link Regatta}. Rounds are ordered within the regatta, and rules for who is assigned to
@@ -26,10 +25,15 @@ public interface Series extends Named {
      */
     Iterable<? extends RaceColumn> getRaceColumns();
     
+    RaceColumn getRaceColumnByName(String columnName);
+
     /**
-     * Tells whether the fleets returned by {@link #getFleets()} have a relevant ordering. This is the case particularly
-     * for final series with fleets such as "Gold" and "Silver" but usually not for qualification series with fleets such
-     * as "Yellow" and "Blue" which don't have an ordering, particularly for ranking considerations.
+     * Tells whether this is the "last" / "medal" race series, usually having only one race. This may have implications
+     * on the scoring scheme (usually, medal races scores are doubled and cannot be discarded).
      */
-    boolean isFleetsOrdered();
+    boolean isMedal();
+    
+    void setIsMedal(boolean isMedal);
+
+    Fleet getFleetByName(String fleetName);
 }
