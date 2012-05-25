@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -17,8 +19,20 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements IsSerializ
      * The competitor list, ordered ascending by total rank
      */
     public List<CompetitorDTO> competitors;
+    
+    private Map<RaceColumnDTO, List<CompetitorDTO>> competitorOrderingPerRace;
 
-    public LeaderboardDTO() {}
+    public LeaderboardDTO() {
+        competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>();
+    }
+    
+    public void setCompetitorsFromBestToWorst(RaceColumnDTO raceColumn, List<CompetitorDTO> orderedCompetitors) {
+        competitorOrderingPerRace.put(raceColumn, orderedCompetitors);
+    }
+    
+    public List<CompetitorDTO> getCompetitorsFromBestToWorst(RaceColumnDTO raceColumn) {
+        return competitorOrderingPerRace.get(raceColumn);
+    }
 
     public int getRank(CompetitorDTO competitor) {
         return competitors.indexOf(competitor) + 1;

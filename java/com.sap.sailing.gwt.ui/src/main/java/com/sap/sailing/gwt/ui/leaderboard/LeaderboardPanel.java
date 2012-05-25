@@ -45,9 +45,9 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
@@ -63,7 +63,6 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
-import com.sap.sailing.gwt.ui.leaderboard.NetPointsComparator.SortOrderCalculator;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
@@ -478,17 +477,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public Comparator<LeaderboardRowDTO> getComparator() {
-            if (race.isMedalRace()) {
-                return getLeaderboard().getMedalRaceComparator(race.getRaceColumnName());
-            } else {
-                SortOrderCalculator sortOrderCalculator = new SortOrderCalculator() {
-                    @Override
-                    public boolean isAscending() {
-                        return isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
-                    }
-                };
-                return new NetPointsComparator(sortOrderCalculator, race.getRaceColumnName());
-            }
+            return new Comparator<LeaderboardRowDTO>() {
+                @Override
+                public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
+                    List<CompetitorDTO> competitorsFromBestToWorst = getLeaderboard().getCompetitorsFromBestToWorst(race);
+                    boolean ascending = isSortedAscendingForThisColumn(getLeaderboardPanel().getLeaderboardTable());
+                    int o1Rank = competitorsFromBestToWorst.indexOf(o1.competitor) + 1;
+                    int o2Rank = competitorsFromBestToWorst.indexOf(o2.competitor) + 1;
+                    return o1Rank == 0 ? o2Rank == 0 ? 0
+                            : ascending ? 1 : -1 : o2Rank == 0 ? ascending ? -1 : 1
+                            : o1Rank - o2Rank;
+                }
+            };
         }
 
         @Override

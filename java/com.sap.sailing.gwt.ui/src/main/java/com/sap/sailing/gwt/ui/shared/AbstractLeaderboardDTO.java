@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +29,6 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         } else {
             return competitorDisplayNames.get(competitor);
         }
-    }
-
-    public Comparator<LeaderboardRowDTO> getMedalRaceComparator(String medalRaceName) {
-        return new MedalRaceComparator(medalRaceName);
     }
 
     /**
@@ -70,39 +65,6 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
             totalPoints += e.totalPoints;
         }
         return totalPoints;
-    }
-
-    private class MedalRaceComparator implements Comparator<LeaderboardRowDTO> {
-        private final String medalRaceName;
-
-        public MedalRaceComparator(String medalRaceName) {
-            this.medalRaceName = medalRaceName;
-        }
-
-        @Override
-        public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-            int result;
-            if (scoredInMedalRace(o1.competitor)) {
-                if (scoredInMedalRace(o2.competitor)) {
-                    // both scored in medal race
-                    result = o1.fieldsByRaceName.get(medalRaceName).netPoints
-                            - o2.fieldsByRaceName.get(medalRaceName).netPoints;
-                } else {
-                    // only o1 scored in medal race, so o1 scores better = "less"
-                    result = -1;
-                }
-            } else {
-                if (scoredInMedalRace(o2.competitor)) {
-                    // only o2 scored in medal race, so o2 scores better, o1 scores worse = "greater"
-                    result = 1;
-                } else {
-                    // neither one scored in any medal race; to be considered equal for medal race comparison
-                    result = 0;
-                }
-
-            }
-            return result;
-        }
     }
 
     public int getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
@@ -186,11 +148,12 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         races.add(index, raceInLeaderboardDTO);
     }
     
-    public void createEmptyRaceColumn(String raceColumnName, boolean medalRace) {
-        RaceColumnDTO raceInLeaderboardDTO = new RaceColumnDTO();
-        raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
-        raceInLeaderboardDTO.setMedalRace(medalRace);
-        races.add(raceInLeaderboardDTO);
+    public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace) {
+        RaceColumnDTO raceColumn = new RaceColumnDTO();
+        raceColumn.setRaceColumnName(raceColumnName);
+        raceColumn.setMedalRace(medalRace);
+        races.add(raceColumn);
+        return raceColumn;
     }
 
     protected RaceColumnDTO getRaceInLeaderboardByName(String raceColumnName) {

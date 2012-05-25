@@ -104,6 +104,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
             }
             // ensure that race isn't updated by events as we're tying to sort the competitors
             synchronized (getTrackedRace()) {
+                // TODO See bug 469; competitors already disqualified may need to be ranked worst 
                 Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint));
                 rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
                 synchronized (competitorTracksOrderedByRank) {

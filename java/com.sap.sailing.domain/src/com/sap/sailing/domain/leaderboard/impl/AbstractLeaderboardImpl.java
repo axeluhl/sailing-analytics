@@ -233,7 +233,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
         boolean discarded = isDiscarded(competitor, race, timePoint);
         return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), correctedResults.isCorrected(),
                 discarded ? 0
-                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded);
+                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? MEDAL_RACE_FACTOR : 1),
+                        correctedResults.getMaxPointsReason(), discarded);
     }
     
     @Override
