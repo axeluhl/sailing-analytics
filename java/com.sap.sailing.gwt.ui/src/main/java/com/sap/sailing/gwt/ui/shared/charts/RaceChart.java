@@ -100,12 +100,16 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     }
 
     protected void showLoading(String message) {
-        chart.showLoading(message);
+        if(timer.getPlayMode() != PlayModes.Live) {
+            chart.showLoading(message);
+        }
         isLoading = true;
     }
 
     protected void hideLoading() {
-        chart.hideLoading();
+        if(timer.getPlayMode() != PlayModes.Live) {
+            chart.hideLoading();
+        }
         isLoading = false;
     }
 
