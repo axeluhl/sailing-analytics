@@ -46,11 +46,13 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final Leaderboard leaderboard;
     private final TimePoint timePoint;
+    private final Comparator<Integer> scoreComparator;
     
-    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint) {
+    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, Comparator<Integer> scoreComparator) {
         super();
         this.leaderboard = leaderboard;
         this.timePoint = timePoint;
+        this.scoreComparator = scoreComparator;
     }
     
     protected Leaderboard getLeaderboard() {
@@ -202,19 +204,14 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * the integer numbers by their natural ordering.
      */
     protected Comparator<Integer> getScoreComparator() {
-        return new Comparator<Integer>() {
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                return o1-o2;
-            }
-        };
+        return scoreComparator;
     }
 
     /**
      * This implementation ranks a competitor better (lesser) if it has the lower score sum
      */
     protected int compareByScoreSum(int o1ScoreSum, int o2ScoreSum) {
-        return o1ScoreSum - o2ScoreSum;
+        return getScoreComparator().compare(o1ScoreSum, o2ScoreSum);
     }
 
     /**

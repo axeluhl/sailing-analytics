@@ -20,6 +20,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
@@ -35,7 +36,8 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
 
     @Test
     public void leaderboardWithOneRaceTest() throws URISyntaxException, NoWindException, IOException, InterruptedException {
-        leaderboard = new FlexibleLeaderboardImpl("Kiel Week 2011 505s", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(new int[] { 3, 6 }));
+        leaderboard = new FlexibleLeaderboardImpl("Kiel Week 2011 505s", new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(new int[] { 3, 6 }), new LowerScoreIsBetter());
         Fleet defaultFleet = leaderboard.getFleet(null);
         MillisecondsTimePoint now = MillisecondsTimePoint.now();
         loadRace("357c700a-9d9a-11e0-85be-406186cbf87c"); // 505 Race 2
