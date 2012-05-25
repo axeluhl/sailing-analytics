@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Comparator;
  * @author Axel Uhl (D043530)
  *
  */
-public class LowerScoreIsBetter implements Comparator<Integer> {
+public class LowerScoreIsBetter implements Comparator<Integer>, Serializable {
     @Override
     public int compare(Integer o1, Integer o2) {
         return o1-o2;
