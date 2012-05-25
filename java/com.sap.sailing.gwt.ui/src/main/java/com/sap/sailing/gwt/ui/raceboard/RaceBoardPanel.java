@@ -239,6 +239,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         
         checkBox.setValue(component.isVisible());
         checkBox.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
+        checkBox.addStyleName("raceBoardNavigation-innerElement");
 
         checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
