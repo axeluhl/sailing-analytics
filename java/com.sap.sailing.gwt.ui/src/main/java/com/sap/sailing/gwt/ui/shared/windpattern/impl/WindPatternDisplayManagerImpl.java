@@ -20,7 +20,7 @@ public class WindPatternDisplayManagerImpl implements  WindPatternDisplayManager
     public List<WindPatternDTO> getWindPatterns() {
         List<WindPatternDTO> list = new ArrayList<WindPatternDTO>();
         for (WindPattern w : WindPattern.values()) {
-            list.add(new WindPatternDTO(w.name()));
+            list.add(new WindPatternDTO(w.name(),w.getDisplayName()));
         }
         return list;
     }
@@ -28,21 +28,21 @@ public class WindPatternDisplayManagerImpl implements  WindPatternDisplayManager
     @Override
     public WindPatternDisplay getDisplay(WindPattern windPattern) {
         WindPatternDisplay display = new WindPatternDisplayImpl();
-        
+        WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("speed", 1,10,1);
+        display.addSetting(windSpeedSetting);  
+       
         switch(windPattern) {
-            case CONSTANT :          
-                WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("speed", 1,10,1);
-                display.addSetting(windSpeedSetting);      
+            case BLASTS :          
                 break;
-            case OSCILLATING :
-                WindPatternSetting<Double> speed = new WindPatternSettingSliderBar("speed", 1,10,1);
-                display.addSetting(speed);   
+            case OSCILLATIONS :
                 WindPatternSetting<Double> noise = new WindPatternSettingSliderBar("noise", 0,1,0);
                 display.addSetting(noise);
                 WindPatternSetting<String> names = new WindPatternSettingListBox("names");
                 names.getValues().add("A");
                 names.getValues().add("B");
                 display.addSetting(names);
+                break;
+            case OSCILLATION_WITH_BLASTS :
                 break;
         }
         return display;

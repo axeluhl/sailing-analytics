@@ -20,7 +20,9 @@ public interface SimulatorServiceAsync {
     void getWindLatice(WindLatticeGenParamsDTO params, AsyncCallback<WindLatticeDTO> callback);
 
     void getWindField(WindFieldGenParamsDTO params, AsyncCallback<WindFieldDTO> callback);
-
+    
+    void getWindField(WindFieldGenParamsDTO params, WindPatternDisplay display, AsyncCallback<WindFieldDTO> callback);
+    
     void getPaths(WindFieldGenParamsDTO params, AsyncCallback<PathDTO[]> callback);
 
     void getWindPatterns(AsyncCallback<List<WindPatternDTO>> callback);

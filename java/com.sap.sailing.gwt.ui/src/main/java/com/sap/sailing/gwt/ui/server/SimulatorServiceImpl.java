@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +29,8 @@ import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager.WindPattern;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
+import com.sap.sailing.gwt.ui.simulator.WindControlParameters;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
@@ -173,6 +176,67 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     }
 
+    @Override
+    public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) {
+
+        Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
+        Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
+        List<Position> course = new ArrayList<Position>();
+        course.add(nw);
+        course.add(se);
+        Distance dist = nw.getDistance(se);
+        Speed requiredSpeed10 = dist.inTime(600000);
+        logger.info(requiredSpeed10.getKilometersPerHour() + "km/h," + requiredSpeed10.getKnots() + "kn," 
+        + requiredSpeed10.getMetersPerSecond() + "m/s");
+        RectangularBoundary bd = new RectangularBoundary(nw, se);
+        List<Position> lattice = bd.extractLattice(5, 5);
+        WindControlParameters controlParameters = new WindControlParameters(0,0);
+        
+        for(WindPatternSetting<?> s : pattern.getSettings()) {
+            Field f;
+            try {
+                f = controlParameters.getClass().getField(s.getName());
+                try {
+                  
+                    logger.info("Setting " + f.getName() + " to " + s.getName());
+                    f.set(controlParameters, s.getValue());
+                    //f.setDouble(controlParameters, (Double) s.getValue());
+                   
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            } catch (SecurityException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchFieldException e) {
+              logger.info(e.getMessage());
+            }
+            
+        }
+        KnotSpeedImpl knotSpeedImpl = new KnotSpeedImpl(controlParameters.speed);
+        WindField wf = new WindFieldImpl(bd, knotSpeedImpl.getKilometersPerHour(), bd.getSouth().getDegrees());
+        
+        List<WindDTO> wList = new ArrayList<WindDTO>();
+
+        if (lattice != null) {
+            for (Position p : lattice) {
+                Wind localWind = wf.getWind(new TimedPositionWithSpeedSimple(p));
+                logger.fine(localWind.toString());
+                WindDTO w = createWindDTO(localWind);
+                wList.add(w);
+            }
+        }
+
+        WindFieldDTO wfDTO = new WindFieldDTO();
+
+        wfDTO.setMatrix(wList);
+        return wfDTO;
+
+    }
     /**
      * Currently the path is a list of WindDTO objects at the path points and only a single optimal path is returned
      * 
@@ -260,4 +324,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     public WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern) {
        return WindPatternDisplayManager.INSTANCE.getDisplay(WindPattern.valueOf(pattern.name));
     }
+    
+        
 }

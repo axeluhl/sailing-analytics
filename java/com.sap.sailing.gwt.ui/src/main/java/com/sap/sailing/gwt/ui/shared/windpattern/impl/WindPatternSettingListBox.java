@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
 
-public class WindPatternSettingListBox implements Named, WindPatternSetting<String>, IsSerializable {
+public class WindPatternSettingListBox implements WindPatternSetting<String>, IsSerializable {
 
     /**
      * 
      */
     private static final long serialVersionUID = 5396311857725053774L;
     private String name;
+    private String currentValue;
     private List<String> values;
     
     /**
@@ -64,6 +64,23 @@ public class WindPatternSettingListBox implements Named, WindPatternSetting<Stri
     @Override 
     public String toString() {
         return getName() + " " + getDisplayWidgetType() +  " " + getValues();
+        
+    }
+
+    @Override
+    public void setValue(String value) {
+        this.currentValue = value;
+        
+    }
+
+    @Override
+    public String getValue() {
+      return currentValue;
+    }
+
+    @Override
+    public void setValue(Double value) {
+        // TODO Auto-generated method stub
         
     }
 }

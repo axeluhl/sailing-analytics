@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 
 public class SimulatorMap extends AbsolutePanel implements RequiresDataInitialization {
 
@@ -114,7 +115,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         overlaysInitialized = true;
     }
 
-    private void generateWindField(final WindControlParameters wControls) {
+    private void generateWindField(final WindControlParameters wControls, WindPatternDisplay windPatternDisplay) {
         logger.info("In generateWindField");
 
         PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
@@ -129,7 +130,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setWindBearing(wControls.windBearing);
         windParams.setWindSpeed(wControls.windSpeedInKnots);
 
-        simulatorSvc.getWindField(windParams, new AsyncCallback<WindFieldDTO>() {
+        simulatorSvc.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
             @Override
             public void onFailure(Throwable message) {
                 errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
@@ -205,7 +206,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         raceCourseCanvasOverlay.redraw(true);
     }
 
-    private void refreshSummaryView(WindControlParameters wControls) {
+    private void refreshSummaryView(WindControlParameters wControls, WindPatternDisplay windPatternDisplay) {
         mapw.removeOverlay(windFieldCanvasOverlay);
         mapw.removeOverlay(replayPathCanvasOverlay);
         pathCanvasOverlay.displayWindAlongPath = true;
@@ -214,23 +215,23 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         // pathCanvasOverlay.redraw(true);
     }
 
-    private void refreshReplayView(WindControlParameters wControls) {
+    private void refreshReplayView(WindControlParameters wControls, WindPatternDisplay windPatternDisplay) {
         mapw.removeOverlay(pathCanvasOverlay);
         mapw.addOverlay(windFieldCanvasOverlay);
         replayPathCanvasOverlay.displayWindAlongPath = false;
         mapw.addOverlay(replayPathCanvasOverlay);
-        generateWindField(wControls);
+        generateWindField(wControls, windPatternDisplay);
         generatePath(wControls, false);
     }
 
-    private void refreshWindDisplayView(WindControlParameters wControls) {
+    private void refreshWindDisplayView(WindControlParameters wControls, WindPatternDisplay windPatternDisplay) {
         mapw.removeOverlay(pathCanvasOverlay);
         mapw.removeOverlay(replayPathCanvasOverlay);
         mapw.addOverlay(windFieldCanvasOverlay);
-        generateWindField(wControls);
+        generateWindField(wControls, windPatternDisplay);
     }
 
-    public void refreshView(ViewName name, WindControlParameters wControls) {
+    public void refreshView(ViewName name, WindControlParameters wControls, WindPatternDisplay windPatternDisplay) {
         if (!overlaysInitialized) {
             initializeOverlays();
         }
@@ -239,13 +240,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             raceCourseCanvasOverlay.setSelected(false);
             switch (name) {
             case SUMMARY:
-                refreshSummaryView(wControls);
+                refreshSummaryView(wControls, windPatternDisplay);
                 break;
             case REPLAY:
-                refreshReplayView(wControls);
+                refreshReplayView(wControls, windPatternDisplay);
                 break;
             case WINDDISPLAY:
-                refreshWindDisplayView(wControls);
+                refreshWindDisplayView(wControls, windPatternDisplay);
                 break;
             default:
                 break;

@@ -1,10 +1,13 @@
 package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -38,12 +41,13 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
-
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
 
 public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private FlowPanel leftPanel;
     private FlowPanel rightPanel;
+    private VerticalPanel windPanel;
 
     private Button updateButton;
     private Button courseInputButton;
@@ -52,12 +56,18 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private RadioButton replayButton;
     private RadioButton windDisplayButton;
     private TimePanel<TimePanelSettings> timePanel;
-    
+
     private WindControlParameters wControls;
+    private Map<String, WindPatternDisplay> patternDisplayMap;
+    private Map<String, Panel> patternPanelMap;
+   
+    private WindPatternDisplay currentWPDisplay;
+    private Panel currentWPPanel;
 
     private ListBox patternSelector;
+    private Map<String, WindPatternDTO> patternNameDTOMap;
     private ListBox boatSelector;
-    
+
     private final Timer timer;
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
@@ -65,64 +75,104 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private final StringMessages stringMessages;
     private final SimulatorServiceAsync simulatorSvc;
     private final ErrorReporter errorReporter;
-    
-    private class WindSpeedCapture implements ValueChangeHandler<Double> {
+
+    private class WindControlCapture implements ValueChangeHandler<Double> {
+
+        private WindPatternSetting<?> setting;
+
+        public WindControlCapture(WindPatternSetting<?> setting) {
+            this.setting = setting;
+        }
 
         @Override
         public void onValueChange(ValueChangeEvent<Double> arg0) {
             logger.info("Slider value : " + arg0.getValue());
-            wControls.windSpeedInKnots = arg0.getValue();
-            update();
+            setting.setValue(arg0.getValue());
+            //update();
         }
 
     }
-    
+
     private class PatternSelectorHandler implements ChangeHandler {
+
+        private class PatternRetriever implements AsyncCallback<WindPatternDisplay> {
+
+            private String windPattern;
+
+            public PatternRetriever(String windPattern) {
+                this.windPattern = windPattern;
+            }
+
+            @Override
+            public void onFailure(Throwable message) {
+                errorReporter.reportError("Error retreiving wind patterns" + message.getMessage());
+            }
+
+            @Override
+            public void onSuccess(WindPatternDisplay display) {
+                logger.info(display.getSettings().toString());
+                patternDisplayMap.put(windPattern, display);
+                currentWPDisplay = display;
+                Panel wPanel = getWindControlPanel();
+                if (currentWPPanel != null) {
+                    currentWPPanel.removeFromParent();
+                }
+                currentWPPanel = wPanel;
+                patternPanelMap.put(windPattern, currentWPPanel);
+                windPanel.add(currentWPPanel);
+                currentWPPanel.setWidth("80%");
+            }
+
+        }
 
         @Override
         public void onChange(ChangeEvent arg0) {
-            logger.info(patternSelector.getItemText(patternSelector.getSelectedIndex()));
-            WindPatternDTO pattern = new WindPatternDTO(patternSelector.getItemText(patternSelector.getSelectedIndex()));
-            
-            simulatorSvc.getWindPatternDisplay(pattern, new AsyncCallback<WindPatternDisplay>() {
 
-                @Override
-                public void onFailure(Throwable message) {
-                   errorReporter.reportError("Error retreiving wind patterns" + message.getMessage());
-                    
-                }
+            String windPattern = patternSelector.getItemText(patternSelector.getSelectedIndex());
+            logger.info(windPattern);
 
-                @Override
-                public void onSuccess(final WindPatternDisplay display) {
-                    logger.info(display.getSettings().toString());
+            if (patternDisplayMap.containsKey(windPattern)) {
+                currentWPDisplay = patternDisplayMap.get(windPattern);
+                if (currentWPPanel != null) {
+                    currentWPPanel.removeFromParent();
                 }
-                
-            });
-        
+                currentWPPanel = patternPanelMap.get(windPattern);
+                windPanel.add(currentWPPanel);
+                currentWPPanel.setWidth("80%");
+            } else {
+                WindPatternDTO pattern = patternNameDTOMap.get(windPattern);
+                simulatorSvc.getWindPatternDisplay(pattern, new PatternRetriever(windPattern));
+            }
+
         }
-        
+
     }
 
     public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter) {
-        
+
         super();
-        
+
         this.simulatorSvc = svc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        
+
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
         wControls = new WindControlParameters(1, 0);
         patternSelector = new ListBox();
         patternSelector.addChangeHandler(new PatternSelectorHandler());
-        
+        patternNameDTOMap = new HashMap<String, WindPatternDTO>();
+        patternDisplayMap = new HashMap<String, WindPatternDisplay>();
+        patternPanelMap = new HashMap<String, Panel>();
+        currentWPDisplay = null;
+        currentWPPanel = null;
+
         boatSelector = new ListBox();
         timer = new Timer(PlayModes.Replay, 1000l);
         timer.setPlaySpeedFactor(30);
         timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
         resetTimer();
-        
+
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.simulator(), stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         this.addNorth(logoAndTitlePanel, 68);
@@ -131,9 +181,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         createOptionsPanelTop();
         createOptionsPanel();
         createMapOptionsPanel();
-        
+
         rightPanel.add(timePanel);
-        
+
         this.addWest(leftPanel, 400);
         // leftPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
         rightPanel.getElement().getStyle().setBackgroundColor("#e0e0e0");
@@ -170,7 +220,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     private void createWindSetup(Panel controlPanel) {
-        VerticalPanel windPanel = new VerticalPanel();
+        windPanel = new VerticalPanel();
 
         controlPanel.add(windPanel);
         windPanel.setSize("100%", "50%");
@@ -184,7 +234,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         Label pattern = new Label(stringMessages.pattern());
         hp.add(pattern);
 
-        simulatorSvc.getWindPatterns(new AsyncCallback<List<WindPatternDTO>> () {
+        simulatorSvc.getWindPatterns(new AsyncCallback<List<WindPatternDTO>>() {
 
             @Override
             public void onFailure(Throwable message) {
@@ -194,61 +244,81 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             @Override
             public void onSuccess(List<WindPatternDTO> patterns) {
                 for (WindPatternDTO p : patterns) {
-                    patternSelector.addItem(p.name);
+                    patternSelector.addItem(p.getDisplayName());
+                    patternNameDTOMap.put(p.getDisplayName(), p);
                 }
             }
 
         });
+        // patternSelector.setItemSelected(0, true);
         hp.add(patternSelector);
         windPanel.add(hp);
         hp.setSize("80%", "10%");
 
-        addSlider(windPanel, stringMessages.strength(), 1, 10, new WindSpeedCapture());
+        // addSlider(windPanel, stringMessages.strength(), 1, 10, wControls.windSpeedInKnots, new WindSpeedCapture());
 
     }
 
-    private void addSlider(Panel parentPanel, String labelName, double minValue, double maxValue,
-            final ValueChangeHandler<Double> handler) {
-       FlowPanel vp = new FlowPanel();
-        //vp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    private Panel getWindControlPanel() {
+        assert (currentWPDisplay != null);
+        VerticalPanel windControlPanel = new VerticalPanel();
+        //windControlPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        
+        for (WindPatternSetting<?> s : currentWPDisplay.getSettings()) {
+            switch (s.getDisplayWidgetType()) {
+            case SLIDERBAR:
+                Panel sliderPanel = getSliderPanel(windControlPanel, s.getName(), (Double) s.getMin(), (Double) s.getMax(),
+                        (Double) s.getDefault(), new WindControlCapture(s));
+                //windControlPanel.add(sliderPanel);
+                //sliderPanel.getElement().getStyle().setFloat(Style.Float.NONE);
+                break;
+            case LISTBOX:
+                logger.info("We have a listbox " + s);
+                break;
+            default:
+                break;
+            }
+        }
+        return windControlPanel;
+    }
 
+    private Panel getSliderPanel(Panel parentPanel, String labelName, double minValue, double maxValue, double defaultValue,
+            final ValueChangeHandler<Double> handler) {
+
+        FlowPanel vp = new FlowPanel();
         Label label = new Label(labelName);
+        label.getElement().getStyle().setVerticalAlign(VerticalAlign.TEXT_BOTTOM);
         vp.add(label);
-        //FlowPanel fp = new FlowPanel();
+        label.setWordWrap(true);
+
         final SliderBar sliderBar = new SliderBar(minValue, maxValue);
 
-        sliderBar.setStepSize(1, false);
-        sliderBar.setNumTicks((int) (maxValue - minValue));
+        sliderBar.setStepSize(maxValue/10, false);
+        sliderBar.setNumTicks(10);
         sliderBar.setNumTickLabels(1);
         sliderBar.setTitle(labelName);
         sliderBar.setEnabled(true);
         sliderBar.addValueChangeHandler(handler);
-        /*
-         * sliderBar.addValueChangeHandler(new ValueChangeHandler<Double>() {
-         * 
-         * @Override public void onValueChange(ValueChangeEvent<Double> arg0) { logger.info("Slider value : " +
-         * arg0.getValue()); }
-         * 
-         * });
-         */
+
         sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
             @Override
             public String formatLabel(SliderBar slider, double value) {
                 return String.valueOf(Math.round(value));
             }
         });
-        // sliderBar.setMinValue(1.0, false);
-        // sliderBar.setMaxValue(10.0, false);
-        sliderBar.setCurrentValue(wControls.windSpeedInKnots);
+
+        sliderBar.setCurrentValue(defaultValue);
         vp.add(sliderBar);
-    //    sliderBar.setWidth("100%");
-        //vp.add(fp);
+      
         parentPanel.add(vp);
         label.getElement().getStyle().setFloat(Style.Float.LEFT);
+       
         sliderBar.getElement().getStyle().setFloat(Style.Float.RIGHT);
         sliderBar.setWidth("60%");
         sliderBar.setHeight("25px");
-    //    vp.setWidth("80%");
+        
+      
+        return vp;
     }
 
     private void createSailingSetup(Panel controlPanel) {
@@ -315,27 +385,25 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         simulatorMap.setSize("100%", "82%");
         rightPanel.add(simulatorMap);
-        
-    }
-    
 
-    
-    //TODO Get the right dates and times
+    }
+
+    // TODO Get the right dates and times
     private void resetTimer() {
-        Date startDate = new Date(0); 
+        Date startDate = new Date(0);
         timer.setTime(startDate.getTime());
         if (timePanel != null) {
             timePanel.reset();
-       
+
             Date now = timer.getTime();
-            Date maxTime = new Date(now.getTime()+10*60*1000);
-       
+            Date maxTime = new Date(now.getTime() + 10 * 60 * 1000);
+
             timePanel.setMinMax(now, maxTime, false);
             timePanel.setVisible(false);
         }
-        
+
     }
-    
+
     private void initUpdateButton() {
         updateButton = new Button(stringMessages.update());
         updateButton.addClickHandler(new ClickHandler() {
@@ -350,16 +418,16 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private void update() {
         resetTimer();
-       
+
         if (windDisplayButton.getValue()) {
             timePanel.setVisible(true);
-            simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls);
+            simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls, currentWPDisplay);
         } else if (summaryButton.getValue()) {
             timePanel.setVisible(false);
-            simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, wControls);
+            simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, wControls, currentWPDisplay);
         } else if (replayButton.getValue()) {
             timePanel.setVisible(true);
-            simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls);
+            simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls, currentWPDisplay);
         }
 
     }
@@ -385,7 +453,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 timePanel.setVisible(false);
-                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, wControls);
+                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, wControls, currentWPDisplay);
             }
 
         });
@@ -398,7 +466,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onClick(ClickEvent arg0) {
                 resetTimer();
                 timePanel.setVisible(true);
-                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls);
+                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls, currentWPDisplay);
             }
 
         });
@@ -411,7 +479,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onClick(ClickEvent arg0) {
                 resetTimer();
                 timePanel.setVisible(true);
-                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls);
+                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls, currentWPDisplay);
             }
 
         });

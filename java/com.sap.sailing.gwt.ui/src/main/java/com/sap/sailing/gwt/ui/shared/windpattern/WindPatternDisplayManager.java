@@ -8,9 +8,19 @@ import com.sap.sailing.gwt.ui.shared.windpattern.impl.WindPatternDisplayManagerI
 public interface WindPatternDisplayManager {
     
    public enum WindPattern {
-        CONSTANT,
-        OSCILLATING,
-        ANOTHERONE
+        NONE ("Choose a wind pattern"),
+        BLASTS ("Blasts"),
+        OSCILLATIONS ("Oscillations"),
+        OSCILLATION_WITH_BLASTS ("Oscillation with Blasts");
+        
+        private String displayName;
+        WindPattern(String displayName) {
+            this.displayName = displayName;
+        }
+        
+        public String getDisplayName() {
+            return displayName;
+        }
     }
     
     static WindPatternDisplayManager INSTANCE = new WindPatternDisplayManagerImpl();
