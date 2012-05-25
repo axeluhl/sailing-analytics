@@ -20,10 +20,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
 
-    private final transient TotalRankingComparator totalRankingComparator;
-
     public AbstractLeaderboardDTO() {
-        totalRankingComparator = new TotalRankingComparator();
         races = new ArrayList<RaceColumnDTO>();
     }
 
@@ -33,10 +30,6 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         } else {
             return competitorDisplayNames.get(competitor);
         }
-    }
-
-    public Comparator<LeaderboardRowDTO> getTotalRankingComparator() {
-        return totalRankingComparator;
     }
 
     public Comparator<LeaderboardRowDTO> getMedalRaceComparator(String medalRaceName) {
@@ -79,59 +72,6 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         return totalPoints;
     }
 
-    private class TotalRankingComparator implements Comparator<LeaderboardRowDTO> {
-        @Override
-        public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-            int result;
-            if (o1 == null && o2 == null) {
-                result = 0;
-            } else if (o1 == null) {
-                result = -1;
-            } else if (o2 == null) {
-                result = 1;
-            } else {
-                final int totalPoints1 = getTotalPoints(o1);
-                final int totalPoints2 = getTotalPoints(o2);
-                if (scoredInMedalRace(o1.competitor)) {
-                    if (scoredInMedalRace(o2.competitor)) {
-                        // both scored in medal race
-                        result = totalPoints1 - totalPoints2;
-                        // in case of tie, medal race points decide:
-                        if (result == 0) {
-                            result = getMedalRaceScore(o1.competitor) - getMedalRaceScore(o2.competitor);
-                        }
-                    } else {
-                        // only o1 scored in medal race, so o1 scores better = "less"
-                        result = -1;
-                    }
-                } else {
-                    if (scoredInMedalRace(o2.competitor)) {
-                        // only o2 scored in medal race, so o2 scores better, o1 scores worse = "greater"
-                        result = 1;
-                    } else {
-                        // neither one scored in any medal race; 0 total points means "did not participate" and ranks worse
-                        result = totalPoints1 == 0 ? totalPoints2 == 0 ? 0 : 1 : totalPoints2 == 0 ? -1 : totalPoints1 - totalPoints2;
-                        // Now if both have equal points, count races won.
-                        if (result == 0) {
-                            // TODO bug 469: not the number of races won but the better rankings count
-                            result = getNumberOfRacesWon(o2.competitor) - getNumberOfRacesWon(o1.competitor);
-                        }
-                        // If number of races won is still equal, use rank in last race where at least one of the two
-                        // competitors was assigned a score
-                        if (result == 0) {
-                            String nameOfLastRaceSoFar = getNameOfLastRaceSoFar(o1.competitor, o2.competitor);
-                            int netPoints1 = getNetPoints(o1.competitor, nameOfLastRaceSoFar);
-                            int netPoints2 = getNetPoints(o2.competitor, nameOfLastRaceSoFar);
-                            result = netPoints1 == 0 ? netPoints2 == 0 ? 0 : -1 : netPoints2 == 0 ? 1 : netPoints1
-                                    - netPoints2;
-                        }
-                    }
-                }
-            }
-            return result;
-        }
-    }
-
     private class MedalRaceComparator implements Comparator<LeaderboardRowDTO> {
         private final String medalRaceName;
 
@@ -165,20 +105,6 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         }
     }
 
-    /**
-     * Sums up the net points <code>competitor</code> scored in any medal races
-     */
-    private int getMedalRaceScore(CompetitorDTO competitor) {
-        int result = 0;
-        LeaderboardRowDTO row = rows.get(competitor);
-        for (RaceColumnDTO race : races) {
-            if (race.isMedalRace() && row.fieldsByRaceName.containsKey(race.getRaceColumnName())) {
-                result += row.fieldsByRaceName.get(race.getRaceColumnName()).netPoints;
-            }
-        }
-        return result;
-    }
-
     public int getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
         int result = 0;
         LeaderboardRowDTO row = rows.get(competitor);
@@ -186,40 +112,6 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
             LeaderboardEntryDTO field = row.fieldsByRaceName.get(nameOfLastRaceSoFar);
             if (field != null) {
                 result = field.netPoints;
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Find the name of the last race in {@link #raceNamesAndMedalRaceAndTracked}'s keys for which both, <code>c1</code>
-     * and <code>c2</code> have been assigned a score.
-     */
-    private String getNameOfLastRaceSoFar(CompetitorDTO c1, CompetitorDTO c2) {
-        String nameOfLastRaceSoFar = null;
-        for (RaceColumnDTO race : races) {
-            for (LeaderboardRowDTO row : rows.values()) {
-                if (row.competitor.equals(c1) || row.competitor.equals(c2)) {
-                    LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceName.get(race.getRaceColumnName());
-                    if (leaderboardEntryDTO != null && leaderboardEntryDTO.netPoints != 0) {
-                        nameOfLastRaceSoFar = race.getRaceColumnName();
-                        break;
-                    }
-                }
-            }
-        }
-        return nameOfLastRaceSoFar;
-    }
-
-    private int getNumberOfRacesWon(CompetitorDTO competitor) {
-        int result = 0;
-        LeaderboardRowDTO row = rows.get(competitor);
-        if (row != null) {
-            for (RaceColumnDTO race : races) {
-                LeaderboardEntryDTO field = row.fieldsByRaceName.get(race.getRaceColumnName());
-                if (field != null && field.netPoints == 1) {
-                    result++;
-                }
             }
         }
         return result;
