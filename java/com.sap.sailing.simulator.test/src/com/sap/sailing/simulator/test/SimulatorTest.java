@@ -12,12 +12,14 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
+import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.impl.PolarDiagramImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
@@ -40,8 +42,9 @@ public class SimulatorTest {
         course.add(end);
         PolarDiagram pd = new PolarDiagramImpl(0);
         RectangularBoundary bd = new RectangularBoundary(start, end);
-
-        WindField wf = new WindFieldImpl(bd, 7.2, 45);
+        KilometersPerHourSpeedImpl kmhrSpeed = new KilometersPerHourSpeedImpl(7.2);
+        WindControlParameters windParameters = new WindControlParameters(kmhrSpeed.getKnots(), 45);
+        WindField wf = new WindFieldImpl(bd, windParameters);
         SimulationParameters param = new SimulationParametersImpl(course, pd, wf);
 
         SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
@@ -68,7 +71,8 @@ public class SimulatorTest {
 
         // I am creating the WindField such as the course goes mainly against the wind (as it should)
         // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
-        WindField wf = new WindFieldImpl(b, requiredSpeed10.getKilometersPerHour(), b.getSouth().getDegrees());
+        WindControlParameters windParameters = new WindControlParameters(requiredSpeed10.getKnots(), b.getSouth().getDegrees());
+        WindField wf = new WindFieldImpl(b, windParameters);
         PolarDiagram pd = new PolarDiagramImpl(1);
         List<Position> course = new ArrayList<Position>();
         course.add(p1);

@@ -28,16 +28,16 @@ public class WindPatternDisplayManagerImpl implements  WindPatternDisplayManager
     @Override
     public WindPatternDisplay getDisplay(WindPattern windPattern) {
         WindPatternDisplay display = new WindPatternDisplayImpl();
-        WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("speed", 1,10,1);
+        WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseSpeed", "Base Wind Speed", 1,10,1);
         display.addSetting(windSpeedSetting);  
        
         switch(windPattern) {
             case BLASTS :          
                 break;
             case OSCILLATIONS :
-                WindPatternSetting<Double> noise = new WindPatternSettingSliderBar("noise", 0,1,0);
+                WindPatternSetting<Double> noise = new WindPatternSettingSliderBar("noise", "Noise", 0,1,0);
                 display.addSetting(noise);
-                WindPatternSetting<String> names = new WindPatternSettingListBox("names");
+                WindPatternSetting<String> names = new WindPatternSettingListBox("names", "Names");
                 names.getValues().add("A");
                 names.getValues().add("B");
                 display.addSetting(names);

@@ -12,7 +12,11 @@ public class WindPatternSettingListBox implements WindPatternSetting<String>, Is
      * 
      */
     private static final long serialVersionUID = 5396311857725053774L;
+    /**
+     * name should match the corresponding field name from @WindControlParameters for which this control is being set
+     */
     private String name;
+    private String displayName;
     private String currentValue;
     private List<String> values;
     
@@ -23,8 +27,9 @@ public class WindPatternSettingListBox implements WindPatternSetting<String>, Is
         
     }
     
-    public WindPatternSettingListBox(String name) {
+    public WindPatternSettingListBox(String name, String displayName) {
         this.name = name;
+        this.displayName = displayName;
         this.values = new ArrayList<String>();
     }
     
@@ -82,5 +87,10 @@ public class WindPatternSettingListBox implements WindPatternSetting<String>, Is
     public void setValue(Double value) {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public String getDisplayName() {
+       return displayName;
     }
 }

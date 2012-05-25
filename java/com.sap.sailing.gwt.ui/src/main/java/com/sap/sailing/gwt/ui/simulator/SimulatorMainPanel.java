@@ -57,7 +57,6 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private RadioButton windDisplayButton;
     private TimePanel<TimePanelSettings> timePanel;
 
-    private WindControlParameters wControls;
     private Map<String, WindPatternDisplay> patternDisplayMap;
     private Map<String, Panel> patternPanelMap;
    
@@ -158,7 +157,6 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
-        wControls = new WindControlParameters(1, 0);
         patternSelector = new ListBox();
         patternSelector.addChangeHandler(new PatternSelectorHandler());
         patternNameDTOMap = new HashMap<String, WindPatternDTO>();
@@ -267,7 +265,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         for (WindPatternSetting<?> s : currentWPDisplay.getSettings()) {
             switch (s.getDisplayWidgetType()) {
             case SLIDERBAR:
-                Panel sliderPanel = getSliderPanel(windControlPanel, s.getName(), (Double) s.getMin(), (Double) s.getMax(),
+                Panel sliderPanel = getSliderPanel(windControlPanel, s.getDisplayName(), (Double) s.getMin(), (Double) s.getMax(),
                         (Double) s.getDefault(), new WindControlCapture(s));
                 //windControlPanel.add(sliderPanel);
                 //sliderPanel.getElement().getStyle().setFloat(Style.Float.NONE);
@@ -421,13 +419,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         if (windDisplayButton.getValue()) {
             timePanel.setVisible(true);
-            simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls, currentWPDisplay);
+            simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay);
         } else if (summaryButton.getValue()) {
             timePanel.setVisible(false);
-            simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, wControls, currentWPDisplay);
+            simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay);
         } else if (replayButton.getValue()) {
             timePanel.setVisible(true);
-            simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls, currentWPDisplay);
+            simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay);
         }
 
     }
@@ -453,7 +451,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 timePanel.setVisible(false);
-                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, wControls, currentWPDisplay);
+                simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay);
             }
 
         });
@@ -466,7 +464,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onClick(ClickEvent arg0) {
                 resetTimer();
                 timePanel.setVisible(true);
-                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, wControls, currentWPDisplay);
+                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay);
             }
 
         });
@@ -479,7 +477,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             public void onClick(ClickEvent arg0) {
                 resetTimer();
                 timePanel.setVisible(true);
-                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, wControls, currentWPDisplay);
+                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay);
             }
 
         });

@@ -28,4 +28,6 @@ public interface WindPatternSetting<SettingsType> extends Named {
     
     public SettingsType getValue();
     
+    public String getDisplayName();
+    
 }

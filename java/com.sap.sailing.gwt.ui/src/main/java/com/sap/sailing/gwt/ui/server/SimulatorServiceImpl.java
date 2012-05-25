@@ -30,12 +30,12 @@ import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager.WindPattern;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
-import com.sap.sailing.gwt.ui.simulator.WindControlParameters;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
+import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.impl.PolarDiagramImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
@@ -172,8 +172,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         List<Position> lattice = bd.extractLattice(params.getxRes(), params.getyRes());
         retreiveWindControlParameters(pattern);
         
-        KnotSpeedImpl knotSpeedImpl = new KnotSpeedImpl(controlParameters.speed);
-        WindField wf = new WindFieldImpl(bd, knotSpeedImpl.getKilometersPerHour(), bd.getSouth().getDegrees());
+        controlParameters.windBearing =  bd.getSouth().getDegrees();
+        WindField wf = new WindFieldImpl(bd, controlParameters);
         
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
@@ -206,8 +206,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         RectangularBoundary bd = new RectangularBoundary(nw, se);
         retreiveWindControlParameters(pattern);
-        KnotSpeedImpl knotSpeedImpl = new KnotSpeedImpl(controlParameters.speed);
-        WindField wf = new WindFieldImpl(bd, knotSpeedImpl.getKilometersPerHour(), bd.getSouth().getDegrees());
+        
+        controlParameters.windBearing =  bd.getSouth().getDegrees();
+        WindField wf = new WindFieldImpl(bd, controlParameters);
         
 
         //TODO Get all the paths that need to be displayed
