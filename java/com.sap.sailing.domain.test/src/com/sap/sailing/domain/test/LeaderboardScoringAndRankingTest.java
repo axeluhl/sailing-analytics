@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
@@ -36,7 +37,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     private Leaderboard createLeaderboard(Regatta regatta, int[] discardingThresholds) {
         ScoreCorrectionImpl scoreCorrections = new ScoreCorrectionImpl();
         ResultDiscardingRuleImpl discardingRules = new ResultDiscardingRuleImpl(discardingThresholds);
-        return new RegattaLeaderboardImpl(regatta, scoreCorrections, discardingRules);
+        return new RegattaLeaderboardImpl(regatta, scoreCorrections, discardingRules, new LowerScoreIsBetter());
     }
 
     @Test

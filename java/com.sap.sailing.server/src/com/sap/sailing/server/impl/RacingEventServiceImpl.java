@@ -51,6 +51,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
+import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -207,7 +208,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public Leaderboard addFlexibleLeaderboard(String name, int[] discardThresholds) {
         Leaderboard result = new FlexibleLeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
-                discardThresholds));
+                discardThresholds), new LowerScoreIsBetter());
         synchronized (leaderboardsByName) {
             if (leaderboardsByName.containsKey(name)) {
                 throw new IllegalArgumentException("Leaderboard with name "+name+" already exists");

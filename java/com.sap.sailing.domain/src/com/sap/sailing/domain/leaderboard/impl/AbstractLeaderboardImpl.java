@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -46,6 +47,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
      * provided by this map are considered by {@link #getTotalPoints(Competitor, TimePoint)}.
      */
     private final Map<Competitor, Integer> carriedPoints;
+
+    private final Comparator<Integer> scoreComparator;
     
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -96,13 +99,16 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     /**
+     * @param scoreComparator TODO
      * @param name must not be <code>null</code>
      */
-    public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+    public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection,
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
         this.carriedPoints = new HashMap<Competitor, Integer>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
+        this.scoreComparator = scoreComparator;
     }
     
     @Override
@@ -186,7 +192,27 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     @Override
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
-        return trackedRace == null ? 0 : trackedRace.hasStarted(timePoint) ? trackedRace.getRank(competitor, timePoint) : 0;
+        return trackedRace == null ? 0
+                : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race, timePoint, trackedRace
+                        .getRank(competitor, timePoint)) : 0;
+    }
+
+    /**
+     * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor), all
+     * competitors ranked worse by the tracking system need to have their rank corrected by one.
+     * 
+     * @param timePoint
+     *            time point at which to consider disqualifications (not used yet because currently we don't remember
+     *            <em>when</em> a competitor was disqualified)
+     * @param race the race column to which the rank refers; look for disqualifications / max points reasons in this column
+     * @param rank a competitors rank according to the tracking system
+     * @return the unmodified <code>rank</code> if no disqualifications for better-ranked competitors exist for <code>race</code>,
+     * or otherwise a rank improved (lowered) by the number of disqualifications of competitors whose tracked rank is better (lower)
+     * than <code>rank</code>.
+     */
+    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn race, TimePoint timePoint, int rank) {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
     @Override
@@ -366,6 +392,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) {
-        return new LeaderboardTotalRankComparator(this, timePoint);
+        return new LeaderboardTotalRankComparator(this, timePoint, scoreComparator);
     }
 }

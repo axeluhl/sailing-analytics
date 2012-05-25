@@ -326,7 +326,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     @Override
     public String getValue(LeaderboardRowDTO row) {
         LegEntryDTO legEntry = getLegEntry(row);
-        if (legEntry != null && legEntry.rank != null) {
+        if (legEntry != null && legEntry.rank != 0) {
             return ""+legEntry.rank;
         } else {
             return "";
