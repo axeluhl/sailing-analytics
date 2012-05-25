@@ -127,8 +127,6 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setSouthEast(endPointDTO);
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
-        windParams.setWindBearing(wControls.windBearing);
-        windParams.setWindSpeed(wControls.windSpeedInKnots);
 
         simulatorSvc.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
             @Override
@@ -150,7 +148,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windFieldCanvasOverlay.redraw(true);
     }
 
-    private void generatePath(final WindControlParameters wControls, final boolean display) {
+    private void generatePath(final WindControlParameters wControls, WindPatternDisplay windPatternDisplay, final boolean display) {
         logger.info("In generatePath");
 
         PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
@@ -162,10 +160,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setSouthEast(endPointDTO);
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
-        windParams.setWindBearing(wControls.windBearing);
-        windParams.setWindSpeed(wControls.windSpeedInKnots);
+       
 
-        simulatorSvc.getPaths(windParams, new AsyncCallback<PathDTO[]>() {
+        simulatorSvc.getPaths(windParams, windPatternDisplay, new AsyncCallback<PathDTO[]>() {
             @Override
             public void onFailure(Throwable message) {
                 errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
@@ -211,7 +208,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         mapw.removeOverlay(replayPathCanvasOverlay);
         pathCanvasOverlay.displayWindAlongPath = true;
         mapw.addOverlay(pathCanvasOverlay);
-        generatePath(wControls, true);
+        generatePath(wControls, windPatternDisplay, true);
         // pathCanvasOverlay.redraw(true);
     }
 
@@ -221,7 +218,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         replayPathCanvasOverlay.displayWindAlongPath = false;
         mapw.addOverlay(replayPathCanvasOverlay);
         generateWindField(wControls, windPatternDisplay);
-        generatePath(wControls, false);
+        generatePath(wControls, windPatternDisplay, false);
     }
 
     private void refreshWindDisplayView(WindControlParameters wControls, WindPatternDisplay windPatternDisplay) {

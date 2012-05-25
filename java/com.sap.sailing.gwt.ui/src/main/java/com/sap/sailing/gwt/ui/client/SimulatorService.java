@@ -21,12 +21,10 @@ public interface SimulatorService extends RemoteService {
     public PositionDTO[] getRaceLocations();
 
     public WindLatticeDTO getWindLatice(WindLatticeGenParamsDTO params);
-
-    public WindFieldDTO getWindField(WindFieldGenParamsDTO params);
     
     public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern);
 
-    public PathDTO[] getPaths(WindFieldGenParamsDTO params);
+    public PathDTO[] getPaths(WindFieldGenParamsDTO params, WindPatternDisplay pattern);
 
     public List<WindPatternDTO> getWindPatterns();
     
