@@ -219,7 +219,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 if (raceDefinitions != null && !raceDefinitions.isEmpty()) {
                     logger.info("fetching paramURL to check for new ControlPoint positions...");
                     Event event = KeyValue.setup(paramURL);
-                    updateStartStopTimes(paramURL);
+                    updateStartStopTimesAndLiveDelay(paramURL);
                     for (ControlPoint controlPoint : event.getControlPointList()) {
                         com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
                         boolean first = true;
@@ -243,11 +243,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return task;
     }
 
-    private void updateStartStopTimes(URL paramURL) {
+    private void updateStartStopTimesAndLiveDelay(URL paramURL) {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) paramURL.getContent()));
             RaceDefinition currentRace = null;
             String line = br.readLine();
+            Integer delayInSeconds = null;
             while (line != null) {
                 int colonIndex = line.indexOf(':');
                 if (colonIndex >= 0) {
@@ -257,6 +258,18 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                         RaceDefinition race = getRegatta().getRaceByName(propertyValue);
                         if (race != null) {
                             currentRace = race;
+                            if (delayInSeconds != null) {
+                                final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
+                                if (trackedRace != null) {
+                                    trackedRace.setDelayToLiveInMillis(1000*delayInSeconds);
+                                }
+                            }
+                        }
+                    } else  if (propertyName.equals("LiveDelaySecs")) {
+                        try {
+                            delayInSeconds = Integer.valueOf(propertyValue.trim());
+                        } catch (NumberFormatException nfe) {
+                            logger.throwing(TracTracRaceTrackerImpl.class.getName(), "updateStartStopTimesAndLiveDelay", nfe);
                         }
                     } else {
                         final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);

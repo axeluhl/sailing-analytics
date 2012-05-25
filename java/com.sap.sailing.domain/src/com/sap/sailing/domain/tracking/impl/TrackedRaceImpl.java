@@ -1654,7 +1654,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return delayToLiveInMillis;
     }
     
-    public void setDelayToLiveInMillis(long delayToLiveInMillis) {
+    protected void setDelayToLiveInMillis(long delayToLiveInMillis) {
         this.delayToLiveInMillis = delayToLiveInMillis; 
     }
 }
