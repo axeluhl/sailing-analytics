@@ -211,7 +211,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * This implementation ranks a competitor better (lesser) if it has the lower score sum
      */
     protected int compareByScoreSum(int o1ScoreSum, int o2ScoreSum) {
-        return o1ScoreSum - o2ScoreSum;
+        return getScoreComparator().compare(o1ScoreSum, o2ScoreSum);
     }
 
     /**

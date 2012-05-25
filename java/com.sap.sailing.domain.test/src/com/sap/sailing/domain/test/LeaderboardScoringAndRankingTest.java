@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -55,6 +56,33 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         f1Column.setTrackedRace(f1Column.getFleets().iterator().next(), f1);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitors, rankedCompetitors);
+    }
+
+    /**
+     * Asserts that the competitors ranking worse than the disqualified competitor advance by one
+     */
+    @Test
+    public void testOneStartedRaceWithDifferentScoresAndDisqualification() {
+        List<Competitor> competitors = createCompetitors(10);
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
+                new String[] { "Default" },
+                /* medal */false, "testOneStartedRaceWithDifferentScores",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series finalSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        seriesIter.next();
+        finalSeries = seriesIter.next();
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitors.get(5), finalSeries.getRaceColumnByName("F1"), MaxPointsReason.DSQ);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace f1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors);
+        RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
+        f1Column.setTrackedRace(f1Column.getFleets().iterator().next(), f1);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(competitors.subList(0, 5), rankedCompetitors.subList(0, 5));
+        assertEquals(competitors.subList(6, 10), rankedCompetitors.subList(5, 9));
+        assertEquals(competitors.get(5), rankedCompetitors.get(9));
     }
 
     @Test

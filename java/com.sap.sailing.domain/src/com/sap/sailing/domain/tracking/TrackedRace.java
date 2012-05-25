@@ -391,4 +391,10 @@ public interface TrackedRace extends Serializable {
     WindStore getWindStore();
 
     Competitor getOverallLeader(TimePoint timePoint) throws NoWindException;
+
+    /**
+     * Returns the competitors of this tracked race, according to their ranking. Competitors whose {@link #getRank(Competitor)} is 0 will
+     * be sorted "worst".
+     */
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 }

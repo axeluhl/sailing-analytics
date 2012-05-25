@@ -610,7 +610,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public synchronized Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
         try {
             Competitor result = null;
-            List<Competitor> ranks = getRanks(timePoint);
+            List<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint);
             if (ranks != null && !ranks.isEmpty()) {
                 result = ranks.iterator().next();
             }
@@ -627,7 +627,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             if (getMarkPassings(competitor).isEmpty()) {
                 result = 0;
             } else {
-                result = getRanks(timePoint).indexOf(competitor) + 1;
+                result = getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
             }
             return result;
         } catch (NoWindError e) {
@@ -635,7 +635,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
     }
     
-    private List<Competitor> getRanks(TimePoint timePoint) {
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         synchronized (competitorRankings) {
             List<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
             if (rankedCompetitors == null) {

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import java.util.Collections;
+import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -41,6 +42,11 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
             }
         };
 
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        return Collections.singletonList(competitor);
     }
 
     @Override
