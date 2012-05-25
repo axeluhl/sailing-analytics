@@ -97,6 +97,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         this.stringMessages = stringMessages;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
+        userExplicitlyChangedLivePlayDelay = false;
         FlowPanel vp = new FlowPanel();
         vp.setSize("100%", "100%");
         
