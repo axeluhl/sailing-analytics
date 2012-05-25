@@ -46,6 +46,8 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     private transient Set<RaceChangeListener> listeners;
     
     private boolean raceIsKnownToStartUpwind;
+
+    private boolean delayToLiveInMillisFixed;
     
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -126,10 +128,19 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         notifyListenersWindAveragingChanged(oldMillisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageWind);
     }
 
+    
+    @Override
+    public void setAndFixDelayToLiveInMillis(long delayToLiveInMillis) {
+        super.setDelayToLiveInMillis(delayToLiveInMillis);
+        delayToLiveInMillisFixed = true;
+    }
+
     @Override
     public void setDelayToLiveInMillis(long delayToLiveInMillis) {
-        super.setDelayToLiveInMillis(delayToLiveInMillis);
-        notifyListenersDelayToLiveChanged(delayToLiveInMillis);
+        if (!delayToLiveInMillisFixed) {
+            super.setDelayToLiveInMillis(delayToLiveInMillis);
+            notifyListenersDelayToLiveChanged(delayToLiveInMillis);
+        }
     }
     
     @Override

@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -96,13 +97,13 @@ public interface SailingService extends RemoteService {
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails)
             throws NoWindException;
 
-    List<LeaderboardDTO> getLeaderboards();
+    List<StrippedLeaderboardDTO> getLeaderboards();
     
-    List<LeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
+    List<StrippedLeaderboardDTO> getLeaderboardsByEvent(RegattaDTO regatta);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
 
-    LeaderboardDTO createLeaderboard(String leaderboardName, int[] discardThresholds);
+    StrippedLeaderboardDTO createLeaderboard(String leaderboardName, int[] discardThresholds);
 
     void removeLeaderboard(String leaderboardName);
 
@@ -159,7 +160,7 @@ public interface SailingService extends RemoteService {
     Map<CompetitorDTO, List<ManeuverDTO>> getManeuvers(RaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to) throws NoWindException;
 
-    List<LeaderboardDTO> getLeaderboardsByRace(RaceDTO race);
+    List<StrippedLeaderboardDTO> getLeaderboardsByRace(RaceDTO race);
     
     List<LeaderboardGroupDTO> getLeaderboardGroups();
     

@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 
 public class GwtTestCaseColumnToggling extends GWTTestCase {
@@ -101,9 +102,9 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     private void createLeaderboard(){
         service.createLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
-                new AsyncCallback<LeaderboardDTO>() {
+                new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
-                    public void onSuccess(LeaderboardDTO result) {
+                    public void onSuccess(StrippedLeaderboardDTO result) {
                         System.out.println("Created Leaderboard "+result.name);
                         addColumnToLeaderboard();
                     }

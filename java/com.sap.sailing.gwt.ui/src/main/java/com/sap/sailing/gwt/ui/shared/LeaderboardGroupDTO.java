@@ -11,14 +11,14 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
 
     public String description;
-    public List<LeaderboardDTO> leaderboards;
+    public List<StrippedLeaderboardDTO> leaderboards;
     
     /**
      * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.<br />
      * The additional data (start dates and places for the races) will be initialized but empty.
      */
     public LeaderboardGroupDTO() {
-        this("", "", new ArrayList<LeaderboardDTO>());
+        this("", "", new ArrayList<StrippedLeaderboardDTO>());
     }
 
     /**
@@ -26,7 +26,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
      * All parameters can be <code>null</code> but then the attributes will also be <code>null</code>.<br />
      * The additional data (start dates and places for the races) will be initialized but empty.
      */
-    public LeaderboardGroupDTO(String name, String description, List<LeaderboardDTO> leaderboards) {
+    public LeaderboardGroupDTO(String name, String description, List<StrippedLeaderboardDTO> leaderboards) {
         super(name);
         this.description = description;
         this.leaderboards = leaderboards;
@@ -35,7 +35,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     public boolean containsRace(RaceIdentifier race) {
         boolean containsRace = false;
         leaderboardsLoop:
-        for (LeaderboardDTO leaderboard : leaderboards) {
+        for (StrippedLeaderboardDTO leaderboard : leaderboards) {
             for (RaceColumnDTO raceInLeaderboard : leaderboard.getRaceList()) {
                 for (String fleetName : raceInLeaderboard.getFleetNames()) {
                     final RegattaAndRaceIdentifier raceIdentifierForFleet = raceInLeaderboard.getRaceIdentifier(fleetName);
@@ -54,7 +54,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
      */
     public Date getGroupStartDate() {
         Date groupStart = null;
-        for (LeaderboardDTO leaderboard : leaderboards) {
+        for (StrippedLeaderboardDTO leaderboard : leaderboards) {
             Date leaderboardStart = leaderboard.getStartDate();
             if (leaderboardStart != null) {
                 if (groupStart == null) {
@@ -75,7 +75,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
      */
     public List<PlacemarkOrderDTO> getGroupPlaces() {
         List<PlacemarkOrderDTO> places = new ArrayList<PlacemarkOrderDTO>();
-        for (LeaderboardDTO leaderboard : leaderboards) {
+        for (StrippedLeaderboardDTO leaderboard : leaderboards) {
             PlacemarkOrderDTO leaderboardPlaces = leaderboard.getPlaces();
             if (leaderboardPlaces != null) {
                 places.add(leaderboardPlaces);
@@ -88,7 +88,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
      * @return <code>true</code> if the group contains a race which is live.
      */
     public boolean containsLiveRace() {
-        for (LeaderboardDTO leaderboard : leaderboards) {
+        for (StrippedLeaderboardDTO leaderboard : leaderboards) {
             if (leaderboard.containsLiveRace()) {
                 return true;
             }
