@@ -137,7 +137,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
 
     @Override
     public void setDelayToLiveInMillis(long delayToLiveInMillis) {
-        if (!delayToLiveInMillisFixed) {
+        if (!delayToLiveInMillisFixed && getDelayToLiveInMillis() != delayToLiveInMillis) {
             super.setDelayToLiveInMillis(delayToLiveInMillis);
             notifyListenersDelayToLiveChanged(delayToLiveInMillis);
         }

@@ -568,29 +568,29 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
     
     @Override
     public void updateSettings(TrackedRacesSettings newSettings) {
-        boolean delayChanged = newSettings.getDelayToLiveInSeconds() != settings.getDelayToLiveInSeconds();
-        if (delayChanged) {
-            settings.setDelayToLiveInSeconds(newSettings.getDelayToLiveInSeconds());
+        settings.setDelayToLiveInSeconds(newSettings.getDelayToLiveInSeconds());
 
-            // set the new delay to all selected races
-            List<RegattaAndRaceIdentifier> raceIdentifiersToUpdate = new ArrayList<RegattaAndRaceIdentifier>();
-            for(RaceDTO raceDTO: getSelectedRaces()) {
-                raceIdentifiersToUpdate.add(raceDTO.getRaceIdentifier());
-            }
-            
-            if(raceIdentifiersToUpdate != null && !raceIdentifiersToUpdate.isEmpty()) {
-                sailingService.updateRacesDelayToLive(raceIdentifiersToUpdate, settings.getDelayToLiveInSeconds() * 1000l, new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Exception trying to set the delay to live for the selected tracked races: " + caught.getMessage());
-                    }
+        // set the new delay to all selected races
+        List<RegattaAndRaceIdentifier> raceIdentifiersToUpdate = new ArrayList<RegattaAndRaceIdentifier>();
+        for (RaceDTO raceDTO : getSelectedRaces()) {
+            raceIdentifiersToUpdate.add(raceDTO.getRaceIdentifier());
+        }
 
-                    @Override
-                    public void onSuccess(Void result) {
-                        regattaRefresher.fillRegattas();
-                    }
-                });
-            }
+        if (raceIdentifiersToUpdate != null && !raceIdentifiersToUpdate.isEmpty()) {
+            sailingService.updateRacesDelayToLive(raceIdentifiersToUpdate, settings.getDelayToLiveInSeconds() * 1000l,
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter
+                                    .reportError("Exception trying to set the delay to live for the selected tracked races: "
+                                            + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            regattaRefresher.fillRegattas();
+                        }
+                    });
         }
     }
 
