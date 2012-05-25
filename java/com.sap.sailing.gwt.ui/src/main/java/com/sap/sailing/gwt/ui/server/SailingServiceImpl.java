@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -214,8 +215,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private final Executor executor;
 
+    private final WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
+
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
+        weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
         mongoObjectFactory = MongoFactory.INSTANCE.getDefaultMongoObjectFactory();
@@ -258,7 +262,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace());
+                RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace());
                 for (Fleet fleet : raceColumn.getFleets()) {
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
@@ -269,6 +273,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     result.addRace(raceColumn.getName(), fleet.getName(), raceColumn.isMedalRace(),
                             raceIdentifier, /* StrippedRaceDTO */ null);
                 }
+                result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             }
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -285,15 +290,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     final Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
                     RunnableFuture<LeaderboardEntryDTO> future = new FutureTask<LeaderboardEntryDTO>(new Callable<LeaderboardEntryDTO>() {
                         @Override
-                                public LeaderboardEntryDTO call() {
-                                    try {
-                                        return getLeaderboardEntryDTO(entry, raceColumn.getTrackedRace(competitor), competitor, timePoint,
-                                                namesOfRaceColumnsForWhichToLoadLegDetails != null
-                                                        && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()));
-                                    } catch (NoWindException e) {
-                                        throw new NoWindError(e);
-                                    }
-                                }
+                        public LeaderboardEntryDTO call() {
+                            try {
+                               return getLeaderboardEntryDTO(entry, raceColumn.getTrackedRace(competitor), competitor, timePoint,
+                                       namesOfRaceColumnsForWhichToLoadLegDetails != null
+                                        && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()));
+                            } catch (NoWindException e) {
+                                throw new NoWindError(e);
+                            }
+                        }
                     });
                     executor.execute(future);
                     futuresForColumnName.put(raceColumn.getName(), future);
@@ -319,6 +324,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
     
+    private List<CompetitorDTO> getCompetitorDTOList(List<Competitor> competitorsFromBestToWorst) {
+        List<CompetitorDTO> result = new ArrayList<CompetitorDTO>();
+        for (Competitor competitor : competitorsFromBestToWorst) {
+            result.add(getCompetitorDTO(competitor));
+        }
+        return result;
+    }
+
     @Override
     public void stressTestLeaderboardByName(String leaderboardName, int times) throws Exception {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
@@ -474,12 +487,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     private CompetitorDTO getCompetitorDTO(Competitor c) {
-        CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
-        CompetitorDTO competitorDTO = new CompetitorDTO(c.getName(), countryCode == null ? ""
-                : countryCode.getTwoLetterISOCode(), countryCode == null ? "" : countryCode.getThreeLetterIOCCode(),
-                countryCode == null ? "" : countryCode.getName(), c.getBoat().getSailID(), c.getId().toString(),
-                new BoatClassDTO(c.getBoat().getBoatClass().getName(), c.getBoat().getBoatClass().getHullLength()
-                        .getMeters()));
+        CompetitorDTO competitorDTO = weakCompetitorDTOCache.get(c);
+        if (competitorDTO == null) {
+            CountryCode countryCode = c.getTeam().getNationality().getCountryCode();
+            competitorDTO = new CompetitorDTO(c.getName(), countryCode == null ? ""
+                    : countryCode.getTwoLetterISOCode(),
+                    countryCode == null ? "" : countryCode.getThreeLetterIOCCode(), countryCode == null ? ""
+                            : countryCode.getName(), c.getBoat().getSailID(), c.getId().toString(),
+                    new BoatClassDTO(c.getBoat().getBoatClass().getName(), c.getBoat().getBoatClass().getHullLength()
+                            .getMeters()));
+            weakCompetitorDTOCache.put(c, competitorDTO);
+        }
         return competitorDTO;
     }
 

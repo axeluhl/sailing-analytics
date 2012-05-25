@@ -623,7 +623,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public synchronized int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
         try {
-            return getRanks(timePoint).indexOf(competitor) + 1;
+            int result;
+            if (getMarkPassings(competitor).isEmpty()) {
+                result = 0;
+            } else {
+                result = getRanks(timePoint).indexOf(competitor) + 1;
+            }
+            return result;
         } catch (NoWindError e) {
             throw e.getCause();
         }
