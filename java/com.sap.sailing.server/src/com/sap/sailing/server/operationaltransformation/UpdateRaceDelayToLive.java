@@ -17,7 +17,7 @@ public class UpdateRaceDelayToLive extends AbstractRaceOperation<Void> {
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        trackedRace.setDelayToLiveInMillis(delayToLiveInMillis);
+        trackedRace.setAndFixDelayToLiveInMillis(delayToLiveInMillis);
         return null;
     }
 

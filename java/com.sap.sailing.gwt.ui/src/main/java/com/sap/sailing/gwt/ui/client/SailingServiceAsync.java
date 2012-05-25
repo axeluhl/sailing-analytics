@@ -25,10 +25,10 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
-import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
@@ -166,33 +166,17 @@ public interface SailingServiceAsync {
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
-    /**
-     * Creates a {@link LeaderboardDTO} for each leaderboard known by the server and fills in the name, race master data
-     * in the form of {@link RaceColumnDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints
-     * carried points} and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No
-     * data about the points is filled into the result object. No data about the competitor display names is filled in;
-     * instead, an empty map is used for {@link LeaderboardDTO#competitorDisplayNames}.
-     */
-    void getLeaderboards(AsyncCallback<List<LeaderboardDTO>> callback);
+    void getLeaderboards(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
     
-    /**
-     * Does the same as {@link SailingServiceAsync#getLeaderboards(AsyncCallback) getLeaderboards} but returns only
-     * leaderboards which have the given regatta as race
-     */
-    void getLeaderboardsByEvent(RegattaDTO regatta, AsyncCallback<List<LeaderboardDTO>> callback);
+    void getLeaderboardsByEvent(RegattaDTO regatta, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
     
-    void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<LeaderboardDTO>> callback);
+    void getLeaderboardsByRace(RaceDTO race, AsyncCallback<List<StrippedLeaderboardDTO>> callback);
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);
 
-    /**
-     * Creates a leaderboard with the name specified by <code>leaderboardName</code> and the initial discarding thesholds
-     * as specified by <code>discardThresholds</code>. The leaderboard returned has the leaderboard name and the master
-     * data about the race columns filled in, but no details about the race points. As such, the result structure
-     * equals that of the result of {@link #getLeaderboards(AsyncCallback)}.
-     */
-    void createLeaderboard(String leaderboardName, int[] discardThresholds, AsyncCallback<LeaderboardDTO> asyncCallback);
+    void createLeaderboard(String leaderboardName, int[] discardThresholds,
+            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
     
