@@ -113,6 +113,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
      */
     private Chart createChart(DetailType dataToShow) {
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
+                .setPersistent(true)
                 .setWidth100()
                 .setHeight100()
                 .setMarginLeft(65)
