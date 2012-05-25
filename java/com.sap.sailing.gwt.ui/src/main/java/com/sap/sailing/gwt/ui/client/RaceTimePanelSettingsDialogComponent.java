@@ -18,8 +18,8 @@ public class RaceTimePanelSettingsDialogComponent extends TimePanelSettingsDialo
         Label delayForLiveMode = new Label(getStringMessages().delayForLiveMode());
         labelAndTDelayForLiveBoxPanel.add(delayForLiveMode);
         RaceTimesInfoDTO raceTimesInfo = initialSettings.getRaceTimesInfo();
-        if (raceTimesInfo != null && raceTimesInfo.startOfTracking != null) {
-            long delayforLiveModeInMs = System.currentTimeMillis() - raceTimesInfo.getStartOfTracking().getTime();
+        if (raceTimesInfo != null && raceTimesInfo.startOfRace != null) {
+            long delayforLiveModeInMs = System.currentTimeMillis() - raceTimesInfo.getStartOfRace().getTime();
             labelAndTDelayForLiveBoxPanel.add(new Label(delayforLiveModeInMs / 1000 + " s"));
         }
         mainContentPanel.add(labelAndTDelayForLiveBoxPanel);
