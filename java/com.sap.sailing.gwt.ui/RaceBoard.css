@@ -142,7 +142,18 @@ input.opencoloumn {
 }
 
 .globalNavigation-leaderBoardGroup {
-	background-color: gray;	
+	background: url(images/globalNavigation-home_bg.png) 5px center no-repeat #7c7b7c;	
+  border-radius: 0px 0px 4px 4px; 
+  -moz-border-radius: 0px 0px 4px 4px; 
+  -webkit-border-radius: 0px 0px 4px 4px;
+  margin: 0 10px 0 0;
+  padding: 5px 6px 5px 25px;
+  float: left;
+}
+
+.globalNavigation-leaderBoardGroup a {
+	color: #fff;
+	text-decoration: none;
 }
 
 .raceBoardNavigation {

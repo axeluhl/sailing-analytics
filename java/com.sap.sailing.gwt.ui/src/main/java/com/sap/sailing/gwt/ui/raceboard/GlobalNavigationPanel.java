@@ -34,12 +34,12 @@ public class GlobalNavigationPanel extends FlowPanel {
         String homeLink = spectatorViewLink;
         
         if(showHomeNavigation) {
-            addNavigationLink(stringMessages.home(), homeLink, "home");
-        }
-        
-        if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
-            String leaderBoardGroupLink = spectatorViewLink + "?leaderboardGroupName=" + leaderboardGroupName; 
-            addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup");
+            if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
+                String leaderBoardGroupLink = spectatorViewLink + "?leaderboardGroupName=" + leaderboardGroupName; 
+                addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup");
+            } else {
+                addNavigationLink(stringMessages.home(), homeLink, "home");
+            }
         }
         
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
