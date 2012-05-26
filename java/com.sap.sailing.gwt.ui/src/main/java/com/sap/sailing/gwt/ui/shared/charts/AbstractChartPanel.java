@@ -79,6 +79,12 @@ implements CompetitorSelectionChangeListener, RequiresResize {
     private long stepSize = 5000;
     private DetailType dataToShow;
     private final CompetitorSelectionProvider competitorSelectionProvider;
+    
+    /**
+     * When the chart is not visible and the competitor selection changes, no loading is performed. However, in this case
+     * we need to remember that loading will be necessary as soon as the chart becomes visible.
+     */
+    private boolean needToLoadWhenMadeVisible;
 
     public AbstractChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
@@ -103,6 +109,14 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         raceSelectionProvider.addRaceSelectionChangeListener(this);
         timer.addTimeListener(this);
         timeZoomProvider.addTimeZoomChangeListener(this);
+    }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (needToLoadWhenMadeVisible) {
+            loadData(/* showBusyIndicator */ true);
+        }
     }
 
     /**
@@ -210,60 +224,70 @@ implements CompetitorSelectionChangeListener, RequiresResize {
      * @param showBusyIndicator If <code>true</code> is the busy indicator shown while loading the data from the server.
      */
     protected void loadData(boolean showBusyIndicator) {
-        if (needsDataLoading()) {
-            if (showBusyIndicator) {
-                setWidget(chart);
-                showLoading("Loading competitor data...");
-            }
-            if (chartData == null || chartData.getDetailType() != getDataToShow()) {
-                chartData = new MultiCompetitorRaceDataDTO(getDataToShow());
-            }
-            
-//            Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
-            final ArrayList<Pair<Date, CompetitorDTO>> dataQuery = new ArrayList<Pair<Date, CompetitorDTO>>();
-            for (CompetitorDTO competitor : getVisibleCompetitors()) {
-                Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
-                Date competitorDateOfNewestData = chartData.contains(competitor) ? chartData.getCompetitorData(competitor).getDateOfNewestData() : null;
-                if (!chartData.contains(competitor)) {
-                    dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
-                } else if (competitorDateOfNewestData.before(chartDataDateOfNewestData) || competitorDateOfNewestData.before(maxTimepoint)) {
-                    dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime() + getStepSize()), competitor));
+        if (isVisible()) {
+            if (hasVisibleCompetitors()) {
+                needToLoadWhenMadeVisible = false; // we're loading it now
+                if (showBusyIndicator) {
+                    setWidget(chart);
+                    showLoading("Loading competitor data...");
                 }
-            }
-            
-            GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
-                        selectedRaceIdentifier, dataQuery, maxTimepoint, getStepSize(), getDataToShow(),
-                    new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+                if (chartData == null || chartData.getDetailType() != getDataToShow()) {
+                    chartData = new MultiCompetitorRaceDataDTO(getDataToShow());
+                }
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": " + caught.toString(),
+                // Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
+                final ArrayList<Pair<Date, CompetitorDTO>> dataQuery = new ArrayList<Pair<Date, CompetitorDTO>>();
+                for (CompetitorDTO competitor : getVisibleCompetitors()) {
+                    Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
+                    Date competitorDateOfNewestData = chartData.contains(competitor) ? chartData.getCompetitorData(
+                            competitor).getDateOfNewestData() : null;
+                    if (!chartData.contains(competitor)) {
+                        dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
+                    } else if (competitorDateOfNewestData.before(chartDataDateOfNewestData)
+                            || competitorDateOfNewestData.before(maxTimepoint)) {
+                        dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime()
+                                + getStepSize()), competitor));
+                    }
+                }
+
+                GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(
+                        sailingService, selectedRaceIdentifier, dataQuery, maxTimepoint, getStepSize(),
+                        getDataToShow(), new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(
+                                        getStringMessages().failedToLoadRaceData() + ": " + caught.toString(),
                                         timer.getPlayMode() == PlayModes.Live);
                                 hideLoading();
-                        }
+                            }
 
-                        @Override
-                        public void onSuccess(MultiCompetitorRaceDataDTO result) {
-                            if (result != null) {
-                                for (CompetitorRaceDataDTO competitorData : result.getAllRaceData()) {
-                                    if (chartData.contains(competitorData.getCompetitor())) {
-                                        chartData.addCompetitorRaceData(competitorData);
-                                        chartData.setCompetitorMarkPassingsData(competitorData);
-                                    } else {
-                                        chartData.setCompetitorData(competitorData.getCompetitor(), competitorData);
+                            @Override
+                            public void onSuccess(MultiCompetitorRaceDataDTO result) {
+                                if (result != null) {
+                                    for (CompetitorRaceDataDTO competitorData : result.getAllRaceData()) {
+                                        if (chartData.contains(competitorData.getCompetitor())) {
+                                            chartData.addCompetitorRaceData(competitorData);
+                                            chartData.setCompetitorMarkPassingsData(competitorData);
+                                        } else {
+                                            chartData.setCompetitorData(competitorData.getCompetitor(), competitorData);
+                                        }
                                     }
                                 }
-                            }
-                            chart.getXAxis().setMin(minTimepoint.getTime());
-                            chart.getXAxis().setMax(maxTimepoint.getTime());
+                                chart.getXAxis().setMin(minTimepoint.getTime());
+                                chart.getXAxis().setMax(maxTimepoint.getTime());
 
-                            drawChartData();
-                            hideLoading();
-                        }
-                    });
-                    asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
+                                drawChartData();
+                                hideLoading();
+                            }
+                        });
+                asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
+            } else {
+                setWidget(noCompetitorsSelectedLabel);
+            }
         } else {
-            setWidget(noCompetitorsSelectedLabel);            
+            // not visible; don't load data but remember that data needs to be loaded as soon as the chart becomes visible
+            needToLoadWhenMadeVisible = true;
         }
     }
 
@@ -569,10 +593,6 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         }
     }
     
-    private boolean needsDataLoading() {
-        return hasVisibleCompetitors() && isVisible();
-    }
-
     @Override
     public void onResize() {
         if(getChartData() != null) {
