@@ -107,7 +107,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     }
 
     protected void hideLoading() {
-        if(timer.getPlayMode() != PlayModes.Live) {
+        if (timer.getPlayMode() != PlayModes.Live) {
             chart.hideLoading();
         }
         isLoading = false;
@@ -134,14 +134,9 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     }
 
     protected boolean onClick(ChartClickEvent chartClickEvent) {
-        if(!isLoading && !isZoomed) {
-            // when the user zooms into the chart first a AxisSetExtremesEvent is sent and a ChartClickEvent afterwards 
-//            if (ignoreClickOnce) {
-//                ignoreClickOnce = false;
-//            } else {
-                timer.setPlayMode(PlayModes.Replay);
-                timer.setTime(chartClickEvent.getXAxisValueAsLong());
-//            }
+        if (!isLoading && !isZoomed) {
+            timer.setPlayMode(PlayModes.Replay);
+            timer.setTime(chartClickEvent.getXAxisValueAsLong());
         }
         return true;
     }

@@ -120,7 +120,6 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                 .setMarginRight(65)
                 .setBorderColor(new Color("#A6A6A6"))
                 .setBorderWidth(1)
-//                .setBackgroundColor(new Color("#C6C6C6"))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
@@ -259,7 +258,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
                             chart.getXAxis().setMax(maxTimepoint.getTime());
 
                             drawChartData();
-                            chart.hideLoading();
+                            hideLoading();
                         }
                     });
                     asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
