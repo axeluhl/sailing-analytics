@@ -1495,7 +1495,6 @@ public abstract class BaseChart<T> extends Widget {
 
             // Once we're rendered, we're maintaining the point state in the DOM, so we can dump our internal list to save memory
             series.clearInternalPointsList();
-            nativeAdjustCheckboxPosition(get(series.getId()));
         }
 
         return returnThis();
@@ -1818,6 +1817,7 @@ public abstract class BaseChart<T> extends Widget {
     public T redraw() {
         if (isRendered()) {
             nativeRedraw(chart);
+            nativeAdjustCheckboxPosition(chart);
         }
         return returnThis();
     }
@@ -1969,7 +1969,6 @@ public abstract class BaseChart<T> extends Widget {
         for (Series series : seriesList) {
             series.clearInternalPointsList();
             series.setRendered(true);
-            nativeAdjustCheckboxPosition(get(series.getId()));
         }
 
     }
@@ -2489,20 +2488,22 @@ public abstract class BaseChart<T> extends Widget {
 
     /**
      * Fixing a bug currently in the base Highcharts implementation regarding the placement of the checkbox in the legend.
-     * Requires the symbol padding (see {@link Legend#setSymbolPadding(Number)}) to be set to <code>20</code>. Invoked
-     * whenever a series is added / displayed in a rendered chart.<p>
+     * Requires the symbol padding (see {@link Legend#setSymbolPadding(Number)}) to be set to <code>25</code>. Invoked
+     * whenever the chart is rendered.<p>
      * 
-     * The implementation moves the legend item text 15px to the left, using the space made by setting the symbol
-     * padding to 20px; the checkbox is moved 18px to the left with the top margin set to 0px.
+     * The implementation moves the checkbox between the legend symbol and the legend item, using the space made by setting the symbol
+     * padding to 25px.
      */
-    private static native JavaScriptObject nativeAdjustCheckboxPosition(JavaScriptObject series) /*-{
-        if (series.legendItem && series.checkbox) {
-            series.legendItem.translate(-15, 0);
-            series.checkbox.style.marginLeft = '-18px'
-            series.checkbox.style.marginTop = '0px'
+    private static native JavaScriptObject nativeAdjustCheckboxPosition(JavaScriptObject chart) /*-{
+        var series = chart.series;
+        for(var i= 0; i<series.length; i++) {
+            if(series[i].legendItem && series[i].checkbox) {
+                series[i].checkbox.style.marginLeft = - series[i].legendItemWidth + 20 + "px";
+                series[i].checkbox.style.marginTop = '0px';
+            }
         }
     }-*/;
-
+    
     private static native void nativeRedraw(JavaScriptObject chart) /*-{
         chart.redraw();
     }-*/;

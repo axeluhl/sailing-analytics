@@ -10,6 +10,8 @@ import java.util.Comparator;
  *
  */
 public class LowerScoreIsBetter implements Comparator<Integer>, Serializable {
+    private static final long serialVersionUID = -2767385186133743330L;
+
     @Override
     public int compare(Integer o1, Integer o2) {
         return o1-o2;

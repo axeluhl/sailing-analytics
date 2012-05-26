@@ -107,7 +107,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     }
 
     protected void hideLoading() {
-        if(timer.getPlayMode() != PlayModes.Live) {
+        if (timer.getPlayMode() != PlayModes.Live) {
             chart.hideLoading();
         }
         isLoading = false;
@@ -134,14 +134,9 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     }
 
     protected boolean onClick(ChartClickEvent chartClickEvent) {
-        if(!isLoading && !isZoomed) {
-            // when the user zooms into the chart first a AxisSetExtremesEvent is sent and a ChartClickEvent afterwards 
-//            if (ignoreClickOnce) {
-//                ignoreClickOnce = false;
-//            } else {
-                timer.setPlayMode(PlayModes.Replay);
-                timer.setTime(chartClickEvent.getXAxisValueAsLong());
-//            }
+        if (!isLoading && !isZoomed) {
+            timer.setPlayMode(PlayModes.Replay);
+            timer.setTime(chartClickEvent.getXAxisValueAsLong());
         }
         return true;
     }
@@ -168,7 +163,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
      * visibility state.
      */
     protected void useCheckboxesToShowAndHide(final Chart chart) {
-        chart.setLegend(new Legend().setEnabled(true).setBorderWidth(0).setSymbolPadding(20)); // make room for checkbox
+        chart.setLegend(new Legend().setEnabled(true).setBorderWidth(0).setSymbolPadding(25)); // make room for checkbox
         chart.setSeriesPlotOptions(new SeriesPlotOptions().setSeriesCheckboxClickEventHandler(new SeriesCheckboxClickEventHandler() {
                     @Override
                     public boolean onClick(SeriesCheckboxClickEvent seriesCheckboxClickEvent) {

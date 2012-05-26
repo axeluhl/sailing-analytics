@@ -147,7 +147,7 @@ input.opencoloumn {
 
 .raceBoardNavigation {
 	float: left;
-	margin: 3px;;
+	margin: 9px 0 0 7px;
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
@@ -196,6 +196,22 @@ input.opencoloumn {
 
 .raceBoardNavigation-settingsButtonPanel {
 	float: right;
-	margin: 3px;;
+	margin: 9px 12px 0 0;
 }
 
+
+.raceBoardNavigation-innerElement {
+    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
+    border: medium none;
+    border-radius: 3px 3px 3px 3px;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-family: UbuntuBold,Verdana,Arial,sans-serif;
+    font-size: 14px;
+    margin: 0 0 0 5px;
+    padding: 2px 7px 2px 3px;
+}
+.raceBoardNavigation-innerElement:hover {
+    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center -30px transparent;
+    cursor: pointer;
+}
