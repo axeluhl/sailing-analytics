@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import com.sap.sailing.domain.common.impl.NamedImpl;
 public class SeriesImpl extends NamedImpl implements Series {
     private static final long serialVersionUID = -1640404303144907381L;
     private final Map<String, Fleet> fleetsByName;
+    private final List<Fleet> fleetsInAscendingOrder;
     private final Iterable<RaceColumnInSeriesImpl> raceColumns;
     private boolean isMedal;
     
@@ -22,6 +24,8 @@ public class SeriesImpl extends NamedImpl implements Series {
         for (Fleet fleet : fleets) {
             this.fleetsByName.put(fleet.getName(), fleet);
         }
+        fleetsInAscendingOrder = new ArrayList<Fleet>(fleetsByName.values());
+        Collections.sort(fleetsInAscendingOrder);
         List<RaceColumnInSeriesImpl> myRaceColumns = new ArrayList<RaceColumnInSeriesImpl>();
         for (String raceColumnName : raceColumnNames) {
             RaceColumnInSeriesImpl raceColumn = new RaceColumnInSeriesImpl(raceColumnName, this);
@@ -32,7 +36,7 @@ public class SeriesImpl extends NamedImpl implements Series {
     }
 
     public Iterable<? extends Fleet> getFleets() {
-        return fleetsByName.values();
+        return fleetsInAscendingOrder;
     }
 
     @Override
