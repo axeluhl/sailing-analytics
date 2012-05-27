@@ -183,9 +183,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         
         FlowPanel toolbarPanel = new FlowPanel();
         
-        //TODO Quickfix for touch devices
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
-        toolbarPanel.add(raceBoardPanel.getSettingsWidget());
 
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);

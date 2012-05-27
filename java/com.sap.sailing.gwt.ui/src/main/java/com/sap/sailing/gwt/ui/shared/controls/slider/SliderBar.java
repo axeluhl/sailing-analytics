@@ -103,7 +103,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          * 
          * @return a prototype of this image
          */
-        @Source("slider.png")
+        @Source("slider_blue.png")
         ImageResource slider();
 
         /**
@@ -111,7 +111,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          * 
          * @return a prototype of this image
          */
-        @Source("slider.png")
+        @Source("slider_blue.png")
         ImageResource sliderDisabled();
 
         /**
@@ -119,7 +119,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          * 
          * @return a prototype of this image
          */
-        @Source("slider.png")
+        @Source("slider_blue.png")
         ImageResource sliderSliding();
 
         @NotStrict
