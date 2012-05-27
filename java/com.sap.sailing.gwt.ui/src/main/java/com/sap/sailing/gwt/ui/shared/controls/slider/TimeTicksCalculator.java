@@ -183,7 +183,7 @@ public class TimeTicksCalculator {
 
                 // else, the interval is fixed and we use simple addition
             } else {
-                time += interval * count;
+                time += interval;
             }
 
             i++;

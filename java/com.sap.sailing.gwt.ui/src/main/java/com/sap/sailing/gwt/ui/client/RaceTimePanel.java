@@ -67,12 +67,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     timer.setPlayMode(PlayModes.Live);
                 }
                 
-                boolean timerAlreadyInitialized = getMin() != null && getMax() != null && sliderBar.getCurrentValue() != null;
-                initMinMax(raceTimesInfo);
-                if (!timerAlreadyInitialized) {
-                    initTimerPosition(raceTimesInfo);
+                boolean timerAlreadyInitialized = getMin() != null && getMax() != null && timeSlider.getCurrentValue() != null;
+                if(!isTimeZoomed) {
+                    initMinMax(raceTimesInfo);
+                    if (!timerAlreadyInitialized) {
+                        initTimerPosition(raceTimesInfo);
+                    }
+                    updateLegMarkers(raceTimesInfo);
                 }
-                updateLegMarkers(raceTimesInfo);
             } else {
                 // the tracked race did not start yet or has no events yet
                 // maybe show a special state for this like "Race did not start yet"
@@ -82,10 +84,30 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     
     @Override
     public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        
+        System.out.println("vor zoom:");
+        timeSlider.printValues();
+        
+        isTimeZoomed = true;
+        timeSlider.setZoomed(true);
+        timer.setAutoAdvance(false);
+        setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
+        timeSlider.clearMarkersAndLabelsAndTicks();
+        timeSlider.redraw();
+        initTimerPosition(lastRaceTimesInfo);
+        updateLegMarkers(lastRaceTimesInfo);
+        
+        System.out.println("nach zoom:");
+        timeSlider.printValues();
     }
 
     @Override
     public void onTimeZoomReset() {
+        isTimeZoomed = false;
+        timeSlider.setZoomed(false);
+        timer.setAutoAdvance(true);
+        timeSlider.clearMarkersAndLabelsAndTicks();
+        timeSlider.redraw();
     }
 
     @Override
@@ -197,18 +219,18 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 requiresMarkerUpdate = true;
             }
         }
-        if (requiresMarkerUpdate && sliderBar.isMinMaxInitialized()) {
-            sliderBar.clearMarkers();
+        if (requiresMarkerUpdate && timeSlider.isMinMaxInitialized()) {
+            timeSlider.clearMarkers();
             for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
                 if(markPassingTimesDTO.firstPassingDate != null) {
-                    sliderBar.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
+                    timeSlider.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
                 }
             }
             if(newRaceTimesInfo.endOfRace != null) {
-                sliderBar.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
+                timeSlider.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
             }
                 
-            sliderBar.redraw(); 
+            timeSlider.redraw(); 
         }
         lastRaceTimesInfo = newRaceTimesInfo;
     }

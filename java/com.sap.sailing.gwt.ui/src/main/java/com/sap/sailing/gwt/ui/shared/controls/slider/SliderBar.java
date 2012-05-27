@@ -17,6 +17,7 @@ package com.sap.sailing.gwt.ui.shared.controls.slider;
  */
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -103,7 +104,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          * 
          * @return a prototype of this image
          */
-        @Source("slider.png")
+        @Source("slider_blue.png")
         ImageResource slider();
 
         /**
@@ -111,7 +112,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          * 
          * @return a prototype of this image
          */
-        @Source("slider.png")
+        @Source("slider_blue.png")
         ImageResource sliderDisabled();
 
         /**
@@ -119,7 +120,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          * 
          * @return a prototype of this image
          */
-        @Source("slider.png")
+        @Source("slider_blue.png")
         ImageResource sliderSliding();
 
         @NotStrict
@@ -195,12 +196,12 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * The current value.
      */
-    private Double curValue;
+    protected Double curValue;
 
     /**
      * The knob that slides across the line.
      */
-    private Image knobImage = new Image();
+    protected Image knobImage = new Image();
 
     /**
      * The timer used to continue to shift the knob if the user holds down a key.
@@ -275,7 +276,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * The size of the increments between knob positions.
      */
-    private double stepSize;
+    protected double stepSize;
 
     /**
      * The elements used to display tick marks, which are the vertical lines along the slider bar.
@@ -285,7 +286,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * The elements used to display additional markers on the slider bar.
      */
-    private List<Element> markerElements = new ArrayList<Element>();
+    protected List<Element> markerElements = new ArrayList<Element>();
 
     private List<Marker> markers = new ArrayList<Marker>();
 
@@ -619,6 +620,13 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         drawKnob();
     }
 
+    public void printValues() {
+        System.out.println("Min: " + new Date(minValue.longValue()));
+        System.out.println("Max: " + new Date(maxValue.longValue()));
+        System.out.println("Val: " + new Date(curValue.longValue()));
+        System.out.println("\n");
+    }
+    
     /**
      * Redraw the progress bar when something changes the layout.
      */
@@ -847,7 +855,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * Draw the knob where it is supposed to be relative to the line.
      */
-    private void drawKnob() {
+    protected void drawKnob() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
 
@@ -1157,7 +1165,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     public void clearMarkers() {
         markers.clear();
     }
-
+    
     public boolean addMarker(String markerName, Double markerPosition) {
         return markers.add(new Marker(markerName, markerPosition));
     }

@@ -59,8 +59,6 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     protected boolean isLoading = false;
     protected boolean isZoomed = false;
     
-    private int NUMBER_OF_TICKS = 9;
-    
     public RaceChart(SailingServiceAsync sailingService, Timer timer, TimeZoomProvider timeZoomProvider, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
@@ -146,19 +144,19 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
         return true;
     }
 
-    protected void changeMinMaxInterval(Date minIntervalTimepoint, Date maxIntervalTimepoint, long numTicks) {
+    protected void changeMinMaxInterval(Date minIntervalTimepoint, Date maxIntervalTimepoint) {
         XAxis xAxis = chart.getXAxis();
         xAxis.setExtremes(minIntervalTimepoint.getTime(), maxIntervalTimepoint.getTime(), true, true);
     }
     
     public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
-        changeMinMaxInterval(zoomStartTimepoint, zoomEndTimepoint, NUMBER_OF_TICKS);
+        changeMinMaxInterval(zoomStartTimepoint, zoomEndTimepoint);
         // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
         // chart.showResetZoom();
     }
 
     public void onTimeZoomReset() {
-        changeMinMaxInterval(minTimepoint, maxTimepoint, NUMBER_OF_TICKS);
+        changeMinMaxInterval(minTimepoint, maxTimepoint);
     }
 
     /**
