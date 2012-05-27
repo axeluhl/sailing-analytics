@@ -210,16 +210,27 @@ input.opencoloumn {
 	margin: 9px 12px 0 0;
 }
 
+.raceBoardNavigation-settingsButton {
+	background: url(images/settings_new.png) center no-repeat;
+	width: 27px;
+	height: 23px;	
+    margin: 0 5px 0 0;
+}
+
+.raceBoardNavigation-settingsButton:hover {
+	background: url(images/settings_new.png) center no-repeat;
+}
 
 .raceBoardNavigation-innerElement {
     background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
     border: medium none;
-    border-radius: 3px 3px 3px 3px;
-    color: #FFFFFF;
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
+	color: #FFFFFF;
     cursor: pointer;
     font-family: UbuntuBold,Verdana,Arial,sans-serif;
     font-size: 14px;
-    margin: 0 0 0 5px;
+    margin: 0 0 0 0;
     padding: 2px 7px 2px 3px;
 }
 .raceBoardNavigation-innerElement:hover {
