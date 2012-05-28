@@ -12,9 +12,12 @@ public class AbstractPosition implements Position {
     }
     
     public boolean equals(Object o) {
-        return o instanceof Position &&
-               getLatRad() == ((Position) o).getLatRad() &&
-               getLngRad() == ((Position) o).getLngRad();
+        if (o == null) {
+            return false;
+        } else {
+            return o instanceof Position && getLatRad() == ((Position) o).getLatRad()
+                    && getLngRad() == ((Position) o).getLngRad();
+        }
     }
     
     @Override

@@ -57,7 +57,10 @@ public class DeclinationServiceImpl implements DeclinationService {
         int year = cal.get(Calendar.YEAR);
         QuadTree<Declination> set;
         while ((set = getYearStore(year)) != null) {
-            Declination resultForYear = set.get(position);
+            Declination resultForYear;
+            synchronized (set) {
+                resultForYear = set.get(position);
+            }
             Distance spatialDistance = resultForYear.getPosition().getDistance(position);
             // consider result only if it's closer than maxDistance
             if (spatialDistance.compareTo(maxDistance) <= 0) {
@@ -73,7 +76,9 @@ public class DeclinationServiceImpl implements DeclinationService {
         if (result == null) {
             QuadTree<Declination> importerCacheForYear = importerCache.get(year);
             if (importerCacheForYear != null) {
-                result = importerCacheForYear.get(position);
+                synchronized (importerCacheForYear) {
+                    result = importerCacheForYear.get(position);
+                }
                 if (result.getPosition().getDistance(position).compareTo(maxDistance) <= 0) {
                     return result;
                     // else it's further away from the requested position as demanded by maxDistance
@@ -85,7 +90,9 @@ public class DeclinationServiceImpl implements DeclinationService {
                     importerCacheForYear = new QuadTree<Declination>();
                     importerCache.put(year, importerCacheForYear);
                 }
-                importerCacheForYear.put(result.getPosition(), result);
+                synchronized (importerCacheForYear) {
+                    importerCacheForYear.put(result.getPosition(), result);
+                }
             }
         }
         return result;
