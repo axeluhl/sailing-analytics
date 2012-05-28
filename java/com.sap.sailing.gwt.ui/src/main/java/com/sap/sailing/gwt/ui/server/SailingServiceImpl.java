@@ -1772,7 +1772,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         groupDTO.name = leaderboardGroup.getName();
         groupDTO.description = leaderboardGroup.getDescription();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-            groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, false));
+            groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, true));
         }
         return groupDTO;
     }
