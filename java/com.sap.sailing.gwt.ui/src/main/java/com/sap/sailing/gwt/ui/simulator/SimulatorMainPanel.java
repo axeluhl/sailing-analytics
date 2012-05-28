@@ -286,8 +286,10 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         FlowPanel vp = new FlowPanel();
         Label label = new Label(labelName);
         label.getElement().getStyle().setVerticalAlign(VerticalAlign.TEXT_BOTTOM);
-        vp.add(label);
         label.setWordWrap(true);
+       
+        vp.add(label);
+        label.setWidth("30%");
 
         final SliderBar sliderBar = new SliderBar(minValue, maxValue);
 
@@ -314,7 +316,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         sliderBar.getElement().getStyle().setFloat(Style.Float.RIGHT);
         sliderBar.setWidth("60%");
         sliderBar.setHeight("25px");
-        
+        vp.setHeight("40px");
       
         return vp;
     }

@@ -24,9 +24,9 @@ public class WindFieldImpl implements WindField {
 	
 	@Override
 	public Wind getWind(TimedPosition coordinates) {
-	        KnotSpeedImpl knotSpeedImpl = new KnotSpeedImpl(windParameters.baseSpeed);
+	        KnotSpeedImpl knotSpeedImpl = new KnotSpeedImpl(windParameters.baseWindSpeed);
 		
-	        double wBearing = windParameters.windBearing *
+	        double wBearing = windParameters.baseWindBearing *
 				(1 + coordinates.getPosition().getDistance(boundary.getCorners().get("NorthWest")).getMeters()/boundary.getHeight().getMeters());
 		SpeedWithBearing wspeed = new KilometersPerHourSpeedWithBearingImpl(knotSpeedImpl.getKilometersPerHour(), new DegreeBearingImpl(wBearing));
 		
