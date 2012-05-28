@@ -13,8 +13,12 @@ public class WindPatternDisplayImpl implements WindPatternDisplay, IsSerializabl
     private WindPattern windPattern;
     private List<WindPatternSetting<?>> windPatternSettings;
     
+    public WindPatternDisplayImpl() {
+        windPatternSettings = new ArrayList<WindPatternSetting<?>>();
+    }
+    
     public WindPatternDisplayImpl(WindPattern windPattern) {
-        windPattern = windPattern;
+        this.windPattern = windPattern;
         windPatternSettings = new ArrayList<WindPatternSetting<?>>();
     }
     
