@@ -111,12 +111,7 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         for (Race tractracRace : getTracTracEvent().getRaceList()) {
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {
-                ControlPointPositionData p = event.getB();
-                // Attention: if we receive a lat/lon position with 0.0/0.0 position it is probably the bug
-                // We have already experienced such a situation and therefore we filter here those positions
-                if(p.getLatitude() != 0.0 && p.getLongitude() != 0.0) {
-                    trackedRace.recordFix(buoy, getDomainFactory().createGPSFixMoving(p));
-                }
+                trackedRace.recordFix(buoy, getDomainFactory().createGPSFixMoving(event.getB()));
             } else {
                 logger.warning("Couldn't find tracked race for race " + tractracRace.getName()
                         + ". Dropping mark position event " + event);
