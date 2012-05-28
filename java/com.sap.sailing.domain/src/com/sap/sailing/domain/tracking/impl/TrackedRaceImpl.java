@@ -84,7 +84,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     // TODO make this variable
     private static final long DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS = 7500;
-
+    
     private final RaceDefinition race;
 
     private final TrackedRegatta trackedRegatta;
@@ -189,14 +189,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private transient CombinedWindTrackImpl combinedWindTrack;
 
+    /**
+     * The time delay to the current point in time in milliseconds.  
+     */
+    private long delayToLiveInMillis;
+    
     public TrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        this(trackedRegatta, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-        /* delay for wind estimation cache invalidation */millisecondsOverWhichToAverageWind / 2);
-    }
-
-    public TrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
         this.updateCount = 0;
@@ -206,6 +205,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Wind>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
+        this.delayToLiveInMillis = delayToLiveInMillis; 
         this.startToNextMarkCacheInvalidationListeners = new HashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = new HashMap<Competitor, Util.Triple<TimePoint, TimePoint, List<Maneuver>>>();
         this.buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
@@ -610,7 +610,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public synchronized Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
         try {
             Competitor result = null;
-            List<Competitor> ranks = getRanks(timePoint);
+            List<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint);
             if (ranks != null && !ranks.isEmpty()) {
                 result = ranks.iterator().next();
             }
@@ -623,13 +623,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public synchronized int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
         try {
-            return getRanks(timePoint).indexOf(competitor) + 1;
+            int result;
+            if (getMarkPassings(competitor).isEmpty()) {
+                result = 0;
+            } else {
+                result = getCompetitorsFromBestToWorst(timePoint).indexOf(competitor) + 1;
+            }
+            return result;
         } catch (NoWindError e) {
             throw e.getCause();
         }
     }
     
-    private List<Competitor> getRanks(TimePoint timePoint) {
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         synchronized (competitorRankings) {
             List<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
             if (rankedCompetitors == null) {
@@ -1649,4 +1656,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return windTracks.keySet();
     }
 
+    @Override
+    public long getDelayToLiveInMillis() {
+        return delayToLiveInMillis;
+    }
+    
+    protected void setDelayToLiveInMillis(long delayToLiveInMillis) {
+        this.delayToLiveInMillis = delayToLiveInMillis; 
+    }
 }

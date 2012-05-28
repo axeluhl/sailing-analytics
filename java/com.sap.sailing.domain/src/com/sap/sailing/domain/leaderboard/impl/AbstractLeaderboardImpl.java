@@ -1,20 +1,25 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -22,9 +27,14 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public abstract class AbstractLeaderboardImpl implements Leaderboard {
     private static final long serialVersionUID = -328091952760083438L;
+
+    /**
+     * The factor by which a medal race score is multiplied in the overall point scheme
+     */
+    private static final int MEDAL_RACE_FACTOR = 2;
+    
     private final SettableScoreCorrection scoreCorrection;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
-    private String name;
     
     /**
      * The optional display name mappings for competitors. This allows a user to override the tracking-provided
@@ -38,6 +48,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
      * provided by this map are considered by {@link #getTotalPoints(Competitor, TimePoint)}.
      */
     private final Map<Competitor, Integer> carriedPoints;
+
+    private final Comparator<Integer> scoreComparator;
     
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -88,17 +100,16 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     /**
+     * @param scoreComparator the comparator to use to compare basic scores, such as net points
      * @param name must not be <code>null</code>
      */
-    public AbstractLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        if (name == null) {
-            throw new IllegalArgumentException("A leaderboard's name must not be null");
-        }
-        this.name = name;
+    public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection,
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
         this.carriedPoints = new HashMap<Competitor, Integer>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
+        this.scoreComparator = scoreComparator;
     }
     
     @Override
@@ -180,29 +191,58 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     @Override
-    public int getTrackedPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
-        return trackedRace == null ? 0 : trackedRace.hasStarted(timePoint) ? trackedRace.getRank(competitor, timePoint) : 0;
+        return trackedRace == null ? 0
+                : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race, trackedRace, timePoint, trackedRace
+                        .getRank(competitor, timePoint)) : 0;
+    }
+
+    /**
+     * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor), all
+     * competitors ranked worse by the tracking system need to have their rank corrected by one.
+     * @param trackedRace the race to which the rank refers; look for disqualifications / max points reasons in this column
+     * @param timePoint
+     *            time point at which to consider disqualifications (not used yet because currently we don't remember
+     *            <em>when</em> a competitor was disqualified)
+     * @param rank a competitors rank according to the tracking system
+     * 
+     * @return the unmodified <code>rank</code> if no disqualifications for better-ranked competitors exist for <code>race</code>,
+     * or otherwise a rank improved (lowered) by the number of disqualifications of competitors whose tracked rank is better (lower)
+     * than <code>rank</code>.
+     */
+    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace, TimePoint timePoint, int rank) {
+        int correctedRank = rank;
+        List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
+        int betterCompetitorRank=1;
+        Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
+        while (betterCompetitorRank < rank && ci.hasNext()) {
+            Competitor betterTrackedCompetitor = ci.next();
+            MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(betterTrackedCompetitor, raceColumn);
+            if (maxPointsReasonForBetterCompetitor != null && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE) {
+                correctedRank--;
+            }
+            betterCompetitorRank++;
+        }
+        return correctedRank;
     }
 
     @Override
     public int getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
-        return getScoreCorrection().getCorrectedScore(getTrackedPoints(competitor, raceColumn, timePoint), competitor,
+        return getScoreCorrection().getCorrectedScore(getTrackedRank(competitor, raceColumn, timePoint), competitor,
                 raceColumn, timePoint, Util.size(getCompetitors())).getCorrectedScore();
     }
     
     
     @Override
-    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint)
-            throws NoWindException {
-        return raceColumn.getTrackedRace(competitor) == null ? MaxPointsReason.NONE : getScoreCorrection().getCorrectedScore(
-                getTrackedPoints(competitor, raceColumn, timePoint), competitor, raceColumn, timePoint, Util.size(getCompetitors()))
-                .getMaxPointsReason();
+    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        return raceColumn.getTrackedRace(competitor) == null ? MaxPointsReason.NONE : getScoreCorrection()
+                .getMaxPointsReason(competitor, raceColumn);
     }
     
     @Override
     public boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        return !raceColumn.isMedalRace()
+        return !raceColumn.isMedalRace() && getMaxPointsReason(competitor, raceColumn, timePoint).isDiscardable()
                 && getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, timePoint).contains(
                         raceColumn);
     }
@@ -211,7 +251,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     public int getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
         return isDiscarded(competitor, raceColumn, timePoint) ?
                 0 :
-                (raceColumn.isMedalRace() ? 2 : 1) * getNetPoints(competitor, raceColumn, timePoint);
+                (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1) * getNetPoints(competitor, raceColumn, timePoint);
     }
     
     @Override
@@ -225,13 +265,14 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
 
     @Override
     public Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
-        int trackedPoints = getTrackedPoints(competitor, race, timePoint);
+        int trackedPoints = getTrackedRank(competitor, race, timePoint);
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race,
                 timePoint, Util.size(getCompetitors()));
         boolean discarded = isDiscarded(competitor, race, timePoint);
         return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), correctedResults.isCorrected(),
                 discarded ? 0
-                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded);
+                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? MEDAL_RACE_FACTOR : 1),
+                        correctedResults.getMaxPointsReason(), discarded);
     }
     
     @Override
@@ -265,21 +306,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param newName must not be <code>null</code>
-     */
-    public void setName(String newName) {
-        if (newName == null) {
-            throw new IllegalArgumentException("A leaderboard's name must not be null");
-        }
-        this.name = newName;
-    }
-    
-    @Override
     public void setCarriedPoints(Competitor competitor, int carriedPoints) {
         this.carriedPoints.put(competitor, carriedPoints);
     }
@@ -306,11 +332,11 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     @Override
-    public boolean considerForDiscarding(RaceColumn raceInLeaderboard, TimePoint timePoint) {
-        boolean result = getScoreCorrection().hasCorrectionFor(raceInLeaderboard);
-        if (!result && !raceInLeaderboard.isMedalRace()) {
-            for (Fleet fleet : raceInLeaderboard.getFleets()) {
-                TrackedRace trackedRace = raceInLeaderboard.getTrackedRace(fleet);
+    public boolean considerForDiscarding(RaceColumn raceColumn, TimePoint timePoint) {
+        boolean result = getScoreCorrection().hasCorrectionFor(raceColumn);
+        if (!result && !raceColumn.isMedalRace()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                 if (trackedRace != null && trackedRace.hasStarted(timePoint)) {
                     result = true;
                     break;
@@ -333,5 +359,51 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     @Override
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
         this.resultDiscardingRule = discardingRule;
+    }
+
+    /**
+     * All competitors with non-zero net points are added to the result which is then sorted by net points in ascending
+     * order. The fleet is the primary ordering criterion, followed by the net points.
+     */
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+        final Map<Competitor, Pair<Integer, Fleet>> netPointsAndFleet = new HashMap<Competitor, Pair<Integer, Fleet>>();
+        for (Competitor competitor : getCompetitors()) {
+            int netPoints = getNetPoints(competitor, raceColumn, timePoint);
+            if (netPoints != 0) {
+                netPointsAndFleet.put(competitor, new Pair<Integer, Fleet>(netPoints, raceColumn.getFleetOfCompetitor(competitor)));
+            }
+        }
+        List<Competitor> result = new ArrayList<Competitor>(netPointsAndFleet.keySet());
+        Collections.sort(result, new Comparator<Competitor>() {
+            @Override
+            public int compare(Competitor o1, Competitor o2) {
+                int comparisonResult;
+                if (o1 == o2) {
+                    comparisonResult = 0;
+                } else {
+                    comparisonResult = netPointsAndFleet.get(o1).getB().compareTo(netPointsAndFleet.get(o2).getB());
+                    if (comparisonResult == 0) {
+                        comparisonResult = scoreComparator.compare(netPointsAndFleet.get(o1).getA(), netPointsAndFleet.get(o2).getA());
+                    }
+                }
+                return comparisonResult;
+            }
+        });
+        return result;
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        List<Competitor> result = new ArrayList<Competitor>();
+        for (Competitor competitor : getCompetitors()) {
+            result.add(competitor);
+        }
+        Collections.sort(result, getTotalRankComparator(timePoint));
+        return result;
+    }
+
+    protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) {
+        return new LeaderboardTotalRankComparator(this, timePoint, scoreComparator);
     }
 }

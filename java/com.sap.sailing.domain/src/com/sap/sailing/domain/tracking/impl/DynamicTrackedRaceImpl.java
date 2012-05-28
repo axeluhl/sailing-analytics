@@ -46,11 +46,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     private transient Set<RaceChangeListener> listeners;
     
     private boolean raceIsKnownToStartUpwind;
+
+    private boolean delayToLiveInMillisFixed;
     
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
-            WindStore windStore, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation) {
-        super(trackedRegatta, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        super(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation);
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
         for (Competitor competitor : getRace().getCompetitors()) {
@@ -84,9 +86,9 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
      * <code>delayForCacheInvalidationOfWindEstimation</code> argument of the constructor.
      */
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race,
-            WindStore windStore,
+            WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        this(trackedRegatta, race, windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+        this(trackedRegatta, race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 millisecondsOverWhichToAverageWind/2);
     }
 
@@ -126,6 +128,21 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         notifyListenersWindAveragingChanged(oldMillisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageWind);
     }
 
+    
+    @Override
+    public void setAndFixDelayToLiveInMillis(long delayToLiveInMillis) {
+        super.setDelayToLiveInMillis(delayToLiveInMillis);
+        delayToLiveInMillisFixed = true;
+    }
+
+    @Override
+    public void setDelayToLiveInMillis(long delayToLiveInMillis) {
+        if (!delayToLiveInMillisFixed && getDelayToLiveInMillis() != delayToLiveInMillis) {
+            super.setDelayToLiveInMillis(delayToLiveInMillis);
+            notifyListenersDelayToLiveChanged(delayToLiveInMillis);
+        }
+    }
+    
     @Override
     public DynamicGPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor) {
         return (DynamicGPSFixTrack<Competitor, GPSFixMoving>) super.getTrack(competitor);
@@ -293,6 +310,22 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
                 logger.throwing(DynamicTrackedRaceImpl.class.getName(),
                         "notifyListenersWindAveragingChanged(long, long)", t);
+            }
+        }
+    }
+
+    private void notifyListenersDelayToLiveChanged(long delayToLiveInMillis) {
+        RaceChangeListener[] listeners;
+        synchronized (getListeners()) {
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                listener.delayToLiveChanged(delayToLiveInMillis);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + t.getMessage());
+                logger.throwing(DynamicTrackedRaceImpl.class.getName(),
+                        "notifyListenersDelayToLiveChanged(long)", t);
             }
         }
     }
@@ -469,7 +502,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     protected TrackedLeg createTrackedLeg(Leg leg) {
         return new TrackedLegImpl(this, leg, getRace().getCompetitors());
     }
-
+    
     @Override
     public long getMillisecondsOverWhichToAverageSpeed() {
         long result = 0; // default in case there is no competitor

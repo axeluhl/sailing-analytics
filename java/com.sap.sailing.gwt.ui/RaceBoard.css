@@ -150,12 +150,23 @@ input.opencoloumn {
 }
 
 .globalNavigation-leaderBoardGroup {
-	background-color: gray;	
+	background: url(images/globalNavigation-home_bg.png) 5px center no-repeat #7c7b7c;	
+  border-radius: 0px 0px 4px 4px; 
+  -moz-border-radius: 0px 0px 4px 4px; 
+  -webkit-border-radius: 0px 0px 4px 4px;
+  margin: 0 10px 0 0;
+  padding: 5px 6px 5px 25px;
+  float: left;
+}
+
+.globalNavigation-leaderBoardGroup a {
+	color: #fff;
+	text-decoration: none;
 }
 
 .raceBoardNavigation {
 	float: left;
-	margin: 3px;;
+	margin: 9px 0 0 7px;
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
@@ -204,6 +215,40 @@ input.opencoloumn {
 
 .raceBoardNavigation-settingsButtonPanel {
 	float: right;
-	margin: 3px;;
+	margin: 9px 12px 0 0;
 }
 
+.raceBoardNavigation-settingsButton {
+	background: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center 0;
+	background-repeat: no-repeat, repeat-x;
+	width: 27px;
+	height: 23px;	
+    margin: 0 5px 0 1px;
+	-webkit-border-radius: 0px 3px 3px 0px;
+	border-radius: 0px 3px 3px 0px; 
+}
+
+.raceBoardNavigation-settingsButton:hover {
+	background-image: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center -30px;
+	background-repeat: no-repeat, repeat-x;
+    cursor: pointer;
+}
+
+.raceBoardNavigation-innerElement {
+    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
+    border: medium none;
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
+	color: #FFFFFF;
+    cursor: pointer;
+    font-family: UbuntuBold,Verdana,Arial,sans-serif;
+    font-size: 14px;
+    margin: 0 0 0 0;
+    padding: 2px 7px 2px 3px;
+}
+.raceBoardNavigation-innerElement:hover {
+    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center -30px transparent;
+    cursor: pointer;
+}

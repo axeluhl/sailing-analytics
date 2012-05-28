@@ -13,7 +13,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class LegEntryDTO implements IsSerializable {
     public Double distanceTraveledInMeters;
     public Double averageSpeedOverGroundInKnots;
-    public Integer rank;
+    public int rank;
     public Double gapToLeaderInSeconds;
     public Double estimatedTimeToNextWaypointInSeconds;
 
@@ -57,7 +57,7 @@ public class LegEntryDTO implements IsSerializable {
         result = prime * result + ((numberOfJibes == null) ? 0 : numberOfJibes.hashCode());
         result = prime * result + ((numberOfPenaltyCircles == null) ? 0 : numberOfPenaltyCircles.hashCode());
         result = prime * result + ((numberOfTacks == null) ? 0 : numberOfTacks.hashCode());
-        result = prime * result + ((rank == null) ? 0 : rank.hashCode());
+        result = prime * result + rank;
         result = prime * result + (started ? 1231 : 1237);
         result = prime * result + (int) (timeInMilliseconds ^ (timeInMilliseconds >>> 32));
         result = prime * result + ((velocityMadeGoodInKnots == null) ? 0 : velocityMadeGoodInKnots.hashCode());
@@ -116,10 +116,7 @@ public class LegEntryDTO implements IsSerializable {
                 return false;
         } else if (!numberOfTacks.equals(other.numberOfTacks))
             return false;
-        if (rank == null) {
-            if (other.rank != null)
-                return false;
-        } else if (!rank.equals(other.rank))
+        if (rank != other.rank)
             return false;
         if (started != other.started)
             return false;

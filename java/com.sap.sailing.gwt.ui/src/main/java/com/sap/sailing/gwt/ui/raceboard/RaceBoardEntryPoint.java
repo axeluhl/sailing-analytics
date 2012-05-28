@@ -18,10 +18,10 @@ import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.UserDTO;
 
 public class RaceBoardEntryPoint extends AbstractEntryPoint {
@@ -106,7 +106,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         }
         if (leaderboardGroupName != null && leaderboardGroup != null) {
             boolean foundLeaderboard = false; 
-            for(LeaderboardDTO leaderBoard:  leaderboardGroup.leaderboards) {
+            for(StrippedLeaderboardDTO leaderBoard:  leaderboardGroup.leaderboards) {
                 if(leaderBoard.name.equals(leaderboardName)) {
                     foundLeaderboard = true;
                     break;
@@ -183,9 +183,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         
         FlowPanel toolbarPanel = new FlowPanel();
         
-        //TODO Quickfix for touch devices
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
-        toolbarPanel.add(raceBoardPanel.getSettingsWidget());
 
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);

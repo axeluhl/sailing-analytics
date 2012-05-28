@@ -1,12 +1,18 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -18,8 +24,10 @@ import java.util.logging.Logger;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -66,6 +74,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     private final WindStore windStore;
     private final Set<RaceDefinition> races;
     private final DynamicTrackedRegatta trackedRegatta;
+    private final static SimpleDateFormat tracTracDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 
     /**
      * paramURL, liveURI and storedURI for TracTrac connection
@@ -107,19 +116,19 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      *            used to create the {@link TrackedRegatta} for the domain event
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException {
-        this(KeyValue.setup(paramURL), domainFactory, paramURL, liveURI, storedURI, startOfTracking, endOfTracking, windStore,
+        this(KeyValue.setup(paramURL), domainFactory, paramURL, liveURI, storedURI, startOfTracking, endOfTracking, delayToLiveInMillis, windStore,
                 trackedRegattaRegistry);
     }
     
     private TracTracRaceTrackerImpl(Event tractracEvent, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException {
         this(tractracEvent, null, domainFactory, paramURL, liveURI, storedURI,
-                startOfTracking, endOfTracking, windStore, trackedRegattaRegistry);
+                startOfTracking, endOfTracking, delayToLiveInMillis, windStore, trackedRegattaRegistry);
     }
     
     /**
@@ -129,11 +138,11 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * always be what you want.
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException {
         this(KeyValue.setup(paramURL), regatta, domainFactory, paramURL, liveURI, storedURI, startOfTracking,
-                endOfTracking, windStore, trackedRegattaRegistry);
+                endOfTracking, delayToLiveInMillis, windStore, trackedRegattaRegistry);
     }
     
     /**
@@ -142,7 +151,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * obtain a default regatta
      */
     private TracTracRaceTrackerImpl(Event tractracEvent, Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, WindStore windStore,
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore,
             TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
             FileNotFoundException {
         super();
@@ -174,7 +183,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
-                endOfTracking, windStore, this)) {
+                endOfTracking, delayToLiveInMillis, windStore, this)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 typeControllers.add(typeController);
@@ -210,6 +219,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                 if (raceDefinitions != null && !raceDefinitions.isEmpty()) {
                     logger.info("fetching paramURL to check for new ControlPoint positions...");
                     Event event = KeyValue.setup(paramURL);
+                    updateStartStopTimesAndLiveDelay(paramURL);
                     for (ControlPoint controlPoint : event.getControlPointList()) {
                         com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
                         boolean first = true;
@@ -231,6 +241,72 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             }
         }, /* initialDelay */ 30000, /* delay */ 15000, /* unit */ TimeUnit.MILLISECONDS);
         return task;
+    }
+
+    private void updateStartStopTimesAndLiveDelay(URL paramURL) {
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) paramURL.getContent()));
+            RaceDefinition currentRace = null;
+            String line = br.readLine();
+            Integer delayInSeconds = null;
+            while (line != null) {
+                int colonIndex = line.indexOf(':');
+                if (colonIndex >= 0) {
+                    String propertyName = line.substring(0, colonIndex);
+                    String propertyValue = line.substring(colonIndex+1);
+                    if (propertyName.equals("RaceName")) {
+                        RaceDefinition race = getRegatta().getRaceByName(propertyValue);
+                        if (race != null) {
+                            currentRace = race;
+                            if (delayInSeconds != null) {
+                                final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
+                                if (trackedRace != null) {
+                                    trackedRace.setDelayToLiveInMillis(1000*delayInSeconds);
+                                }
+                            }
+                        }
+                    } else  if (propertyName.equals("LiveDelaySecs")) {
+                        try {
+                            delayInSeconds = Integer.valueOf(propertyValue.trim());
+                        } catch (NumberFormatException nfe) {
+                            logger.throwing(TracTracRaceTrackerImpl.class.getName(), "updateStartStopTimesAndLiveDelay", nfe);
+                        }
+                    } else {
+                        final DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(currentRace);
+                        if (trackedRace != null) {
+                            if (propertyName.equals("RaceTrackingStartTime")) {
+                                TimePoint startOfTracking = parseTimePoint(propertyValue);
+                                if (startOfTracking != null) {
+                                    trackedRace.setStartOfTrackingReceived(startOfTracking);
+                                }
+                            } else if (propertyName.equals("RaceTrackingEndTime")) {
+                                TimePoint endOfTracking = parseTimePoint(propertyValue);
+                                if (endOfTracking != null) {
+                                    trackedRace.setEndOfTrackingReceived(endOfTracking);
+                                }
+                            }
+                        }
+                    }
+                }
+                line = br.readLine();
+            }
+            br.close();
+        } catch (IOException e) {
+            logger.throwing(TracTracRaceTrackerImpl.class.getName(), "updateStartStopTimes", e);
+        }
+    }
+
+    /**
+     * @return <code>null</code> if the <code>dateTimeString</code> doesn't parse into a date according to
+     *         {@link #tracTracDateFormat}, or the time point parsed from the string otherwise
+     */
+    private TimePoint parseTimePoint(String dateTimeString) {
+        try {
+            Date date = tracTracDateFormat.parse(dateTimeString + " UTC");
+            return new MillisecondsTimePoint(date);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
     @Override

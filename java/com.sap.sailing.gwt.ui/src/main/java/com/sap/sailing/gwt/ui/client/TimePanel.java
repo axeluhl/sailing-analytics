@@ -69,6 +69,13 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     protected Date lastReceivedDataTimepoint;
     private final Button slowDownButton;
     private final Button speedUpButton;
+
+    /**
+     * The live delay may be adjusted automatically if the server decides so. However, if the user explicitly sets a live delay,
+     * server-side updates to the delay should be suppressed. This flag records whether the user has performed a manual delay
+     * override.
+     */
+    private boolean userExplicitlyChangedLivePlayDelay;
     
     private static ClientResources resources = GWT.create(ClientResources.class);
 
@@ -90,6 +97,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         this.stringMessages = stringMessages;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
+        userExplicitlyChangedLivePlayDelay = false;
         FlowPanel vp = new FlowPanel();
         vp.setSize("100%", "100%");
         
@@ -433,12 +441,17 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         return new TimePanelSettingsDialogComponent<T>(getSettings(), stringMessages);
     }
 
+    protected boolean isUserExplicitlyChangedLivePlayDelay() {
+        return userExplicitlyChangedLivePlayDelay;
+    }
+    
     @Override
     public void updateSettings(T newSettings) {
         boolean delayChanged = newSettings.getDelayToLivePlayInSeconds() != getSettings().getDelayToLivePlayInSeconds();
         if (delayChanged) {
-            timer.setDelay(1000l * newSettings.getDelayToLivePlayInSeconds());
-            if(timer.getPlayMode() == PlayModes.Live) {
+            userExplicitlyChangedLivePlayDelay = true;
+            timer.setLivePlayDelayInMillis(1000l * newSettings.getDelayToLivePlayInSeconds());
+            if (timer.getPlayMode() == PlayModes.Live) {
                 timeDelayLabel.setText(String.valueOf(newSettings.getDelayToLivePlayInSeconds()) + " s");
             }
         }

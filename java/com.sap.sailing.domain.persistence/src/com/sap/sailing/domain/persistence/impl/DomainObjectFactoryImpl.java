@@ -21,6 +21,7 @@ import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
@@ -47,10 +48,10 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
+import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -170,7 +171,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
         FlexibleLeaderboardImplWithDelayedCarriedPoints result = new FlexibleLeaderboardImplWithDelayedCarriedPoints(
-                (String) o.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule);
+                (String) o.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
         BasicDBList dbRaceColumns = (BasicDBList) o.get(FieldNames.LEADERBOARD_COLUMNS.name());
         // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage them here:
         Map<String, Fleet> fleetsByName = new HashMap<String, Fleet>();
@@ -450,13 +451,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Series loadSeries(DBObject dbSeries) {
         String name = (String) dbSeries.get(FieldNames.SERIES_NAME.name());
-        boolean isFleetsOrdered = (Boolean) dbSeries.get(FieldNames.SERIES_IS_FLEETS_ORDERED.name());
         boolean isMedal = (Boolean) dbSeries.get(FieldNames.SERIES_IS_MEDAL.name());
         final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
         Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
         Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
-        Series series = new SeriesImpl(name, isFleetsOrdered, isMedal, fleetsByName.values(), raceColumnNames);
+        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames);
         loadRaceColumnRaceLinks(dbRaceColumns, series);
         return series;
     }
@@ -502,7 +502,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private Fleet loadFleet(DBObject dbFleet) {
         String name = (String) dbFleet.get(FieldNames.FLEET_NAME.name());
-        Fleet result = new FleetImpl(name);
+        Integer ordering = (Integer) dbFleet.get(FieldNames.FLEET_ORDERING.name());
+        Fleet result;
+        if (ordering != null) {
+            result = new FleetImpl(name, ordering);
+        } else {
+            result = new FleetImpl(name);
+        }
         return result;
     }
 

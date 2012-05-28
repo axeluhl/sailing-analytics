@@ -54,7 +54,7 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings>
 		labelAndTimeDelayBoxPanel.add(labelTimeDelayBox);
 
 		timeDelayBox = dialog.createLongBox(
-				initialSettings.getDelayToLivePlayInSeconds(), 4);
+				initialSettings.getDelayToLivePlayInSeconds(), 10);
 		timeDelayBox.setStyleName(STYLE_INPUT);
 
 		labelAndTimeDelayBoxPanel.setStyleName(STYLE_BOXPANEL);

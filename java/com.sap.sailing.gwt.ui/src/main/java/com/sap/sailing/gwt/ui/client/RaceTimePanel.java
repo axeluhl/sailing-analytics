@@ -50,7 +50,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         if (raceTimesInfo == null) { 
             // in case the race is not tracked anymore we reset the timer
             reset();
-        } else { 
+        } else {
+            // check if the live delay is already been set
+            if (!isUserExplicitlyChangedLivePlayDelay() && timer.getLivePlayDelayInMillis() != raceTimesInfo.delayToLiveInMs) {
+                timer.setLivePlayDelayInMillis(raceTimesInfo.delayToLiveInMs);
+            }
+            
             if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && 
                     (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null)) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known

@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.NoWindException;
@@ -71,19 +74,20 @@ public interface Leaderboard extends Named {
 
     /**
      * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.common.TimePoint)} with the
-     * additional logic that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started}
-     * yet, 0 points will be allotted to the race for all competitors.
+     * additional logic that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started} yet
+     * or no {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked
+     * race for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.
      * 
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
      * @param race
      *            a race that is contained in the {@link #getRaceColumns()} result
      */
-    int getTrackedPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
-     * {@link #getTrackedPoints(Competitor, TrackedRace, TimePoint)} but may be corrected by disqualifications or calls
+     * {@link #getTrackedRank(Competitor, TrackedRace, TimePoint)} but may be corrected by disqualifications or calls
      * by the jury for the particular race that differ from the tracking results.
      * 
      * @param competitor
@@ -94,14 +98,16 @@ public interface Leaderboard extends Named {
     int getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
 
     /**
-     * Tells if and why a competitor received maximum points for a race.
+     * Tells if and why a competitor received "penalty" points for a race (however the scoring rules define the
+     * points for such a penalty; usually, it would be a high score defined by the number of competitors plus one)
      */
-    MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn race, TimePoint timePoint);
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
-     * {@link #getNetPoints(Competitor, TrackedRace, TimePoint)} but may be corrected by the regatta
-     * rules for discarding results.
+     * {@link #getNetPoints(Competitor, TrackedRace, TimePoint)} but may be corrected by the regatta rules for
+     * discarding results. If {@link #isDiscarded(Competitor, RaceColumn, TimePoint) discarded}, the points returned
+     * will be 0.
      * 
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
@@ -111,9 +117,10 @@ public interface Leaderboard extends Named {
     int getTotalPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
 
     /**
-     * Tells whether the contribution of <code>raceColumn</code> is discarded in the current leaderboard's
-     * standings for <code>competitor</code>. A column representing a {@link RaceColumn#isMedalRace() medal race}
-     * cannot be discarded.
+     * Tells whether the contribution of <code>raceColumn</code> is discarded in the current leaderboard's standings for
+     * <code>competitor</code>. A column representing a {@link RaceColumn#isMedalRace() medal race} cannot be discarded.
+     * Neither can be a race where the competitor received a non-{@link MaxPointsReason#isDiscardable() discardable}
+     * penalty or disqualification.
      */
     boolean isDiscarded(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
 
@@ -122,6 +129,27 @@ public interface Leaderboard extends Named {
      * across all races tracked by this leaderboard.
      */
     int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Sorts the competitors according to their ranking in the race column specified. Only competitors who have a score
+     * are added to the result list. This excludes competitors whose fleet hasn't raced for the <code>raceColumn</code>
+     * yet, and those where no tracked rank is known and no manual score correction was performed.
+     * <p>
+     * 
+     * The sorting order considers this leaderboard's scoring scheme including the semantics of
+     * {@link Fleet#compareTo(Fleet) ordered fleets} and {@link RaceColumn#isMedalRace() medal races}. The ordering
+     * does not consider result discarding because when sorting for a race column it is of interest how the competitor
+     * performed in that race and not how the score affected the overall regatta score. Therefore, it is based on
+     * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)} and not on
+     * {@link #getTotalPoints(Competitor, RaceColumn, TimePoint)}.
+     */
+    List<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
+     * {@link Series}, {@link Fleet}s, medal races, discarding rules and score corrections.
+     */
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 
     /**
      * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some
@@ -132,14 +160,6 @@ public interface Leaderboard extends Named {
      * for the entire leaderboard, the {@link #getCarriedPoints(Competitor) carried-over points} need to be added.
      */
     Map<Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException;
-
-    /**
-     * A leaderboard can be renamed. If a leaderboard is managed in a structure that keys leaderboards by name,
-     * that structure's rules have to be obeyed to ensure the structure's consistency. For example,
-     * <code>RacingEventService</code> has a <code>renameLeaderboard</code> method that ensures the internal
-     * structure's consistency and invokes this method.
-     */
-    void setName(String newName);
 
     /**
      * Retrieves all race columns that were added, either by {@link #addRace(TrackedRace, String, boolean)} or
@@ -192,13 +212,14 @@ public interface Leaderboard extends Named {
     String getDisplayName(Competitor competitor);
     
     /**
-     * Tells if the column represented by <code>raceInLeaderboard</code> shall be considered for discarding.
-     * Medal races are never considered for discarding (not counted as a "started race" nor discarded themselves).
-     * If a leaderboard has corrections for a column then that column shall be considered for discarding and counts
-     * for determining the number of races so far. Also, if a tracked race is connected to the column and has
-     * started already, the column is to be considered for discarding. 
+     * Tells if the column represented by <code>raceColumn</code> shall be considered when counting the number of "races
+     * so far" for discarding. Although medal races are never discarded themselves, they still count in determining the
+     * number of "races so far" which is then the basis for deciding how many races may be discarded. If a leaderboard
+     * has corrections for a column then that column shall be considered for discarding and counts for determining the
+     * number of races so far. Also, if a tracked race is connected to the column and has started already, the column is
+     * to be considered for discarding.
      */
-    boolean considerForDiscarding(RaceColumn raceInLeaderboard, TimePoint timePoint);
+    boolean considerForDiscarding(RaceColumn raceColumn, TimePoint timePoint);
     
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
 

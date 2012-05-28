@@ -19,6 +19,8 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
+import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
@@ -82,6 +84,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         this.settings = settings;
         
         chart = new Chart()
+                .setPersistent(true)
                 .setZoomType(Chart.ZoomType.X)
                 .setMarginLeft(65)
                 .setMarginRight(65)
@@ -120,12 +123,12 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
             }
         }));
         
-//        chart.setClickEventHandler(new ChartClickEventHandler() {
-//            @Override
-//            public boolean onClick(ChartClickEvent chartClickEvent) {
-//                return WindChart.this.onClick(chartClickEvent);
-//            }
-//        });
+        chart.setClickEventHandler(new ChartClickEventHandler() {
+            @Override
+            public boolean onClick(ChartClickEvent chartClickEvent) {
+                return WindChart.this.onClick(chartClickEvent);
+            }
+        });
        
         chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
             @Override
@@ -164,7 +167,6 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                  .getXAxis().setAxisTitle(null);
         }
         
-        setWidget(chart);
         setSize("100%", "100%");
         
         raceSelectionProvider.addRaceSelectionChangeListener(this);
@@ -182,7 +184,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         return this;
     }
 
-    private void showVisibleSeries() {
+    private void updateVisibleSeries() {
         List<Series> currentSeries = Arrays.asList(chart.getSeries());
         Set<Series> visibleSeries = new HashSet<Series>(currentSeries);
         
@@ -243,10 +245,6 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         if (result == null) {
             result = createSpeedSeries(windSource);
             windSourceSpeedSeries.put(windSource, result);
-            if (settings.isShowWindSpeedSeries() &&  settings.getWindSpeedSourcesToDisplay().contains(windSource.getType())) {
-                result.select(true); // ensures that the checkbox will be ticked
-                chart.addSeries(result);
-            }
         }
         return result;
     }
@@ -260,10 +258,6 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         if (result == null) {
             result = createDirectionSeries(windSource);
             windSourceDirectionSeries.put(windSource, result);
-            if (settings.isShowWindDirectionsSeries() && settings.getWindDirectionSourcesToDisplay().contains(windSource.getType())) {
-                chart.addSeries(result);
-                result.select(true); // ensures that the checkbox will be ticked
-            }
         }
         return result;
     }
@@ -271,7 +265,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
 
     /**
      * Only creates the series but doesn't add it to the chart. See also {@link #getOrCreateDirectionSeries(WindSource)} and
-     * {@link #showVisibleSeries()}
+     * {@link #updateVisibleSeries()}
      */
     private Series createDirectionSeries(WindSource windSource) {
         Series newSeries = chart
@@ -285,7 +279,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
 
     /**
      * Only creates the series but doesn't add it to the chart. See also {@link #getOrCreateSpeedSeries(WindSource)} and
-     * {@link #showVisibleSeries()}
+     * {@link #updateVisibleSeries()}
      */
     private Series createSpeedSeries(WindSource windSource) {
         Series newSeries = chart
@@ -423,7 +417,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
 
         settings.setShowWindSpeedSeries(newSettings.isShowWindSpeedSeries());
         settings.setWindSpeedSourcesToDisplay(newSettings.getWindSpeedSourcesToDisplay());
-        showVisibleSeries();
+        updateVisibleSeries();
     }
 
     private void clearCacheAndReload() {
@@ -442,6 +436,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         if (selectedRaceIdentifier == null) {
             clearChart();
         } else if (needsDataLoading() && from != null && to != null) {
+            setWidget(chart);
             showLoading("Loading wind data...");
             GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
                     // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121.
@@ -452,7 +447,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         public void onSuccess(WindInfoForRaceDTO result) {
                             if (result != null) {
                                 updateStripChartSeries(result, append);
-                                showVisibleSeries();
+                                updateVisibleSeries();
                             } else {
                                 if (!append) {
                                     clearChart(); // no wind known for untracked race
@@ -487,7 +482,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         if(selectedRaceIdentifier != null) {
             clearCacheAndReload();
             if(isVisible())
-                showVisibleSeries();
+                updateVisibleSeries();
         } else {
             clearChart();
         }
@@ -500,6 +495,10 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
      */
     @Override
     public void timeChanged(Date date) {
+        if(!isVisible()) {
+            return;
+        }
+        
         switch(timer.getPlayMode()) {
             case Live:
             {
@@ -531,5 +530,4 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
     private boolean needsDataLoading() {
         return isVisible();
     }
-
 }

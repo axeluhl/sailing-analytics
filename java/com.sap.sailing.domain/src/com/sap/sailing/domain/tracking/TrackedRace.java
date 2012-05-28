@@ -41,6 +41,8 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 public interface TrackedRace extends Serializable {
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
     
+    final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
+
     RaceDefinition getRace();
     
     RegattaAndRaceIdentifier getRaceIdentifier();
@@ -268,6 +270,11 @@ public interface TrackedRace extends Serializable {
     long getMillisecondsOverWhichToAverageWind();
 
     /**
+     * Gets the current delay of incoming events to the real time of the events in milliseconds
+     */
+    long getDelayToLiveInMillis();
+    
+    /**
      * Estimates the wind direction based on the observed boat courses at the time given for the position provided. The
      * estimate is based on the assumption that the boats which are on an upwind or a downwind leg sail with very
      * similar angles on the starboard and the port side. There should be clusters of courses which are close to each
@@ -384,4 +391,10 @@ public interface TrackedRace extends Serializable {
     WindStore getWindStore();
 
     Competitor getOverallLeader(TimePoint timePoint) throws NoWindException;
+
+    /**
+     * Returns the competitors of this tracked race, according to their ranking. Competitors whose {@link #getRank(Competitor)} is 0 will
+     * be sorted "worst".
+     */
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 }

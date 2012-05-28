@@ -8,22 +8,33 @@ package com.sap.sailing.domain.common;
  *
  */
 public enum MaxPointsReason {
+    
     /** The competitor finished the race properly */
-    NONE,
+    NONE(true),
     /** Did Not Start */
-    DNS, 
+    DNS(true), 
     /** Did Not Finish */
-    DNF,
+    DNF(true),
     /** DiSQualified */
-    DSQ,
+    DSQ(true),
     /** On Course Side (jumped the gun) */
-    OCS,
+    OCS(true),
     /** Disqualified, non-discardable */
-    DND,
+    DND(false),
     /** Black Flag Disqualified */
-    BFD,
+    BFD(true),
     /** Did Not Compete */
-    DNC,
+    DNC(true),
     /** Retired After Finishing */
-    RAF
+    RAF(true);
+    
+    private final boolean discardable;
+
+    private MaxPointsReason(boolean discardable) {
+        this.discardable = discardable;
+    }
+
+    public boolean isDiscardable() {
+        return discardable;
+    }
 }

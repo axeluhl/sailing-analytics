@@ -1,44 +1,42 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 
 public class SeriesImpl extends NamedImpl implements Series {
     private static final long serialVersionUID = -1640404303144907381L;
-    private final boolean isFleetsOrdered;
     private final Map<String, Fleet> fleetsByName;
-    private final Iterable<RaceColumnInSeries> raceColumns;
+    private final List<Fleet> fleetsInAscendingOrder;
+    private final Iterable<RaceColumnInSeriesImpl> raceColumns;
     private boolean isMedal;
     
-    public SeriesImpl(String name, boolean isFleetsOrdered, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames) {
+    public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames) {
         super(name);
-        this.isFleetsOrdered = isFleetsOrdered;
         this.fleetsByName = new HashMap<String, Fleet>();
         for (Fleet fleet : fleets) {
             this.fleetsByName.put(fleet.getName(), fleet);
         }
-        List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
+        fleetsInAscendingOrder = new ArrayList<Fleet>(fleetsByName.values());
+        Collections.sort(fleetsInAscendingOrder);
+        List<RaceColumnInSeriesImpl> myRaceColumns = new ArrayList<RaceColumnInSeriesImpl>();
         for (String raceColumnName : raceColumnNames) {
-            RaceColumnInSeries raceColumn = new RaceColumnInSeries(raceColumnName, this);
+            RaceColumnInSeriesImpl raceColumn = new RaceColumnInSeriesImpl(raceColumnName, this);
             myRaceColumns.add(raceColumn);
         }
         this.raceColumns = myRaceColumns;
         this.isMedal = isMedal;
     }
 
-    public boolean isFleetsOrdered() {
-        return isFleetsOrdered;
-    }
-
     public Iterable<? extends Fleet> getFleets() {
-        return fleetsByName.values();
+        return fleetsInAscendingOrder;
     }
 
     @Override

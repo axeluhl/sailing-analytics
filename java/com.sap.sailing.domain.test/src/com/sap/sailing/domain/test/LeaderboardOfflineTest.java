@@ -16,26 +16,21 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
-import com.sap.sailing.domain.base.impl.NationalityImpl;
-import com.sap.sailing.domain.base.impl.PersonImpl;
-import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
+import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class LeaderboardOfflineTest {
+public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     private Set<TrackedRace> testRaces;
     private Map<TrackedRace, RaceColumn> raceColumnsInLeaderboard;
     private Competitor competitor;
@@ -45,15 +40,6 @@ public class LeaderboardOfflineTest {
         competitor = createCompetitor("Wolfgang Hunger");
     }
     
-    private CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
-                new PersonImpl(competitorName, new NationalityImpl("GER"),
-                /* dateOfBirth */ null, "This is famous "+competitorName)),
-                new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null));
-    }
-
     public void setupRaces(int numberOfStartedRaces, int numberOfNotStartedRaces) {
         testRaces = new HashSet<TrackedRace>();
         raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
@@ -100,7 +86,7 @@ public class LeaderboardOfflineTest {
     @Test
     public void ensureMedalRaceParamIsIgnoredIfRaceColumnAlreadyExists() {
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
-                new int[] { 5, 8 }));
+                new int[] { 5, 8 }), new LowerScoreIsBetter());
         Fleet defaultFleet = leaderboard.getFleet(null);
         final String columnName = "abc";
         setupRaces(1, 0);
@@ -123,7 +109,7 @@ public class LeaderboardOfflineTest {
         }
         ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
-                new int[] { 1 }));
+                new int[] { 1 }), new LowerScoreIsBetter());
         Fleet defaultFleet = leaderboard.getFleet(null);
         int i=0;
         int bestScore = Integer.MAX_VALUE;
@@ -145,11 +131,48 @@ public class LeaderboardOfflineTest {
         assertEquals(0, leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getTotalPoints());
     }
     
+    @Test
+    public void testNoDNDDiscard() throws NoWindException {
+        testRaces = new HashSet<TrackedRace>();
+        raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
+        Competitor c2 = createCompetitor("Marcus Baur");
+        Competitor c3 = createCompetitor("Robert Stanjek");
+        for (int i=0; i<3; i++) {
+            MockedTrackedRaceWithFixedRankAndManyCompetitors r = new MockedTrackedRaceWithFixedRankAndManyCompetitors(competitor, i+1, /* started */ true);
+            r.addCompetitor(c2);
+            r.addCompetitor(c3); // this makes maxPoints==4
+            testRaces.add(r); // hash set should take care of more or less randomly permuting the races
+        }
+        ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
+                new int[] { 1 }), new LowerScoreIsBetter());
+        Fleet defaultFleet = leaderboard.getFleet(null);
+        int i=0;
+        int bestScore = Integer.MAX_VALUE;
+        RaceColumn bestScoringRaceColumn = null;
+        for (TrackedRace race : testRaces) {
+            i++;
+            RaceColumn raceColumn = leaderboard.addRace(race, "Test Race " + i, /* medalRace */ false, defaultFleet);
+            raceColumnsInLeaderboard.put(race, raceColumn);
+            if (race.getRank(competitor) < bestScore) {
+                bestScore = race.getRank(competitor);
+                bestScoringRaceColumn = raceColumn;
+            }
+        }
+        scoreCorrection.setMaxPointsReason(competitor, bestScoringRaceColumn, MaxPointsReason.DND);
+        // assert that best scoring but now disqualified race gets max net points because of disqualification:
+        assertEquals(Util.size(bestScoringRaceColumn.getTrackedRace(defaultFleet).getRace().getCompetitors())+1,
+                leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getNetPoints());
+        // now assert that it does not get discarded because it's a DND
+        assertEquals(Util.size(bestScoringRaceColumn.getTrackedRace(defaultFleet).getRace().getCompetitors())+1,
+                leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getTotalPoints());
+    }
+    
     protected void testLeaderboard(int numberOfStartedRaces, int numberOfNotStartedRaces, int firstDiscardingThreshold,
             int secondDiscardingThreshold, Integer carry, boolean addOneMedalRace, int numberOfUntrackedRaces) throws NoWindException {
         setupRaces(numberOfStartedRaces, numberOfNotStartedRaces);
         FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
-                new int[] { firstDiscardingThreshold, secondDiscardingThreshold }));
+                new int[] { firstDiscardingThreshold, secondDiscardingThreshold }), new LowerScoreIsBetter());
         Fleet defaultFleet = leaderboard.getFleet(null);
         int i=0;
         for (TrackedRace race : testRaces) {
@@ -182,7 +205,7 @@ public class LeaderboardOfflineTest {
             Pair<Competitor, RaceColumn> key = new Pair<Competitor, RaceColumn>(competitor, raceColumn);
             if (race.hasStarted(now)) {
                 int rank = race.getRank(competitor, now);
-                assertEquals(rank, leaderboard.getTrackedPoints(competitor, raceColumn, now));
+                assertEquals(rank, leaderboard.getTrackedRank(competitor, raceColumn, now));
                 assertEquals(rank, leaderboard.getContent(now).get(key).getTrackedPoints());
                 assertEquals(rank, leaderboard.getEntry(competitor, raceColumn, now).getTrackedPoints());
                 assertEquals(rank, leaderboard.getNetPoints(competitor, raceColumn, now));
@@ -199,7 +222,7 @@ public class LeaderboardOfflineTest {
                 assertEquals(expected, leaderboard.getEntry(competitor, raceColumn, now).getTotalPoints());
                 totalPoints += leaderboard.getContent(now).get(key).getTotalPoints();
             } else {
-                assertEquals(0, leaderboard.getTrackedPoints(competitor, raceColumn, now));
+                assertEquals(0, leaderboard.getTrackedRank(competitor, raceColumn, now));
                 assertEquals(0, leaderboard.getNetPoints(competitor, raceColumn, now));
                 assertEquals(0, leaderboard.getContent(now).get(key).getTrackedPoints());
                 assertEquals(0, leaderboard.getContent(now).get(key).getNetPoints());

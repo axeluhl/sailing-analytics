@@ -158,11 +158,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
 
     @Override
-    public TrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore, long millisecondsOverWhichToAverageWind,
+    public TrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition,
-                windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
         if (raceDefinitionSetToUpdate != null) {
             raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
         }

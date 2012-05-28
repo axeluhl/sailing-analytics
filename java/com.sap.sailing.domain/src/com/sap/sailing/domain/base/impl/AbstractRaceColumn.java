@@ -5,10 +5,10 @@ import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public abstract class AbstractRaceColumn implements RaceColumn {
@@ -63,6 +63,16 @@ public abstract class AbstractRaceColumn implements RaceColumn {
     @Override
     public void releaseTrackedRace(Fleet fleet) {
         trackedRaces.remove(fleet);
+    }
+
+    @Override
+    public Fleet getFleetOfCompetitor(Competitor competitor) {
+        for (Map.Entry<Fleet, TrackedRace> e : trackedRaces.entrySet()) {
+            if (Util.contains(e.getValue().getRace().getCompetitors(), competitor)) {
+                return e.getKey();
+            }
+        }
+        return null;
     }
 
     @Override

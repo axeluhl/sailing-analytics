@@ -3,11 +3,11 @@ package com.sap.sailing.server.operationaltransformation;
 import java.util.Date;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 

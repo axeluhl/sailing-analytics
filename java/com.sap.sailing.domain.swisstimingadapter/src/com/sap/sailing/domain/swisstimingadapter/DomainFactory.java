@@ -40,7 +40,8 @@ public interface DomainFactory {
 
     void removeRace(String raceID);
     
-    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, boolean canSendRequests,
+    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, 
+            boolean canSendRequests, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore,
             RaceSpecificMessageLoader messageLoader);
 }

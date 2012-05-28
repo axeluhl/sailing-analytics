@@ -1,14 +1,15 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
@@ -60,8 +61,8 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
     }
     
     public FlexibleLeaderboardImplWithDelayedCarriedPoints(String name, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(name, scoreCorrection, resultDiscardingRule);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
+        super(name, scoreCorrection, resultDiscardingRule, scoreComparator);
         carriedPointsByCompetitorName = new HashMap<String, Integer>();
         maxPointsReasonsByCompetitorName = new HashMap<String, Map<RaceColumn,MaxPointsReason>>();
         correctedScoresByCompetitorName = new HashMap<String, Map<RaceColumn,Integer>>();
