@@ -211,14 +211,21 @@ input.opencoloumn {
 }
 
 .raceBoardNavigation-settingsButton {
-	background: url(images/settings_new.png) center no-repeat;
+	background: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center 0;
+	background-repeat: no-repeat, repeat-x;
 	width: 27px;
 	height: 23px;	
-    margin: 0 5px 0 0;
+    margin: 0 5px 0 1px;
+	-webkit-border-radius: 0px 3px 3px 0px;
+	border-radius: 0px 3px 3px 0px; 
 }
 
 .raceBoardNavigation-settingsButton:hover {
-	background: url(images/settings_new.png) center no-repeat;
+	background-image: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center -30px;
+	background-repeat: no-repeat, repeat-x;
+    cursor: pointer;
 }
 
 .raceBoardNavigation-innerElement {
