@@ -238,7 +238,6 @@ input.opencoloumn {
 
 .raceBoardNavigation-innerElement {
     background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
-    border: medium none;
 	border-bottom-left-radius: 3px;
 	border-top-left-radius: 3px;
 	color: #FFFFFF;
@@ -247,6 +246,7 @@ input.opencoloumn {
     font-size: 14px;
     margin: 0 0 0 0;
     padding: 2px 7px 2px 3px;
+    height: 19px;   
 }
 .raceBoardNavigation-innerElement:hover {
     background: url("images/btn-cta-orangeleft.png") repeat-x scroll center -30px transparent;

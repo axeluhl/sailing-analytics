@@ -194,7 +194,9 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private void cachePlacemarks(Position position, Double radius, List<Placemark> placemarks) {
         Collections.sort(placemarks, new Placemark.ByDistance(position));
         if (position != null) {
-            cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
+            synchronized (cache) {
+                cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
+            }
         }
     }
     
@@ -211,7 +213,9 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      */
     private void updateCachedPlacemarks(Position cachedPoint, Double newRadius, List<Placemark> newPlacemarks) {
         if (cachedPoint != null) {
-            cache.replace(cachedPoint, new Triple<Position, Double, List<Placemark>>(cachedPoint, newRadius, newPlacemarks));
+            synchronized (cache) {
+                cache.replace(cachedPoint, new Triple<Position, Double, List<Placemark>>(cachedPoint, newRadius, newPlacemarks));
+            }
         }
     }
 
@@ -223,7 +227,9 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      *         {@link ReverseGeocoderImpl#POSITION_CACHE_DISTANCE_LIMIT the distance limit}
      */
     private Triple<Position, Double, List<Placemark>> checkCache(Position position) {
-        return cache.get(position, POSITION_CACHE_DISTANCE_LIMIT);
+        synchronized (cache) {
+            return cache.get(position, POSITION_CACHE_DISTANCE_LIMIT);
+        }
     }
 
     private JSONArray callNearestService(Position position) throws MalformedURLException, IOException, ParseException {

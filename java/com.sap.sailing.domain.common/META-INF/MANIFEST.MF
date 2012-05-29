@@ -7,4 +7,5 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.impl,
- com.sap.sailing.domain.common.quadtree
+ com.sap.sailing.domain.common.quadtree,
+ com.sap.sailing.domain.common.quadtree.impl;x-friends:="com.sap.sailing.domain.test"

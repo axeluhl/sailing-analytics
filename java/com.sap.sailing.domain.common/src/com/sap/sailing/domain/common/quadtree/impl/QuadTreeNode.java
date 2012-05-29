@@ -110,7 +110,7 @@ public class QuadTreeNode<T> implements Serializable {
      * into the children.
      */
     @SuppressWarnings("unchecked")
-	protected void split() {
+    protected void split() {
         // Make sure we're bigger than the minimum, if we care,
         if (minSize != NO_MIN_SIZE) {
             if (Math.abs(bounds.getNorthEast().getLatDeg() - bounds.getSouthWest().getLatDeg()) < minSize
@@ -121,7 +121,6 @@ public class QuadTreeNode<T> implements Serializable {
         double nsHalf = (bounds.getNorthEast().getLatDeg() + bounds.getSouthWest().getLatDeg()) / 2.0;
         double ewHalf = (bounds.getNorthEast().getLngDeg() + bounds.getSouthWest().getLngDeg()) / 2.0;
         children = new QuadTreeNode[4];
-
         children[NORTHWEST] = new QuadTreeNode<T>(new Bounds(new DegreePosition(nsHalf, bounds.getSouthWest().getLngDeg()), new DegreePosition(bounds.getNorthEast().getLatDeg(), ewHalf)), maxItems);
         children[NORTHEAST] = new QuadTreeNode<T>(new Bounds(new DegreePosition(nsHalf, ewHalf), bounds.getNorthEast()), maxItems);
         children[SOUTHEAST] = new QuadTreeNode<T>(new Bounds(new DegreePosition(bounds.getSouthWest().getLatDeg(), ewHalf), new DegreePosition(nsHalf, bounds.getNorthEast().getLngDeg())), maxItems);
@@ -131,7 +130,6 @@ public class QuadTreeNode<T> implements Serializable {
         for (Iterator<QuadTreeLeaf<T>> i=temp.iterator(); i.hasNext(); ) {
             put(i.next());
         }
-        //items.removeAllElements();
     }
 
     /**
@@ -208,9 +206,9 @@ public class QuadTreeNode<T> implements Serializable {
                     this.allTheSamePoint = false;
                 }
             }
-
-            if (this.items.size() > maxItems && !this.allTheSamePoint)
+            if (this.items.size() > maxItems && !this.allTheSamePoint) {
                 split();
+            }
         } else {
             QuadTreeNode<T> node = getChild(leaf.getPoint());
             if (node != null) {
