@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -46,6 +48,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
      * provided by this map are considered by {@link #getTotalPoints(Competitor, TimePoint)}.
      */
     private final Map<Competitor, Integer> carriedPoints;
+
+    private final Comparator<Integer> scoreComparator;
     
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -96,13 +100,16 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     /**
+     * @param scoreComparator the comparator to use to compare basic scores, such as net points
      * @param name must not be <code>null</code>
      */
-    public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+    public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection,
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
         this.carriedPoints = new HashMap<Competitor, Integer>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
+        this.scoreComparator = scoreComparator;
     }
     
     @Override
@@ -186,7 +193,38 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     @Override
     public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
         final TrackedRace trackedRace = race.getTrackedRace(competitor);
-        return trackedRace == null ? 0 : trackedRace.hasStarted(timePoint) ? trackedRace.getRank(competitor, timePoint) : 0;
+        return trackedRace == null ? 0
+                : trackedRace.hasStarted(timePoint) ? improveByDisqualificationsOfBetterRankedCompetitors(race, trackedRace, timePoint, trackedRace
+                        .getRank(competitor, timePoint)) : 0;
+    }
+
+    /**
+     * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor), all
+     * competitors ranked worse by the tracking system need to have their rank corrected by one.
+     * @param trackedRace the race to which the rank refers; look for disqualifications / max points reasons in this column
+     * @param timePoint
+     *            time point at which to consider disqualifications (not used yet because currently we don't remember
+     *            <em>when</em> a competitor was disqualified)
+     * @param rank a competitors rank according to the tracking system
+     * 
+     * @return the unmodified <code>rank</code> if no disqualifications for better-ranked competitors exist for <code>race</code>,
+     * or otherwise a rank improved (lowered) by the number of disqualifications of competitors whose tracked rank is better (lower)
+     * than <code>rank</code>.
+     */
+    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace, TimePoint timePoint, int rank) {
+        int correctedRank = rank;
+        List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
+        int betterCompetitorRank=1;
+        Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
+        while (betterCompetitorRank < rank && ci.hasNext()) {
+            Competitor betterTrackedCompetitor = ci.next();
+            MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(betterTrackedCompetitor, raceColumn);
+            if (maxPointsReasonForBetterCompetitor != null && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE) {
+                correctedRank--;
+            }
+            betterCompetitorRank++;
+        }
+        return correctedRank;
     }
 
     @Override
@@ -233,7 +271,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
         boolean discarded = isDiscarded(competitor, race, timePoint);
         return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), correctedResults.isCorrected(),
                 discarded ? 0
-                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded);
+                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? MEDAL_RACE_FACTOR : 1),
+                        correctedResults.getMaxPointsReason(), discarded);
     }
     
     @Override
@@ -345,7 +384,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
                 } else {
                     comparisonResult = netPointsAndFleet.get(o1).getB().compareTo(netPointsAndFleet.get(o2).getB());
                     if (comparisonResult == 0) {
-                        comparisonResult = netPointsAndFleet.get(o1).getA() - netPointsAndFleet.get(o2).getA();
+                        comparisonResult = scoreComparator.compare(netPointsAndFleet.get(o1).getA(), netPointsAndFleet.get(o2).getA());
                     }
                 }
                 return comparisonResult;
@@ -365,6 +404,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     }
 
     protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) {
-        return new LeaderboardTotalRankComparator(this, timePoint);
+        return new LeaderboardTotalRankComparator(this, timePoint, scoreComparator);
     }
 }

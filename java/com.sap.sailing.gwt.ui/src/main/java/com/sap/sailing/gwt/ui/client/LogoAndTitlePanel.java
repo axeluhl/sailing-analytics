@@ -22,9 +22,13 @@ public class LogoAndTitlePanel extends FlowPanel {
         sailingAnalyticsLabel.addStyleName("sailingAnalyticsLabel boldLabel");
         this.add(labelPanel);
         
+        FlowPanel titleLabelWrapper = new FlowPanel();
+        titleLabelWrapper.addStyleName("titleLabelWrapper");
         titleLabel = new Label(title);
         titleLabel.addStyleName("titleLabel");
-        this.add(titleLabel);
+        titleLabelWrapper.add(titleLabel);
+        this.add(titleLabelWrapper);
+        
     }
 
 }

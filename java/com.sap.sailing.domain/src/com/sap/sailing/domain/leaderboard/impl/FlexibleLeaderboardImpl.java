@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -31,8 +32,8 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private String name;
 
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(scoreCorrection, resultDiscardingRule);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
+        super(scoreCorrection, resultDiscardingRule, scoreComparator);
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");
         }

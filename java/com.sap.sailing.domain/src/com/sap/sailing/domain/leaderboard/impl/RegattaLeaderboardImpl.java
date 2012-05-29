@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Fleet;
@@ -22,8 +23,9 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl {
     private static final long serialVersionUID = 2370461218294770084L;
     private final Regatta regatta;
 
-    public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(scoreCorrection, resultDiscardingRule);
+    public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection,
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
+        super(scoreCorrection, resultDiscardingRule, scoreComparator);
         this.regatta = regatta;
     }
     

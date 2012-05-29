@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.persistence.impl;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -60,8 +61,8 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
     }
     
     public FlexibleLeaderboardImplWithDelayedCarriedPoints(String name, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(name, scoreCorrection, resultDiscardingRule);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
+        super(name, scoreCorrection, resultDiscardingRule, scoreComparator);
         carriedPointsByCompetitorName = new HashMap<String, Integer>();
         maxPointsReasonsByCompetitorName = new HashMap<String, Map<RaceColumn,MaxPointsReason>>();
         correctedScoresByCompetitorName = new HashMap<String, Map<RaceColumn,Integer>>();

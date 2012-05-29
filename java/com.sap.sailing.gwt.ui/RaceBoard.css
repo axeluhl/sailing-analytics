@@ -111,7 +111,45 @@ input.opencoloumn {
     right:0;
 }
 
-.globalNavigation-home {
+.globalNavigation-home {    	
+    border-radius: 0px 0px 4px 4px; 
+    -moz-border-radius: 0px 0px 4px 4px; 
+    -webkit-border-radius: 0px 0px 4px 4px;
+    margin: 0 10px 0 0;
+    float: left;
+}
+
+.globalNavigation-home a{
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    background: url(images/globalNavigation-home_bg.png) 5px center no-repeat #7c7b7c;
+    padding: 5px 6px 5px 25px;
+    border-radius: 0px 0px 4px 4px; 
+    -moz-border-radius: 0px 0px 4px 4px; 
+    -webkit-border-radius: 0px 0px 4px 4px;
+}  
+
+.globalNavigation-leaderBoard {
+    border-radius: 0px 0px 4px 4px; 
+    -moz-border-radius: 0px 0px 4px 4px; 
+    -webkit-border-radius: 0px 0px 4px 4px;
+    margin: 0 5px 0 0;
+    float: left;
+}
+
+.globalNavigation-leaderBoard a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    background: url(images/globalNavigation-leaderBoard_bg.png) 5px center no-repeat #7c7b7c;   
+    border-radius: 0px 0px 4px 4px; 
+    -moz-border-radius: 0px 0px 4px 4px; 
+    -webkit-border-radius: 0px 0px 4px 4px;
+    padding: 5px 6px 5px 25px;
+}
+
+.globalNavigation-leaderBoardGroup {
 	background: url(images/globalNavigation-home_bg.png) 5px center no-repeat #7c7b7c;	
   border-radius: 0px 0px 4px 4px; 
   -moz-border-radius: 0px 0px 4px 4px; 
@@ -121,33 +159,14 @@ input.opencoloumn {
   float: left;
 }
 
-.globalNavigation-home a{
-  color: #fff;
-  text-decoration: none;
-}  
-
-.globalNavigation-leaderBoard {
-	background: url(images/globalNavigation-leaderBoard_bg.png) 5px center no-repeat #7c7b7c;	
-  border-radius: 0px 0px 4px 4px; 
-  -moz-border-radius: 0px 0px 4px 4px; 
-  -webkit-border-radius: 0px 0px 4px 4px;
-  padding: 5px 6px 5px 25px;
-  margin: 0 10px 0 0;
-  float: left;
-}
-
-.globalNavigation-leaderBoard a {
-  color: #fff;
-  text-decoration: none;
-}
-
-.globalNavigation-leaderBoardGroup {
-	background-color: gray;	
+.globalNavigation-leaderBoardGroup a {
+	color: #fff;
+	text-decoration: none;
 }
 
 .raceBoardNavigation {
 	float: left;
-	margin: 3px;;
+	margin: 9px 0 0 7px;
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
 }
 
@@ -196,6 +215,40 @@ input.opencoloumn {
 
 .raceBoardNavigation-settingsButtonPanel {
 	float: right;
-	margin: 3px;;
+	margin: 9px 12px 0 0;
 }
 
+.raceBoardNavigation-settingsButton {
+	background: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center 0;
+	background-repeat: no-repeat, repeat-x;
+	width: 27px;
+	height: 23px;	
+    margin: 0 5px 0 1px;
+	-webkit-border-radius: 0px 3px 3px 0px;
+	border-radius: 0px 3px 3px 0px; 
+}
+
+.raceBoardNavigation-settingsButton:hover {
+	background-image: url(images/settings_white.png), url(images/btn-cta-orangeleft.png);
+	background-position: center, center -30px;
+	background-repeat: no-repeat, repeat-x;
+    cursor: pointer;
+}
+
+.raceBoardNavigation-innerElement {
+    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center 0 transparent;
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
+	color: #FFFFFF;
+    cursor: pointer;
+    font-family: UbuntuBold,Verdana,Arial,sans-serif;
+    font-size: 14px;
+    margin: 0 0 0 0;
+    padding: 2px 7px 2px 3px;
+    height: 19px;   
+}
+.raceBoardNavigation-innerElement:hover {
+    background: url("images/btn-cta-orangeleft.png") repeat-x scroll center -30px transparent;
+    cursor: pointer;
+}

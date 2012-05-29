@@ -49,7 +49,9 @@ public class DeclinationStore {
             result = new QuadTree<Declination>();
             BufferedReader in = new BufferedReader(new InputStreamReader(is));
             while ((record = readExternal(in)) != null) {
-                result.put(record.getPosition(), record);
+                synchronized (result) {
+                    result.put(record.getPosition(), record);
+                }
             }
         }
         return result;
@@ -150,7 +152,10 @@ public class DeclinationStore {
                         System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
                         for (double lng = 0; lng < 180; lng += grid) {
                             Position point = new DegreePosition(lat, lng);
-                            Declination existingDeclinationRecord = storedDeclinations.get(point);
+                            Declination existingDeclinationRecord;
+                            synchronized (storedDeclinations) {
+                                existingDeclinationRecord = storedDeclinations.get(point);
+                            }
                             if (existingDeclinationRecord == null
                                     || DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord
                                             .getPosition().getDistance(point), timePoint, existingDeclinationRecord
@@ -161,7 +166,10 @@ public class DeclinationStore {
                         }
                         for (double lng = -grid; lng > -180; lng -= grid) {
                             Position point = new DegreePosition(lat, lng);
-                            Declination existingDeclinationRecord = storedDeclinations.get(point);
+                            Declination existingDeclinationRecord;
+                            synchronized (storedDeclinations) {
+                                existingDeclinationRecord = storedDeclinations.get(point);
+                            }
                             if (existingDeclinationRecord == null
                                     || DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord
                                             .getPosition().getDistance(point), timePoint, existingDeclinationRecord
@@ -175,7 +183,10 @@ public class DeclinationStore {
                         System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
                         for (double lng = 0; lng < 180; lng += grid) {
                             Position point = new DegreePosition(lat, lng);
-                            Declination existingDeclinationRecord = storedDeclinations.get(point);
+                            Declination existingDeclinationRecord;
+                            synchronized (storedDeclinations) {
+                                existingDeclinationRecord = storedDeclinations.get(point);
+                            }
                             if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
                                     timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
                                 // less than ~6 nautical miles and/or ~.6 months off
@@ -184,7 +195,10 @@ public class DeclinationStore {
                         }
                         for (double lng = -grid; lng > -180; lng -= grid) {
                             Position point = new DegreePosition(lat, lng);
-                            Declination existingDeclinationRecord = storedDeclinations.get(point);
+                            Declination existingDeclinationRecord;
+                            synchronized (storedDeclinations) {
+                                existingDeclinationRecord = storedDeclinations.get(point);
+                            }
                             if (DeclinationServiceImpl.timeAndSpaceDistance(existingDeclinationRecord.getPosition().getDistance(point),
                                     timePoint, existingDeclinationRecord.getTimePoint()) > 0.1) {
                                 // less than ~6 nautical miles and/or ~.6 months off
