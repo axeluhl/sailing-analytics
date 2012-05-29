@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,11 +29,13 @@ import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager.WindPattern;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
+import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.impl.PolarDiagramImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
@@ -49,6 +52,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private static final long serialVersionUID = 4445427185387524086L;
     
     private static Logger logger = Logger.getLogger("com.sap.sailing");
+    
+    private   WindControlParameters controlParameters = new WindControlParameters(0,0);
     
     @Override
     public PositionDTO[] getRaceLocations() {
@@ -126,34 +131,49 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return wl;
     }
 
-    public WindFieldDTO getWindField(WindFieldGenParamsDTO params) {
+    private void retreiveWindControlParameters(WindPatternDisplay pattern) {
+        for(WindPatternSetting<?> s : pattern.getSettings()) {
+            Field f;
+            try {
+                f = controlParameters.getClass().getField(s.getName());
+                try {
+                  
+                    logger.info("Setting " + f.getName() + " to " + s.getName());
+                    f.set(controlParameters, s.getValue());
+                    //f.setDouble(controlParameters, (Double) s.getValue());
+                   
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            } catch (SecurityException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoSuchFieldException e) {
+              logger.info(e.getMessage());
+            }
+            
+        }
+    }
+    
+    @Override
+    public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) {
 
         Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
         Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
         List<Position> course = new ArrayList<Position>();
         course.add(nw);
         course.add(se);
-        Distance dist = nw.getDistance(se);
-        Speed requiredSpeed10 = dist.inTime(600000);
-        logger.info(requiredSpeed10.getKilometersPerHour() + "km/h," + requiredSpeed10.getKnots() + "kn," 
-        + requiredSpeed10.getMetersPerSecond() + "m/s");
+       
         RectangularBoundary bd = new RectangularBoundary(nw, se);
-        List<Position> lattice = bd.extractLattice(5, 5);
-
-        // TODO remove this, only placed so that we can display some points
-        if (lattice == null) {
-            lattice = new LinkedList<Position>();
-            lattice.add(nw);
-            lattice.add(se);
-        }
+        List<Position> lattice = bd.extractLattice(params.getxRes(), params.getyRes());
+        retreiveWindControlParameters(pattern);
         
-      
-        // WindField wf = new WindFieldImpl(bd, params.getWindSpeed(), params.getWindBearing());
-        // I am creating the WindField such as the course goes mainly against the wind (as it should)
-        // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
-        //WindField wf = new WindFieldImpl(bd, requiredSpeed10.getKilometersPerHour(), bd.getSouth().getDegrees());
-        KnotSpeedImpl knotSpeedImpl = new KnotSpeedImpl(params.getWindSpeed());
-        WindField wf = new WindFieldImpl(bd, knotSpeedImpl.getKilometersPerHour(), bd.getSouth().getDegrees());
+        controlParameters.baseWindBearing =  bd.getSouth().getDegrees();
+        WindField wf = new WindFieldImpl(bd, controlParameters);
         
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
@@ -172,31 +192,28 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return wfDTO;
 
     }
-
     /**
      * Currently the path is a list of WindDTO objects at the path points and only a single optimal path is returned
      * 
      * */
-    public PathDTO[] getPaths(WindFieldGenParamsDTO params) {
+    public PathDTO[] getPaths(WindFieldGenParamsDTO params,  WindPatternDisplay pattern) {
 
         Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
         Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
         List<Position> course = new ArrayList<Position>();
         course.add(nw);
         course.add(se);
-        Distance dist = nw.getDistance(se);
-        Speed requiredSpeed10 = dist.inTime(600000);
-        RectangularBoundary bd = new RectangularBoundary(nw, se);
 
-        // WindField wf = new WindFieldImpl(bd, params.getWindSpeed(), params.getWindBearing());
-        // I am creating the WindField such as the course goes mainly against the wind (as it should)
-        // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
-        KnotSpeedImpl knotSpeedImpl = new KnotSpeedImpl(params.getWindSpeed());
-        WindField wf = new WindFieldImpl(bd, knotSpeedImpl.getKilometersPerHour(), bd.getSouth().getDegrees());
+        RectangularBoundary bd = new RectangularBoundary(nw, se);
+        retreiveWindControlParameters(pattern);
+        
+        controlParameters.baseWindBearing =  bd.getSouth().getDegrees();
+        WindField wf = new WindFieldImpl(bd, controlParameters);
         
 
-        PathDTO[] pathDTO = new PathDTO[1];
+        //TODO Get all the paths that need to be displayed
         List<WindDTO> path = getOptimumPath(course, wf);
+        PathDTO[] pathDTO = new PathDTO[1];
         pathDTO[0] = new PathDTO("Path 1");
         pathDTO[0].setMatrix(path);
         return pathDTO;
@@ -260,4 +277,6 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     public WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern) {
        return WindPatternDisplayManager.INSTANCE.getDisplay(WindPattern.valueOf(pattern.name));
     }
+    
+        
 }
