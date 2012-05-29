@@ -14,8 +14,8 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.simulator.WindControlParameters;
+import com.sap.sailing.simulator.impl.WindFieldGeneratorBlastImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
-import com.sap.sailing.simulator.impl.WindFieldGenerator;
 
 /**
  * Test for @WindFieldGenerator
@@ -36,7 +36,7 @@ public class WindFieldGeneratorTest {
        
         WindControlParameters windParameters = new WindControlParameters(3, 180);
         RectangularBoundary bd = new RectangularBoundary(start, end);
-        WindFieldGenerator wf = new WindFieldGenerator(bd, windParameters);
+        WindFieldGeneratorBlastImpl wf = new WindFieldGeneratorBlastImpl(bd, windParameters);
         int hSteps = 10;
         int vSteps = 5;
         List<Position> positionList = wf.extractLattice(hSteps,vSteps);

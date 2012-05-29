@@ -2,16 +2,13 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -37,12 +34,13 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindField;
+import com.sap.sailing.simulator.WindFieldGenerator;
+import com.sap.sailing.simulator.WindFieldGeneratorFactory;
 import com.sap.sailing.simulator.impl.PolarDiagramImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedSimple;
-import com.sap.sailing.simulator.impl.WindFieldImpl;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
@@ -50,11 +48,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
      * Generated uid serial version
      */
     private static final long serialVersionUID = 4445427185387524086L;
-    
+
     private static Logger logger = Logger.getLogger("com.sap.sailing");
-    
-    private   WindControlParameters controlParameters = new WindControlParameters(0,0);
-    
+
+    private WindControlParameters controlParameters = new WindControlParameters(0, 0);
+
     @Override
     public PositionDTO[] getRaceLocations() {
         PositionDTO lakeGarda = new PositionDTO();
@@ -132,16 +130,16 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     private void retreiveWindControlParameters(WindPatternDisplay pattern) {
-        for(WindPatternSetting<?> s : pattern.getSettings()) {
+        for (WindPatternSetting<?> s : pattern.getSettings()) {
             Field f;
             try {
                 f = controlParameters.getClass().getField(s.getName());
                 try {
-                  
+
                     logger.info("Setting " + f.getName() + " to " + s.getName());
                     f.set(controlParameters, s.getValue());
-                    //f.setDouble(controlParameters, (Double) s.getValue());
-                   
+                    // f.setDouble(controlParameters, (Double) s.getValue());
+
                 } catch (IllegalArgumentException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -153,12 +151,12 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (NoSuchFieldException e) {
-              logger.info(e.getMessage());
+                logger.info(e.getMessage());
             }
-            
+
         }
     }
-    
+
     @Override
     public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) {
 
@@ -167,14 +165,17 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         List<Position> course = new ArrayList<Position>();
         course.add(nw);
         course.add(se);
-       
+
         RectangularBoundary bd = new RectangularBoundary(nw, se);
-        List<Position> lattice = bd.extractLattice(params.getxRes(), params.getyRes());
+        // List<Position> lattice = bd.extractLattice(params.getxRes(), params.getyRes());
         retreiveWindControlParameters(pattern);
-        
-        controlParameters.baseWindBearing =  bd.getSouth().getDegrees();
-        WindField wf = new WindFieldImpl(bd, controlParameters);
-        
+
+        controlParameters.baseWindBearing = bd.getSouth().getDegrees();
+        WindFieldGenerator wf = WindFieldGeneratorFactory.INSTANCE.createWindFieldGenerator(pattern.getWindPattern()
+                .name(), bd, controlParameters);
+
+        List<Position> lattice = wf.extractLattice(params.getxRes(), params.getyRes());
+
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
         if (lattice != null) {
@@ -192,11 +193,12 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return wfDTO;
 
     }
+
     /**
      * Currently the path is a list of WindDTO objects at the path points and only a single optimal path is returned
      * 
      * */
-    public PathDTO[] getPaths(WindFieldGenParamsDTO params,  WindPatternDisplay pattern) {
+    public PathDTO[] getPaths(WindFieldGenParamsDTO params, WindPatternDisplay pattern) {
 
         Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
         Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
@@ -206,12 +208,12 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         RectangularBoundary bd = new RectangularBoundary(nw, se);
         retreiveWindControlParameters(pattern);
-        
-        controlParameters.baseWindBearing =  bd.getSouth().getDegrees();
-        WindField wf = new WindFieldImpl(bd, controlParameters);
-        
 
-        //TODO Get all the paths that need to be displayed
+        controlParameters.baseWindBearing = bd.getSouth().getDegrees();
+        WindFieldGenerator wf = WindFieldGeneratorFactory.INSTANCE.createWindFieldGenerator(pattern.getWindPattern()
+                .name(), bd, controlParameters);
+        
+        // TODO Get all the paths that need to be displayed
         List<WindDTO> path = getOptimumPath(course, wf);
         PathDTO[] pathDTO = new PathDTO[1];
         pathDTO[0] = new PathDTO("Path 1");
@@ -230,14 +232,14 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         List<WindDTO> wList = new ArrayList<WindDTO>();
         for (TimedPositionWithSpeed p : pth.getPathPoints()) {
             // the null in the Wind output is the timestamp - this Wind is time-invariant!
-            //System.out.println("Position: " + p.getPosition() + " Wind: "
-            //        + wf.getWind(new TimedPositionWithSpeedSimple(p.getPosition())));
+            // System.out.println("Position: " + p.getPosition() + " Wind: "
+            // + wf.getWind(new TimedPositionWithSpeedSimple(p.getPosition())));
             // System.out.println("Position: " + p.getPosition() + " Wind: " +
             // wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
             Wind localWind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
             logger.fine(localWind.toString());
             WindDTO w = createWindDTO(localWind);
-            //w.trueWindBearingDeg = 10.0*i;
+            // w.trueWindBearingDeg = 10.0*i;
             ++i;
             wList.add(w);
         }
@@ -255,7 +257,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return new BoatClassDTO[] { boatClassDTO };
 
     }
-    
+
     private WindDTO createWindDTO(Wind wind) {
         WindDTO windDTO = new WindDTO();
         windDTO.trueWindBearingDeg = wind.getBearing().getDegrees();
@@ -263,20 +265,18 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         windDTO.trueWindSpeedInKnots = wind.getKnots();
         windDTO.trueWindSpeedInMetersPerSecond = wind.getMetersPerSecond();
         if (wind.getPosition() != null) {
-            windDTO.position = new PositionDTO(wind.getPosition().getLatDeg(), wind.getPosition()
-                    .getLngDeg());
+            windDTO.position = new PositionDTO(wind.getPosition().getLatDeg(), wind.getPosition().getLngDeg());
         }
         if (wind.getTimePoint() != null) {
             windDTO.timepoint = wind.getTimePoint().asMillis();
         }
-        
+
         return windDTO;
     }
 
     @Override
     public WindPatternDisplay getWindPatternDisplay(WindPatternDTO pattern) {
-       return WindPatternDisplayManager.INSTANCE.getDisplay(WindPattern.valueOf(pattern.name));
+        return WindPatternDisplayManager.INSTANCE.getDisplay(WindPattern.valueOf(pattern.name));
     }
-    
-        
+
 }
