@@ -126,8 +126,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
 	
 	//SailingSimulator roundtrip
 	public static void main(String args[]) {
-		Position p1 = new DegreePosition(25.661333,-90.752563);
-		Position p2 = new DegreePosition(24.522137,-90.774536);
+		//Position p1 = new DegreePosition(25.661333,-90.752563);
+		//Position p2 = new DegreePosition(24.522137,-90.774536);
+		
+		Position p1 = new DegreePosition(48.401856, -140.001526);
+		Position p2 = new DegreePosition(49.143987,-139.987793);
 		
 		Boundary b = new RectangularBoundary(p1, p2);
 		
@@ -150,6 +153,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		for(TimedPositionWithSpeed p : pth.getPathPoints()) {
 			System.out.println("Position: " + p.getPosition() + " Wind: " + wf.getWind(new TimedPositionWithSpeedSimple(p.getPosition())));
 		}
+		System.out.println(pth.getPathPoints().get(pth.getPathPoints().size()-1).getTimePoint().asMillis());
 		//the null in the Wind output is the timestamp - this Wind is time-invariant!
 	}
 }
