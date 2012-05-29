@@ -36,9 +36,9 @@ public class GlobalNavigationPanel extends FlowPanel {
         if(showHomeNavigation) {
             if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
                 String leaderBoardGroupLink = spectatorViewLink + "?leaderboardGroupName=" + leaderboardGroupName; 
-                addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup");
+                addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", "Go to the Event overview.");
             } else {
-                addNavigationLink(stringMessages.home(), homeLink, "home");
+                addNavigationLink(stringMessages.home(), homeLink, "home", "Go to the Event overview.");
             }
         }
         
@@ -47,11 +47,12 @@ public class GlobalNavigationPanel extends FlowPanel {
             if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
                 leaderBoardLink += "&leaderboardGroupName=" + leaderboardGroupName;
             }
-            addNavigationLink(leaderboardName, leaderBoardLink, "leaderBoard");
+            addNavigationLink(leaderboardName, leaderBoardLink, "leaderBoard", "Go to the overview and see all Races in one Leaderboard");
         }        
     }
 
-    private void addNavigationLink(String linkName, String linkUrl, String styleNameExtension) {
+    private void addNavigationLink(String linkName, String linkUrl, String styleNameExtension, String htmlTitle) {
+    	String setHtmlTitle = htmlTitle;
         String url = linkUrl;
         if(debugParam != null && !debugParam.isEmpty()) {
             url += url.contains("?") ? "&" : "?";
@@ -60,6 +61,7 @@ public class GlobalNavigationPanel extends FlowPanel {
         
         HTML linkHtml = new HTML(ANCHORTEMPLATE.anchor(URLFactory.INSTANCE.encode(url), linkName));
         linkHtml.addStyleName(STYLE_NAME_PREFIX + styleNameExtension);
+        linkHtml.setTitle(setHtmlTitle);
         add(linkHtml);
     }
 }
