@@ -40,6 +40,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -114,6 +115,7 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
@@ -438,7 +440,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<RegattaDTO> listEvents() throws IllegalArgumentException {
+    public List<RegattaDTO> getRegattas() throws IllegalArgumentException {
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         for (Regatta regatta : getService().getAllRegattas()) {
             List<CompetitorDTO> competitorList = getCompetitorDTOs(regatta.getCompetitors());
@@ -454,6 +456,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 result.add(regattaDTO);
             }
+        }
+        return result;
+    }
+
+    @Override
+    public List<EventDTO> getEvents() {
+        List<EventDTO> result = new ArrayList<EventDTO>();
+        for (Event event : getService().getAllEvents()) {
+            List<RegattaDTO> regattasList = getRegattas();
+            EventDTO eventDTO = new EventDTO(event.getName(), regattasList);
+            result.add(eventDTO);
         }
         return result;
     }
@@ -1377,7 +1390,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public Map<String, RegattaAndRaceIdentifier> getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName) {
+    public Map<String, RegattaAndRaceIdentifier> getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName) {
         Map<String, RegattaAndRaceIdentifier> result = new HashMap<String, RegattaAndRaceIdentifier>();
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {

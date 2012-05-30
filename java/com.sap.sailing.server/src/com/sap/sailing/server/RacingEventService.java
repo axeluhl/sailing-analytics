@@ -15,16 +15,17 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.RaceFetcher;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.RaceFetcher;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -35,9 +36,9 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -64,12 +65,14 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RaceFetcher {
+    Iterable<Event> getAllEvents();
+
     /**
      * @return a thread-safe copy of the regattas currently known by the service; it's safe for callers to iterate over
      *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
      */
     Iterable<Regatta> getAllRegattas();
-
+    
     Regatta getRegattaByName(String name);
     
     @Override

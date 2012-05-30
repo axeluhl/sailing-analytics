@@ -574,7 +574,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         final Pair<RaceColumnDTO, String> selectedRaceColumnAndFleetNameInLeaderboard = getSelectedRaceColumnAndFleetName();
         final String selectedRaceColumnName = selectedRaceColumnAndFleetNameInLeaderboard.getA().getRaceColumnName();
         final String selectedFleetName = selectedRaceColumnAndFleetNameInLeaderboard.getB();
-        sailingService.getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(selectedLeaderboardName,
+        sailingService.getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(selectedLeaderboardName,
                 selectedRaceColumnName, new AsyncCallback<Map<String, RegattaAndRaceIdentifier>>() {
                     @Override
                     public void onFailure(Throwable t) {
