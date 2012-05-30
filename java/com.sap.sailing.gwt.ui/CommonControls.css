@@ -217,7 +217,7 @@
 	width: 100%;
 	position: fixed;
 	bottom: 0;
-	height: 122px;
+	height: 89px;
 	z-index: 9;
 	background: #7c7b7c;
 	box-shadow: 0 0 20px #858585;
@@ -228,7 +228,7 @@
 .timeLineInnerPanel {
 	/*height: 100%;*/
 	margin: 0 12px;
-	margin-top: 10px;
+	margin-top: 5px;
 	/*padding: 38px 24px 0 24px;*/
 }
 
@@ -247,8 +247,10 @@
 }
 
 .timePanel-controls {
-	margin: 6px 0 6px 0;
-	padding: 13px 0 0 0;
+    margin: 0;
+    padding: 0;
+    -webkit-box-shadow: 0px -7px 13px 0px rgba(105, 104, 105, 1);
+    box-shadow: 0px -7px 13px 0px rgba(105, 104, 105, 1);
 }
 
 .timePanel-controls-play {
