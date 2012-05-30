@@ -27,7 +27,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
     public WindPatternDisplay getDisplay(WindPattern windPattern) {
         WindPatternDisplay display = new WindPatternDisplayImpl(windPattern);
         WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
-                "Base Wind Speed (kn)", 0, 30, 0);
+                "Base Wind Speed (kn)", 0, 30, 3);
         display.addSetting(windSpeedSetting);
 
         switch (windPattern) {
