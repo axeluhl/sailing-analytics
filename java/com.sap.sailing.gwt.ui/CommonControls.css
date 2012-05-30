@@ -266,7 +266,10 @@
 	vertical-align: middle;
 	line-height: 25px;
 	float:left;
-	padding: 0 0 0 0;
+	padding: 0 14px 0 0;
+	margin: 0 14px 0 0;
+    border-right: 1px solid #fcbb22;
+    height: 24px;
 }
 
 .timePanel-label {
@@ -289,11 +292,14 @@
 
 .timePanel-controls-playmode{
     float:left;
-    padding: 0 0 0 0;
+    padding: 0 14px 0 0;
+    margin: 0 14px 0 0;
+    height: 24px;
+    border-right: 1px solid #fcbb22;
 }
 
 .timePanel-controls-playmode .playModeLabel{
-    padding: 4px 20px 0 5px;   	
+    padding: 4px 0 0 5px;   	
 }
 
 .timePanelSettings{
@@ -301,7 +307,7 @@
 }
 
 .timePanelSlider {
-	border-top: 1px solid #e8a808;
+
 	margin: 0 12px;
 	height: 47px;
 }
