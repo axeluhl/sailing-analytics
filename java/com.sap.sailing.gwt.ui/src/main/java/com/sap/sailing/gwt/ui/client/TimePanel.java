@@ -99,6 +99,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         timer.addPlayStateListener(this);
         userExplicitlyChangedLivePlayDelay = false;
         FlowPanel vp = new FlowPanel();
+        vp.setStyleName("timePanelInnerWrapper");
         vp.setSize("100%", "100%");
         
         SimplePanel s = new SimplePanel();
