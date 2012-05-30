@@ -39,12 +39,13 @@ public class WindFieldGeneratorTest {
         WindFieldGeneratorBlastImpl wf = new WindFieldGeneratorBlastImpl(bd, windParameters);
         int hSteps = 10;
         int vSteps = 5;
-        List<Position> positionList = wf.extractLattice(hSteps,vSteps);
+        List<Position> positionList = bd.extractLattice(hSteps,vSteps);
         assert(positionList.size() == hSteps*vSteps);
         int index = 0;
         for(Position p : positionList) {
             logger.info("P" + ++index + ":" + p);
         }
+        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps));
         Position[][] positionGrid = wf.getPositionsGrid();
         assertNotNull("Position Grid is not null", positionGrid);
         assertEquals("Position Grid Number of Rows", vSteps, positionGrid.length);

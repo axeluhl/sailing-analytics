@@ -59,10 +59,10 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         this.boundary = boundary;
         this.windParameters = windParameters;
         this.positions = null;
-        this.indexPositionMap = null;
+        this.indexPositionMap = new HashMap<Pair<Integer, Integer>, Position>();
     }
 
-    public List<Position> extractLattice(int hPoints, int vPoints) {
+    private List<Position> extractLattice(int hPoints, int vPoints) {
         sortedPositionList = boundary.extractLattice(hPoints, vPoints);
         Collections.sort(sortedPositionList, new LatLngComparator());
         assert (sortedPositionList.size() == hPoints * vPoints);
@@ -108,6 +108,21 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
 
     public Position[][] getPositionsGrid() {
         return positions;
+    }
+
+    @Override
+    public void setPositionGrid(Position[][] positions) {
+        this.positions = positions;
+        indexPositionMap.clear();
+        if (positions == null || positions.length < 1) {
+            return;
+        }
+        for (int i = 0; i < positions.length; ++i) {
+            for (int j = 0; j < positions[0].length; ++j) {
+                indexPositionMap.put(new Pair<Integer, Integer>(i, j), positions[i][j]);
+            }
+        }
+        
     }
 
     public Position getPosition(int i, int j) {
