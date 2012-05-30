@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -40,6 +42,7 @@ import com.sap.sailing.simulator.impl.PolarDiagramImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
+import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedSimple;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
@@ -175,13 +178,16 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         WindFieldGenerator wf = WindFieldGeneratorFactory.INSTANCE.createWindFieldGenerator(pattern.getWindPattern()
                 .name(), bd, controlParameters);
 
-        List<Position> lattice =bd.extractLattice(params.getxRes(),params.getyRes());//wf.extractLattice(params.getxRes(), params.getyRes());
-
+        List<Position> lattice = bd.extractLattice(params.getxRes(),params.getyRes());//wf.extractLattice(params.getxRes(), params.getyRes());
+        wf.setPositionGrid(bd.extractGrid(params.getxRes(), params.getyRes()));
+        TimePoint start = new MillisecondsTimePoint(0);
+        TimePoint timeStep = new MillisecondsTimePoint(30*1000);
+        wf.generate(start,null,timeStep);
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
         if (lattice != null) {
             for (Position p : lattice) {
-                Wind localWind = wf.getWind(new TimedPositionWithSpeedSimple(p));
+                Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(start,p,null));
                 logger.fine(localWind.toString());
                 WindDTO w = createWindDTO(localWind);
                 wList.add(w);

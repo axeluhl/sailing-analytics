@@ -25,13 +25,24 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
 
     protected Boundary boundary;
     protected WindControlParameters windParameters;
+    
     protected List<Position> sortedPositionList;
+    
     protected Position[][] positions;
     protected Map<Pair<Integer, Integer>, Position> indexPositionMap;
+    protected Map<Position,Pair<Integer, Integer>> positionIndexMap;
+    
     protected Map<TimePoint, SpeedWithBearing[][]> timeSpeedWithBearingMap;
 
+    protected TimePoint startTime;
+    protected TimePoint endTime;
+    /**
+     * TimePoint which constitutes one unit of time
+     */
+    protected TimePoint timeStep;
+    
     @SuppressWarnings("unused")
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    protected static Logger logger = Logger.getLogger("com.sap.sailing");
 
     private class LatLngComparator implements Comparator<Position> {
 
@@ -60,6 +71,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         this.windParameters = windParameters;
         this.positions = null;
         this.indexPositionMap = new HashMap<Pair<Integer, Integer>, Position>();
+        this.positionIndexMap = new HashMap<Position, Pair<Integer, Integer>>();
     }
 
     private List<Position> extractLattice(int hPoints, int vPoints) {
@@ -114,12 +126,15 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     public void setPositionGrid(Position[][] positions) {
         this.positions = positions;
         indexPositionMap.clear();
+        positionIndexMap.clear();
         if (positions == null || positions.length < 1) {
             return;
         }
         for (int i = 0; i < positions.length; ++i) {
             for (int j = 0; j < positions[0].length; ++j) {
-                indexPositionMap.put(new Pair<Integer, Integer>(i, j), positions[i][j]);
+                Pair<Integer,Integer> index = new Pair<Integer, Integer>(i, j);
+                indexPositionMap.put(index, positions[i][j]);
+                positionIndexMap.put(positions[i][j],index);
             }
         }
         
@@ -130,4 +145,26 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         return indexPositionMap.get(indexKey);
 
     }
+    
+    public Pair<Integer,Integer> getPositionIndex(Position p) {
+        return positionIndexMap.get(p);
+
+    }
+    
+    /**
+     * 
+     * @param t
+     * @return time units relative to the startTime where each unit is timeStep long
+     */
+    public int getTimeIndex(TimePoint t) {
+        return (int) ((t.asMillis()-startTime.asMillis())/timeStep.asMillis());
+    }
+    
+    @Override
+    public void generate(TimePoint start, TimePoint end, TimePoint step) {
+        this.startTime = start;
+        this.endTime = end;
+        this.timeStep = step;
+    }
+    
 }
