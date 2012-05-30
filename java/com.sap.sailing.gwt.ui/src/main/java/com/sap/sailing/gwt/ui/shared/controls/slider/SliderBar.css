@@ -24,21 +24,21 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-tick {
-  top: 16pt;
+  top: 17px;
   width: 2px;
-  height: 11pt;
+  height: 20px;
   background: #efefef;
   overflow: hidden;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-mark {
   top: 22pt;
-  width: 6px;
+  width: 3px;
   height: 12px;
-  background: #f0ab00;
+  background: #fcbb22;
   overflow: hidden;
-  border-left: 4px solid #7c7b7c;
-  border-right: 4px solid #7c7b7c;
+  border-left: 3px solid #7c7b7c;
+  border-right: 3px solid #7c7b7c;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-tick-disabled {
@@ -48,15 +48,16 @@
 .gwt-SliderBar-shell .gwt-SliderBar-ticklabel {
   font-size: 12px;
   cursor: default;
-  font-weight: 600;
-  top: 4px;
+  font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+  top: 2px;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-markerlabel {
   top: 15px;
   font-size: 12px;
-  color: #f0ab00;
+  color: #fcbb22;
   cursor: default;
+  font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
 }
 
 .gwt-SliderBar-shell-focused {
