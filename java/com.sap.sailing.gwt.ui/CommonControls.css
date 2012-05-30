@@ -248,8 +248,8 @@
 .timePanel-controls {
     margin: 0;
     padding: 7px 0 0 12px;
-    -webkit-box-shadow: 0px -7px 13px 0px rgba(105, 104, 105, 1);
-    box-shadow: 0px -7px 13px 0px rgba(105, 104, 105, 1);
+    -webkit-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
+    box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
     height: 29px;
     width: 100%;
 }
@@ -257,6 +257,9 @@
 .timePanel-controls-play {
     float:left;
     padding: 0 10px 0 0;
+    border-right: 1px solid #fcbb22;
+    height: 24px;
+    margin: 0 14px 0 0;
 }
 
 .timePanel-controls-playSpeed {
@@ -304,8 +307,8 @@
 }
 
 .timePanelInnerWrapper {
-    -webkit-box-shadow: inset 0px -7px 13px 0px rgba(105, 104, 105, 1);
-    box-shadow: inset 0px -7px 13px 0px rgba(105, 104, 105, 1);
+    -webkit-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
+    box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
 }
 
 .LogoAndTitlePanel {
