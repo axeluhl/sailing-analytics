@@ -219,7 +219,7 @@
 	bottom: 0;
 	height: 122px;
 	z-index: 9;
-	background: #DDDCDC;
+	background: #7c7b7c;
 	box-shadow: 0 0 20px #858585;
 	-webkit-box-shadow: 0 0 20px #858585;
 	-moz-box-shadow: 0 0 20px #858585;
@@ -234,12 +234,7 @@
 }
 
 .timeLineInnerBgPanel {
-	background: url(images/timeslider-bg.png) 0 -2px repeat-x #f6f6f6;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
-	border-radius: 6px;
 	padding: 0px 10px 0;
-	border: 1px solid #a6a6a6;
 }
 
 .footerShadowPanel {
