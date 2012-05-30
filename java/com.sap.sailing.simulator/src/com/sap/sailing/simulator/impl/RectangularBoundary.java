@@ -39,7 +39,7 @@ public class RectangularBoundary implements Boundary {
 		
 		tolerance = tlr;
 		
-		north = p2.getBearingGreatCircle(p1);
+		north = p1.getBearingGreatCircle(p2);
 		south = north.reverse();
 		east = north.add(TRUEEAST);
 		west = north.add(TRUEWEST);
@@ -47,8 +47,8 @@ public class RectangularBoundary implements Boundary {
 		appHeight = p1.getDistance(p2);
 		appWidth = appHeight.scale(2);
 		
-		appNorthWest = p1.translateGreatCircle(west, appWidth.scale(0.5));
-		appNorthEast = p1.translateGreatCircle(east, appWidth.scale(0.5));
+		appNorthWest = p2.translateGreatCircle(west, appWidth.scale(0.5));
+		appNorthEast = p2.translateGreatCircle(east, appWidth.scale(0.5));
 		appSouthEast = appNorthEast.translateGreatCircle(south, appHeight);
 		appSouthWest = appNorthWest.translateGreatCircle(south, appHeight);
 		
@@ -115,8 +115,8 @@ public class RectangularBoundary implements Boundary {
 		for (int i = 0; i < vPoints; i++) {
 			for (int j = 0; j < hPoints; j++) {
 				grid[i][j] = appSouthWest.
-						translateGreatCircle(getNorth(), vStep.scale(j)).
-						translateGreatCircle(getEast(), hStep.scale(i));
+						translateGreatCircle(getNorth(), vStep.scale(i)).
+						translateGreatCircle(getEast(), hStep.scale(j));
 			}
 		}
 		
