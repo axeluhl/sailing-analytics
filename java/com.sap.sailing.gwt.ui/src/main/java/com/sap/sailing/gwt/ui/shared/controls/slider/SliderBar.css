@@ -26,7 +26,7 @@
 .gwt-SliderBar-shell .gwt-SliderBar-tick {
   top: 16pt;
   width: 2px;
-  height: 6pt;
+  height: 11pt;
   background: #efefef;
   overflow: hidden;
 }
@@ -49,7 +49,7 @@
   font-size: 12px;
   cursor: default;
   font-weight: 600;
-  top: 9px;
+  top: 5px;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-markerlabel {
