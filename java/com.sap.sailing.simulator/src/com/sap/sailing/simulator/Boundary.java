@@ -15,11 +15,14 @@ public interface Boundary {
 	static Bearing TRUEEAST = new DegreeBearingImpl(90);
 	static Bearing TRUEWEST = new DegreeBearingImpl(270);
 	
+	double getTolerance();
+	
 	Map<String, Position> getCorners();
 	
 	boolean isWithinBoundaries(Position P);
 	
 	List<Position> extractLattice(int hPoints, int vPoints);
+	Position[][] extractGrid(int hPoints, int vPoints);
 	List<Position> extractLattice(Distance hStep, Distance vstep);
 	
 	Bearing getNorth();

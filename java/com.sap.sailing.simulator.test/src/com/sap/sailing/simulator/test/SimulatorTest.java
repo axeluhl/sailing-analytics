@@ -50,7 +50,7 @@ public class SimulatorTest {
         course.add(start);
         course.add(end);
         PolarDiagram pd = new PolarDiagramImpl(0);
-        RectangularBoundary bd = new RectangularBoundary(start, end);
+        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
         KilometersPerHourSpeedImpl kmhrSpeed = new KilometersPerHourSpeedImpl(7.2);
         WindControlParameters windParameters = new WindControlParameters(kmhrSpeed.getKnots(), 45);
         WindField wf = new WindFieldImpl(bd, windParameters);
@@ -72,7 +72,7 @@ public class SimulatorTest {
         Position p1 = new DegreePosition(25.661333, -90.752563);
         Position p2 = new DegreePosition(24.522137, -90.774536);
 
-        Boundary b = new RectangularBoundary(p1, p2);
+        Boundary b = new RectangularBoundary(p1, p2, 0.1);
 
         Distance dist = p1.getDistance(p2);
         // the Speed required to go from p1 to p2 in 10 minutes
@@ -102,7 +102,19 @@ public class SimulatorTest {
 
         assertEquals("Number of path points", 30, pth.getPathPoints().size());
     }
+    
+    @Test 
+    public void testRectangularBoundary1() {
+    	Position p1 = new DegreePosition(25.661333, -90.752563);
+        Position p2 = new DegreePosition(24.522137, -90.774536);
 
+        Boundary b = new RectangularBoundary(p1, p2, 0.1);
+        
+        assertEquals("Number of lattice points",400,b.extractLattice(20,20).size());
+    	
+    }
+
+    /*
     @Test
     public void testPolarDiagram49_1() {
     	
@@ -136,5 +148,5 @@ public class SimulatorTest {
     	tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(0));
     	table.put(new KnotSpeedImpl(6), tableRow);
     	
-    }
+    }*/
 }

@@ -168,7 +168,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         course.add(nw);
         course.add(se);
        
-        RectangularBoundary bd = new RectangularBoundary(nw, se);
+        RectangularBoundary bd = new RectangularBoundary(nw, se, 0.1);
         List<Position> lattice = bd.extractLattice(params.getxRes(), params.getyRes());
         retreiveWindControlParameters(pattern);
         
@@ -204,7 +204,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         course.add(nw);
         course.add(se);
 
-        RectangularBoundary bd = new RectangularBoundary(nw, se);
+        RectangularBoundary bd = new RectangularBoundary(nw, se, 0.1);
         retreiveWindControlParameters(pattern);
         
         controlParameters.baseWindBearing =  bd.getSouth().getDegrees();
