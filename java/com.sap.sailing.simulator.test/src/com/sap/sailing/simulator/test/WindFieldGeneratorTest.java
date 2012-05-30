@@ -35,7 +35,7 @@ public class WindFieldGeneratorTest {
         course.add(end);
        
         WindControlParameters windParameters = new WindControlParameters(3, 180);
-        RectangularBoundary bd = new RectangularBoundary(start, end);
+        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
         WindFieldGeneratorBlastImpl wf = new WindFieldGeneratorBlastImpl(bd, windParameters);
         int hSteps = 10;
         int vSteps = 5;

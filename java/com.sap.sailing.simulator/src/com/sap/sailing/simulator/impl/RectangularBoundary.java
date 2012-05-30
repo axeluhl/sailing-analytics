@@ -104,10 +104,10 @@ public class RectangularBoundary implements Boundary {
 		
 		Distance hStep = appWidth.scale(1.0/(hPoints-1)); 
 		Distance vStep = appHeight.scale(1.0/(vPoints-1));
-		Position[][] grid = new Position[hPoints][vPoints];
+		Position[][] grid = new Position[vPoints][hPoints];
 		
-		for (int i = 0; i < hPoints; i++) {
-			for (int j = 0; j < vPoints; j++) {
+		for (int i = 0; i < vPoints; i++) {
+			for (int j = 0; j < hPoints; j++) {
 				grid[i][j] = appSouthWest.
 						translateGreatCircle(getNorth(), vStep.scale(j)).
 						translateGreatCircle(getEast(), hStep.scale(i));
@@ -132,6 +132,7 @@ public class RectangularBoundary implements Boundary {
 	}
 
 	@Override
+	//may not return a rectangular lattice!
 	public List<Position> extractLattice(Distance hStep, Distance vStep) {
 		
 		Position startPoint = appSouthWest;
