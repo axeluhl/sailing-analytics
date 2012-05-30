@@ -190,7 +190,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         
         p.addNorth(logoAndTitlePanel, 68);        
         p.addNorth(toolbarPanel, 40);
-        p.addSouth(timePanel, 122);                     
+        p.addSouth(timePanel, 89);                     
         p.add(raceBoardPanel);
     }    
 }
