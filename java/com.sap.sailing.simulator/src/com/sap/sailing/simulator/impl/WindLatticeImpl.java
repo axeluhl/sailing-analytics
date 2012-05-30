@@ -4,7 +4,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.simulator.WindLattice;
-import com.sap.sailing.simulator.impl.WindLatticeImpl.LatticePoint;
 
 public class WindLatticeImpl implements WindLattice {
 

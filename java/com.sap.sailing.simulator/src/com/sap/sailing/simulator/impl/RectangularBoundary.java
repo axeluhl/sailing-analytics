@@ -16,6 +16,12 @@ public class RectangularBoundary implements Boundary {
 	private Position southWest;
 	private Position northEast;
 	
+	private Position appNorthWest;
+	private Position appSouthEast;
+	private Position appSouthWest;
+	private Position appNorthEast;
+	
+	
 	private Bearing north;
 	private Bearing south;
 	private Bearing east;
@@ -24,35 +30,51 @@ public class RectangularBoundary implements Boundary {
 	private Distance width;
 	private Distance height;
 	
-	public RectangularBoundary(Position p1, Position p2) {
-				
+	private Distance appWidth;
+	private Distance appHeight;
+	
+	double tolerance;
+	
+	public RectangularBoundary(Position p1, Position p2, double tlr) {
+		
+		tolerance = tlr;
+		
 		north = p2.getBearingGreatCircle(p1);
 		south = north.reverse();
 		east = north.add(TRUEEAST);
 		west = north.add(TRUEWEST);
 		
-		Distance dist = p1.getDistance(p2);
-		Position pp1 = p1.translateGreatCircle(getNorth(), dist.scale(0.1));
-		Position pp2 = p2.translateGreatCircle(getSouth(), dist.scale(0.1)) ;
+		appHeight = p1.getDistance(p2);
+		appWidth = appHeight.scale(2);
 		
-		height = p1.getDistance(pp2);
-		width = height.scale(2);
+		appNorthWest = p1.translateGreatCircle(west, appWidth.scale(0.5));
+		appNorthEast = p1.translateGreatCircle(east, appWidth.scale(0.5));
+		appSouthEast = appNorthEast.translateGreatCircle(south, appHeight);
+		appSouthWest = appNorthWest.translateGreatCircle(south, appHeight);
 		
-		northWest = pp1.translateGreatCircle(west, width.scale(0.5));
-		northEast = pp1.translateGreatCircle(east, width.scale(0.5));
-		southEast = northEast.translateGreatCircle(south, height);
-		southWest = northWest.translateGreatCircle(south, height);
-
+		Distance diag = appNorthWest.getDistance(appSouthEast);
+		
+		Bearing diag1 = appSouthEast.getBearingGreatCircle(appNorthWest);
+		northWest = appNorthWest.translateGreatCircle(diag1, diag.scale(tolerance));
+		diag1 = diag1.reverse();
+		southEast = appSouthEast.translateGreatCircle(diag1, diag.scale(tolerance));
+		Bearing diag2 = appSouthWest.getBearingGreatCircle(appNorthEast);
+		northEast = appNorthEast.translateGreatCircle(diag2, diag.scale(tolerance));
+		diag2 = diag2.reverse();
+		southWest = appSouthWest.translateGreatCircle(diag2, diag.scale(tolerance));
+		
+		height = northWest.getDistance(southWest);
+		width = southWest.getDistance(southEast);
 	}
 
 	@Override
 	public Map<String, Position> getCorners() {
 
 		Map<String, Position> map = new HashMap<String, Position>();
-		map.put("NorthWest", northWest);
-		map.put("SouthWest", southWest);
-		map.put("SouthEast", southEast);
-		map.put("NorthEast", northEast);
+		map.put("NorthWest", appNorthWest);
+		map.put("SouthWest", appSouthWest);
+		map.put("SouthEast", appSouthEast);
+		map.put("NorthEast", appNorthEast);
 		
 		return map;
 
@@ -78,18 +100,42 @@ public class RectangularBoundary implements Boundary {
 	}
 
 	@Override
+	public Position[][] extractGrid(int hPoints, int vPoints) {
+		
+		Distance hStep = appWidth.scale(1.0/(hPoints-1)); 
+		Distance vStep = appHeight.scale(1.0/(vPoints-1));
+		Position[][] grid = new Position[vPoints][hPoints];
+		
+		for (int i = 0; i < vPoints; i++) {
+			for (int j = 0; j < hPoints; j++) {
+				grid[i][j] = appSouthWest.
+						translateGreatCircle(getNorth(), vStep.scale(j)).
+						translateGreatCircle(getEast(), hStep.scale(i));
+			}
+		}
+		
+		return grid;
+		
+	}
+	
+	@Override
 	public List<Position> extractLattice(int hPoints, int vPoints) {
 		
-		return extractLattice(width.scale(1.0/hPoints), height.scale(1.0/vPoints));
-		
+		Position[][] grid = extractGrid(hPoints, vPoints);
+		List<Position> lst = new ArrayList<Position>();
+		for(Position[] line : grid) {
+			for(Position p : line) {
+				lst.add(p);
+			}
+		}
+		return lst;
 	}
 
 	@Override
+	//may not return a rectangular lattice!
 	public List<Position> extractLattice(Distance hStep, Distance vStep) {
 		
-		Bearing diagBearing = southWest.getBearingGreatCircle(northEast);
-		Distance diag = southWest.getDistance(northEast);
-		Position startPoint = southWest.translateGreatCircle(diagBearing, diag.scale(0.01));
+		Position startPoint = appSouthWest;
 		
 		Bearing vBearing = getNorth();
 		Bearing hBearing = getEast();
@@ -146,12 +192,12 @@ public class RectangularBoundary implements Boundary {
 
 	@Override
 	public Distance getWidth() {
-		return width;
+		return appWidth;
 	}
 	
 	@Override
 	public Distance getHeight() {
-		return height;
+		return appHeight;
 	}
 
 	@Override
@@ -159,21 +205,26 @@ public class RectangularBoundary implements Boundary {
 		if (!isWithinBoundaries(p)) return null;
 		
 		Map<String,Double> map = new HashMap<String,Double>();
-		Position px = p.projectToLineThrough(southWest, getEast());
-		Position py = p.projectToLineThrough(southWest, getNorth());
+		Position px = p.projectToLineThrough(appSouthWest, getEast());
+		Position py = p.projectToLineThrough(appSouthWest, getNorth());
 		
-		map.put("X", px.getDistance(southWest).getMeters()/getWidth().getMeters());
-		map.put("Y", py.getDistance(southWest).getMeters()/getHeight().getMeters());
+		map.put("X", px.getDistance(appSouthWest).getMeters()/getWidth().getMeters());
+		map.put("Y", py.getDistance(appSouthWest).getMeters()/getHeight().getMeters());
 		return map;
 	}
 
 	@Override
 	public Position getRelativePoint(double x, double y) {
 		
-		Position point = southWest;
+		Position point = appSouthWest;
 		point = point.translateGreatCircle(getEast(), getWidth().scale(x));
 		point = point.translateGreatCircle(getNorth(), getHeight().scale(y));
 		return point;
+	}
+
+	@Override
+	public double getTolerance() {
+		return tolerance;
 	}
 	
 }
