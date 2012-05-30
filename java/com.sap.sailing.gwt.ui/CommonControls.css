@@ -295,6 +295,10 @@
 	float: right;
 }
 
+.timePanelSlider {
+	border-top: 1px solid #e8a808;
+}
+
 .LogoAndTitlePanel {
     height: 68px;
     font-family: Arial, Verdana, sans-serif;
