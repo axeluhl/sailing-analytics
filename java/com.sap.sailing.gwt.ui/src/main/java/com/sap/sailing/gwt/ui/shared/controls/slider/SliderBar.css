@@ -4,9 +4,8 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-line {
-  border: 1px solid #919191;
-  background-color: #818181;
-  height: 4px;
+  background: #efefef;
+  height: 12px;
   width: 100%;
   top: 22pt;
   overflow: hidden;
@@ -26,9 +25,9 @@
 
 .gwt-SliderBar-shell .gwt-SliderBar-tick {
   top: 16pt;
-  width: 1px;
+  width: 2px;
   height: 6pt;
-  background: #919191;
+  background: #efefef;
   overflow: hidden;
 }
 
