@@ -196,7 +196,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         timeLabel = new Label();
         timeControlPanel.add(dateLabel);
         timeControlPanel.add(timeLabel);
-        controlsPanel.add(timeControlPanel);
+        
         dateLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         dateLabel.getElement().setClassName("dateLabel");
         timeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -210,14 +210,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         
         playModeLabel = new Label();
         playModeControlPanel .add(playModeLabel);
-        controlsPanel.add(playModeControlPanel );
+
         playModeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         playModeLabel.getElement().setClassName("playModeLabel");
         
         // play speed controls
         FlowPanel playSpeedControlPanel = new FlowPanel();
         playSpeedControlPanel.setStyleName("timePanel-controls-playSpeed");
-        controlsPanel.add(playSpeedControlPanel);
+        
 
         playSpeedBox = new IntegerBox();
         playSpeedBox.setVisibleLength(3);
@@ -267,7 +267,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
 
         timeDelayLabel = new Label();
         timeDelayPanel.add(timeDelayLabel);
-        controlsPanel.add(timeDelayPanel);
+        
         timeDelayLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         timeDelayLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
         
@@ -280,6 +280,12 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         controlsPanel.add(settingsAnchor);
         setWidget(vp);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
+        
+        
+        controlsPanel.add(playSpeedControlPanel);
+        controlsPanel.add(playModeControlPanel );
+        controlsPanel.add(timeDelayPanel);
+        controlsPanel.add(timeControlPanel);
     }
 
     @Override
