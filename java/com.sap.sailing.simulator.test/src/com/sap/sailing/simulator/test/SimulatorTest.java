@@ -5,19 +5,14 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NavigableMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+
 import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.simulator.Boundary;
@@ -34,8 +29,6 @@ import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedSimple;
 import com.sap.sailing.simulator.impl.WindFieldImpl;
-
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 
 public class SimulatorTest {
     private static Logger logger = Logger.getLogger("com.sap.sailing");
@@ -103,50 +96,4 @@ public class SimulatorTest {
         assertEquals("Number of path points", 37, pth.getPathPoints().size());
     }
     
-    @Test 
-    public void testRectangularBoundary1() {
-    	Position p1 = new DegreePosition(25.661333, -90.752563);
-        Position p2 = new DegreePosition(24.522137, -90.774536);
-
-        Boundary b = new RectangularBoundary(p1, p2, 0.1);
-        
-        assertEquals("Number of lattice points",400,b.extractLattice(20,20).size());
-    	
-    }
-
-    /*
-    @Test
-    public void testPolarDiagram49_1() {
-    	
-    	SortedSet<Speed> speeds = new TreeSet<Speed>();
-    	NavigableMap<Speed, NavigableMap<Bearing, Speed>> table = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
-    	NavigableMap<Bearing, Speed> tableRow; 
-    	
-    	tableRow = new TreeMap<Bearing,Speed>();
-    	tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-    	tableRow.put(new DegreeBearingImpl(52), Speed.NULL);
-    	tableRow.put(new DegreeBearingImpl(60), Speed.NULL);
-    	tableRow.put(new DegreeBearingImpl(75), Speed.NULL);
-    	tableRow.put(new DegreeBearingImpl(90), Speed.NULL);
-    	tableRow.put(new DegreeBearingImpl(110), Speed.NULL);
-    	tableRow.put(new DegreeBearingImpl(120), Speed.NULL);
-    	tableRow.put(new DegreeBearingImpl(135), Speed.NULL);
-    	tableRow.put(new DegreeBearingImpl(150), Speed.NULL);
-    	tableRow.put(new DegreeBearingImpl(180), Speed.NULL);
-    	table.put(Speed.NULL, tableRow);
-    	
-    	tableRow = new TreeMap<Bearing,Speed>();
-    	tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-    	tableRow.put(new DegreeBearingImpl(52), new KnotSpeedImpl(6.57));
-    	tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(7.01));
-    	tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(7.36));
-    	tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(7.31));
-    	tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(0));
-    	tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(0));
-    	tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(0));
-    	tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(0));
-    	tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(0));
-    	table.put(new KnotSpeedImpl(6), tableRow);
-    	
-    }*/
 }
