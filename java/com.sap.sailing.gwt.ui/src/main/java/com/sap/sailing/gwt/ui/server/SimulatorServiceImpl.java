@@ -175,7 +175,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         WindFieldGenerator wf = WindFieldGeneratorFactory.INSTANCE.createWindFieldGenerator(pattern.getWindPattern()
                 .name(), bd, controlParameters);
 
-        List<Position> lattice = wf.extractLattice(params.getxRes(), params.getyRes());
+        List<Position> lattice =bd.extractLattice(params.getxRes(),params.getyRes());//wf.extractLattice(params.getxRes(), params.getyRes());
 
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
