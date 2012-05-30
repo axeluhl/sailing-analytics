@@ -303,6 +303,11 @@
 	height: 47px;
 }
 
+.timePanelInnerWrapper {
+    -webkit-box-shadow: inset 0px -7px 13px 0px rgba(105, 104, 105, 1);
+    box-shadow: inset 0px -7px 13px 0px rgba(105, 104, 105, 1);
+}
+
 .LogoAndTitlePanel {
     height: 68px;
     font-family: Arial, Verdana, sans-serif;
