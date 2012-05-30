@@ -148,7 +148,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         FlowPanel controlsPanel = new FlowPanel();
         
         controlsPanel.setStyleName("timePanel-controls");
-        controlsPanel.setSize("100%", "25px");
         vp.add(controlsPanel);
         
         // play button control
