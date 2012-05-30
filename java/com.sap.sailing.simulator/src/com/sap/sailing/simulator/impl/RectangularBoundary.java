@@ -66,6 +66,12 @@ public class RectangularBoundary implements Boundary {
 		height = northWest.getDistance(southWest);
 		width = southWest.getDistance(southEast);
 	}
+	
+	public RectangularBoundary(Position p1, Position p2) {
+		
+		this(p1, p2, 0.1);
+		
+	}
 
 	@Override
 	public Map<String, Position> getCorners() {

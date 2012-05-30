@@ -28,6 +28,8 @@ public class PolarDiagram49 implements PolarDiagram {
 			SortedMap<Speed, Speed> beatSOGs,
 			SortedMap<Speed, Speed> gybeSOGs) {
 		
+		wind = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180));
+		
 		speedTable = speeds;
 		beatAngles = beats;
 		gybeAngles = gybes;
@@ -36,10 +38,10 @@ public class PolarDiagram49 implements PolarDiagram {
 		
 		for (Speed s : speedTable.keySet()) {
 			
-			if ( !speedTable.get(s).containsKey(beatAngles.get(s)) ) 
+			if ( beatAngles.containsKey(s) && !speedTable.get(s).containsKey(beatAngles.get(s)) ) 
 				speedTable.get(s).put(beatAngles.get(s), beatSOG.get(s));
 			
-			if (! speedTable.get(s).containsKey(gybeAngles.get(s)) )
+			if ( gybeAngles.containsKey(s) && !speedTable.get(s).containsKey(gybeAngles.get(s)) )
 				speedTable.get(s).put(gybeAngles.get(s), gybeSOG.get(s));
 			
 		}
@@ -84,12 +86,20 @@ public class PolarDiagram49 implements PolarDiagram {
 
 	@Override
 	public Bearing[] optimalDirectionsUpwind() {
-		return (Bearing[]) beatAngles.values().toArray();
+		Bearing windBearing = wind.getBearing().reverse();
+		return new Bearing[] { 
+				windBearing.add(beatAngles.get(wind)), 
+				windBearing.add(beatAngles.get(wind).getDifferenceTo(windBearing)) 
+				};
 	}
 
 	@Override
 	public Bearing[] optimalDirectionsDownwind() {
-		return (Bearing[]) gybeAngles.values().toArray();
+		Bearing windBearing = wind.getBearing().reverse();
+		return new Bearing[] { 
+				windBearing.add(gybeAngles.get(wind)), 
+				windBearing.add(gybeAngles.get(wind).getDifferenceTo(windBearing)) 
+				};
 	}
 	
 	public static Comparator<Bearing> bearingComparator = new Comparator<Bearing>() {
