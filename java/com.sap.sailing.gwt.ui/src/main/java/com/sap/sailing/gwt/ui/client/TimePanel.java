@@ -4,7 +4,6 @@ import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -103,8 +102,8 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         vp.setSize("100%", "100%");
         
         SimplePanel s = new SimplePanel();
-        s.getElement().getStyle().setMarginLeft(55, Unit.PX);
-        s.getElement().getStyle().setMarginRight(55, Unit.PX);
+        s.setStyleName("timePanelSlider");
+
 
         playButtonImg = resources.timesliderPlayActiveIcon();
         pauseButtonImg = resources.timesliderPauseIcon();
