@@ -1,8 +1,8 @@
 package com.sap.sailing.simulator.impl;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
@@ -19,7 +19,7 @@ import com.sap.sailing.simulator.impl.WindFieldGeneratorImpl;
 
 public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl implements WindFieldGenerator {
 
-    /* Currectly the speed is time and vertical step invariant, it only changes along the horizontal 
+    /* Currently the speed is time and vertical step invariant, it only changes along the horizontal 
      * direction*/
     private Speed[] speed;
     
@@ -77,7 +77,6 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
             Bearing phi0 = new DegreeBearingImpl(windParameters.baseWindBearing);
             phi0 = phi0.reverse();
             double vStep = 1.0/(positions.length-1);
-            logger.info("Nrows:"+ positions.length + " vstep:"+vStep);
             double t = (timeIndex+(timeIndex+rowIndex)*vStep);
             Bearing angle = new DegreeBearingImpl(Math.sin(2*Math.PI*t*windParameters.frequency)*windParameters.amplitude);
             angle.add(phi0);
@@ -92,7 +91,8 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
     @Override
     public Wind getWind(TimedPosition timedPosition) {
 
-        SpeedWithBearing wspeed = new KilometersPerHourSpeedWithBearingImpl(getSpeed(timedPosition).getKilometersPerHour(),
+        Speed speed = getSpeed(timedPosition);
+        SpeedWithBearing wspeed = new KnotSpeedWithBearingImpl(speed.getKnots(),
                 getBearing(timedPosition));
 
         return new WindImpl(timedPosition.getPosition(), timedPosition.getTimePoint(), wspeed);
