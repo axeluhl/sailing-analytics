@@ -163,6 +163,49 @@ public class WindFieldGeneratorTest {
 
     }
 
+    @Test
+    public void testWindFieldGeneratorBlast() {
+        Position start = new DegreePosition(54.32447456461419, 10.15613079071045);
+        Position end = new DegreePosition(54.32877915239163, 10.156173706054688);
+        List<Position> course = new LinkedList<Position>();
+        course.add(start);
+        course.add(end);
+
+        WindControlParameters windParameters = new WindControlParameters(10, 180);
+        windParameters.blastProbability = 15.0;
+        windParameters.maxBlastSize = 4.0;
+        windParameters.blastWindSpeed = 15.0;
+        windParameters.blastWindSpeedVar = 15.0;
+
+        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
+        WindFieldGeneratorBlastImpl wf = new WindFieldGeneratorBlastImpl(bd, windParameters);
+        int hSteps = 10;
+        int vSteps = 5;
+
+        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps));
+        Position[][] positionGrid = wf.getPositionsGrid();
+        TimePoint startTime = new MillisecondsTimePoint(0);
+        TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
+        wf.generate(startTime, null, timeStep);
+
+        SpeedWithBearing speed = new KilometersPerHourSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
+
+        /*
+         * Check the speed & angle at the start time
+         */
+        List<Wind> windList = new ArrayList<Wind>();
+        for (int i = 0; i < vSteps; ++i) {
+            for (int j = 0; j < hSteps; ++j) {
+                Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(startTime, positionGrid[i][j], speed));
+                logger.info("Wind[" + i + "][" + j + "]" + localWind.toString());
+                windList.add(localWind);
+            }
+        }
+        assertEquals("Size of windList ", hSteps * vSteps, windList.size());
+        double epsilon = 1e-6;
+        // Check the speed
+        assertEquals("StartTime First Wind Speed ", 0, windList.get(0).getKnots(), 0);
+    }
     private Pair<Integer, Integer> getIndex(int listIndex, int numCols) {
         Pair<Integer, Integer> indexPair = new Pair<Integer, Integer>(1 + (listIndex - 1) / numCols, 1
                 + (listIndex - 1) % numCols);

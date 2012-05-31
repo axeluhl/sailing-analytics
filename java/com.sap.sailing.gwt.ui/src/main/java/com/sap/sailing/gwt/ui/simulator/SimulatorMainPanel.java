@@ -87,7 +87,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         public void onValueChange(ValueChangeEvent<Double> arg0) {
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
-            update();
+            //update();
         }
 
     }
