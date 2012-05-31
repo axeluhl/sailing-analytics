@@ -27,30 +27,23 @@
          unpack="false"/>
 
    <plugin
-         id="jackson-xc"
-         download-size="0"
-         install-size="0"
-         version="1.9.7"
-         unpack="false"/>
-
-   <plugin
          id="org.restlet"
          download-size="0"
          install-size="0"
-         version="2.1.0.rc4-v20120406-1833"
+         version="2.1.0.rc5-v20120523-1754"
          unpack="false"/>
 
    <plugin
          id="org.restlet.ext.servlet"
          download-size="0"
          install-size="0"
-         version="2.1.0.rc4-v20120406-1833"
+         version="2.1.0.rc5-v20120523-1754"
          unpack="false"/>
 
    <plugin
          id="org.restlet.ext.jackson"
          download-size="0"
          install-size="0"
-         version="2.1.0.rc4-v20120406-1833"
+         version="2.1.0.rc5-v20120523-1754"
          unpack="false"/>
 </feature>
