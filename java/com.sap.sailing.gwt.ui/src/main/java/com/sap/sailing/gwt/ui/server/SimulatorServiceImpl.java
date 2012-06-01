@@ -220,6 +220,12 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         WindFieldGenerator wf = WindFieldGeneratorFactory.INSTANCE.createWindFieldGenerator(pattern.getWindPattern()
                 .name(), bd, controlParameters);
         
+        List<Position> lattice = bd.extractLattice(params.getxRes(),params.getyRes());//wf.extractLattice(params.getxRes(), params.getyRes());
+        wf.setPositionGrid(bd.extractGrid(params.getxRes(), params.getyRes()));
+        TimePoint start = new MillisecondsTimePoint(0);
+        TimePoint timeStep = new MillisecondsTimePoint(30*1000);
+        wf.generate(start,null,timeStep);
+        
         // TODO Get all the paths that need to be displayed
         List<WindDTO> path = getOptimumPath(course, wf);
         PathDTO[] pathDTO = new PathDTO[1];

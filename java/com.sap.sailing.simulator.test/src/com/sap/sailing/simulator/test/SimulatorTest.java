@@ -10,9 +10,11 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
 import com.sap.sailing.simulator.Boundary;
@@ -23,11 +25,13 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindField;
+import com.sap.sailing.simulator.WindFieldGenerator;
 import com.sap.sailing.simulator.impl.PolarDiagramImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedSimple;
+import com.sap.sailing.simulator.impl.WindFieldGeneratorOscillationImpl;
 import com.sap.sailing.simulator.impl.WindFieldImpl;
 
 public class SimulatorTest {
@@ -88,6 +92,46 @@ public class SimulatorTest {
             // the null in the Wind output is the timestamp - this Wind is time-invariant!
             System.out.println("Position: " + p.getPosition() + " Wind: "
                     + wf.getWind(new TimedPositionWithSpeedSimple(p.getPosition())));
+            System.out.println("Position: " + p.getPosition() + " Wind: "
+                    + wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
+            // Wind wind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
+        }
+
+        assertEquals("Number of path points", 37, pth.getPathPoints().size());
+    }
+    
+    @Test
+    public void testSailingSimulatorWithOscillation() {
+        Position p1 = new DegreePosition(25.661333, -90.752563);
+        Position p2 = new DegreePosition(24.522137, -90.774536);
+
+        Boundary b = new RectangularBoundary(p1, p2, 0.1);
+
+        Distance dist = p1.getDistance(p2);
+        // the Speed required to go from p1 to p2 in 10 minutes
+        Speed requiredSpeed10 = dist.inTime(600000);
+
+        // I am creating the WindField such as the course goes mainly against the wind (as it should)
+        // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
+        WindControlParameters windParameters = new WindControlParameters(requiredSpeed10.getKnots(), b.getSouth().getDegrees());
+        WindFieldGenerator wf = new WindFieldGeneratorOscillationImpl(b, windParameters);
+        
+        
+        wf.setPositionGrid(b.extractGrid(5, 5));
+        TimePoint start = new MillisecondsTimePoint(0);
+        TimePoint timeStep = new MillisecondsTimePoint(30*1000);
+        wf.generate(start,null,timeStep);
+
+        PolarDiagram pd = new PolarDiagramImpl(1);
+        List<Position> course = new ArrayList<Position>();
+        course.add(p1);
+        course.add(p2);
+        SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
+        SailingSimulator solver = new SailingSimulatorImpl(sp);
+
+        Path pth = solver.getOptimumPath();
+        logger.info("Path with " + pth.getPathPoints().size() + " points");
+        for (TimedPositionWithSpeed p : pth.getPathPoints()) {
             System.out.println("Position: " + p.getPosition() + " Wind: "
                     + wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
             // Wind wind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));

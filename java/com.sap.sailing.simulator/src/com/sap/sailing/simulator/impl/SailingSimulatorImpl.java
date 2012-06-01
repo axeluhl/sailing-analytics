@@ -84,7 +84,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 			
 			TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
 			
-			pd.setWind(wf.getWind(new TimedPositionWithSpeedSimple(currentPosition)));
+			pd.setWind(wf.getWind(new TimedPositionWithSpeedImpl(nextTime, currentPosition, null)));
 			
 			Bearing lft = pd.optimalDirectionsDownwind()[0];
 			Bearing rght = pd.optimalDirectionsUpwind()[1];

@@ -91,9 +91,9 @@ public class WindControlParameters {
         baseWindBearing = 0.0;
         frequency = 0.0;
         amplitude = 0.0;
-        leftWindSpeed = 0.0;
-        middleWindSpeed = 0.0;
-        rightWindSpeed = 0.0;
+        leftWindSpeed = 100.0;
+        middleWindSpeed = 100.0;
+        rightWindSpeed = 100.0;
         
         blastProbability = 0.0;
         maxBlastSize = 1.0;

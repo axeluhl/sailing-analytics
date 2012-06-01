@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -30,7 +32,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     
     protected Position[][] positions;
     protected Map<Pair<Integer, Integer>, Position> indexPositionMap;
-    protected Map<Position,Pair<Integer, Integer>> positionIndexMap;
+    protected TreeMap<Position,Pair<Integer, Integer>> positionIndexMap;
     
     protected Map<TimePoint, SpeedWithBearing[][]> timeSpeedWithBearingMap;
 
@@ -71,7 +73,7 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         this.windParameters = windParameters;
         this.positions = null;
         this.indexPositionMap = new HashMap<Pair<Integer, Integer>, Position>();
-        this.positionIndexMap = new HashMap<Position, Pair<Integer, Integer>>();
+        this.positionIndexMap = new TreeMap<Position, Pair<Integer, Integer>>(new LatLngComparator());
     }
 
     private List<Position> extractLattice(int hPoints, int vPoints) {
@@ -147,8 +149,11 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     }
     
     public Pair<Integer,Integer> getPositionIndex(Position p) {
-        return positionIndexMap.get(p);
-
+        Entry<Position,Pair<Integer,Integer>> entry = positionIndexMap.floorEntry(p);
+        if (entry != null) {
+            return entry.getValue();
+        }
+        return null;
     }
     
     /**

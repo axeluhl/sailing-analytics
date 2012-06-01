@@ -52,7 +52,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
                 1);
         display.addSetting(maxBlastSize);
         WindPatternSetting<Double> blastWindSpeed = new WindPatternSettingSliderBar("blastWindSpeed",
-                "Average Blast Wind Speed (%)", 0, 100, 0);
+                "Average Blast Wind Speed (%)", 0, 100, 100);
         display.addSetting(blastWindSpeed);
         WindPatternSetting<Double> blastWindSpeedVar = new WindPatternSettingSliderBar("blastWindSpeedVar",
                 "Blast Wind Speed Variance (%)", 0, 100, 0);
@@ -70,13 +70,13 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
                 "Oscillation Amplitude (Degrees)", 0, 20, 0);
         display.addSetting(amplitude);
         WindPatternSetting<Double> leftWindSpeed = new WindPatternSettingSliderBar("leftWindSpeed",
-                "Wind Speed Left Side (%)", 0, 200, 0);
+                "Wind Speed Left Side (%)", 0, 200, 100);
         display.addSetting(leftWindSpeed);
         WindPatternSetting<Double> middleWindSpeed = new WindPatternSettingSliderBar("middleWindSpeed",
-                "Wind Speed Middle (%)", 0, 200, 0);
+                "Wind Speed Middle (%)", 0, 200, 100);
         display.addSetting(middleWindSpeed);
         WindPatternSetting<Double> rightWindSpeed = new WindPatternSettingSliderBar("rightWindSpeed",
-                "Wind Speed Right Side (%)", 0, 200, 0);
+                "Wind Speed Right Side (%)", 0, 200, 100);
         display.addSetting(rightWindSpeed);
     }
 
