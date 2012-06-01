@@ -14,6 +14,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
@@ -77,14 +78,17 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private class WindControlCapture implements ValueChangeHandler<Double> {
 
+        private SliderBar sliderBar;
         private WindPatternSetting<?> setting;
-
-        public WindControlCapture(WindPatternSetting<?> setting) {
+        
+        public WindControlCapture(SliderBar sliderBar, WindPatternSetting<?> setting) {
+            this.sliderBar = sliderBar;
             this.setting = setting;
         }
 
         @Override
         public void onValueChange(ValueChangeEvent<Double> arg0) {
+            sliderBar.setTitle(String.valueOf(Math.round(sliderBar.getCurrentValue())));
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
             //update();
@@ -265,8 +269,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         for (WindPatternSetting<?> s : currentWPDisplay.getSettings()) {
             switch (s.getDisplayWidgetType()) {
             case SLIDERBAR:
-                Panel sliderPanel = getSliderPanel(windControlPanel, s.getDisplayName(), (Double) s.getMin(), (Double) s.getMax(),
-                        (Double) s.getDefault(), new WindControlCapture(s));
+                Panel sliderPanel = getSliderPanel(windControlPanel, s);
                 //windControlPanel.add(sliderPanel);
                 //sliderPanel.getElement().getStyle().setFloat(Style.Float.NONE);
                 break;
@@ -280,9 +283,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         return windControlPanel;
     }
 
-    private Panel getSliderPanel(Panel parentPanel, String labelName, double minValue, double maxValue, double defaultValue,
-            final ValueChangeHandler<Double> handler) {
+    private Panel getSliderPanel(Panel parentPanel, WindPatternSetting<?> s) {
 
+        String labelName = s.getDisplayName();
+        double minValue = (Double) s.getMin();
+        double maxValue = (Double) s.getMax();
+        double defaultValue = (Double) s.getDefault();
+        
         FlowPanel vp = new FlowPanel();
         Label label = new Label(labelName);
         label.getElement().getStyle().setVerticalAlign(VerticalAlign.TEXT_BOTTOM);
@@ -292,12 +299,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         label.setWidth("30%");
 
         final SliderBar sliderBar = new SliderBar(minValue, maxValue);
-
+        
         sliderBar.setStepSize(maxValue/10, false);
         sliderBar.setNumTicks(10);
         sliderBar.setNumTickLabels(1);
-        sliderBar.setTitle(labelName);
+       
         sliderBar.setEnabled(true);
+        WindControlCapture handler = new WindControlCapture(sliderBar, s);
         sliderBar.addValueChangeHandler(handler);
 
         sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
@@ -308,6 +316,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         });
 
         sliderBar.setCurrentValue(defaultValue);
+        sliderBar.setTitle(String.valueOf(Math.round(sliderBar.getCurrentValue())));
         vp.add(sliderBar);
       
         parentPanel.add(vp);
