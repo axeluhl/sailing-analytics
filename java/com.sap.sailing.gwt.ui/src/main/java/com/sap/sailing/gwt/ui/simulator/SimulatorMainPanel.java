@@ -225,7 +225,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         windPanel = new VerticalPanel();
 
         controlPanel.add(windPanel);
-        windPanel.setSize("100%", "50%");
+        windPanel.setSize("100%", "65%");
         String windSetup = stringMessages.wind() + " " + stringMessages.setup();
         Label windSetupLabel = new Label(windSetup);
 
@@ -334,7 +334,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         VerticalPanel sailingPanel = new VerticalPanel();
         controlPanel.add(sailingPanel);
-        sailingPanel.setSize("100%", "50%");
+        sailingPanel.setSize("100%", "35%");
         String sailingSetup = stringMessages.sailing() + " " + stringMessages.setup();
         Label sailingSetupLabel = new Label(sailingSetup);
 
