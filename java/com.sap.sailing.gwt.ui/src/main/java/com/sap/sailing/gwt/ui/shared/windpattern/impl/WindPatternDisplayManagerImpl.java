@@ -46,7 +46,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
 
     private void addBlastParameters(WindPatternDisplay display) {
         WindPatternSetting<Double> blastProbability = new WindPatternSettingSliderBar("blastProbability",
-                "Blast Probability (%)", 0, 50, 0);
+                "Blast Probability (%)", 0, 50, 50);
         display.addSetting(blastProbability);
         WindPatternSetting<Double> maxBlastSize = new WindPatternSettingSliderBar("maxBlastSize", "Blast Size", 1, 10,
                 1);
@@ -55,7 +55,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
                 "Average Blast Wind Speed (%)", 0, 100, 100);
         display.addSetting(blastWindSpeed);
         WindPatternSetting<Double> blastWindSpeedVar = new WindPatternSettingSliderBar("blastWindSpeedVar",
-                "Blast Wind Speed Variance (%)", 0, 100, 0);
+                "Blast Wind Speed Variance (%)", 1e-4, 100, 1e-4);
         display.addSetting(blastWindSpeedVar);
     }
 

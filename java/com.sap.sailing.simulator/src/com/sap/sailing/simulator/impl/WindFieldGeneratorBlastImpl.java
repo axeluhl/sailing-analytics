@@ -5,12 +5,11 @@ import umontreal.iro.lecuyer.randvar.NormalGen;
 import umontreal.iro.lecuyer.randvar.UniformGen;
 import umontreal.iro.lecuyer.rng.LFSR113;
 import umontreal.iro.lecuyer.rng.MRG32k3a;
-import umontreal.iro.lecuyer.rng.RandomStreamBase;
+
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -30,14 +29,18 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     private double blastEdgeProbability = 30;
     private double blastBearingMean = 0;
     private double blastBearingVar = 8;
-
+    private double defaultWindSpeed = 0.0;
+    private double defaultWindBearing = 0.0;
+    
     public WindFieldGeneratorBlastImpl(Boundary boundary, WindControlParameters windParameters) {
-        super(boundary, windParameters);
+        super(boundary, windParameters); 
     }
 
     @Override
     public void generate(TimePoint start, TimePoint end, TimePoint step) {
         super.generate(start, end, step);
+        defaultWindSpeed = windParameters.baseWindSpeed;
+        defaultWindBearing = windParameters.baseWindBearing;
         initializeSpeedWithBearing();
     }
 
@@ -59,8 +62,8 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
                         new DegreeBearingImpl(blastAngle));
                     growBlast(i, j, blastSpeedWithBearing);
                 } else {
-                    speedWithBearing[i][j] = new KnotSpeedWithBearingImpl(0,
-                            new DegreeBearingImpl(0));
+                    speedWithBearing[i][j] = new KnotSpeedWithBearingImpl(defaultWindSpeed,
+                            new DegreeBearingImpl(defaultWindBearing));
                 }
             }
         }
@@ -90,28 +93,28 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
                 if (isBlastCell()) {
                     speedWithBearing[i][hSpanStart] = blastSpeedWithBearing;
                 } else {
-                    speedWithBearing[i][hSpanStart] = new KnotSpeedWithBearingImpl(0,
-                            new DegreeBearingImpl(0));
+                    speedWithBearing[i][hSpanStart] = new KnotSpeedWithBearingImpl(defaultWindSpeed,
+                            new DegreeBearingImpl(defaultWindBearing));
                 }
                 if (isBlastCell()) {
                     speedWithBearing[i][hSpanEnd] = blastSpeedWithBearing;
                 } else {
-                    speedWithBearing[i][hSpanEnd] = new KnotSpeedWithBearingImpl(0,
-                            new DegreeBearingImpl(0));
+                    speedWithBearing[i][hSpanEnd] = new KnotSpeedWithBearingImpl(defaultWindSpeed,
+                            new DegreeBearingImpl(defaultWindBearing));
                 } 
             }
             for(int j = hSpanStart+1; j <= hSpanEnd-1;++j) {
                 if (isBlastCell()) {
                     speedWithBearing[rowIndex][j] = blastSpeedWithBearing;
                 } else {
-                    speedWithBearing[rowIndex][j] = new KnotSpeedWithBearingImpl(0,
-                            new DegreeBearingImpl(0));
+                    speedWithBearing[rowIndex][j] = new KnotSpeedWithBearingImpl(defaultWindSpeed,
+                            new DegreeBearingImpl(defaultWindBearing));
                 }
                 if (isBlastCell()) {
                     speedWithBearing[vSpan][j] = blastSpeedWithBearing;
                 } else {
-                    speedWithBearing[vSpan][j] = new KnotSpeedWithBearingImpl(0,
-                            new DegreeBearingImpl(0));
+                    speedWithBearing[vSpan][j] = new KnotSpeedWithBearingImpl(defaultWindSpeed,
+                            new DegreeBearingImpl(defaultWindBearing));
                 }
             }
             
@@ -130,7 +133,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     private double getBlastSpeed() {
         return Math.abs(NormalGen.nextDouble(new LFSR113("BlastSpeedStream"), windParameters.baseWindSpeed
                 * windParameters.blastWindSpeed / 100.0,
-                windParameters.baseWindSpeed * Math.sqrt(windParameters.blastWindSpeedVar) / 100.0));
+                windParameters.baseWindSpeed * Math.sqrt(windParameters.blastWindSpeedVar / 100.0)));
 
     }
 

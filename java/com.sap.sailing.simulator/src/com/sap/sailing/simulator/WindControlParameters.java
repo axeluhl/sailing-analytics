@@ -95,9 +95,9 @@ public class WindControlParameters {
         middleWindSpeed = 100.0;
         rightWindSpeed = 100.0;
         
-        blastProbability = 0.0;
+        blastProbability = 50.0;
         maxBlastSize = 1.0;
-        blastWindSpeed = 0.0;
-        blastWindSpeedVar = 0.0;
+        blastWindSpeed = 100.0;
+        blastWindSpeedVar = 1e-4;
     }
 }
