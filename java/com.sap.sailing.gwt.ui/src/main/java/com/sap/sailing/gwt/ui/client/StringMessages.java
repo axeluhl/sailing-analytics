@@ -304,4 +304,9 @@ public interface StringMessages extends Messages {
     String fleet();
     String boatClass();
     String setDelayToLive();
+    String pleaseEnterNonEmptyVenue();
+    String eventWithThisNameAlreadyExists();
+    String venue();
+    String pleaseSelectABoatClass();
+    String regattaWithThisNameAlreadyExists();
 }

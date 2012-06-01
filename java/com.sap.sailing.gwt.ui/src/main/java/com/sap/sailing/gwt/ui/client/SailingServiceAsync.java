@@ -44,8 +44,6 @@ public interface SailingServiceAsync {
     
     void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
 
-    void getEvents(AsyncCallback<List<EventDTO>> callback);
-
     /**
      * The string returned in the callback's pair is the common event name
      */
@@ -328,4 +326,39 @@ public interface SailingServiceAsync {
 
     void startReplicatingFromMaster(String masterName, int servletPort, int jmsPort, AsyncCallback<Void> callback);
 
+    void getEvents(AsyncCallback<List<EventDTO>> callback);
+
+    /**
+     * Creates a {@link EventDTO} for the {@link Event} with the name <code>eventName</code>, which contains the
+     * name, the description and a list with {@link RegattaDTO RegattaDTOs} contained in the event.<br />
+     * If no event with the name <code>eventName</code> is known, an {@link IllegalArgumentException} is thrown.
+     */
+    void getEventByName(String eventName, AsyncCallback<EventDTO> callback);
+    
+    /**
+    * Renames the event with the name <code>oldName</code> to the <code>newName</code>.<br />
+    * If there's no event with the name <code>oldName</code> or there's already a event with the name
+    * <code>newName</code> a {@link IllegalArgumentException} is thrown.
+    */
+    void renameEvent(String oldName, String newName, AsyncCallback<Void> callback);
+    
+    /**
+     * Removes the event with the name <code>eventName</code> from the service and the persistence store.
+     */
+    void removeEvent(String eventName, AsyncCallback<Void> callback);
+    
+    /**
+     * Creates a new event with the name <code>eventName</code>, the venue <code>venue</code> and an empty list of regattas.<br/>
+     */
+    void createEvent(String eventName, String venue, AsyncCallback<EventDTO> callback);
+    
+    /**
+     * Updates the data of the event with the name <code>oldName</code>.
+     * 
+     * @param oldName The old name of the event
+     * @param newName The new name of the event
+     * @param description The new description of the event
+     * @param leaderboardNames The list of names of the new regattas of the event
+     */
+    void updateEvent(String oldName, String newName, String venue, List<String> regattaNames, AsyncCallback<Void> callback);
 }

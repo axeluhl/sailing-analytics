@@ -65,8 +65,6 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  *
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RaceFetcher {
-    Iterable<Event> getAllEvents();
-
     /**
      * @return a thread-safe copy of the regattas currently known by the service; it's safe for callers to iterate over
      *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
@@ -408,4 +406,25 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * <b>Caution:</b> All relevant contents of this service instance will be replaced by the stream contents.
      */
     void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException;
+
+
+    /**
+     * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
+     *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
+     */
+    Iterable<Event> getAllEvents();
+
+    /**
+     * Creates a new event with the name <code>eventName</code>, the description <code>desciption</code> and the
+     * regattas with the names in <code>regattaNames</code> and saves it in the database.
+     * 
+     * @param eventName
+     *            The name of the new event
+     * @param venue
+     *            The venue of the new event
+     * @param regattaNames
+     *            The names of the regattas contained in the new event.<br />
+     * @return The new event
+     */
+    Event addEvent(String eventName, String venue, List<String> regattaNames);
 }
