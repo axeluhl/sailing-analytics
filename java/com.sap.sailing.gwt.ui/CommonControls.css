@@ -129,12 +129,12 @@
 }
 
 .gwt-SplitLayoutPanel-HDragger {
-  background: #e7e7e7 url(images/thumb_vertical.png) center center no-repeat;
+  background: #cbcaca url(images/thumb_vertical.png) center center no-repeat;
   cursor: col-resize;
 }
 
 .gwt-SplitLayoutPanel-VDragger {
-  background: #e7e7e7 url(images/thumb_horz.png) center center no-repeat;
+  background: #cbcaca url(images/thumb_horz.png) center center no-repeat;
   cursor: row-resize;
 }
 
@@ -143,15 +143,23 @@
 	color: #fff;
 }
 
-.titleLabel {
+.titleLabelWrapper {
 	position: absolute;
-	width: 400px;
-	text-align: right;
-	font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
-	font-size: 16px;
-	color: #fff;
-  right: 5px;
-  top: 41px;
+    min-width: 400px;
+    text-align: right;
+    height: 68px;
+    right: 0;
+    top: 0;
+    font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
+    font-size: 16px;
+    color: #fff;
+    //background: url(images/titleLabelWrapper.png) right center no-repeat;
+}
+
+.titleLabel {
+    background: url(images/titleLabelInner.png) left center no-repeat;
+    height: 26px;
+    padding: 41px 7px 0 130px;
 }
 
 
@@ -206,12 +214,12 @@
 }
 
 .timeLinePanel {
+	color: #fff;
 	width: 100%;
 	position: fixed;
 	bottom: 0;
-	height: 122px;
 	z-index: 9;
-	background: #DDDCDC;
+	background: #7c7b7c;
 	box-shadow: 0 0 20px #858585;
 	-webkit-box-shadow: 0 0 20px #858585;
 	-moz-box-shadow: 0 0 20px #858585;
@@ -219,19 +227,12 @@
 
 .timeLineInnerPanel {
 	/*height: 100%;*/
-	margin: 0 12px;
-	margin-top: 10px;
-	background: #dddcdc;
+	margin-top: 5px;
 	/*padding: 38px 24px 0 24px;*/
 }
 
 .timeLineInnerBgPanel {
-	background: url(images/timeslider-bg.png) 0 -2px repeat-x #f6f6f6;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
-	border-radius: 6px;
-	padding: 0px 10px 0;
-	border: 1px solid #a6a6a6;
+ 
 }
 
 .footerShadowPanel {
@@ -244,19 +245,29 @@
 }
 
 .timePanel-controls {
-	margin: 15px 0 8px 0;
+    margin: 0;
+    padding: 7px 12px 0 12px;
+    -webkit-box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
+    box-shadow: 0px -7px 8px 0px rgba(84, 84, 84, 1);
+    height: 29px;
 }
 
 .timePanel-controls-play {
     float:left;
     padding: 0 10px 0 0;
+    border-right: 1px solid #fcbb22;
+    height: 24px;
+    margin: 0 14px 0 0;
 }
 
 .timePanel-controls-playSpeed {
 	vertical-align: middle;
 	line-height: 25px;
 	float:left;
-	padding: 3px 0 0 0;
+	padding: 0 14px 0 0;
+	margin: 0 14px 0 0;
+    border-right: 1px solid #fcbb22;
+    height: 24px;
 }
 
 .timePanel-label {
@@ -265,12 +276,12 @@
 
 .timePanel-controls-time {
     float:left;
-    padding: 5px 0 0 0;    
+    padding: 0 0 0 0;    
 }
 
 .timePanel-controls-time .dateLabel,
 .timePanel-controls-time .timeLabel {
-    padding: 0 20px 0 0;    	
+    padding: 4px 20px 0 0;    	
 }
 
 .timePanel-controls-timeDelay {
@@ -279,15 +290,28 @@
 
 .timePanel-controls-playmode{
     float:left;
-    padding: 5px 0 0 0;
+    padding: 0 14px 0 0;
+    margin: 0 14px 0 0;
+    height: 24px;
+    border-right: 1px solid #fcbb22;
 }
 
 .timePanel-controls-playmode .playModeLabel{
-    padding: 0 20px 0 0;   	
+    padding: 4px 0 0 5px;   	
 }
 
 .timePanelSettings{
 	float: right;
+}
+
+.timePanelSlider {
+	margin: 0 12px;
+	height: 49px;
+}
+
+.timePanelInnerWrapper {
+    -webkit-box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
+    box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
 }
 
 .LogoAndTitlePanel {
@@ -296,9 +320,9 @@
     position: fixed;
     width: 100%;
     top: 0;
-    background-image: url(images/header_bg_modern_eventname.png), url(images/white_gradient_header.png), url(images/header_bg_modern.png);
-    background-position: right top, center top, 0 0;
-    background-repeat: no-repeat, no-repeat, repeat-x;
+    background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
+    background-position: center top, 0 0;
+    background-repeat: no-repeat, repeat-x;
     box-shadow: 0 0 20px #858585;
     -moz-box-shadow: 0 0 20px #858585;
     -webkit-box-shadow: 0 0 20px #858585;

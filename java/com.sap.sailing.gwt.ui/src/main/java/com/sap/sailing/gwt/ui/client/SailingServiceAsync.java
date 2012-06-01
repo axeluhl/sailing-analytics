@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -41,8 +42,10 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
  */
 public interface SailingServiceAsync {
     
-    void listEvents(AsyncCallback<List<RegattaDTO>> callback);
-    
+    void getRegattas(AsyncCallback<List<RegattaDTO>> callback);
+
+    void getEvents(AsyncCallback<List<EventDTO>> callback);
+
     /**
      * The string returned in the callback's pair is the common event name
      */
@@ -198,7 +201,7 @@ public interface SailingServiceAsync {
      * tracked race currently linked to the fleet in the race column; otherwise, the value is the {@link RaceIdentifier}
      * of the tracked race currently connected for the fleet whose name is the key. The map returned is never <code>null</code>.
      */
-    void getEventAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName,
+    void getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName,
             AsyncCallback<Map<String, RegattaAndRaceIdentifier>> callback);
 
     void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName, String fleetName,

@@ -32,11 +32,16 @@ import com.sap.sailing.domain.common.quadtree.impl.Bounds;
 import com.sap.sailing.domain.common.quadtree.impl.QuadTreeNode;
 
 /**
- * The QuadTree lets you organize objects in a grid, that redefines
- * itself and focuses more gridding when more objects appear in a
- * certain area.
+ * The QuadTree lets you organize objects in a grid, that redefines itself and focuses more gridding when more objects
+ * appear in a certain area.
+ * <p>
  * 
- * @param <T> type of object stored by coordinates
+ * Note that this class is not thread safe. If multiple threads can access the same instance concurrently, callers have
+ * to ensure proper synchronization. Concurrent reads are permissible while any write should block all other operations.
+ * 
+ * @param <T>
+ *            type of object stored by coordinates
+ * @author Axel Uhl (D043530)
  */
 public class QuadTree<T> implements Serializable {
 

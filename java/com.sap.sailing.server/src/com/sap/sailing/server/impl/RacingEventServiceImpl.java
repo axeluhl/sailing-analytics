@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -118,10 +119,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory;
     
     private final ExpeditionWindTrackerFactory windTrackerFactory;
-    
+
+    /**
+     * Holds the {@link Event} objects for those event registered with this service. Note that there may be {@link Event}
+     * objects that exist outside this service for events not (yet) registered here.
+     */
+    protected final Map<String, Event> eventsByName;
+
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be {@link Regatta}
-     * objects that exist outside this service for races not (yet) registered here.
+     * objects that exist outside this service for regattas not (yet) registered here.
      */
     protected final Map<String, Regatta> regattasByName;
     
@@ -173,6 +180,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         regattasByName = new HashMap<String, Regatta>();
+        eventsByName = new HashMap<String, Event>();
         regattaTrackingCache = new HashMap<Regatta, DynamicTrackedRegatta>();
         raceTrackersByRegatta = new HashMap<Regatta, Set<RaceTracker>>();
         raceTrackersByID = new HashMap<Object, RaceTracker>();
@@ -389,7 +397,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public SwissTimingFactory getSwissTimingFactory() {
         return swissTimingFactory;
     }
-    
+
+    @Override
+    public synchronized Iterable<Event> getAllEvents() {
+        return Collections.unmodifiableCollection(new ArrayList<Event>(eventsByName.values()));
+    }
+
     @Override
     public synchronized Iterable<Regatta> getAllRegattas() {
         return Collections.unmodifiableCollection(new ArrayList<Regatta>(regattasByName.values()));

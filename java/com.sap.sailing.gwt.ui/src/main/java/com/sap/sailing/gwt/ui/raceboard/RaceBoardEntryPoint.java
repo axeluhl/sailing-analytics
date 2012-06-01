@@ -64,15 +64,15 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
             return;
         }
         final ParallelExecutionCallback<List<String>> getLeaderboardNamesCallback = new ParallelExecutionCallback<List<String>>();  
-        final ParallelExecutionCallback<List<RegattaDTO>> listEventsCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
+        final ParallelExecutionCallback<List<RegattaDTO>> getRegattasCallback = new ParallelExecutionCallback<List<RegattaDTO>>();  
         final ParallelExecutionCallback<LeaderboardGroupDTO> getLeaderboardGroupByNameCallback = new ParallelExecutionCallback<LeaderboardGroupDTO>();  
         final ParallelExecutionCallback<UserDTO> getUserCallback = new ParallelExecutionCallback<UserDTO>();  
         if (leaderboardGroupName != null) {
-            new ParallelExecutionHolder(getLeaderboardNamesCallback, getLeaderboardGroupByNameCallback, listEventsCallback, getUserCallback) {
+            new ParallelExecutionHolder(getLeaderboardNamesCallback, getLeaderboardGroupByNameCallback, getRegattasCallback, getUserCallback) {
                 @Override
                 public void handleSuccess() {
                     checkUrlParameters(getLeaderboardNamesCallback.getData(),
-                            getLeaderboardGroupByNameCallback.getData(), listEventsCallback.getData(), getUserCallback.getData());
+                            getLeaderboardGroupByNameCallback.getData(), getRegattasCallback.getData(), getUserCallback.getData());
                 }
                 @Override
                 public void handleFailure(Throwable t) {
@@ -80,10 +80,10 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             };
         } else {
-            new ParallelExecutionHolder(getLeaderboardNamesCallback, listEventsCallback, getUserCallback) {
+            new ParallelExecutionHolder(getLeaderboardNamesCallback, getRegattasCallback, getUserCallback) {
                 @Override
                 public void handleSuccess() {
-                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, listEventsCallback.getData(), getUserCallback.getData());
+                    checkUrlParameters(getLeaderboardNamesCallback.getData(), null, getRegattasCallback.getData(), getUserCallback.getData());
                 }
                 @Override
                 public void handleFailure(Throwable t) {
@@ -91,7 +91,7 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
                 }
             };
         }
-        sailingService.listEvents(listEventsCallback);
+        sailingService.getRegattas(getRegattasCallback);
         sailingService.getLeaderboardNames(getLeaderboardNamesCallback);
         if (leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupNameParamValue, getLeaderboardGroupByNameCallback);
@@ -183,16 +183,14 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         
         FlowPanel toolbarPanel = new FlowPanel();
         
-        //TODO Quickfix for touch devices
         toolbarPanel.add(raceBoardPanel.getNavigationWidget());
-        toolbarPanel.add(raceBoardPanel.getSettingsWidget());
 
         FlowPanel logoAndTitlePanel = createLogoAndTitlePanel(raceBoardPanel);
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
         p.addNorth(logoAndTitlePanel, 68);        
         p.addNorth(toolbarPanel, 40);
-        p.addSouth(timePanel, 122);                     
+        p.addSouth(timePanel, 90);                     
         p.add(raceBoardPanel);
     }    
 }

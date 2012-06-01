@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
@@ -176,23 +175,10 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
             mainPanel.add(componentViewer.getViewerWidget());
         }
 
-        settingsPanel = new FlowPanel();
-        settingsPanel.addStyleName("raceBoardNavigation-settingsButtonPanel");
-        Label settingsLabel = new Label("Settings: ");
-        settingsLabel.addStyleName("raceBoardNavigation-settingsLabel");
-        settingsLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        settingsLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        settingsPanel.add(settingsLabel);
-
-        addSettingsMenuButton(settingsPanel, leaderboardPanel);
-        addSettingsMenuButton(settingsPanel, raceMap);
-        addSettingsMenuButton(settingsPanel, windChart);
-        addSettingsMenuButton(settingsPanel, competitorChart);
-
-        addComponentAsCheckboxToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel);
-        addComponentAsCheckboxToNavigationMenu(leaderboardAndMapViewer, windChart);
-        addComponentAsCheckboxToNavigationMenu(leaderboardAndMapViewer, competitorChart);
-        
+        addComponentToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel, true);
+        addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
+        addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
+        addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
     }
 
     @SuppressWarnings("unused")
@@ -206,23 +192,6 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         }
     }
     
-    private <SettingsType> void addSettingsMenuButton(FlowPanel settingsPanel, final Component<SettingsType> component) {
-        if(component.hasSettings()) {
-            Button settingsButton = new Button(component.getLocalizedShortName());
-            settingsButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    new SettingsDialog<SettingsType>(component, stringMessages).show();
-                }
-            });
-            settingsButton.addStyleName("raceBoardNavigation-settingsButton");
-            settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-            settingsButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
-            
-            settingsPanel.add(settingsButton);
-        }
-    }
-    
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName) {
         LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
                 .createNewSettingsForPlayMode(timer.getPlayMode(), /* nameOfRaceToSort */
@@ -233,11 +202,12 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                 userAgentType);
      }
 
-    private void addComponentAsCheckboxToNavigationMenu(final ComponentViewer componentViewer,
-            final Component<?> component) {
+    private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,
+            final Component<SettingsType> component, boolean withCheckbox) {
         final CheckBox checkBox= new CheckBox(component.getLocalizedShortName());
         checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
-        
+
+        checkBox.setEnabled(withCheckbox);
         checkBox.setValue(component.isVisible());
         checkBox.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
         checkBox.addStyleName("raceBoardNavigation-innerElement");
@@ -261,6 +231,22 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         });
 
         componentsNavigationPanel.add(checkBox);
+        
+        if(component.hasSettings()) {
+            Button settingsButton = new Button("");
+            settingsButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    new SettingsDialog<SettingsType>(component, stringMessages).show();
+                }
+            });
+            settingsButton.addStyleName("raceBoardNavigation-settingsButton");
+            settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+            settingsButton.setTitle(stringMessages.settingsForComponent(component.getLocalizedShortName()));
+            
+            componentsNavigationPanel.add(settingsButton);
+        }
+
     }
     
     public void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,

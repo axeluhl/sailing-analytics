@@ -23,7 +23,8 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  */
 public interface RaceColumn extends Named {
     /**
-     * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}
+     * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}, in
+     * ascending order; best fleets first
      */
     Iterable<? extends Fleet> getFleets();
     

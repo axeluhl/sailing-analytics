@@ -15,6 +15,9 @@ import com.sap.sailing.domain.common.Named;
  * 
  */
 public interface Series extends Named {
+    /**
+     * Returns the fleets of this series, on ascending order, better fleets first.
+     */
     Iterable<? extends Fleet> getFleets();
     
     /**

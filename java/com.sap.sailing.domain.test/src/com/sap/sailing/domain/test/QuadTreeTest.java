@@ -1,12 +1,14 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
+import com.sap.sailing.domain.common.quadtree.impl.QuadTreeNode;
 
 public class QuadTreeTest {
     private class GLatLngQuadTree extends QuadTree<Position> {
@@ -19,6 +21,53 @@ public class QuadTreeTest {
         public void put(Position x) {
             super.put(x, x);
         }
+    }
+    
+    private static class QuadTreeWithPublicGetTop<T> extends QuadTree<T> {
+        private static final long serialVersionUID = -783622065160380333L;
+        @Override
+        public QuadTreeNode<T> getTop() {
+            return super.getTop();
+        }
+    }
+    
+    @Test
+    public void testNoNPEDuringSecondPutInSameLeaf() {
+        final QuadTreeWithPublicGetTop<Object> qt = new QuadTreeWithPublicGetTop<Object>();
+        final Position p = new DegreePosition(0, 0);
+        final NullPointerException[] npe = new NullPointerException[1];
+        final boolean[] stop = new boolean[1];
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                while (!stop[0]) {
+                    synchronized (qt) {
+                        try {
+                            qt.wait();
+                            // if the following try/catch is moved outside the synchronized block, occasional NPEs result
+                            try {
+                                qt.put(p, p);
+                            } catch (NullPointerException e) {
+                                npe[0] = e;
+                            }
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+        };
+        new Thread(r, "1").start();
+        new Thread(r, "2").start();
+        new Thread(r, "3").start();
+        new Thread(r, "4").start();
+        for (int i=0; i<10000000; i++) {
+            synchronized(qt) {
+                qt.notifyAll();
+            }
+            assertNull("NullPointerException "+(npe[0]==null?"":npe[0].getMessage())+" during iteration "+i, npe[0]);
+        }
+        stop[0] = true;
     }
     
     @Test
