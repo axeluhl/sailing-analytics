@@ -17,7 +17,6 @@ package com.sap.sailing.gwt.ui.shared.controls.slider;
  */
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -620,13 +619,6 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         drawKnob();
     }
 
-    public void printValues() {
-        System.out.println("Min: " + new Date(minValue.longValue()));
-        System.out.println("Max: " + new Date(maxValue.longValue()));
-        System.out.println("Val: " + new Date(curValue.longValue()));
-        System.out.println("\n");
-    }
-    
     /**
      * Redraw the progress bar when something changes the layout.
      */

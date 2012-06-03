@@ -59,6 +59,9 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     protected boolean isLoading = false;
     protected boolean isZoomed = false;
     
+    /** the tick count must be the same as TimeSlider.TICKCOUNT, otherwise the time ticks will be not synchronized */  
+    private final int TICKCOUNT = 10;
+    
     public RaceChart(SailingServiceAsync sailingService, Timer timer, TimeZoomProvider timeZoomProvider, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
@@ -92,8 +95,8 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
             chart.getXAxis().setMax(maxTimepoint.getTime());
             chart.getXAxis().setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), false, false);
             
-            long diff = (maxTimepoint.getTime() - minTimepoint.getTime()) / 10;
-            chart.getXAxis().setTickInterval(diff);
+            long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
+            chart.getXAxis().setTickInterval(tickInterval);
         }
     }
 
@@ -120,6 +123,9 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
                 isZoomed = true;
             }
             timeZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
+//            long tickInterval = (xAxisMax - xAxisMin) / TICKCOUNT;
+//            chart.getXAxis().setTickInterval(tickInterval);
+//            chart.redraw();
         } catch (Throwable t) {
             // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
             timeZoomProvider.resetTimeZoom(this);

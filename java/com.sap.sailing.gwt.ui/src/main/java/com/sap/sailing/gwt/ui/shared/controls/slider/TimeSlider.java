@@ -15,7 +15,9 @@ public class TimeSlider extends SliderBar {
     private List<TickPosition> calculatedTimeTicks;
     
     private boolean isZoomed;
-    
+
+    private final int TICKCOUNT = 10;
+
     public TimeSlider() {
         calculatedTimeTicks = new ArrayList<TickPosition>();
         isZoomed = false;
@@ -29,14 +31,19 @@ public class TimeSlider extends SliderBar {
             return;
 
         long minMaxDiffInMs = maxValue.longValue() - minValue.longValue();
-        NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(minMaxDiffInMs);
+        long tickInterval = minMaxDiffInMs / TICKCOUNT; 
+        NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
         calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
-        
-//        normalizedTimeTickInterval = calc.normalizeTimeTickInterval(minMaxDiffInMs / count);
-//        calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
-        
-        //NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval((maxValue.longValue() - minValue.longValue()) / 8);
-        
+
+        boolean debug = true;
+        if(debug) {
+            System.out.println("Diff: " + minMaxDiffInMs);
+            System.out.println("Tick count: " + normalizedTimeTickInterval.count);
+            System.out.println("Unit name: " + normalizedTimeTickInterval.unitName);
+            System.out.println("Unit range: " + normalizedTimeTickInterval.unitRange);
+            System.out.println("Calculated ticks count: " + calculatedTimeTicks.size());
+        }
+
         // Draw the ticks
         int lineWidth = lineElement.getOffsetWidth();
             // Create the ticks or make them visible
@@ -157,8 +164,6 @@ public class TimeSlider extends SliderBar {
     protected void drawKnob() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
-
-        printValues();
         
         Element knobElement = knobImage.getElement();
         if(curValue >= minValue && curValue <= maxValue) {
