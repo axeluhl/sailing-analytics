@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.simulator;
 
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.google.gwt.maps.client.MapWidget;
@@ -13,6 +15,7 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
@@ -20,6 +23,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
@@ -39,7 +43,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final Timer timer;
-
+   
+    
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     private final int xRes;
@@ -110,7 +115,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         raceCourseCanvasOverlay = new RaceCourseCanvasOverlay();
         mapw.addOverlay(raceCourseCanvasOverlay);
 
-        windFieldCanvasOverlay = new WindFieldCanvasOverlay();
+        windFieldCanvasOverlay = new WindFieldCanvasOverlay(timer);
         // mapw.addOverlay(windFieldCanvasOverlay);
         pathCanvasOverlay = new PathCanvasOverlay();
         replayPathCanvasOverlay = new ReplayPathCanvasOverlay(timer);
@@ -139,6 +144,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             @Override
             public void onSuccess(WindFieldDTO wl) {
                 logger.info("Number of windDTO : " + wl.getMatrix().size());
+                Window.alert("Number of windDTO : " + wl.getMatrix().size());
                 refreshWindFieldOverlay(wl);
             }
         });
@@ -181,6 +187,13 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     pathCanvasOverlay.redraw(display);
                 } else {
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
+                    
+                    List<WindDTO> path = pathWindDTO.getMatrix();
+                    if (path != null) {
+                        int length = path.size();
+                        Date endTime =  new Date(path.get(length-1).timepoint);
+                        windParams.setEndTime(endTime);
+                    }
                 }
             }
         });
@@ -219,14 +232,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         mapw.addOverlay(windFieldCanvasOverlay);
         replayPathCanvasOverlay.displayWindAlongPath = false;
         mapw.addOverlay(replayPathCanvasOverlay);
-        generateWindField(windPatternDisplay);
+        //Get the path first so we know how many windfields to generate
         generatePath(windPatternDisplay, false);
+        generateWindField(windPatternDisplay);
     }
 
     private void refreshWindDisplayView(WindPatternDisplay windPatternDisplay) {
         mapw.removeOverlay(pathCanvasOverlay);
         mapw.removeOverlay(replayPathCanvasOverlay);
         mapw.addOverlay(windFieldCanvasOverlay);
+        windParams.setDefaultTimeSettings();
         generateWindField(windPatternDisplay);
     }
 

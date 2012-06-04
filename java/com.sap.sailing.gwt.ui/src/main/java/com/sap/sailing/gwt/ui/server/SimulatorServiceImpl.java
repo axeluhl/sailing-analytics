@@ -180,17 +180,24 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         List<Position> lattice = bd.extractLattice(params.getxRes(),params.getyRes());//wf.extractLattice(params.getxRes(), params.getyRes());
         wf.setPositionGrid(bd.extractGrid(params.getxRes(), params.getyRes()));
-        TimePoint start = new MillisecondsTimePoint(0);
-        TimePoint timeStep = new MillisecondsTimePoint(30*1000);
-        wf.generate(start,null,timeStep);
+        
+        TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());//new MillisecondsTimePoint(0);
+        TimePoint timeStep = new MillisecondsTimePoint(params.getTimeStep().getTime());//new MillisecondsTimePoint(30*1000);
+        TimePoint endTime = new MillisecondsTimePoint(params.getEndTime().getTime());//new MillisecondsTimePoint(10 * 60 * 1000);
+        
+        wf.generate(startTime,null,timeStep);
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
         if (lattice != null) {
-            for (Position p : lattice) {
-                Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(start,p,null));
-                logger.fine(localWind.toString());
-                WindDTO w = createWindDTO(localWind);
-                wList.add(w);
+            TimePoint t = startTime;
+            while(t.compareTo(endTime) <= 0) {
+                for (Position p : lattice) {
+                    Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(t,p,null));
+                    logger.fine(localWind.toString());
+                    WindDTO w = createWindDTO(localWind);
+                    wList.add(w);
+                }
+                t = new MillisecondsTimePoint(t.asMillis() + timeStep.asMillis());
             }
         }
 

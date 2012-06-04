@@ -13,6 +13,7 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 
@@ -37,6 +38,11 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
         super();
     }
 
+
+    public PathCanvasOverlay(Timer timer) {
+        super(timer);
+    }
+    
     @Override
     protected void drawWindField() {
         logger.fine("In PathCanvasOverlay.drawWindField");

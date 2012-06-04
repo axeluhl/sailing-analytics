@@ -409,7 +409,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             timePanel.reset();
 
             Date now = timer.getTime();
-            Date maxTime = new Date(now.getTime() + 10 * 60 * 1000);
+            Date maxTime = new Date(startDate.getTime() + 10 * 60 * 1000);
 
             timePanel.setMinMax(now, maxTime, false);
             timePanel.setVisible(false);

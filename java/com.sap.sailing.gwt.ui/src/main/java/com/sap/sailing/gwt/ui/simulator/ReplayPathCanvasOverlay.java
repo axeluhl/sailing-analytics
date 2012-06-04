@@ -5,18 +5,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 
-public class ReplayPathCanvasOverlay extends PathCanvasOverlay implements TimeListener {
+public class ReplayPathCanvasOverlay extends PathCanvasOverlay  {
 
-    private final Timer timer;
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     
     public ReplayPathCanvasOverlay(Timer timer) {
-        this.timer = timer;
-        this.timer.addTimeListener(this);
+        super(timer);
+        this.displayWindAlongPath = false;
+        //this.timer.addTimeListener(this);
+        canvas.setStyleName("replayPanel");
     }
     
     @Override
@@ -26,7 +26,9 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay implements TimeLi
     
     @Override
     public void timeChanged(Date date) {
-       canvas.getContext2d().clearRect(canvas.getAbsoluteLeft(), canvas.getAbsoluteTop(), canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+        
+       canvas.getContext2d().clearRect(canvas.getAbsoluteLeft(), canvas.getAbsoluteTop(), 
+               canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
         List<WindDTO> windDTOToDraw = new ArrayList<WindDTO>();
         for(WindDTO windDTO : wl.getMatrix()) {
             if (windDTO.timepoint <= date.getTime()) {
