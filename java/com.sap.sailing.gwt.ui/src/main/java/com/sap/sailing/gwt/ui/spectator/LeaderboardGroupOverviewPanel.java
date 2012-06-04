@@ -595,12 +595,12 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     
     private boolean checkSearchCriteria(LeaderboardGroupDTO forGroup, String location, String name, boolean onlyLive, Date from, Date until) {
         boolean result = true;
-        if (result && location != null && !location.equals("")) {
+        if (result && location != null && location.length() > 0) {
             result = textContainsStringsToCheck(
                     PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(forGroup.getGroupPlaces(), true),
                     location.split("\\s"));
         }
-        if (result && name != null && !name.equals("")) {
+        if (result && name != null && name.length() > 0) {
             result = textContainsStringsToCheck(forGroup.name, name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
@@ -624,8 +624,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     private boolean textContainsStringsToCheck(String text, String[] stringsToCheck) {
         boolean contains = false;
         for (String stringToCheck : stringsToCheck) {
-            contains = text.contains(stringToCheck);
-            if (contains) {
+            contains = text.toLowerCase().contains(stringToCheck.toLowerCase());
+            if (!contains) {
                 break;
             }
         }
