@@ -192,4 +192,14 @@ public interface SailingService extends RemoteService {
     void updateRaceDelayToLive(RegattaAndRaceIdentifier regattaAndRaceIdentifier, long delayToLiveInMs);
 
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
+
+    void updateEvent(String oldName, String newName, String description, List<String> regattaNames);
+
+    EventDTO createEvent(String eventName, String description);
+
+    void removeEvent(String eventName);
+
+    void renameEvent(String oldName, String newName);
+
+    EventDTO getEventByName(String eventName);
 }

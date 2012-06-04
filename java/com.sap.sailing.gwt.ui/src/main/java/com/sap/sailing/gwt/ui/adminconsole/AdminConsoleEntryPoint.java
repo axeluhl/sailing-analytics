@@ -36,6 +36,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         rootPanel.add(tabPanel); //, 10, 10);
         tabPanel.setSize("95%", "95%");
         
+        tabPanel.add(new EventStructureManagementPanel(sailingService, this, stringMessages), stringMessages.events());
         regattaDisplayers = new HashSet<RegattaDisplayer>();
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringMessages);
         regattaDisplayers.add(tractracEventManagementPanel);
@@ -75,7 +76,6 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         regattaDisplayers.add(leaderboardConfigPanel);
         tabPanel.add(new ReplicationPanel(sailingService, this, stringMessages), stringMessages.replication(), /* asHTML */ false);
-        tabPanel.add(new EventStructureManagementPanel(sailingService, this, stringMessages), stringMessages.events());
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {

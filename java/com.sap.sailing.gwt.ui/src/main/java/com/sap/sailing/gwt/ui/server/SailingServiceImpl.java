@@ -146,6 +146,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -153,6 +154,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
+import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.DisconnectLeaderboardColumnFromTrackedRace;
@@ -456,17 +458,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 result.add(regattaDTO);
             }
-        }
-        return result;
-    }
-
-    @Override
-    public List<EventDTO> getEvents() {
-        List<EventDTO> result = new ArrayList<EventDTO>();
-        for (Event event : getService().getAllEvents()) {
-            List<RegattaDTO> regattasList = getRegattas();
-            EventDTO eventDTO = new EventDTO(event.getName(), regattasList);
-            result.add(eventDTO);
         }
         return result;
     }
@@ -1845,4 +1836,59 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         getReplicationService().startToReplicateFrom(
                 ReplicationFactory.INSTANCE.createReplicationMasterDescriptor(masterName, servletPort, jmsPort));
     }
+
+    @Override
+    public List<EventDTO> getEvents() {
+        List<EventDTO> result = new ArrayList<EventDTO>();
+        for (Event event : getService().getAllEvents()) {
+            List<RegattaDTO> regattasList = getRegattas();
+            EventDTO eventDTO = new EventDTO(event.getName(), regattasList);
+            result.add(eventDTO);
+        }
+        return result;
+    }
+
+    @Override
+    public void updateEvent(String oldName, String newName, String venue, List<String> regattaNames) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public EventDTO createEvent(String eventName, String venue) {
+        return convertToEventDTO(getService().apply(new CreateEvent(eventName, venue, new ArrayList<String>())));
+    }
+
+    @Override
+    public void removeEvent(String eventName) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void renameEvent(String oldName, String newName) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public EventDTO getEventByName(String eventName) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    private EventDTO convertToEventDTO(Event event) {
+        EventDTO eventDTO = new EventDTO();
+        eventDTO.name = event.getName();
+        eventDTO.venue = new VenueDTO();
+        eventDTO.venue.name = event.getVenue() != null ? event.getVenue().getName() : null;
+        eventDTO.regattas = new ArrayList<RegattaDTO>();
+        for (Regatta regatta: event.getRegattas()) {
+            RegattaDTO regattaDTO = new RegattaDTO();
+            regattaDTO.name = regatta.getName();
+            eventDTO.regattas.add(regattaDTO);
+        }
+        return eventDTO;
+    }
+
 }

@@ -389,6 +389,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
+    @Override
+    public Iterable<Event> loadAllEvents() {
+        ArrayList<Event> result = new ArrayList<Event>();
+        DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
+        
+        try {
+            for (DBObject o : eventCollection.find()) {
+                result.add(loadEvent(o));
+            }
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");
+            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadEvents", t);
+        }
+        
+        return result;
+    }
+    
     /**
      * An event doesn't store its regattas; it's the regatta that stores a reference to its event; the regatta
      * needs to add itself to the event when loaded or instantiated.
