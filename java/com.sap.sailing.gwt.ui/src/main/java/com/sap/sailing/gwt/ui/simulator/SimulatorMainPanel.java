@@ -14,7 +14,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
@@ -60,7 +59,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private Map<String, WindPatternDisplay> patternDisplayMap;
     private Map<String, Panel> patternPanelMap;
-   
+
     private WindPatternDisplay currentWPDisplay;
     private Panel currentWPPanel;
 
@@ -75,12 +74,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private final StringMessages stringMessages;
     private final SimulatorServiceAsync simulatorSvc;
     private final ErrorReporter errorReporter;
-
+    private final int xRes;
+    private final int yRes;
+    
     private class WindControlCapture implements ValueChangeHandler<Double> {
 
         private SliderBar sliderBar;
         private WindPatternSetting<?> setting;
-        
+
         public WindControlCapture(SliderBar sliderBar, WindPatternSetting<?> setting) {
             this.sliderBar = sliderBar;
             this.setting = setting;
@@ -91,7 +92,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             sliderBar.setTitle(String.valueOf(Math.round(sliderBar.getCurrentValue())));
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
-            //update();
+            // update();
         }
 
     }
@@ -151,14 +152,17 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     }
 
-    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter) {
+    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter,
+            int xRes, int yRes) {
 
         super();
 
         this.simulatorSvc = svc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-
+        this.xRes = xRes;
+        this.yRes = yRes;
+        
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
         patternSelector = new ListBox();
@@ -264,14 +268,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private Panel getWindControlPanel() {
         assert (currentWPDisplay != null);
         VerticalPanel windControlPanel = new VerticalPanel();
-        //windControlPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        
+        // windControlPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+
         for (WindPatternSetting<?> s : currentWPDisplay.getSettings()) {
             switch (s.getDisplayWidgetType()) {
             case SLIDERBAR:
                 Panel sliderPanel = getSliderPanel(windControlPanel, s);
-                //windControlPanel.add(sliderPanel);
-                //sliderPanel.getElement().getStyle().setFloat(Style.Float.NONE);
+                // windControlPanel.add(sliderPanel);
+                // sliderPanel.getElement().getStyle().setFloat(Style.Float.NONE);
                 break;
             case LISTBOX:
                 logger.info("We have a listbox " + s);
@@ -289,21 +293,21 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         double minValue = (Double) s.getMin();
         double maxValue = (Double) s.getMax();
         double defaultValue = (Double) s.getDefault();
-        
+
         FlowPanel vp = new FlowPanel();
         Label label = new Label(labelName);
         label.getElement().getStyle().setVerticalAlign(VerticalAlign.TEXT_BOTTOM);
         label.setWordWrap(true);
-       
+
         vp.add(label);
         label.setWidth("30%");
 
         final SliderBar sliderBar = new SliderBar(minValue, maxValue);
-        
-        sliderBar.setStepSize(maxValue/10, false);
+
+        sliderBar.setStepSize(maxValue / 10, false);
         sliderBar.setNumTicks(10);
         sliderBar.setNumTickLabels(1);
-       
+
         sliderBar.setEnabled(true);
         WindControlCapture handler = new WindControlCapture(sliderBar, s);
         sliderBar.addValueChangeHandler(handler);
@@ -318,15 +322,15 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         sliderBar.setCurrentValue(defaultValue);
         sliderBar.setTitle(String.valueOf(Math.round(sliderBar.getCurrentValue())));
         vp.add(sliderBar);
-      
+
         parentPanel.add(vp);
         label.getElement().getStyle().setFloat(Style.Float.LEFT);
-       
+
         sliderBar.getElement().getStyle().setFloat(Style.Float.RIGHT);
         sliderBar.setWidth("60%");
         sliderBar.setHeight("25px");
         vp.setHeight("40px");
-      
+
         return vp;
     }
 
@@ -384,7 +388,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         initDisplayOptions(mapOptions);
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, timer);
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer);
 
         // FlowPanel mapPanel = new FlowPanel();
         // mapPanel.setTitle("Map");

@@ -42,18 +42,20 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
-    private final int xRes = 5;
-    private final int yRes = 5;
+    private final int xRes;
+    private final int yRes;
 
     public enum ViewName {
         SUMMARY, REPLAY, WINDDISPLAY
     }
 
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
-            Timer timer) {
+            int xRes, int yRes, Timer timer) {
         this.simulatorSvc = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        this.xRes = xRes;
+        this.yRes = yRes;
         this.timer = timer;
 
         dataInitialized = false;
@@ -79,7 +81,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             public void run() {
                 mapw = new MapWidget();
                 // mapw.setUI(SimulatorMapOptions.newInstance());
-                mapw.setZoomLevel(15);
+                mapw.setZoomLevel(13);
                 // mapw.setSize("100%", "650px");
                 // mapw.setSize("100%", "80%");
 
@@ -92,7 +94,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 mapw.setScrollWheelZoomEnabled(true);
                 // mapw.setContinuousZoom(true);
                 mapw.setTitle(stringMessages.simulator() + " " + stringMessages.map());
-                PositionDTO kiel = new PositionDTO(54.332700439830454, 10.133256912231445);
+                PositionDTO kiel = new PositionDTO(54.46195148135232, 10.1513671875);
 
                 LatLng position = LatLng.newInstance(kiel.latDeg, kiel.lngDeg);
                 mapw.panTo(position);
