@@ -179,6 +179,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         String uuid = registerReplicaWithMaster(master);
         TopicSubscriber replicationSubscription = master.getTopicSubscriber(uuid);
         URL initialLoadURL = master.getInitialLoadURL();
+        // TODO bug 723 hold back Replicator from performing operations received until initial load has completed
         replicationSubscription.setMessageListener(new Replicator(master, this));
         InputStream is = initialLoadURL.openStream();
         ObjectInputStream ois = new ObjectInputStream(is);
