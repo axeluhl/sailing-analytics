@@ -80,6 +80,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 // maybe show a special state for this like "Race did not start yet"
             }
         }
+        lastRaceTimesInfo = raceTimesInfo;
     } 
     
     @Override
@@ -91,7 +92,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         timeSlider.clearMarkersAndLabelsAndTicks();
         timeSlider.redraw();
         initTimerPosition(lastRaceTimesInfo);
-        updateLegMarkers(lastRaceTimesInfo);
+        redrawAllMarkers(lastRaceTimesInfo);
     }
 
     @Override
@@ -102,6 +103,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         initMinMax(this.lastRaceTimesInfo);
         timeSlider.clearMarkersAndLabelsAndTicks();
         timeSlider.redraw();
+        redrawAllMarkers(lastRaceTimesInfo);
     }
 
     @Override
@@ -194,7 +196,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
 
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
-        List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
         boolean requiresMarkerUpdate = true;
         
         // updating the sliderbar markers requires a lot of time, therefore we need to do this only if required
@@ -214,19 +215,22 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             }
         }
         if (requiresMarkerUpdate && timeSlider.isMinMaxInitialized()) {
-            timeSlider.clearMarkers();
-            for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
-                if(markPassingTimesDTO.firstPassingDate != null) {
-                    timeSlider.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
-                }
-            }
-            if(newRaceTimesInfo.endOfRace != null) {
-                timeSlider.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
-            }
-                
-            timeSlider.redraw(); 
+            redrawAllMarkers(newRaceTimesInfo);
         }
-        lastRaceTimesInfo = newRaceTimesInfo;
+    }
+    
+    private void redrawAllMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
+        List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
+        timeSlider.clearMarkers();
+        for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
+            if(markPassingTimesDTO.firstPassingDate != null) {
+                timeSlider.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
+            }
+        }
+        if(newRaceTimesInfo.endOfRace != null) {
+            timeSlider.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
+        }
+        timeSlider.redraw(); 
     }
     
     @Override

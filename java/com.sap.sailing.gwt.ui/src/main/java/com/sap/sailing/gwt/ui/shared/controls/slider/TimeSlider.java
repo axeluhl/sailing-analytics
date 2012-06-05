@@ -35,7 +35,7 @@ public class TimeSlider extends SliderBar {
         NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
         calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
 
-        boolean debug = true;
+        boolean debug = false;
         if(debug) {
             System.out.println("Diff: " + minMaxDiffInMs);
             System.out.println("Tick count: " + normalizedTimeTickInterval.count);

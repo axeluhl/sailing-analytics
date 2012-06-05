@@ -77,6 +77,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
      * override.
      */
     private boolean userExplicitlyChangedLivePlayDelay;
+
+    /** 
+     * the minimum time the slider extends it's time when the end of the slider is reached
+     */
+    private long MINIMUM_AUTO_ADVANCE_TIME_IN_MS = 5 * 60 * 1000; // 5 minutes
     
     private static ClientResources resources = GWT.create(ClientResources.class);
 
@@ -297,7 +302,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             // Handle it equally for replay and live mode for robustness reasons. This at least allows a user
             // to watch on even if the time panel was off in its assumptions about race end and end of tracking.
             if (time.after(getMax())) {
-                setMinMax(getMin(), time, /* fireEvent */ false); // no event because we guarantee that time is between min/max
+                Date newMaxTime = time;
+                if (newMaxTime.getTime() - getMax().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
+                    newMaxTime.setTime(getMax().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
+                }
+                setMinMax(getMin(), newMaxTime, /* fireEvent */ false); // no event because we guarantee that time is between min/max
             }
             long t = time.getTime();
             timeSlider.setCurrentValue(new Double(t), false);
