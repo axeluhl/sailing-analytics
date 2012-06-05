@@ -68,6 +68,11 @@ public class Timer {
      * Applies only if the timer is in replay mode.
      */
     private double playSpeedFactor;
+
+    /**
+     * Set to <code>true</code> to enable the timer to advance the max time automatically if the current time gets greater than the max time 
+     */
+    private boolean autoAdvance;
     
     /**
      * The timer can run in two different modes: Live and Replay
@@ -102,6 +107,7 @@ public class Timer {
         playState = PlayStates.Stopped;
         playSpeedFactor = 1.0;
         livePlayDelayInMillis = 0l;
+        autoAdvance = true;
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -198,7 +204,9 @@ public class Timer {
             if (playMode == PlayModes.Live) {
                 setTime(System.currentTimeMillis()-livePlayDelayInMillis);
             }
-            startAutoAdvance();
+            if(autoAdvance) {
+                startAutoAdvance();
+            }
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
             }
@@ -261,5 +269,12 @@ public class Timer {
     public PlayModes getPlayMode() {
         return playMode;
     }
-    
+
+    public boolean isAutoAdvance() {
+        return autoAdvance;
+    }
+
+    public void setAutoAdvance(boolean autoAdvance) {
+        this.autoAdvance = autoAdvance;
+    }
 }
