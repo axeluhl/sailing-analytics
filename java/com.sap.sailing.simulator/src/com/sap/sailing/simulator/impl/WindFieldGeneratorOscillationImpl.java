@@ -79,8 +79,7 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
             double vStep = 1.0/((positions.length-1)*60.0);
             double t = (timeIndex+(timeIndex+rowIndex)*vStep);
             Bearing angle = new DegreeBearingImpl(Math.sin(2*Math.PI*t*windParameters.frequency)*windParameters.amplitude);
-            angle.add(phi0);
-        
+            angle=angle.add(phi0);
             return angle;
         } else {
             logger.severe("Error finding position " + p);
