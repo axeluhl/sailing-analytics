@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Race;
@@ -43,8 +44,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind) {
-        super(domainFactory, tractracEvent, trackedRegatta);
+            long millisecondsOverWhichToAverageWind, TrackedRegattaRegistry trackedRegattaRegistry) {
+        super(domainFactory, tractracEvent, trackedRegatta, trackedRegattaRegistry);
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.windStore = windStore;

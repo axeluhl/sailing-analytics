@@ -41,6 +41,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
@@ -56,7 +57,7 @@ import difflib.PatchFailedException;
  */
 public class DomainFactoryImpl implements DomainFactory {
     private final static Logger logger = Logger.getLogger(DomainFactoryImpl.class.getName());
-    private final Map<String, Regatta> raceIDToEventCache;
+    private final Map<String, Regatta> raceIDToRegattaCache;
     private final Map<Iterable<String>, ControlPoint> controlPointCache;
     private final Map<String, BoatClass> olympicClassesByID;
     private final BoatClass unknownBoatClass;
@@ -64,7 +65,7 @@ public class DomainFactoryImpl implements DomainFactory {
     
     public DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory baseDomainFactory) {
         this.baseDomainFactory = baseDomainFactory;
-        raceIDToEventCache = new HashMap<String, Regatta>();
+        raceIDToRegattaCache = new HashMap<String, Regatta>();
         controlPointCache = new HashMap<Iterable<String>, ControlPoint>();
         olympicClassesByID = new HashMap<String, BoatClass>();
         /*
@@ -91,12 +92,12 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Regatta getOrCreateRegatta(String raceID) {
-        Regatta result = raceIDToEventCache.get(raceID);
+    public Regatta getOrCreateRegatta(String raceID, TrackedRegattaRegistry trackedRegattaRegistry) {
+        Regatta result = raceIDToRegattaCache.get(raceID);
         if (result == null) {
-            result = new RegattaImpl(raceID, null);
+            result = new RegattaImpl(raceID, null, trackedRegattaRegistry);
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
-            raceIDToEventCache.put(raceID, result);
+            raceIDToRegattaCache.put(raceID, result);
         }
         return result;
     }
@@ -232,9 +233,9 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public void removeRace(String raceID) {
-        Regatta regatta = getOrCreateRegatta(raceID);
-        Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
+        Regatta regatta = raceIDToRegattaCache.get(raceID);
         if (regatta != null) {
+            Set<RaceDefinition> toRemove = new HashSet<RaceDefinition>();
             for (RaceDefinition race : regatta.getAllRaces()) {
                 if (race.getName().equals(raceID)) {
                     toRemove.add(race);
@@ -244,7 +245,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 regatta.removeRace(raceToRemove);
             }
             if (Util.isEmpty(regatta.getAllRaces())) {
-                raceIDToEventCache.remove(raceID);
+                raceIDToRegattaCache.remove(raceID);
             }
         }
     }

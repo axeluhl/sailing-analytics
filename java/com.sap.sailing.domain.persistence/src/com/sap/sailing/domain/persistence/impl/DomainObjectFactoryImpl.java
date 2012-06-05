@@ -55,6 +55,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
@@ -434,26 +435,26 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<Regatta> loadAllRegattas() {
+    public Iterable<Regatta> loadAllRegattas(TrackedRegattaRegistry trackedRegattaRegistry) {
         List<Regatta> result = new ArrayList<Regatta>();
         DBCollection regattaCollection = database.getCollection(CollectionNames.REGATTAS.name());
         for (DBObject dbRegatta : regattaCollection.find()) {
-            result.add(loadRegatta(dbRegatta));
+            result.add(loadRegatta(dbRegatta, trackedRegattaRegistry));
         }
         return result;
     }
 
     @Override
-    public Regatta loadRegatta(String name) {
+    public Regatta loadRegatta(String name, TrackedRegattaRegistry trackedRegattaRegistry) {
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), name);
         DBCollection regattaCollection = database.getCollection(CollectionNames.REGATTAS.name());
         DBObject dbRegatta = regattaCollection.findOne(query);
-        Regatta result = loadRegatta(dbRegatta);
+        Regatta result = loadRegatta(dbRegatta, trackedRegattaRegistry);
         assert result.getName().equals(name);
         return result;
     }
 
-    private Regatta loadRegatta(DBObject dbRegatta) {
+    private Regatta loadRegatta(DBObject dbRegatta, TrackedRegattaRegistry trackedRegattaRegistry) {
         Regatta result = null;
         if (dbRegatta != null) {
             String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
@@ -464,30 +465,30 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass(boatClassName, typicallyStartsUpwind);
             }
             BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
-            Iterable<Series> series = loadSeries(dbSeries);
+            Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
             result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true);
         }
         return result;
     }
 
-    private Iterable<Series> loadSeries(BasicDBList dbSeries) {
+    private Iterable<Series> loadSeries(BasicDBList dbSeries, TrackedRegattaRegistry trackedRegattaRegistry) {
         List<Series> result = new ArrayList<Series>();
         for (Object o : dbSeries) {
             DBObject oneDBSeries = (DBObject) o;
-            Series series = loadSeries(oneDBSeries);
+            Series series = loadSeries(oneDBSeries, trackedRegattaRegistry);
             result.add(series);
         }
         return result;
     }
 
-    private Series loadSeries(DBObject dbSeries) {
+    private Series loadSeries(DBObject dbSeries, TrackedRegattaRegistry trackedRegattaRegistry) {
         String name = (String) dbSeries.get(FieldNames.SERIES_NAME.name());
         boolean isMedal = (Boolean) dbSeries.get(FieldNames.SERIES_IS_MEDAL.name());
         final BasicDBList dbFleets = (BasicDBList) dbSeries.get(FieldNames.SERIES_FLEETS.name());
         Map<String, Fleet> fleetsByName = loadFleets(dbFleets);
         BasicDBList dbRaceColumns = (BasicDBList) dbSeries.get(FieldNames.SERIES_RACE_COLUMNS.name());
         Iterable<String> raceColumnNames = loadRaceColumnNames(dbRaceColumns, fleetsByName);
-        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames);
+        Series series = new SeriesImpl(name, isMedal, fleetsByName.values(), raceColumnNames, trackedRegattaRegistry);
         loadRaceColumnRaceLinks(dbRaceColumns, series);
         return series;
     }

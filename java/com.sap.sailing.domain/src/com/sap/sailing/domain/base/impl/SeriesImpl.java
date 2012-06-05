@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 public class SeriesImpl extends NamedImpl implements Series {
     private static final long serialVersionUID = -1640404303144907381L;
@@ -20,7 +21,8 @@ public class SeriesImpl extends NamedImpl implements Series {
     private boolean isMedal;
     private Regatta regatta;
     
-    public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames) {
+    public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
+            TrackedRegattaRegistry trackedRegattaRegistry) {
         super(name);
         this.fleetsByName = new HashMap<String, Fleet>();
         for (Fleet fleet : fleets) {
@@ -30,7 +32,7 @@ public class SeriesImpl extends NamedImpl implements Series {
         Collections.sort(fleetsInAscendingOrder);
         List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
         for (String raceColumnName : raceColumnNames) {
-            RaceColumnInSeriesImpl raceColumn = new RaceColumnInSeriesImpl(raceColumnName, this);
+            RaceColumnInSeriesImpl raceColumn = new RaceColumnInSeriesImpl(raceColumnName, this, trackedRegattaRegistry);
             myRaceColumns.add(raceColumn);
         }
         this.raceColumns = myRaceColumns;
@@ -62,8 +64,8 @@ public class SeriesImpl extends NamedImpl implements Series {
     }
     
     @Override
-    public RaceColumnInSeries addRaceColumn(String raceColumnName) {
-        final RaceColumnInSeriesImpl result = new RaceColumnInSeriesImpl(raceColumnName, this);
+    public RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
+        final RaceColumnInSeriesImpl result = new RaceColumnInSeriesImpl(raceColumnName, this, trackedRegattaRegistry);
         raceColumns.add(result);
         return result;
     }

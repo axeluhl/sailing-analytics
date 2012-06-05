@@ -11,6 +11,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -28,14 +29,14 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.createRegatta(getBaseEventName(), getBoatClassName(), isBoatClassTypicallyStartsUpwind(), createSeries(), persistent);
+        return toState.createRegatta(getBaseEventName(), getBoatClassName(), isBoatClassTypicallyStartsUpwind(), createSeries(toState), persistent);
     }
 
-    private Iterable<? extends Series> createSeries() {
+    private Iterable<? extends Series> createSeries(TrackedRegattaRegistry trackedRegattaRegistry) {
         List<Series> result = new ArrayList<Series>();
         for (Map.Entry<String, Pair<List<Pair<String, Integer>>, Boolean>> e : seriesNamesWithFleetNamesAndFleetOrderingAndMedal.entrySet()) {
             final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-            Series s = new SeriesImpl(e.getKey(), /* isMedal */ e.getValue().getB(), createFleets(e.getValue().getA()), emptyRaceColumnNamesList);
+            Series s = new SeriesImpl(e.getKey(), /* isMedal */ e.getValue().getB(), createFleets(e.getValue().getA()), emptyRaceColumnNamesList, trackedRegattaRegistry);
             result.add(s);
         }
         return result;

@@ -75,7 +75,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         mof.storeRegatta(regatta);
         
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
-        Regatta loadedRegatta = dof.loadRegatta(regatta.getName());
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
         assertEquals(regattaBaseName, loadedRegatta.getBaseName());
         Iterator<? extends Series> seriesIter = loadedRegatta.getSeries().iterator();
         Series loadedQualifyingSeries = seriesIter.next();
@@ -99,7 +99,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         mof.storeRegatta(regatta);
         
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
-        Regatta loadedRegatta = dof.loadRegatta(regatta.getName());
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
         assertEquals(regattaBaseName, loadedRegatta.getBaseName());
         Iterator<? extends Series> seriesIter = loadedRegatta.getSeries().iterator();
         Series loadedQualifyingSeries = seriesIter.next();
@@ -141,7 +141,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         mof.storeRegatta(regatta);
         
         DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
-        Regatta loadedRegatta = dof.loadRegatta(regatta.getName());
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
         Series loadedQualifyingSeries = loadedRegatta.getSeries().iterator().next();
         RaceColumn loadedQ2 = loadedQualifyingSeries.getRaceColumnByName("Q2");
         RaceIdentifier loadedQ2TrackedRaceIdentifier = loadedQ2.getRaceIdentifier(loadedQualifyingSeries.getFleetByName("Yellow"));
@@ -164,7 +164,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             qualifyingRaceColumnNames.add("Q"+i);
         }
         Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, qualifyingFleets,
-                qualifyingRaceColumnNames);
+                qualifyingRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(qualifyingSeries);
         
         // -------- final series ------------
@@ -175,7 +175,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         for (int i=1; i<=numberOfFinalRaces; i++) {
             finalRaceColumnNames.add("F"+i);
         }
-        Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, finalFleets, finalRaceColumnNames);
+        Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(finalSeries);
 
         // ------------ medal --------------
@@ -183,7 +183,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         medalFleets.add(new FleetImpl("Medal"));
         List<String> medalRaceColumnNames = new ArrayList<String>();
         medalRaceColumnNames.add("M");
-        Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, medalFleets, medalRaceColumnNames);
+        Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(medalSeries);
 
         Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, /* persistent */ false);

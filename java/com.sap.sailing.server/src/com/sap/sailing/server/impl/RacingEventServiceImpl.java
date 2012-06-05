@@ -205,7 +205,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     private void loadStoredRegattas() {
-        for (Regatta regatta : domainObjectFactory.loadAllRegattas()) {
+        for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
             regattasByName.put(regatta.getName(), regatta);
         }
     }
@@ -462,7 +462,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public Regatta getOrCreateRegatta(String baseEventName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
         Regatta regatta = new RegattaImpl(baseEventName, com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(
-                boatClassName, boatClassTypicallyStartsUpwind));
+                boatClassName, boatClassTypicallyStartsUpwind), this);
         Regatta result = regattasByName.get(regatta.getName());
         if (result == null) {
             result = regatta;
