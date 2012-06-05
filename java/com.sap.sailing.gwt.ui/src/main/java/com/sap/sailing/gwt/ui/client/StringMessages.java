@@ -313,4 +313,6 @@ public interface StringMessages extends Messages {
     String series();
     String splitFleet();
     String group();
+    String groups();
+    String color();
 }
