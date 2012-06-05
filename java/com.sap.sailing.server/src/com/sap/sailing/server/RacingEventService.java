@@ -180,7 +180,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link RaceColumn#getTrackedRace(Fleet)}.
      * 
      * @param regatta
-     *            the event to remove
+     *            the regatta from which to remove the race
      * @param race
      *            the race to remove
      */

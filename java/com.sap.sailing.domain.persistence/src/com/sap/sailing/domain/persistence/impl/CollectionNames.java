@@ -38,6 +38,7 @@ public enum CollectionNames {
     
     /**
      * Stores boat class-specific master data such as the class's hull length, logo, name, number of sailors, etc.
+     * To be implemented in future versions.
      */
     BOAT_CLASSES;
 }
