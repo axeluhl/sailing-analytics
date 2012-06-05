@@ -576,7 +576,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(
                     DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
-                    new FormattedDoubleLegDetailColumn(stringMessages.windwardDistanceToOverallLeader(), "["+stringMessages
+                    new FormattedDoubleLegDetailColumn(stringMessages.windwardDistanceToLeader(), "["+stringMessages
                             .distanceInMetersUnit()+"]", new RaceDistanceToLeaderInMeters(), 0, getLeaderboardPanel()
                             .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(
