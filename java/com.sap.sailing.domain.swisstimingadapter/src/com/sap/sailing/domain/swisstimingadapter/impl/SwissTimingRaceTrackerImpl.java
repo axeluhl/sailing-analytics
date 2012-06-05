@@ -73,7 +73,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        this(domainFactory.getOrCreateRegatta(raceID), raceID, hostname, port, windStore, domainFactory, factory,
+        this(domainFactory.getOrCreateRegatta(raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
                 messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
     }
     

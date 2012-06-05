@@ -178,12 +178,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             // domain regatta *after* calling removeRace
             domainFactory.removeRace(tractracEvent, tractracRace, trackedRegattaRegistry);
         }
-        this.regatta = regatta == null ? domainFactory.getOrCreateRegatta(tractracEvent) : regatta;
+        this.regatta = regatta == null ? domainFactory.getOrCreateRegatta(tractracEvent, trackedRegattaRegistry) : regatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
-                endOfTracking, delayToLiveInMillis, windStore, this)) {
+                endOfTracking, delayToLiveInMillis, windStore, this, trackedRegattaRegistry)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 typeControllers.add(typeController);

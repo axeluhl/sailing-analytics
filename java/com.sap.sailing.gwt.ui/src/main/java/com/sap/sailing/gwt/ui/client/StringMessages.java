@@ -309,4 +309,8 @@ public interface StringMessages extends Messages {
     String venue();
     String pleaseSelectABoatClass();
     String regattaWithThisNameAlreadyExists();
+    String seriesWithThisNameAlreadyExists();
+    String series();
+    String splitFleet();
+    String group();
 }

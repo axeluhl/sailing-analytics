@@ -63,7 +63,7 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
         } else {
             throw new IllegalArgumentException("Didn't find leaderboard "+getLeaderboardName());
         }
-        toState.updateStoredLeaderboard(leaderboard);
+        updateStoredLeaderboard(toState, leaderboard);
         return new Triple<Integer, Integer, Boolean>(newNetPoints, newTotalPoints, isScoreCorrected);
     }
 

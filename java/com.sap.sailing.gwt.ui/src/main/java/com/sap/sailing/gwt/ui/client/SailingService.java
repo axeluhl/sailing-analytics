@@ -106,7 +106,9 @@ public interface SailingService extends RemoteService {
     
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds);
 
-    StrippedLeaderboardDTO createLeaderboard(String leaderboardName, int[] discardThresholds);
+    StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds);
+
+    StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds);
 
     void removeLeaderboard(String leaderboardName);
 

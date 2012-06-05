@@ -40,11 +40,11 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final String boatClassName = "49er";
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
         Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
-                Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList);
+                Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Series finals = new SeriesImpl("Finals", /* isMedal */ false,
-                Arrays.asList(new Fleet[] { new FleetImpl("Gold", 1), new FleetImpl("Silver", 2) }), emptyRaceColumnNamesList);
+                Arrays.asList(new Fleet[] { new FleetImpl("Gold", 1), new FleetImpl("Silver", 2) }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Series medal = new SeriesImpl("Medal", /* isMedal */ true,
-                Arrays.asList(new Fleet[] { new FleetImpl("Medal") }), emptyRaceColumnNamesList);
+                Arrays.asList(new Fleet[] { new FleetImpl("Medal") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true,
                 Arrays.asList(new Series[] { qualification, finals, medal }), /* persistent */ true);
         Thread.sleep(1000);

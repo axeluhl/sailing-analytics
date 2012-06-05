@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 
 /**
@@ -49,7 +50,7 @@ public interface DomainObjectFactory {
 
     Iterable<Event> loadAllEvents();
 
-    Regatta loadRegatta(String name);
+    Regatta loadRegatta(String name, TrackedRegattaRegistry trackedRegattaRegistry);
 
-    Iterable<Regatta> loadAllRegattas();
+    Iterable<Regatta> loadAllRegattas(TrackedRegattaRegistry trackedRegattaRegistry);
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 /**
  * A series is a part of a {@link Regatta}. Rounds are ordered within the regatta, and rules for who is assigned to
@@ -16,7 +17,7 @@ import com.sap.sailing.domain.common.Named;
  */
 public interface Series extends Named {
     /**
-     * Returns the fleets of this series, on ascending order, better fleets first.
+     * Returns the fleets of this series, in ascending order, better fleets first.
      */
     Iterable<? extends Fleet> getFleets();
     
@@ -40,7 +41,7 @@ public interface Series extends Named {
 
     Fleet getFleetByName(String fleetName);
 
-    RaceColumnInSeries addRaceColumn(String raceColumnName);
+    RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry);
     
     void moveRaceColumnUp(String raceColumnName);
     

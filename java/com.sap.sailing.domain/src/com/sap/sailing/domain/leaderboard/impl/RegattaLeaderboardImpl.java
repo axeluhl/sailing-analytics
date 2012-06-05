@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 
@@ -19,7 +20,7 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
  * @author Axel Uhl (D043530)
  *
  */
-public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl {
+public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements RegattaLeaderboard {
     private static final long serialVersionUID = 2370461218294770084L;
     private final Regatta regatta;
 
@@ -29,7 +30,8 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl {
         this.regatta = regatta;
     }
     
-    private Regatta getRegatta() {
+    @Override
+    public Regatta getRegatta() {
         return regatta;
     }
 

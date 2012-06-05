@@ -86,8 +86,9 @@ public interface DomainFactory {
      * A new {@link com.sap.sailing.domain.base.Regatta} is created if no event by
      * an equal name with a boat class with an equal name as the <code>event</code>'s
      * boat class exists yet.
+     * @param trackedRegattaRegistry TODO
      */
-    com.sap.sailing.domain.base.Regatta getOrCreateRegatta(Event event);
+    com.sap.sailing.domain.base.Regatta getOrCreateRegatta(Event event, TrackedRegattaRegistry trackedRegattaRegistry);
     
     /**
      * Creates a race tracked for the specified URL/URIs and starts receiving all available existing and future push
@@ -152,12 +153,13 @@ public interface DomainFactory {
      *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to
      *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
      *            particularly the mark position loading will be constrained to this end time.
+     * @param trackedRegattaRegistry TODO
      * @param tokenToRetrieveAssociatedRace
      *            used to update the set of{@link RaceDefinition}s received by the
      *            {@link RaceCourseReceiver} created by this call
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, TimePoint startOfTracking,
-            TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate);
+            TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry);
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
@@ -192,7 +194,7 @@ public interface DomainFactory {
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor);
 
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, WindStore windStore,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, ReceiverType... types);
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, ReceiverType... types);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
@@ -232,7 +234,7 @@ public interface DomainFactory {
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding
      * {@link RaceDefinition} exists, from the {@link TrackedRegatta}. If removing the race from the event, the event is
-     * removed from the event cache such that {@link #getOrCreateRegatta(Event)} will have to create a new one. Similarly,
+     * removed from the event cache such that {@link #getOrCreateRegatta(Event, TrackedRegattaRegistry)} will have to create a new one. Similarly,
      * if the {@link TrackedRace} that was removed from the {@link TrackedRegatta} was the last one, the
      * {@link TrackedRegatta} is removed such that {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)}
      * will have to create a new one.

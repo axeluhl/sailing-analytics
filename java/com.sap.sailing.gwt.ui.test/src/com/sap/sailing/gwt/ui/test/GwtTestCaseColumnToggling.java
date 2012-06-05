@@ -101,7 +101,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void createLeaderboard(){
-        service.createLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
+        service.createFlexibleLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
                 new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onSuccess(StrippedLeaderboardDTO result) {
