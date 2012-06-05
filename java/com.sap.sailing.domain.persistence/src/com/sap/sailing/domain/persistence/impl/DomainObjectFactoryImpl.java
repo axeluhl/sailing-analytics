@@ -432,17 +432,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String name = (String) courseAreaDBObject.get(FieldNames.COURSE_AREA_NAME.name());
         return new CourseAreaImpl(name);
     }
+    
+    @Override
+    public Iterable<Regatta> loadAllRegattas() {
+        List<Regatta> result = new ArrayList<Regatta>();
+        DBCollection regattaCollection = database.getCollection(CollectionNames.REGATTAS.name());
+        for (DBObject dbRegatta : regattaCollection.find()) {
+            result.add(loadRegatta(dbRegatta));
+        }
+        return result;
+    }
 
     @Override
     public Regatta loadRegatta(String name) {
         DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), name);
         DBCollection regattaCollection = database.getCollection(CollectionNames.REGATTAS.name());
         DBObject dbRegatta = regattaCollection.findOne(query);
+        Regatta result = loadRegatta(dbRegatta);
+        assert result.getName().equals(name);
+        return result;
+    }
+
+    private Regatta loadRegatta(DBObject dbRegatta) {
         Regatta result = null;
         if (dbRegatta != null) {
-            String regattaName = (String) dbRegatta.get(FieldNames.REGATTA_NAME.name());
             String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
-            assert regattaName.equals(name);
             String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
             BoatClass boatClass = null;
             if (boatClassName != null) {

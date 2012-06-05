@@ -196,6 +196,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
         loadStoredLeaderboardsAndGroups();
+        loadStoredRegattas();
         loadStoredEvents();
     }
     
@@ -203,8 +204,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE.getMongoObjectFactory(mongoDBService));
     }
 
+    private void loadStoredRegattas() {
+        for (Regatta regatta : domainObjectFactory.loadAllRegattas()) {
+            regattasByName.put(regatta.getName(), regatta);
+        }
+    }
+
     private void loadStoredEvents() {
-        for(Event event: domainObjectFactory.loadAllEvents()) {
+        for (Event event : domainObjectFactory.loadAllEvents()) {
             eventsByName.put(event.getName(), event);
         }
     }
@@ -320,6 +327,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
     
+    @Override
+    public void updateStoredRegatta(Regatta regatta) {
+        if (regatta.isPersistent()) {
+            mongoObjectFactory.storeRegatta(regatta);
+        }
+    }
+
     /**
      * Checks all groups, if they contain a leaderboard with the name of the <code>updatedLeaderboard</code> and
      * replaces the one in the group with the updated one.<br />
@@ -356,7 +370,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             leaderboardsByName.remove(leaderboardName);
         }
         mongoObjectFactory.removeLeaderboard(leaderboardName);
-        
         syncGroupsAfterLeaderboardRemove(leaderboardName, true);
     }
     
@@ -467,6 +480,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                         boatClassTypicallyStartsUpwind), series, persistent);
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ")");
         cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
+        if (persistent) {
+            updateStoredRegatta(regatta);
+        }
         return regatta;
     }
 
@@ -894,7 +910,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             removeRace(regatta, race);
         }
         if (regatta.isPersistent()) {
-            // TODO remove regatta from database; or should this probably happen inside RacingEventServiceImpl.removeRegatta?
+            mongoObjectFactory.removeRegatta(regatta);
         }
     }
     

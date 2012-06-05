@@ -18,7 +18,7 @@ public class MoveColumnInSeriesUp extends AbstractColumnInSeriesOperation<Void> 
         if (series != null) {
             series.moveRaceColumnUp(getColumnName());
             if (series.getRegatta().isPersistent()) {
-                // TODO update regatta in DB
+                toState.updateStoredRegatta(series.getRegatta());
             }
         }
         return null;
