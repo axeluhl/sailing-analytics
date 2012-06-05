@@ -46,6 +46,8 @@ public interface DomainObjectFactory {
             long millisecondsOverWhichToAverageWind);
 
     Event loadEvent(String name);
-    
+
+    Iterable<Event> loadAllEvents();
+
     Regatta loadRegatta(String name);
 }

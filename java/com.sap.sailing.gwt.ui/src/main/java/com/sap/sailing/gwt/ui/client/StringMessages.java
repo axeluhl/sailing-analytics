@@ -188,7 +188,7 @@ public interface StringMessages extends Messages {
     String actionRaceUnlink();
     String actionRaceRemove();
     String filterLeaderboardsByName();
-    String windwardDistanceToOverallLeader();
+    String windwardDistanceToLeader();
     String actions();
     String islinked();
     String yes();
@@ -304,4 +304,9 @@ public interface StringMessages extends Messages {
     String fleet();
     String boatClass();
     String setDelayToLive();
+    String pleaseEnterNonEmptyVenue();
+    String eventWithThisNameAlreadyExists();
+    String venue();
+    String pleaseSelectABoatClass();
+    String regattaWithThisNameAlreadyExists();
 }

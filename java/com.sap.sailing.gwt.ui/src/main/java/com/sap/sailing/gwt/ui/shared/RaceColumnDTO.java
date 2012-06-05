@@ -94,10 +94,12 @@ public class RaceColumnDTO implements IsSerializable {
     public PlacemarkOrderDTO getPlaces() {
         PlacemarkOrderDTO places = null;
         for (StrippedRaceDTO race : racesPerFleet.values()) {
-            if (places == null) {
-                places = race.places;
-            } else {
-                places.add(race.places);
+            if (race != null) {
+                if (places == null) {
+                    places = race.places;
+                } else {
+                    places.add(race.places);
+                }
             }
         }
         return places;

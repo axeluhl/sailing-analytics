@@ -36,6 +36,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -193,14 +194,21 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
         loadStoredLeaderboardsAndGroups();
+        loadStoredEvents();
     }
     
     public RacingEventServiceImpl(MongoDBService mongoDBService) {
         this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE.getMongoObjectFactory(mongoDBService));
     }
-    
+
+    private void loadStoredEvents() {
+        for(Event event: domainObjectFactory.loadAllEvents()) {
+            eventsByName.put(event.getName(), event);
+        }
+    }
+
     private void loadStoredLeaderboardsAndGroups() {
-        // Loading all leaderboard groups and putting the contained leaderboards
+        // Loading all leaderboard groups and the contained leaderboards
         for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups()) {
             leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
@@ -1229,6 +1237,19 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void setDelayToLiveInMillis(long delayToLiveInMillis) {
         this.delayToLiveInMillis = delayToLiveInMillis;
+    }
+
+    @Override
+    public Event addEvent(String eventName, String venue, List<String> regattaNames) {
+        Event result = new EventImpl(eventName, venue);
+        synchronized (eventsByName) {
+            if (eventsByName.containsKey(eventName)) {
+                throw new IllegalArgumentException("Event with name " + eventName + " already exists");
+            }
+            eventsByName.put(eventName, result);
+        }
+        mongoObjectFactory.storeEvent(result);
+        return result;
     }
 
 }

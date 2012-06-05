@@ -101,7 +101,7 @@ public class WindChartSettingsDialogComponent implements SettingsDialogComponent
         
         for (WindSourceType windSourceType : WindSourceType.values()) {
             CheckBox checkbox = dialog.createCheckbox(WindSourceTypeFormatter.format(windSourceType, stringMessages));
-            checkbox.setEnabled(initialSettings.isShowWindSpeedSeries());
+            checkbox.setEnabled(initialSettings.isShowWindSpeedSeries() && windSourceType.useSpeed());
             windSpeedCheckboxes.put(windSourceType, checkbox);
             checkbox.setValue(initialSettings.getWindSpeedSourcesToDisplay().contains(windSourceType));
             checkbox.getElement().getStyle().setMarginLeft(15.0, Unit.PX);
