@@ -118,6 +118,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
@@ -484,15 +485,15 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     private SeriesDTO createSeriesDTO(Series series) {
-        List<String> fleetNames = new ArrayList<String>();
+        List<FleetDTO> fleets = new ArrayList<FleetDTO>();
         for (Fleet fleet : series.getFleets()) {
-            fleetNames.add(fleet.getName());
+            fleets.add(new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor()));
         }
         List<String> raceColumnNames = new ArrayList<String>();
         for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
             raceColumnNames.add(raceColumn.getName());
         }
-        SeriesDTO result = new SeriesDTO(series.getName(), fleetNames, raceColumnNames, series.isMedal());
+        SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumnNames, series.isMedal());
         return result;
     }
 
