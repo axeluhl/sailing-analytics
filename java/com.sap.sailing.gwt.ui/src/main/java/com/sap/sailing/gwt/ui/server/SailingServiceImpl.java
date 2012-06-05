@@ -44,8 +44,10 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
@@ -139,6 +141,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedRaceDTO;
@@ -455,6 +458,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             List<CompetitorDTO> competitorList = getCompetitorDTOs(regatta.getCompetitors());
             RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), competitorList);
             regattaDTO.races = getRaceDTOs(regatta);
+            regattaDTO.series = getSeriesDTOs(regatta);
             BoatClass boatClass = regatta.getBoatClass();
             if(boatClass != null) {
                 regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
@@ -466,6 +470,28 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 result.add(regattaDTO);
             }
         }
+        return result;
+    }
+
+    private List<SeriesDTO> getSeriesDTOs(Regatta regatta) {
+        List<SeriesDTO> result = new ArrayList<SeriesDTO>();
+        for (Series series : regatta.getSeries()) {
+            SeriesDTO seriesDTO = createSeriesDTO(series);
+            result.add(seriesDTO);
+        }
+        return result;
+    }
+
+    private SeriesDTO createSeriesDTO(Series series) {
+        List<String> fleetNames = new ArrayList<String>();
+        for (Fleet fleet : series.getFleets()) {
+            fleetNames.add(fleet.getName());
+        }
+        List<String> raceColumnNames = new ArrayList<String>();
+        for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
+            raceColumnNames.add(raceColumn.getName());
+        }
+        SeriesDTO result = new SeriesDTO(series.getName(), fleetNames, raceColumnNames, series.isMedal());
         return result;
     }
 

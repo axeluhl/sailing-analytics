@@ -17,7 +17,7 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
  */
 public interface Series extends Named {
     /**
-     * Returns the fleets of this series, on ascending order, better fleets first.
+     * Returns the fleets of this series, in ascending order, better fleets first.
      */
     Iterable<? extends Fleet> getFleets();
     
