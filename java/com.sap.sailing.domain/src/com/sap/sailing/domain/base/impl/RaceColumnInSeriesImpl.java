@@ -20,6 +20,14 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     private final Series series;
     private final TrackedRegattaRegistry trackedRegattaRegistry;
 
+    /**
+     * @param trackedRegattaRegistry
+     *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
+     *            in order to re-associate a {@link TrackedRace} passed to {@link #setTrackedRace(Fleet, TrackedRace)}
+     *            with this column's series' {@link TrackedRegatta}, and the tracked race's {@link RaceDefinition} with
+     *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
+     *            carried out.
+     */
     public RaceColumnInSeriesImpl(String name, Series series, TrackedRegattaRegistry trackedRegattaRegistry) {
         super(name);
         this.series = series;
@@ -54,15 +62,17 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
      */
     @Override
     public void setTrackedRace(Fleet fleet, TrackedRace trackedRace) {
-        RaceDefinition race = trackedRace.getRace();
-        TrackedRegatta trackedRegatta = trackedRace.getTrackedRegatta();
-        Regatta regatta = trackedRegatta.getRegatta();
-        if (regatta != getRegatta()) {
-            // re-associate:
-            regatta.removeRace(race);
-            getRegatta().addRace(race);
-            trackedRegatta.removeTrackedRace(trackedRace);
-            trackedRegattaRegistry.getOrCreateTrackedRegatta(getRegatta()).addTrackedRace(trackedRace);
+        if (trackedRegattaRegistry != null) {
+            RaceDefinition race = trackedRace.getRace();
+            TrackedRegatta trackedRegatta = trackedRace.getTrackedRegatta();
+            Regatta regatta = trackedRegatta.getRegatta();
+            if (regatta != getRegatta()) {
+                // re-associate:
+                regatta.removeRace(race);
+                getRegatta().addRace(race);
+                trackedRegatta.removeTrackedRace(trackedRace);
+                trackedRegattaRegistry.getOrCreateTrackedRegatta(getRegatta()).addTrackedRace(trackedRace);
+            }
         }
         super.setTrackedRace(fleet, trackedRace);
     }
