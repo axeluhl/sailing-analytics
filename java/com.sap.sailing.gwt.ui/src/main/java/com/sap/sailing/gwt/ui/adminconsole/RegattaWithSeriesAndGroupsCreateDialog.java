@@ -5,7 +5,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -26,6 +29,8 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
     private TextBox boatClassEntryField;
 
     private List<TextBox> seriesNameEntryFields;
+
+    private Grid seriesGrid;
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
 
@@ -59,7 +64,7 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
                 errorMessage = stringConstants.regattaWithThisNameAlreadyExists();
             }
 
-            if(errorMessage != null) {
+            if(errorMessage == null) {
                 List<SeriesDTO> seriesToValidate = regattaToValidate.series;
                 int index = 0;
                 boolean seriesNameNotEmpty = true;
@@ -71,7 +76,8 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
                     }
                     index++;
                 }
-                index = 0;
+
+                int index2 = 0;
                 boolean seriesUnique = true;
                 
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
@@ -80,14 +86,13 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
                         seriesUnique = false;
                         break;
                     }
-                    index++;
+                    index2++;
                 }
 
-                String prefix = stringConstants.series() + " " + (index + 1) + ": ";  
                 if (!seriesNameNotEmpty) {
-                    errorMessage = prefix + stringConstants.pleaseEnterNonEmptyName();
+                    errorMessage = stringConstants.series() + " " + (index + 1) + ": " + stringConstants.pleaseEnterNonEmptyName();
                 } else if (!seriesUnique) {
-                    errorMessage = prefix + stringConstants.seriesWithThisNameAlreadyExists();
+                    errorMessage = stringConstants.series() + " " + (index2 + 1) + ": " + stringConstants.seriesWithThisNameAlreadyExists();
                 }
                 
             }
@@ -104,11 +109,20 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
         this.stringConstants = stringConstants;
         this.regatta = new RegattaDTO();
 
+        nameEntryField = createTextBox(null);
+        nameEntryField.setWidth("200px");
+        boatClassEntryField = createTextBox(null);
+        boatClassEntryField.setWidth("150px");
+
         seriesNameEntryFields = new ArrayList<TextBox>();
-        addNewSeriesWidget(null);
+        createNewSeriesWidget(null);
+        
+        seriesGrid = new Grid(1, 2);
+        seriesGrid.setWidget(0,  0, new Label(stringConstants.series() + " 1:"));
+        seriesGrid.setWidget(0, 1, createAddGroupButton(0));
     }
 
-    private TextBox addNewSeriesWidget(String defaultName) {
+    private TextBox createNewSeriesWidget(String defaultName) {
         TextBox textBox = createTextBox(defaultName); 
         textBox.setWidth("200px");
         seriesNameEntryFields.add(textBox);
@@ -123,7 +137,7 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
         regatta.series = new ArrayList<SeriesDTO>();
         for(TextBox textBox: seriesNameEntryFields) {
             SeriesDTO seriesDTO = new SeriesDTO();
-            seriesDTO.name = textBox.getName();
+            seriesDTO.name = textBox.getValue();
             regatta.series.add(seriesDTO);
         }
 
@@ -132,12 +146,11 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
 
     @Override
     protected Widget getAdditionalWidget() {
-        VerticalPanel panel = new VerticalPanel();
+        final VerticalPanel panel = new VerticalPanel();
         Widget additionalWidget = super.getAdditionalWidget();
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        
         Grid formGrid = new Grid(2, 2);
         panel.add(formGrid);
         
@@ -145,9 +158,50 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 0, new Label(stringConstants.boatClass() + ":"));
         formGrid.setWidget(1, 1, boatClassEntryField);
+        
+        panel.add(createHeadlineLabel(stringConstants.series()));
+        panel.add(seriesGrid);
+        
+        Button addSeriesButton = new Button("Add series");
+        addSeriesButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                createNewSeriesWidget(null);
+                updateSeriesGrid(panel);
+            }
+        });
+        panel.add(addSeriesButton);
+        
         return panel;
     }
 
+    private void updateSeriesGrid(VerticalPanel parentPanel) {
+        int widgetIndex = parentPanel.getWidgetIndex(seriesGrid);
+        parentPanel.remove(seriesGrid);
+        
+        int seriesCount = seriesNameEntryFields.size();
+        seriesGrid = new Grid(seriesCount, 3);
+
+        for(int i = 0; i < seriesCount; i++) {
+            seriesGrid.setWidget(i, 0, new Label(stringConstants.series() + " " + (i+1) + ":"));
+            seriesGrid.setWidget(i, 1, seriesNameEntryFields.get(i));
+            seriesGrid.setWidget(i, 2, createAddGroupButton(i));
+        }
+
+        parentPanel.insert(seriesGrid, widgetIndex);
+    }
+
+    private Button createAddGroupButton(final int seriesIndex) {
+        Button addGroupButton = new Button(stringConstants.add());
+        addGroupButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+            }
+        });
+        return addGroupButton;
+    }
+    
     @Override
     public void show() {
         super.show();

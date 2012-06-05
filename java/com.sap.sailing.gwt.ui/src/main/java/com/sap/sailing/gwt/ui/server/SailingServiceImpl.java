@@ -1850,6 +1850,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         for (Event event : getService().getAllEvents()) {
             List<RegattaDTO> regattasList = getRegattas();
             EventDTO eventDTO = new EventDTO(event.getName(), regattasList);
+            eventDTO.venue = new VenueDTO(event.getVenue().getName());
             result.add(eventDTO);
         }
         return result;
