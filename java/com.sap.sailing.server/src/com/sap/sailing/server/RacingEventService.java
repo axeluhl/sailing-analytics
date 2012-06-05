@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -361,6 +362,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
     Regatta getOrCreateRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
+
+    Regatta createRegatta(String baseName, String boatClassName, boolean boatClassTypicallyStartsUpwind,
+            Iterable<? extends Series> series, boolean persistent);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}

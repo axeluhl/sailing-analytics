@@ -27,19 +27,39 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     private final Iterable<? extends Series> series;
     
     /**
-     * Constructs a regatta with a single default series with empty race column list, and a single default fleet.
+     * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
+     * durably and don't contain valuable information worth being preserved; or they are constructed explicitly
+     * with series and race columns in which case this data needs to be protected. This flag indicates whether
+     * the data of this regatta needs to be maintained persistently.
+     * 
+     * @see #isPersistent
+     */
+    private final boolean persistent;
+    
+    /**
+     * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
+     * is not {@link #isPersistent() marked for persistence}.
      */
     public RegattaImpl(String baseName, BoatClass boatClass) {
         this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */ false,
-                Collections.singletonList(new FleetImpl("Default")), /* race column names */ new ArrayList<String>())));
+                Collections.singletonList(new FleetImpl("Default")), /* race column names */ new ArrayList<String>())), /* persistent */ false);
     }
     
-    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series) {
+    /**
+     * @param series
+     *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
+     *            this new regatta.
+     */
+    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent) {
         super(baseName+(boatClass==null?"":" ("+boatClass.getName()+")"));
         races = new HashSet<RaceDefinition>();
         regattaListeners = new HashSet<RegattaListener>();
         this.boatClass = boatClass;
         this.series = series;
+        for (Series s : series) {
+            s.setRegatta(this);
+        }
+        this.persistent = persistent;
     }
     
     @Override
@@ -53,6 +73,11 @@ public class RegattaImpl extends NamedImpl implements Regatta {
         return result;
     }
     
+    @Override
+    public boolean isPersistent() {
+        return persistent;
+    }
+    
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         regattaListeners = new HashSet<>();
@@ -61,6 +86,16 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     @Override
     public Iterable<? extends Series> getSeries() {
         return series;
+    }
+    
+    @Override
+    public Series getSeriesByName(String name) {
+        for (Series s : getSeries()) {
+            if (s.getName().equals(name)) {
+                return s;
+            }
+        }
+        return null;
     }
 
     @Override

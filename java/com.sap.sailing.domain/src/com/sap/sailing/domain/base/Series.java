@@ -26,9 +26,9 @@ public interface Series extends Named {
      * something called "R2", those are as many "races" as we have fleets; therefore, we use "race column" instead to
      * describe all "races" named, e.g., "R3" in a series.
      */
-    Iterable<? extends RaceColumn> getRaceColumns();
+    Iterable<? extends RaceColumnInSeries> getRaceColumns();
     
-    RaceColumn getRaceColumnByName(String columnName);
+    RaceColumnInSeries getRaceColumnByName(String columnName);
 
     /**
      * Tells whether this is the "last" / "medal" race series, usually having only one race. This may have implications
@@ -39,4 +39,19 @@ public interface Series extends Named {
     void setIsMedal(boolean isMedal);
 
     Fleet getFleetByName(String fleetName);
+
+    RaceColumnInSeries addRaceColumn(String raceColumnName);
+    
+    void moveRaceColumnUp(String raceColumnName);
+    
+    void moveRaceColumnDown(String raceColumnName);
+    
+    void removeRaceColumn(String raceColumnName);
+    
+    Regatta getRegatta();
+    
+    /**
+     * Sets this series' regatta.
+     */
+    void setRegatta(Regatta regatta);
 }

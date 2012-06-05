@@ -289,7 +289,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             series.add(medalSeries);
         }
 
-        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series);
+        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, /* persistent */ false);
         return regatta;
     }
 }

@@ -34,6 +34,7 @@ public class FleetImpl extends NamedImpl implements Fleet {
         return this.ordering - ((FleetImpl) o).ordering;
     }
 
+    @Override
     public int getOrdering() {
         return ordering;
     }

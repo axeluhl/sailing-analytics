@@ -17,4 +17,10 @@ import com.sap.sailing.domain.common.Named;
  * 
  */
 public interface Fleet extends Named, Comparable<Fleet> {
+
+    /**
+     * The comparability is implemented by an integer field. For fleets of a series to compare equal, the constructor
+     * without this ordering criterion should be chosen (implicitly setting it to 0).
+     */
+    int getOrdering();
 }

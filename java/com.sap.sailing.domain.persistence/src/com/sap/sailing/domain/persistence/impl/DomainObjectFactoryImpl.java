@@ -451,7 +451,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries);
-            result = new RegattaImpl(baseName, boatClass, series);
+            result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true);
         }
         return result;
     }

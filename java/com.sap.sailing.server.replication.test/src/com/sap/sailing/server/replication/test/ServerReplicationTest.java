@@ -24,7 +24,7 @@ import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.server.operationaltransformation.AddRegatta;
+import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
@@ -78,7 +78,7 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true);
         final String baseEventName = "Test Event";
-        AddRegatta addEventOperation = new AddRegatta(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true);
+        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true);
         Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
