@@ -1,25 +1,29 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.base.Series;
+import java.util.logging.Logger;
+
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class MoveColumnInSeriesDown extends AbstractColumnInSeriesOperation<Void> {
-    private static final long serialVersionUID = 1055871052852494542L;
-
-    public MoveColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
-        super(regattaIdentifier, seriesName, columnName);
+public class RemoveRegatta extends AbstractRacingEventServiceOperation<Void> {
+    private static final long serialVersionUID = -2232723085937305299L;
+    private static final Logger logger = Logger.getLogger(RemoveRegatta.class.getName());
+    private final RegattaIdentifier regattaIdentifier;
+    
+    public RemoveRegatta(RegattaIdentifier regattaIdentifier) {
+        super();
+        this.regattaIdentifier = regattaIdentifier;
     }
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        Series series = getSeries(toState);
-        if (series != null) {
-            series.moveRaceColumnDown(getColumnName());
-            if (series.getRegatta().isPersistent()) {
-                // TODO update regatta in DB
-            }
+        Regatta regatta = toState.getRegatta(regattaIdentifier);
+        if (regatta != null) {
+            toState.removeRegatta(regatta);
+        } else {
+            logger.warning("Couldn't find regatta "+regattaIdentifier);
         }
         return null;
     }

@@ -167,10 +167,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
     
     /**
-     * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race} from
-     * this service. If it was the last {@link RaceDefinition} in its {@link Regatta}, the <code>regatta</code> is removed
-     * as well and will no longer be returned by {@link #getAllRegattas()}. The wind tracking is stopped for
-     * <code>race</code>.
+     * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race}
+     * from this service. If it was the last {@link RaceDefinition} in its {@link Regatta} and the regatta
+     * {@link Regatta#isPersistent() is not stored persistently}, the <code>regatta</code> is removed as well and will no
+     * longer be returned by {@link #getAllRegattas()}. The wind tracking is stopped for <code>race</code>.
      * <p>
      * 
      * Any {@link RaceTracker} for which <code>race</race> is the last race tracked that is still reachable

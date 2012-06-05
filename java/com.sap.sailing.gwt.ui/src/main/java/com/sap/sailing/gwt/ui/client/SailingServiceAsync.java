@@ -361,4 +361,20 @@ public interface SailingServiceAsync {
      * @param leaderboardNames The list of names of the new regattas of the event
      */
     void updateEvent(String oldName, String newName, String venue, List<String> regattaNames, AsyncCallback<Void> callback);
+
+    void removeRegatta(RegattaIdentifier regattaIdentifier, AsyncCallback<Void> callback);
+
+    void addColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName, AsyncCallback<Void> callback);
+
+    void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
+            AsyncCallback<Void> callback);
+
+    void renameColumnInSeries(RegattaIdentifier regattaIdentifier, String seriesName, String oldColumnName,
+            String newColumnName, AsyncCallback<Void> callback);
+
+    void moveColumnToSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
+            AsyncCallback<Void> callback);
+
+    void moveColumnToSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
+            AsyncCallback<Void> callback);
 }

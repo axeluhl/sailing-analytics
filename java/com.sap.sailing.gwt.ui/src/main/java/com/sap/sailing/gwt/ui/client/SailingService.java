@@ -121,6 +121,18 @@ public interface SailingService extends RemoteService {
     void moveLeaderboardColumnUp(String leaderboardName, String columnName);
     
     void moveLeaderboardColumnDown(String leaderboardName, String columnName);
+    
+    void removeRegatta(RegattaIdentifier regattaIdentifier);
+    
+    void addColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
+
+    void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
+
+    void renameColumnInSeries(RegattaIdentifier regattaIdentifier, String seriesName, String oldColumnName, String newColumnName);
+
+    void moveColumnToSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
+
+    void moveColumnToSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
     boolean connectTrackedRaceToLeaderboardColumn(String leaderboardName, String raceColumnName,
             String fleetName, RaceIdentifier raceIdentifier);
