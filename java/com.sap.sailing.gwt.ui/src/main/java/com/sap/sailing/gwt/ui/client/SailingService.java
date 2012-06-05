@@ -122,6 +122,10 @@ public interface SailingService extends RemoteService {
     
     void moveLeaderboardColumnDown(String leaderboardName, String columnName);
     
+    void createRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind,
+            Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
+            boolean persistent);
+    
     void removeRegatta(RegattaIdentifier regattaIdentifier);
     
     void addColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);

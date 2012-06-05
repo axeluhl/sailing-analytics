@@ -377,4 +377,8 @@ public interface SailingServiceAsync {
 
     void moveColumnToSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
+
+    void createRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind,
+            Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
+            boolean persistent, AsyncCallback<Void> callback);
 }

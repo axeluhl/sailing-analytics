@@ -154,6 +154,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
+import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
@@ -1926,6 +1927,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void moveColumnToSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new MoveColumnInSeriesDown(regattaIdentifier, seriesName, columnName));
+    }
+
+    @Override
+    public void createRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind, Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent) {
+        getService().apply(
+                new AddSpecificRegatta(regattaName, boatClassName, boatClassTypicallyStartsUpwind,
+                        seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent));
     }
 
 }
