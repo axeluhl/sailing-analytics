@@ -36,7 +36,7 @@ public class DetailTypeFormatter {
         case RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS:
             return stringMessages.averageCrossTrackErrorInMeters();
         case WINDWARD_DISTANCE_TO_OVERALL_LEADER:
-            return stringMessages.windwardDistanceToOverallLeader();
+            return stringMessages.windwardDistanceToLeader();
         case HEAD_UP:
             return stringMessages.headUp();
         case BEAR_AWAY:
