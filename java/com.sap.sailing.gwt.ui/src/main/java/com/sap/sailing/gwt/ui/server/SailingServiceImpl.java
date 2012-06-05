@@ -462,7 +462,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             regattaDTO.races = getRaceDTOs(regatta);
             regattaDTO.series = getSeriesDTOs(regatta);
             BoatClass boatClass = regatta.getBoatClass();
-            if(boatClass != null) {
+            if (boatClass != null) {
                 regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
             }
             if (!regattaDTO.races.isEmpty()) {
