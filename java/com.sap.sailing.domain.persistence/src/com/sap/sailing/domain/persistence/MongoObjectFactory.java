@@ -4,9 +4,11 @@ import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 
@@ -28,7 +30,7 @@ public interface MongoObjectFactory {
      * Stores the configuration data of <code>leaderboard</code> in the Mongo DB associated with this
      * factory. 
      */
-    void storeLeaderboard(Leaderboard leaderboard);
+    void storeFlexibleLeaderboard(FlexibleLeaderboard leaderboard);
     
     /**
      * Removes the leaderboard named <code>name</code> from the database.
@@ -67,4 +69,6 @@ public interface MongoObjectFactory {
     void storeRegatta(Regatta regatta);
 
     void removeRegatta(Regatta regatta);
+
+    void storeRegattaLeaderboard(RegattaLeaderboard result);
 }

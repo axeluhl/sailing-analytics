@@ -26,8 +26,10 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.tracking.Positioned;
@@ -123,7 +125,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeLeaderboard(Leaderboard leaderboard) {
+    public void storeFlexibleLeaderboard(FlexibleLeaderboard leaderboard) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         try {
             leaderboardCollection.ensureIndex(FieldNames.LEADERBOARD_NAME.name());
@@ -164,6 +166,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         result.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
         leaderboardCollection.update(query, result, /* upsrt */ true, /* multi */ false);
+    }
+
+    @Override
+    public void storeRegattaLeaderboard(RegattaLeaderboard result) {
+        // TODO Auto-generated method stub
+        
     }
 
     private BasicDBObject storeRaceColumn(RaceColumn raceColumn) {
@@ -247,6 +255,15 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardIds);
         
         leaderboardGroupCollection.update(query, result, true, false);
+    }
+
+    private void storeLeaderboard(Leaderboard leaderboard) {
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+        } else if (leaderboard instanceof RegattaLeaderboard) {
+            storeRegattaLeaderboard((RegattaLeaderboard) leaderboard);
+        }
+        
     }
 
     @Override

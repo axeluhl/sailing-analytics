@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.server.RacingEventService;
@@ -26,11 +27,11 @@ public class LeaderboardDiscardingRulesTest {
     public void testDiscardingRoules() {
         racingEventService.removeLeaderboard(LEADERBOARDNAME);
         racingEventService.addFlexibleLeaderboard(LEADERBOARDNAME, new int[] { 1, 4 });
-        Leaderboard leaderboard = racingEventService.getLeaderboardByName(LEADERBOARDNAME);
+        FlexibleLeaderboard leaderboard = (FlexibleLeaderboard) racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboard);
         int[] discardingRoulesNew = new int[] { 1, 5 };
         leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(discardingRoulesNew));
-        racingEventService.updateStoredLeaderboard(leaderboard);
+        racingEventService.updateStoredFlexibleLeaderboard(leaderboard);
         Leaderboard leaderboardNew = racingEventService.getLeaderboardByName(LEADERBOARDNAME);
         assertNotNull(leaderboardNew);
         int[] result = leaderboardNew.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();

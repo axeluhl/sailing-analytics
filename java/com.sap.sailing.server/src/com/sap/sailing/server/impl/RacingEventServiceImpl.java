@@ -32,6 +32,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
@@ -52,9 +53,11 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
+import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -231,8 +234,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public Leaderboard addFlexibleLeaderboard(String name, int[] discardThresholds) {
-        Leaderboard result = new FlexibleLeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+    public FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds) {
+        FlexibleLeaderboard result = new FlexibleLeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 discardThresholds), new LowerScoreIsBetter());
         synchronized (leaderboardsByName) {
             if (leaderboardsByName.containsKey(name)) {
@@ -240,17 +243,37 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             leaderboardsByName.put(name, result);
         }
-        mongoObjectFactory.storeLeaderboard(result);
+        mongoObjectFactory.storeFlexibleLeaderboard(result);
         return result;
     }
     
+    @Override
+    public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
+        Regatta regatta = getRegatta(regattaIdentifier);
+        RegattaLeaderboard result = null;
+        if (regatta != null) {
+            result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
+                    discardThresholds), new LowerScoreIsBetter());
+            synchronized (leaderboardsByName) {
+                if (leaderboardsByName.containsKey(result.getName())) {
+                    throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists");
+                }
+                leaderboardsByName.put(result.getName(), result);
+            }
+            mongoObjectFactory.storeRegattaLeaderboard(result);
+        } else {
+            logger.warning("Cannot find regatta "+regattaIdentifier+". Hence, cannot create regatta leaderboard for it.");
+        }
+        return result;
+    }
+
     @Override
     public RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
             // uses the default fleet as the single fleet for the new column
             RaceColumn result = ((FlexibleLeaderboard) leaderboard).addRaceColumn(columnName, medalRace, leaderboard.getFleet(null));
-            updateStoredLeaderboard(leaderboard);
+            updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
             return result;
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
@@ -262,7 +285,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
             ((FlexibleLeaderboard) leaderboard).moveRaceColumnUp(columnName);
-            updateStoredLeaderboard(leaderboard);
+            updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
@@ -273,7 +296,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
             ((FlexibleLeaderboard) leaderboard).moveRaceColumnDown(columnName);
-            updateStoredLeaderboard(leaderboard);
+            updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
@@ -284,7 +307,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
             ((FlexibleLeaderboard) leaderboard).removeRaceColumn(columnName);
-            updateStoredLeaderboard(leaderboard);
+            updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }
@@ -295,7 +318,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             leaderboard.getRaceColumnByName(oldColumnName).setName(newColumnName);
-            updateStoredLeaderboard(leaderboard);
+            updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named "+leaderboardName+" not found");
         }
@@ -322,11 +345,17 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public void updateStoredLeaderboard(Leaderboard leaderboard) {
-        mongoObjectFactory.storeLeaderboard(leaderboard);
+    public void updateStoredFlexibleLeaderboard(FlexibleLeaderboard leaderboard) {
+        mongoObjectFactory.storeFlexibleLeaderboard(leaderboard);
         syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
     
+    @Override
+    public void updateStoredRegattaLeaderboard(RegattaLeaderboard leaderboard) {
+        mongoObjectFactory.storeRegattaLeaderboard(leaderboard);
+        syncGroupsAfterLeaderboardChange(leaderboard, true);
+    }
+
     @Override
     public void updateStoredRegatta(Regatta regatta) {
         if (regatta.isPersistent()) {
@@ -929,18 +958,35 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             if (Util.isEmpty(trackedRegatta.getTrackedRaces())) {
                 removeTrackedRegatta(regatta);
             }
-            for (Leaderboard leaderboard : getLeaderboards().values()) {
-                boolean changed = false;
-                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    for (Fleet fleet : raceColumn.getFleets()) {
+            // remove tracked race from RaceColumns of regatta
+            boolean regattaChanged = false;
+            for (Series series : regatta.getSeries()) {
+                for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
+                    for (Fleet fleet : series.getFleets()) {
                         if (raceColumn.getTrackedRace(fleet) == trackedRace) {
-                            raceColumn.releaseTrackedRace(fleet); // but leave the RaceIdentifier on the race column
-                            changed = true;                       // untouched, e.g., for later re-load
+                            raceColumn.setTrackedRace(fleet, null);
+                            regattaChanged = true;
                         }
                     }
                 }
-                if (changed) {
-                    updateStoredLeaderboard(leaderboard);
+            }
+            if (regattaChanged) {
+                updateStoredRegatta(regatta);
+            }
+            for (Leaderboard leaderboard : getLeaderboards().values()) {
+                if (leaderboard instanceof FlexibleLeaderboard) { // RegattaLeaderboards have implicitly been updated by the code above
+                    boolean changed = false;
+                    for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                        for (Fleet fleet : raceColumn.getFleets()) {
+                            if (raceColumn.getTrackedRace(fleet) == trackedRace) {
+                                raceColumn.releaseTrackedRace(fleet); // but leave the RaceIdentifier on the race column
+                                changed = true; // untouched, e.g., for later re-load
+                            }
+                        }
+                    }
+                    if (changed) {
+                        updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+                    }
                 }
             }
         }

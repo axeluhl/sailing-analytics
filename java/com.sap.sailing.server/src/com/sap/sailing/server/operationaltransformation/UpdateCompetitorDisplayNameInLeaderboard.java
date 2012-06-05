@@ -35,7 +35,7 @@ public class UpdateCompetitorDisplayNameInLeaderboard extends AbstractLeaderboar
         Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
         if (competitor != null) {
             leaderboard.setDisplayName(competitor, newDisplayName);
-            toState.updateStoredLeaderboard(leaderboard);
+            updateStoredLeaderboard(toState, leaderboard);
         }
         return null;
     }
