@@ -2,8 +2,9 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -23,10 +24,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
@@ -145,7 +148,7 @@ public class EventStructureManagementPanel extends SimplePanel {
         regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                Set<RegattaDTO> selectedRegatta = regattaSelectionModel.getSelectedSet();
+//                Set<RegattaDTO> selectedRegatta = regattaSelectionModel.getSelectedSet();
             }
         });
         regattaTable.setSelectionModel(regattaSelectionModel);
@@ -194,7 +197,7 @@ public class EventStructureManagementPanel extends SimplePanel {
     }
 
     private void openCreateRegattaDialog() {
-        RegattaCreateDialog dialog = new RegattaCreateDialog(Collections.unmodifiableCollection(selectedEvent.regattas), stringMessages,
+        RegattaWithSeriesAndGroupsCreateDialog dialog = new RegattaWithSeriesAndGroupsCreateDialog(Collections.unmodifiableCollection(selectedEvent.regattas), stringMessages,
                 new AsyncCallback<RegattaDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -233,16 +236,32 @@ public class EventStructureManagementPanel extends SimplePanel {
     }
 
     private void createNewRegatta(final RegattaDTO newRegatta) {
-//        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, new AsyncCallback<RegattaDTO>() {
-//            @Override
-//            public void onFailure(Throwable t) {
-//                errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());
-//            }
-//
-//            @Override
-//            public void onSuccess(RegattaDTO newRegatta) {
-//            }
-//        });
+        
+        Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesStructure = new HashMap<String, Pair<List<Pair<String, Integer>>, Boolean>>();
+
+        for(SeriesDTO seriesDTO: newRegatta.series) {
+            List<Pair<String, Integer>> fleets = new ArrayList<Pair<String, Integer>>();
+            
+            for(FleetDTO fleetDTO: seriesDTO.getFleets()) {
+                Pair<String, Integer> fleetPair = new Pair<String, Integer>(fleetDTO.name, fleetDTO.getOrderNo());
+                fleets.add(fleetPair);
+            }
+            Pair<List<Pair<String, Integer>>, Boolean> seriesPair = new Pair<List<Pair<String, Integer>>, Boolean>(fleets, seriesDTO.isMedal());
+
+            seriesStructure.put(seriesDTO.name, seriesPair);
+        }
+        
+        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, true,
+                seriesStructure, true, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void nothing) {
+            }
+        });
     }
 
     private int getEventItemIndex(String eventName) {

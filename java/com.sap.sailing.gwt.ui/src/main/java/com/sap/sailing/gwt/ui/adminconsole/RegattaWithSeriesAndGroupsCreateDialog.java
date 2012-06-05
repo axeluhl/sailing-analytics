@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
@@ -13,14 +15,17 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
-public class RegattaDialog extends DataEntryDialog<RegattaDTO> {
+public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<RegattaDTO> {
 
-    protected StringMessages stringConstants;
-    protected RegattaDTO regatta;
+    private StringMessages stringConstants;
+    private RegattaDTO regatta;
 
-    protected TextBox nameEntryField;
-    protected TextBox boatClassEntryField;
+    private TextBox nameEntryField;
+    private TextBox boatClassEntryField;
+
+    private List<TextBox> seriesNameEntryFields;
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
 
@@ -54,23 +59,73 @@ public class RegattaDialog extends DataEntryDialog<RegattaDTO> {
                 errorMessage = stringConstants.regattaWithThisNameAlreadyExists();
             }
 
+            if(errorMessage != null) {
+                List<SeriesDTO> seriesToValidate = regattaToValidate.series;
+                int index = 0;
+                boolean seriesNameNotEmpty = true;
+
+                for (SeriesDTO series : seriesToValidate) {
+                    seriesNameNotEmpty = series.name != null && series.name.length() > 0;
+                    if(!seriesNameNotEmpty) {
+                        break;
+                    }
+                    index++;
+                }
+                index = 0;
+                boolean seriesUnique = true;
+                
+                HashSet<String> setToFindDuplicates = new HashSet<String>();
+                for (SeriesDTO series : seriesToValidate) {
+                    if(!setToFindDuplicates.add(series.name)) {
+                        seriesUnique = false;
+                        break;
+                    }
+                    index++;
+                }
+
+                String prefix = stringConstants.series() + " " + (index + 1) + ": ";  
+                if (!seriesNameNotEmpty) {
+                    errorMessage = prefix + stringConstants.pleaseEnterNonEmptyName();
+                } else if (!seriesUnique) {
+                    errorMessage = prefix + stringConstants.seriesWithThisNameAlreadyExists();
+                }
+                
+            }
+            
             return errorMessage;
         }
 
     }
 
-    public RegattaDialog(RegattaDTO regatta, RegattaParameterValidator validator, StringMessages stringConstants,
+    public RegattaWithSeriesAndGroupsCreateDialog(Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
             AsyncCallback<RegattaDTO> callback) {
-        super(stringConstants.regatta(), null, stringConstants.ok(), stringConstants.cancel(), validator,
-                callback);
+        super(stringConstants.regatta(), null, stringConstants.ok(), stringConstants.cancel(),  
+                new RegattaParameterValidator(stringConstants, existingRegattas), callback);
         this.stringConstants = stringConstants;
-        this.regatta = regatta;
+        this.regatta = new RegattaDTO();
+
+        seriesNameEntryFields = new ArrayList<TextBox>();
+        addNewSeriesWidget(null);
+    }
+
+    private TextBox addNewSeriesWidget(String defaultName) {
+        TextBox textBox = createTextBox(defaultName); 
+        textBox.setWidth("200px");
+        seriesNameEntryFields.add(textBox);
+        return textBox; 
     }
 
     @Override
     protected RegattaDTO getResult() {
         regatta.name = nameEntryField.getText();
         regatta.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
+
+        regatta.series = new ArrayList<SeriesDTO>();
+        for(TextBox textBox: seriesNameEntryFields) {
+            SeriesDTO seriesDTO = new SeriesDTO();
+            seriesDTO.name = textBox.getName();
+            regatta.series.add(seriesDTO);
+        }
 
         return regatta;
     }
