@@ -176,7 +176,10 @@ public interface SailingServiceAsync {
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);
 
-    void createLeaderboard(String leaderboardName, int[] discardThresholds,
+    void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds,
+            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
+
+    void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
