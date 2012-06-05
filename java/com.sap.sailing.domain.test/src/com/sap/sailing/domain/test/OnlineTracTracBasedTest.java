@@ -94,7 +94,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                }, receiverTypes)) {
+                }, /* trackedRegattaRegistry */ null, receiverTypes)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
@@ -131,7 +131,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
-        domainEvent = domainFactory.getOrCreateRegatta(getTracTracEvent());
+        domainEvent = domainFactory.getOrCreateRegatta(getTracTracEvent(), /* trackedRegattaRegistry */ null);
         trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
     }
     

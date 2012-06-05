@@ -13,6 +13,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 
 import difflib.PatchFailedException;
@@ -20,7 +21,7 @@ import difflib.PatchFailedException;
 public interface DomainFactory {
     final static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
-    Regatta getOrCreateRegatta(String raceID);
+    Regatta getOrCreateRegatta(String raceID, TrackedRegattaRegistry trackedRegattaRegistry);
 
     Nationality getOrCreateNationality(String nationalityName);
 

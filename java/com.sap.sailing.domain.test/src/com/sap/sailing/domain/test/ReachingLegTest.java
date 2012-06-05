@@ -80,7 +80,7 @@ public class ReachingLegTest extends TrackBasedTest {
     protected DynamicTrackedRace createTestTrackedRace(String regattaName, String raceName, String boatClassName,
             Iterable<Competitor> competitors, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(regattaName, boatClass);
+        Regatta regatta = new RegattaImpl(regattaName, boatClass, /* trackedRegattaRegistry */ null);
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:

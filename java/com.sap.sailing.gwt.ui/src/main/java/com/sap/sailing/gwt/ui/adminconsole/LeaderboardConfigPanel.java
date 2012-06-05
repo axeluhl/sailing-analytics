@@ -788,7 +788,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     }
 
     private void createNewLeaderboard(final StrippedLeaderboardDTO newLeaderboard) {
-        sailingService.createLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
+        sailingService.createFlexibleLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
                 new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable t) {

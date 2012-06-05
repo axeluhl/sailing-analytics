@@ -30,8 +30,10 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -240,7 +242,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @return the leaderboard created
      */
-    Leaderboard addFlexibleLeaderboard(String name, int[] discardThresholds);
+    FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds);
+    
+    RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds);
 
     void removeLeaderboard(String leaderboardName);
     
@@ -266,8 +270,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Updates the leaderboard data in the persistent store
      */
-    void updateStoredLeaderboard(Leaderboard leaderboard);
+    void updateStoredFlexibleLeaderboard(FlexibleLeaderboard leaderboard);
     
+    void updateStoredRegattaLeaderboard(RegattaLeaderboard leaderboard);
+
     void updateStoredRegatta(Regatta regatta);
 
     long getDelayToLiveInMillis();
@@ -433,4 +439,5 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return The new event
      */
     Event addEvent(String eventName, String venue, List<String> regattaNames);
+
 }

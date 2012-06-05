@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 public class RegattaImpl extends NamedImpl implements Regatta {
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
@@ -39,12 +40,14 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     /**
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
      * is not {@link #isPersistent() marked for persistence}.
+     * @param trackedRegattaRegistry TODO
      */
-    public RegattaImpl(String baseName, BoatClass boatClass) {
-        this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */ false,
-                Collections.singletonList(new FleetImpl("Default")), /* race column names */ new ArrayList<String>())), /* persistent */ false);
+    public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry) {
+        this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
+                .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
+                trackedRegattaRegistry)), /* persistent */false);
     }
-    
+
     /**
      * @param series
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to

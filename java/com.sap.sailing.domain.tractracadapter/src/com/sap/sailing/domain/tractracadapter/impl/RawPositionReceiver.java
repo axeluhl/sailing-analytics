@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
@@ -21,8 +22,8 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
 
     private int received;
 
-    public RawPositionReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedRegatta);
+    public RawPositionReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) {
+        super(domainFactory, tractracEvent, trackedRegatta, trackedRegattaRegistry);
     }
     
     /**

@@ -1,10 +1,10 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class CreateFlexibleLeaderboard extends AbstractLeaderboardOperation<Leaderboard> {
+public class CreateFlexibleLeaderboard extends AbstractLeaderboardOperation<FlexibleLeaderboard> {
     private static final long serialVersionUID = 891352705068098580L;
     private final int[] discardThresholds;
 
@@ -14,7 +14,7 @@ public class CreateFlexibleLeaderboard extends AbstractLeaderboardOperation<Lead
     }
 
     @Override
-    public Leaderboard internalApplyTo(RacingEventService toState) {
+    public FlexibleLeaderboard internalApplyTo(RacingEventService toState) {
         return toState.addFlexibleLeaderboard(getLeaderboardName(), discardThresholds);
     }
 

@@ -45,7 +45,7 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
                 }
             }
             success = true;
-            toState.updateStoredLeaderboard(leaderboard);
+            updateDB(toState, leaderboard, raceColumn);
         }
         return success;
     }

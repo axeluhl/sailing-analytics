@@ -39,7 +39,7 @@ public class UpdateLeaderboardCarryValue extends AbstractLeaderboardOperation<Vo
                 } else {
                     leaderboard.setCarriedPoints(competitor, newCarriedValue);
                 }
-                toState.updateStoredLeaderboard(leaderboard);
+                updateStoredLeaderboard(toState, leaderboard);
             } else {
                 throw new IllegalArgumentException("Didn't find competitor ID "+competitorIdAsString+" in leaderboard "+getLeaderboardName());
             }

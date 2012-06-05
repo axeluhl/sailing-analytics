@@ -52,7 +52,7 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
                     throw new IllegalArgumentException("Didn't find race "+getColumnName()+" in leaderboard "+getLeaderboardName());
                 }
                 leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, newMaxPointsReason);
-                toState.updateStoredLeaderboard(leaderboard);
+                updateStoredLeaderboard(toState, leaderboard);
                 Entry updatedEntry = leaderboard.getEntry(competitor, raceColumn, timePoint);
                 return new Pair<Integer, Integer>(updatedEntry.getNetPoints(), updatedEntry.getTotalPoints());
             } else {

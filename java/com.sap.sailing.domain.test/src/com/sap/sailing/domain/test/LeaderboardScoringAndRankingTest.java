@@ -263,7 +263,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             qualifyingRaceColumnNames.add("Q"+i);
         }
         Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, qualifyingFleets,
-                qualifyingRaceColumnNames);
+                qualifyingRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(qualifyingSeries);
         
         // -------- final series ------------
@@ -276,7 +276,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         for (int i=1; i<=numberOfFinalRaces; i++) {
             finalRaceColumnNames.add("F"+i);
         }
-        Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, finalFleets, finalRaceColumnNames);
+        Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(finalSeries);
 
         if (medalRaceAndSeries) {
@@ -285,7 +285,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             medalFleets.add(new FleetImpl("Medal"));
             List<String> medalRaceColumnNames = new ArrayList<String>();
             medalRaceColumnNames.add("M");
-            Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, medalFleets, medalRaceColumnNames);
+            Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
             series.add(medalSeries);
         }
 

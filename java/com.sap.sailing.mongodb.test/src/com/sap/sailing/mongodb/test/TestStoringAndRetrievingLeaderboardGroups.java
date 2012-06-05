@@ -92,16 +92,16 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
         final String[] ungroupedLeaderboardNames = {"Ungrouped Leaderboard 0", "Ungrouped Leaderboard 1", "Ungrouped Leaderboard 2"};
 
-        final Leaderboard[] ungroupedLeaderboards = {
+        final FlexibleLeaderboard[] ungroupedLeaderboards = {
                 new FlexibleLeaderboardImpl(ungroupedLeaderboardNames[0], new ScoreCorrectionImpl(),
                         new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter()),
                 new FlexibleLeaderboardImpl(ungroupedLeaderboardNames[1], new ScoreCorrectionImpl(),
                         new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter()),
                 new FlexibleLeaderboardImpl(ungroupedLeaderboardNames[2], new ScoreCorrectionImpl(),
                         new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter()) };
-        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[0]);
-        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[1]);
-        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[2]);
+        mongoObjectFactory.storeFlexibleLeaderboard(ungroupedLeaderboards[0]);
+        mongoObjectFactory.storeFlexibleLeaderboard(ungroupedLeaderboards[1]);
+        mongoObjectFactory.storeFlexibleLeaderboard(ungroupedLeaderboards[2]);
         
         Iterable<Leaderboard> loadedUngroupedLeaderboards = domainObjectFactory.getLeaderboardsNotInGroup();
         
@@ -155,7 +155,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final String regattaName = "Event";
         final String raceName = "Race";
         leaderboard.getRaceColumnByName(columnName).setRaceIdentifier(fleet, new RegattaNameAndRaceName(regattaName, raceName));
-        mongoObjectFactory.storeLeaderboard(leaderboard);
+        mongoObjectFactory.storeFlexibleLeaderboard(leaderboard);
         
         //Check if the leaderboard updated correctly
         final Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboard.getName());

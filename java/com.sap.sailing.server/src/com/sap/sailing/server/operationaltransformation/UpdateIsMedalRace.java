@@ -31,7 +31,7 @@ public class UpdateIsMedalRace extends AbstractLeaderboardColumnOperation<Void> 
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
             ((FlexibleLeaderboard) leaderboard).updateIsMedalRace(getColumnName(), isMedalRace);
-            toState.updateStoredLeaderboard(leaderboard);
+            updateStoredLeaderboard(toState, leaderboard);
         } else {
             throw new IllegalArgumentException("Leaderboard named " + getLeaderboardName() + " not found");
         }
