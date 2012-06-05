@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import com.google.gwt.maps.client.MapWidget;
@@ -33,13 +36,19 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     /* The wind field that is to be displayed in the overlay */
     protected WindFieldDTO wl;
-
+    /*
+     * Map containing the windfield for easy retrieval with key as time point.
+     */
+    protected TreeMap<Long, List<WindDTO>> timePointWindDTOMap;
+    
     /* The points where ToolTip is to be displayed */
     protected Map<ToolTip, WindDTO> windFieldPoints;
     protected String arrowColor = "Blue";
     protected String arrowHeadColor = "Blue";
     protected WindFieldMapMouseMoveHandler mmHandler;
     protected double arrowLength = 15;
+    
+   
     
     protected final Timer timer;
 
@@ -63,10 +72,24 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         mmHandler = new WindFieldMapMouseMoveHandler(this);
 
         mmHandler.setWindFieldPoints(windFieldPoints);
+        
+        timePointWindDTOMap = new TreeMap<Long, List<WindDTO>>();
+        
     }
 
     public void setWindField(WindFieldDTO wl) {
         this.wl = wl;
+        /*
+        timePointWindDTOMap.clear();
+        if (wl != null) {
+            for(WindDTO w : wl.getMatrix()) {
+                if (!timePointWindDTOMap.containsKey(w.timepoint)) {
+                    timePointWindDTOMap.put(w.timepoint, new LinkedList<WindDTO>());
+                }
+                timePointWindDTOMap.get(w.timepoint).add(w);
+            }
+        }
+        */
     }
 
     public void setArrowColor(String arrowColor, String arrowHeadColor) {
@@ -146,7 +169,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     protected void drawArrow(WindDTO windDTO, double angle, double length, double weight, int index) {
         String msg = "Wind @ P" + index + ": time : " + windDTO.timepoint + " speed: " + windDTO.trueWindSpeedInKnots
                 + "knots " + windDTO.trueWindSpeedInMetersPerSecond + "m/s " + windDTO.trueWindBearingDeg;
-        logger.info(msg);
+        logger.fine(msg);
 
         PositionDTO position = windDTO.position;
 
@@ -159,7 +182,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         windFieldPoints.put(new ToolTip(x, y), windDTO);
 
         // TODO check if the angles are correct
-        double dx = length * Math.sin(angle);
+        double dx = -length * Math.sin(angle); // -90 degree rotation
         double dy = length * Math.cos(angle);
 
         double x1 = x + dx / 2;
@@ -203,6 +226,12 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
                 windDTOToDraw.add(windDTO);
             }
         }
+        /*
+        Entry<Long, List<WindDTO>> entry = (timePointWindDTOMap.floorEntry(date.getTime()));
+        
+        if(entry != null) {
+          windDTOToDraw = entry.getValue();
+        }*/
         logger.info("In WindFieldCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points" + " @ "
                 + date);
         if (windDTOToDraw.size() == 0) {
