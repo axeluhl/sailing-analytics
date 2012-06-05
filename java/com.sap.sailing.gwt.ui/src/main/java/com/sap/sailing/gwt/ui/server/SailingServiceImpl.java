@@ -153,17 +153,23 @@ import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
+import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.DisconnectLeaderboardColumnFromTrackedRace;
+import com.sap.sailing.server.operationaltransformation.MoveColumnInSeriesDown;
+import com.sap.sailing.server.operationaltransformation.MoveColumnInSeriesUp;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnDown;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
+import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
+import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
+import com.sap.sailing.server.operationaltransformation.RenameColumnInSeries;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboardGroup;
@@ -1889,6 +1895,37 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             eventDTO.regattas.add(regattaDTO);
         }
         return eventDTO;
+    }
+
+    @Override
+    public void removeRegatta(RegattaIdentifier regattaIdentifier) {
+        getService().apply(new RemoveRegatta(regattaIdentifier));
+    }
+
+    @Override
+    public void addColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+    }
+
+    @Override
+    public void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
+    }
+
+    @Override
+    public void renameColumnInSeries(RegattaIdentifier regattaIdentifier, String seriesName, String oldColumnName,
+            String newColumnName) {
+        getService().apply(new RenameColumnInSeries(regattaIdentifier, seriesName, oldColumnName, newColumnName));
+    }
+
+    @Override
+    public void moveColumnToSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        getService().apply(new MoveColumnInSeriesUp(regattaIdentifier, seriesName, columnName));
+    }
+
+    @Override
+    public void moveColumnToSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+        getService().apply(new MoveColumnInSeriesDown(regattaIdentifier, seriesName, columnName));
     }
 
 }

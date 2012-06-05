@@ -19,6 +19,9 @@ public class AddColumnToSeries extends AbstractColumnInSeriesOperation<RaceColum
         Series series = getSeries(toState);
         if (series != null) {
             result = series.addRaceColumn(getColumnName());
+            if (series.getRegatta().isPersistent()) {
+                // TODO update regatta in DB
+            }
         }
         return result;
     }

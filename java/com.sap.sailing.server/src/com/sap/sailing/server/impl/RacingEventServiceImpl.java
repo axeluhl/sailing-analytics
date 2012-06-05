@@ -893,6 +893,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         for (RaceDefinition race : regatta.getAllRaces()) {
             removeRace(regatta, race);
         }
+        if (regatta.isPersistent()) {
+            // TODO remove regatta from database; or should this probably happen inside RacingEventServiceImpl.removeRegatta?
+        }
     }
     
     @Override
@@ -925,9 +928,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 }
             }
         }
-        // remove the race from the regatta
+        // remove the race from the regatta if the regatta is not persistently stored
         regatta.removeRace(race);
-        if (Util.isEmpty(regatta.getAllRaces())) {
+        if (!regatta.isPersistent() && Util.isEmpty(regatta.getAllRaces())) {
             logger.info("Removing regatta "+regatta.getName()+" from service "+this);
             regattasByName.remove(regatta.getName());
             regatta.removeRegattaListener(this);

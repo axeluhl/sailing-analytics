@@ -24,6 +24,7 @@ public class RemoveLeaderboardGroup extends AbstractLeaderboardGroupOperation<Vo
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
+        // TODO see bug 729: try to move addLeaderboardGroup implementation here and synthesize and apply this operation there
         toState.removeLeaderboardGroup(getLeaderboardGroupName());
         return null;
     }

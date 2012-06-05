@@ -14,6 +14,7 @@ public class RenameLeaderboardGroup extends AbstractLeaderboardGroupOperation<Vo
 
     @Override
     public Void internalApplyTo(RacingEventService toState) {
+        // TODO see bug 729: try to move addLeaderboardGroup implementation here and synthesize and apply this operation there
         if (!getLeaderboardGroupName().equals(newLeaderboardGroupName)) {
             toState.renameLeaderboardGroup(getLeaderboardGroupName(), newLeaderboardGroupName);
         }
