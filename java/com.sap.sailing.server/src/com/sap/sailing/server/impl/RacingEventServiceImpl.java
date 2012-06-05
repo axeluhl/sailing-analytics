@@ -35,6 +35,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -91,8 +92,9 @@ import com.sap.sailing.operationaltransformation.Operation;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
-import com.sap.sailing.server.operationaltransformation.AddRegatta;
+import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RecordBuoyGPSFix;
@@ -452,9 +454,20 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (result == null) {
             result = regatta;
             logger.info("Created regatta "+result.getName()+" ("+hashCode()+")");
-            cacheAndReplicateRegatta(result);
+            cacheAndReplicateDefaultRegatta(result);
         }
         return result;
+    }
+
+    @Override
+    public Regatta createRegatta(String baseEventName, String boatClassName,
+            boolean boatClassTypicallyStartsUpwind, Iterable<? extends Series> series, boolean persistent) {
+        Regatta regatta = new RegattaImpl(baseEventName,
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(boatClassName,
+                        boatClassTypicallyStartsUpwind), series, persistent);
+        logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ")");
+        cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
+        return regatta;
     }
 
     @Override
@@ -467,9 +480,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> getSwissTimingRaceRecords(String hostname,
             int port, boolean canSendRequests) throws InterruptedException, UnknownHostException, IOException, ParseException {
         List<com.sap.sailing.domain.swisstimingadapter.RaceRecord> result = new ArrayList<com.sap.sailing.domain.swisstimingadapter.RaceRecord>();
-//        SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterConnector(hostname, port, swissTimingAdapterPersistence,
-//                canSendRequests);
-        //TODO remove after testing and enable the upper code instead
         SailMasterConnector swissTimingConnector = swissTimingFactory.getOrCreateSailMasterLiveSimulatorConnector(hostname, port, swissTimingAdapterPersistence,
                 canSendRequests);
         //
@@ -548,13 +558,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 if (regattaWithName != tracker.getRegatta()) {
                     if (Util.isEmpty(regattaWithName.getAllRaces())) {
                         // probably, tracker removed the last races from the old regatta and created a new one
-                        cacheAndReplicateRegatta(tracker.getRegatta());
+                        cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                     } else {
                         throw new RuntimeException("Internal error. Two Event objects with equal name "+regattaName);
                     }
                 }
             } else {
-                cacheAndReplicateRegatta(tracker.getRegatta());
+                cacheAndReplicateDefaultRegatta(tracker.getRegatta());
             }
         } else {
             WindStore existingTrackersWindStore = tracker.getWindStore();
@@ -571,14 +581,50 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     /**
      * If <code>regatta</code> is not yet in {@link #regattasByName}, it is added, this service is
-     * {@link Regatta#addRegattaListener(RegattaListener) added} as regatta listener, and the regatta and all its contained
-     * {@link Regatta#getAllRaces() races} are replicated to all replica.
+     * {@link Regatta#addRegattaListener(RegattaListener) added} as regatta listener, and the regatta and all its
+     * contained {@link Regatta#getAllRaces() races} are replicated to all replica.
+     * 
+     * @param regatta
+     *            the series of this regatta must not have any {@link Series#getRaceColumns() race columns associated
+     *            (yet)}.
      */
-    private void cacheAndReplicateRegatta(Regatta regatta) {
+    private void cacheAndReplicateSpecificRegattaWithoutRaceColumns(Regatta regatta) {
         if (!regattasByName.containsKey(regatta.getName())) {
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
-            replicate(new AddRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(),
+            replicate(new AddSpecificRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
+                    .getBoatClass().getName(), regatta.getBoatClass() == null ? false : regatta.getBoatClass()
+                    .typicallyStartsUpwind(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent()));
+            RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
+            for (RaceDefinition race : regatta.getAllRaces()) {
+                replicate(new AddRaceDefinition(regattaIdentifier, race));
+            }
+        }
+    }
+    
+    private Map<String, Pair<List<Pair<String, Integer>>, Boolean>> getSeriesWithoutRaceColumnsConstructionParametersAsMap(Regatta regatta) {
+        Map<String, Pair<List<Pair<String, Integer>>, Boolean>> result = new HashMap<String, Pair<List<Pair<String, Integer>>, Boolean>>();
+        for (Series s : regatta.getSeries()) {
+            assert Util.isEmpty(s.getRaceColumns());
+            List<Pair<String, Integer>> fleetNamesAndOrdering = new ArrayList<Pair<String, Integer>>();
+            for (Fleet f : s.getFleets()) {
+                fleetNamesAndOrdering.add(new Pair<String, Integer>(f.getName(), f.getOrdering()));
+            }
+            result.put(s.getName(), new Pair<List<Pair<String, Integer>>, Boolean>(fleetNamesAndOrdering, s.isMedal()));
+        }
+        return result;
+    }
+
+    /**
+     * If <code>regatta</code> is not yet in {@link #regattasByName}, it is added, this service is
+     * {@link Regatta#addRegattaListener(RegattaListener) added} as regatta listener, and the regatta and all its contained
+     * {@link Regatta#getAllRaces() races} are replicated to all replica.
+     */
+    private void cacheAndReplicateDefaultRegatta(Regatta regatta) {
+        if (!regattasByName.containsKey(regatta.getName())) {
+            regattasByName.put(regatta.getName(), regatta);
+            regatta.addRegattaListener(this);
+            replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(),
                     regatta.getBoatClass() == null ? false : regatta.getBoatClass().typicallyStartsUpwind()));
             RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
             for (RaceDefinition race : regatta.getAllRaces()) {
@@ -964,7 +1010,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     @Override
     public DynamicTrackedRegatta getOrCreateTrackedRegatta(Regatta regatta) {
-        cacheAndReplicateRegatta(regatta);
+        cacheAndReplicateDefaultRegatta(regatta);
         synchronized (regattaTrackingCache) {
             DynamicTrackedRegatta result = regattaTrackingCache.get(regatta);
             if (result == null) {

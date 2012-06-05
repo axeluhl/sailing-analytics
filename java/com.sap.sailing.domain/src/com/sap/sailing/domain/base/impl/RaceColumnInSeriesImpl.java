@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 
 /**
@@ -17,6 +18,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     public RaceColumnInSeriesImpl(String name, Series series) {
         super(name);
         this.series = series;
+    }
+
+    @Override
+    public Regatta getRegatta() {
+        return getSeries().getRegatta();
     }
 
     @Override

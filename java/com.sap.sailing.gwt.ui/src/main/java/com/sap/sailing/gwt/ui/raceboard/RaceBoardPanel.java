@@ -139,6 +139,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         }
 
         timePanel = new RaceTimePanel(timer, stringMessages, raceTimesInfoProvider);
+        timeZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());

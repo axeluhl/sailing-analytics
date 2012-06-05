@@ -186,7 +186,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, medalFleets, medalRaceColumnNames);
         series.add(medalSeries);
 
-        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series);
+        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, /* persistent */ false);
         return regatta;
     }
     

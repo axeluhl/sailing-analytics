@@ -67,25 +67,43 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     timer.setPlayMode(PlayModes.Live);
                 }
                 
-                boolean timerAlreadyInitialized = getMin() != null && getMax() != null && sliderBar.getCurrentValue() != null;
-                initMinMax(raceTimesInfo);
-                if (!timerAlreadyInitialized) {
-                    initTimerPosition(raceTimesInfo);
+                boolean timerAlreadyInitialized = getMin() != null && getMax() != null && timeSlider.getCurrentValue() != null;
+                if(!isTimeZoomed) {
+                    initMinMax(raceTimesInfo);
+                    if (!timerAlreadyInitialized) {
+                        initTimerPosition(raceTimesInfo);
+                    }
+                    updateLegMarkers(raceTimesInfo);
                 }
-                updateLegMarkers(raceTimesInfo);
             } else {
                 // the tracked race did not start yet or has no events yet
                 // maybe show a special state for this like "Race did not start yet"
             }
         }
+        lastRaceTimesInfo = raceTimesInfo;
     } 
     
     @Override
     public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        isTimeZoomed = true;
+        timeSlider.setZoomed(true);
+        timer.setAutoAdvance(false);
+        setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
+        timeSlider.clearMarkersAndLabelsAndTicks();
+        timeSlider.redraw();
+        initTimerPosition(lastRaceTimesInfo);
+        redrawAllMarkers(lastRaceTimesInfo);
     }
 
     @Override
     public void onTimeZoomReset() {
+        isTimeZoomed = false;
+        timeSlider.setZoomed(false);
+        timer.setAutoAdvance(true);
+        initMinMax(this.lastRaceTimesInfo);
+        timeSlider.clearMarkersAndLabelsAndTicks();
+        timeSlider.redraw();
+        redrawAllMarkers(lastRaceTimesInfo);
     }
 
     @Override
@@ -178,7 +196,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
 
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
-        List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
         boolean requiresMarkerUpdate = true;
         
         // updating the sliderbar markers requires a lot of time, therefore we need to do this only if required
@@ -197,20 +214,23 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 requiresMarkerUpdate = true;
             }
         }
-        if (requiresMarkerUpdate && sliderBar.isMinMaxInitialized()) {
-            sliderBar.clearMarkers();
-            for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
-                if(markPassingTimesDTO.firstPassingDate != null) {
-                    sliderBar.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
-                }
-            }
-            if(newRaceTimesInfo.endOfRace != null) {
-                sliderBar.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
-            }
-                
-            sliderBar.redraw(); 
+        if (requiresMarkerUpdate && timeSlider.isMinMaxInitialized()) {
+            redrawAllMarkers(newRaceTimesInfo);
         }
-        lastRaceTimesInfo = newRaceTimesInfo;
+    }
+    
+    private void redrawAllMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
+        List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
+        timeSlider.clearMarkers();
+        for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
+            if(markPassingTimesDTO.firstPassingDate != null) {
+                timeSlider.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
+            }
+        }
+        if(newRaceTimesInfo.endOfRace != null) {
+            timeSlider.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
+        }
+        timeSlider.redraw(); 
     }
     
     @Override

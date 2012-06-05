@@ -350,6 +350,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         return null;
                     }
+
+                    @Override
+                    public Series getSeriesByName(String seriesName) {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public boolean isPersistent() {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
                 };
             }
 

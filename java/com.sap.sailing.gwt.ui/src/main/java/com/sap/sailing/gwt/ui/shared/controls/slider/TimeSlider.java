@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.controls.slider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.DOM;
@@ -11,6 +12,17 @@ public class TimeSlider extends SliderBar {
 
     private final TimeTicksCalculator calc = new TimeTicksCalculator();
 
+    private List<TickPosition> calculatedTimeTicks;
+    
+    private boolean isZoomed;
+
+    private final int TICKCOUNT = 10;
+
+    public TimeSlider() {
+        calculatedTimeTicks = new ArrayList<TickPosition>();
+        isZoomed = false;
+    }
+    
     /**
      * Draw the tick along the line.
      */
@@ -18,9 +30,20 @@ public class TimeSlider extends SliderBar {
         if (!isAttached() || !isMinMaxInitialized())
             return;
 
-        NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval((maxValue.longValue() - minValue.longValue()) / 8);
-        List<TickPosition> calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
-        
+        long minMaxDiffInMs = maxValue.longValue() - minValue.longValue();
+        long tickInterval = minMaxDiffInMs / TICKCOUNT; 
+        NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
+        calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
+
+        boolean debug = false;
+        if(debug) {
+            System.out.println("Diff: " + minMaxDiffInMs);
+            System.out.println("Tick count: " + normalizedTimeTickInterval.count);
+            System.out.println("Unit name: " + normalizedTimeTickInterval.unitName);
+            System.out.println("Unit range: " + normalizedTimeTickInterval.unitRange);
+            System.out.println("Calculated ticks count: " + calculatedTimeTicks.size());
+        }
+
         // Draw the ticks
         int lineWidth = lineElement.getOffsetWidth();
             // Create the ticks or make them visible
@@ -66,9 +89,6 @@ public class TimeSlider extends SliderBar {
     protected void drawTickLabels() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
-
-        NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval((maxValue.longValue() - minValue.longValue()) / 8);
-        List<TickPosition> calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
 
         // Draw the tick labels
         int lineWidth = lineElement.getOffsetWidth();
@@ -117,4 +137,79 @@ public class TimeSlider extends SliderBar {
             }
     }
 
+    public void clearMarkersAndLabelsAndTicks() {
+        clearMarkers();
+        for (Element elem : tickLabelElements) {
+            DOM.setStyleAttribute(elem, "display", "none");
+            DOM.setStyleAttribute(elem, "visibility", "hidden");
+        }
+        for (Element elem : tickElements) {
+            DOM.setStyleAttribute(elem, "display", "none");
+            DOM.setStyleAttribute(elem, "visibility", "hidden");
+        }
+
+        for (Element elem : markerLabelElements) {
+            DOM.setStyleAttribute(elem, "display", "none");
+            DOM.setStyleAttribute(elem, "visibility", "hidden");
+        }
+        for (Element elem : markerElements) {
+            DOM.setStyleAttribute(elem, "display", "none");
+            DOM.setStyleAttribute(elem, "visibility", "hidden");
+        }
+    }
+    
+    /**
+     * Draw the knob where it is supposed to be relative to the line.
+     */
+    protected void drawKnob() {
+        if (!isAttached() || !isMinMaxInitialized())
+            return;
+        
+        Element knobElement = knobImage.getElement();
+        if(curValue >= minValue && curValue <= maxValue) {
+            // Move the knob to the correct position
+            int lineWidth = lineElement.getOffsetWidth();
+            int knobWidth = knobElement.getOffsetWidth();
+            int knobLeftOffset = (int) (lineLeftOffset + (getKnobPercent() * lineWidth) - (knobWidth / 2));
+            knobLeftOffset = Math.min(knobLeftOffset, lineLeftOffset + lineWidth - (knobWidth / 2) - 1);
+            DOM.setStyleAttribute(knobElement, "left", knobLeftOffset + "px");
+            DOM.setStyleAttribute(knobElement, "visibility", "visible");
+            DOM.setStyleAttribute(knobElement, "display", "");
+        } else {
+            DOM.setStyleAttribute(knobElement, "display", "none");
+            DOM.setStyleAttribute(knobElement, "visibility", "hidden");
+        }
+    }
+    
+    public void setMaxValue(Double maxValue, boolean fireEvent) {
+        if(!isZoomed) {
+            super.setMaxValue(maxValue, fireEvent);
+        } else {
+            this.maxValue = maxValue;
+        }
+    }
+
+    public void setMinValue(Double minValue, boolean fireEvent) {
+        if(!isZoomed) {
+            super.setMinValue(minValue, fireEvent);
+        } else {
+            this.minValue = minValue;
+        }
+    }
+
+    public void setStepSize(double stepSize, boolean fireEvent) {
+        if(!isZoomed) {
+            super.setStepSize(stepSize, fireEvent);
+        } else {
+            this.stepSize = stepSize;
+        }
+    }
+
+    public boolean isZoomed() {
+        return isZoomed;
+    }
+
+    public void setZoomed(boolean isZoomed) {
+        this.isZoomed = isZoomed;
+    }
 }
