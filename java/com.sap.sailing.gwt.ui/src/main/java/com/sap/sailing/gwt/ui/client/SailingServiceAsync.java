@@ -372,10 +372,10 @@ public interface SailingServiceAsync {
     void renameColumnInSeries(RegattaIdentifier regattaIdentifier, String seriesName, String oldColumnName,
             String newColumnName, AsyncCallback<Void> callback);
 
-    void moveColumnToSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
+    void moveColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void moveColumnToSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
+    void moveColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
     void createRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind,

@@ -1920,12 +1920,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void moveColumnToSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+    public void moveColumnInSeriesUp(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new MoveColumnInSeriesUp(regattaIdentifier, seriesName, columnName));
     }
 
     @Override
-    public void moveColumnToSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
+    public void moveColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new MoveColumnInSeriesDown(regattaIdentifier, seriesName, columnName));
     }
 
