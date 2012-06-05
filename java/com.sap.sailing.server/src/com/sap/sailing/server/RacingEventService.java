@@ -267,6 +267,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Updates the leaderboard data in the persistent store
      */
     void updateStoredLeaderboard(Leaderboard leaderboard);
+    
+    void updateStoredRegatta(Regatta regatta);
 
     long getDelayToLiveInMillis();
 

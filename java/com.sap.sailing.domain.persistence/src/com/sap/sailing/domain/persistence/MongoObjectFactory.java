@@ -65,4 +65,6 @@ public interface MongoObjectFactory {
      * {@link Event} to which the regatta belongs.
      */
     void storeRegatta(Regatta regatta);
+
+    void removeRegatta(Regatta regatta);
 }

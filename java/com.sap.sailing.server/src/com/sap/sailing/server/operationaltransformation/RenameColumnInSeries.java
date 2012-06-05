@@ -31,7 +31,7 @@ public class RenameColumnInSeries extends AbstractColumnInSeriesOperation<Void> 
                 } else {
                     raceColumn.setName(newColumnName);
                     if (series.getRegatta().isPersistent()) {
-                        // TODO update regatta in DB
+                        toState.updateStoredRegatta(series.getRegatta());
                     }
                 }
             } else {
