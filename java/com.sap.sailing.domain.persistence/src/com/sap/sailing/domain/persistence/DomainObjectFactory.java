@@ -50,4 +50,6 @@ public interface DomainObjectFactory {
     Iterable<Event> loadAllEvents();
 
     Regatta loadRegatta(String name);
+
+    Iterable<Regatta> loadAllRegattas();
 }

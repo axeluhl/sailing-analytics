@@ -306,6 +306,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false);
     }
 
+    @Override
+    public void removeRegatta(Regatta regatta) {
+        DBCollection regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
+        DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
+        regattasCollection.remove(query);
+    }
+
     private BasicDBList storeSeries(Iterable<? extends Series> series) {
         BasicDBList dbSeries = new BasicDBList();
         for (Series s : series) {
