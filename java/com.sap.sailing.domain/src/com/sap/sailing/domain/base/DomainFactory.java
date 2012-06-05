@@ -40,6 +40,12 @@ public interface DomainFactory {
     
     BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind);
     
+    /**
+     * Like {@link #getOrCreateBoatClass(String, boolean)}, only that a default for <code>typicallyStartsUpwind</code> based
+     * on the boat class name is calculated.
+     */
+    BoatClass getOrCreateBoatClass(String name);
+    
     Competitor getExistingCompetitorById(Serializable competitorId);
     
     Competitor createCompetitor(Serializable id, String name, Team team, Boat boat);

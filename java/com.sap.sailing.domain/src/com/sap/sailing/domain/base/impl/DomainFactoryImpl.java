@@ -4,8 +4,11 @@ import java.awt.TrayIcon.MessageType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import com.sap.sailing.domain.base.Boat;
@@ -38,12 +41,15 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final WeakHashMap<Serializable, Waypoint> waypointCache;
 
+    private final Set<String> mayStartWithNoUpwindLeg;
+    
     public DomainFactoryImpl() {
         nationalityCache = new HashMap<String, Nationality>();
         buoyCache = new HashMap<String, Buoy>();
         boatClassCache = new HashMap<String, BoatClass>();
         competitorCache = new HashMap<Serializable, Competitor>();
         waypointCache = new WeakHashMap<Serializable, Waypoint>();
+        mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
     }
     
     @Override
@@ -113,6 +119,11 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             return result;
         }
+    }
+    
+    @Override
+    public BoatClass getOrCreateBoatClass(String name) {
+        return getOrCreateBoatClass(name, /* typicallyStartsUpwind */!mayStartWithNoUpwindLeg.contains(name.toLowerCase()));
     }
 
     @Override
