@@ -22,4 +22,12 @@ public class FleetDTO extends NamedDTO implements IsSerializable {
     public int getOrderNo() {
         return orderNo;
     }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public void setOrderNo(int orderNo) {
+        this.orderNo = orderNo;
+    }
 }

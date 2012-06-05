@@ -20,7 +20,7 @@ public class SeriesDTO extends NamedDTO implements IsSerializable {
     /**
      * Names of this series' fleets, if ordered then from best to worst (best first, worst last) 
      */
-    public Iterable<String> getRaceColumnNames() {
+    public List<String> getRaceColumnNames() {
         return raceColumnNames;
     }
 
@@ -28,7 +28,19 @@ public class SeriesDTO extends NamedDTO implements IsSerializable {
         return isMedal;
     }
 
-    public Iterable<FleetDTO> getFleets() {
+    public List<FleetDTO> getFleets() {
         return fleets;
+    }
+
+    public void setFleets(List<FleetDTO> fleets) {
+        this.fleets = fleets;
+    }
+
+    public void setRaceColumnNames(List<String> raceColumnNames) {
+        this.raceColumnNames = raceColumnNames;
+    }
+
+    public void setMedal(boolean isMedal) {
+        this.isMedal = isMedal;
     }
 }

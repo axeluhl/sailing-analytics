@@ -2,10 +2,15 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -25,7 +30,9 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
     private TextBox nameEntryField;
     private TextBox boatClassEntryField;
 
-    private List<TextBox> seriesNameEntryFields;
+    private List<SeriesDTO> createdSeries;
+
+    private Grid seriesGrid;
 
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
 
@@ -59,7 +66,7 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
                 errorMessage = stringConstants.regattaWithThisNameAlreadyExists();
             }
 
-            if(errorMessage != null) {
+            if(errorMessage == null) {
                 List<SeriesDTO> seriesToValidate = regattaToValidate.series;
                 int index = 0;
                 boolean seriesNameNotEmpty = true;
@@ -71,7 +78,8 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
                     }
                     index++;
                 }
-                index = 0;
+
+                int index2 = 0;
                 boolean seriesUnique = true;
                 
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
@@ -80,14 +88,13 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
                         seriesUnique = false;
                         break;
                     }
-                    index++;
+                    index2++;
                 }
 
-                String prefix = stringConstants.series() + " " + (index + 1) + ": ";  
                 if (!seriesNameNotEmpty) {
-                    errorMessage = prefix + stringConstants.pleaseEnterNonEmptyName();
+                    errorMessage = stringConstants.series() + " " + (index + 1) + ": " + stringConstants.pleaseEnterNonEmptyName();
                 } else if (!seriesUnique) {
-                    errorMessage = prefix + stringConstants.seriesWithThisNameAlreadyExists();
+                    errorMessage = stringConstants.series() + " " + (index2 + 1) + ": " + stringConstants.seriesWithThisNameAlreadyExists();
                 }
                 
             }
@@ -104,15 +111,13 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
         this.stringConstants = stringConstants;
         this.regatta = new RegattaDTO();
 
-        seriesNameEntryFields = new ArrayList<TextBox>();
-        addNewSeriesWidget(null);
-    }
+        nameEntryField = createTextBox(null);
+        nameEntryField.setWidth("200px");
+        boatClassEntryField = createTextBox(null);
+        boatClassEntryField.setWidth("150px");
 
-    private TextBox addNewSeriesWidget(String defaultName) {
-        TextBox textBox = createTextBox(defaultName); 
-        textBox.setWidth("200px");
-        seriesNameEntryFields.add(textBox);
-        return textBox; 
+        createdSeries = new ArrayList<SeriesDTO>();
+        seriesGrid = new Grid(0, 0);
     }
 
     @Override
@@ -121,23 +126,18 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
         regatta.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
 
         regatta.series = new ArrayList<SeriesDTO>();
-        for(TextBox textBox: seriesNameEntryFields) {
-            SeriesDTO seriesDTO = new SeriesDTO();
-            seriesDTO.name = textBox.getName();
-            regatta.series.add(seriesDTO);
-        }
+        regatta.series.addAll(createdSeries);
 
         return regatta;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
-        VerticalPanel panel = new VerticalPanel();
+        final VerticalPanel panel = new VerticalPanel();
         Widget additionalWidget = super.getAdditionalWidget();
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        
         Grid formGrid = new Grid(2, 2);
         panel.add(formGrid);
         
@@ -145,9 +145,62 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 0, new Label(stringConstants.boatClass() + ":"));
         formGrid.setWidget(1, 1, boatClassEntryField);
+        
+        panel.add(createHeadlineLabel(stringConstants.series()));
+        panel.add(seriesGrid);
+        
+        Button addSeriesButton = new Button("Add series");
+        addSeriesButton.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                RegattaDTO result = getResult();
+                
+                SeriesWithGroupsCreateDialog dialog = new SeriesWithGroupsCreateDialog(Collections.unmodifiableCollection(result.series), stringConstants,
+                        new AsyncCallback<SeriesDTO>() {
+                            @Override
+                            public void onFailure(Throwable t) {
+                            }
+
+                            @Override
+                            public void onSuccess(SeriesDTO newSeries) {
+                                createdSeries.add(newSeries);
+                                updateSeriesGrid(panel);
+                            }
+                        });
+                dialog.show();
+            }
+        });
+        panel.add(addSeriesButton);
+        
         return panel;
     }
 
+    private void updateSeriesGrid(VerticalPanel parentPanel) {
+        int widgetIndex = parentPanel.getWidgetIndex(seriesGrid);
+        parentPanel.remove(seriesGrid);
+        
+        int seriesCount = createdSeries.size();
+        seriesGrid = new Grid(seriesCount * 2, 3);
+        seriesGrid.setCellSpacing(3);
+
+        for(int i = 0; i < seriesCount; i++) {
+            SeriesDTO seriesDTO = createdSeries.get(i);
+            Label seriesLabel = new Label((i+1) + ". " + stringConstants.series() + ":");
+            seriesLabel.setWordWrap(false);
+            seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+            seriesGrid.setWidget(i*2, 0, seriesLabel);
+            seriesGrid.setHTML(i*2, 1, seriesDTO.name);
+            if(seriesDTO.getFleets() != null && seriesDTO.getFleets().size() > 0) {
+                seriesGrid.setHTML(i*2+1, 1, seriesDTO.getFleets().size() + " groups: " + seriesDTO.getFleets().toString());
+            } else {
+                seriesGrid.setHTML(i*2+1, 1, seriesDTO.getFleets().size() + " No groups defined.");
+            }
+        }
+
+        parentPanel.insert(seriesGrid, widgetIndex);
+    }
+    
     @Override
     public void show() {
         super.show();
