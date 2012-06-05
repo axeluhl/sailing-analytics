@@ -46,7 +46,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -67,6 +66,8 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
  * the {@link AdminConsoleEntryPoint}.
  */
 public class TrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>, RegattaDisplayer, RaceSelectionChangeListener {
+    private final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
+
     private final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
 
     private final boolean multiSelection;
@@ -137,7 +138,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         selectionModel = multiSelection ? new MultiSelectionModel<RaceDTO>()
                 : new SingleSelectionModel<RaceDTO>();
         settings = new TrackedRacesSettings();
-        settings.setDelayToLiveInSeconds(TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
+        settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
         panel = new VerticalPanel();
         setWidget(panel);
         HorizontalPanel filterPanel = new HorizontalPanel();
@@ -395,7 +396,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
 
     private void showSetDelayToLiveDialog() {
         TrackedRacesSettings settings = new TrackedRacesSettings();
-        settings.setDelayToLiveInSeconds(TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS);
+        settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS);
         
         SettingsDialog<TrackedRacesSettings> settingsDialog = new SettingsDialog<TrackedRacesSettings>(this, stringMessages);
         settingsDialog.show();

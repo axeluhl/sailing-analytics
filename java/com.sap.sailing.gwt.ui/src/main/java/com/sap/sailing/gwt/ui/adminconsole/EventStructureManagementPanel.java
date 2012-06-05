@@ -236,21 +236,16 @@ public class EventStructureManagementPanel extends SimplePanel {
     }
 
     private void createNewRegatta(final RegattaDTO newRegatta) {
-        
         Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesStructure = new HashMap<String, Pair<List<Pair<String, Integer>>, Boolean>>();
-
-        for(SeriesDTO seriesDTO: newRegatta.series) {
+        for(SeriesDTO seriesDTO : newRegatta.series) {
             List<Pair<String, Integer>> fleets = new ArrayList<Pair<String, Integer>>();
-            
-            for(FleetDTO fleetDTO: seriesDTO.getFleets()) {
+            for(FleetDTO fleetDTO : seriesDTO.getFleets()) {
                 Pair<String, Integer> fleetPair = new Pair<String, Integer>(fleetDTO.name, fleetDTO.getOrderNo());
                 fleets.add(fleetPair);
             }
             Pair<List<Pair<String, Integer>>, Boolean> seriesPair = new Pair<List<Pair<String, Integer>>, Boolean>(fleets, seriesDTO.isMedal());
-
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
-        
         sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, true,
                 seriesStructure, true, new AsyncCallback<Void>() {
             @Override

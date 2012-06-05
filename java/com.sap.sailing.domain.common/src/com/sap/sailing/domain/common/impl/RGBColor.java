@@ -9,6 +9,8 @@ public class RGBColor implements Color {
     private int green;
     private int blue;
     
+    RGBColor() {} // for GWT serializability
+    
     public RGBColor(int red, int green, int blue) {
         super();
         this.red = ensureValidRange(red);
@@ -18,9 +20,9 @@ public class RGBColor implements Color {
 
     private int ensureValidRange(int value) {
         int result = value;
-        if(value < 0) {
+        if (value < 0) {
             result = 0;
-        } else if(value > 255){
+        } else if (value > 255) {
             result = 255;
         }
         return result;
