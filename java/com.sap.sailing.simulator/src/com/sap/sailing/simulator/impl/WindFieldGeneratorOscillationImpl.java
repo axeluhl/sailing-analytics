@@ -22,6 +22,10 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
     /* Currently the speed is time and vertical step invariant, it only changes along the horizontal 
      * direction*/
     private Speed[] speed;
+    /**
+     * Temporary place holder for time correction, to be replaced.
+     */
+    public double timeScale = 60.0;
     
     public WindFieldGeneratorOscillationImpl(Boundary boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);
@@ -76,10 +80,10 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
             int timeIndex = getTimeIndex(timePoint);
             Bearing phi0 = new DegreeBearingImpl(windParameters.baseWindBearing);
             phi0 = phi0.reverse();
-            double vStep = 1.0/((positions.length-1)*60.0);
+            double vStep = 1.0/((positions.length-1)*timeScale);
             double t = (timeIndex+(timeIndex+rowIndex)*vStep);
             Bearing angle = new DegreeBearingImpl(Math.sin(2*Math.PI*t*windParameters.frequency)*windParameters.amplitude);
-            angle=angle.add(phi0);
+            angle = angle.add(phi0);
             return angle;
         } else {
             logger.severe("Error finding position " + p);
