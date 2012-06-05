@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base;
 
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.Named;
 
 /**
@@ -23,4 +24,11 @@ public interface Fleet extends Named, Comparable<Fleet> {
      * without this ordering criterion should be chosen (implicitly setting it to 0).
      */
     int getOrdering();
+    
+    /**
+     * The color associated with the fleet.
+     * Normally each fleet gets a color code to distinguish between the fleets like 'blue', 'yellow' etc.
+     * @return
+     */
+    Color getColor();
 }

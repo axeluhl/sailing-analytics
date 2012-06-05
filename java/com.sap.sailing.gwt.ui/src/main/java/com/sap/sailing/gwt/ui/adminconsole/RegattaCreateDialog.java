@@ -15,13 +15,8 @@ public class RegattaCreateDialog extends RegattaDialog {
 
         nameEntryField = createTextBox(null);
         nameEntryField.setWidth("200px");
-        boatClassEntryField = createListBox(false);
-        boatClassEntryField.addItem(stringConstants.pleaseSelectABoatClass());
-        boatClassEntryField.setSelectedIndex(0);
-        for(BoatTypes boatType: BoatTypes.values()) {
-            boatClassEntryField.addItem(boatType.getName());
-        }
-
+        boatClassEntryField = createTextBox(null);
+        boatClassEntryField.setWidth("200px");
     }
 
 }

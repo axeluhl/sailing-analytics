@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 /**
@@ -14,6 +15,8 @@ public class FleetImpl extends NamedImpl implements Fleet {
     private static final long serialVersionUID = 7560417723293278246L;
     
     private final int ordering;
+    
+    private final Color color;
 
     public FleetImpl(String name) {
         this(name, 0);
@@ -27,8 +30,15 @@ public class FleetImpl extends NamedImpl implements Fleet {
     public FleetImpl(String name, int ordering) {
         super(name);
         this.ordering = ordering;
+        this.color = null;
     }
-    
+
+    public FleetImpl(String name, int ordering, Color color) {
+        super(name);
+        this.ordering = ordering;
+        this.color = color;
+    }
+
     @Override
     public int compareTo(Fleet o) {
         return this.ordering - ((FleetImpl) o).ordering;
@@ -38,5 +48,9 @@ public class FleetImpl extends NamedImpl implements Fleet {
     public int getOrdering() {
         return ordering;
     }
-    
+
+    @Override
+    public Color getColor() {
+        return color;
+    }
 }
