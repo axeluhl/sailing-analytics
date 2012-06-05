@@ -361,6 +361,7 @@ public class ModeratorApp extends Servlet {
             for (Competitor competitor : regatta.getCompetitors()) {
                 JSONObject jsonCompetitor = new JSONObject();
                 jsonCompetitor.put("name", competitor.getName());
+                jsonCompetitor.put("sailID", competitor.getBoat()==null?"":competitor.getBoat().getSailID());
                 jsonCompetitor.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
                 CountryCode countryCode = competitor.getTeam().getNationality().getCountryCode();
                 jsonCompetitor.put("nationalityISO2", countryCode == null ? "" : countryCode.getTwoLetterISOCode());

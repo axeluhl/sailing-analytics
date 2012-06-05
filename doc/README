@@ -427,6 +427,7 @@ into one in the future.
 		      "boatclass": ..., // optional; name of boat class
 		      "competitors": [  // the event's competitors
 		        { "name", ...,  // competitor's name
+			  "sailID": ... // sail ID if known
 			  "nationality": ..., // 3-letter IOC country code
 			  "nationalityISO2": ..., // 2-letter ISO country code (may be empty)
 			  "nationalityISO3": ..., // 3-letter ISO country code (may be empty)
