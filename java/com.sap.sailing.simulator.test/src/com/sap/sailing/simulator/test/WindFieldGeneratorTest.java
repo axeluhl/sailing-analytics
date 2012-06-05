@@ -78,7 +78,7 @@ public class WindFieldGeneratorTest {
         course.add(start);
         course.add(end);
 
-        WindControlParameters windParameters = new WindControlParameters(10, 180);
+        WindControlParameters windParameters = new WindControlParameters(10,0);
         windParameters.leftWindSpeed = 70.0;
         windParameters.middleWindSpeed = 80.0;
         windParameters.rightWindSpeed = 90.0;

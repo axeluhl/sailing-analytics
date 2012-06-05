@@ -138,7 +138,7 @@ public class SimulatorTest {
             // Wind wind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
         }
 
-        assertEquals("Number of path points", 33, pth.getPathPoints().size());
+        assertEquals("Number of path points", 37, pth.getPathPoints().size());
     }
     
     @Test

@@ -79,7 +79,6 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
             TimePoint timePoint = timedPosition.getTimePoint();
             int timeIndex = getTimeIndex(timePoint);
             Bearing phi0 = new DegreeBearingImpl(windParameters.baseWindBearing);
-            phi0 = phi0.reverse();
             double vStep = 1.0/((positions.length-1)*timeScale);
             double t = (timeIndex+(timeIndex+rowIndex)*vStep);
             Bearing angle = new DegreeBearingImpl(Math.sin(2*Math.PI*t*windParameters.frequency)*windParameters.amplitude);

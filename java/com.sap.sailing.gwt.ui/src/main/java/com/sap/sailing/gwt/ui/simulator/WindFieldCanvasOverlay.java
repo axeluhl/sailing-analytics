@@ -181,9 +181,8 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
         windFieldPoints.put(new ToolTip(x, y), windDTO);
 
-        // TODO check if the angles are correct
-        double dx = -length * Math.sin(angle); // -90 degree rotation
-        double dy = length * Math.cos(angle);
+        double dx = length * Math.sin(angle); 
+        double dy = -length * Math.cos(angle);
 
         double x1 = x + dx / 2;
         double y1 = y + dy / 2;
