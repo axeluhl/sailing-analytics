@@ -10,7 +10,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 
 public abstract class AbstractLeaderboardTest {
-    protected CompetitorImpl createCompetitor(String competitorName) {
+    public static CompetitorImpl createCompetitor(String competitorName) {
         return new CompetitorImpl(123, competitorName, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous "+competitorName)),

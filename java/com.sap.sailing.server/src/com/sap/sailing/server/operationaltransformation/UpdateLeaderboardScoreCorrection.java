@@ -1,11 +1,9 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import java.util.Date;
-
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
@@ -15,14 +13,14 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
     private static final long serialVersionUID = -977025759476022993L;
     private final String competitorIdAsString;
     private final Integer correctedScore;
-    private final Date date;
+    private final TimePoint timePoint;
     
     public UpdateLeaderboardScoreCorrection(String leaderboardName, String columnName, String competitorIdAsString,
-            Integer correctedScore, Date date) {
+            Integer correctedScore, TimePoint timePoint) {
         super(leaderboardName, columnName);
         this.competitorIdAsString = competitorIdAsString;
         this.correctedScore = correctedScore;
-        this.date = date;
+        this.timePoint = timePoint;
     }
 
     @Override
@@ -44,7 +42,6 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
         int newTotalPoints;
         boolean isScoreCorrected;
         if (leaderboard != null) {
-            MillisecondsTimePoint timePoint = new MillisecondsTimePoint(date);
             Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
             if (competitor != null) {
                 RaceColumn raceColumn = leaderboard.getRaceColumnByName(getColumnName());
