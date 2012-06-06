@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +41,7 @@ public class DummyTrackedRegattaRegistry implements TrackedRegattaRegistry {
     }
 
     @Override
-    public Regatta getRememberedRegattaForRace(RaceDefinition race) {
+    public Regatta getRememberedRegattaForRace(Serializable race) {
         return null;
     }
 

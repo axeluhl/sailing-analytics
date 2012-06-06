@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tractracadapter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -240,5 +241,10 @@ public interface DomainFactory {
      * will have to create a new one.
      */
     void removeRace(Event tractracEvent, Race tractracRace, TrackedRegattaRegistry trackedRegattaRegistry);
+
+    /**
+     * Computes an ID to use for a {@link RaceDefinition} based on the TracTrac race.
+     */
+    Serializable getRaceID(Race tractracRace);
 
 }
