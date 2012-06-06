@@ -9,9 +9,9 @@ public interface WindPatternDisplayManager {
     
    public enum WindPattern {
         NONE ("Choose a wind pattern"),
-        BLASTS ("Blasts"),
+        BLASTS ("Gusts"),
         OSCILLATIONS ("Oscillations"),
-        OSCILLATION_WITH_BLASTS ("Oscillation with Blasts");
+        OSCILLATION_WITH_BLASTS ("Oscillation with Gusts");
         
         private String displayName;
         WindPattern(String displayName) {

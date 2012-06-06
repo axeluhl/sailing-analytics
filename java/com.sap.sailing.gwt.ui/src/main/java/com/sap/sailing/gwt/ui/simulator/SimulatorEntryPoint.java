@@ -14,7 +14,8 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private final SimulatorServiceAsync simulatorSvc = GWT.create(SimulatorService.class);
     private int   xRes = 5;
     private int   yRes = 5;
-
+    private boolean autoUpdate = true;
+    
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
 
@@ -38,7 +39,14 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
         } else {
             yRes = Integer.parseInt(verticalRes);
         }
-        SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc,stringMessages, this, xRes, yRes);
+        String autoUpdateStr = Window.Location.getParameter("autoUpdate");
+        if (autoUpdateStr == null || autoUpdateStr.isEmpty()) {
+            logger.config("Using default auto update " + autoUpdate);
+        } else {
+            autoUpdate = Boolean.parseBoolean(autoUpdateStr);
+        }
+        
+        SimulatorMainPanel mainPanel = new SimulatorMainPanel(simulatorSvc,stringMessages, this, xRes, yRes, autoUpdate);
         RootLayoutPanel.get().add(mainPanel);
     }
 

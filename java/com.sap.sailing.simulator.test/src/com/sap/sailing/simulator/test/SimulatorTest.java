@@ -116,13 +116,14 @@ public class SimulatorTest {
         // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
         WindControlParameters windParameters = new WindControlParameters(requiredSpeed10.getKnots(), b.getSouth().getDegrees());
         WindFieldGeneratorOscillationImpl wf = new WindFieldGeneratorOscillationImpl(b, windParameters);
-        wf.timeScale = 1;
+       
         
         wf.setPositionGrid(b.extractGrid(10, 5));
         TimePoint start = new MillisecondsTimePoint(0);
         TimePoint timeStep = new MillisecondsTimePoint(30*1000);
         wf.generate(start,null,timeStep);
-
+        wf.setTimeScale(1);
+        
         PolarDiagram pd = new PolarDiagramImpl(1);
         List<Position> course = new ArrayList<Position>();
         course.add(p1);

@@ -81,7 +81,7 @@ public class WindFieldMapMouseMoveHandler implements MapMouseMoveHandler {
            
             context2d.setFillStyle("Blue");
             String speedStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindSpeedInKnots);
-            String bearingStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindFromDeg);
+            String bearingStr = NumberFormat.getFormat("#.00").format(windDTO.trueWindBearingDeg);
             String ttMsg = speedStr + " kn " + bearingStr + "°";
             context2d.fillText(ttMsg, x+10,y+15,60);
         }

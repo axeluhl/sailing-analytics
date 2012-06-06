@@ -27,7 +27,7 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay  {
     @Override
     public void timeChanged(Date date) {
         
-       canvas.getContext2d().clearRect(canvas.getAbsoluteLeft(), canvas.getAbsoluteTop(), 
+       canvas.getContext2d().clearRect(0/*canvas.getAbsoluteLeft()*/, 0/*canvas.getAbsoluteTop()*/, 
                canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
         List<WindDTO> windDTOToDraw = new ArrayList<WindDTO>();
         for(WindDTO windDTO : wl.getMatrix()) {

@@ -13,7 +13,8 @@ Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="2.5.0",
  javax.servlet.http;version="2.5.0",
  org.osgi.framework;version="1.6.0"
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ lib/ssj.jar
 Export-Package: com.sap.sailing.simulator,
  com.sap.sailing.simulator.impl;x-friends:="com.sap.sailing.simulator.test"
 Web-ContextPath: /simulator

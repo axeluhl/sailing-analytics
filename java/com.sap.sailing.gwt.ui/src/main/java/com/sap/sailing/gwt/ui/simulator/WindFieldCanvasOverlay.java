@@ -132,7 +132,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     }
 
     private void clear() {
-        canvas.getContext2d().clearRect(canvas.getAbsoluteLeft(), canvas.getAbsoluteTop(),
+        canvas.getContext2d().clearRect(0.0 /*canvas.getAbsoluteLeft()*/, 0.0/*canvas.getAbsoluteTop()*/,
                 canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
         windFieldPoints.clear();
         mmHandler.clear();

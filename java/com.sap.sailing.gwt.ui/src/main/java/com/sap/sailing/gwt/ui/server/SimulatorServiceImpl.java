@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplayManager.WindPattern;
+import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternNotFoundException;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
@@ -161,8 +162,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     @Override
-    public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern) {
-
+    public WindFieldDTO getWindField(WindFieldGenParamsDTO params, WindPatternDisplay pattern)
+            throws WindPatternNotFoundException {
+        logger.info("Entering getWindField");
         Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
         Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
         List<Position> course = new ArrayList<Position>();
@@ -172,29 +174,35 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         RectangularBoundary bd = new RectangularBoundary(nw, se, 0.1);
         // List<Position> lattice = bd.extractLattice(params.getxRes(), params.getyRes());
 
-       
         retreiveWindControlParameters(pattern);
         logger.info("Boundary south direction " + bd.getSouth());
         controlParameters.baseWindBearing += bd.getSouth().getDegrees();
-        
+
         WindFieldGenerator wf = WindFieldGeneratorFactory.INSTANCE.createWindFieldGenerator(pattern.getWindPattern()
                 .name(), bd, controlParameters);
 
-        List<Position> lattice = bd.extractLattice(params.getxRes(),params.getyRes());//wf.extractLattice(params.getxRes(), params.getyRes());
+        if (wf == null) {
+            throw new WindPatternNotFoundException("Please select a valid wind pattern.");
+        }
+        List<Position> lattice = bd.extractLattice(params.getxRes(), params.getyRes());// wf.extractLattice(params.getxRes(),
+                                                                                       // params.getyRes());
         wf.setPositionGrid(bd.extractGrid(params.getxRes(), params.getyRes()));
-        
-        TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());//new MillisecondsTimePoint(0);
-        TimePoint timeStep = new MillisecondsTimePoint(params.getTimeStep().getTime());//new MillisecondsTimePoint(30*1000);
-        TimePoint endTime = new MillisecondsTimePoint(params.getEndTime().getTime());//new MillisecondsTimePoint(10 * 60 * 1000);
-        
-        wf.generate(startTime,null,timeStep);
+
+        TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());// new
+                                                                                         // MillisecondsTimePoint(0);
+        TimePoint timeStep = new MillisecondsTimePoint(params.getTimeStep().getTime());// new
+                                                                                       // MillisecondsTimePoint(30*1000);
+        TimePoint endTime = new MillisecondsTimePoint(params.getEndTime().getTime());// new MillisecondsTimePoint(10 *
+                                                                                     // 60 * 1000);
+
+        wf.generate(startTime, null, timeStep);
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
         if (lattice != null) {
             TimePoint t = startTime;
-            while(t.compareTo(endTime) <= 0) {
+            while (t.compareTo(endTime) <= 0) {
                 for (Position p : lattice) {
-                    Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(t,p,null));
+                    Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(t, p, null));
                     logger.finer(localWind.toString());
                     WindDTO w = createWindDTO(localWind);
                     wList.add(w);
@@ -206,6 +214,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         WindFieldDTO wfDTO = new WindFieldDTO();
 
         wfDTO.setMatrix(wList);
+        logger.info("Exiting getWindField");
         return wfDTO;
 
     }
@@ -214,7 +223,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
      * Currently the path is a list of WindDTO objects at the path points and only a single optimal path is returned
      * 
      * */
-    public PathDTO[] getPaths(WindFieldGenParamsDTO params, WindPatternDisplay pattern) {
+    public PathDTO[] getPaths(WindFieldGenParamsDTO params, WindPatternDisplay pattern) throws WindPatternNotFoundException {
 
         Position nw = new DegreePosition(params.getNorthWest().latDeg, params.getNorthWest().lngDeg);
         Position se = new DegreePosition(params.getSouthEast().latDeg, params.getSouthEast().lngDeg);
@@ -226,16 +235,20 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         retreiveWindControlParameters(pattern);
         controlParameters.baseWindBearing += bd.getSouth().getDegrees();
-        
+
         WindFieldGenerator wf = WindFieldGeneratorFactory.INSTANCE.createWindFieldGenerator(pattern.getWindPattern()
                 .name(), bd, controlParameters);
-        
-        List<Position> lattice = bd.extractLattice(params.getxRes(),params.getyRes());//wf.extractLattice(params.getxRes(), params.getyRes());
+
+        if (wf == null) {
+            throw new WindPatternNotFoundException("Please select a valid wind pattern.");
+        }
+        List<Position> lattice = bd.extractLattice(params.getxRes(), params.getyRes());// wf.extractLattice(params.getxRes(),
+                                                                                       // params.getyRes());
         wf.setPositionGrid(bd.extractGrid(params.getxRes(), params.getyRes()));
         TimePoint start = new MillisecondsTimePoint(0);
-        TimePoint timeStep = new MillisecondsTimePoint(30*1000);
-        wf.generate(start,null,timeStep);
-        
+        TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
+        wf.generate(start, null, timeStep);
+
         // TODO Get all the paths that need to be displayed
         List<WindDTO> path = getOptimumPath(course, wf);
         PathDTO[] pathDTO = new PathDTO[1];
