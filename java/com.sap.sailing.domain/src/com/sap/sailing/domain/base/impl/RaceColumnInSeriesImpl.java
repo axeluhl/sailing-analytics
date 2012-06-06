@@ -55,24 +55,20 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     }
 
     /**
-     * In addition to associating the tracked race to this column for the fleet specified, this method also assures that
-     * <code>trackedRace</code> belongs to the {@link TrackedRegatta} of this column's series'
-     * {@link Series#getRegatta() regatta} and that the corresponding {@link TrackedRace#getRace() RaceDefinition} is owned
-     * by this column's series' {@link Series#getRegatta() regatta}.
+     * In addition to associating the tracked race to this column for the fleet specified, if this column has a non-
+     * <code>null</code> {@link #trackedRegattaRegistry}, this method also verifies that <code>trackedRace</code>
+     * belongs to the {@link TrackedRegatta} of this column's series' {@link Series#getRegatta() regatta} and that the
+     * corresponding {@link TrackedRace#getRace() RaceDefinition} is owned by this column's series'
+     * {@link Series#getRegatta() regatta}. If not, an {@link IllegalArgumentException} is thrown.
      */
     @Override
     public void setTrackedRace(Fleet fleet, TrackedRace trackedRace) {
         if (trackedRegattaRegistry != null) {
-            RaceDefinition race = trackedRace.getRace();
             TrackedRegatta trackedRegatta = trackedRace.getTrackedRegatta();
             Regatta regatta = trackedRegatta.getRegatta();
             if (regatta != getRegatta()) {
-                // re-associate:
-                regatta.removeRace(race);
-                getRegatta().addRace(race);
-                trackedRegatta.removeTrackedRace(trackedRace);
-                // FIXME adding the tracked race to the tracked regatta triggers the RacingEventService which tries to re-associate with existing leaderboards; leads to an endless recursion
-                trackedRegattaRegistry.getOrCreateTrackedRegatta(getRegatta()).addTrackedRace(trackedRace);
+                throw new IllegalArgumentException("Trying to associate tracked race of regatta "+regatta.getName()+
+                        " to a race column of regatta "+getRegatta().getName());
             }
         }
         // re-associating the TrackedRace needs to happen before the super call because the RaceIdentifier may have changed

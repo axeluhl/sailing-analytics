@@ -40,7 +40,7 @@ public class DummyTrackedRegattaRegistry implements TrackedRegattaRegistry {
     }
 
     @Override
-    public Regatta getOrCreateRegattaForRace(RaceDefinition race) {
+    public Regatta getRememberedRegattaForRace(RaceDefinition race) {
         return null;
     }
 

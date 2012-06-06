@@ -46,7 +46,9 @@ import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
@@ -110,11 +112,16 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     public void testLoadStoreRegattaLeaderboardWithScoreCorrections() {
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        final DynamicTrackedRegatta[] trackedRegatta = new DynamicTrackedRegatta[1];
         final TrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false, boatClass) {
             private static final long serialVersionUID = 1234L;
             @Override
             public RegattaAndRaceIdentifier getRaceIdentifier() {
                 return new RegattaNameAndRaceName("Kieler Woche (29erXX)", "Yellow Race 2");
+            }
+            @Override
+            public DynamicTrackedRegatta getTrackedRegatta() {
+                return trackedRegatta[0];
             }
         };
         RacingEventService res = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
@@ -124,6 +131,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Regatta regattaProxy = createRegatta(regattaBaseName, boatClass, /* persistent */ true);
         Regatta regatta = res.createRegatta(regattaProxy.getBaseName(), regattaProxy.getBoatClass().getName(),
                 regattaProxy.getSeries(), regattaProxy.isPersistent());
+        trackedRegatta[0] = new DynamicTrackedRegattaImpl(regatta);
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
         RegattaLeaderboard regattaLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
         final RaceColumnInSeries q2 = regatta.getSeriesByName("Qualifying").getRaceColumnByName("Q2");
@@ -132,6 +140,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
         res.apply(new UpdateLeaderboardMaxPointsReason(regattaLeaderboard.getName(), q2.getName(), hasso.getId().toString(),
                 MaxPointsReason.DNF, MillisecondsTimePoint.now()));
+        
+        // load new RacingEventService including regatta and leaderboard
         RacingEventService resForLoading = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
         Regatta loadedRegatta = resForLoading.getRegattaByName("Kieler Woche (29erXX)");
         assertNotNull(loadedRegatta);
@@ -149,6 +159,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         // now re-associate the tracked race to let score correction "snap" to competitor:
         final RaceColumnInSeries loadedQ2 = loadedRegatta.getSeriesByName("Qualifying").getRaceColumnByName("Q2");
         final Fleet loadedYellow = loadedQ2.getFleetByName("Yellow");
+        // adjust tracked regatta for tracked race:
+        trackedRegatta[0] = new DynamicTrackedRegattaImpl(loadedRegatta);
         resForLoading.apply(new ConnectTrackedRaceToLeaderboardColumn(loadedLeaderboard.getName(), loadedQ2.getName(), loadedYellow
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
         MaxPointsReason hassosLoadedMaxPointsReason = loadedLeaderboard.getScoreCorrection().getMaxPointsReason(hasso, loadedQ2);

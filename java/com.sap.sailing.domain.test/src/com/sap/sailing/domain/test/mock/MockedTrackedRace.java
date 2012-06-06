@@ -285,7 +285,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public String getName() {
-                        return "A Mocked Test Event";
+                        return "A Mocked Test Regatta";
                     }
 
                     @Override

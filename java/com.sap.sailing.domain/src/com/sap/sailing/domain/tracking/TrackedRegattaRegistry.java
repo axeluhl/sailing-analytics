@@ -37,12 +37,12 @@ public interface TrackedRegattaRegistry {
      * If no such explicit assignment has been performed, an "appropriate" non-persistent default regatta will be
      * selected and returned.
      */
-    Regatta getOrCreateRegattaForRace(RaceDefinition race);
+    Regatta getRememberedRegattaForRace(RaceDefinition race);
     
     /**
      * Persistently remembers the association of the race with its {@link RaceDefinition#getId()} to the
      * <code>regatta</code> with its {@link Regatta#getRegattaIdentifier() identifier} so that the next time
-     * {@link #getOrCreateRegattaForRace(RaceDefinition)} is called with <code>race</code> as argument,
+     * {@link #getRememberedRegattaForRace(RaceDefinition)} is called with <code>race</code> as argument,
      * <code>regatta</code> will be returned.
      */
     void setRegattaForRace(Regatta regatta, RaceDefinition race);
