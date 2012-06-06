@@ -246,8 +246,7 @@ public class EventStructureManagementPanel extends SimplePanel {
             Pair<List<Pair<String, Integer>>, Boolean> seriesPair = new Pair<List<Pair<String, Integer>>, Boolean>(fleets, seriesDTO.isMedal());
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
-        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, true,
-                seriesStructure, true, new AsyncCallback<Void>() {
+        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());

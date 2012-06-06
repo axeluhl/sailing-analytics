@@ -76,9 +76,9 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         final String boatClassName = "49er";
         // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = DomainFactory.INSTANCE;
-        BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true);
+        BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName);
         final String baseEventName = "Test Event";
-        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true);
+        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName);
         Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());

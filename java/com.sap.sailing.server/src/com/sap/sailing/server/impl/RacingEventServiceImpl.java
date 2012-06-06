@@ -489,9 +489,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta getOrCreateRegatta(String baseEventName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
+    public Regatta getOrCreateRegatta(String baseEventName, String boatClassName) {
         Regatta regatta = new RegattaImpl(baseEventName, com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(
-                boatClassName, boatClassTypicallyStartsUpwind), this);
+                boatClassName), this);
         Regatta result = regattasByName.get(regatta.getName());
         if (result == null) {
             result = regatta;
@@ -503,10 +503,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta createRegatta(String baseEventName, String boatClassName,
-            boolean boatClassTypicallyStartsUpwind, Iterable<? extends Series> series, boolean persistent) {
+            Iterable<? extends Series> series, boolean persistent) {
         Regatta regatta = new RegattaImpl(baseEventName,
-                com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(boatClassName,
-                        boatClassTypicallyStartsUpwind), series, persistent);
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(boatClassName), series, persistent);
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ")");
         cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
         if (persistent) {
@@ -638,8 +637,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             replicate(new AddSpecificRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
-                    .getBoatClass().getName(), regatta.getBoatClass() == null ? false : regatta.getBoatClass()
-                    .typicallyStartsUpwind(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent()));
+                    .getBoatClass().getName(), getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent()));
             RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
             for (RaceDefinition race : regatta.getAllRaces()) {
                 replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -669,8 +667,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (!regattasByName.containsKey(regatta.getName())) {
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
-            replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(),
-                    regatta.getBoatClass() == null ? false : regatta.getBoatClass().typicallyStartsUpwind()));
+            replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName()));
             RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
             for (RaceDefinition race : regatta.getAllRaces()) {
                 replicate(new AddRaceDefinition(regattaIdentifier, race));

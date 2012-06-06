@@ -20,16 +20,15 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal;
     private final boolean persistent;
     
-    public AddSpecificRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind,
-            Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrdering, boolean persistent) {
-        super(regattaName, boatClassName, boatClassTypicallyStartsUpwind);
+    public AddSpecificRegatta(String regattaName, String boatClassName, Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrdering, boolean persistent) {
+        super(regattaName, boatClassName);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedal = seriesNamesWithFleetNamesAndFleetOrdering;
         this.persistent = persistent;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        return toState.createRegatta(getBaseEventName(), getBoatClassName(), isBoatClassTypicallyStartsUpwind(), createSeries(toState), persistent);
+        return toState.createRegatta(getBaseEventName(), getBoatClassName(), createSeries(toState), persistent);
     }
 
     private Iterable<? extends Series> createSeries(TrackedRegattaRegistry trackedRegattaRegistry) {
