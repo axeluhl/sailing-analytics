@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -64,7 +62,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
 
     private final Comparator<Integer> scoreComparator;
     
-    private transient Set<RaceColumnListener> raceColumnListeners;
+    private Set<RaceColumnListener> raceColumnListeners;
 
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -126,11 +124,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         this.resultDiscardingRule = resultDiscardingRule;
         this.scoreComparator = scoreComparator;
         this.raceColumnListeners = new HashSet<RaceColumnListener>();
-    }
-    
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        raceColumnListeners = new HashSet<RaceColumnListener>();
     }
     
     @Override

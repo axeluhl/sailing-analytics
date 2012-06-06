@@ -30,7 +30,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private final Iterable<? extends Series> series;
-    private transient Set<RaceColumnListener> raceColumnListeners;
+    private Set<RaceColumnListener> raceColumnListeners;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -90,7 +90,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         regattaListeners = new HashSet<>();
-        raceColumnListeners = new HashSet<RaceColumnListener>();
     }
 
     @Override
