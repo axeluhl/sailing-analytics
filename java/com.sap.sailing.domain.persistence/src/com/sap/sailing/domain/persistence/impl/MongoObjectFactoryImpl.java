@@ -135,6 +135,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBObject dbLeaderboard = new BasicDBObject();
+        dbLeaderboard.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         if (leaderboard instanceof FlexibleLeaderboard) {
             storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard, dbLeaderboard);
         } else if (leaderboard instanceof RegattaLeaderboard) {
@@ -149,7 +150,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     private void storeFlexibleLeaderboard(FlexibleLeaderboard leaderboard, BasicDBObject dbLeaderboard) {
-        dbLeaderboard.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
         BasicDBList dbRaceColumns = new BasicDBList();
         dbLeaderboard.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {

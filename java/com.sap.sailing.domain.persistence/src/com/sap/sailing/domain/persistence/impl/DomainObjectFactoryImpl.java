@@ -485,7 +485,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBCollection regattaCollection = database.getCollection(CollectionNames.REGATTAS.name());
         DBObject dbRegatta = regattaCollection.findOne(query);
         Regatta result = loadRegatta(dbRegatta, trackedRegattaRegistry);
-        assert result.getName().equals(name);
+        assert result == null || result.getName().equals(name);
         return result;
     }
 
