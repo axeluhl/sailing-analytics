@@ -124,7 +124,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     private void generateWindField(WindPatternDisplay windPatternDisplay) {
         logger.info("In generateWindField");
-
+        if (windPatternDisplay == null) {
+            errorReporter.reportError("Please select a valid wind pattern.");   
+            return;
+        }
         PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
                 raceCourseCanvasOverlay.startPoint.getLongitude());
         PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(),
@@ -158,7 +161,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     private void generatePath(WindPatternDisplay windPatternDisplay, final boolean display) {
         logger.info("In generatePath");
-
+        if (windPatternDisplay == null) {
+            errorReporter.reportError("Please select a valid wind pattern.");    
+            return;
+        }
         PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
                 raceCourseCanvasOverlay.startPoint.getLongitude());
         PositionDTO endPointDTO = new PositionDTO(raceCourseCanvasOverlay.endPoint.getLatitude(),
