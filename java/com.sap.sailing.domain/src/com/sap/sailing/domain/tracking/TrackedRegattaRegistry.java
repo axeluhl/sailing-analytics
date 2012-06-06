@@ -41,12 +41,4 @@ public interface TrackedRegattaRegistry {
      * @param raceID the ID as obtained from {@link RaceDefinition#getId()}
      */
     Regatta getRememberedRegattaForRace(Serializable raceID);
-    
-    /**
-     * Persistently remembers the association of the race with its {@link RaceDefinition#getId()} to the
-     * <code>regatta</code> with its {@link Regatta#getRegattaIdentifier() identifier} so that the next time
-     * {@link #getRememberedRegattaForRace(RaceDefinition)} is called with <code>race</code> as argument,
-     * <code>regatta</code> will be returned.
-     */
-    void setRegattaForRace(Regatta regatta, RaceDefinition race);
 }

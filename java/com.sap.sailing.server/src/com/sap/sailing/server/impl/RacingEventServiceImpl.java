@@ -570,11 +570,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition) {
         Regatta regatta = getRegatta(addToRegatta);
-        regatta.addRace(raceDefinition); // will trigger the raceAdded operation because this service is listening on all its regattass
+        regatta.addRace(raceDefinition); // will trigger the raceAdded operation because this service is listening on all its regattas
     }
     
+    /**
+     * If the <code>regatta</code> {@link Regatta#isPersistent() is a persistent one}, the association of the race with the
+     * regatta is remembered persistently so that {@link #getRememberedRegattaForRace(Serializable)} will provide it.
+     */
     @Override
     public void raceAdded(Regatta regatta, RaceDefinition raceDefinition) {
+        if (regatta.isPersistent()) {
+            setRegattaForRace(regatta, raceDefinition);
+        }
         final CourseChangeReplicator listener = new CourseChangeReplicator(this, regatta, raceDefinition);
         courseListeners.put(raceDefinition, listener);
         raceDefinition.getCourse().addCourseListener(listener);
@@ -1378,8 +1385,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         return persistentRegattasForRaceIDs.get(raceID.toString());
     }
 
-    @Override
-    public void setRegattaForRace(Regatta regatta, RaceDefinition race) {
+    /**
+     * Persistently remembers the association of the race with its {@link RaceDefinition#getId()} to the
+     * <code>regatta</code> with its {@link Regatta#getRegattaIdentifier() identifier} so that the next time
+     * {@link #getRememberedRegattaForRace(RaceDefinition)} is called with <code>race</code> as argument,
+     * <code>regatta</code> will be returned.
+     */
+    private void setRegattaForRace(Regatta regatta, RaceDefinition race) {
         persistentRegattasForRaceIDs.put(race.getId().toString(), regatta);
         mongoObjectFactory.storeRegattaForRaceID(race.getId().toString(), regatta);
     }
