@@ -15,8 +15,8 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -70,7 +70,7 @@ public class ServerReplicationTest extends AbstractServerReplicationTest {
         final Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
         assertNull(replicaLeaderboard);
     }
-    
+
     @Test
     public void testWaypointRemovalReplication() throws InterruptedException {
         final String boatClassName = "49er";
