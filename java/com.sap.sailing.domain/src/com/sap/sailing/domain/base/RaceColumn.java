@@ -16,12 +16,19 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * {@link RaceColumn} therefore provides access to the {@link TrackedRace}s by {@link Fleet} and by {@link Competitor}.
  * The {@link TrackedRace}s represent the data of a race. Over the life time of this object it can be assigned one or more
  * {@link TrackedRace}s which then act(s) as data provider to this column. If no tracked race has been assigned, the
- * scores reported by this column will all default to zero.
+ * scores reported by this column will all default to zero.<p>
+ * 
+ * A {@link RaceColumnListener} can be {@link #addRaceColumnListener added} to receive notifications about tracked races
+ * being {@link #setTrackedRace(Fleet, TrackedRace) linked} to this column or unlinked from this column.
  * 
  * @author Axel Uhl (D043530)
  * 
  */
 public interface RaceColumn extends Named {
+    void addRaceColumnListener(RaceColumnListener listener);
+    
+    void removeRaceColumnListener(RaceColumnListener listener);
+    
     /**
      * @return the fleets for each of which this column has a single race and therefore optionally a {@link TrackedRace}, in
      * ascending order; best fleets first

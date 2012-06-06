@@ -72,4 +72,8 @@ public interface Regatta extends Named {
      * the data of this regatta needs to be maintained persistently.
      */
     boolean isPersistent();
+
+    void addRaceColumnListener(RaceColumnListener listener);
+
+    void removeRaceColumnListener(RaceColumnListener listener);
 }

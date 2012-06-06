@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -67,20 +68,10 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RaceFetcher {
-    /**
-     * @return a thread-safe copy of the regattas currently known by the service; it's safe for callers to iterate over
-     *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
-     */
-    Iterable<Regatta> getAllRegattas();
-    
-    Regatta getRegattaByName(String name);
-    
+public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher {
     @Override
     Regatta getRegatta(RegattaName regattaName);
     
-    Regatta getRegatta(RegattaIdentifier regattaIdentifier);
-
     @Override
     RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier);
 

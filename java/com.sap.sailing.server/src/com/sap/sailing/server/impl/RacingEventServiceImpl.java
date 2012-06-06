@@ -199,8 +199,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
-        loadStoredLeaderboardsAndGroups();
         loadStoredRegattas();
+        loadStoredLeaderboardsAndGroups();
         loadStoredEvents();
     }
     
@@ -222,14 +222,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private void loadStoredLeaderboardsAndGroups() {
         // Loading all leaderboard groups and the contained leaderboards
-        for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups()) {
+        for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups(this)) {
             leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 leaderboardsByName.put(leaderboard.getName(), leaderboard);
             }
         }
         // Loading the remaining leaderboards
-        for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup()) {
+        for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup(this)) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
         }
     }
@@ -244,7 +244,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             leaderboardsByName.put(name, result);
         }
-        mongoObjectFactory.storeFlexibleLeaderboard(result);
+        mongoObjectFactory.storeLeaderboard(result);
         return result;
     }
     
@@ -261,7 +261,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 }
                 leaderboardsByName.put(result.getName(), result);
             }
-            mongoObjectFactory.storeRegattaLeaderboard(result);
+            mongoObjectFactory.storeLeaderboard(result);
         } else {
             logger.warning("Cannot find regatta "+regattaIdentifier+". Hence, cannot create regatta leaderboard for it.");
         }
@@ -347,13 +347,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     @Override
     public void updateStoredFlexibleLeaderboard(FlexibleLeaderboard leaderboard) {
-        mongoObjectFactory.storeFlexibleLeaderboard(leaderboard);
+        mongoObjectFactory.storeLeaderboard(leaderboard);
         syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
     
     @Override
     public void updateStoredRegattaLeaderboard(RegattaLeaderboard leaderboard) {
-        mongoObjectFactory.storeRegattaLeaderboard(leaderboard);
+        mongoObjectFactory.storeLeaderboard(leaderboard);
         syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
 

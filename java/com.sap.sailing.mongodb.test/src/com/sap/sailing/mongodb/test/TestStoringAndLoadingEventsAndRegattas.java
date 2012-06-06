@@ -4,36 +4,53 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.test.AbstractLeaderboardTest;
+import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
+import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 
 public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest {
     @Test
@@ -65,12 +82,85 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     }
 
     @Test
+    public void testLoadStoreSimpleRegattaLeaderboard() {
+        RacingEventService res = new RacingEventServiceImpl(getMongoService());
+        final int numberOfQualifyingRaces = 5;
+        final int numberOfFinalRaces = 7;
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        Regatta regattaProxy = createRegatta(regattaBaseName, boatClass, /* persistent */ true);
+        Regatta regatta = res.createRegatta(regattaProxy.getBaseName(), regattaProxy.getBoatClass().getName(),
+                regattaProxy.getSeries(), regattaProxy.isPersistent());
+        addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
+        res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
+        DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
+        assertNotNull(loadedRegatta);
+        assertEquals(regatta.getName(), loadedRegatta.getName());
+        assertEquals(Util.size(regatta.getSeries()), Util.size(loadedRegatta.getSeries()));
+        
+        Leaderboard loadedLeaderboard = dof.loadLeaderboard(regatta.getName(), res);
+        assertNotNull(loadedLeaderboard);
+        assertTrue(loadedLeaderboard instanceof RegattaLeaderboard);
+        RegattaLeaderboard loadedRegattaLeaderboard = (RegattaLeaderboard) loadedLeaderboard;
+        assertSame(regatta, loadedRegattaLeaderboard.getRegatta());
+    }
+    
+    @Test
+    public void testLoadStoreRegattaLeaderboardWithScoreCorrections() {
+        Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
+        final TrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false) {
+            private static final long serialVersionUID = 1234L;
+            @Override
+            public RegattaAndRaceIdentifier getRaceIdentifier() {
+                return new RegattaNameAndRaceName("Kieler Woche (29erXX)", "Yellow Race 2");
+            }
+        };
+        RacingEventService res = new RacingEventServiceImpl(getMongoService()) {
+            @Override
+            public TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
+                return q2YellowTrackedRace;
+            }
+        };
+        final int numberOfQualifyingRaces = 5;
+        final int numberOfFinalRaces = 7;
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        Regatta regattaProxy = createRegatta(regattaBaseName, boatClass, /* persistent */ true);
+        Regatta regatta = res.createRegatta(regattaProxy.getBaseName(), regattaProxy.getBoatClass().getName(),
+                regattaProxy.getSeries(), regattaProxy.isPersistent());
+        addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
+        RegattaLeaderboard regattaLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
+        final RaceColumnInSeries q2 = regatta.getSeriesByName("Qualifying").getRaceColumnByName("Q2");
+        final Fleet yellow = q2.getFleetByName("Yellow");
+        res.apply(new ConnectTrackedRaceToLeaderboardColumn(regattaLeaderboard.getName(), q2.getName(), yellow
+                .getName(), q2YellowTrackedRace.getRaceIdentifier()));
+        res.apply(new UpdateLeaderboardMaxPointsReason(regattaLeaderboard.getName(), q2.getName(), hasso.getId().toString(),
+                MaxPointsReason.DNF, MillisecondsTimePoint.now()));
+        RacingEventService resForLoading = new RacingEventServiceImpl(getMongoService());
+        Regatta loadedRegatta = resForLoading.getRegattaByName("Kieler Woche (29erXX)");
+        assertNotNull(loadedRegatta);
+        assertEquals(regatta.getName(), loadedRegatta.getName());
+        assertEquals(Util.size(regatta.getSeries()), Util.size(loadedRegatta.getSeries()));
+        Leaderboard loadedLeaderboard = resForLoading.getLeaderboardByName(loadedRegatta.getName());
+        assertNotNull(loadedLeaderboard);
+        assertEquals(regattaLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces().length,
+                loadedLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces().length);
+        assertTrue(Arrays.equals(regattaLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
+                loadedLeaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()));
+        assertTrue(loadedLeaderboard instanceof RegattaLeaderboard);
+        RegattaLeaderboard loadedRegattaLeaderboard = (RegattaLeaderboard) loadedLeaderboard;
+        assertSame(loadedRegatta, loadedRegattaLeaderboard.getRegatta());
+    }
+    
+    @Test
     public void testLoadStoreSimpleRegatta() {
         final int numberOfQualifyingRaces = 5;
         final int numberOfFinalRaces = 7;
         final String regattaBaseName = "Kieler Woche";
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
-        Regatta regatta = createRegatta(numberOfQualifyingRaces, numberOfFinalRaces, regattaBaseName, boatClass);
+        Regatta regatta = createRegattaAndAddRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regattaBaseName,
+                boatClass, /* persistent */false);
         MongoObjectFactory mof = MongoFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         mof.storeRegatta(regatta);
         
@@ -94,7 +184,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final int numberOfFinalRaces = 7;
         final String regattaBaseName = "Kieler Woche";
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
-        Regatta regatta = createRegatta(numberOfQualifyingRaces, numberOfFinalRaces, regattaBaseName, boatClass);
+        Regatta regatta = createRegattaAndAddRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regattaBaseName, boatClass,
+                /* persistent */ false);
         MongoObjectFactory mof = MongoFactory.INSTANCE.getMongoObjectFactory(getMongoService());
         mof.storeRegatta(regatta);
         
@@ -132,7 +223,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final int numberOfFinalRaces = 7;
         final String regattaBaseName = "Kieler Woche";
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
-        Regatta regatta = createRegatta(numberOfQualifyingRaces, numberOfFinalRaces, regattaBaseName, boatClass);
+        Regatta regatta = createRegattaAndAddRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regattaBaseName, boatClass,
+                /* persistent */ false);
         Series qualifyingSeries = regatta.getSeries().iterator().next();
         RaceColumn q2 = qualifyingSeries.getRaceColumnByName("Q2");
         final RegattaNameAndRaceName q2TrackedRaceIdentifier = new RegattaNameAndRaceName(regatta.getName(), "Q2 TracTrac");
@@ -151,43 +243,61 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertNull(loadedQualifyingSeries.getRaceColumnByName("Q2").getRaceIdentifier(loadedQualifyingSeries.getFleetByName("Blue")));
     }
 
-    private Regatta createRegatta(final int numberOfQualifyingRaces, final int numberOfFinalRaces,
-            final String regattaBaseName, BoatClass boatClass) {
+    private Regatta createRegattaAndAddRaceColumns(final int numberOfQualifyingRaces, final int numberOfFinalRaces,
+            final String regattaBaseName, BoatClass boatClass, boolean persistent) {
+        Regatta regatta = createRegatta(regattaBaseName, boatClass, persistent);
+        addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
+        return regatta;
+    }
+
+    private void addRaceColumns(final int numberOfQualifyingRaces, final int numberOfFinalRaces, Regatta regatta) {
+        List<String> finalRaceColumnNames = new ArrayList<String>();
+        for (int i=1; i<=numberOfFinalRaces; i++) {
+            finalRaceColumnNames.add("F"+i);
+        }
+        List<String> qualifyingRaceColumnNames = new ArrayList<String>();
+        for (int i=1; i<=numberOfQualifyingRaces; i++) {
+            qualifyingRaceColumnNames.add("Q"+i);
+        }
+        List<String> medalRaceColumnNames = new ArrayList<String>();
+        medalRaceColumnNames.add("M");
+        addRaceColumnsToSeries(qualifyingRaceColumnNames, regatta.getSeriesByName("Qualifying"));
+        addRaceColumnsToSeries(finalRaceColumnNames, regatta.getSeriesByName("Final"));
+        addRaceColumnsToSeries(medalRaceColumnNames, regatta.getSeriesByName("Medal"));
+    }
+
+    private Regatta createRegatta(final String regattaBaseName, BoatClass boatClass, boolean persistent) {
+        List<String> emptyRaceColumnNames = Collections.emptyList();
         List<Series> series = new ArrayList<Series>();
         
         // -------- qualifying series ------------
         List<Fleet> qualifyingFleets = new ArrayList<Fleet>();
         qualifyingFleets.add(new FleetImpl("Yellow"));
         qualifyingFleets.add(new FleetImpl("Blue"));
-        List<String> qualifyingRaceColumnNames = new ArrayList<String>();
-        for (int i=1; i<=numberOfQualifyingRaces; i++) {
-            qualifyingRaceColumnNames.add("Q"+i);
-        }
         Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, qualifyingFleets,
-                qualifyingRaceColumnNames, /* trackedRegattaRegistry */ null);
+                emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(qualifyingSeries);
         
         // -------- final series ------------
         List<Fleet> finalFleets = new ArrayList<Fleet>();
         finalFleets.add(new FleetImpl("Gold", 1));
         finalFleets.add(new FleetImpl("Silver", 2));
-        List<String> finalRaceColumnNames = new ArrayList<String>();
-        for (int i=1; i<=numberOfFinalRaces; i++) {
-            finalRaceColumnNames.add("F"+i);
-        }
-        Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+        Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, finalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(finalSeries);
 
         // ------------ medal --------------
         List<Fleet> medalFleets = new ArrayList<Fleet>();
         medalFleets.add(new FleetImpl("Medal"));
-        List<String> medalRaceColumnNames = new ArrayList<String>();
-        medalRaceColumnNames.add("M");
-        Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
+        Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, medalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(medalSeries);
-
-        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, /* persistent */ false);
+        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, persistent);
         return regatta;
+    }
+
+    private void addRaceColumnsToSeries(List<String> finalRaceColumnNames, Series finalSeries) {
+        for (String raceColumnName : finalRaceColumnNames) {
+            finalSeries.addRaceColumn(raceColumnName, /* trackedRegattaRegistry */ null);
+        }
     }
     
 }
