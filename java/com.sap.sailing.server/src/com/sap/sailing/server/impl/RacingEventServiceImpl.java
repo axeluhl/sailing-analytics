@@ -198,8 +198,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
-        loadStoredLeaderboardsAndGroups();
         loadStoredRegattas();
+        loadStoredLeaderboardsAndGroups();
         loadStoredEvents();
     }
     

@@ -337,8 +337,10 @@ public class AdminApp extends Servlet {
                     try {
                         TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS, MillisecondsTimePoint.now());
                         Wind wind = new WindImpl(p, timePoint, speed);
-                        final DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
-                        trackedRace.recordWind(wind, trackedRace.getWindSources(WindSourceType.WEB).iterator().next());
+                        final DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getExistingTrackedRace(race);
+                        if (trackedRace != null) {
+                            trackedRace.recordWind(wind, trackedRace.getWindSources(WindSourceType.WEB).iterator().next());
+                        }
                     } catch (InvalidDateException ex) {
                         resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't parse time specification " + ex.getMessage());
                     }

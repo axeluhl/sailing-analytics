@@ -139,4 +139,9 @@ public abstract class AbstractRaceColumn implements RaceColumn {
         }
         return null;
     }
+    
+    @Override
+    public String toString() {
+        return getName();
+    }
 }
