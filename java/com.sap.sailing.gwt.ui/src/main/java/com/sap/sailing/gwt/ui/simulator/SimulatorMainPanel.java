@@ -456,7 +456,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 simulatorMap.reset();
-
+                //TODO fix so that resetting the course displays the current selection
+                //For now disable all button & force user to select
+                summaryButton.setValue(false);
+                replayButton.setValue(false);
+                windDisplayButton.setValue(false);
             }
         });
 
