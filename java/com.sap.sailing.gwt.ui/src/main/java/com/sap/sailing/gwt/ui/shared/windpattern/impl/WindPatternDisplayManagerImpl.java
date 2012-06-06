@@ -26,10 +26,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
     @Override
     public WindPatternDisplay getDisplay(WindPattern windPattern) {
         WindPatternDisplay display = new WindPatternDisplayImpl(windPattern);
-        WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
-                "Base Wind Speed (kn)", 0, 30, 3);
-        display.addSetting(windSpeedSetting);
-
+      
         switch (windPattern) {
         case BLASTS:
             addBlastParameters(display);
@@ -45,21 +42,29 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
     }
 
     private void addBlastParameters(WindPatternDisplay display) {
+        WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
+                "Base Wind Speed (kn)", 0, 30, 3);
+        display.addSetting(windSpeedSetting);
+
         WindPatternSetting<Double> blastProbability = new WindPatternSettingSliderBar("blastProbability",
-                "Blast Probability (%)", 0, 50, 50);
+                "Gust Probability (%)", 0, 50, 50);
         display.addSetting(blastProbability);
-        WindPatternSetting<Double> maxBlastSize = new WindPatternSettingSliderBar("maxBlastSize", "Blast Size", 1, 10,
+        WindPatternSetting<Double> maxBlastSize = new WindPatternSettingSliderBar("maxBlastSize", "Gust Size", 1, 10,
                 1);
         display.addSetting(maxBlastSize);
         WindPatternSetting<Double> blastWindSpeed = new WindPatternSettingSliderBar("blastWindSpeed",
-                "Average Blast Wind Speed (%)", 0, 100, 100);
+                "Average Gust Wind Speed (%)", 0, 100, 100);
         display.addSetting(blastWindSpeed);
         WindPatternSetting<Double> blastWindSpeedVar = new WindPatternSettingSliderBar("blastWindSpeedVar",
-                "Blast Wind Speed Variance (%)", 1e-4, 100, 1e-4);
+                "Gust Wind Speed Variance (%)", 1e-4, 100, 1e-4);
         display.addSetting(blastWindSpeedVar);
     }
 
     private void addOscillationParameters(WindPatternDisplay display) {
+        WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
+                "Base Wind Speed (kn)", 0, 30, 3);
+        display.addSetting(windSpeedSetting);
+
         WindPatternSetting<Double> baseWindBearing = new WindPatternSettingSliderBar("baseWindBearing",
                 "Average Wind Direction (Degrees)", -180, 180, 0);
         display.addSetting(baseWindBearing);
