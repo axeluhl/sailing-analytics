@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Named;
@@ -224,4 +225,8 @@ public interface Leaderboard extends Named {
     public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule);
 
     Competitor getCompetitorByIdAsString(String idAsString);
+    
+    void addRaceColumnListener(RaceColumnListener listener);
+    
+    void removeRaceColumnListener(RaceColumnListener listener);
 }

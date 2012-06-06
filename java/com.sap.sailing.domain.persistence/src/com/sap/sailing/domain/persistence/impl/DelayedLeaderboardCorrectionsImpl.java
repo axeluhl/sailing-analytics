@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.persistence.impl;
 
-import java.util.Comparator;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -8,12 +8,10 @@ import java.util.Map;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
-import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
-import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
-import com.sap.sailing.domain.leaderboard.impl.RaceColumnImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -23,54 +21,38 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * score corrections are then assigned to the {@link Competitor}s once they show up by
  * {@link #addRace(TrackedRace, String, boolean) adding races} to this leaderboard.<p>
  * 
- * TODO This class should be in the impl package. However, in order to temporarily solve bug 595, moving this class
- * to the exported package may help. A better solution would involve obtaining this bundle's class loader in
- * <code>ObjectInputStreamResolvingAgainstDomainFactory</code> which is able to obtain the class from a non-exported
- * package.
+ * This object registers itself as a {@link RaceColumnListener} on the {@link Leaderboard} at construction time. It
+ * therefore receives all updates to the linking structure between the leaderboard's {@link RaceColumn}s and the
+ * {@link TrackedRace}s associated with them and can react accordingly to assign left-over corrections to the
+ * correct, resolved competitor objects (see {@link #trackedRaceLinked(RaceColumn, Fleet, TrackedRace)}).
  * 
  * @author Axel Uhl (d043530)
  * 
  */
-public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLeaderboardImpl {
-    private static final long serialVersionUID = -8933075542228571746L;
+public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorrections, Serializable {
+    private static final long serialVersionUID = 8824782847677232275L;
     private final Map<String, Integer> carriedPointsByCompetitorName;
     private final Map<String, Map<RaceColumn, MaxPointsReason>> maxPointsReasonsByCompetitorName;
     private final Map<String, Map<RaceColumn, Integer>> correctedScoresByCompetitorName;
     private final Map<String, String> displayNamesByCompetitorName;
+    private final Leaderboard leaderboard;
 
-    /**
-     * A wrapper for {@link RaceColumn} that, when its {@link #setTrackedRace(Fleet, TrackedRace)} method is called,
-     * additionally calls {@link FlexibleLeaderboardImplWithDelayedCarriedPoints#assignLeftOvers(TrackedRace)}.
-     * 
-     * @author Axel Uhl (D043530)
-     */
-    private class RaceColumnForDelayedCarriedPoints extends RaceColumnImpl {
-        private static final long serialVersionUID = -1243132535406059096L;
-
-        public RaceColumnForDelayedCarriedPoints(Leaderboard leaderboard, String name, boolean medalRace, Iterable<Fleet> fleets) {
-            super(name, medalRace, fleets);
-        }
-
-        @Override
-        public void setTrackedRace(Fleet fleet, TrackedRace trackedRace) {
-            super.setTrackedRace(fleet, trackedRace);
-            if (trackedRace != null) {
-                assignLeftOvers(trackedRace);
-            }
-        }
-    }
-    
-    public FlexibleLeaderboardImplWithDelayedCarriedPoints(String name, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
-        super(name, scoreCorrection, resultDiscardingRule, scoreComparator);
+    public DelayedLeaderboardCorrectionsImpl(Leaderboard leaderboard) {
         carriedPointsByCompetitorName = new HashMap<String, Integer>();
         maxPointsReasonsByCompetitorName = new HashMap<String, Map<RaceColumn,MaxPointsReason>>();
         correctedScoresByCompetitorName = new HashMap<String, Map<RaceColumn,Integer>>();
         displayNamesByCompetitorName = new HashMap<String, String>();
+        this.leaderboard = leaderboard;
+        leaderboard.addRaceColumnListener(this);
+    }
+    
+    @Override
+    public Leaderboard getLeaderboard() {
+        return leaderboard;
     }
     
     private void assertNoTrackedRaceAssociatedYet() {
-        for (RaceColumn raceColumn : getRaceColumns()) {
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if (raceColumn.hasTrackedRaces()) {
                 throw new IllegalStateException("Can't enqueue competitor name-based state while tracked races are already associated with leaderboard");
             }
@@ -78,15 +60,12 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
     }
 
     @Override
-    protected RaceColumnImpl createRaceColumn(String columnName, boolean medalRace, Fleet... fleets) {
-        return new RaceColumnForDelayedCarriedPoints(this, columnName, medalRace, turnNullOrEmptyFleetsIntoDefaultFleet(fleets));
-    }
-
     public void setCarriedPoints(String competitorName, int carriedPoints) {
         assertNoTrackedRaceAssociatedYet();
         carriedPointsByCompetitorName.put(competitorName, carriedPoints);
     }
     
+    @Override
     public void setMaxPointsReason(String competitorName, RaceColumn raceColumn, MaxPointsReason maxPointsReason) {
         assertNoTrackedRaceAssociatedYet();
         Map<RaceColumn, MaxPointsReason> map = maxPointsReasonsByCompetitorName.get(competitorName);
@@ -97,6 +76,7 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
         map.put(raceColumn, maxPointsReason);
     }
 
+    @Override
     public void correctScore(String competitorName, RaceColumn raceColumn, int correctedScore) {
         assertNoTrackedRaceAssociatedYet();
         Map<RaceColumn, Integer> map = correctedScoresByCompetitorName.get(competitorName);
@@ -105,18 +85,6 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
             correctedScoresByCompetitorName.put(competitorName, map);
         }
         map.put(raceColumn, correctedScore);
-    }
-
-    /**
-     * Performs the regular {@link FlexibleLeaderboardImpl#addRace(TrackedRace, String, boolean)} and then checks if
-     * there are any carried points etc. left over to assign to the competitor objects (see
-     * {@link #assignLeftOvers(TrackedRace)}).
-     */
-    @Override
-    public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
-        RaceColumn result = super.addRace(race, columnName, medalRace, fleet);
-        assignLeftOvers(race);
-        return result;
     }
 
     /**
@@ -135,7 +103,7 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
         for (Iterator<Map.Entry<String, Integer>> carryEntryIter = carriedPointsByCompetitorName.entrySet().iterator(); carryEntryIter.hasNext(); ) {
             Map.Entry<String, Integer> carryEntry = carryEntryIter.next();
             if (competitorsByName.containsKey(carryEntry.getKey())) {
-                setCarriedPoints(competitorsByName.get(carryEntry.getKey()), carryEntry.getValue());
+                leaderboard.setCarriedPoints(competitorsByName.get(carryEntry.getKey()), carryEntry.getValue());
                 carryEntryIter.remove();
             }
         }
@@ -144,7 +112,7 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
             java.util.Map.Entry<String, Map<RaceColumn, MaxPointsReason>> maxPointsReasonEntries = maxPointsReasonsEntryIter.next();
             if (competitorsByName.containsKey(maxPointsReasonEntries.getKey())) {
                 for (Map.Entry<RaceColumn, MaxPointsReason> maxPointsReasonEntry : maxPointsReasonEntries.getValue().entrySet()) {
-                    getScoreCorrection().setMaxPointsReason(competitorsByName.get(maxPointsReasonEntries.getKey()),
+                    leaderboard.getScoreCorrection().setMaxPointsReason(competitorsByName.get(maxPointsReasonEntries.getKey()),
                             maxPointsReasonEntry.getKey(), maxPointsReasonEntry.getValue());
                 }
                 maxPointsReasonsEntryIter.remove();
@@ -155,7 +123,7 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
             java.util.Map.Entry<String, Map<RaceColumn, Integer>> correctedScoresEntries = correctedScoresEntryIter.next();
             if (competitorsByName.containsKey(correctedScoresEntries.getKey())) {
                 for (java.util.Map.Entry<RaceColumn, Integer> correctedScoreEntry : correctedScoresEntries.getValue().entrySet()) {
-                    getScoreCorrection().correctScore(competitorsByName.get(correctedScoresEntries.getKey()),
+                    leaderboard.getScoreCorrection().correctScore(competitorsByName.get(correctedScoresEntries.getKey()),
                             correctedScoreEntry.getKey(), correctedScoreEntry.getValue());
                 }
                 correctedScoresEntryIter.remove();
@@ -165,14 +133,24 @@ public class FlexibleLeaderboardImplWithDelayedCarriedPoints extends FlexibleLea
                 displayNamesByCompetitorName.entrySet().iterator(); displayNamesEntryIter.hasNext();) {
             java.util.Map.Entry<String, String> displayNamesEntry = displayNamesEntryIter.next();
             if (competitorsByName.containsKey(displayNamesEntry.getKey())) {
-                setDisplayName(competitorsByName.get(displayNamesEntry.getKey()), displayNamesEntry.getValue());
+                leaderboard.setDisplayName(competitorsByName.get(displayNamesEntry.getKey()), displayNamesEntry.getValue());
                 displayNamesEntryIter.remove();
             }
         }
     }
 
+    @Override
     public void setDisplayName(String competitorName, String displayName) {
         assertNoTrackedRaceAssociatedYet();
         displayNamesByCompetitorName.put(competitorName, displayName);
+    }
+
+    @Override
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        assignLeftOvers(trackedRace);
+    }
+
+    @Override
+    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
     }
 }

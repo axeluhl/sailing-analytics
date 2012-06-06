@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
@@ -18,7 +19,10 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be observed regarding
- * the columns belonging to the same regatta or even boat class.
+ * the columns belonging to the same regatta or even boat class.<p>
+ * 
+ * The flexible leaderboard listens as {@link RaceColumnListener} on all its {@link RaceColumn}s and forwards all events to
+ * all {@link RaceColumnListener}s subscribed with this leaderboard.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -64,6 +68,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             logger.severe(msg);
         } else {
             column = createRaceColumn(name, medalRace, fleets);
+            column.addRaceColumnListener(this);
             races.add(column);
         }
         return column;
@@ -87,7 +92,9 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
 
     @Override
     public void removeRaceColumn(String columnName) {
-        races.remove(getRaceColumnByName(columnName));
+        final FlexibleRaceColumn raceColumn = getRaceColumnByName(columnName);
+        races.remove(raceColumn);
+        raceColumn.removeRaceColumnListener(this);
     }
     
     @Override
@@ -100,9 +107,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         FlexibleRaceColumn column = getRaceColumnByName(columnName);
         if (column == null) {
             column = createRaceColumn(columnName, medalRace);
+            column.addRaceColumnListener(this);
             races.add(column);
         }
-        column.setTrackedRace(fleet, race);
+        column.setTrackedRace(fleet, race); // triggers listeners because this object was registered above as race column listener on the column
         return column;
     }
 
@@ -174,4 +182,5 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
             race.setIsMedalRace(isMedalRace);
         }
     }
+
 }

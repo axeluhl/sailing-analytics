@@ -46,10 +46,12 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
+import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
@@ -162,18 +164,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Leaderboard loadLeaderboard(DBObject o) {
+    private Leaderboard loadLeaderboard(DBObject dbLeaderboard) {
         SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
-        BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) o.get(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name());
+        BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name());
         int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
         int i=0;
         for (Object discardingThresholdAsObject : dbDiscardIndexResultsStartingWithHowManyRaces) {
             discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
         }
         ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
-        FlexibleLeaderboardImplWithDelayedCarriedPoints result = new FlexibleLeaderboardImplWithDelayedCarriedPoints(
-                (String) o.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
-        BasicDBList dbRaceColumns = (BasicDBList) o.get(FieldNames.LEADERBOARD_COLUMNS.name());
+        FlexibleLeaderboardImpl result = new FlexibleLeaderboardImpl(
+                (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
+        BasicDBList dbRaceColumns = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMNS.name());
         // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage them here:
         Map<String, Fleet> fleetsByName = new HashMap<String, Fleet>();
         for (Object dbRaceColumnAsObject : dbRaceColumns) {
@@ -209,39 +211,44 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
             }
         }
-        DBObject carriedPoints = (DBObject) o.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
+        DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
+        loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections);
+        return result;
+    }
+
+    private void loadLeaderboardCorrections(DBObject dbLeaderboard, DelayedLeaderboardCorrections correctionsToUpdate) {
+        DBObject carriedPoints = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
         if (carriedPoints != null) {
             for (String competitorName : carriedPoints.keySet()) {
                 Integer carriedPointsForCompetitor = (Integer) carriedPoints.get(competitorName);
                 if (carriedPointsForCompetitor != null) {
-                    result.setCarriedPoints(MongoUtils.unescapeDollarAndDot(competitorName), carriedPointsForCompetitor);
+                    correctionsToUpdate.setCarriedPoints(MongoUtils.unescapeDollarAndDot(competitorName), carriedPointsForCompetitor);
                 }
             }
         }
-        DBObject dbScoreCorrection = (DBObject) o.get(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name());
+        DBObject dbScoreCorrection = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name());
         for (String raceName : dbScoreCorrection.keySet()) {
             DBObject dbScoreCorrectionForRace = (DBObject) dbScoreCorrection.get(raceName);
             for (String competitorName : dbScoreCorrectionForRace.keySet()) {
-                RaceColumn raceColumn = result.getRaceColumnByName(raceName);
+                RaceColumn raceColumn = correctionsToUpdate.getLeaderboard().getRaceColumnByName(raceName);
                 DBObject dbScoreCorrectionForCompetitorInRace = (DBObject) dbScoreCorrectionForRace.get(competitorName);
                 if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())) {
-                    result.setMaxPointsReason(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, MaxPointsReason
+                    correctionsToUpdate.setMaxPointsReason(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, MaxPointsReason
                             .valueOf((String) dbScoreCorrectionForCompetitorInRace
                                     .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
                 }
                 if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
-                    result.correctScore(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, (Integer) dbScoreCorrectionForCompetitorInRace
+                    correctionsToUpdate.correctScore(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, (Integer) dbScoreCorrectionForCompetitorInRace
                                     .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name()));
                 }
             }
         }
-        DBObject competitorDisplayNames = (DBObject) o.get(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name());
+        DBObject competitorDisplayNames = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name());
         if (competitorDisplayNames != null) {
             for (String escapedCompetitorName : competitorDisplayNames.keySet()) {
-                result.setDisplayName(MongoUtils.unescapeDollarAndDot(escapedCompetitorName), (String) competitorDisplayNames.get(escapedCompetitorName));
+                correctionsToUpdate.setDisplayName(MongoUtils.unescapeDollarAndDot(escapedCompetitorName), (String) competitorDisplayNames.get(escapedCompetitorName));
             }
         }
-        return result;
     }
 
     /**

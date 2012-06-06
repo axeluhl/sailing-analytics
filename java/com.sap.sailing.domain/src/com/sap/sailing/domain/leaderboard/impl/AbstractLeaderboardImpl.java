@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,6 +15,7 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
@@ -25,7 +28,17 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public abstract class AbstractLeaderboardImpl implements Leaderboard {
+/**
+ * Abstract leaderboard implementation that already knows about carried points, competitor display name re-keying,
+ * score corrections and result discarding rules. It manages a set of registered {@link RaceColumnListener}s and
+ * is itself one. All events received this way are forwarded to all {@link RaceColumnListener}s subscribed. This can
+ * be used to subscribe a concrete leaderboard implementation to the data structure providing the actual race columns
+ * in order to be notified whenever the set of {@link TrackedRace}s attached to the leaderboard changes.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumnListener {
     private static final long serialVersionUID = -328091952760083438L;
 
     /**
@@ -51,6 +64,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
 
     private final Comparator<Integer> scoreComparator;
     
+    private transient Set<RaceColumnListener> raceColumnListeners;
+
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
      * 
@@ -110,6 +125,12 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
         this.scoreComparator = scoreComparator;
+        this.raceColumnListeners = new HashSet<RaceColumnListener>();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        raceColumnListeners = new HashSet<RaceColumnListener>();
     }
     
     @Override
@@ -406,4 +427,37 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard {
     protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) {
         return new LeaderboardTotalRankComparator(this, timePoint, scoreComparator);
     }
+
+    @Override
+    public void addRaceColumnListener(RaceColumnListener listener) {
+        raceColumnListeners.add(listener);
+    }
+
+    @Override
+    public void removeRaceColumnListener(RaceColumnListener listener) {
+        raceColumnListeners.remove(listener);
+    }
+    
+    @Override
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+    }
+
+    @Override
+    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+    }
+
+    private void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        for (RaceColumnListener listener : raceColumnListeners) {
+            listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
+        }
+    }
+
+    private void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        for (RaceColumnListener listener : raceColumnListeners) {
+            listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        }
+    }
+
 }

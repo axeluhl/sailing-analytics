@@ -1,25 +1,33 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
+import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
-public class SeriesImpl extends NamedImpl implements Series {
+public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener {
     private static final long serialVersionUID = -1640404303144907381L;
     private final Map<String, Fleet> fleetsByName;
     private final List<Fleet> fleetsInAscendingOrder;
     private final List<RaceColumnInSeries> raceColumns;
     private boolean isMedal;
     private Regatta regatta;
+    private transient Set<RaceColumnListener> listeners;
     
     public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
             TrackedRegattaRegistry trackedRegattaRegistry) {
@@ -32,11 +40,38 @@ public class SeriesImpl extends NamedImpl implements Series {
         Collections.sort(fleetsInAscendingOrder);
         List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
         for (String raceColumnName : raceColumnNames) {
-            RaceColumnInSeriesImpl raceColumn = new RaceColumnInSeriesImpl(raceColumnName, this, trackedRegattaRegistry);
-            myRaceColumns.add(raceColumn);
+            addRaceColumn(raceColumnName, trackedRegattaRegistry);
         }
         this.raceColumns = myRaceColumns;
         this.isMedal = isMedal;
+        this.listeners = new HashSet<RaceColumnListener>();
+    }
+
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        listeners = new HashSet<RaceColumnListener>();
+    }
+    
+    @Override
+    public void addRaceColumnListener(RaceColumnListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeRaceColumnListener(RaceColumnListener listener) {
+        listeners.remove(listener);
+    }
+    
+    private void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        for (RaceColumnListener listener : listeners) {
+            listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
+        }
+    }
+
+    private void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        for (RaceColumnListener listener : listeners) {
+            listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        }
     }
 
     @Override
@@ -65,8 +100,14 @@ public class SeriesImpl extends NamedImpl implements Series {
     
     @Override
     public RaceColumnInSeries addRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
-        final RaceColumnInSeriesImpl result = new RaceColumnInSeriesImpl(raceColumnName, this, trackedRegattaRegistry);
+        final RaceColumnInSeriesImpl result = createRaceColumn(raceColumnName, trackedRegattaRegistry);
+        result.addRaceColumnListener(this);
         raceColumns.add(result);
+        return result;
+    }
+
+    private RaceColumnInSeriesImpl createRaceColumn(String raceColumnName, TrackedRegattaRegistry trackedRegattaRegistry) {
+        RaceColumnInSeriesImpl result = new RaceColumnInSeriesImpl(raceColumnName, this, trackedRegattaRegistry);
         return result;
     }
 
@@ -101,6 +142,7 @@ public class SeriesImpl extends NamedImpl implements Series {
         RaceColumnInSeries rc = getRaceColumnByName(raceColumnName);
         if (rc != null) {
             raceColumns.remove(rc);
+            rc.removeRaceColumnListener(this);
         }
     }
 
@@ -123,4 +165,16 @@ public class SeriesImpl extends NamedImpl implements Series {
     public void setIsMedal(boolean isMedal) {
         this.isMedal = isMedal;
     }
+
+    @Override
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+        
+    }
+
+    @Override
+    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+    }
+
 }
