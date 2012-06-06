@@ -164,7 +164,7 @@ public class SimulatorTest {
         wf.setPositionGrid(b.extractGrid(5, 5));
         TimePoint start = new MillisecondsTimePoint(0);
         TimePoint timeStep = new MillisecondsTimePoint(30*1000);
-        wf.generate(start,null,timeStep);
+        wf.generate(start,start,timeStep);
 
         PolarDiagram pd = new PolarDiagramImpl(1);
         List<Position> course = new ArrayList<Position>();
@@ -181,7 +181,7 @@ public class SimulatorTest {
             // Wind wind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
         }
 
-        assertEquals("Number of path points", 88, pth.getPathPoints().size());
+        assertEquals("Number of path points", 47, pth.getPathPoints().size());
         
     }
     

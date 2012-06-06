@@ -31,6 +31,11 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     private double blastBearingVar = 8;
     private double defaultWindSpeed = 0.0;
     private double defaultWindBearing = 0.0;
+    /**
+     * Number of time units before we cycle through the gusts
+     */
+    public final int defaultTimeUnits = 20;
+    private int timeUnits;
     
     public WindFieldGeneratorBlastImpl(Boundary boundary, WindControlParameters windParameters) {
         super(boundary, windParameters); 
@@ -51,9 +56,15 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
 
         int nrow = positions.length;
         int ncol = positions[0].length;
-        speedWithBearing = new KnotSpeedWithBearingImpl[nrow][ncol];
+        
+        timeUnits = nrow + defaultTimeUnits;
+        if (startTime!= null && endTime != null) {
+            timeUnits = (int) ((endTime.asMillis() - startTime.asMillis())/timeStep.asMillis()) + nrow;
+            logger.info("Generating blasts for " + timeUnits + " rows & " + ncol + " columns");
+        }
+        speedWithBearing = new KnotSpeedWithBearingImpl[timeUnits][ncol];
 
-        for (int i = 0; i < nrow; ++i) {
+        for (int i = 0; i < timeUnits; ++i) {
             for (int j = 0; j < ncol; ++j) {
                 if (isBlastSeed()) {
                     double blastSpeed = getBlastSpeed();
@@ -76,8 +87,8 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
         }
         
         int blastSize = (int) Math.min(getBlastSize(), windParameters.maxBlastSize);
-        logger.info("Blast Size:"+ blastSize);
-        int nrow = positions.length;
+        logger.fine("Blast Size:"+ blastSize);
+        int nrow = timeUnits;
         int ncol = positions[0].length;
         int hSpanStart = Math.max(0, colIndex-blastSize/2);
         int hSpanEnd =  Math.min(colIndex+blastSize-blastSize/2, ncol-1);
@@ -152,7 +163,11 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
         if (positionIndex != null) {
             int rowIndex = positionIndex.getA();
             int colIndex = positionIndex.getB();
-            return speedWithBearing[rowIndex][colIndex];
+            int timeIndex = 0;
+            if (timedPosition.getTimePoint() != null) {
+                timeIndex = getTimeIndex(timedPosition.getTimePoint());
+            }
+            return speedWithBearing[(rowIndex+timeIndex) % timeUnits][colIndex];
         } else {
             logger.severe("Error finding position " + p);
         }
