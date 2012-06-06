@@ -2,12 +2,8 @@ package com.sap.sailing.simulator.test;
 
 import static org.junit.Assert.*;
 import java.util.NavigableMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -171,10 +167,11 @@ public class PolarDiagram49Test {
     	gybeSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(9.38));
     	
     	PolarDiagram polarDiagram = new PolarDiagram49(table, beatAngles, gybeAngles, beatSOG, gybeSOG);
-    	SpeedWithBearing newWind = new KnotSpeedWithBearingImpl(7, new DegreeBearingImpl(180));
+    	SpeedWithBearing newWind = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
     	polarDiagram.setWind(newWind);
     	
-    	System.out.println(polarDiagram.getSpeedAtBearing(new DegreeBearingImpl(41.8)));
+    	System.out.println(polarDiagram.getSpeedAtBearing(new DegreeBearingImpl(52)));
+    	//for (Bearing b: polarDiagram.optimalDirectionsUpwind()) System.out.println(b);
     	
     	assertEquals("no test",1,1);
     	
