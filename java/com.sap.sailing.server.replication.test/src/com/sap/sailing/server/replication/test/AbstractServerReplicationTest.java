@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,6 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -50,6 +52,12 @@ public abstract class AbstractServerReplicationTest {
      */
     @Before
     public void setUp() throws Exception {
+        Pair<ReplicationService, ReplicationMasterDescriptor> result = basicSetUp();
+        result.getA().startToReplicateFrom(result.getB());
+    }
+
+    protected Pair<ReplicationService, ReplicationMasterDescriptor> basicSetUp() throws FileNotFoundException, Exception,
+            JMSException, UnknownHostException {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         mongoDBService.getDB().dropDatabase();
         resolveAgainst = DomainFactory.INSTANCE;
@@ -103,7 +111,8 @@ public abstract class AbstractServerReplicationTest {
             }
         };
         ReplicationService replicaReplicator = new ReplicationServiceTestImpl(resolveAgainst, rim, brokerMgr, replicaDescriptor, replica, master, masterReplicator);
-        replicaReplicator.startToReplicateFrom(masterDescriptor);
+        Pair<ReplicationService, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
+        return result;
     }
 
     @After

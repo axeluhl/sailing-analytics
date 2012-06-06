@@ -23,7 +23,9 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * This object registers itself as a {@link RaceColumnListener} on the {@link Leaderboard} at construction time. It
  * therefore receives all updates to the linking structure between the leaderboard's {@link RaceColumn}s and the
  * {@link TrackedRace}s associated with them and can react accordingly to assign left-over corrections to the
- * correct, resolved competitor objects (see {@link #trackedRaceLinked(RaceColumn, Fleet, TrackedRace)}).
+ * correct, resolved competitor objects (see {@link #trackedRaceLinked(RaceColumn, Fleet, TrackedRace)}). When
+ * all left-overs have been applied to the leaderboard, this object removes itself as {@link RaceColumnListener} from
+ * the leaderboard again.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -135,6 +137,14 @@ public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorr
                 leaderboard.setDisplayName(competitorsByName.get(displayNamesEntry.getKey()), displayNamesEntry.getValue());
                 displayNamesEntryIter.remove();
             }
+        }
+        removeAsListenerIfNoLeftOvers();
+    }
+
+    private void removeAsListenerIfNoLeftOvers() {
+        if (carriedPointsByCompetitorName.isEmpty() && maxPointsReasonsByCompetitorName.isEmpty() &&
+                correctedScoresByCompetitorName.isEmpty() && displayNamesByCompetitorName.isEmpty()) {
+            getLeaderboard().removeRaceColumnListener(this);
         }
     }
 
