@@ -17,6 +17,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
@@ -29,9 +30,15 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private Regatta regatta;
     private transient Set<RaceColumnListener> listeners;
     
+    /**
+     * @param fleets must be non-empty
+     */
     public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
             TrackedRegattaRegistry trackedRegattaRegistry) {
         super(name);
+        if (fleets == null || Util.isEmpty(fleets)) {
+            throw new IllegalArgumentException("Series must have at least one fleet");
+        }
         this.fleetsByName = new HashMap<String, Fleet>();
         for (Fleet fleet : fleets) {
             this.fleetsByName.put(fleet.getName(), fleet);

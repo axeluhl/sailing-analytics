@@ -172,7 +172,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     /**
      * If the DBObject has a field {@link FieldNames#REGATTA_NAME} then the object represents a {@link RegattaLeaderboard}. Otherwise,
      * a {@link FlexibleLeaderboard} will be loaded.
-     * @param regattaRegistry TODO
      */
     private Leaderboard loadLeaderboard(DBObject dbLeaderboard, RegattaRegistry regattaRegistry) {
         SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
@@ -199,7 +198,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             ThresholdBasedResultDiscardingRule resultDiscardingRule, RegattaRegistry regattaRegistry) {
         Regatta regatta = regattaRegistry.getRegatta(new RegattaName(regattaName));
         RegattaLeaderboard result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
-        
         return result;
     }
 

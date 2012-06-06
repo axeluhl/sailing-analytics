@@ -99,9 +99,9 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                         new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter()),
                 new FlexibleLeaderboardImpl(ungroupedLeaderboardNames[2], new ScoreCorrectionImpl(),
                         new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter()) };
-        mongoObjectFactory.storeFlexibleLeaderboard(ungroupedLeaderboards[0]);
-        mongoObjectFactory.storeFlexibleLeaderboard(ungroupedLeaderboards[1]);
-        mongoObjectFactory.storeFlexibleLeaderboard(ungroupedLeaderboards[2]);
+        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[0]);
+        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[1]);
+        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[2]);
         
         Iterable<Leaderboard> loadedUngroupedLeaderboards = domainObjectFactory.getLeaderboardsNotInGroup(/* regattaRegistry */ null);
         
@@ -155,7 +155,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final String regattaName = "Event";
         final String raceName = "Race";
         leaderboard.getRaceColumnByName(columnName).setRaceIdentifier(fleet, new RegattaNameAndRaceName(regattaName, raceName));
-        mongoObjectFactory.storeFlexibleLeaderboard(leaderboard);
+        mongoObjectFactory.storeLeaderboard(leaderboard);
         
         //Check if the leaderboard updated correctly
         final Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboard.getName(), /* regattaRegistry */ null);

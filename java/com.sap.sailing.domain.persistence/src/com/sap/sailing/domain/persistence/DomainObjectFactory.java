@@ -30,19 +30,16 @@ public interface DomainObjectFactory {
     RaceIdentifier loadRaceIdentifier(DBObject dbObject);
     
     /**
-     * @param regattaRegistry TODO
      * @return The group with the name <code>name</code>, or <code>null</code> if no such group exists.
      */
     LeaderboardGroup loadLeaderboardGroup(String name, RegattaRegistry regattaRegistry);
     
     /**
-     * @param regattaRegistry TODO
      * @return All groups in the database.
      */
     Iterable<LeaderboardGroup> getAllLeaderboardGroups(RegattaRegistry regattaRegistry);
     
     /**
-     * @param regattaRegistry TODO
      * @return All leaderboards in the database, which aren't contained by a leaderboard group
      */
     Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry);

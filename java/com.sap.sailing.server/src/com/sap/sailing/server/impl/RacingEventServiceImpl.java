@@ -243,7 +243,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
             leaderboardsByName.put(name, result);
         }
-        mongoObjectFactory.storeFlexibleLeaderboard(result);
+        mongoObjectFactory.storeLeaderboard(result);
         return result;
     }
     
@@ -260,7 +260,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 }
                 leaderboardsByName.put(result.getName(), result);
             }
-            mongoObjectFactory.storeRegattaLeaderboard(result);
+            mongoObjectFactory.storeLeaderboard(result);
         } else {
             logger.warning("Cannot find regatta "+regattaIdentifier+". Hence, cannot create regatta leaderboard for it.");
         }
@@ -346,13 +346,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     @Override
     public void updateStoredFlexibleLeaderboard(FlexibleLeaderboard leaderboard) {
-        mongoObjectFactory.storeFlexibleLeaderboard(leaderboard);
+        mongoObjectFactory.storeLeaderboard(leaderboard);
         syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
     
     @Override
     public void updateStoredRegattaLeaderboard(RegattaLeaderboard leaderboard) {
-        mongoObjectFactory.storeRegattaLeaderboard(leaderboard);
+        mongoObjectFactory.storeLeaderboard(leaderboard);
         syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
 

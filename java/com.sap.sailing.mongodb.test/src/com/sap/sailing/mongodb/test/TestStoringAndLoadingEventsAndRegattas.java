@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -31,9 +32,13 @@ import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest {
     @Test
@@ -64,6 +69,30 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         }
     }
 
+    @Test
+    public void testLoadStoreSimpleRegattaLeaderboard() {
+        RacingEventService res = new RacingEventServiceImpl(getMongoService());
+        final int numberOfQualifyingRaces = 5;
+        final int numberOfFinalRaces = 7;
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        Regatta regattaProxy = createRegatta(numberOfQualifyingRaces, numberOfFinalRaces, regattaBaseName, boatClass);
+        Regatta regatta = res.createRegatta(regattaProxy.getBaseName(), regattaProxy.getBoatClass().getName(),
+                regattaProxy.getSeries(), regattaProxy.isPersistent());
+        res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
+        DomainObjectFactory dof = MongoFactory.INSTANCE.getDomainObjectFactory(getMongoService());
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
+        assertNotNull(loadedRegatta);
+        assertEquals(regatta.getName(), loadedRegatta.getName());
+        assertEquals(Util.size(regatta.getSeries()), Util.size(loadedRegatta.getSeries()));
+        
+        Leaderboard loadedLeaderboard = dof.loadLeaderboard(regatta.getName(), res);
+        assertNotNull(loadedLeaderboard);
+        assertTrue(loadedLeaderboard instanceof RegattaLeaderboard);
+        RegattaLeaderboard loadedRegattaLeaderboard = (RegattaLeaderboard) loadedLeaderboard;
+        assertSame(regatta, loadedRegattaLeaderboard.getRegatta());
+    }
+    
     @Test
     public void testLoadStoreSimpleRegatta() {
         final int numberOfQualifyingRaces = 5;
