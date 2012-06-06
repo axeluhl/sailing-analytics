@@ -40,5 +40,11 @@ public enum CollectionNames {
      * Stores boat class-specific master data such as the class's hull length, logo, name, number of sailors, etc.
      * To be implemented in future versions.
      */
-    BOAT_CLASSES;
+    BOAT_CLASSES,
+    
+    /**
+     * Stores the mapping of {@link RaceDefinition#getId race IDs} to regatta names for automatic re-association
+     * when tracking races again without explicitly specifying a regatta.
+     */
+    REGATTA_FOR_RACE_ID;
 }

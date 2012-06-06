@@ -178,6 +178,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
             // domain regatta *after* calling removeRace
             domainFactory.removeRace(tractracEvent, tractracRace, trackedRegattaRegistry);
         }
+        // TODO bug 733: use trackedRegattaRegistry to obtain a regatta using the race ID
         this.regatta = regatta == null ? domainFactory.getOrCreateRegatta(tractracEvent, trackedRegattaRegistry) : regatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();

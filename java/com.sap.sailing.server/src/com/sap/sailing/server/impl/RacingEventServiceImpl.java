@@ -40,6 +40,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -167,6 +168,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final Map<Regatta, DynamicTrackedRegatta> regattaTrackingCache;
     
     private final Set<OperationExecutionListener> operationExecutionListeners;
+    
+    /**
+     * Keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
+     * {@link #setRegattaForRace(Regatta, RaceDefinition)}.
+     */
+    private final Map<String, Regatta> persistentRegattasForRaceIDs;
 
     /**
      * The globally used configuration of the time delay (in milliseconds) to the 'live' timepoint used for each new tracked race.  
@@ -194,11 +201,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         leaderboardsByName = new HashMap<String, Leaderboard>();
         operationExecutionListeners = new HashSet<OperationExecutionListener>();
         courseListeners = new HashMap<RaceDefinition, CourseChangeReplicator>();
+        persistentRegattasForRaceIDs = new HashMap<String, Regatta>();
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
         loadStoredRegattas();
+        loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
         loadStoredEvents();
     }
@@ -207,6 +216,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE.getMongoObjectFactory(mongoDBService));
     }
 
+    private void loadRaceIDToRegattaAssociations() {
+        persistentRegattasForRaceIDs.putAll(domainObjectFactory.loadRaceIDToRegattaAssociations(this));
+    }
+    
     private void loadStoredRegattas() {
         for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
             regattasByName.put(regatta.getName(), regatta);
@@ -645,15 +658,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
     }
     
-    private Map<String, Pair<List<Pair<String, Integer>>, Boolean>> getSeriesWithoutRaceColumnsConstructionParametersAsMap(Regatta regatta) {
-        Map<String, Pair<List<Pair<String, Integer>>, Boolean>> result = new HashMap<String, Pair<List<Pair<String, Integer>>, Boolean>>();
+    private Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> getSeriesWithoutRaceColumnsConstructionParametersAsMap(Regatta regatta) {
+        Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> result = new HashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>>();
         for (Series s : regatta.getSeries()) {
             assert Util.isEmpty(s.getRaceColumns());
-            List<Pair<String, Integer>> fleetNamesAndOrdering = new ArrayList<Pair<String, Integer>>();
+            List<Triple<String, Integer, Color>> fleetNamesAndOrdering = new ArrayList<Triple<String, Integer, Color>>();
             for (Fleet f : s.getFleets()) {
-                fleetNamesAndOrdering.add(new Pair<String, Integer>(f.getName(), f.getOrdering()));
+                fleetNamesAndOrdering.add(new Triple<String, Integer, Color>(f.getName(), f.getOrdering(), f.getColor()));
             }
-            result.put(s.getName(), new Pair<List<Pair<String, Integer>>, Boolean>(fleetNamesAndOrdering, s.isMedal()));
+            result.put(s.getName(), new Pair<List<Triple<String, Integer, Color>>, Boolean>(fleetNamesAndOrdering, s.isMedal()));
         }
         return result;
     }
@@ -1358,6 +1371,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
         mongoObjectFactory.storeEvent(result);
         return result;
+    }
+
+    @Override
+    public Regatta getOrCreateRegattaForRace(RaceDefinition race) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setRegattaForRace(Regatta regatta, RaceDefinition race) {
+        persistentRegattasForRaceIDs.put(race.getId().toString(), regatta);
+        mongoObjectFactory.storeRegattaForRaceID(race.getId().toString(), regatta);
     }
 
 }

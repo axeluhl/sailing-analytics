@@ -6,12 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -22,9 +26,11 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -53,7 +59,7 @@ public class EventStructureManagementPanel extends SimplePanel {
 
     private Label eventVenueLabel;
     private CellTable<RegattaDTO> regattaTable;
-    private MultiSelectionModel<RegattaDTO> regattaSelectionModel;
+    private SingleSelectionModel<RegattaDTO> regattaSelectionModel;
     private ListDataProvider<RegattaDTO> regattaProvider;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -123,28 +129,75 @@ public class EventStructureManagementPanel extends SimplePanel {
             }
         };
 
-        TextColumn<RegattaDTO> regattaSeriesColumn = new TextColumn<RegattaDTO>() {
+        TextColumn<RegattaDTO> regattaBoatClassColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
-                String result = "";
-                boolean first = true;
+                return regatta.boatClass.name;
+            }
+        };
+
+        final SafeHtmlCell seriesCell = new SafeHtmlCell();
+        Column<RegattaDTO, SafeHtml> regattaSeriesColumn = new Column<RegattaDTO, SafeHtml>(seriesCell) {
+            @Override
+            public SafeHtml getValue(RegattaDTO regatta) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+
+                int seriesCount = regatta.series.size();
+                int i = 1;
                 for (SeriesDTO serie : regatta.series) {
-                    if (!first) {
-                        result += "; ";
+                    builder.appendEscaped(i + ". " + serie.name);
+                    if(serie.isMedal()) {
+                        builder.appendEscaped(" (" + stringMessages.medalSeries() + ")");
                     }
-                    result += serie.name;
-                    first = false;
+                    if(i < seriesCount) {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    i++;
                 }
-                return result;
+                return builder.toSafeHtml();
+            }
+        };
+
+        final SafeHtmlCell fleetsCell = new SafeHtmlCell();
+        Column<RegattaDTO, SafeHtml> regattaFleetsColumn = new Column<RegattaDTO, SafeHtml>(fleetsCell) {
+            @Override
+            public SafeHtml getValue(RegattaDTO regatta) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+
+                int seriesCount = regatta.series.size();
+                int i = 1;
+                for (SeriesDTO serie : regatta.series) {
+                    int fleetsCount = serie.getFleets().size();
+                    int j = 1;
+                    for(FleetDTO fleet: serie.getFleets()) {
+                        builder.appendEscaped(j + ". " + fleet.name);
+                        builder.appendEscaped(" (" + fleet.getOrderNo() + ") ");
+                        if(fleet.getColor() != null) {
+                            builder.appendEscaped(" color: " + fleet.getColor().getAsHtml());
+                        } else {
+                        }
+                        if(j < fleetsCount) {
+                            builder.appendEscaped(", ");
+                        }
+                        j++;
+                    }
+                    if(i < seriesCount) {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    i++;
+                }
+                return builder.toSafeHtml();
             }
         };
 
         regattaTable = new CellTable<RegattaDTO>(200, tableRes);
         regattaTable.setWidth("100%");
         regattaTable.addColumn(regattaNameColumn, stringMessages.regattaName());
-        regattaTable.addColumn(regattaSeriesColumn, stringMessages.name());
-
-        regattaSelectionModel = new MultiSelectionModel<RegattaDTO>();
+        regattaTable.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
+        regattaTable.addColumn(regattaSeriesColumn, stringMessages.series());
+        regattaTable.addColumn(regattaFleetsColumn, stringMessages.fleets());
+        
+        regattaSelectionModel = new SingleSelectionModel<RegattaDTO>();
         regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -197,7 +250,7 @@ public class EventStructureManagementPanel extends SimplePanel {
     }
 
     private void openCreateRegattaDialog() {
-        RegattaWithSeriesAndGroupsCreateDialog dialog = new RegattaWithSeriesAndGroupsCreateDialog(Collections.unmodifiableCollection(selectedEvent.regattas), stringMessages,
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(Collections.unmodifiableCollection(selectedEvent.regattas), stringMessages,
                 new AsyncCallback<RegattaDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -215,6 +268,21 @@ public class EventStructureManagementPanel extends SimplePanel {
         if (selectedEvent != null) {
             eventDetailsCaptionPanel.setCaptionText(selectedEvent.name);
             eventVenueLabel.setText(stringMessages.venue() + ": " + selectedEvent.venue.name);
+            
+            // load the regattas for this event
+            sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
+                @Override
+                public void onFailure(Throwable t) {
+                    errorReporter.reportError("Error trying to read regattas of event " + selectedEvent.name + ": " + t.getMessage());
+                }
+
+                @Override
+                public void onSuccess(List<RegattaDTO> regattas) {
+                    regattaProvider.getList().clear();
+                    regattaProvider.getList().addAll(regattas);
+                }
+            });
+
         }
     }
 
@@ -236,24 +304,25 @@ public class EventStructureManagementPanel extends SimplePanel {
     }
 
     private void createNewRegatta(final RegattaDTO newRegatta) {
-        Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesStructure = new HashMap<String, Pair<List<Pair<String, Integer>>, Boolean>>();
+        Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesStructure = new HashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>>();
         for(SeriesDTO seriesDTO : newRegatta.series) {
-            List<Pair<String, Integer>> fleets = new ArrayList<Pair<String, Integer>>();
+            List<Triple<String, Integer, Color>> fleets = new ArrayList<Triple<String, Integer, Color>>();
             for(FleetDTO fleetDTO : seriesDTO.getFleets()) {
-                Pair<String, Integer> fleetPair = new Pair<String, Integer>(fleetDTO.name, fleetDTO.getOrderNo());
-                fleets.add(fleetPair);
+                Triple<String, Integer, Color> fleetTriple = new Triple<String, Integer, Color>(fleetDTO.name, fleetDTO.getOrderNo(), fleetDTO.getColor());
+                fleets.add(fleetTriple);
             }
-            Pair<List<Pair<String, Integer>>, Boolean> seriesPair = new Pair<List<Pair<String, Integer>>, Boolean>(fleets, seriesDTO.isMedal());
+            Pair<List<Triple<String, Integer, Color>>, Boolean> seriesPair = new Pair<List<Triple<String, Integer, Color>>, Boolean>(fleets, seriesDTO.isMedal());
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
-        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true, new AsyncCallback<Void>() {
+        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());
             }
 
             @Override
-            public void onSuccess(Void nothing) {
+            public void onSuccess(RegattaDTO regatta) {
+                regattaProvider.getList().add(regatta);
             }
         });
     }

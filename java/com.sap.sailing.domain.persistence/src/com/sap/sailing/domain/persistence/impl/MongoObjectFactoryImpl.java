@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -360,8 +361,24 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbFleet = new BasicDBObject(FieldNames.FLEET_NAME.name(), fleet.getName());
         if (fleet instanceof FleetImpl) {
             dbFleet.put(FieldNames.FLEET_ORDERING.name(), ((FleetImpl) fleet).getOrdering());
+            if(fleet.getColor() != null) {
+                Triple<Integer, Integer, Integer> colorAsRGB = fleet.getColor().getAsRGB();
+                // we save the color as a integer value representing the RGB values
+                int colorAsInt = (256 * 256 * colorAsRGB.getC()) + colorAsRGB.getB() * 256 + colorAsRGB.getA(); 
+                dbFleet.put(FieldNames.FLEET_COLOR.name(), colorAsInt);
+            } else {
+                dbFleet.put(FieldNames.FLEET_COLOR.name(), null);
+            }
         }
         return dbFleet;
     }
 
+    @Override
+    public void storeRegattaForRaceID(String raceIDAsString, Regatta regatta) {
+        DBCollection regattaForRaceIDCollection = database.getCollection(CollectionNames.REGATTA_FOR_RACE_ID.name());
+        DBObject query = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
+        DBObject entry = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
+        entry.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
+        regattaForRaceIDCollection.update(query, entry);
+    }
 }

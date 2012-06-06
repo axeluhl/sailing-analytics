@@ -71,9 +71,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
                 regatta.removeRace(race);
                 getRegatta().addRace(race);
                 trackedRegatta.removeTrackedRace(trackedRace);
+                // FIXME adding the tracked race to the tracked regatta triggers the RacingEventService which tries to re-associate with existing leaderboards; leads to an endless recursion
                 trackedRegattaRegistry.getOrCreateTrackedRegatta(getRegatta()).addTrackedRace(trackedRace);
             }
         }
+        // re-associating the TrackedRace needs to happen before the super call because the RaceIdentifier may have changed
         super.setTrackedRace(fleet, trackedRace);
     }
 

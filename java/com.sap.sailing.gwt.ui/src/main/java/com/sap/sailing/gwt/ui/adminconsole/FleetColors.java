@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.RGBColor;
 
-public enum GroupColors {
+public enum FleetColors {
     GOLD (255, 215, 0), 
     SILVER (201, 192, 187),
     BRONZE (205, 127, 50), 
@@ -15,7 +15,7 @@ public enum GroupColors {
     
     private Color color;
     
-    GroupColors(int red, int green, int blue) {
+    FleetColors(int red, int green, int blue) {
         color = new RGBColor(red, green, blue);
     }
 

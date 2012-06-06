@@ -15,6 +15,7 @@ public class SeriesDTO extends NamedDTO implements IsSerializable {
         super(name);
         this.fleets = fleets;
         this.raceColumnNames = raceColumnNames;
+        this.isMedal = isMedal;
     }
     
     /**
