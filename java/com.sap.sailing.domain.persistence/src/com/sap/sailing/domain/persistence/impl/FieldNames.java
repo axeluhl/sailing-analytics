@@ -20,6 +20,7 @@ public enum FieldNames {
     SERIES_RACE_COLUMNS,
     FLEET_NAME,
     FLEET_ORDERING,
+    FLEET_COLOR,
     
     RACE_NAME,
     

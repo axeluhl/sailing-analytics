@@ -40,6 +40,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -657,15 +658,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
     }
     
-    private Map<String, Pair<List<Pair<String, Integer>>, Boolean>> getSeriesWithoutRaceColumnsConstructionParametersAsMap(Regatta regatta) {
-        Map<String, Pair<List<Pair<String, Integer>>, Boolean>> result = new HashMap<String, Pair<List<Pair<String, Integer>>, Boolean>>();
+    private Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> getSeriesWithoutRaceColumnsConstructionParametersAsMap(Regatta regatta) {
+        Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> result = new HashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>>();
         for (Series s : regatta.getSeries()) {
             assert Util.isEmpty(s.getRaceColumns());
-            List<Pair<String, Integer>> fleetNamesAndOrdering = new ArrayList<Pair<String, Integer>>();
+            List<Triple<String, Integer, Color>> fleetNamesAndOrdering = new ArrayList<Triple<String, Integer, Color>>();
             for (Fleet f : s.getFleets()) {
-                fleetNamesAndOrdering.add(new Pair<String, Integer>(f.getName(), f.getOrdering()));
+                fleetNamesAndOrdering.add(new Triple<String, Integer, Color>(f.getName(), f.getOrdering(), f.getColor()));
             }
-            result.put(s.getName(), new Pair<List<Pair<String, Integer>>, Boolean>(fleetNamesAndOrdering, s.isMedal()));
+            result.put(s.getName(), new Pair<List<Triple<String, Integer, Color>>, Boolean>(fleetNamesAndOrdering, s.isMedal()));
         }
         return result;
     }

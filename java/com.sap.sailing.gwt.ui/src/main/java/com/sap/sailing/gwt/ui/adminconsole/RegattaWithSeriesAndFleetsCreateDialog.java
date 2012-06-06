@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
-public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<RegattaDTO> {
+public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<RegattaDTO> {
 
     private StringMessages stringConstants;
     private RegattaDTO regatta;
@@ -104,7 +104,7 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
 
     }
 
-    public RegattaWithSeriesAndGroupsCreateDialog(Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
+    public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
             AsyncCallback<RegattaDTO> callback) {
         super(stringConstants.regatta(), null, stringConstants.ok(), stringConstants.cancel(),  
                 new RegattaParameterValidator(stringConstants, existingRegattas), callback);
@@ -156,7 +156,7 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
             public void onClick(ClickEvent event) {
                 RegattaDTO result = getResult();
                 
-                SeriesWithGroupsCreateDialog dialog = new SeriesWithGroupsCreateDialog(Collections.unmodifiableCollection(result.series), stringConstants,
+                SeriesWithFleetsCreateDialog dialog = new SeriesWithFleetsCreateDialog(Collections.unmodifiableCollection(result.series), stringConstants,
                         new AsyncCallback<SeriesDTO>() {
                             @Override
                             public void onFailure(Throwable t) {
@@ -192,9 +192,9 @@ public class RegattaWithSeriesAndGroupsCreateDialog extends DataEntryDialog<Rega
             seriesGrid.setWidget(i*2, 0, seriesLabel);
             seriesGrid.setHTML(i*2, 1, seriesDTO.name);
             if(seriesDTO.getFleets() != null && seriesDTO.getFleets().size() > 0) {
-                seriesGrid.setHTML(i*2+1, 1, seriesDTO.getFleets().size() + " groups: " + seriesDTO.getFleets().toString());
+                seriesGrid.setHTML(i*2+1, 1, seriesDTO.getFleets().size() + " fleets: " + seriesDTO.getFleets().toString());
             } else {
-                seriesGrid.setHTML(i*2+1, 1, seriesDTO.getFleets().size() + " No groups defined.");
+                seriesGrid.setHTML(i*2+1, 1, seriesDTO.getFleets().size() + " No fleets defined.");
             }
         }
 
