@@ -18,6 +18,7 @@ import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -33,7 +34,7 @@ import com.sap.sailing.gwt.ui.simulator.util.WindFieldMapMouseMoveHandler;
  * @author Nidhi Sawhney(D054070)
  * 
  */
-public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeListener {
+public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
 
     /* The wind field that is to be displayed in the overlay */
     protected WindFieldDTO wl;
@@ -105,10 +106,12 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         if (timer != null) {
             this.timer.addTimeListener(this);
         }
+        setVisible(true);
     }
 
     @Override
     protected void remove() {
+        setVisible(false);
         getMap().removeMapMouseMoveHandler(mmHandler);
         if (timer != null) {
             this.timer.removeTimeListener(this);
@@ -218,15 +221,9 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     @Override
     public void timeChanged(Date date) {
-        // canvas.getContext2d().clearRect(canvas.getAbsoluteLeft(), canvas.getAbsoluteTop(),
-        // canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+       
         List<WindDTO> windDTOToDraw = new ArrayList<WindDTO>();
-      /*  for (WindDTO windDTO : wl.getMatrix()) {
-            if (windDTO.timepoint.equals(date.getTime())) {
-                windDTOToDraw.add(windDTO);
-            }
-        }
-        */
+     
         SortedMap<Long, List<WindDTO>> headMap = (timePointWindDTOMap.headMap(date.getTime()+1));
     
         if (!headMap.isEmpty()) {
@@ -234,11 +231,20 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         }
         logger.info("In WindFieldCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points" + " @ "
                 + date);
-        //if (windDTOToDraw.size() == 0) {
-        if (timePointWindDTOMap.lastKey() < date.getTime()) {   
-            timer.stop();
+        
+        drawWindField(windDTOToDraw);
+        
+    }
+
+    @Override
+    public int stop() {
+       if (!this.isVisible() || timePointWindDTOMap == null || timer == null) {
+           return 0;
+       }
+        if (timePointWindDTOMap.lastKey() < timer.getTime().getTime()) {
+            return 0;
         } else {
-            drawWindField(windDTOToDraw);
+            return 1;
         }
     }
 

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -20,6 +21,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -28,7 +30,7 @@ import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 
-public class SimulatorMap extends AbsolutePanel implements RequiresDataInitialization {
+public class SimulatorMap extends AbsolutePanel implements RequiresDataInitialization, TimeListenerWithStoppingCriteria {
 
     private MapWidget mapw;
     private boolean dataInitialized;
@@ -38,7 +40,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private PathCanvasOverlay pathCanvasOverlay;
     private ReplayPathCanvasOverlay replayPathCanvasOverlay;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
-
+    
+    private List<TimeListenerWithStoppingCriteria> timeListeners;
+    
     private final SimulatorServiceAsync simulatorSvc;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
@@ -62,7 +66,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.xRes = xRes;
         this.yRes = yRes;
         this.timer = timer;
-
+        timer.addTimeListener(this);
+        
         dataInitialized = false;
         overlaysInitialized = false;
         windParams = new WindFieldGenParamsDTO();
@@ -70,7 +75,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         pathCanvasOverlay = null;
         replayPathCanvasOverlay = null;
         raceCourseCanvasOverlay = null;
-
+        timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
         initializeData();
         // createOverlays();
     }
@@ -119,6 +124,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         // mapw.addOverlay(windFieldCanvasOverlay);
         pathCanvasOverlay = new PathCanvasOverlay();
         replayPathCanvasOverlay = new ReplayPathCanvasOverlay(timer);
+        timeListeners.add(windFieldCanvasOverlay);
+        timeListeners.add(replayPathCanvasOverlay);
         overlaysInitialized = true;
     }
 
@@ -198,6 +205,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     if (path != null) {
                         int length = path.size();
                         Date endTime =  new Date(path.get(length-1).timepoint);
+                        logger.info("Setting end time " + endTime);
                         windParams.setEndTime(endTime);
                     }
                 }
@@ -284,5 +292,23 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     @Override
     public boolean isDataInitialized() {
         return dataInitialized;
+    }
+
+    @Override
+    public void timeChanged(Date date) {
+        if (stop() == 0) {
+            logger.info("Stopping the timer");
+            timer.stop();
+        }
+    }
+
+    @Override
+    public int stop() {
+  
+      int value = 0;
+      for(TimeListenerWithStoppingCriteria t : timeListeners) {
+        value += t.stop();
+      }
+      return value;
     }
 }
