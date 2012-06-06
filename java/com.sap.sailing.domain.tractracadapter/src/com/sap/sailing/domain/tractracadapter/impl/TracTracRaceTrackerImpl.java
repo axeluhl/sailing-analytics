@@ -151,10 +151,10 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
      * @param regatta if <code>null</code>, then <code>domainFactory.getOrCreateRegatta(tractracEvent)</code> will be used to
      * obtain a default regatta
      */
-    private TracTracRaceTrackerImpl(Event tractracEvent, Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore,
-            TrackedRegattaRegistry trackedRegattaRegistry) throws URISyntaxException, MalformedURLException,
-            FileNotFoundException {
+    private TracTracRaceTrackerImpl(Event tractracEvent, final Regatta regatta, DomainFactory domainFactory,
+            URL paramURL, URI liveURI, URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
+            long delayToLiveInMillis, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry)
+            throws URISyntaxException, MalformedURLException, FileNotFoundException {
         super();
         this.tractracEvent = tractracEvent;
         urls = createID(paramURL, liveURI, storedURI);
@@ -173,11 +173,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         controller = new DataController(liveURI, storedURI, this);
         // Start live and stored data streams
         ioThread = new Thread(controller, "I/O for event "+tractracEvent.getName()+", race URL "+paramURL);
+        Regatta effectiveRegatta = regatta;
         for (Race tractracRace : tractracEvent.getRaceList()) {
             // Try to find a pre-associated event based on the Race ID
-            if (regatta == null) {
+            if (effectiveRegatta == null) {
                 Serializable raceID = domainFactory.getRaceID(tractracRace);
-                regatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
+                effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
             }
             // removeRace may detach the domain regatta from the domain factory if that
             // removed the last race; therefore, it's important to getOrCreate the
@@ -186,7 +187,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was found;
         // in this case, create a default regatta based on the TracTrac event data
-        this.regatta = regatta == null ? domainFactory.getOrCreateRegatta(tractracEvent, trackedRegattaRegistry) : regatta;
+        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateRegatta(tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
