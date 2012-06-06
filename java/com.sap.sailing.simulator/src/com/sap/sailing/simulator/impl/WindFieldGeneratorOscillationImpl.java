@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
@@ -22,10 +23,8 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
     /* Currently the speed is time and vertical step invariant, it only changes along the horizontal 
      * direction*/
     private Speed[] speed;
-    /**
-     * Temporary place holder for time correction, to be replaced.
-     */
-    public double timeScale = 60.0;
+   
+    private double timeScale = 0.0;
     
     public WindFieldGeneratorOscillationImpl(Boundary boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);
@@ -34,6 +33,13 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
     @Override
     public void generate(TimePoint start, TimePoint end, TimePoint step) {
         super.generate(start,end,step);
+        int vPoints = positions.length;
+        Distance vStep = boundary.getHeight().scale(1.0/(vPoints-1));
+        if (windParameters.baseWindSpeed > 0) {
+            timeScale = vStep.getNauticalMiles()/windParameters.baseWindSpeed;
+        } else {
+            timeScale = 0;
+        }
         initializeSpeed();
     }
     
@@ -79,8 +85,10 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
             TimePoint timePoint = timedPosition.getTimePoint();
             int timeIndex = getTimeIndex(timePoint);
             Bearing phi0 = new DegreeBearingImpl(windParameters.baseWindBearing);
-            double vStep = 1.0/((positions.length-1)*timeScale);
-            double t = (timeIndex+(timeIndex+rowIndex)*vStep);
+            //double vStep = 1.0/((positions.length-1)*timeScale);
+            //double t = (timeIndex+(timeIndex+rowIndex)*vStep);
+            double vStep = 1.0/(positions.length-1);
+            double t = (timeIndex+rowIndex)*vStep*timeScale;
             Bearing angle = new DegreeBearingImpl(Math.sin(2*Math.PI*t*windParameters.frequency)*windParameters.amplitude);
             angle = angle.add(phi0);
             return angle;
@@ -99,5 +107,13 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
 
         return new WindImpl(timedPosition.getPosition(), timedPosition.getTimePoint(), wspeed);
 
+    }
+    
+    public double getTimeScale() {
+        return timeScale;
+    }
+    
+    public void setTimeScale(double timeScale) {
+        this.timeScale = timeScale;
     }
 }
