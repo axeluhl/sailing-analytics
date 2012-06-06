@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.Named;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 /**
@@ -10,7 +11,10 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
  * race column have to be run in this round. For example, if the 49er regatta has so many competitors that they cannot
  * all start in one race, the qualification round can be split into two {@link Fleet}s, "Yellow" and "Blue," each
  * getting their separate races. Fleet assignment may or may not vary. This usually depends on the round's
- * characteristics of having ordered or unordered fleets.
+ * characteristics of having ordered or unordered fleets.<p>
+ * 
+ * To receive notifications when {@link TrackedRace tracked races} are linked to or unlinked from any of this series'
+ * columns, {@link RaceColumnListener}s can be added / removed.
  * 
  * @author Axel Uhl (D043530)
  * 
@@ -55,4 +59,8 @@ public interface Series extends Named {
      * Sets this series' regatta.
      */
     void setRegatta(Regatta regatta);
+    
+    void addRaceColumnListener(RaceColumnListener listener);
+    
+    void removeRaceColumnListener(RaceColumnListener listener);
 }

@@ -6,6 +6,7 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Leg;
@@ -361,6 +362,18 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public boolean isPersistent() {
                         // TODO Auto-generated method stub
                         return false;
+                    }
+
+                    @Override
+                    public void addRaceColumnListener(RaceColumnListener listener) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void removeRaceColumnListener(RaceColumnListener listener) {
+                        // TODO Auto-generated method stub
+                        
                     }
                 };
             }

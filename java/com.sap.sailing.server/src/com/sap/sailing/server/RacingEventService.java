@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -67,20 +68,10 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RaceFetcher {
-    /**
-     * @return a thread-safe copy of the regattas currently known by the service; it's safe for callers to iterate over
-     *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
-     */
-    Iterable<Regatta> getAllRegattas();
-    
-    Regatta getRegattaByName(String name);
-    
+public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher {
     @Override
     Regatta getRegatta(RegattaName regattaName);
     
-    Regatta getRegatta(RegattaIdentifier regattaIdentifier);
-
     @Override
     RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier);
 
@@ -369,10 +360,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
-    Regatta getOrCreateRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
+    Regatta getOrCreateRegatta(String regattaName, String boatClassName);
 
-    Regatta createRegatta(String baseName, String boatClassName, boolean boatClassTypicallyStartsUpwind,
-            Iterable<? extends Series> series, boolean persistent);
+    Regatta createRegatta(String baseName, String boatClassName, Iterable<? extends Series> series, boolean persistent);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}

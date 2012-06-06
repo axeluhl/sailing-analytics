@@ -7,8 +7,8 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 public class AddDefaultRegatta extends AbstractAddRegattaOperation {
     private static final long serialVersionUID = -3550383541066673065L;
     
-    public AddDefaultRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
-        super(regattaName, boatClassName, boatClassTypicallyStartsUpwind);
+    public AddDefaultRegatta(String regattaName, String boatClassName) {
+        super(regattaName, boatClassName);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class AddDefaultRegatta extends AbstractAddRegattaOperation {
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) {
-        return toState.getOrCreateRegatta(getBaseEventName(), getBoatClassName(), isBoatClassTypicallyStartsUpwind());
+        return toState.getOrCreateRegatta(getBaseEventName(), getBoatClassName());
     }
 
 }

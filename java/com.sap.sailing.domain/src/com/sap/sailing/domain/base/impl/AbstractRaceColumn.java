@@ -1,11 +1,16 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -17,13 +22,42 @@ public abstract class AbstractRaceColumn implements RaceColumn {
     private final Map<Fleet, TrackedRace> trackedRaces;
     private String name;
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
+    private transient Set<RaceColumnListener> listeners;
     
     public AbstractRaceColumn(String name) {
         this.name = name;
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
+        this.listeners = new HashSet<RaceColumnListener>();
     }
     
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        listeners = new HashSet<RaceColumnListener>();
+    }
+    
+    @Override
+    public void addRaceColumnListener(RaceColumnListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeRaceColumnListener(RaceColumnListener listener) {
+        listeners.remove(listener);
+    }
+    
+    private void notifyListenersAboutTrackedRaceLinked(Fleet fleet, TrackedRace trackedRace) {
+        for (RaceColumnListener listener : listeners) {
+            listener.trackedRaceLinked(this, fleet, trackedRace);
+        }
+    }
+
+    private void notifyListenersAboutTrackedRaceUnlinked(Fleet fleet, TrackedRace trackedRace) {
+        for (RaceColumnListener listener : listeners) {
+            listener.trackedRaceUnlinked(this, fleet, trackedRace);
+        }
+    }
+
     @Override
     public TrackedRace getTrackedRace(Fleet fleet) {
         return trackedRaces.get(fleet);
@@ -31,8 +65,14 @@ public abstract class AbstractRaceColumn implements RaceColumn {
 
     @Override
     public void setTrackedRace(Fleet fleet, TrackedRace trackedRace) {
-        this.trackedRaces.put(fleet, trackedRace);
+        TrackedRace previouslyLinkedRace = this.trackedRaces.put(fleet, trackedRace);
         this.setRaceIdentifier(fleet, trackedRace == null ? null : trackedRace.getRaceIdentifier());
+        if (previouslyLinkedRace != null) {
+            notifyListenersAboutTrackedRaceUnlinked(fleet, previouslyLinkedRace);
+        }
+        if (trackedRace != null) {
+            notifyListenersAboutTrackedRaceLinked(fleet, trackedRace);
+        }
     }
 
     @Override

@@ -11,7 +11,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -30,7 +32,8 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
     private TextBox nameEntryField;
 
     private List<TextBox> groupNameEntryFields;
-    private List<TextBox> groupColorEntryFields;
+    private List<ListBox> groupColorEntryFields;
+    private List<IntegerBox> groupOrderNoEntryFields;
 
     private Grid groupsGrid;
 
@@ -112,23 +115,31 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
         nameEntryField.setWidth("200px");
 
         groupNameEntryFields = new ArrayList<TextBox>();
-        groupColorEntryFields = new ArrayList<TextBox>();
-        
+        groupColorEntryFields = new ArrayList<ListBox>();
+        groupOrderNoEntryFields = new ArrayList<IntegerBox>(); 
+
         groupsGrid = new Grid(0, 0);
     }
 
-    private TextBox createGroupNameWidget(String defaultName) {
+    private Widget createGroupNameWidget(String defaultName) {
         TextBox textBox = createTextBox(defaultName); 
         textBox.setWidth("200px");
         groupNameEntryFields.add(textBox);
         return textBox; 
     }
 
-    private TextBox createGroupColorWidget(String defaultColor) {
-        TextBox textBox = createTextBox(defaultColor); 
-        textBox.setWidth("50px");
-        groupColorEntryFields.add(textBox);
-        return textBox; 
+    private Widget createGroupColorWidget(Color defaultColor) {
+        ListBox listBox = createListBox(false); 
+        for(GroupColors value: GroupColors.values())
+            listBox.addItem(value.name());
+        groupColorEntryFields.add(listBox);
+        return listBox; 
+    }
+
+    private Widget createGroupOrderNoWidget(int defaultValue) {
+        IntegerBox intBox = createIntegerBox(defaultValue, 3); 
+        groupOrderNoEntryFields.add(intBox);
+        return intBox; 
     }
 
     @Override
@@ -142,6 +153,7 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
             fleetDTO.name = groupNameEntryFields.get(i).getValue();
             Color color = new RGBColor(0, 0, 0);
             fleetDTO.setColor(color);
+            fleetDTO.setOrderNo(groupOrderNoEntryFields.get(i).getValue());
             fleets.add(fleetDTO);
         }
         
@@ -172,6 +184,7 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
             @Override
             public void onClick(ClickEvent event) {
                 createGroupNameWidget(null);
+                createGroupOrderNoWidget(0);
                 createGroupColorWidget(null);
                 updateGroupsGrid(panel);
             }
@@ -186,11 +199,12 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
         parentPanel.remove(groupsGrid);
         
         int groupsCount = groupNameEntryFields.size();
-        groupsGrid = new Grid(groupsCount + 1, 3);
+        groupsGrid = new Grid(groupsCount + 1, 4);
         groupsGrid.setCellSpacing(3);
 
         groupsGrid.setHTML(0, 1, stringConstants.name());
-        groupsGrid.setHTML(0, 2, stringConstants.color());
+        groupsGrid.setHTML(0, 2, stringConstants.no());
+        groupsGrid.setHTML(0, 3, stringConstants.color());
 
         for(int i = 0; i < groupsCount; i++) {
             Label groupLabel = new Label((i+1) + ". " + stringConstants.group() + ":");
@@ -198,7 +212,8 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
             groupLabel.setWordWrap(false);
             groupsGrid.setWidget(i+1, 0, groupLabel);
             groupsGrid.setWidget(i+1, 1, groupNameEntryFields.get(i));
-            groupsGrid.setWidget(i+1, 2, groupColorEntryFields.get(i));
+            groupsGrid.setWidget(i+1, 2, groupOrderNoEntryFields.get(i));
+            groupsGrid.setWidget(i+1, 3, groupColorEntryFields.get(i));
         }
 
         parentPanel.insert(groupsGrid, widgetIndex);

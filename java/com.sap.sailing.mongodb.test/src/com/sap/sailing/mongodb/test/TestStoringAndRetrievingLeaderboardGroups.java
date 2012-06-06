@@ -59,7 +59,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
         
-        final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName);
+        final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null);
 
         Assert.assertEquals(groupName, loadedLeaderboardGroup.getName());
         Assert.assertEquals(groupDescription, loadedLeaderboardGroup.getDescription());
@@ -99,11 +99,11 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
                         new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter()),
                 new FlexibleLeaderboardImpl(ungroupedLeaderboardNames[2], new ScoreCorrectionImpl(),
                         new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter()) };
-        mongoObjectFactory.storeFlexibleLeaderboard(ungroupedLeaderboards[0]);
-        mongoObjectFactory.storeFlexibleLeaderboard(ungroupedLeaderboards[1]);
-        mongoObjectFactory.storeFlexibleLeaderboard(ungroupedLeaderboards[2]);
+        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[0]);
+        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[1]);
+        mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[2]);
         
-        Iterable<Leaderboard> loadedUngroupedLeaderboards = domainObjectFactory.getLeaderboardsNotInGroup();
+        Iterable<Leaderboard> loadedUngroupedLeaderboards = domainObjectFactory.getLeaderboardsNotInGroup(/* regattaRegistry */ null);
         
         Assert.assertTrue(loadedUngroupedLeaderboards.iterator().hasNext());
         
@@ -147,7 +147,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         mongoObjectFactory.renameLeaderboard(leaderboardName, newLeaderboardName);
         leaderboard.setName(newLeaderboardName);
         
-        LeaderboardGroup loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName);
+        LeaderboardGroup loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null);
         String loadedLeaderboardName = loadedGroup.getLeaderboards().iterator().next().getName();
         Assert.assertEquals(newLeaderboardName, loadedLeaderboardName);
         
@@ -155,16 +155,16 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final String regattaName = "Event";
         final String raceName = "Race";
         leaderboard.getRaceColumnByName(columnName).setRaceIdentifier(fleet, new RegattaNameAndRaceName(regattaName, raceName));
-        mongoObjectFactory.storeFlexibleLeaderboard(leaderboard);
+        mongoObjectFactory.storeLeaderboard(leaderboard);
         
         //Check if the leaderboard updated correctly
-        final Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboard.getName());
+        final Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboard.getName(), /* regattaRegistry */ null);
         final RaceColumn loadedRaceColumnByName = loadedLeaderboard.getRaceColumnByName(columnName);
         Fleet loadedFleet = loadedRaceColumnByName.getFleetByName(fleet.getName());
         Assert.assertEquals(race.getRaceIdentifier(fleet), loadedRaceColumnByName.getRaceIdentifier(loadedFleet));
         
         // Check if the group received the changes
-        loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName);
+        loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null);
         final RaceColumn loadedRaceColumnFromGroupByName = loadedGroup.getLeaderboards().iterator().next().getRaceColumnByName(columnName);
         Fleet loadedGroupFleet = loadedRaceColumnFromGroupByName.getFleetByName(fleet.getName());
         RaceIdentifier loadedIdentifier = loadedRaceColumnFromGroupByName.getRaceIdentifier(loadedGroupFleet);

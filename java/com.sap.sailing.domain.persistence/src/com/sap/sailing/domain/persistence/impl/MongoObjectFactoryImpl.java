@@ -125,7 +125,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void storeFlexibleLeaderboard(FlexibleLeaderboard leaderboard) {
+    public void storeLeaderboard(Leaderboard leaderboard) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         try {
             leaderboardCollection.ensureIndex(FieldNames.LEADERBOARD_NAME.name());
@@ -134,29 +134,46 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             logger.throwing(MongoObjectFactoryImpl.class.getName(), "storeLeaderboard", npe);
         }
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
-        BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
+        BasicDBObject dbLeaderboard = new BasicDBObject();
+        dbLeaderboard.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard, dbLeaderboard);
+        } else if (leaderboard instanceof RegattaLeaderboard) {
+            storeRegattaLeaderboard((RegattaLeaderboard) leaderboard, dbLeaderboard);
+        }
+        storeLeaderboardCorrections(leaderboard, dbLeaderboard);
+        leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false);
+    }
+
+    private void storeRegattaLeaderboard(RegattaLeaderboard leaderboard, DBObject dbLeaderboard) {
+        dbLeaderboard.put(FieldNames.REGATTA_NAME.name(), leaderboard.getRegatta().getName());
+    }
+
+    private void storeFlexibleLeaderboard(FlexibleLeaderboard leaderboard, BasicDBObject dbLeaderboard) {
         BasicDBList dbRaceColumns = new BasicDBList();
-        result.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
+        dbLeaderboard.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             BasicDBObject dbRaceColumn = storeRaceColumn(raceColumn);
             dbRaceColumns.add(dbRaceColumn);
         }
+    }
+
+    private void storeLeaderboardCorrections(Leaderboard leaderboard, BasicDBObject dbLeaderboard) {
         if (leaderboard.hasCarriedPoints()) {
             BasicDBObject dbCarriedPoints = new BasicDBObject();
-            result.put(FieldNames.LEADERBOARD_CARRIED_POINTS.name(), dbCarriedPoints);
+            dbLeaderboard.put(FieldNames.LEADERBOARD_CARRIED_POINTS.name(), dbCarriedPoints);
             for (Competitor competitor : leaderboard.getCompetitors()) {
                 dbCarriedPoints.put(MongoUtils.escapeDollarAndDot(competitor.getName()), leaderboard.getCarriedPoints(competitor));
             }
         }
         BasicDBObject dbScoreCorrections = new BasicDBObject();
         storeScoreCorrections(leaderboard, dbScoreCorrections);
-        result.put(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name(), dbScoreCorrections);
+        dbLeaderboard.put(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name(), dbScoreCorrections);
         BasicDBList dbResultDiscardingThresholds = new BasicDBList();
         for (int threshold : leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()) {
             dbResultDiscardingThresholds.add(threshold);
         }
-        result.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
+        dbLeaderboard.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
         BasicDBObject competitorDisplayNames = new BasicDBObject();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             String displayNameForCompetitor = leaderboard.getDisplayName(competitor);
@@ -164,14 +181,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 competitorDisplayNames.put(MongoUtils.escapeDollarAndDot(competitor.getName()), displayNameForCompetitor);
             }
         }
-        result.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
-        leaderboardCollection.update(query, result, /* upsrt */ true, /* multi */ false);
-    }
-
-    @Override
-    public void storeRegattaLeaderboard(RegattaLeaderboard result) {
-        // TODO Auto-generated method stub
-        
+        dbLeaderboard.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
     }
 
     private BasicDBObject storeRaceColumn(RaceColumn raceColumn) {
@@ -255,15 +265,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name(), dbLeaderboardIds);
         
         leaderboardGroupCollection.update(query, result, true, false);
-    }
-
-    private void storeLeaderboard(Leaderboard leaderboard) {
-        if (leaderboard instanceof FlexibleLeaderboard) {
-            storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
-        } else if (leaderboard instanceof RegattaLeaderboard) {
-            storeRegattaLeaderboard((RegattaLeaderboard) leaderboard);
-        }
-        
     }
 
     @Override

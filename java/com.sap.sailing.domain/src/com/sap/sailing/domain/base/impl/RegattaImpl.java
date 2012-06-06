@@ -10,6 +10,9 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
@@ -17,16 +20,18 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
-public class RegattaImpl extends NamedImpl implements Regatta {
+public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListener {
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
     private static final long serialVersionUID = 6509564189552478869L;
     private final Set<RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private final Iterable<? extends Series> series;
-    
+    private transient Set<RaceColumnListener> raceColumnListeners;
+
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
      * durably and don't contain valuable information worth being preserved; or they are constructed explicitly
@@ -40,7 +45,6 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     /**
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
      * is not {@link #isPersistent() marked for persistence}.
-     * @param trackedRegattaRegistry TODO
      */
     public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry) {
         this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
@@ -57,10 +61,12 @@ public class RegattaImpl extends NamedImpl implements Regatta {
         super(baseName+(boatClass==null?"":" ("+boatClass.getName()+")"));
         races = new HashSet<RaceDefinition>();
         regattaListeners = new HashSet<RegattaListener>();
+        raceColumnListeners = new HashSet<RaceColumnListener>();
         this.boatClass = boatClass;
         this.series = series;
         for (Series s : series) {
             s.setRegatta(this);
+            s.addRaceColumnListener(this);
         }
         this.persistent = persistent;
     }
@@ -84,6 +90,7 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         regattaListeners = new HashSet<>();
+        raceColumnListeners = new HashSet<RaceColumnListener>();
     }
 
     @Override
@@ -179,6 +186,38 @@ public class RegattaImpl extends NamedImpl implements Regatta {
     public void removeRegattaListener(RegattaListener listener) {
         synchronized (regattaListeners) {
             regattaListeners.remove(listener);
+        }
+    }
+
+    @Override
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+    }
+
+    @Override
+    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+    }
+
+    @Override
+    public void addRaceColumnListener(RaceColumnListener listener) {
+        raceColumnListeners.add(listener);
+    }
+
+    @Override
+    public void removeRaceColumnListener(RaceColumnListener listener) {
+        raceColumnListeners.remove(listener);
+    }
+    
+    private void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        for (RaceColumnListener listener : raceColumnListeners) {
+            listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
+        }
+    }
+
+    private void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        for (RaceColumnListener listener : raceColumnListeners) {
+            listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
         }
     }
 

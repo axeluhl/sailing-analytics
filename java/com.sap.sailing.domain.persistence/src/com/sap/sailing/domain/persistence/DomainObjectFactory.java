@@ -6,6 +6,7 @@ import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -22,26 +23,26 @@ import com.sap.sailing.domain.tracking.WindTrack;
 public interface DomainObjectFactory {
     WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 
-    Leaderboard loadLeaderboard(String name);
+    Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry);
 
-    Iterable<Leaderboard> getAllLeaderboards();
+    Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry);
 
     RaceIdentifier loadRaceIdentifier(DBObject dbObject);
     
     /**
      * @return The group with the name <code>name</code>, or <code>null</code> if no such group exists.
      */
-    LeaderboardGroup loadLeaderboardGroup(String name);
+    LeaderboardGroup loadLeaderboardGroup(String name, RegattaRegistry regattaRegistry);
     
     /**
      * @return All groups in the database.
      */
-    Iterable<LeaderboardGroup> getAllLeaderboardGroups();
+    Iterable<LeaderboardGroup> getAllLeaderboardGroups(RegattaRegistry regattaRegistry);
     
     /**
      * @return All leaderboards in the database, which aren't contained by a leaderboard group
      */
-    Iterable<Leaderboard> getLeaderboardsNotInGroup();
+    Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry);
 
     Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
             long millisecondsOverWhichToAverageWind);
