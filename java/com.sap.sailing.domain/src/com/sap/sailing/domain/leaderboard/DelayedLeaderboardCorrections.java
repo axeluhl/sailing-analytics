@@ -1,8 +1,11 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * For a {@link Leaderboard}, captures corrections such as {@link ScoreCorrection}s or display names for competitors. It
@@ -15,7 +18,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
  * @author Axel Uhl (D043530)
  *
  */
-public interface DelayedLeaderboardCorrections extends RaceColumnListener {
+public interface DelayedLeaderboardCorrections extends RaceColumnListener, Serializable {
     void correctScore(String competitorName, RaceColumn raceColumn, int correctedScore);
     
     void setCarriedPoints(String competitorName, int carriedPoints);
