@@ -48,7 +48,7 @@ public abstract class AbstractServerReplicationTest {
     private ReplicationServiceImpl masterReplicator;
     
     /**
-     * Sets up master and replica, starts the JMS message broker and registers the replica with the master.
+     * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
      */
     @Before
     public void setUp() throws Exception {
@@ -56,6 +56,9 @@ public abstract class AbstractServerReplicationTest {
         result.getA().startToReplicateFrom(result.getB());
     }
 
+    /**
+     * Drops the test DB.
+     */
     protected Pair<ReplicationService, ReplicationMasterDescriptor> basicSetUp() throws FileNotFoundException, Exception,
             JMSException, UnknownHostException {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;

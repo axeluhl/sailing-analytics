@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,38 +20,33 @@ public abstract class AbstractRaceColumn implements RaceColumn {
     private final Map<Fleet, TrackedRace> trackedRaces;
     private String name;
     private final Map<Fleet, RaceIdentifier> raceIdentifiers;
-    private transient Set<RaceColumnListener> listeners;
+    private Set<RaceColumnListener> raceColumnListeners;
     
     public AbstractRaceColumn(String name) {
         this.name = name;
         this.trackedRaces = new HashMap<Fleet, TrackedRace>();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
-        this.listeners = new HashSet<RaceColumnListener>();
-    }
-    
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        listeners = new HashSet<RaceColumnListener>();
+        this.raceColumnListeners = new HashSet<RaceColumnListener>();
     }
     
     @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        listeners.add(listener);
+        raceColumnListeners.add(listener);
     }
 
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        listeners.remove(listener);
+        raceColumnListeners.remove(listener);
     }
     
     private void notifyListenersAboutTrackedRaceLinked(Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : listeners) {
+        for (RaceColumnListener listener : raceColumnListeners) {
             listener.trackedRaceLinked(this, fleet, trackedRace);
         }
     }
 
     private void notifyListenersAboutTrackedRaceUnlinked(Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : listeners) {
+        for (RaceColumnListener listener : raceColumnListeners) {
             listener.trackedRaceUnlinked(this, fleet, trackedRace);
         }
     }

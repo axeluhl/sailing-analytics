@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,7 +26,7 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
     private final List<RaceColumnInSeries> raceColumns;
     private boolean isMedal;
     private Regatta regatta;
-    private transient Set<RaceColumnListener> listeners;
+    private Set<RaceColumnListener> raceColumnListeners;
     
     /**
      * @param fleets must be non-empty
@@ -48,35 +46,30 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
         this.raceColumns = myRaceColumns;
         this.isMedal = isMedal;
-        this.listeners = new HashSet<RaceColumnListener>();
+        this.raceColumnListeners = new HashSet<RaceColumnListener>();
         for (String raceColumnName : raceColumnNames) {
             addRaceColumn(raceColumnName, trackedRegattaRegistry);
         }
     }
 
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        listeners = new HashSet<RaceColumnListener>();
-    }
-    
     @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        listeners.add(listener);
+        raceColumnListeners.add(listener);
     }
 
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        listeners.remove(listener);
+        raceColumnListeners.remove(listener);
     }
     
     private void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : listeners) {
+        for (RaceColumnListener listener : raceColumnListeners) {
             listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
         }
     }
 
     private void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : listeners) {
+        for (RaceColumnListener listener : raceColumnListeners) {
             listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
         }
     }
