@@ -78,7 +78,7 @@ public class WindFieldGeneratorTest {
         course.add(start);
         course.add(end);
 
-        WindControlParameters windParameters = new WindControlParameters(10, 180);
+        WindControlParameters windParameters = new WindControlParameters(10,0);
         windParameters.leftWindSpeed = 70.0;
         windParameters.middleWindSpeed = 80.0;
         windParameters.rightWindSpeed = 90.0;
@@ -87,6 +87,7 @@ public class WindFieldGeneratorTest {
 
         RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
         WindFieldGeneratorOscillationImpl wf = new WindFieldGeneratorOscillationImpl(bd, windParameters);
+        wf.timeScale = 1.0;
         int hSteps = 30;
         int vSteps = 15;
 
@@ -154,11 +155,11 @@ public class WindFieldGeneratorTest {
         assertEquals("One Time Unit Last Wind Speed ", windList.get(windList.size() - 1).getKnots(), 9, 0);
         // Check the angle
         assertEquals("One Time Unit First Wind Angle ",0.2019944, windList.get(0).getBearing().getRadians(), epsilon);
-        assertEquals("One Time Unit One before Middle Wind Speed ",  -0.1857142, windList.get(windList.size() / 2 - 2).getBearing()
+        assertEquals("One Time Unit One before Middle Wind Angle ",  6.09747107 /*-0.1857142*/, windList.get(windList.size() / 2 - 2).getBearing()
                 .getRadians(), epsilon);
-        assertEquals("One Time Unit Middle Wind Speed ",-0.1857142, windList.get(windList.size() / 2 - 1).getBearing()
-                .getRadians(), epsilon);
-        assertEquals("One Time Unit Last Wind Speed ",  -0.3441339, windList.get(windList.size() - 1).getBearing().getRadians(),
+        assertEquals("One Time Unit Middle Wind Angle ", 6.09747107, windList.get(windList.size() / 2 - 1).getBearing()
+               .getRadians(), epsilon);
+        assertEquals("One Time Unit Last Wind Angle ",  5.939051/*-0.3441339*/, windList.get(windList.size() - 1).getBearing().getRadians(),
                 epsilon);
 
     }

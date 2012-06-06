@@ -115,8 +115,8 @@ public class SimulatorTest {
         // I am creating the WindField such as the course goes mainly against the wind (as it should)
         // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
         WindControlParameters windParameters = new WindControlParameters(requiredSpeed10.getKnots(), b.getSouth().getDegrees());
-        WindFieldGenerator wf = new WindFieldGeneratorOscillationImpl(b, windParameters);
-        
+        WindFieldGeneratorOscillationImpl wf = new WindFieldGeneratorOscillationImpl(b, windParameters);
+        wf.timeScale = 1;
         
         wf.setPositionGrid(b.extractGrid(10, 5));
         TimePoint start = new MillisecondsTimePoint(0);

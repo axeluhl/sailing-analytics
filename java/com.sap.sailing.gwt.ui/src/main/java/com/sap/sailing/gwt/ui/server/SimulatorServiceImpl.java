@@ -139,7 +139,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
                 f = controlParameters.getClass().getField(s.getName());
                 try {
 
-                    logger.info("Setting " + f.getName() + " to " + s.getName());
+                    logger.info("Setting " + f.getName() + " to " + s.getName() + " value : " + s.getValue());
                     f.set(controlParameters, s.getValue());
                     // f.setDouble(controlParameters, (Double) s.getValue());
 
@@ -172,9 +172,11 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         RectangularBoundary bd = new RectangularBoundary(nw, se, 0.1);
         // List<Position> lattice = bd.extractLattice(params.getxRes(), params.getyRes());
 
+       
         retreiveWindControlParameters(pattern);
-
-        controlParameters.baseWindBearing = bd.getSouth().getDegrees();
+        logger.info("Boundary south direction " + bd.getSouth());
+        controlParameters.baseWindBearing += bd.getSouth().getDegrees();
+        
         WindFieldGenerator wf = WindFieldGeneratorFactory.INSTANCE.createWindFieldGenerator(pattern.getWindPattern()
                 .name(), bd, controlParameters);
 
@@ -193,7 +195,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             while(t.compareTo(endTime) <= 0) {
                 for (Position p : lattice) {
                     Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(t,p,null));
-                    logger.fine(localWind.toString());
+                    logger.finer(localWind.toString());
                     WindDTO w = createWindDTO(localWind);
                     wList.add(w);
                 }
@@ -221,9 +223,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         course.add(se);
 
         RectangularBoundary bd = new RectangularBoundary(nw, se, 0.1);
-        retreiveWindControlParameters(pattern);
 
-        controlParameters.baseWindBearing = bd.getSouth().getDegrees();
+        retreiveWindControlParameters(pattern);
+        controlParameters.baseWindBearing += bd.getSouth().getDegrees();
+        
         WindFieldGenerator wf = WindFieldGeneratorFactory.INSTANCE.createWindFieldGenerator(pattern.getWindPattern()
                 .name(), bd, controlParameters);
         
@@ -257,7 +260,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             // System.out.println("Position: " + p.getPosition() + " Wind: " +
             // wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
             Wind localWind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
-            logger.fine(localWind.toString());
+            logger.finer(localWind.toString());
             WindDTO w = createWindDTO(localWind);
             // w.trueWindBearingDeg = 10.0*i;
             ++i;
