@@ -33,12 +33,13 @@ public abstract class AbstractMongoDBTest {
     }
     
     @Before
-    public void dropTestDB() throws UnknownHostException, MongoException {
+    public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {
         mongo = newMongo();
         assertNotNull(mongo);
         mongo.dropDatabase(getDBConfiguration().getDatabaseName());
         db = mongo.getDB(getDBConfiguration().getDatabaseName());
         assertNotNull(db);
+        Thread.sleep(500); // wait for dropDatabase to take effect
     }
 
     protected MongoDBService getMongoService() {

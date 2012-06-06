@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.persistence.impl;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,7 +28,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorrections, Serializable {
+public class DelayedLeaderboardCorrectionsImpl implements DelayedLeaderboardCorrections {
     private static final long serialVersionUID = 8824782847677232275L;
     private final Map<String, Integer> carriedPointsByCompetitorName;
     private final Map<String, Map<RaceColumn, MaxPointsReason>> maxPointsReasonsByCompetitorName;
