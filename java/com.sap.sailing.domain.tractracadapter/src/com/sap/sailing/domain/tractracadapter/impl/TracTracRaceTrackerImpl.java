@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -173,12 +174,18 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         // Start live and stored data streams
         ioThread = new Thread(controller, "I/O for event "+tractracEvent.getName()+", race URL "+paramURL);
         for (Race tractracRace : tractracEvent.getRaceList()) {
+            // Try to find a pre-associated event based on the Race ID
+            if (regatta == null) {
+                Serializable raceID = domainFactory.getRaceID(tractracRace);
+                regatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
+            }
             // removeRace may detach the domain regatta from the domain factory if that
             // removed the last race; therefore, it's important to getOrCreate the
             // domain regatta *after* calling removeRace
             domainFactory.removeRace(tractracEvent, tractracRace, trackedRegattaRegistry);
         }
-        // TODO bug 733: use trackedRegattaRegistry to obtain a regatta using the race ID
+        // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was found;
+        // in this case, create a default regatta based on the TracTrac event data
         this.regatta = regatta == null ? domainFactory.getOrCreateRegatta(tractracEvent, trackedRegattaRegistry) : regatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();

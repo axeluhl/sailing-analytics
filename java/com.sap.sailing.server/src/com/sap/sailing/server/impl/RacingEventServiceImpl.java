@@ -1374,8 +1374,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public Regatta getRememberedRegattaForRace(RaceDefinition race) {
-        return persistentRegattasForRaceIDs.get(race.getId().toString());
+    public Regatta getRememberedRegattaForRace(Serializable raceID) {
+        return persistentRegattasForRaceIDs.get(raceID.toString());
     }
 
     @Override

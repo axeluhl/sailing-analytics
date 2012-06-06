@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -315,6 +316,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
     
     @Override
+    public Serializable getRaceID(Race tractracRace) {
+        return tractracRace.getId();
+    }
+
+    @Override
     public void removeRace(com.tractrac.clientmodule.Event tractracEvent, Race tractracRace, TrackedRegattaRegistry trackedRegattaRegistry) {
         RaceDefinition raceDefinition;
         synchronized (raceCache) {
@@ -370,7 +376,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 Pair<List<Competitor>, BoatClass> competitorsAndDominantBoatClass = getCompetitorsAndDominantBoatClass(race);
                 logger.info("Creating RaceDefinitionImpl for race "+race.getName());
                 raceDefinition = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
-                        competitorsAndDominantBoatClass.getA(), race.getId());
+                        competitorsAndDominantBoatClass.getA(), getRaceID(race));
                 // add to domain Event only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 
@@ -34,10 +36,11 @@ public interface TrackedRegattaRegistry {
      * regatta will be returned.
      * <p>
      * 
-     * If no such explicit assignment has been performed, an "appropriate" non-persistent default regatta will be
-     * selected and returned.
+     * If no such explicit assignment has been performed, <code>null</code> is returned.
+     * 
+     * @param raceID the ID as obtained from {@link RaceDefinition#getId()}
      */
-    Regatta getRememberedRegattaForRace(RaceDefinition race);
+    Regatta getRememberedRegattaForRace(Serializable raceID);
     
     /**
      * Persistently remembers the association of the race with its {@link RaceDefinition#getId()} to the

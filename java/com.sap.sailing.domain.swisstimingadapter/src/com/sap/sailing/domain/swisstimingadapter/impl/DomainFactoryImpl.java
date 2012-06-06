@@ -93,7 +93,10 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Regatta getOrCreateRegatta(String raceID, TrackedRegattaRegistry trackedRegattaRegistry) {
-        Regatta result = raceIDToRegattaCache.get(raceID);
+        Regatta result = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
+        if (result == null) {
+            result = raceIDToRegattaCache.get(raceID);
+        }
         if (result == null) {
             result = new RegattaImpl(raceID, null, trackedRegattaRegistry);
             logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+")");
