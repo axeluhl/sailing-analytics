@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
@@ -18,24 +18,24 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Color;
-import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
-public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
+public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
     private StringMessages stringConstants;
     private SeriesDTO series;
 
     private TextBox nameEntryField;
+    private CheckBox isMedalSeriesCheckbox;
 
-    private List<TextBox> groupNameEntryFields;
-    private List<ListBox> groupColorEntryFields;
-    private List<IntegerBox> groupOrderNoEntryFields;
+    private List<TextBox> fleetNameEntryFields;
+    private List<ListBox> fleetColorEntryFields;
+    private List<IntegerBox> fleetOrderNoEntryFields;
 
-    private Grid groupsGrid;
+    private Grid fleetsGrid;
 
     protected static class SeriesParameterValidator implements Validator<SeriesDTO> {
 
@@ -67,34 +67,34 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
             }
 
             if(errorMessage == null) {
-                List<FleetDTO> groupsToValidate = seriesToValidate.getFleets();
+                List<FleetDTO> fleetsToValidate = seriesToValidate.getFleets();
                 int index = 0;
-                boolean groupNameNotEmpty = true;
+                boolean fleetNameNotEmpty = true;
 
-                for (FleetDTO group : groupsToValidate) {
-                    groupNameNotEmpty = group.name != null && group.name.length() > 0;
-                    if(!groupNameNotEmpty) {
+                for (FleetDTO fleet : fleetsToValidate) {
+                    fleetNameNotEmpty = fleet.name != null && fleet.name.length() > 0;
+                    if(!fleetNameNotEmpty) {
                         break;
                     }
                     index++;
                 }
 
                 int index2 = 0;
-                boolean groupUnique = true;
+                boolean fleetUnique = true;
                 
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
-                for (FleetDTO group: groupsToValidate) {
-                    if(!setToFindDuplicates.add(group.name)) {
-                        groupUnique = false;
+                for (FleetDTO fleet: fleetsToValidate) {
+                    if(!setToFindDuplicates.add(fleet.name)) {
+                        fleetUnique = false;
                         break;
                     }
                     index2++;
                 }
 
-                if (!groupNameNotEmpty) {
-                    errorMessage = stringConstants.group() + " " + (index + 1) + ": " + stringConstants.pleaseEnterNonEmptyName();
-                } else if (!groupUnique) {
-                    errorMessage = stringConstants.group() + " " + (index2 + 1) + ": " + stringConstants.groupWithThisNameAlreadyExists();
+                if (!fleetNameNotEmpty) {
+                    errorMessage = stringConstants.fleet() + " " + (index + 1) + ": " + stringConstants.pleaseEnterNonEmptyName();
+                } else if (!fleetUnique) {
+                    errorMessage = stringConstants.fleet() + " " + (index2 + 1) + ": " + stringConstants.fleetWithThisNameAlreadyExists();
                 }
                 
             }
@@ -104,7 +104,7 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
     }
 
-    public SeriesWithGroupsCreateDialog(Collection<SeriesDTO> existingSeries, StringMessages stringConstants,
+    public SeriesWithFleetsCreateDialog(Collection<SeriesDTO> existingSeries, StringMessages stringConstants,
             AsyncCallback<SeriesDTO> callback) {
         super(stringConstants.series(), null, stringConstants.ok(), stringConstants.cancel(),  
                 new SeriesParameterValidator(stringConstants, existingSeries), callback);
@@ -114,46 +114,53 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
         nameEntryField = createTextBox(null);
         nameEntryField.setWidth("200px");
 
-        groupNameEntryFields = new ArrayList<TextBox>();
-        groupColorEntryFields = new ArrayList<ListBox>();
-        groupOrderNoEntryFields = new ArrayList<IntegerBox>(); 
+        isMedalSeriesCheckbox = createCheckbox(stringConstants.medalSeries());
+        
+        fleetNameEntryFields = new ArrayList<TextBox>();
+        fleetColorEntryFields = new ArrayList<ListBox>();
+        fleetOrderNoEntryFields = new ArrayList<IntegerBox>(); 
 
-        groupsGrid = new Grid(0, 0);
+        fleetsGrid = new Grid(0, 0);
+        
+        // create at least one fleet
+        createFleetNameWidget("Default");
+        createFleetOrderNoWidget(0);
+        createFleetColorWidget(null);
     }
 
-    private Widget createGroupNameWidget(String defaultName) {
+    private Widget createFleetNameWidget(String defaultName) {
         TextBox textBox = createTextBox(defaultName); 
-        textBox.setWidth("200px");
-        groupNameEntryFields.add(textBox);
+        textBox.setWidth("175px");
+        fleetNameEntryFields.add(textBox);
         return textBox; 
     }
 
-    private Widget createGroupColorWidget(Color defaultColor) {
+    private Widget createFleetColorWidget(Color defaultColor) {
         ListBox listBox = createListBox(false); 
-        for(GroupColors value: GroupColors.values())
+        for(FleetColors value: FleetColors.values())
             listBox.addItem(value.name());
-        groupColorEntryFields.add(listBox);
+        fleetColorEntryFields.add(listBox);
         return listBox; 
     }
 
-    private Widget createGroupOrderNoWidget(int defaultValue) {
+    private Widget createFleetOrderNoWidget(int defaultValue) {
         IntegerBox intBox = createIntegerBox(defaultValue, 3); 
-        groupOrderNoEntryFields.add(intBox);
+        fleetOrderNoEntryFields.add(intBox);
         return intBox; 
     }
 
     @Override
     protected SeriesDTO getResult() {
         series.name = nameEntryField.getText();
+        series.setMedal(isMedalSeriesCheckbox.getValue());
 
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
-        int groupsCount = groupNameEntryFields.size();
+        int groupsCount = fleetNameEntryFields.size();
         for(int i = 0; i < groupsCount; i++) {
             FleetDTO fleetDTO = new FleetDTO();
-            fleetDTO.name = groupNameEntryFields.get(i).getValue();
-            Color color = new RGBColor(0, 0, 0);
-            fleetDTO.setColor(color);
-            fleetDTO.setOrderNo(groupOrderNoEntryFields.get(i).getValue());
+            fleetDTO.name = fleetNameEntryFields.get(i).getValue();
+            fleetDTO.setColor(getSelectedColor(fleetColorEntryFields.get(i)));
+            fleetDTO.setOrderNo(fleetOrderNoEntryFields.get(i).getValue());
             fleets.add(fleetDTO);
         }
         
@@ -162,6 +169,22 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
         return series;
     }
 
+    private Color getSelectedColor(ListBox colorListBox) {
+        Color result = null;
+        int selIndex = colorListBox.getSelectedIndex();
+        if(selIndex >= 0) {
+            String value = colorListBox.getValue(selIndex);
+            for(FleetColors color: FleetColors.values()) {
+                if(color.name().equals(value)) {
+                    result = color.getColor();
+                    break;
+                }
+            }
+        }
+            
+        return result;
+    }
+    
     @Override
     protected Widget getAdditionalWidget() {
         final VerticalPanel panel = new VerticalPanel();
@@ -174,49 +197,48 @@ public class SeriesWithGroupsCreateDialog extends DataEntryDialog<SeriesDTO> {
         
         formGrid.setWidget(0,  0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
+        formGrid.setWidget(1, 1, isMedalSeriesCheckbox);
         
-        panel.add(createHeadlineLabel(stringConstants.groups()));
-        panel.add(groupsGrid);
+        panel.add(createHeadlineLabel(stringConstants.fleets()));
+        panel.add(fleetsGrid);
         
-        Button addGroupButton = new Button("Add group");
+        Button addGroupButton = new Button("Add fleet");
         addGroupButton.addClickHandler(new ClickHandler() {
             
             @Override
             public void onClick(ClickEvent event) {
-                createGroupNameWidget(null);
-                createGroupOrderNoWidget(0);
-                createGroupColorWidget(null);
-                updateGroupsGrid(panel);
+                createFleetNameWidget(null);
+                createFleetOrderNoWidget(0);
+                createFleetColorWidget(null);
+                updateFleetsGrid(panel);
             }
         });
         panel.add(addGroupButton);
         
+        updateFleetsGrid(panel);
+        
         return panel;
     }
 
-    private void updateGroupsGrid(VerticalPanel parentPanel) {
-        int widgetIndex = parentPanel.getWidgetIndex(groupsGrid);
-        parentPanel.remove(groupsGrid);
+    private void updateFleetsGrid(VerticalPanel parentPanel) {
+        int widgetIndex = parentPanel.getWidgetIndex(fleetsGrid);
+        parentPanel.remove(fleetsGrid);
         
-        int groupsCount = groupNameEntryFields.size();
-        groupsGrid = new Grid(groupsCount + 1, 4);
-        groupsGrid.setCellSpacing(3);
+        int fleetCount = fleetNameEntryFields.size();
+        fleetsGrid = new Grid(fleetCount + 1, 3);
+        fleetsGrid.setCellSpacing(4);
 
-        groupsGrid.setHTML(0, 1, stringConstants.name());
-        groupsGrid.setHTML(0, 2, stringConstants.no());
-        groupsGrid.setHTML(0, 3, stringConstants.color());
+        fleetsGrid.setHTML(0, 0, stringConstants.name());
+        fleetsGrid.setHTML(0, 1, stringConstants.no());
+        fleetsGrid.setHTML(0, 2, stringConstants.color());
 
-        for(int i = 0; i < groupsCount; i++) {
-            Label groupLabel = new Label((i+1) + ". " + stringConstants.group() + ":");
-            groupLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-            groupLabel.setWordWrap(false);
-            groupsGrid.setWidget(i+1, 0, groupLabel);
-            groupsGrid.setWidget(i+1, 1, groupNameEntryFields.get(i));
-            groupsGrid.setWidget(i+1, 2, groupOrderNoEntryFields.get(i));
-            groupsGrid.setWidget(i+1, 3, groupColorEntryFields.get(i));
+        for(int i = 0; i < fleetCount; i++) {
+            fleetsGrid.setWidget(i+1, 0, fleetNameEntryFields.get(i));
+            fleetsGrid.setWidget(i+1, 1, fleetOrderNoEntryFields.get(i));
+            fleetsGrid.setWidget(i+1, 2, fleetColorEntryFields.get(i));
         }
 
-        parentPanel.insert(groupsGrid, widgetIndex);
+        parentPanel.insert(fleetsGrid, widgetIndex);
     }
     
     @Override

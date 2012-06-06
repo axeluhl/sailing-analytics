@@ -35,6 +35,7 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -44,6 +45,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.RGBColor;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -533,15 +535,22 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private Fleet loadFleet(DBObject dbFleet) {
+        Fleet result;
         String name = (String) dbFleet.get(FieldNames.FLEET_NAME.name());
         Integer ordering = (Integer) dbFleet.get(FieldNames.FLEET_ORDERING.name());
-        Fleet result;
-        if (ordering != null) {
-            result = new FleetImpl(name, ordering);
-        } else {
-            result = new FleetImpl(name);
+        if (ordering == null) {
+            ordering = 0;
         }
+        Integer colorAsInt = (Integer) dbFleet.get(FieldNames.FLEET_COLOR.name());
+        Color color = null;
+        if(colorAsInt != null) {
+            int r = colorAsInt % 256;
+            int g = (colorAsInt / 256 ) % 256;
+            int b = (colorAsInt / 256 / 256) % 256;
+            color = new RGBColor(r, g, b);
+        }
+        result = new FleetImpl(name, ordering, color);
+
         return result;
     }
-
 }

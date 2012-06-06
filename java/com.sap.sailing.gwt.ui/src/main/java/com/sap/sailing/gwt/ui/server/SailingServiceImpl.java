@@ -55,6 +55,7 @@ import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.CountryCode;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
@@ -457,24 +458,30 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<RegattaDTO> getRegattas() throws IllegalArgumentException {
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         for (Regatta regatta : getService().getAllRegattas()) {
-            List<CompetitorDTO> competitorList = getCompetitorDTOs(regatta.getCompetitors());
-            RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), competitorList);
-            regattaDTO.races = getRaceDTOs(regatta);
-            regattaDTO.series = getSeriesDTOs(regatta);
-            BoatClass boatClass = regatta.getBoatClass();
-            if (boatClass != null) {
-                regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
-            }
-            if (!regattaDTO.races.isEmpty()) {
-                for (RaceDTO race : regattaDTO.races) {
-                    race.setRegatta(regattaDTO);
-                }
-                result.add(regattaDTO);
-            }
+//            if(Util.size(regatta.getAllRaces()) > 0) {
+                result.add(getRegattaDTO(regatta));
+//            }
         }
         return result;
     }
 
+    private RegattaDTO getRegattaDTO(Regatta regatta) {
+        List<CompetitorDTO> competitorList = getCompetitorDTOs(regatta.getCompetitors());
+        RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), competitorList);
+        regattaDTO.races = getRaceDTOs(regatta);
+        regattaDTO.series = getSeriesDTOs(regatta);
+        BoatClass boatClass = regatta.getBoatClass();
+        if (boatClass != null) {
+            regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getHullLength().getMeters());
+        }
+        if (!regattaDTO.races.isEmpty()) {
+            for (RaceDTO race : regattaDTO.races) {
+                race.setRegatta(regattaDTO);
+            }
+        }
+        return regattaDTO;
+    }
+    
     private List<SeriesDTO> getSeriesDTOs(Regatta regatta) {
         List<SeriesDTO> result = new ArrayList<SeriesDTO>();
         for (Series series : regatta.getSeries()) {
@@ -1964,9 +1971,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void createRegatta(String regattaName, String boatClassName, Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent) {
-        getService().apply(
+    public RegattaDTO createRegatta(String regattaName, String boatClassName, Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent) {
+        Regatta regatta = getService().apply(
                 new AddSpecificRegatta(regattaName, boatClassName, seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent));
+        return getRegattaDTO(regatta);
     }
 
 }

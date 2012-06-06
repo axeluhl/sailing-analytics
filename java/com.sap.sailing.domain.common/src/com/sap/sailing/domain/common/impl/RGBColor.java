@@ -35,6 +35,14 @@ public class RGBColor implements Color {
 
     @Override
     public String getAsHtml() {
-        return "#" + Integer.toHexString(red) + Integer.toHexString(green) + Integer.toHexString(blue);
+        return "#" + toBrowserHexValue(red) + toBrowserHexValue(green) + toBrowserHexValue(blue);
+    }
+    
+    private static String toBrowserHexValue(int number) {
+        StringBuilder builder = new StringBuilder(Integer.toHexString(number & 0xff));
+        while (builder.length() < 2) {
+            builder.append("0");
+        }
+        return builder.toString().toUpperCase();
     }
 }

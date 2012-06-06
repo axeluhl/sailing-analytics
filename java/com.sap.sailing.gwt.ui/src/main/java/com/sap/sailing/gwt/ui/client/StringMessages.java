@@ -310,9 +310,10 @@ public interface StringMessages extends Messages {
     String pleaseSelectABoatClass();
     String regattaWithThisNameAlreadyExists();
     String seriesWithThisNameAlreadyExists();
+    String fleetWithThisNameAlreadyExists();
+    String fleets();
     String series();
     String splitFleet();
-    String group();
-    String groups();
     String color();
+    String medalSeries();
 }
