@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
@@ -39,7 +40,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     /*
      * Map containing the windfield for easy retrieval with key as time point.
      */
-    protected TreeMap<Long, List<WindDTO>> timePointWindDTOMap;
+    protected SortedMap<Long, List<WindDTO>> timePointWindDTOMap;
     
     /* The points where ToolTip is to be displayed */
     protected Map<ToolTip, WindDTO> windFieldPoints;
@@ -79,7 +80,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     public void setWindField(WindFieldDTO wl) {
         this.wl = wl;
-        /*
+        
         timePointWindDTOMap.clear();
         if (wl != null) {
             for(WindDTO w : wl.getMatrix()) {
@@ -89,7 +90,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
                 timePointWindDTOMap.get(w.timepoint).add(w);
             }
         }
-        */
+        
     }
 
     public void setArrowColor(String arrowColor, String arrowHeadColor) {
@@ -220,20 +221,21 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         // canvas.getContext2d().clearRect(canvas.getAbsoluteLeft(), canvas.getAbsoluteTop(),
         // canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
         List<WindDTO> windDTOToDraw = new ArrayList<WindDTO>();
-        for (WindDTO windDTO : wl.getMatrix()) {
+      /*  for (WindDTO windDTO : wl.getMatrix()) {
             if (windDTO.timepoint.equals(date.getTime())) {
                 windDTOToDraw.add(windDTO);
             }
         }
-        /*
-        Entry<Long, List<WindDTO>> entry = (timePointWindDTOMap.floorEntry(date.getTime()));
-        
-        if(entry != null) {
-          windDTOToDraw = entry.getValue();
-        }*/
+        */
+        SortedMap<Long, List<WindDTO>> headMap = (timePointWindDTOMap.headMap(date.getTime()+1));
+    
+        if (!headMap.isEmpty()) {
+          windDTOToDraw = headMap.get(headMap.lastKey());
+        }
         logger.info("In WindFieldCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points" + " @ "
                 + date);
-        if (windDTOToDraw.size() == 0) {
+        //if (windDTOToDraw.size() == 0) {
+        if (timePointWindDTOMap.lastKey() < date.getTime()) {   
             timer.stop();
         } else {
             drawWindField(windDTOToDraw);
