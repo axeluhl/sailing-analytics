@@ -39,12 +39,12 @@ public class SeriesImpl extends NamedImpl implements Series, RaceColumnListener 
         fleetsInAscendingOrder = new ArrayList<Fleet>(fleetsByName.values());
         Collections.sort(fleetsInAscendingOrder);
         List<RaceColumnInSeries> myRaceColumns = new ArrayList<RaceColumnInSeries>();
-        for (String raceColumnName : raceColumnNames) {
-            addRaceColumn(raceColumnName, trackedRegattaRegistry);
-        }
         this.raceColumns = myRaceColumns;
         this.isMedal = isMedal;
         this.listeners = new HashSet<RaceColumnListener>();
+        for (String raceColumnName : raceColumnNames) {
+            addRaceColumn(raceColumnName, trackedRegattaRegistry);
+        }
     }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {

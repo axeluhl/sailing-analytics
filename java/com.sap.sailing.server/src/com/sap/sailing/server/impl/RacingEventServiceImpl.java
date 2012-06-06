@@ -221,14 +221,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private void loadStoredLeaderboardsAndGroups() {
         // Loading all leaderboard groups and the contained leaderboards
-        for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups()) {
+        for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups(this)) {
             leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 leaderboardsByName.put(leaderboard.getName(), leaderboard);
             }
         }
         // Loading the remaining leaderboards
-        for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup()) {
+        for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup(this)) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
         }
     }

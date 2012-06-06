@@ -24,6 +24,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Venue;
@@ -38,6 +39,7 @@ import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -47,13 +49,16 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
+import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
@@ -131,14 +136,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Leaderboard loadLeaderboard(String name) {
+    public Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Leaderboard result = null;
         try {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.LEADERBOARD_NAME.name(), name);
             for (DBObject o : leaderboardCollection.find(query)) {
-                result = loadLeaderboard(o);
+                result = loadLeaderboard(o, regattaRegistry);
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
@@ -149,12 +154,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<Leaderboard> getAllLeaderboards() {
+    public Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
             for (DBObject o : leaderboardCollection.find()) {
-                result.add(loadLeaderboard(o));
+                result.add(loadLeaderboard(o, regattaRegistry));
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
@@ -164,7 +169,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Leaderboard loadLeaderboard(DBObject dbLeaderboard) {
+    /**
+     * If the DBObject has a field {@link FieldNames#REGATTA_NAME} then the object represents a {@link RegattaLeaderboard}. Otherwise,
+     * a {@link FlexibleLeaderboard} will be loaded.
+     * @param regattaRegistry TODO
+     */
+    private Leaderboard loadLeaderboard(DBObject dbLeaderboard, RegattaRegistry regattaRegistry) {
         SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
         BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name());
         int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
@@ -173,6 +183,28 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
         }
         ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
+        String regattaName = (String) dbLeaderboard.get(FieldNames.REGATTA_NAME.name());
+        Leaderboard result;
+        if (regattaName == null) {
+            result = loadFlexibleLeaderboard(dbLeaderboard, scoreCorrection, resultDiscardingRule);
+        } else {
+            result = loadRegattaLeaderboard(regattaName, dbLeaderboard, scoreCorrection, resultDiscardingRule, regattaRegistry);
+        }
+        DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
+        loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections);
+        return result;
+    }
+
+    private RegattaLeaderboard loadRegattaLeaderboard(String regattaName, DBObject dbLeaderboard, SettableScoreCorrection scoreCorrection,
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, RegattaRegistry regattaRegistry) {
+        Regatta regatta = regattaRegistry.getRegatta(new RegattaName(regattaName));
+        RegattaLeaderboard result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
+        
+        return result;
+    }
+
+    private FlexibleLeaderboard loadFlexibleLeaderboard(DBObject dbLeaderboard,
+            SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         FlexibleLeaderboardImpl result = new FlexibleLeaderboardImpl(
                 (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
         BasicDBList dbRaceColumns = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMNS.name());
@@ -211,8 +243,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 raceColumn.setRaceIdentifier(fleetsByName.get(e.getKey()), e.getValue());
             }
         }
-        DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
-        loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections);
         return result;
     }
 
@@ -279,14 +309,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public LeaderboardGroup loadLeaderboardGroup(String name) {
+    public LeaderboardGroup loadLeaderboardGroup(String name, RegattaRegistry regattaRegistry) {
         DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         LeaderboardGroup leaderboardGroup = null;
         
         try {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), name);
-            leaderboardGroup = loadLeaderboardGroup(leaderboardGroupCollection.findOne(query));
+            leaderboardGroup = loadLeaderboardGroup(leaderboardGroupCollection.findOne(query), regattaRegistry);
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard group "+name+".");
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", t);
@@ -296,13 +326,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<LeaderboardGroup> getAllLeaderboardGroups() {
+    public Iterable<LeaderboardGroup> getAllLeaderboardGroups(RegattaRegistry regattaRegistry) {
         DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         Set<LeaderboardGroup> leaderboardGroups = new HashSet<LeaderboardGroup>();
         
         try {
             for (DBObject o : leaderboardGroupCollection.find()) {
-                leaderboardGroups.add(loadLeaderboardGroup(o));
+                leaderboardGroups.add(loadLeaderboardGroup(o, regattaRegistry));
             }
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
@@ -312,7 +342,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return leaderboardGroups;
     }
     
-    private LeaderboardGroup loadLeaderboardGroup(DBObject o) {
+    private LeaderboardGroup loadLeaderboardGroup(DBObject o, RegattaRegistry regattaRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         
         String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
@@ -323,14 +353,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (Object object : dbLeaderboardIds) {
             ObjectId dbLeaderboardId = (ObjectId) object;
             DBObject dbLeaderboard = leaderboardCollection.findOne(dbLeaderboardId);
-            leaderboards.add(loadLeaderboard(dbLeaderboard));
+            leaderboards.add(loadLeaderboard(dbLeaderboard, regattaRegistry));
         }
         
         return new LeaderboardGroupImpl(name, description, leaderboards);
     }
     
     @Override
-    public Iterable<Leaderboard> getLeaderboardsNotInGroup() {
+    public Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
@@ -338,7 +368,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
                     + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0; }");
             for (DBObject o : leaderboardCollection.find(query)) {
-                result.add(loadLeaderboard(o));
+                result.add(loadLeaderboard(o, regattaRegistry));
             }
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
