@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 
 /**
@@ -25,4 +26,24 @@ public interface TrackedRegattaRegistry {
     
     void removeTrackedRegatta(Regatta regatta);
 
+    /**
+     * A race needs to be associated with a {@link Regatta} so that {@link Regatta#getAllRaces()} returns it. Which
+     * regatta to associate the race with should usually be decided by the user. Once explicitly decided and stored in
+     * this registry by calling {@link #setRegattaForRace(Regatta, RaceDefinition)}, this information is preserved by
+     * this registry for future use so that when the race's {@link RaceDefinition#getId() ID} is recognized, the same
+     * regatta will be returned.
+     * <p>
+     * 
+     * If no such explicit assignment has been performed, an "appropriate" non-persistent default regatta will be
+     * selected and returned.
+     */
+    Regatta getOrCreateRegattaForRace(RaceDefinition race);
+    
+    /**
+     * Persistently remembers the association of the race with its {@link RaceDefinition#getId()} to the
+     * <code>regatta</code> with its {@link Regatta#getRegattaIdentifier() identifier} so that the next time
+     * {@link #getOrCreateRegattaForRace(RaceDefinition)} is called with <code>race</code> as argument,
+     * <code>regatta</code> will be returned.
+     */
+    void setRegattaForRace(Regatta regatta, RaceDefinition race);
 }

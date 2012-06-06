@@ -579,4 +579,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
+    @Override
+    public Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry) {
+        DBCollection raceIDToRegattaCollection = database.getCollection(CollectionNames.REGATTA_FOR_RACE_ID.name());
+        Map<String, Regatta> result = new HashMap<String, Regatta>();
+        for (DBObject o : raceIDToRegattaCollection.find()) {
+            Regatta regatta = regattaRegistry.getRegattaByName((String) o.get(FieldNames.REGATTA_NAME.name()));
+            if (regatta != null) {
+                result.put((String) o.get(FieldNames.RACE_ID_AS_STRING.name()), regatta);
+            } else {
+                logger.warning("Couldn't find regatta " + o.get(FieldNames.REGATTA_NAME.name())
+                        + ". Cannot restore race associations with this regatta.");
+            }
+        }
+        return result;
+    }
 }

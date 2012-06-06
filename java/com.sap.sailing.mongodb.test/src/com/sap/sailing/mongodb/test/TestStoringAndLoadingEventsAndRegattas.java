@@ -109,23 +109,18 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     @Test
     public void testLoadStoreRegattaLeaderboardWithScoreCorrections() {
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
-        final TrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false) {
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        final TrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false, boatClass) {
             private static final long serialVersionUID = 1234L;
             @Override
             public RegattaAndRaceIdentifier getRaceIdentifier() {
                 return new RegattaNameAndRaceName("Kieler Woche (29erXX)", "Yellow Race 2");
             }
         };
-        RacingEventService res = new RacingEventServiceImpl(getMongoService()) {
-            @Override
-            public TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
-                return q2YellowTrackedRace;
-            }
-        };
+        RacingEventService res = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
         final int numberOfQualifyingRaces = 5;
         final int numberOfFinalRaces = 7;
         final String regattaBaseName = "Kieler Woche";
-        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         Regatta regattaProxy = createRegatta(regattaBaseName, boatClass, /* persistent */ true);
         Regatta regatta = res.createRegatta(regattaProxy.getBaseName(), regattaProxy.getBoatClass().getName(),
                 regattaProxy.getSeries(), regattaProxy.isPersistent());
@@ -137,7 +132,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
         res.apply(new UpdateLeaderboardMaxPointsReason(regattaLeaderboard.getName(), q2.getName(), hasso.getId().toString(),
                 MaxPointsReason.DNF, MillisecondsTimePoint.now()));
-        RacingEventService resForLoading = new RacingEventServiceImpl(getMongoService());
+        RacingEventService resForLoading = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
         Regatta loadedRegatta = resForLoading.getRegattaByName("Kieler Woche (29erXX)");
         assertNotNull(loadedRegatta);
         assertEquals(regatta.getName(), loadedRegatta.getName());
@@ -151,6 +146,22 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertTrue(loadedLeaderboard instanceof RegattaLeaderboard);
         RegattaLeaderboard loadedRegattaLeaderboard = (RegattaLeaderboard) loadedLeaderboard;
         assertSame(loadedRegatta, loadedRegattaLeaderboard.getRegatta());
+        // now re-associate the tracked race to let score correction "snap" to competitor:
+        final RaceColumnInSeries loadedQ2 = loadedRegatta.getSeriesByName("Qualifying").getRaceColumnByName("Q2");
+        final Fleet loadedYellow = loadedQ2.getFleetByName("Yellow");
+        resForLoading.apply(new ConnectTrackedRaceToLeaderboardColumn(loadedLeaderboard.getName(), loadedQ2.getName(), loadedYellow
+                .getName(), q2YellowTrackedRace.getRaceIdentifier()));
+        MaxPointsReason hassosLoadedMaxPointsReason = loadedLeaderboard.getScoreCorrection().getMaxPointsReason(hasso, loadedQ2);
+        assertEquals(MaxPointsReason.DNF, hassosLoadedMaxPointsReason);
+    }
+
+    private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final TrackedRace q2YellowTrackedRace) {
+        return new RacingEventServiceImpl(getMongoService()) {
+            @Override
+            public TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier) {
+                return q2YellowTrackedRace;
+            }
+        };
     }
     
     @Test

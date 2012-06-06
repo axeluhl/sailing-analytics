@@ -62,17 +62,19 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         synchronized (trackedRaces) {
             logger.info("adding tracked race for "+trackedRace.getRace()+" to tracked regatta "+getRegatta().getName()+
                     " with regatta hash code "+getRegatta().hashCode());
-            trackedRaces.put(trackedRace.getRace(), trackedRace);
-            Collection<TrackedRace> coll = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
-            if (coll == null) {
-                coll = new ArrayList<TrackedRace>();
-                trackedRacesByBoatClass.put(trackedRace.getRace().getBoatClass(), coll);
+            TrackedRace oldTrackedRace = trackedRaces.put(trackedRace.getRace(), trackedRace);
+            if (oldTrackedRace != trackedRace) {
+                Collection<TrackedRace> coll = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
+                if (coll == null) {
+                    coll = new ArrayList<TrackedRace>();
+                    trackedRacesByBoatClass.put(trackedRace.getRace().getBoatClass(), coll);
+                }
+                coll.add(trackedRace);
+                for (RaceListener listener : raceListeners) {
+                    listener.raceAdded(trackedRace);
+                }
+                trackedRaces.notifyAll();
             }
-            coll.add(trackedRace);
-            for (RaceListener listener : raceListeners) {
-                listener.raceAdded(trackedRace);
-            }
-            trackedRaces.notifyAll();
         }
     }
     

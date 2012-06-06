@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -36,5 +37,14 @@ public class DummyTrackedRegattaRegistry implements TrackedRegattaRegistry {
     @Override
     public void removeTrackedRegatta(Regatta regatta) {
         regattaTrackingCache.remove(regatta);
+    }
+
+    @Override
+    public Regatta getOrCreateRegattaForRace(RaceDefinition race) {
+        return null;
+    }
+
+    @Override
+    public void setRegattaForRace(Regatta regatta, RaceDefinition race) {
     }
 }

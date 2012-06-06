@@ -54,4 +54,6 @@ public interface DomainObjectFactory {
     Regatta loadRegatta(String name, TrackedRegattaRegistry trackedRegattaRegistry);
 
     Iterable<Regatta> loadAllRegattas(TrackedRegattaRegistry trackedRegattaRegistry);
+
+    Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry);
 }

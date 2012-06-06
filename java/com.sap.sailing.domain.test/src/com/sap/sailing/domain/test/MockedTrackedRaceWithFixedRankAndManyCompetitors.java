@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.test;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,6 +34,10 @@ public class MockedTrackedRaceWithFixedRankAndManyCompetitors extends MockedTrac
             }
             @Override
             public BoatClass getBoatClass() {
+                return null;
+            }
+            @Override
+            public Serializable getId() {
                 return null;
             }
         };

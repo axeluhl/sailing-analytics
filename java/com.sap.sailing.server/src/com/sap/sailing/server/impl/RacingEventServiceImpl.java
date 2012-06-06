@@ -167,6 +167,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private final Map<Regatta, DynamicTrackedRegatta> regattaTrackingCache;
     
     private final Set<OperationExecutionListener> operationExecutionListeners;
+    
+    /**
+     * Keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
+     * {@link #setRegattaForRace(Regatta, RaceDefinition)}.
+     */
+    private final Map<String, Regatta> persistentRegattasForRaceIDs;
 
     /**
      * The globally used configuration of the time delay (in milliseconds) to the 'live' timepoint used for each new tracked race.  
@@ -194,11 +200,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         leaderboardsByName = new HashMap<String, Leaderboard>();
         operationExecutionListeners = new HashSet<OperationExecutionListener>();
         courseListeners = new HashMap<RaceDefinition, CourseChangeReplicator>();
+        persistentRegattasForRaceIDs = new HashMap<String, Regatta>();
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
         addFlexibleLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, new int[] { 5, 8 });
         loadStoredRegattas();
+        loadRaceIDToRegattaAssociations();
         loadStoredLeaderboardsAndGroups();
         loadStoredEvents();
     }
@@ -207,6 +215,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE.getMongoObjectFactory(mongoDBService));
     }
 
+    private void loadRaceIDToRegattaAssociations() {
+        persistentRegattasForRaceIDs.putAll(domainObjectFactory.loadRaceIDToRegattaAssociations(this));
+    }
+    
     private void loadStoredRegattas() {
         for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
             regattasByName.put(regatta.getName(), regatta);
@@ -1358,6 +1370,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
         mongoObjectFactory.storeEvent(result);
         return result;
+    }
+
+    @Override
+    public Regatta getOrCreateRegattaForRace(RaceDefinition race) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setRegattaForRace(Regatta regatta, RaceDefinition race) {
+        persistentRegattasForRaceIDs.put(race.getId().toString(), regatta);
+        mongoObjectFactory.storeRegattaForRaceID(race.getId().toString(), regatta);
     }
 
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -11,12 +13,23 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     private final Course course;
     private final Iterable<Competitor> competitors;
     private final BoatClass boatClass;
+    private final Serializable id;
     
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<Competitor> competitors) {
+        this(name, course, boatClass, competitors, /* use name as default ID */ name);
+    }
+
+    public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<Competitor> competitors, Serializable id) {
         super(name);
         this.course = course;
         this.competitors = competitors;
         this.boatClass = boatClass;
+        this.id = id;
+    }
+
+    @Override
+    public Serializable getId() {
+        return id;
     }
 
     @Override
