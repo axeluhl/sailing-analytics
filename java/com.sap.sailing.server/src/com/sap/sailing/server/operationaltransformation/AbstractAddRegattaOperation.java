@@ -6,13 +6,11 @@ public abstract class AbstractAddRegattaOperation extends AbstractRacingEventSer
     private static final long serialVersionUID = 4596134166642095364L;
     private final String baseEventName;
     private final String boatClassName;
-    private final boolean boatClassTypicallyStartsUpwind;
     
-    public AbstractAddRegattaOperation(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind) {
+    public AbstractAddRegattaOperation(String regattaName, String boatClassName) {
         super();
         this.baseEventName = regattaName;
         this.boatClassName = boatClassName;
-        this.boatClassTypicallyStartsUpwind = boatClassTypicallyStartsUpwind;
     }
 
     protected String getBaseEventName() {
@@ -22,9 +20,4 @@ public abstract class AbstractAddRegattaOperation extends AbstractRacingEventSer
     protected String getBoatClassName() {
         return boatClassName;
     }
-
-    protected boolean isBoatClassTypicallyStartsUpwind() {
-        return boatClassTypicallyStartsUpwind;
-    }
-
 }

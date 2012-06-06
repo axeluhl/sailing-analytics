@@ -26,7 +26,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final String baseEventName = "Kiel Week 2012";
         final String boatClassName = "49er";
         final Iterable<Series> series = Collections.emptyList();
-        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true, series, /* persistent */ true);
+        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, series, /* persistent */ true);
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));
         assertNotNull(replicatedRegatta);
@@ -45,7 +45,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
                 Arrays.asList(new Fleet[] { new FleetImpl("Gold", 1), new FleetImpl("Silver", 2) }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Series medal = new SeriesImpl("Medal", /* isMedal */ true,
                 Arrays.asList(new Fleet[] { new FleetImpl("Medal") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
-        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true,
+        Regatta masterRegatta = master.createRegatta(baseEventName, boatClassName,
                 Arrays.asList(new Series[] { qualification, finals, medal }), /* persistent */ true);
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));

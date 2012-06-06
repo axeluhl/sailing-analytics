@@ -1964,10 +1964,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void createRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind, Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent) {
+    public void createRegatta(String regattaName, String boatClassName, Map<String, Pair<List<Pair<String, Integer>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent) {
         getService().apply(
-                new AddSpecificRegatta(regattaName, boatClassName, boatClassTypicallyStartsUpwind,
-                        seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent));
+                new AddSpecificRegatta(regattaName, boatClassName, seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent));
     }
 
 }
