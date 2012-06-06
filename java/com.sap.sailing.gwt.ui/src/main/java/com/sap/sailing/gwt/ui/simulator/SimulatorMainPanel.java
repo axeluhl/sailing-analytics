@@ -76,6 +76,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private final ErrorReporter errorReporter;
     private final int xRes;
     private final int yRes;
+    private final boolean autoUpdate;
     
     private class WindControlCapture implements ValueChangeHandler<Double> {
 
@@ -92,7 +93,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             sliderBar.setTitle(String.valueOf(Math.round(sliderBar.getCurrentValue())));
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
-            // update();
+            if (autoUpdate) {
+                update();
+            }
         }
 
     }
@@ -147,13 +150,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                 WindPatternDTO pattern = patternNameDTOMap.get(windPattern);
                 simulatorSvc.getWindPatternDisplay(pattern, new PatternRetriever(windPattern));
             }
-
+            simulatorMap.reset();
         }
 
     }
 
     public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter,
-            int xRes, int yRes) {
+            int xRes, int yRes, boolean autoUpdate) {
 
         super();
 
@@ -162,6 +165,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         this.errorReporter = errorReporter;
         this.xRes = xRes;
         this.yRes = yRes;
+        this.autoUpdate = autoUpdate;
         
         leftPanel = new FlowPanel();
         rightPanel = new FlowPanel();
