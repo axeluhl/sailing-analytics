@@ -698,10 +698,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public synchronized TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
-        DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(getRegatta(raceIdentifier));
+        DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
-        return trackedRegatta.createTrackedRace(race, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                /* raceDefinitionSetToUpdate */ null);
+        return trackedRegatta.createTrackedRace(race, windStore, delayToLiveInMillis,
+                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
+                /* raceDefinitionSetToUpdate */null);
     }
     
     @Override

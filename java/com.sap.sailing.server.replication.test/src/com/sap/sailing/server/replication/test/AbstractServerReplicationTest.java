@@ -52,20 +52,39 @@ public abstract class AbstractServerReplicationTest {
      */
     @Before
     public void setUp() throws Exception {
-        Pair<ReplicationService, ReplicationMasterDescriptor> result = basicSetUp();
+        Pair<ReplicationService, ReplicationMasterDescriptor> result = basicSetUp(true, /* master=null means create a new one */ null,
+                /* replica=null means create a new one */ null);
         result.getA().startToReplicateFrom(result.getB());
     }
 
     /**
      * Drops the test DB.
+     * 
+     * @param master
+     *            if not <code>null</code>, the value will be used for {@link #master}; otherwise, a new racing event
+     *            service will be created as master
+     * @param replica
+     *            if not <code>null</code>, the value will be used for {@link #replica}; otherwise, a new racing event
+     *            service will be created as replica
      */
-    protected Pair<ReplicationService, ReplicationMasterDescriptor> basicSetUp() throws FileNotFoundException, Exception,
+    protected Pair<ReplicationService, ReplicationMasterDescriptor> basicSetUp(
+            boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws FileNotFoundException, Exception,
             JMSException, UnknownHostException {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
-        mongoDBService.getDB().dropDatabase();
+        if (dropDB) {
+            mongoDBService.getDB().dropDatabase();
+        }
         resolveAgainst = DomainFactory.INSTANCE;
-        master = new RacingEventServiceImpl(mongoDBService);
-        replica = new RacingEventServiceImpl(mongoDBService);
+        if (master != null) {
+            this.master = master;
+        } else {
+            this.master = new RacingEventServiceImpl(mongoDBService);
+        }
+        if (replica != null) {
+            this.replica = replica;
+        } else {
+            this.replica = new RacingEventServiceImpl(mongoDBService);
+        }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         final String IN_VM_BROKER_URL = "vm://localhost-jms-connection?broker.useJmx=false";
         final String activeMQPersistenceParentDir = System.getProperty("java.io.tmpdir");
