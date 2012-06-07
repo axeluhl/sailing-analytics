@@ -118,18 +118,18 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
         try {
             long xAxisMin = chartSelectionEvent.getXAxisMinAsLong();
             long xAxisMax = chartSelectionEvent.getXAxisMaxAsLong();
-            if(!isZoomed) {
+            if (!isZoomed) {
                 isZoomed = true;
             }
             timeZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
-            // after the selection change event, another click event is sent with the mouse position on the "Reset Zoom" button; ignore that
-            ignoreNextClickEvent = true;
         } catch (Throwable t) {
             // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
             timeZoomProvider.resetTimeZoom(this);
             // Trigger the redrawing... otherwise chart wouldn't reset the zoom
             chart.redraw();
             isZoomed = false;
+            // after the selection change event, another click event is sent with the mouse position on the "Reset Zoom" button; ignore that
+            ignoreNextClickEvent = true;
         }
         return true;
     }

@@ -86,6 +86,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
 
     @Test
     public void testLoadStoreSimpleRegattaLeaderboard() {
+        // explicitly drop; it seems that the overall dropDatabase isn't always effective yet when this test is run
+        getMongoService().getDB().getCollection(CollectionNames.LEADERBOARDS.name()).drop();
         RacingEventService res = new RacingEventServiceImpl(getMongoService());
         final int numberOfQualifyingRaces = 5;
         final int numberOfFinalRaces = 7;
