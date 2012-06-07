@@ -95,7 +95,7 @@ public abstract class AbstractServerReplicationTest {
                 IN_VM_BROKER_URL, activeMQPersistenceParentDir));
         brokerMgr.startMessageBroker(/* useJmx */ false);
         brokerMgr.createAndStartConnection();
-        masterReplicator = new ReplicationServiceImpl(rim, brokerMgr, master);
+        masterReplicator = new ReplicationServiceImpl(rim, brokerMgr, this.master);
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost());
         masterReplicator.registerReplica(replicaDescriptor);
         ReplicationMasterDescriptor masterDescriptor = new ReplicationMasterDescriptor() {
@@ -132,7 +132,8 @@ public abstract class AbstractServerReplicationTest {
                 return null;
             }
         };
-        ReplicationService replicaReplicator = new ReplicationServiceTestImpl(resolveAgainst, rim, brokerMgr, replicaDescriptor, replica, master, masterReplicator);
+        ReplicationService replicaReplicator = new ReplicationServiceTestImpl(resolveAgainst, rim, brokerMgr,
+                replicaDescriptor, this.replica, this.master, masterReplicator);
         Pair<ReplicationService, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
         return result;
     }
