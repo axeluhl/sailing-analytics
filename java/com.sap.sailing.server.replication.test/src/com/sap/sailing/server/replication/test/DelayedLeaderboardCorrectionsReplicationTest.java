@@ -99,7 +99,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 masterLeaderboardReloaded.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
         // replicate the re-loaded environment
-        Pair<ReplicationService, ReplicationMasterDescriptor> descriptors = basicSetUp(/* dropDB */ false, master, replica);
+        Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> descriptors = basicSetUp(/* dropDB */ false, master, replica);
         replicaReplicator = descriptors.getA();
         masterDescriptor = descriptors.getB();
         replicaReplicator.startToReplicateFrom(masterDescriptor);
