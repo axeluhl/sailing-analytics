@@ -240,14 +240,17 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         logger.info("loading stored leaderboards and groups");
         // Loading all leaderboard groups and the contained leaderboards
         for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups(this)) {
+            logger.info("loaded leaderboard group "+leaderboardGroup.getName()+" into "+this);
             leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 leaderboardsByName.put(leaderboard.getName(), leaderboard);
+                logger.info("loaded leaderboard "+leaderboard.getName()+" into "+this);
             }
         }
         // Loading the remaining leaderboards
         for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup(this)) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
+            logger.info("loaded leaderboard "+leaderboard.getName()+" into "+this);
         }
         logger.info("done with loading stored leaderboards and groups");
     }
@@ -270,7 +273,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
         Regatta regatta = getRegatta(regattaIdentifier);
-        logger.info("adding regatta leaderboard for regatta "+regatta==null?"null":regatta.getName()+" to "+this);
+        logger.info("adding regatta leaderboard for regatta "+(regatta==null?"null":regatta.getName())+" to "+this);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final PrintWriter pw = new PrintWriter(new OutputStreamWriter(bos));
         new Exception().printStackTrace(pw);

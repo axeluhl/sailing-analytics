@@ -90,8 +90,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         timer.setAutoAdvance(false);
         setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
         timeSlider.clearMarkersAndLabelsAndTicks();
-        timeSlider.redraw(); // TODO see also bug 735: is this necessary? redrawAllMarkers always redraws the timeSlider when done
-        initTimerPosition(lastRaceTimesInfo); // TODO see also bug 735: this could be the reason why the time is altered; suggestion: remove this line
+//        initTimerPosition(lastRaceTimesInfo); // TODO see also bug 735: this could be the reason why the time is altered; suggestion: remove this line
         redrawAllMarkers(lastRaceTimesInfo);
     }
 
@@ -102,7 +101,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         timer.setAutoAdvance(true);
         initMinMax(this.lastRaceTimesInfo);
         timeSlider.clearMarkersAndLabelsAndTicks();
-        timeSlider.redraw();
         redrawAllMarkers(lastRaceTimesInfo);
     }
 

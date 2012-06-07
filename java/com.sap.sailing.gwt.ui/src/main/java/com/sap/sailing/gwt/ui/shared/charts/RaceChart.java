@@ -123,9 +123,6 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
                 isZoomed = true;
             }
             timeZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
-//            long tickInterval = (xAxisMax - xAxisMin) / TICKCOUNT;
-//            chart.getXAxis().setTickInterval(tickInterval);
-//            chart.redraw();
         } catch (Throwable t) {
             // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
             timeZoomProvider.resetTimeZoom(this);
@@ -138,7 +135,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     }
 
     protected boolean onClick(ChartClickEvent chartClickEvent) {
-        if (!isLoading && !isZoomed) {
+        if (!isLoading) { // TODO click on "Reset Zoom" button may be interpreted here as a click on the chart; identify those clicks and ignore
             timer.setPlayMode(PlayModes.Replay);
             timer.setTime(chartClickEvent.getXAxisValueAsLong());
         }
