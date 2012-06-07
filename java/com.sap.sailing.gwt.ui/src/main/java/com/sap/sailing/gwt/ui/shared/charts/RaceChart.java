@@ -138,7 +138,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     }
 
     protected boolean onClick(ChartClickEvent chartClickEvent) {
-        if (!isLoading && !isZoomed) {
+        if (!isLoading) {
             timer.setPlayMode(PlayModes.Replay);
             timer.setTime(chartClickEvent.getXAxisValueAsLong());
         }
