@@ -39,7 +39,6 @@ public abstract class AbstractMongoDBTest {
         mongo.dropDatabase(getDBConfiguration().getDatabaseName());
         db = mongo.getDB(getDBConfiguration().getDatabaseName());
         assertNotNull(db);
-        Thread.sleep(1000); // wait for dropDatabase to take effect
     }
 
     protected MongoDBService getMongoService() {
