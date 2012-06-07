@@ -43,8 +43,6 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     protected Date minTimepoint;
     protected Date maxTimepoint;
     
-    protected boolean ignoreClickOnce;
-
     protected RaceIdentifier selectedRaceIdentifier;
     protected RaceTimesInfoDTO lastRaceTimesInfo;
 
@@ -61,6 +59,8 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     
     /** the tick count must be the same as TimeSlider.TICKCOUNT, otherwise the time ticks will be not synchronized */  
     private final int TICKCOUNT = 10;
+
+    private boolean ignoreNextClickEvent;
     
     public RaceChart(SailingServiceAsync sailingService, Timer timer, TimeZoomProvider timeZoomProvider, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
@@ -118,11 +118,12 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
         try {
             long xAxisMin = chartSelectionEvent.getXAxisMinAsLong();
             long xAxisMax = chartSelectionEvent.getXAxisMaxAsLong();
-
             if(!isZoomed) {
                 isZoomed = true;
             }
             timeZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
+            // after the selection change event, another click event is sent with the mouse position on the "Reset Zoom" button; ignore that
+            ignoreNextClickEvent = true;
         } catch (Throwable t) {
             // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
             timeZoomProvider.resetTimeZoom(this);
@@ -130,14 +131,17 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
             chart.redraw();
             isZoomed = false;
         }
-        
         return true;
     }
 
     protected boolean onClick(ChartClickEvent chartClickEvent) {
-        if (!isLoading) { // TODO click on "Reset Zoom" button may be interpreted here as a click on the chart; identify those clicks and ignore
-            timer.setPlayMode(PlayModes.Replay);
-            timer.setTime(chartClickEvent.getXAxisValueAsLong());
+        if (ignoreNextClickEvent) {
+            ignoreNextClickEvent = false;
+        } else {
+            if (!isLoading) {
+                timer.setPlayMode(PlayModes.Replay);
+                timer.setTime(chartClickEvent.getXAxisValueAsLong());
+            }
         }
         return true;
     }

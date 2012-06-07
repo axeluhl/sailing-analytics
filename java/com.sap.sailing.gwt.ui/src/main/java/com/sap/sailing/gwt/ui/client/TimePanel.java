@@ -30,7 +30,7 @@ import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
 import com.sap.sailing.gwt.ui.shared.controls.slider.TimeSlider;
 
-public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener,  TimeZoomChangeListener,
+public class TimePanel<T extends TimePanelSettings> extends FormPanel implements Component<T>, TimeListener, TimeZoomChangeListener,
     PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected boolean isTimeZoomed;
