@@ -185,6 +185,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
+        logger.info("Created "+this);
         tractracDomainFactory = DomainFactory.INSTANCE;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
@@ -266,14 +267,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
         Regatta regatta = getRegatta(regattaIdentifier);
-        logger.info("adding regatta leaderboard for regatta "+regatta.getName());
+        logger.info("adding regatta leaderboard for regatta "+regatta==null?"null":regatta.getName()+" to "+this);
         RegattaLeaderboard result = null;
         if (regatta != null) {
             result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                     discardThresholds), new LowerScoreIsBetter());
             synchronized (leaderboardsByName) {
                 if (leaderboardsByName.containsKey(result.getName())) {
-                    throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists");
+                    throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists in "+this);
                 }
                 leaderboardsByName.put(result.getName(), result);
             }
