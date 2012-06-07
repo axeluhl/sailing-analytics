@@ -52,7 +52,7 @@ public abstract class AbstractServerReplicationTest {
      */
     @Before
     public void setUp() throws Exception {
-        Pair<ReplicationService, ReplicationMasterDescriptor> result = basicSetUp(true, /* master=null means create a new one */ null,
+        Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(true, /* master=null means create a new one */ null,
                 /* replica=null means create a new one */ null);
         result.getA().startToReplicateFrom(result.getB());
     }
@@ -67,7 +67,7 @@ public abstract class AbstractServerReplicationTest {
      *            if not <code>null</code>, the value will be used for {@link #replica}; otherwise, a new racing event
      *            service will be created as replica
      */
-    protected Pair<ReplicationService, ReplicationMasterDescriptor> basicSetUp(
+    protected Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> basicSetUp(
             boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws FileNotFoundException, Exception,
             JMSException, UnknownHostException {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
@@ -132,9 +132,9 @@ public abstract class AbstractServerReplicationTest {
                 return null;
             }
         };
-        ReplicationService replicaReplicator = new ReplicationServiceTestImpl(resolveAgainst, rim, brokerMgr,
+        ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(resolveAgainst, rim, brokerMgr,
                 replicaDescriptor, this.replica, this.master, masterReplicator);
-        Pair<ReplicationService, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
+        Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
         return result;
     }
 
@@ -147,7 +147,7 @@ public abstract class AbstractServerReplicationTest {
         Activator.removeTemporaryTestBrokerPersistenceDirectory(brokerPersistenceDir);
     }
 
-    private static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
+    static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
         private final DomainFactory resolveAgainst;
         private final RacingEventService master;
         private final ReplicaDescriptor replicaDescriptor;
@@ -169,11 +169,19 @@ public abstract class AbstractServerReplicationTest {
         @Override
         public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException,
                 ClassNotFoundException, JMSException {
+            Replicator replicator = startToReplicateFromButDontYetFetchInitialLoad(master, /* startReplicatorSuspended */ true);
+            initialLoad();
+            replicator.setSuspended(false); // resume after initial load
+        }
+
+        protected Replicator startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
+                throws JMSException, UnknownHostException {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             TopicSubscriber replicationSubscription = master.getTopicSubscriber(replicaDescriptor.getUuid().toString());
-            replicationSubscription.setMessageListener(new Replicator(master, this));
-            initialLoad();
+            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended);
+            replicationSubscription.setMessageListener(replicator);
+            return replicator;
         }
 
         /**
@@ -181,7 +189,7 @@ public abstract class AbstractServerReplicationTest {
          * {@link RacingEventServiceImpl#serializeForInitialReplication(ObjectOutputStream)} and
          * {@link RacingEventServiceImpl#initiallyFillFrom(ObjectInputStream)} through a piped input/output stream.
          */
-        private void initialLoad() throws IOException, ClassNotFoundException {
+        protected void initialLoad() throws IOException, ClassNotFoundException {
             PipedOutputStream pos = new PipedOutputStream();
             PipedInputStream pis = new PipedInputStream(pos);
             final ObjectOutputStream oos = new ObjectOutputStream(pos);
