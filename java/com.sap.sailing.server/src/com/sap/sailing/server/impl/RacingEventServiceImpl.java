@@ -233,6 +233,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     private void loadStoredLeaderboardsAndGroups() {
+        logger.info("loading stored leaderboards and groups");
         // Loading all leaderboard groups and the contained leaderboards
         for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups(this)) {
             leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
@@ -244,10 +245,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup(this)) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
         }
+        logger.info("done with loading stored leaderboards and groups");
     }
     
     @Override
     public FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds) {
+        logger.info("adding flexible leaderboard "+name);
         FlexibleLeaderboard result = new FlexibleLeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 discardThresholds), new LowerScoreIsBetter());
         synchronized (leaderboardsByName) {
@@ -263,6 +266,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
         Regatta regatta = getRegatta(regattaIdentifier);
+        logger.info("adding regatta leaderboard for regatta "+regatta.getName());
         RegattaLeaderboard result = null;
         if (regatta != null) {
             result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
