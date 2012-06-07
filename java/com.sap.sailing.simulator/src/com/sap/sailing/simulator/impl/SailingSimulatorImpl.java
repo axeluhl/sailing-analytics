@@ -1,7 +1,12 @@
 package com.sap.sailing.simulator.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.MeterDistance;
@@ -124,157 +129,110 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		return new PathImpl(lst);
 	}
 	
-	private Path createForwardDynamic() {
+	private Path createDjikstra() {
+		//retrieve simulation parameters
 		Boundary boundary = simulationParameters.getBoundaries();
-		WindField wf = simulationParameters.getWindField();
-		PolarDiagram pd = simulationParameters.getBoatPolarDiagram();
+		WindField windField = simulationParameters.getWindField();
+		PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
 		Position start = simulationParameters.getCourse().get(0);
 		Position end = simulationParameters.getCourse().get(1);
 		TimePoint startTime = new MillisecondsTimePoint(0);
-		List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
 		
-		Position currentPosition = start;
-		TimePoint currentTime = startTime;
-		
+		//the solution path
+		LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
+				
+		//initiate grid
 		int gridv = 10; // number of vertical grid steps
 		int gridh = 30; // number of horizontal grid steps
 		Position[][] sailGrid = boundary.extractGrid(gridh, gridv);
 		
+		//create adjacency graph including start and end 
+		Map<Position,List<Position>> graph = new HashMap<Position, List<Position>>();
+		graph.put(start, Arrays.asList(sailGrid[0]));
+		for(int i = 0; i < gridv-1; i++) {
+			for(Position p : sailGrid[i]) {
+				graph.put(p, Arrays.asList(sailGrid[i+1]));
+			}	
+		}
+		for(Position p: sailGrid[gridv-1]) {
+			graph.put(p, Arrays.asList(end));
+		}
 		
+		//create backwards adjacency graph, required to reconstruct the optimal path
+		Map<Position, List<Position>> backGraph = new HashMap<Position, List<Position>>();
+		backGraph.put(end, Arrays.asList(sailGrid[gridv-1]));
+		for(int i = gridv-2; i>0; i--) {
+			for(Position p: sailGrid[i]) {
+				backGraph.put(p, Arrays.asList(sailGrid[i-1]));
+			}
+		}
+		for(Position p : sailGrid[0]) {
+			backGraph.put(p, Arrays.asList(start));
+		}
 		
+		//create tentative distance matrix
+		Map<Position, Double> tentativeDistances = new HashMap<Position, Double>();
+		for(Position p : graph.keySet()) {
+			tentativeDistances.put(p, Double.POSITIVE_INFINITY);
+		}
+		tentativeDistances.put(start, 0.0);
 		
-		/*
-		stretch.x <- 0.5 ## stretch-factor for horizontal grid
+		//create set of unvisited nodes
+		List<Position> unvisited = new ArrayList<Position>(graph.keySet());		
 		
-		grid.x <- (-grid.h:grid.h)/grid.h*stretch.x
-		grid.y <- (0:grid.v)/grid.v
+		//set the initial node as current
+		Position currentPosition = start;
+		TimePoint currentTime = startTime;
 		
-		sail.grid <- expand.grid(grid.x,grid.y)
-		*/
+		//search loop
+		while(unvisited.contains(end)) {
+			
+			TimedPosition currentTimedPosition = new TimedPositionImpl(currentTime, currentPosition);
+			SpeedWithBearing currentWind = windField.getWind(currentTimedPosition);
+			polarDiagram.setWind(currentWind);
+			
+			List<Position> unvisitedNeighbours = graph.get(currentPosition);
+			unvisitedNeighbours.retainAll(unvisited);
+			for(Position p : unvisitedNeighbours) {
+				Bearing bearingToP = currentPosition.getBearingGreatCircle(p);
+				Distance distanceToP = currentPosition.getDistance(p);
+				Speed speedToP = polarDiagram.getSpeedAtBearing(bearingToP);
+				//multiplied by 1000 to have milliseconds
+				Double timeToP = 1000 * (distanceToP.getMeters() / speedToP.getMetersPerSecond());
+				Double tentativeDistanceToP = currentTime.asMillis() + timeToP;
+				if (tentativeDistanceToP < tentativeDistances.get(p)) {
+					tentativeDistances.put(p, tentativeDistanceToP);
+				}
+			}
+			unvisited.remove(currentPosition);
+			
+			Map<Position, Double> unvisitedTentativeDistances =  new HashMap<Position, Double>(tentativeDistances);
+			unvisitedTentativeDistances.entrySet().retainAll(unvisited);
+			Double minTentativeDistance = Collections.min(unvisitedTentativeDistances.values());
+			for (Position p : unvisitedTentativeDistances.keySet()) {
+				if( unvisitedTentativeDistances.get(p) == minTentativeDistance ) {
+					currentPosition = p;
+					currentTime = new MillisecondsTimePoint(minTentativeDistance.longValue());
+					break;
+				}
+			}
+			
+		}	
 		
-		
-		/*for(idxv=1; idxv<=hridv; idxv++) {
-		
-		  paths.new <- vector("list",2*grid.h+1)
-		  duras.new <- vector("list",2*grid.h+1)
-		  alldur <-  NULL
-		
-		  if (idx.v==1) {
-		    range1 <- 0
-		  } else {
-		    range1 <- grid.h
-		  }
-		
-		  if (idx.v==grid.v) {
-		    range2 <- 0
-		  } else {
-		    range2 <- grid.h
-		  }
-		  
-		  for(idx.h2 in -range2:range2) {
-		
-		    alldur <- NULL
-		    
-		    for(idx.h1 in -range1:range1) {
-		
-		      duration.h1h2 <- duration(idx.h1,idx.h2,idx.v)
-		      
-		      if (duration.h1h2 == Inf) {
-		        next
-		      }
-		      
-		      if (idx.v==1) {
-		        dur <- data.frame(duration=signif(duration.h1h2,digits=sig.digits),hidx=idx.h1+range1+1,pidx=1)
-		        if (is.null(alldur)) {
-		          alldur <- dur
-		        } else {
-		          alldur <- rbind(alldur,dur)
-		        }
-		        
-		      } else {
-		
-		        for(pidx in 1:length(paths[[idx.h1+range1+1]])) {
-		
-		          curdur = signif(duration.h1h2 + duras[[idx.h1+range1+1]][pidx],digits=sig.digits)
-		          
-		          dur <- data.frame(duration=curdur,hidx=idx.h1+range1+1,pidx=pidx)
-		          if (is.null(alldur)) {
-		            alldur <- dur
-		          } else {
-		            alldur <- rbind(alldur,dur)
-		          }
-		          
-		        }
-		        
-		      }
-		      
-		    }
-		    
-		    if (idx.v>1) {
-		
-		      if (idx.v != grid.v) {
-		
-		        idx.min <- alldur[which(alldur[,"duration"] == min(alldur[,"duration"])),]
-		
-		        jdx <- 0
-		        for (pidx in 1:nrow(idx.min)) {
-		          jdx <- jdx+1
-		          paths.new[[idx.h2+grid.h+1]][[jdx]] <- c(paths[[idx.min[pidx,"hidx"]]][[idx.min[pidx,"pidx"]]],idx.h2)
-		          duras.new[[idx.h2+grid.h+1]][[jdx]] <- idx.min[pidx,"duration"]
-		        }
-		
-		      } else {
-		
-		        for(ddx in 1:nrow(alldur)) {
-		
-		          tcks <- tacks(c(paths[[alldur[ddx,"hidx"]]][[alldur[ddx,"pidx"]]],0))
-		          alldur[ddx,"duration"] <- tcks*tack.cost + alldur[ddx,"duration"]
-		          
-		        }
-		
-		        dur.idx <- order(alldur[,"duration"])
-		        srtdur <- alldur[dur.idx,]
-		        
-		        jdx <- 1
-		        kdx <- 1
-		        p.grps <- length(unique(alldur[,"duration"]))
-		        paths.new <- vector("list",p.grps)
-		        paths.new[[kdx]][[jdx]] <- c(paths[[srtdur[1,"hidx"]]][[srtdur[1,"pidx"]]],0)
-		        duras.new <- vector("list",p.grps)
-		        duras.new[[kdx]] <- srtdur[1,"duration"]
-		
-		        for (pidx in 2:nrow(alldur)) {
-		          
-		          if (srtdur[pidx,"duration"]==srtdur[pidx-1,"duration"]) {
-		            jdx <- jdx + 1
-		          } else {
-		            jdx <- 1
-		            kdx <- kdx + 1
-		            duras.new[[kdx]] <- srtdur[pidx,"duration"]
-		          }
-		          paths.new[[kdx]][[jdx]] <- c(paths[[srtdur[pidx,"hidx"]]][[srtdur[pidx,"pidx"]]],0)
-		
-		        }
-		
-		      }
-		      
-		    } else {
-		      for (idx in -grid.h:grid.h) {
-		        paths.new[[idx+grid.h+1]][[1]] <- c(0,idx)
-		        dur.eval <- duration(0,idx,1)
-		        duras.new[[idx+grid.h+1]][[1]] <- dur.eval[1]
-		      }   
-		    }
-		    
-		  }
-		
-		  paths <- paths.new
-		  duras <- duras.new
+		//reconstruct the optimal path by going from start to end
+		currentPosition = end;
+		Position nextPosition = end;
+		while(nextPosition!=start) {
+			List<Position> currentPredecessors = backGraph.get(currentPosition);
+			
+			currentTime = new MillisecondsTimePoint(tentativeDistances.get(currentPosition).longValue());
+			TimedPosition currentTimedPosition = new TimedPositionImpl(currentTime, end);
+			SpeedWithBearing currentWind = windField.getWind(currentTimedPosition);
+			polarDiagram.setWind(currentWind);
+			SpeedWithBearing currentSpeed;
+			//TimedPositionWithSpeed = new TimedPositionWithSpeedImpl(currentTime, currentPosition, );
 		
 		}
-		 
-		 */
-		
 		return new PathImpl(lst);
 	}
 	
