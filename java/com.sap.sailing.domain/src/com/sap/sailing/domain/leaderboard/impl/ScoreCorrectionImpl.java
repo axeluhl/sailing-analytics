@@ -119,9 +119,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     /**
      * Under the assumption that the competitor is not assigned the maximum score due to disqualification or other
-     * reasons, computes the corrected score. This default implementation uses <code>uncorrectedScore</code> without
-     * changes. Subclasses may wish to allow for optionally overwriting this uncorrected score to handle, e.g.,
-     * differences between what the tracking results suggest and what the jury or race committee decided.
+     * reasons, computes the corrected score. If {@link #correctedScores} contains an entry for the <code>competitor</code>'s key,
+     * it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
      */
     protected int getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn, int uncorrectedScore) {
         Integer correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
