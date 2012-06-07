@@ -145,14 +145,13 @@
 <!-- no proxy -->
 					<argLine>-Dfile.encoding=cp1252 -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 <!-- -->
-<!-- -->
 <!-- debug, proxy
 					<argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
 -->
 
-<!-- debug, no proxy -->
+<!-- debug, no proxy
 					<argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
-<!-- -->
+-->
 
 					<excludes>
 						<exclude>**/*$*</exclude> <!-- Exclude inner classes -->
