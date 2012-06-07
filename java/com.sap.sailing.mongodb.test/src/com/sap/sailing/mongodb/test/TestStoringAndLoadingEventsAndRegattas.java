@@ -44,6 +44,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
+import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -110,6 +111,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     
     @Test
     public void testLoadStoreRegattaLeaderboardWithScoreCorrections() {
+        // explicitly drop; it seems that the overall dropDatabase isn't always effective yet when this test is run
+        getMongoService().getDB().getCollection(CollectionNames.LEADERBOARDS.name()).drop();
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         final DynamicTrackedRegatta[] trackedRegatta = new DynamicTrackedRegatta[1];

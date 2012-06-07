@@ -145,8 +145,7 @@ implements CompetitorSelectionChangeListener, RequiresResize {
             chart.setClickEventHandler(new ChartClickEventHandler() {
                 @Override
                 public boolean onClick(ChartClickEvent chartClickEvent) {
-                    AbstractChartPanel.this.onClick(chartClickEvent);
-                    return true;
+                    return AbstractChartPanel.this.onClick(chartClickEvent);
                 }
             });
             chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
