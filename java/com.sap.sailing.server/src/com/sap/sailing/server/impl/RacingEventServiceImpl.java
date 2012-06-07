@@ -272,7 +272,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Regatta regatta = getRegatta(regattaIdentifier);
         logger.info("adding regatta leaderboard for regatta "+regatta==null?"null":regatta.getName()+" to "+this);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        new Exception().printStackTrace(new PrintWriter(new OutputStreamWriter(bos)));
+        final PrintWriter pw = new PrintWriter(new OutputStreamWriter(bos));
+        new Exception().printStackTrace(pw);
+        pw.close();
         logger.info("    at "+new String(bos.toByteArray()));
         RegattaLeaderboard result = null;
         if (regatta != null) {
