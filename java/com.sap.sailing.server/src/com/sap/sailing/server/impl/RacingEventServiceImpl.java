@@ -1,11 +1,8 @@
 package com.sap.sailing.server.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -274,11 +271,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
         Regatta regatta = getRegatta(regattaIdentifier);
         logger.info("adding regatta leaderboard for regatta "+(regatta==null?"null":regatta.getName())+" to "+this);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final PrintWriter pw = new PrintWriter(new OutputStreamWriter(bos));
-        new Exception().printStackTrace(pw);
-        pw.close();
-        logger.info("    at "+new String(bos.toByteArray()));
         RegattaLeaderboard result = null;
         if (regatta != null) {
             result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
