@@ -134,6 +134,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     private void retreiveWindControlParameters(WindPatternDisplay pattern) {
+        
+        controlParameters.setDefaults();
+        
         for (WindPatternSetting<?> s : pattern.getSettings()) {
             Field f;
             try {

@@ -33,6 +33,9 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
     @Override
     public void generate(TimePoint start, TimePoint end, TimePoint step) {
         super.generate(start,end,step);
+        if (positions == null || positions.length < 1) {
+            return;
+        }
         int vPoints = positions.length;
         Distance vStep = boundary.getHeight().scale(1.0/(vPoints-1));
         if (windParameters.baseWindSpeed > 0) {

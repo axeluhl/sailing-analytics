@@ -160,7 +160,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
             int index = 0;
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
-                int width = (int) Math.max(1, Math.min(2, Math.round(windDTO.trueWindSpeedInMetersPerSecond)));
+                int width = (int) Math.max(1, Math.min(7, Math.round(windDTO.trueWindSpeedInMetersPerSecond)));
                 DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                 drawArrow(windDTO, dbi.getRadians(), arrowLength, width, ++index);
 

@@ -16,6 +16,9 @@ public class WindFieldGeneratorFactoryImpl implements WindFieldGeneratorFactory 
         if (patternName.equals("OSCILLATIONS")) {
             return new WindFieldGeneratorOscillationImpl(boundary, windParameters);
         }
+        if (patternName.equals("OSCILLATION_WITH_BLASTS")) {
+            return new WindFieldGeneratorCombined(boundary, windParameters);
+        }
         return null;
     }
 
