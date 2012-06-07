@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.UnknownHostException;
 
 import javax.jms.JMSException;
@@ -45,9 +44,8 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
     
     @Before
     public void setUp() throws FileNotFoundException, UnknownHostException, JMSException, Exception {
-        Pair<ReplicationService, ReplicationMasterDescriptor> descriptors = basicSetUp();
-        replicaReplicator = descriptors.getA();
-        masterDescriptor = descriptors.getB();
+        final MongoDBService mongoDBService = MongoDBService.INSTANCE;
+        mongoDBService.getDB().dropDatabase();
     }
     
     /**
@@ -60,7 +58,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
      * also in the replica. This is what this test verifies.
      */
     @Test
-    public void testDelayedLeaderboardCorrectionsReplication() throws ClassNotFoundException, IOException, JMSException {
+    public void testDelayedLeaderboardCorrectionsReplication() throws Exception {
         // TODO prepare a leaderboard with corrections on master by creating through RacingEventService which stores it; then
         // create a new RacingEventServiceImpl which is expected to load the leaderboard, but only with DelayedLeaderboardCorrections.
         // then start initial load, wait until finished; then link a tracked race to leaderboard's RaceColumn on master and
@@ -78,7 +76,6 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         };
         master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
         final String leaderboardName = "My new leaderboard";
-        assertNull(replica.getLeaderboardByName(leaderboardName));
         final int[] discardThresholds = new int[] { 19, 44 };
         CreateFlexibleLeaderboard createTestLeaderboard = new CreateFlexibleLeaderboard(leaderboardName, discardThresholds);
         assertNull(master.getLeaderboardByName(leaderboardName));
@@ -94,14 +91,38 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
                 masterLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
 
         // re-load new master from persistence
-        master = new RacingEventServiceImpl(MongoDBService.INSTANCE);
+        master = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
+        replica = createRacingEventServiceWithOneMockedTrackedRace(q2YellowTrackedRace);
         final Leaderboard masterLeaderboardReloaded = master.getLeaderboardByName(leaderboardName);
         assertNotNull(masterLeaderboardReloaded);
         // expecting the correction to only be in the DelayedLeaderboardCorrection object but not the leaderboard itself
         assertEquals(MaxPointsReason.NONE, masterLeaderboardReloaded.getMaxPointsReason(hasso,
                 masterLeaderboardReloaded.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
-        
+
+        // replicate the re-loaded environment
+        Pair<ReplicationService, ReplicationMasterDescriptor> descriptors = basicSetUp(/* dropDB */ false, master, replica);
+        replicaReplicator = descriptors.getA();
+        masterDescriptor = descriptors.getB();
         replicaReplicator.startToReplicateFrom(masterDescriptor);
+        Thread.sleep(1000);
+
+        Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
+        assertNotNull(replicaLeaderboard);
+        assertNotNull(replicaLeaderboard.getRaceColumnByName(Q2));
+        // so far, the replica should also only have the delayed corrections:
+        assertEquals(MaxPointsReason.NONE, replicaLeaderboard.getMaxPointsReason(hasso,
+                replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
+        
+        // now connect the tracked race again to the leaderboard column in the re-loaded environment
+        master.apply(new ConnectTrackedRaceToLeaderboardColumn(masterLeaderboard.getName(), Q2, /* default fleet */
+                masterLeaderboard.getFleet(null).getName(), q2YellowTrackedRace.getRaceIdentifier()));
+        // now the delayed corrections are expected to have been resolved:
+        assertEquals(MaxPointsReason.DNF, master.getLeaderboardByName(leaderboardName).getMaxPointsReason(hasso,
+                master.getLeaderboardByName(leaderboardName).getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
+        Thread.sleep(1000); // wait for the tracked race to column connection to be replicated
+        assertNotNull(replicaLeaderboard.getRaceColumnByName(Q2).getTrackedRace(hasso));
+        assertEquals(MaxPointsReason.DNF, replicaLeaderboard.getMaxPointsReason(hasso,
+                replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
         
     }
     
