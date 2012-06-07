@@ -59,12 +59,11 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
      */
     @Test
     public void testDelayedLeaderboardCorrectionsReplication() throws Exception {
-        // TODO prepare a leaderboard with corrections on master by creating through RacingEventService which stores it; then
+        // prepare a leaderboard with corrections on master by creating through RacingEventService which stores it; then
         // create a new RacingEventServiceImpl which is expected to load the leaderboard, but only with DelayedLeaderboardCorrections.
         // then start initial load, wait until finished; then link a tracked race to leaderboard's RaceColumn on master and
         // verify that on the replica it is associated to the RaceColumn as well, and the DelayedLeaderboardCorrections are
         // resolved properly on the replica.
-        
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
         final TrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false, boatClass) {
@@ -123,7 +122,6 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
         assertNotNull(replicaLeaderboard.getRaceColumnByName(Q2).getTrackedRace(hasso));
         assertEquals(MaxPointsReason.DNF, replicaLeaderboard.getMaxPointsReason(hasso,
                 replicaLeaderboard.getRaceColumnByName(Q2), MillisecondsTimePoint.now()));
-        
     }
     
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final TrackedRace q2YellowTrackedRace) {
