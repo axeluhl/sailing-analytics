@@ -221,10 +221,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                                 @Override
                                 public void onSuccess(Pair<Integer, Integer> newNetAndTotalPoints) {
-                                    row.fieldsByRaceName.get(raceName).reasonForMaxPoints = value == null
+                                    row.fieldsByRaceColumnName.get(raceName).reasonForMaxPoints = value == null
                                             || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
-                                    row.fieldsByRaceName.get(raceName).netPoints = newNetAndTotalPoints.getA();
-                                    row.fieldsByRaceName.get(raceName).totalPoints = newNetAndTotalPoints.getB();
+                                    row.fieldsByRaceColumnName.get(raceName).netPoints = newNetAndTotalPoints.getA();
+                                    row.fieldsByRaceColumnName.get(raceName).totalPoints = newNetAndTotalPoints.getB();
                                     getCell().setViewData(row, null); // ensure that getValue() is called again
                                     whiteboard.setObjectWithWhichToUpdateRow(row);
                                 }
@@ -235,7 +235,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceName);
             MaxPointsReason reasonForMaxPoints = null;
             if (leaderboardEntryDTO != null) {
                 reasonForMaxPoints = leaderboardEntryDTO.reasonForMaxPoints;
@@ -283,7 +283,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         private boolean isNetPointsCorrected() {
-            LeaderboardEntryDTO leaderboardEntryDTO = getCurrentlyRendering().fieldsByRaceName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = getCurrentlyRendering().fieldsByRaceColumnName.get(raceName);
             return leaderboardEntryDTO.netPointsCorrected;
         }
 
@@ -313,7 +313,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                         @Override
                         public void onSuccess(Triple<Integer, Integer, Boolean> newNetAndTotalPointsAndIsCorrected) {
-                            final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceName.get(raceName);
+                            final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceName);
                                     leaderboardEntryDTO.netPoints = value == null || value.length() == 0 ? newNetAndTotalPointsAndIsCorrected
                                             .getA() : Integer.valueOf(value.trim());
                                     leaderboardEntryDTO.totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
@@ -328,7 +328,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceName);
             String result = "";
             if (leaderboardEntryDTO != null) {
                 result = result+leaderboardEntryDTO.netPoints;

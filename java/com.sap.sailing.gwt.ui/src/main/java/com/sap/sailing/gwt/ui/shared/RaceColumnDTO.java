@@ -25,6 +25,10 @@ public class RaceColumnDTO implements IsSerializable {
         fleetNames = new ArrayList<String>();
     }
     
+    public boolean hasTrackedRace(RaceIdentifier raceIdentifier) {
+        return trackedRaceIdentifiersPerFleet.values().contains(raceIdentifier);
+    }
+    
     public String getRaceColumnName() {
         return raceColumnName;
     }
@@ -182,4 +186,8 @@ public class RaceColumnDTO implements IsSerializable {
         fleetNames.add(fleetName);
     }
 
+    @Override
+    public String toString() {
+        return getRaceColumnName();
+    }
 }
