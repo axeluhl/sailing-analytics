@@ -299,7 +299,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 CompetitorDTO competitorDTO = getCompetitorDTO(competitor);
                 LeaderboardRowDTO row = new LeaderboardRowDTO();
                 row.competitor = competitorDTO;
-                row.fieldsByRaceName = new HashMap<String, LeaderboardEntryDTO>();
+                row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
                 row.carriedPoints = leaderboard.hasCarriedPoints(competitor) ? leaderboard.getCarriedPoints(competitor) : null;
                 result.competitors.add(competitorDTO);
                 Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
@@ -322,7 +322,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 for (Map.Entry<String, Future<LeaderboardEntryDTO>> raceColumnNameAndFuture : futuresForColumnName.entrySet()) {
                     try {
-                        row.fieldsByRaceName.put(raceColumnNameAndFuture.getKey(), raceColumnNameAndFuture.getValue().get());
+                        row.fieldsByRaceColumnName.put(raceColumnNameAndFuture.getKey(), raceColumnNameAndFuture.getValue().get());
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     } catch (ExecutionException e) {
@@ -370,6 +370,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint, boolean addLegDetails) throws NoWindException {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
+        entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
         entryDTO.netPoints = entry.getNetPoints();
         entryDTO.netPointsCorrected = entry.isNetPointsCorrected();
         entryDTO.totalPoints = entry.getTotalPoints();

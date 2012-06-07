@@ -63,6 +63,7 @@ import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
+import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
@@ -448,7 +449,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
          */
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder html) {
-            LeaderboardEntryDTO entry = object.fieldsByRaceName.get(getRaceColumnName());
+            LeaderboardEntryDTO entry = object.fieldsByRaceColumnName.get(getRaceColumnName());
             if (entry != null) {
                 // don't show points if max points / penalty
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
@@ -528,7 +529,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            final int totalPoints = object.fieldsByRaceName.get(getRaceColumnName()).totalPoints;
+            final int totalPoints = object.fieldsByRaceColumnName.get(getRaceColumnName()).totalPoints;
             return "" + (totalPoints == 0 ? "" : totalPoints);
         }
 
@@ -651,7 +652,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null) {
                     double distanceTraveledInMeters = 0;
                     long timeInMilliseconds = 0;
@@ -678,7 +679,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null) {
                     result = fieldsForRace.averageCrossTrackErrorInMeters;
                 }
@@ -695,7 +696,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null) {
                     for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
                         if (legDetail != null) {
@@ -716,7 +717,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null && !fieldsForRace.legDetails.isEmpty()) {
                     for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
                         if (legDetail != null) {
@@ -747,7 +748,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.legDetails != null) {
                     int lastLegIndex = fieldsForRace.legDetails.size() - 1;
                     LegEntryDTO lastLegDetail = fieldsForRace.legDetails.get(lastLegIndex);
@@ -772,7 +773,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceColumnName());
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
                 if (fieldsForRace != null && fieldsForRace.windwardDistanceToOverallLeaderInMeters != null) {
                     result = fieldsForRace.windwardDistanceToOverallLeaderInMeters;
                 }
@@ -967,7 +968,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         getLeaderboardTable().addColumnSortHandler(listHandler);
         loadCompleteLeaderboard(getLeaderboardDisplayDate());
 
-        if(preSelectedRace == null) {
+        if (this.preSelectedRace == null) {
             isEmbedded = false;
         } else {
             isEmbedded = true;
@@ -1228,7 +1229,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             getData().getList().clear();
             if (leaderboard != null) {
                 boolean firstRace = true;
-                getData().getList().addAll(leaderboard.rows.values());
+                getData().getList().addAll(getRowsToDisplay(leaderboard));
                 for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
                     SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
                     c.updateMinMax(leaderboard);
@@ -1259,6 +1260,56 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 }
             }
         }
+    }
+
+    /**
+     * Extracts the rows to display of the <code>leaderboard</code>. These are all {@link AbstractLeaderboardDTO#rows rows} in case
+     * {@link #preSelectedRace} is <code>null</code>, or only the rows of the competitors who scored in
+     * the race identified by {@link #preSelectedRace} otherwise.
+     */
+    private Collection<LeaderboardRowDTO> getRowsToDisplay(LeaderboardDTO leaderboard) {
+        Collection<LeaderboardRowDTO> result;
+        if (preSelectedRace == null) {
+            result = leaderboard.rows.values();
+        } else {
+            result = new ArrayList<LeaderboardRowDTO>();
+            for (CompetitorDTO competitorInPreSelectedRace : getCompetitors(preSelectedRace)) {
+                result.add(leaderboard.rows.get(competitorInPreSelectedRace));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * The {@link LeaderboardDTO} holds {@link LeaderboardDTO#getRaceList() races} as {@link RaceColumnDTO} objects.
+     * Those map their fleet names to the {@link RegattaAndRaceIdentifier} which identifies the tracked race
+     * representing the fleet race within the race column.
+     * <p>
+     * 
+     * On the other hand, a {@link LeaderboardRowDTO} has {@link LeaderboardEntryDTO}, keyed by race column name. The
+     * entry DTOs, in turn, store the {@link RaceIdentifier} of the race in which the respective competitor achieved the
+     * score.
+     * <p>
+     * 
+     * With this information it is possible to identify the competitors who participated in a particular tracked race,
+     * as identified through the <code>race</code> parameter.
+     * 
+     * @return all competitors for which the {@link #getLeaderboard() leaderboard} has an entry whose
+     *         {@link LeaderboardEntryDTO#race} equals <code>race</code>
+     */
+    private Iterable<CompetitorDTO> getCompetitors(RaceIdentifier race) {
+        Set<CompetitorDTO> result = new HashSet<CompetitorDTO>();
+        for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
+            if (raceColumn.hasTrackedRace(race)) {
+                for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : getLeaderboard().rows.entrySet()) {
+                    LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(raceColumn.getRaceColumnName());
+                    if (entry != null && entry.race.equals(race)) {
+                        result.add(e.getKey());
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     private SortableColumn<LeaderboardRowDTO, ?> getDefaultSortColumn() {

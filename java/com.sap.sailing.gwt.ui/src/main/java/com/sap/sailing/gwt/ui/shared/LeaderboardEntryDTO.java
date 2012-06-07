@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.RaceIdentifier;
 
 /**
  * Holds a single competitor's scoring details for a single race. It may optionally contain
@@ -14,6 +15,12 @@ import com.sap.sailing.domain.common.MaxPointsReason;
  *
  */
 public class LeaderboardEntryDTO implements IsSerializable {
+    /**
+     * Identifies the race in which the competitor achieved this score. This makes it possible to find out in which
+     * fleet the competitor started in this column.
+     */
+    public RaceIdentifier race;
+    
     /**
      * Either <code>null</code> in case no max points, or one of "DNS", "DNF", "OCS", "DND", "RAF", "BFD", "DNC", or "DSQ"
      */
@@ -41,6 +48,8 @@ public class LeaderboardEntryDTO implements IsSerializable {
      */
     public List<LegEntryDTO> legDetails;
 
+    public LeaderboardEntryDTO() { }
+    
     @Override
     public int hashCode() {
         final int prime = 31;

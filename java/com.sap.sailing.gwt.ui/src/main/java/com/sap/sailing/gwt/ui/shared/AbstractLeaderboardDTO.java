@@ -38,8 +38,8 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
      */
     public int getLegCount(String raceName) {
         for (LeaderboardRowDTO row : rows.values()) {
-            if (row.fieldsByRaceName.get(raceName) != null && row.fieldsByRaceName.get(raceName).legDetails != null) {
-                return row.fieldsByRaceName.get(raceName).legDetails.size();
+            if (row.fieldsByRaceColumnName.get(raceName) != null && row.fieldsByRaceColumnName.get(raceName).legDetails != null) {
+                return row.fieldsByRaceColumnName.get(raceName).legDetails.size();
             }
         }
         return -1;
@@ -52,7 +52,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public boolean scoredInMedalRace(CompetitorDTO competitor) {
         LeaderboardRowDTO row = rows.get(competitor);
         for (RaceColumnDTO race : races) {
-            if (race.isMedalRace() && row.fieldsByRaceName.get(race.getRaceColumnName()).totalPoints > 0) {
+            if (race.isMedalRace() && row.fieldsByRaceColumnName.get(race.getRaceColumnName()).totalPoints > 0) {
                 return true;
             }
         }
@@ -61,7 +61,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
 
     public int getTotalPoints(LeaderboardRowDTO object) {
         int totalPoints = object.carriedPoints == null ? 0 : object.carriedPoints;
-        for (LeaderboardEntryDTO e : object.fieldsByRaceName.values()) {
+        for (LeaderboardEntryDTO e : object.fieldsByRaceColumnName.values()) {
             totalPoints += e.totalPoints;
         }
         return totalPoints;
@@ -71,7 +71,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         int result = 0;
         LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
-            LeaderboardEntryDTO field = row.fieldsByRaceName.get(nameOfLastRaceSoFar);
+            LeaderboardEntryDTO field = row.fieldsByRaceColumnName.get(nameOfLastRaceSoFar);
             if (field != null) {
                 result = field.netPoints;
             }
