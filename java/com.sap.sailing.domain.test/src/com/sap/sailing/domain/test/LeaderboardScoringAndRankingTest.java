@@ -59,10 +59,12 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     /**
-     * Asserts that the competitors ranking worse than the disqualified competitor advance by one
+     * Asserts that the competitors ranking worse than the disqualified competitor advance by one in the
+     * {@link Leaderboard#getCompetitorsFromBestToWorst(TimePoint)} ordering. Note that this does not test
+     * the total points given for those competitors.
      */
     @Test
-    public void testOneStartedRaceWithDifferentScoresAndDisqualification() {
+    public void testOneStartedRaceWithDifferentScoresAndDisqualification() throws NoWindException {
         List<Competitor> competitors = createCompetitors(10);
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
                 new String[] { "Default" },
@@ -83,6 +85,15 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(competitors.subList(0, 5), rankedCompetitors.subList(0, 5));
         assertEquals(competitors.subList(6, 10), rankedCompetitors.subList(5, 9));
         assertEquals(competitors.get(5), rankedCompetitors.get(9));
+        
+        // Now test the total points and make sure the other competitors advanced by one, too
+        assertEquals(11, leaderboard.getTotalPoints(competitors.get(5), f1Column, now));
+        for (int i=0; i<5; i++) {
+            assertEquals(i+1, leaderboard.getTotalPoints(competitors.get(i), f1Column, now));
+        }
+        for (int i=6; i<10; i++) {
+            assertEquals(i, leaderboard.getTotalPoints(competitors.get(i), f1Column, now));
+        }
     }
 
     @Test

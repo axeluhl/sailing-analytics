@@ -77,7 +77,11 @@ public interface Leaderboard extends Named {
      * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.common.TimePoint)} with the
      * additional logic that in case the <code>race</code> hasn't {@link TrackedRace#hasStarted(TimePoint) started} yet
      * or no {@link TrackedRace} exists for <code>race</code>, 0 will be returned for all those competitors. The tracked
-     * race for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.
+     * race for the correct {@link Fleet} is determined using {@link RaceColumn#getTrackedRace(Competitor)}.<p>
+     * 
+     * For each competitor tracking-wise ranking better than <code>competitor</code> but with
+     * a {@link #getMaxPointsReason(Competitor, RaceColumn, TimePoint) disqualification reason} given, <code>competitor</code>'s
+     * rank is improved by one.  
      * 
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
