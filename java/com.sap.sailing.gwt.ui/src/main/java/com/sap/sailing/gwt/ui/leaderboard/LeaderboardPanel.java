@@ -1303,7 +1303,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (raceColumn.hasTrackedRace(race)) {
                 for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : getLeaderboard().rows.entrySet()) {
                     LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(raceColumn.getRaceColumnName());
-                    if (entry != null && entry.race.equals(race)) {
+                    if (entry != null && entry.race != null && entry.race.equals(race)) {
                         result.add(e.getKey());
                     }
                 }
