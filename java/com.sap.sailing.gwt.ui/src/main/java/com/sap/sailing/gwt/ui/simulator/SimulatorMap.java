@@ -222,16 +222,20 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         if (!overlaysInitialized) {
             initializeOverlays();
         }
+        removeOverlays();
         mapw.setDoubleClickZoom(false);
-        mapw.removeOverlay(windFieldCanvasOverlay);
-        mapw.removeOverlay(pathCanvasOverlay);
-        mapw.removeOverlay(replayPathCanvasOverlay);
         raceCourseCanvasOverlay.setSelected(true);
         // raceCourseCanvasOverlay.setVisible(true);
         raceCourseCanvasOverlay.reset();
         raceCourseCanvasOverlay.redraw(true);
     }
 
+    public void removeOverlays() {
+        mapw.removeOverlay(windFieldCanvasOverlay);
+        mapw.removeOverlay(pathCanvasOverlay);
+        mapw.removeOverlay(replayPathCanvasOverlay);
+    }
+    
     private void refreshSummaryView(WindPatternDisplay windPatternDisplay) {
         mapw.removeOverlay(windFieldCanvasOverlay);
         mapw.removeOverlay(replayPathCanvasOverlay);

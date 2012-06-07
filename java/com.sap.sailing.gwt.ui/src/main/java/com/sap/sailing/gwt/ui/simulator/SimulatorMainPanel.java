@@ -150,7 +150,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
                 WindPatternDTO pattern = patternNameDTOMap.get(windPattern);
                 simulatorSvc.getWindPatternDisplay(pattern, new PatternRetriever(windPattern));
             }
-            simulatorMap.reset();
+            simulatorMap.removeOverlays();
         }
 
     }
