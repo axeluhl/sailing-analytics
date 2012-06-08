@@ -1,6 +1,8 @@
 package com.sap.sailing.kiworesultimport.impl;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.Crew;
@@ -14,32 +16,29 @@ public class BoatImpl extends NamedImpl implements Boat {
 
     @Override
     public String getSailingNumber() {
-        // TODO Auto-generated method stub
-        return null;
+        return getNode().getAttributes().getNamedItem("sailingnumber").getNodeValue();
     }
 
     @Override
     public Integer getPosition() {
-        // TODO Auto-generated method stub
-        return null;
+        return Integer.valueOf(getNode().getAttributes().getNamedItem("position").getNodeValue());
     }
 
     @Override
     public String getPreis() {
-        // TODO Auto-generated method stub
-        return null;
+        return getNode().getAttributes().getNamedItem("preis").getNodeValue();
     }
 
     @Override
     public Crew getCrew() {
-        // TODO Auto-generated method stub
-        return null;
+        final NodeList crew = ((Element) getNode()).getElementsByTagName("Crew");
+        return new CrewImpl(crew.item(0));
     }
 
     @Override
     public Races getRaces() {
-        // TODO Auto-generated method stub
-        return null;
+        final NodeList races = ((Element) getNode()).getElementsByTagName("Races");
+        return new RacesImpl(races.item(0));
     }
 
 }

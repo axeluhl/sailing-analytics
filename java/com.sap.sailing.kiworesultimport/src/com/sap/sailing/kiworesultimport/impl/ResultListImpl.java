@@ -48,6 +48,6 @@ public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
 
     @Override
     public Verteilung getVerteilung() {
-        return new VerteilungImpl(((Element) getNode()).getElementsByTagName("verteilung").item(0));
+        return new VerteilungImpl(((Element) getNode()).getElementsByTagName("Verteilung").item(0));
     }
 }
