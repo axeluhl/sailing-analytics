@@ -223,6 +223,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     private void loadStoredRegattas() {
         for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
+            logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName");
             regattasByName.put(regatta.getName(), regatta);
         }
     }
@@ -517,7 +518,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         Regatta result = regattasByName.get(regatta.getName());
         if (result == null) {
             result = regatta;
-            logger.info("Created regatta "+result.getName()+" ("+hashCode()+")");
+            logger.info("Created regatta "+result.getName()+" ("+hashCode()+") on "+this);
             cacheAndReplicateDefaultRegatta(result);
         }
         return result;
@@ -528,7 +529,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             Iterable<? extends Series> series, boolean persistent) {
         Regatta regatta = new RegattaImpl(baseEventName,
                 com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(boatClassName), series, persistent);
-        logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ")");
+        logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on "+this);
         cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
         if (persistent) {
             updateStoredRegatta(regatta);
@@ -663,7 +664,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private void cacheAndReplicateSpecificRegattaWithoutRaceColumns(Regatta regatta) {
         if (!regattasByName.containsKey(regatta.getName())) {
-            logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName");
+            logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName of "+this);
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             replicate(new AddSpecificRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
@@ -695,7 +696,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private void cacheAndReplicateDefaultRegatta(Regatta regatta) {
         if (!regattasByName.containsKey(regatta.getName())) {
-            logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName");
+            logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName of "+this);
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName()));
@@ -886,7 +887,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         stopTracking(regatta);
         if (regatta != null) {
             if (regatta.getName() != null) {
-                logger.info("Removing regatta "+regatta.getName()+" ("+regatta.hashCode()+") from RacingEventServiceImpl");
+                logger.info("Removing regatta "+regatta.getName()+" ("+regatta.hashCode()+") from "+this);
                 regattasByName.remove(regatta.getName());
                 regattaTrackingCache.remove(regatta);
                 regatta.removeRegattaListener(this);
@@ -1022,7 +1023,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         // remove the race from the regatta if the regatta is not persistently stored
         regatta.removeRace(race);
         if (!regatta.isPersistent() && Util.isEmpty(regatta.getAllRaces())) {
-            logger.info("Removing regatta "+regatta.getName()+" from service "+this);
+            logger.info("Removing regatta "+regatta.getName()+" ("+regatta.hashCode()+") from service "+this);
             regattasByName.remove(regatta.getName());
             regatta.removeRegattaListener(this);
         }
@@ -1346,6 +1347,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @SuppressWarnings("unchecked") // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
     public synchronized void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        logger.info("Performing initial replication load on "+this);
         ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
         try {
             // Use this object's class's class loader as the context class loader which will then be used for

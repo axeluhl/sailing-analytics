@@ -1,5 +1,7 @@
 package com.sap.sailing.kiworesultimport;
 
+import com.sap.sailing.domain.common.TimePoint;
+
 public interface ResultList {
     String getLegende();
     
@@ -14,4 +16,8 @@ public interface ResultList {
     String getTime();
     
     String getDate();
+    
+    TimePoint getTimePoint();
+    
+    Verteilung getVerteilung();
 }

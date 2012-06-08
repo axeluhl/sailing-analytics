@@ -34,6 +34,8 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -48,7 +50,7 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
  * @author Frank Mittag (C5163974)
  * 
  */
-public class EventStructureManagementPanel extends SimplePanel {
+public class EventStructureManagementPanel extends SimplePanel implements RegattaDisplayer {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -63,15 +65,17 @@ public class EventStructureManagementPanel extends SimplePanel {
     private CellTable<RegattaDTO> regattaTable;
     private SingleSelectionModel<RegattaDTO> regattaSelectionModel;
     private ListDataProvider<RegattaDTO> regattaProvider;
+    private final RegattaRefresher regattaRefresher;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private boolean supportEvents = false;
 
     public EventStructureManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            StringMessages stringMessages) {
+            StringMessages stringMessages, RegattaRefresher regattaRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        this.regattaRefresher = regattaRefresher;
 
         events = new ArrayList<EventDTO>();
         selectedEvent = null;
@@ -115,8 +119,6 @@ public class EventStructureManagementPanel extends SimplePanel {
         } else {
             createEventDetailsPanel();
             mainPanel.add(eventDetailsCaptionPanel);
-            
-            fillRegattas();
         }
     }
 
@@ -135,6 +137,15 @@ public class EventStructureManagementPanel extends SimplePanel {
     }
 
     private void createRegattaDetails(Panel parentPanel) {
+        Button addRegattaBtn = new Button("Add regatta");
+        parentPanel.add(addRegattaBtn);
+        addRegattaBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                openCreateRegattaDialog();
+            }
+        });
+
         // regatta table
         TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
             @Override
@@ -223,15 +234,6 @@ public class EventStructureManagementPanel extends SimplePanel {
         regattaProvider = new ListDataProvider<RegattaDTO>();
         regattaProvider.addDataDisplay(regattaTable);
         parentPanel.add(regattaTable);
-
-        Button addRegattaBtn = new Button("Add regatta");
-        parentPanel.add(addRegattaBtn);
-        addRegattaBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                openCreateRegattaDialog();
-            }
-        });
     }
     
     private void onEventSelectionChanged() {
@@ -306,22 +308,6 @@ public class EventStructureManagementPanel extends SimplePanel {
         }
     }
 
-    private void fillRegattas() {
-        // load the regattas for this event
-        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
-            @Override
-            public void onFailure(Throwable t) {
-                errorReporter.reportError("Error trying to read regattas of event " + selectedEvent.name + ": " + t.getMessage());
-            }
-
-            @Override
-            public void onSuccess(List<RegattaDTO> regattas) {
-                regattaProvider.getList().clear();
-                regattaProvider.getList().addAll(regattas);
-            }
-        });
-    }
-
     private void createNewEvent(final EventDTO newEvent) {
         sailingService.createEvent(newEvent.name, newEvent.venue.name, new AsyncCallback<EventDTO>() {
             @Override
@@ -358,7 +344,7 @@ public class EventStructureManagementPanel extends SimplePanel {
 
             @Override
             public void onSuccess(RegattaDTO regatta) {
-                regattaProvider.getList().add(regatta);
+                regattaRefresher.fillRegattas();
             }
         });
     }
@@ -393,4 +379,9 @@ public class EventStructureManagementPanel extends SimplePanel {
         });
     }
 
+    @Override
+    public void fillRegattas(List<RegattaDTO> regattas) {
+        regattaProvider.getList().clear();
+        regattaProvider.getList().addAll(regattas);
+    }
 }

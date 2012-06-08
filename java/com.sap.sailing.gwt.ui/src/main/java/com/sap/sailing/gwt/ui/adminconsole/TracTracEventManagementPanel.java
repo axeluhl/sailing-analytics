@@ -34,10 +34,12 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -73,7 +75,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private final ListBox previousConfigurationsComboBox;
     private final Grid grid;
     private final List<TracTracRaceRecordDTO> availableTracTracRaces;
-    
+    private Iterable<RegattaDTO> allRegattas;
+    private final ListBox regattaListBox;
+
     public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants) {
         super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
@@ -271,6 +275,18 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         trackedRacesCaptionPanel.setStyleName("bold");
 
         // text box for filtering the cell table
+        // the regatta selection for a tracked race
+        HorizontalPanel regattaPanel = new HorizontalPanel();
+        racesPanel.add(regattaPanel);
+        Label lblRegattas = new Label("Regatta used for the tracked race:");
+        lblRegattas.setWordWrap(false);
+        regattaPanel.setCellVerticalAlignment(lblRegattas, HasVerticalAlignment.ALIGN_MIDDLE);
+        regattaPanel.setSpacing(5);
+        regattaPanel.add(lblRegattas);
+        regattaListBox = new ListBox();
+        regattaPanel.add(regattaListBox);
+        regattaPanel.setCellVerticalAlignment(regattaListBox, HasVerticalAlignment.ALIGN_MIDDLE);
+        
         HorizontalPanel filterPanel = new HorizontalPanel();
         filterPanel.setSpacing(5);
         racesPanel.add(filterPanel);
@@ -453,10 +469,15 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
         String liveURI = liveURIBox.getValue();
         String storedURI = storedURIBox.getValue();
+        RegattaDTO selectedRegatta = getSelectedRegatta();
+        RegattaIdentifier regattaIdentifier = null;
+        if(selectedRegatta != null) {
+            regattaIdentifier = new RegattaName(selectedRegatta.name);
+        }
         for (final TracTracRaceRecordDTO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
-                sailingService.trackWithTracTrac(/* regattaToAddTo */ null, // TODO allow user to optionally select a pre-defined regatta
-                        rr, liveURI, storedURI, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
+                sailingService.trackWithTracTrac(regattaIdentifier, rr, liveURI, storedURI, trackWind, 
+                        correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register race " + rr.name + " for tracking: "
@@ -487,10 +508,39 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> result) {
-        trackedRacesListComposite.fillRegattas(result);
+    public void fillRegattas(List<RegattaDTO> regattas) {
+        trackedRacesListComposite.fillRegattas(regattas);
+        
+        RegattaDTO oldRegattaSelection = getSelectedRegatta();
+        regattaListBox.clear();
+        regattaListBox.addItem("No regatta");
+        if (!regattas.isEmpty()) {
+            regattaListBox.addItem("No regatta");
+            for (RegattaDTO regatta : regattas) {
+                regattaListBox.addItem(regatta.name);
+                if(oldRegattaSelection != null && oldRegattaSelection.name.equals(regatta.name)) {
+                    regattaListBox.setSelectedIndex(regattaListBox.getItemCount()-1);
+                }
+            }
+        }
+        allRegattas = new ArrayList<RegattaDTO>(regattas);
     }
-    
+
+    public RegattaDTO getSelectedRegatta() {
+        RegattaDTO result = null;
+        int selIndex = regattaListBox.getSelectedIndex();
+        if(selIndex > 0) { // the zero index represents the 'no selection' text
+            String itemText = regattaListBox.getItemText(selIndex);
+            for(RegattaDTO regattaDTO: allRegattas) {
+                if(regattaDTO.name.equals(itemText)) {
+                    result = regattaDTO;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
         raceList.getList().clear();

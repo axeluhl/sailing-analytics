@@ -264,7 +264,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         fleetsGrid.setCellSpacing(4);
 
         fleetsGrid.setHTML(0, 0, stringConstants.name());
-        fleetsGrid.setHTML(0, 1, stringConstants.no());
+        fleetsGrid.setHTML(0, 1, stringConstants.rank());
         fleetsGrid.setHTML(0, 2, stringConstants.color());
 
         for(int i = 0; i < fleetCount; i++) {
