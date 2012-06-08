@@ -26,4 +26,14 @@ public class VerteilungImpl extends AbstractNodeWrapper implements Verteilung {
         return result;
     }
 
+    @Override
+    public Boat getBoatBySailID(String sailID) {
+        for (Boat boat : getBoats()) {
+            if (sailID.equals(boat.getSailingNumber())) {
+                return boat;
+            }
+        }
+        return null;
+    }
+
 }

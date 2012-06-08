@@ -9,6 +9,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -18,11 +21,16 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.kiworesultimport.Boat;
+import com.sap.sailing.kiworesultimport.Crewmember;
+import com.sap.sailing.kiworesultimport.Race;
+import com.sap.sailing.kiworesultimport.Races;
 import com.sap.sailing.kiworesultimport.ResultList;
 import com.sap.sailing.kiworesultimport.ResultListParser;
 import com.sap.sailing.kiworesultimport.ResultListParserFactory;
+import com.sap.sailing.kiworesultimport.Skipper;
 import com.sap.sailing.kiworesultimport.Verteilung;
 
 public class ParserTest {
@@ -61,5 +69,26 @@ public class ParserTest {
         Iterable<Boat> boats = verteilung.getBoats();
         assertFalse(Util.isEmpty(boats));
         assertEquals(48, Util.size(boats));
+        Boat DEN9 = verteilung.getBoatBySailID("DEN 9");
+        assertNotNull(DEN9);
+        assertEquals(7, (int) DEN9.getPosition());
+        Skipper DEN9Skipper = DEN9.getCrew().getSkipper();
+        assertEquals("Norregaard, Allan (1981) Kolding", DEN9Skipper.getName());
+        assertEquals(new URL("http://www.sailing.org/biog.php?id=DENAN1"), DEN9Skipper.getIsaf());
+        Iterable<Crewmember> DEN9Crewmembers = DEN9.getCrew().getCrewmembers();
+        assertEquals(1, Util.size(DEN9Crewmembers));
+        Crewmember DEN9Crewmember = DEN9Crewmembers.iterator().next();
+        assertEquals("Lang, Peter (1989) Kolding Sejlklub", DEN9Crewmember.getName());
+        Races DEN9Races = DEN9.getRaces();
+        assertNotNull(DEN9Races);
+        assertEquals(2, Util.size(DEN9Races.getRaces()));
+        Iterator<Race> i = DEN9Races.getRaces().iterator();
+        Race r1 = i.next();
+        assertEquals(9.00, r1.getPoints(), 0.0000000001);
+        assertEquals(1, (int) r1.getNumber());
+        Race r2 = i.next();
+        assertEquals(1.00, r2.getPoints(), 0.0000000001);
+        assertEquals(2, (int) r2.getNumber());
+        assertEquals(new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 18, 16, 26).getTime()), resultList.getTimePoint());
     }
 }
