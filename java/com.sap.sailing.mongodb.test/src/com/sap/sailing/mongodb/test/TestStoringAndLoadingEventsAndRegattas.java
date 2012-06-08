@@ -91,6 +91,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     public void testLoadStoreSimpleRegattaLeaderboard() {
         // explicitly drop; it seems that the overall dropDatabase isn't always effective yet when this test is run
         getMongoService().getDB().getCollection(CollectionNames.LEADERBOARDS.name()).drop();
+        getMongoService().getDB().getCollection(CollectionNames.REGATTAS.name()).drop();
         RacingEventService res = new RacingEventServiceImpl(getMongoService());
         final int numberOfQualifyingRaces = 5;
         final int numberOfFinalRaces = 7;
@@ -118,6 +119,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     public void testLoadStoreRegattaLeaderboardWithScoreCorrections() {
         // explicitly drop; it seems that the overall dropDatabase isn't always effective yet when this test is run
         getMongoService().getDB().getCollection(CollectionNames.LEADERBOARDS.name()).drop();
+        getMongoService().getDB().getCollection(CollectionNames.REGATTAS.name()).drop();
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         final DynamicTrackedRegatta[] trackedRegatta = new DynamicTrackedRegatta[1];
