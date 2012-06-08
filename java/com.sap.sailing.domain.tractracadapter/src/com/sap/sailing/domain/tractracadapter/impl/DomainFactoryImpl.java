@@ -367,7 +367,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Pair<RaceDefinition, TrackedRace> getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
+    public void getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
             Race race, Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         synchronized (raceCache) {
@@ -377,21 +377,23 @@ public class DomainFactoryImpl implements DomainFactory {
                 logger.info("Creating RaceDefinitionImpl for race "+race.getName());
                 raceDefinition = new RaceDefinitionImpl(race.getName(), course, competitorsAndDominantBoatClass.getB(),
                         competitorsAndDominantBoatClass.getA(), getRaceID(race));
-                // add to domain Event only if boat class matches
+                // add to existing regatta only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
+
+                    createTrackedRace(trackedRegatta, raceDefinition, windStore,
+                            delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+                    logger.info("Added race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta());
+
+                    synchronized (raceCache) {
+                        raceCache.put(race, raceDefinition);
+                        raceCache.notifyAll();
+                    }
                 } else {
                     logger.warning("Not adding race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta()+
                             " because boat class "+raceDefinition.getBoatClass()+" doesn't match regatta's boat class "+
                             trackedRegatta.getRegatta().getBoatClass());
                 }
-                TrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, windStore,
-                        delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
-                synchronized (raceCache) {
-                    raceCache.put(race, raceDefinition);
-                    raceCache.notifyAll();
-                }
-                return new Pair<RaceDefinition, TrackedRace>(raceDefinition, trackedRace);
             } else {
                 throw new RuntimeException("Race "+race.getName()+" already exists");
             }
