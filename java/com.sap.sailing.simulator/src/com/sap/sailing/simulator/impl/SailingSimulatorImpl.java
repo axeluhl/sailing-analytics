@@ -252,7 +252,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		Map<String, Path> allPaths = new HashMap<String, Path>();
 		allPaths.put("Dummy", createDummy());
 		allPaths.put("Heuristic", createHeuristic());
-		allPaths.put("Djikstra", createDjikstra());
+		//allPaths.put("Djikstra", createDjikstra());
 		return allPaths;
 	}
 
