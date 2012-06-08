@@ -14,4 +14,6 @@ public interface ResultList {
     String getTime();
     
     String getDate();
+    
+    Verteilung getVerteilung();
 }
