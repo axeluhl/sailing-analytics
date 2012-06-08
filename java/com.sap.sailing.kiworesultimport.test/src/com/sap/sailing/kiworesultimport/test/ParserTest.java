@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,9 +21,11 @@ import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.kiworesultimport.Boat;
+import com.sap.sailing.kiworesultimport.Crewmember;
 import com.sap.sailing.kiworesultimport.ResultList;
 import com.sap.sailing.kiworesultimport.ResultListParser;
 import com.sap.sailing.kiworesultimport.ResultListParserFactory;
+import com.sap.sailing.kiworesultimport.Skipper;
 import com.sap.sailing.kiworesultimport.Verteilung;
 
 public class ParserTest {
@@ -61,5 +64,14 @@ public class ParserTest {
         Iterable<Boat> boats = verteilung.getBoats();
         assertFalse(Util.isEmpty(boats));
         assertEquals(48, Util.size(boats));
+        Boat DEN9 = verteilung.getBoatBySailID("DEN 9");
+        assertNotNull(DEN9);
+        Skipper DEN9Skipper = DEN9.getCrew().getSkipper();
+        assertEquals("Norregaard, Allan (1981) Kolding", DEN9Skipper.getName());
+        assertEquals(new URL("http://www.sailing.org/biog.php?id=DENAN1"), DEN9Skipper.getIsaf());
+        Iterable<Crewmember> DEN9Crewmembers = DEN9.getCrew().getCrewmembers();
+        assertEquals(1, Util.size(DEN9Crewmembers));
+        Crewmember DEN9Crewmember = DEN9Crewmembers.iterator().next();
+        assertEquals("Lang, Peter (1989) Kolding Sejlklub", DEN9Crewmember.getName());
     }
 }

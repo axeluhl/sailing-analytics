@@ -36,8 +36,8 @@ public abstract class AbstractMongoDBTest {
     public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {
         mongo = newMongo();
         assertNotNull(mongo);
-        mongo.dropDatabase(getDBConfiguration().getDatabaseName());
         db = mongo.getDB(getDBConfiguration().getDatabaseName());
+        db.dropDatabase();
         assertNotNull(db);
     }
 

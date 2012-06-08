@@ -1,6 +1,11 @@
 package com.sap.sailing.kiworesultimport.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.sap.sailing.kiworesultimport.Crew;
 import com.sap.sailing.kiworesultimport.Crewmember;
@@ -14,14 +19,17 @@ public class CrewImpl extends AbstractNodeWrapper implements Crew {
 
     @Override
     public Skipper getSkipper() {
-        // TODO Auto-generated method stub
-        return null;
+        return new SkipperImpl(((Element) getNode()).getElementsByTagName("Skipper").item(0));
     }
 
     @Override
     public Iterable<Crewmember> getCrewmembers() {
-        // TODO Auto-generated method stub
-        return null;
+        List<Crewmember> result = new ArrayList<Crewmember>();
+        final NodeList crewmembers = ((Element) getNode()).getElementsByTagName("Crewmember");
+        for (int i=0; i<crewmembers.getLength(); i++) {
+            result.add(new CrewmemberImpl(crewmembers.item(i)));
+        }
+        return result;
     }
 
 }
