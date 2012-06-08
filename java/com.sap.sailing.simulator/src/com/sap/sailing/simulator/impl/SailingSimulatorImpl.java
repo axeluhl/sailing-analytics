@@ -57,10 +57,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		TimePoint startTime = new MillisecondsTimePoint(0);
 		List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
 		
-		pd.setWind(wf.getWind(new TimedPositionWithSpeedSimple(start)));
+		pd.setWind(wf.getWind(new TimedPositionWithSpeedImpl(startTime, start, null)));
 		Bearing direct = start.getBearingGreatCircle(end);
 		TimedPositionWithSpeed p1 = new TimedPositionWithSpeedImpl(startTime, start, pd.getSpeedAtBearing(direct));
-		TimedPositionWithSpeed p2 = new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(3600000), end, null);
+		TimedPositionWithSpeed p2 = new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(startTime.asMillis()+5*30*1000), end, null);
 		lst.add(p1);
 		lst.add(p2);
 		
@@ -277,5 +277,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		
 		return new PathImpl(lst);
 	}
+
+    @Override
+    public Path getOpputunisticPath() {
+        // TODO Auto-generated method stub
+        return createDummy();
+    }
 	
 }

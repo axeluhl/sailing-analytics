@@ -6,5 +6,7 @@ public interface SailingSimulator {
 	SimulationParameters getSimulationParameters();
 	
 	Path getOptimumPath();
+	
+	Path getOpputunisticPath();
 
 }

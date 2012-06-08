@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.simulator;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +17,6 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
@@ -25,10 +25,12 @@ import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
-import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
+import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
+import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
 
 public class SimulatorMap extends AbsolutePanel implements RequiresDataInitialization, TimeListenerWithStoppingCriteria {
 
@@ -37,18 +39,19 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private boolean overlaysInitialized;
     private WindFieldGenParamsDTO windParams;
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
-    private PathCanvasOverlay pathCanvasOverlay;
-    private ReplayPathCanvasOverlay replayPathCanvasOverlay;
+    private List<PathCanvasOverlay> pathCanvasOverlays;
+    private List<ReplayPathCanvasOverlay> replayPathCanvasOverlays;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
-    
+
     private List<TimeListenerWithStoppingCriteria> timeListeners;
-    
+
     private final SimulatorServiceAsync simulatorSvc;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final Timer timer;
-   
-    
+
+    private ColorPalette colorPalette;
+
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     private final int xRes;
@@ -58,6 +61,128 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         SUMMARY, REPLAY, WINDDISPLAY
     }
 
+    private class PathManager implements AsyncCallback<PathDTO[]> {
+        private boolean summaryView;
+        private WindPatternDisplay windPatternDisplay;
+
+        public PathManager(WindPatternDisplay windPatternDisplay, boolean summaryView) {
+            this.windPatternDisplay = windPatternDisplay;
+            this.summaryView = summaryView;
+        }
+
+        @Override
+        public void onFailure(Throwable message) {
+            errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
+        }
+
+        @Override
+        public void onSuccess(PathDTO[] paths) {
+            logger.info("Number of Paths : " + paths.length);
+            removeOverlays();
+            pathCanvasOverlays.clear();
+            replayPathCanvasOverlays.clear();
+
+            colorPalette.reset();
+            for (int i = 0; i < paths.length; ++i) {
+                /* TODO Revisit for now creating a WindFieldDTO from the path */
+                WindFieldDTO pathWindDTO = new WindFieldDTO();
+                pathWindDTO.setMatrix(paths[i].getMatrix());
+                if (summaryView) {
+                    PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay();
+                    pathCanvasOverlays.add(pathCanvasOverlay);
+                    pathCanvasOverlay.pathColor = colorPalette.getNextColor();
+                    mapw.addOverlay(pathCanvasOverlay);
+                    pathCanvasOverlay.setWindField(pathWindDTO);    
+                    pathCanvasOverlay.redraw(true); 
+                } else {
+                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(timer);
+                    replayPathCanvasOverlays.add(replayPathCanvasOverlay);
+                    replayPathCanvasOverlay.pathColor = colorPalette.getNextColor();
+                    mapw.addOverlay(replayPathCanvasOverlay);
+                    replayPathCanvasOverlay.setWindField(pathWindDTO);
+                }
+            }
+
+            if (!summaryView) {
+                Date endTimeToSet = new Date(0);
+                for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
+                    Date endTime = new Date(replayPathCanvasOverlays.get(i).timePointWindDTOMap.lastKey());
+                    if (endTimeToSet.before(endTime)) {
+                        endTimeToSet = endTime;
+                    }
+                }
+                logger.info("Setting end time " + endTimeToSet);
+                windParams.setEndTime(endTimeToSet);
+                generateWindField(windPatternDisplay, false);
+                timeListeners.clear();
+                timeListeners.add(windFieldCanvasOverlay);
+                for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
+                    timeListeners.add(replayPathCanvasOverlays.get(i));
+                }
+            }
+        }
+
+    }
+
+    private class ResultManager implements AsyncCallback<SimulatorResultsDTO> {
+        private boolean summaryView;
+        private WindPatternDisplay windPatternDisplay;
+
+        public ResultManager(WindPatternDisplay windPatternDisplay, boolean summaryView) {
+            this.windPatternDisplay = windPatternDisplay;
+            this.summaryView = summaryView;
+        }
+
+        @Override
+        public void onFailure(Throwable message) {
+            errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
+        }
+
+        @Override
+        public void onSuccess(SimulatorResultsDTO result) {
+            PathDTO[] paths = result.paths;
+            logger.info("Number of Paths : " + paths.length);
+            
+            removeOverlays();
+            pathCanvasOverlays.clear();
+            replayPathCanvasOverlays.clear();
+
+            colorPalette.reset();
+            for (int i = 0; i < paths.length; ++i) {
+                /* TODO Revisit for now creating a WindFieldDTO from the path */
+                WindFieldDTO pathWindDTO = new WindFieldDTO();
+                pathWindDTO.setMatrix(paths[i].getMatrix());
+                if (summaryView) {
+                    PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay();
+                    pathCanvasOverlays.add(pathCanvasOverlay);
+                    pathCanvasOverlay.pathColor = colorPalette.getNextColor();
+                    mapw.addOverlay(pathCanvasOverlay);
+                    pathCanvasOverlay.setWindField(pathWindDTO);    
+                    pathCanvasOverlay.redraw(true); 
+                } else {
+                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(timer);
+                    replayPathCanvasOverlays.add(replayPathCanvasOverlay);
+                    replayPathCanvasOverlay.pathColor = colorPalette.getNextColor();
+                    mapw.addOverlay(replayPathCanvasOverlay);
+                    replayPathCanvasOverlay.setWindField(pathWindDTO);
+                }
+            }
+
+            if (!summaryView) {
+                WindFieldDTO windFieldDTO = result.windField;
+                logger.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
+                mapw.addOverlay(windFieldCanvasOverlay);
+                refreshWindFieldOverlay(windFieldDTO);
+                
+                timeListeners.clear();
+                timeListeners.add(windFieldCanvasOverlay);
+                for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
+                    timeListeners.add(replayPathCanvasOverlays.get(i));
+                }
+            }
+        }
+
+    }
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
             int xRes, int yRes, Timer timer) {
         this.simulatorSvc = simulatorSvc;
@@ -67,13 +192,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.yRes = yRes;
         this.timer = timer;
         timer.addTimeListener(this);
-        
+        colorPalette = new ColorPaletteGenerator();
+
         dataInitialized = false;
         overlaysInitialized = false;
         windParams = new WindFieldGenParamsDTO();
         windFieldCanvasOverlay = null;
-        pathCanvasOverlay = null;
-        replayPathCanvasOverlay = null;
+        pathCanvasOverlays = null;
+        replayPathCanvasOverlays = null;
         raceCourseCanvasOverlay = null;
         timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
         initializeData();
@@ -122,17 +248,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         windFieldCanvasOverlay = new WindFieldCanvasOverlay(timer);
         // mapw.addOverlay(windFieldCanvasOverlay);
-        pathCanvasOverlay = new PathCanvasOverlay();
-        replayPathCanvasOverlay = new ReplayPathCanvasOverlay(timer);
-        timeListeners.add(windFieldCanvasOverlay);
-        timeListeners.add(replayPathCanvasOverlay);
+        pathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
+        replayPathCanvasOverlays = new ArrayList<ReplayPathCanvasOverlay>();
+        // timeListeners.add(replayPathCanvasOverlay);
         overlaysInitialized = true;
     }
 
-    private void generateWindField(WindPatternDisplay windPatternDisplay) {
+    private void generateWindField(WindPatternDisplay windPatternDisplay, final boolean removeOverlays) {
         logger.info("In generateWindField");
         if (windPatternDisplay == null) {
-            errorReporter.reportError("Please select a valid wind pattern.");   
+            errorReporter.reportError("Please select a valid wind pattern.");
             return;
         }
         PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
@@ -153,8 +278,12 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
             @Override
             public void onSuccess(WindFieldDTO wl) {
+                if (removeOverlays) {
+                    removeOverlays();
+                }
                 logger.info("Number of windDTO : " + wl.getMatrix().size());
-                //Window.alert("Number of windDTO : " + wl.getMatrix().size());
+                // Window.alert("Number of windDTO : " + wl.getMatrix().size());
+                mapw.addOverlay(windFieldCanvasOverlay);
                 refreshWindFieldOverlay(wl);
             }
         });
@@ -166,10 +295,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windFieldCanvasOverlay.redraw(true);
     }
 
-    private void generatePath(WindPatternDisplay windPatternDisplay, final boolean display) {
+    private void generatePath(WindPatternDisplay windPatternDisplay, final boolean summaryView) {
         logger.info("In generatePath");
         if (windPatternDisplay == null) {
-            errorReporter.reportError("Please select a valid wind pattern.");    
+            errorReporter.reportError("Please select a valid wind pattern.");
             return;
         }
         PositionDTO startPointDTO = new PositionDTO(raceCourseCanvasOverlay.startPoint.getLatitude(),
@@ -181,36 +310,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setSouthEast(endPointDTO);
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
-       
 
-        simulatorSvc.getPaths(windParams, windPatternDisplay, new AsyncCallback<PathDTO[]>() {
-            @Override
-            public void onFailure(Throwable message) {
-                errorReporter.reportError("Failed servlet call to SimulatorService\n" + message.getMessage());
-            }
-
-            @Override
-            public void onSuccess(PathDTO[] paths) {
-                logger.info("Number of Paths : " + paths.length);
-                /* TODO Revisit for now creating a WindFieldDTO from the path */
-                WindFieldDTO pathWindDTO = new WindFieldDTO();
-                pathWindDTO.setMatrix(paths[0].getMatrix());
-                if (display) {
-                    pathCanvasOverlay.setWindField(pathWindDTO);
-                    pathCanvasOverlay.redraw(display);
-                } else {
-                    replayPathCanvasOverlay.setWindField(pathWindDTO);
-                    
-                    List<WindDTO> path = pathWindDTO.getMatrix();
-                    if (path != null) {
-                        int length = path.size();
-                        Date endTime =  new Date(path.get(length-1).timepoint);
-                        logger.info("Setting end time " + endTime);
-                        windParams.setEndTime(endTime);
-                    }
-                }
-            }
-        });
+        //simulatorSvc.getPaths(windParams, windPatternDisplay, new PathManager(windPatternDisplay, summaryView));
+        simulatorSvc.getSimulatorResults(windParams, windPatternDisplay, !summaryView, 
+                new ResultManager(windPatternDisplay, summaryView));
 
     }
 
@@ -221,8 +324,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     public void reset() {
         if (!overlaysInitialized) {
             initializeOverlays();
+        } else {
+            removeOverlays();
         }
-        removeOverlays();
         mapw.setDoubleClickZoom(false);
         raceCourseCanvasOverlay.setSelected(true);
         // raceCourseCanvasOverlay.setVisible(true);
@@ -231,36 +335,38 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     public void removeOverlays() {
-        mapw.removeOverlay(windFieldCanvasOverlay);
-        mapw.removeOverlay(pathCanvasOverlay);
-        mapw.removeOverlay(replayPathCanvasOverlay);
+        if (overlaysInitialized) {
+            int num = 0;
+            mapw.removeOverlay(windFieldCanvasOverlay);
+            num++;
+            for (int i = 0; i < pathCanvasOverlays.size(); ++i) {
+                mapw.removeOverlay(pathCanvasOverlays.get(i));
+                num++;
+            }
+            for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
+                mapw.removeOverlay(replayPathCanvasOverlays.get(i));
+                num++;
+            }
+            logger.info("Removed " + num + " overlays");
+        }
     }
-    
+
     private void refreshSummaryView(WindPatternDisplay windPatternDisplay) {
-        mapw.removeOverlay(windFieldCanvasOverlay);
-        mapw.removeOverlay(replayPathCanvasOverlay);
-        pathCanvasOverlay.displayWindAlongPath = true;
-        mapw.addOverlay(pathCanvasOverlay);
+        //removeOverlays();
         generatePath(windPatternDisplay, true);
-        // pathCanvasOverlay.redraw(true);
     }
 
     private void refreshReplayView(WindPatternDisplay windPatternDisplay) {
-        mapw.removeOverlay(pathCanvasOverlay);
-        mapw.addOverlay(windFieldCanvasOverlay);
-        replayPathCanvasOverlay.displayWindAlongPath = false;
-        mapw.addOverlay(replayPathCanvasOverlay);
-        //Get the path first so we know how many windfields to generate
+        //removeOverlays();
         generatePath(windPatternDisplay, false);
-        generateWindField(windPatternDisplay);
     }
 
     private void refreshWindDisplayView(WindPatternDisplay windPatternDisplay) {
-        mapw.removeOverlay(pathCanvasOverlay);
-        mapw.removeOverlay(replayPathCanvasOverlay);
-        mapw.addOverlay(windFieldCanvasOverlay);
+        //removeOverlays();
         windParams.setDefaultTimeSettings();
-        generateWindField(windPatternDisplay);
+        generateWindField(windPatternDisplay,true);
+        timeListeners.clear();
+        timeListeners.add(windFieldCanvasOverlay);
     }
 
     public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay) {
@@ -308,11 +414,12 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
     @Override
     public int stop() {
-  
-      int value = 0;
-      for(TimeListenerWithStoppingCriteria t : timeListeners) {
-        value += t.stop();
-      }
-      return value;
+
+        int value = 0;
+        for (TimeListenerWithStoppingCriteria t : timeListeners) {
+            value += t.stop();
+        }
+        return value;
     }
+
 }

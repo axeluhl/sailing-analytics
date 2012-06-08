@@ -120,7 +120,8 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         return boundary;
     }
 
-    public Position[][] getPositionsGrid() {
+    @Override
+    public Position[][] getPositionGrid() {
         return positions;
     }
 

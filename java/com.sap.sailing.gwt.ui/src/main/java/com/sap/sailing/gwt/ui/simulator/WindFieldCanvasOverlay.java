@@ -69,6 +69,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     }
 
     private void init() {
+        wl = null;
         windFieldPoints = new HashMap<ToolTip, WindDTO>();
 
         mmHandler = new WindFieldMapMouseMoveHandler(this);
@@ -160,7 +161,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
             int index = 0;
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
-                int width = (int) Math.max(1, Math.min(7, Math.round(windDTO.trueWindSpeedInMetersPerSecond)));
+                int width = (int) Math.max(1, Math.min(5, Math.round(windDTO.trueWindSpeedInMetersPerSecond)));
                 DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                 drawArrow(windDTO, dbi.getRadians(), arrowLength, width, ++index);
 

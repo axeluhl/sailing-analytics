@@ -10,4 +10,6 @@ public interface WindFieldGenerator extends WindField {
     public void setPositionGrid(Position[][] positions);
     
     public void generate(TimePoint start, TimePoint end, TimePoint step);
+
+    public Position[][] getPositionGrid();
 }
