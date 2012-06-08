@@ -101,7 +101,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
         if (startPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(startPoint);
-            drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "Start");
+            //drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "Start");
+            drawCircleWithText(point.getX() - getWidgetPosLeft(),point.getY() - getWidgetPosTop(),10,"Start");
             if (startMarker != null) {
                 startMarker.setLatLng(startPoint);
             } else {
@@ -132,8 +133,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
         if (endPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(endPoint);
-            drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "End");
-           
+            //drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "End");
+            drawCircleWithText(point.getX() - getWidgetPosLeft(),point.getY() - getWidgetPosTop(),10,"End");
             
             if (endMarker != null) {
                 endMarker.setLatLng(endPoint);

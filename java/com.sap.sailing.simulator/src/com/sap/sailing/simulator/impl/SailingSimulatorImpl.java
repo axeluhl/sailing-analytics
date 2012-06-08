@@ -2,22 +2,18 @@ package com.sap.sailing.simulator.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
-import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
@@ -62,10 +58,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		TimePoint startTime = new MillisecondsTimePoint(0);
 		List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
 		
-		pd.setWind(wf.getWind(new TimedPositionWithSpeedSimple(start)));
+		pd.setWind(wf.getWind(new TimedPositionWithSpeedImpl(startTime, start, null)));
 		Bearing direct = start.getBearingGreatCircle(end);
 		TimedPositionWithSpeed p1 = new TimedPositionWithSpeedImpl(startTime, start, pd.getSpeedAtBearing(direct));
-		TimedPositionWithSpeed p2 = new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(3600000), end, null);
+		TimedPositionWithSpeed p2 = new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(startTime.asMillis()+5*30*1000), end, null);
 		lst.add(p1);
 		lst.add(p2);
 		
@@ -219,6 +215,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 			for (Position p : unvisited) {
 				if( tentativeDistances.get(p) < minTentativeDistance ) {
 					currentPosition = p;
+					minTentativeDistance = tentativeDistances.get(p);
 					currentTime = new MillisecondsTimePoint(minTentativeDistance);
 				}
 			
@@ -256,8 +253,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		Map<String, Path> allPaths = new HashMap<String, Path>();
 		allPaths.put("Dummy", createDummy());
 		allPaths.put("Heuristic", createHeuristic());
-		allPaths.put("Djikstra", createDjikstra());
+		//allPaths.put("Djikstra", createDjikstra());
 		return allPaths;
 	}
+
 	
 }
