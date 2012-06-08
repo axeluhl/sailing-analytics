@@ -143,6 +143,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
         logColumnsInRegatta(regatta);
         RegattaLeaderboard regattaLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
+        assertSame(regatta, regattaLeaderboard.getRegatta());
         final RaceColumnInSeries q2 = regatta.getSeriesByName("Qualifying").getRaceColumnByName("Q2");
         final Fleet yellow = q2.getFleetByName("Yellow");
         logColumnsInRegatta(regatta);

@@ -663,6 +663,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private void cacheAndReplicateSpecificRegattaWithoutRaceColumns(Regatta regatta) {
         if (!regattasByName.containsKey(regatta.getName())) {
+            logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName");
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             replicate(new AddSpecificRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta
@@ -694,6 +695,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private void cacheAndReplicateDefaultRegatta(Regatta regatta) {
         if (!regattasByName.containsKey(regatta.getName())) {
+            logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName");
             regattasByName.put(regatta.getName(), regatta);
             regatta.addRegattaListener(this);
             replicate(new AddDefaultRegatta(regatta.getBaseName(), regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName()));
