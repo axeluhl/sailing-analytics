@@ -69,6 +69,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     }
 
     private void init() {
+        wl = null;
         windFieldPoints = new HashMap<ToolTip, WindDTO>();
 
         mmHandler = new WindFieldMapMouseMoveHandler(this);
@@ -153,6 +154,15 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     }
 
+    protected void drawScaledArrow(WindDTO windDTO, double angle, int index) {
+
+        double aWidth = Math.max(1., (windDTO.trueWindSpeedInMetersPerSecond/2.));
+        double aLength = Math.max(10., (4.*windDTO.trueWindSpeedInMetersPerSecond));
+        //System.out.println("windspeed: "+windDTO.trueWindSpeedInMetersPerSecond+", aWidth: "+aWidth+", aLength: "+aLength);
+        drawArrow(windDTO, angle, aLength, aWidth, index);
+
+    }
+    
     protected void drawWindField(final List<WindDTO> windDTOList) {
         clear();
         if (windDTOList != null && windDTOList.size() > 0) {
@@ -160,13 +170,8 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
             int index = 0;
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
-                //int aWidth = (int) Math.max(1, Math.min(2, Math.round(windDTO.trueWindSpeedInMetersPerSecond)));
-                double aWidth = Math.max(1., (windDTO.trueWindSpeedInMetersPerSecond/3.));
-                double aLength = Math.max(10., (3.*windDTO.trueWindSpeedInMetersPerSecond));
-                logger.info("windspeed: "+windDTO.trueWindSpeedInMetersPerSecond+", aWidth: "+aWidth+", aLength: "+aLength);
                 DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
-                drawArrow(windDTO, dbi.getRadians(), aLength, aWidth, ++index);
-
+                drawScaledArrow(windDTO, dbi.getRadians(), ++index);
             }
             String title = "Wind Field at " + windDTOList.size() + " points.";
             getCanvas().setTitle(title);
@@ -199,7 +204,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         double theta = Math.atan2(-dy, dx);
 
         double hLength = Math.max(6.,6.+(10./(60.-10.))*Math.max(length-6.,0));
-        logger.info("headlength: "+hLength+", arrowlength: "+length);
+        logger.finer("headlength: "+hLength+", arrowlength: "+length);
         drawHead(x1, y1, theta, hLength, weight);
         //String text = "P" + index;// + NumberFormat.getFormat("0.00").format(windDTO.trueWindBearingDeg) + "°";
         //drawPointWithText(x, y, text);

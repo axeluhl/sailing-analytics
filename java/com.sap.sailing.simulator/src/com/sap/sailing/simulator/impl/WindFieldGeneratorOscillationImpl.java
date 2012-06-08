@@ -60,11 +60,11 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
         int midPoint = ncol/2;
         for (int i = 0; i <= midPoint; ++i) {
             speed[i] = new KnotSpeedImpl(leftSpeed + i*(middleSpeed-leftSpeed)/(midPoint)); 
-            logger.info("index: "+i+"speed: "+speed[i]);
+            //logger.info("index: "+i+"speed: "+speed[i]);
         }
         for (int i = 1; i < ncol - midPoint; ++i) {
             speed[midPoint + i] = new KnotSpeedImpl(middleSpeed + i*(rightSpeed-middleSpeed)/(ncol - midPoint -1)); 
-            logger.info("index: "+(midPoint+i)+"speed: "+speed[midPoint-1+i]);
+            //logger.info("index: "+(midPoint+i)+"speed: "+speed[midPoint-1+i]);
         }
     
     }

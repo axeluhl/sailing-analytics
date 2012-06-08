@@ -27,6 +27,9 @@ import com.sap.sailing.gwt.ui.shared.racemap.FullCanvasOverlay;
  */
 public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
+    public String racecourseColor = "White";
+    public double racecourseBuoySize = 5;
+
     public LatLng startPoint;
     public LatLng endPoint;
     private Marker startMarker;
@@ -101,7 +104,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
         if (startPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(startPoint);
-            drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "Start");
+            //drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "Start");
+            drawCircleWithText(point.getX() - getWidgetPosLeft(),point.getY() - getWidgetPosTop(),racecourseBuoySize,racecourseColor,"Start");
             if (startMarker != null) {
                 startMarker.setLatLng(startPoint);
             } else {
@@ -132,9 +136,13 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
         if (endPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(endPoint);
-            drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "End");
-           
-            
+            //drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "End");
+            drawCircleWithText(point.getX() - getWidgetPosLeft(),point.getY() - getWidgetPosTop(),racecourseBuoySize,racecourseColor,"End");
+            double cLat = (startPoint.getLatitude() + ((endPoint.getLatitude() - startPoint.getLatitude())%180.)/2. + 90.)%180. - 90.;
+            double cLon = (startPoint.getLongitude() + ((endPoint.getLongitude() - startPoint.getLongitude())%360.)/2. + 180.)%360. -180;
+            LatLng centerPoint = LatLng.newInstance(cLat, cLon);
+            //System.out.println("center: "+cLat+","+cLon);
+            getMap().panTo(centerPoint);
             if (endMarker != null) {
                 endMarker.setLatLng(endPoint);
             } else {
@@ -205,11 +213,12 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     @Override
     protected void redraw(boolean force) {
+        System.out.println("method: RaceCourseCanvasOverlay.redraw().");
         if (startPoint != null && endPoint != null) {
             setCanvasSettings();
             // drawCanvas();
             setStartEndPoint(startPoint, endPoint);
-            drawLine(endPoint, "White");
+            drawLine(endPoint, racecourseColor);
         }
     }
 
