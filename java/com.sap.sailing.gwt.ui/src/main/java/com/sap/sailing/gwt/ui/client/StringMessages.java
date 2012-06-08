@@ -317,4 +317,5 @@ public interface StringMessages extends Messages {
     String splitFleet();
     String color();
     String medalSeries();
+    String noColor();
 }
