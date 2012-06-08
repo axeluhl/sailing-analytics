@@ -67,6 +67,22 @@ public class ParserTest {
     }
     
     @Test
+    public void testEmptyStatus() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
+        ResultListParser parser = ResultListParserFactory.INSTANCE.createResultListParser();
+        ResultList resultList = parser.parse(getSampleInputStream());
+        assertNotNull(resultList);
+        assertNull(resultList.getVerteilung().getBoatBySailID("SWE 1196").getRaces().getRaces().iterator().next().getStatus());
+    }
+    
+    @Test
+    public void testNonEmptyStatus() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
+        ResultListParser parser = ResultListParserFactory.INSTANCE.createResultListParser();
+        ResultList resultList = parser.parse(getSampleInputStream());
+        assertNotNull(resultList);
+        assertEquals("DNC", resultList.getVerteilung().getBoatBySailID("GER 1199").getRaces().getRaces().iterator().next().getStatus());
+    }
+    
+    @Test
     public void testObtainingResultList() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
         ResultListParser parser = ResultListParserFactory.INSTANCE.createResultListParser();
         ResultList resultList = parser.parse(getSampleInputStream());

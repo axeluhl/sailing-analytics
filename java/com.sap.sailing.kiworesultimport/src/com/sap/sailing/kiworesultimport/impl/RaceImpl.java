@@ -20,4 +20,10 @@ public class RaceImpl extends AbstractNodeWrapper implements Race {
         return Integer.valueOf(getNode().getAttributes().getNamedItem("number").getNodeValue());
     }
 
+    @Override
+    public String getStatus() {
+        final Node namedItem = getNode().getAttributes().getNamedItem("status");
+        return namedItem == null || namedItem.getNodeValue() == null || namedItem.getNodeValue().trim().length() == 0 ? null : namedItem.getNodeValue();
+    }
+
 }
