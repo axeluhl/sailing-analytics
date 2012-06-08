@@ -30,4 +30,6 @@ public interface ResultList {
      * @return <code>null</code> if no such {@link Boat} is found in {@link #getBoats}, or the boat found otherwise.
      */
     Boat getBoatBySailID(String sailID);
+
+    String getSourceName();
 }

@@ -20,10 +20,18 @@ import com.sap.sailing.kiworesultimport.ResultList;
 public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
     private static final Logger logger = Logger.getLogger(ResultListImpl.class.getName());
     
+    private final String sourceName;
+    
     private static final SimpleDateFormat df = new SimpleDateFormat("dd. MMM yyyy hh:mm", Locale.GERMAN);
     
-    public ResultListImpl(Node node) {
+    public ResultListImpl(Node node, String sourceName) {
         super(node);
+        this.sourceName = sourceName;
+    }
+    
+    @Override
+    public String getSourceName() {
+        return sourceName;
     }
 
     @Override

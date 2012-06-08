@@ -4,18 +4,20 @@ import java.text.ParseException;
 
 import com.sap.sailing.domain.common.TimePoint;
 
-public interface Startbericht {
-    String getDatum();
+public interface StartReport {
+    String getDateAsString();
     
     TimePoint getTimePoint() throws ParseException;
     
-    String getRegattabahn();
+    String getCourseAreaName();
     
-    String getKompasskurs();
+    String getStartBearingAsString();
     
-    String getWindstaerke();
+    String getWindSpeedAsString();
     
-    String getWindrichtung();
+    String getWindDirectionAsString();
     
     Iterable<Start> getStarts();
+    
+    String getSourceName();
 }

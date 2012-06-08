@@ -29,12 +29,12 @@ import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.Crewmember;
 import com.sap.sailing.kiworesultimport.ParserFactory;
 import com.sap.sailing.kiworesultimport.Race;
-import com.sap.sailing.kiworesultimport.Races;
 import com.sap.sailing.kiworesultimport.ResultList;
 import com.sap.sailing.kiworesultimport.ResultListParser;
 import com.sap.sailing.kiworesultimport.Skipper;
 
 public class ParserTest {
+    private static final String SAMPLE_INPUT_NAME = "2011-06-18_49er_Wettfahrt_2_Extra.xml";
     private static final String RESOURCES = "resources/";
 
     private InputStream getInputStream(String filename) throws FileNotFoundException, IOException {
@@ -55,13 +55,13 @@ public class ParserTest {
     }
 
     private InputStream getSampleInputStream() throws FileNotFoundException, IOException {
-        return getInputStream("2011-06-18_49er_Wettfahrt_2_Extra.xml");
+        return getInputStream(SAMPLE_INPUT_NAME);
     }
     
     @Test
     public void testEmptyIsafID() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
         ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
-        ResultList resultList = parser.parse(getSampleInputStream());
+        ResultList resultList = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
         assertNotNull(resultList);
         assertNull(resultList.getBoatBySailID("SWE 1196").getCrew().getSkipper().getIsaf());
     }
@@ -69,27 +69,31 @@ public class ParserTest {
     @Test
     public void testEmptyStatus() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
         ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
-        ResultList resultList = parser.parse(getSampleInputStream());
+        ResultList resultList = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
         assertNotNull(resultList);
-        assertNull(resultList.getBoatBySailID("SWE 1196").getRaces().getRaces().iterator().next().getStatus());
-        assertEquals(MaxPointsReason.NONE, resultList.getBoatBySailID("SWE 1196").getRaces().getRaces()
+        assertNull(resultList.getBoatBySailID("SWE 1196").getRaces().iterator().next().getStatus());
+        assertEquals(MaxPointsReason.NONE, resultList.getBoatBySailID("SWE 1196").getRaces()
                 .iterator().next().getMaxPointsReason());
     }
     
     @Test
     public void testNonEmptyStatus() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
         ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
-        ResultList resultList = parser.parse(getSampleInputStream());
+        ResultList resultList = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
         assertNotNull(resultList);
-        assertEquals("DNC", resultList.getBoatBySailID("GER 1199").getRaces().getRaces().iterator().next().getStatus());
-        assertEquals(MaxPointsReason.DNC, resultList.getBoatBySailID("GER 1199").getRaces().getRaces()
+        final Boat GER1199 = resultList.getBoatBySailID("GER 1199");
+        assertEquals("DNC", GER1199.getRaces().iterator().next().getStatus());
+        assertEquals(MaxPointsReason.DNC, GER1199.getRaces()
                 .iterator().next().getMaxPointsReason());
+        assertEquals(47, (int) GER1199.getRank());
+        assertEquals(25.00, GER1199.getRace(1).getPoints(), 0.00000001);
+        assertEquals(25.00, GER1199.getRace(2).getPoints(), 0.00000001);
     }
     
     @Test
     public void testObtainingResultList() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
         ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
-        ResultList resultList = parser.parse(getSampleInputStream());
+        ResultList resultList = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
         assertNotNull(resultList);
         assertEquals("D:\\Programme\\KWSailing\\eventlogos\\KielerWoche_Ergebnislistenkopf_2011.jpg", resultList.getImagePfad());
         assertEquals(new String(new byte[] { (byte) 160  /* non-breaking space */}), resultList.getLegende());
@@ -98,7 +102,7 @@ public class ParserTest {
         assertEquals(48, Util.size(boats));
         Boat DEN9 = resultList.getBoatBySailID("DEN 9");
         assertNotNull(DEN9);
-        assertEquals(7, (int) DEN9.getPosition());
+        assertEquals(7, (int) DEN9.getRank());
         Skipper DEN9Skipper = DEN9.getCrew().getSkipper();
         assertEquals("Norregaard, Allan (1981) Kolding", DEN9Skipper.getName());
         assertEquals(new URL("http://www.sailing.org/biog.php?id=DENAN1"), DEN9Skipper.getIsaf());
@@ -106,16 +110,16 @@ public class ParserTest {
         assertEquals(1, Util.size(DEN9Crewmembers));
         Crewmember DEN9Crewmember = DEN9Crewmembers.iterator().next();
         assertEquals("Lang, Peter (1989) Kolding Sejlklub", DEN9Crewmember.getName());
-        Races DEN9Races = DEN9.getRaces();
+        Iterable<Race> DEN9Races = DEN9.getRaces();
         assertNotNull(DEN9Races);
-        assertEquals(2, Util.size(DEN9Races.getRaces()));
-        Iterator<Race> i = DEN9Races.getRaces().iterator();
+        assertEquals(2, Util.size(DEN9Races));
+        Iterator<Race> i = DEN9Races.iterator();
         Race r1 = i.next();
         assertEquals(9.00, r1.getPoints(), 0.0000000001);
-        assertEquals(1, (int) r1.getNumber());
+        assertEquals(1, (int) r1.getRaceNumber());
         Race r2 = i.next();
         assertEquals(1.00, r2.getPoints(), 0.0000000001);
-        assertEquals(2, (int) r2.getNumber());
+        assertEquals(2, (int) r2.getRaceNumber());
         assertEquals(new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 18, 16, 26).getTime()), resultList.getTimePoint());
     }
 }

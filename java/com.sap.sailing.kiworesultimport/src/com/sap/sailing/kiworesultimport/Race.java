@@ -7,7 +7,7 @@ public interface Race {
     
     Double getPoints();
 
-    Integer getNumber();
+    Integer getRaceNumber();
 
     MaxPointsReason getMaxPointsReason();
 }

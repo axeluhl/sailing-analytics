@@ -1,12 +1,15 @@
 package com.sap.sailing.kiworesultimport.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.Crew;
-import com.sap.sailing.kiworesultimport.Races;
+import com.sap.sailing.kiworesultimport.Race;
 
 public class BoatImpl extends NamedImpl implements Boat {
 
@@ -20,12 +23,12 @@ public class BoatImpl extends NamedImpl implements Boat {
     }
 
     @Override
-    public Integer getPosition() {
+    public Integer getRank() {
         return Integer.valueOf(getNode().getAttributes().getNamedItem("position").getNodeValue());
     }
 
     @Override
-    public String getPreis() {
+    public String getPrice() {
         return getNode().getAttributes().getNamedItem("preis").getNodeValue();
     }
 
@@ -34,11 +37,31 @@ public class BoatImpl extends NamedImpl implements Boat {
         final NodeList crew = ((Element) getNode()).getElementsByTagName("Crew");
         return new CrewImpl(crew.item(0));
     }
+    
+    @Override
+    public Double getTotalPoints() {
+        return Double.valueOf(((Element) getNode()).getElementsByTagName("Races").item(0).getAttributes()
+                .getNamedItem("totalpoints").getNodeValue().replace(',', '.'));
+    }
 
     @Override
-    public Races getRaces() {
-        final NodeList races = ((Element) getNode()).getElementsByTagName("Races");
-        return new RacesImpl(races.item(0));
+    public Iterable<Race> getRaces() {
+        List<Race> result = new ArrayList<Race>();
+        final NodeList races = ((Element) ((Element) getNode()).getElementsByTagName("Races").item(0)).getElementsByTagName("Race");
+        for (int i=0; i<races.getLength(); i++) {
+            result.add(new RaceImpl(races.item(i)));
+        }
+        return result;
+    }
+
+    @Override
+    public Race getRace(int raceNumberOneBased) {
+        for (Race race : getRaces()) {
+            if (race.getRaceNumber() == raceNumberOneBased) {
+                return race;
+            }
+        }
+        return null;
     }
 
 }

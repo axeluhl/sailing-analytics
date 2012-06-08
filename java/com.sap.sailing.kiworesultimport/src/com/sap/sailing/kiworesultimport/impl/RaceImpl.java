@@ -17,7 +17,7 @@ public class RaceImpl extends AbstractNodeWrapper implements Race {
     }
 
     @Override
-    public Integer getNumber() {
+    public Integer getRaceNumber() {
         return Integer.valueOf(getNode().getAttributes().getNamedItem("number").getNodeValue());
     }
 
