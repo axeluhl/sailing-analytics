@@ -56,7 +56,7 @@ public class SimulatorTest {
 
         SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
         Path path = sailingSim.getOptimumPath();
-        logger.info("Path with " + path.getPathPoints().size() + "points");
+        //logger.info("Path with " + path.getPathPoints().size() + "points");
         assertEquals("Number of path points", 2612, path.getPathPoints().size());
         /*
          * for(TimedPositionWithSpeed p : path.getPathPoints()) { logger.info("Position: " + p.getPosition() + " Wind: "
@@ -88,15 +88,15 @@ public class SimulatorTest {
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 
         Path pth = solver.getOptimumPath();
-        logger.info("Path with " + pth.getPathPoints().size() + "points");
-        for (TimedPositionWithSpeed p : pth.getPathPoints()) {
+        //logger.info("Path with " + pth.getPathPoints().size() + "points");
+       /* for (TimedPositionWithSpeed p : pth.getPathPoints()) {
             // the null in the Wind output is the timestamp - this Wind is time-invariant!
             System.out.println("Position: " + p.getPosition() + " Wind: "
                     + wf.getWind(new TimedPositionWithSpeedSimple(p.getPosition())));
             System.out.println("Position: " + p.getPosition() + " Wind: "
                     + wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
             // Wind wind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
-        }
+        }*/
 
         assertEquals("Number of path points", 37, pth.getPathPoints().size());
     }
@@ -132,12 +132,12 @@ public class SimulatorTest {
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 
         Path pth = solver.getOptimumPath();
-        logger.info("Path with " + pth.getPathPoints().size() + " points");
-        for (TimedPositionWithSpeed p : pth.getPathPoints()) {
+        //logger.info("Path with " + pth.getPathPoints().size() + " points");
+       /* for (TimedPositionWithSpeed p : pth.getPathPoints()) {
             System.out.println("Position: " + p.getPosition() + " Wind: "
                     + wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
             // Wind wind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
-        }
+        }*/
 
         assertEquals("Number of path points", 37, pth.getPathPoints().size());
     }
@@ -174,16 +174,38 @@ public class SimulatorTest {
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 
         Path pth = solver.getOptimumPath();
-        logger.info("Path with " + pth.getPathPoints().size() + " points");
-        for (TimedPositionWithSpeed p : pth.getPathPoints()) {
+        //logger.info("Path with " + pth.getPathPoints().size() + " points");
+        /*for (TimedPositionWithSpeed p : pth.getPathPoints()) {
             System.out.println("Position: " + p.getPosition() + " Wind: "
                     + wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
             // Wind wind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
-        }
+        }*/
 
         assertEquals("Number of path points", 47, pth.getPathPoints().size());
         
     }
     
+    @Test
+    public void testSailingSimulatorDjikstra() {
+
+        Position start = new DegreePosition(48.401856, -140.001526);
+        Position end = new DegreePosition(49.143987, -139.987783);
+        //System.out.println(start.getDistance(end).getKilometers());
+
+        List<Position> course = new LinkedList<Position>();
+        course.add(start);
+        course.add(end);
+        PolarDiagram pd = new PolarDiagramImpl(0);
+        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
+        KilometersPerHourSpeedImpl kmhrSpeed = new KilometersPerHourSpeedImpl(7.2);
+        WindControlParameters windParameters = new WindControlParameters(kmhrSpeed.getKnots(), 45);
+        WindField wf = new WindFieldImpl(bd, windParameters);
+        SimulationParameters param = new SimulationParametersImpl(course, pd, wf);
+
+        SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
+        Path path = sailingSim.getAllPaths().get("Djikstra");
+        System.out.println(path.getPathPoints().size());
+        assertEquals("none", 1, 1);
+    }
     
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.server;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -257,7 +258,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         TimePoint start = new MillisecondsTimePoint(0);
         TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
         wf.generate(start, null, timeStep);
-
+        /*
         // TODO Get all the paths that need to be displayed
         List<WindDTO> path = getOppurtunisticPath(course, wf);
         PathDTO[] pathDTO = new PathDTO[2];
@@ -266,6 +267,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         pathDTO[1] = new PathDTO("Path 2");
         List<WindDTO> path1 = getOptimumPath(course, wf);
         pathDTO[1].setMatrix(path1);
+        */
+        PathDTO[] pathDTO = getSimulatedPaths(course, wf);
+        
         return pathDTO;
     }
 
@@ -295,26 +299,32 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     }
 
-    private List<WindDTO> getOppurtunisticPath(List<Position> course, WindField wf) {
+    private PathDTO[] getSimulatedPaths(List<Position> course, WindField wf) {
 
         PolarDiagram pd = new PolarDiagramImpl(1);
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 
-        Path pth = solver.getOpputunisticPath();
-        int i = 0;
-        List<WindDTO> wList = new ArrayList<WindDTO>();
-        for (TimedPositionWithSpeed p : pth.getPathPoints()) {
+        Map<String, Path> paths = solver.getAllPaths();
+        PathDTO[] pathDTO = new PathDTO[paths.size()];
+        int pathIndex = 0;
+        for(String pathName : paths.keySet()) {
+            logger.info("Path " + pathName);
+            Path path = paths.get(pathName);
+            pathDTO[pathIndex] = new PathDTO(pathName);
+            List<WindDTO> wList = new ArrayList<WindDTO>();
+            for (TimedPositionWithSpeed p : path.getPathPoints()) {
 
-            Wind localWind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
-            logger.finer(localWind.toString());
-            WindDTO w = createWindDTO(localWind);
-            // w.trueWindBearingDeg = 10.0*i;
-            ++i;
-            wList.add(w);
+                Wind localWind = wf.getWind(path.getPositionAtTime(p.getTimePoint()));
+                logger.finer(localWind.toString());
+                WindDTO w = createWindDTO(localWind);
+           
+                wList.add(w);
+            }
+            pathDTO[pathIndex].setMatrix(wList);
+            ++pathIndex;
         }
-        return wList;
-
+        return pathDTO;
     }
 
     public List<WindPatternDTO> getWindPatterns() {
@@ -375,19 +385,17 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         TimePoint startTime = new MillisecondsTimePoint(0);
         TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
         wf.generate(startTime, null, timeStep);
+        
+        Long longestPathTime = 0L; 
+        PathDTO[] pathDTO = getSimulatedPaths(course, wf);
+        for (int i = 0; i < pathDTO.length; ++i) {
+            List<WindDTO> path = pathDTO[i].getMatrix();
+            int pathLength = path.size();
+            long pathTime = pathDTO[i].getMatrix().get(pathLength - 1).timepoint - path.get(0).timepoint;
+            longestPathTime = Math.max(longestPathTime, pathTime);
+        }
 
-        // TODO Get all the paths that need to be displayed
-        List<WindDTO> path = getOppurtunisticPath(course, wf);
-        Long pathTime = path.get(path.size() - 1).timepoint - path.get(0).timepoint;
-        PathDTO[] pathDTO = new PathDTO[2];
-        pathDTO[0] = new PathDTO("Path 1");
-        pathDTO[0].setMatrix(path);
-        pathDTO[1] = new PathDTO("Path 2");
-        List<WindDTO> path1 = getOptimumPath(course, wf);
-        Long pathTime1 = path1.get(path1.size() - 1).timepoint - path1.get(0).timepoint;
-        pathDTO[1].setMatrix(path1);
-
-        TimePoint endTime = new MillisecondsTimePoint(startTime.asMillis() + Math.max(pathTime, pathTime1));
+        TimePoint endTime = new MillisecondsTimePoint(startTime.asMillis() + longestPathTime);
         WindFieldDTO windFieldDTO = createWindFieldDTO(wf, startTime, endTime, timeStep);
         SimulatorResultsDTO simulatorResults = new SimulatorResultsDTO(pathDTO, windFieldDTO);
 
