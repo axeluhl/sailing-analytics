@@ -2,7 +2,7 @@ package com.sap.sailing.kiworesultimport;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
 
-public interface Race {
+public interface BoatResultInRace {
     String getStatus();
     
     Double getPoints();
@@ -10,4 +10,6 @@ public interface Race {
     Integer getRaceNumber();
 
     MaxPointsReason getMaxPointsReason();
+
+    boolean isDiscarded();
 }

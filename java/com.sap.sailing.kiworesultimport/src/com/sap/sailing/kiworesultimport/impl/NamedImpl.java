@@ -15,4 +15,8 @@ public class NamedImpl extends AbstractNodeWrapper implements Named {
         return getNode().getAttributes().getNamedItem("name").getNodeValue();
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

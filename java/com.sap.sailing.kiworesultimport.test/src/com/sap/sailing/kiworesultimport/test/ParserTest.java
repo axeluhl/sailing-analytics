@@ -28,7 +28,7 @@ import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.Crewmember;
 import com.sap.sailing.kiworesultimport.ParserFactory;
-import com.sap.sailing.kiworesultimport.Race;
+import com.sap.sailing.kiworesultimport.BoatResultInRace;
 import com.sap.sailing.kiworesultimport.ResultList;
 import com.sap.sailing.kiworesultimport.ResultListParser;
 import com.sap.sailing.kiworesultimport.Skipper;
@@ -71,8 +71,8 @@ public class ParserTest {
         ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
         ResultList resultList = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
         assertNotNull(resultList);
-        assertNull(resultList.getBoatBySailID("SWE 1196").getRaces().iterator().next().getStatus());
-        assertEquals(MaxPointsReason.NONE, resultList.getBoatBySailID("SWE 1196").getRaces()
+        assertNull(resultList.getBoatBySailID("SWE 1196").getResultsInRaces().iterator().next().getStatus());
+        assertEquals(MaxPointsReason.NONE, resultList.getBoatBySailID("SWE 1196").getResultsInRaces()
                 .iterator().next().getMaxPointsReason());
     }
     
@@ -82,12 +82,12 @@ public class ParserTest {
         ResultList resultList = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
         assertNotNull(resultList);
         final Boat GER1199 = resultList.getBoatBySailID("GER 1199");
-        assertEquals("DNC", GER1199.getRaces().iterator().next().getStatus());
-        assertEquals(MaxPointsReason.DNC, GER1199.getRaces()
+        assertEquals("DNC", GER1199.getResultsInRaces().iterator().next().getStatus());
+        assertEquals(MaxPointsReason.DNC, GER1199.getResultsInRaces()
                 .iterator().next().getMaxPointsReason());
         assertEquals(47, (int) GER1199.getRank());
-        assertEquals(25.00, GER1199.getRace(1).getPoints(), 0.00000001);
-        assertEquals(25.00, GER1199.getRace(2).getPoints(), 0.00000001);
+        assertEquals(25.00, GER1199.getResultsInRace(1).getPoints(), 0.00000001);
+        assertEquals(25.00, GER1199.getResultsInRace(2).getPoints(), 0.00000001);
     }
     
     @Test
@@ -95,8 +95,8 @@ public class ParserTest {
         ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
         ResultList resultList = parser.parse(getSampleInputStream(), SAMPLE_INPUT_NAME);
         assertNotNull(resultList);
-        assertEquals("D:\\Programme\\KWSailing\\eventlogos\\KielerWoche_Ergebnislistenkopf_2011.jpg", resultList.getImagePfad());
-        assertEquals(new String(new byte[] { (byte) 160  /* non-breaking space */}), resultList.getLegende());
+        assertEquals("D:\\Programme\\KWSailing\\eventlogos\\KielerWoche_Ergebnislistenkopf_2011.jpg", resultList.getImagePath());
+        assertEquals(new String(new byte[] { (byte) 160  /* non-breaking space */}), resultList.getLegend());
         Iterable<Boat> boats = resultList.getBoats();
         assertFalse(Util.isEmpty(boats));
         assertEquals(48, Util.size(boats));
@@ -110,16 +110,16 @@ public class ParserTest {
         assertEquals(1, Util.size(DEN9Crewmembers));
         Crewmember DEN9Crewmember = DEN9Crewmembers.iterator().next();
         assertEquals("Lang, Peter (1989) Kolding Sejlklub", DEN9Crewmember.getName());
-        Iterable<Race> DEN9Races = DEN9.getRaces();
+        Iterable<BoatResultInRace> DEN9Races = DEN9.getResultsInRaces();
         assertNotNull(DEN9Races);
         assertEquals(2, Util.size(DEN9Races));
-        Iterator<Race> i = DEN9Races.iterator();
-        Race r1 = i.next();
+        Iterator<BoatResultInRace> i = DEN9Races.iterator();
+        BoatResultInRace r1 = i.next();
         assertEquals(9.00, r1.getPoints(), 0.0000000001);
         assertEquals(1, (int) r1.getRaceNumber());
-        Race r2 = i.next();
+        BoatResultInRace r2 = i.next();
         assertEquals(1.00, r2.getPoints(), 0.0000000001);
         assertEquals(2, (int) r2.getRaceNumber());
-        assertEquals(new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 18, 16, 26).getTime()), resultList.getTimePoint());
+        assertEquals(new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 18, 16, 26).getTime()), resultList.getTimePointPublished());
     }
 }

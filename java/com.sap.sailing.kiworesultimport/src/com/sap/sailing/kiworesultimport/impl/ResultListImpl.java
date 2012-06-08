@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -15,6 +16,7 @@ import org.w3c.dom.NodeList;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.kiworesultimport.Boat;
+import com.sap.sailing.kiworesultimport.BoatResultInRace;
 import com.sap.sailing.kiworesultimport.ResultList;
 
 public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
@@ -35,12 +37,12 @@ public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
     }
 
     @Override
-    public String getLegende() {
+    public String getLegend() {
         return getNode().getAttributes().getNamedItem("legende").getNodeValue();
     }
 
     @Override
-    public String getImagePfad() {
+    public String getImagePath() {
         return getNode().getAttributes().getNamedItem("imagePfad").getNodeValue();
     }
 
@@ -50,7 +52,7 @@ public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
     }
 
     @Override
-    public String getBoatClass() {
+    public String getBoatClassName() {
         return getNode().getAttributes().getNamedItem("class").getNodeValue();
     }
 
@@ -70,7 +72,7 @@ public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
     }
 
     @Override
-    public TimePoint getTimePoint() {
+    public TimePoint getTimePointPublished() {
         TimePoint result = null;
         String dateTime = getDate()+" "+getTime();
         try {
@@ -100,5 +102,16 @@ public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
             }
         }
         return null;
+    }
+
+    @Override
+    public Iterable<Integer> getRaceNumbers() {
+        LinkedHashSet<Integer> result = new LinkedHashSet<Integer>();
+        for (Boat boat : getBoats()) {
+            for (BoatResultInRace results : boat.getResultsInRaces()) {
+                result.add(results.getRaceNumber());
+            }
+        }
+        return result;
     }
 }

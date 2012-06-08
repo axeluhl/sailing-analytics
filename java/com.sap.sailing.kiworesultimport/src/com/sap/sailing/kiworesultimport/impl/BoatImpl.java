@@ -9,7 +9,7 @@ import org.w3c.dom.NodeList;
 
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.Crew;
-import com.sap.sailing.kiworesultimport.Race;
+import com.sap.sailing.kiworesultimport.BoatResultInRace;
 
 public class BoatImpl extends NamedImpl implements Boat {
 
@@ -45,18 +45,18 @@ public class BoatImpl extends NamedImpl implements Boat {
     }
 
     @Override
-    public Iterable<Race> getRaces() {
-        List<Race> result = new ArrayList<Race>();
+    public Iterable<BoatResultInRace> getResultsInRaces() {
+        List<BoatResultInRace> result = new ArrayList<BoatResultInRace>();
         final NodeList races = ((Element) ((Element) getNode()).getElementsByTagName("Races").item(0)).getElementsByTagName("Race");
         for (int i=0; i<races.getLength(); i++) {
-            result.add(new RaceImpl(races.item(i)));
+            result.add(new BoatResultsInRaceImpl(races.item(i)));
         }
         return result;
     }
 
     @Override
-    public Race getRace(int raceNumberOneBased) {
-        for (Race race : getRaces()) {
+    public BoatResultInRace getResultsInRace(int raceNumberOneBased) {
+        for (BoatResultInRace race : getResultsInRaces()) {
             if (race.getRaceNumber() == raceNumberOneBased) {
                 return race;
             }
@@ -64,4 +64,8 @@ public class BoatImpl extends NamedImpl implements Boat {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return getSailingNumber();
+    }
 }

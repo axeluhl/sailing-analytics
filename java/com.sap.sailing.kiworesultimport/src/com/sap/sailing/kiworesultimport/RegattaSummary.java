@@ -1,5 +1,7 @@
 package com.sap.sailing.kiworesultimport;
 
+import com.sap.sailing.domain.common.TimePoint;
+
 /**
  * Derived object, providing a view onto the data parsed from the result ZIP
  * 
@@ -7,6 +9,8 @@ package com.sap.sailing.kiworesultimport;
  *
  */
 public interface RegattaSummary {
+    TimePoint getTimePointPublished();
+    
     String getBoatClassName();
     
     Iterable<RaceSummary> getRaces();

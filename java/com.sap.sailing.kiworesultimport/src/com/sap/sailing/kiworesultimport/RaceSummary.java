@@ -9,7 +9,9 @@ package com.sap.sailing.kiworesultimport;
 public interface RaceSummary {
     String getBoatClassName();
     
-    Integer getRaceNumber();
+    int getRaceNumber();
+    
+    Iterable<String> getFleetNames();
     
     /**
      * The {@link Boat} objects 
@@ -17,7 +19,7 @@ public interface RaceSummary {
     Iterable<Boat> getBoats();
     
     /**
-     * Retrieves the {@link Race} data that <code>boat</code> achieved in the race summarized by this object
+     * Retrieves the {@link BoatResultInRace} data that <code>boat</code> achieved in the race summarized by this object
      */
-    Race getRace(Boat boat);
+    BoatResultInRace getBoatResults(Boat boat);
 }

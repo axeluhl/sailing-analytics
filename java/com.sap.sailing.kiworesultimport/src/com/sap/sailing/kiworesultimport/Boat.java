@@ -9,9 +9,9 @@ public interface Boat extends Named {
     
     Crew getCrew();
     
-    Iterable<Race> getRaces();
+    Iterable<BoatResultInRace> getResultsInRaces();
     
-    Race getRace(int raceNumberOneBased);
+    BoatResultInRace getResultsInRace(int raceNumberOneBased);
 
     Double getTotalPoints();
 }
