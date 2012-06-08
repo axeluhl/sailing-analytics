@@ -270,7 +270,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
         Regatta regatta = getRegatta(regattaIdentifier);
-        logger.info("adding regatta leaderboard for regatta "+(regatta==null?"null":regatta.getName())+" to "+this);
+        logger.info("adding regatta leaderboard for regatta "
+                + (regatta == null ? "null" : (regatta.getName() + " (" + regatta.hashCode() + ")")) + " to " + this);
         RegattaLeaderboard result = null;
         if (regatta != null) {
             result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
