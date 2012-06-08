@@ -6,4 +6,8 @@ public interface Boat extends Named {
     Integer getPosition();
 
     String getPreis();
+    
+    Crew getCrew();
+    
+    Races getRaces();
 }
