@@ -96,6 +96,7 @@ public interface StringMessages extends Messages {
     String event();
     String startTime();
     String regatta();
+    String regattas();
     String startTracking();
     String stopTracking();
     String connections();

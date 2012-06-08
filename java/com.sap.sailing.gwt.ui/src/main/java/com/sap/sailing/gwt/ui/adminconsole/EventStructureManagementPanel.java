@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -52,7 +54,7 @@ public class EventStructureManagementPanel extends SimplePanel {
     private final StringMessages stringMessages;
 
     private final List<EventDTO> events;
-    private final ListBox eventsComboBox;
+    private ListBox eventsComboBox;
     private EventDTO selectedEvent;
 
     private CaptionPanel eventDetailsCaptionPanel;
@@ -63,6 +65,7 @@ public class EventStructureManagementPanel extends SimplePanel {
     private ListDataProvider<RegattaDTO> regattaProvider;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    private boolean supportEvents = false;
 
     public EventStructureManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
@@ -77,37 +80,44 @@ public class EventStructureManagementPanel extends SimplePanel {
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
 
-        HorizontalPanel eventsPanel = new HorizontalPanel();
-        eventsPanel.setSpacing(5);
-        mainPanel.add(eventsPanel);
+        if(supportEvents) {
+            HorizontalPanel eventsPanel = new HorizontalPanel();
+            eventsPanel.setSpacing(5);
+            mainPanel.add(eventsPanel);
 
-        Label managedEventsLabel = new Label(stringMessages.events() + ":");
-        eventsPanel.add(managedEventsLabel);
+            Label managedEventsLabel = new Label(stringMessages.events() + ":");
+            eventsPanel.add(managedEventsLabel);
 
-        eventsComboBox = new ListBox();
-        eventsComboBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                onEventSelectionChanged();
-            }
-        });
-        eventsPanel.add(eventsComboBox);
+            eventsComboBox = new ListBox();
+            eventsComboBox.addChangeHandler(new ChangeHandler() {
+                @Override
+                public void onChange(ChangeEvent event) {
+                    onEventSelectionChanged();
+                }
+            });
+            eventsPanel.add(eventsComboBox);
 
-        Button createEventBtn = new Button(stringMessages.add());
-        createEventBtn.addClickHandler(new ClickHandler() {
+            Button createEventBtn = new Button(stringMessages.add());
+            createEventBtn.addClickHandler(new ClickHandler() {
 
-            @Override
-            public void onClick(ClickEvent event) {
-                openCreateEventDialog();
-            }
-        });
-        eventsPanel.add(createEventBtn);
+                @Override
+                public void onClick(ClickEvent event) {
+                    openCreateEventDialog();
+                }
+            });
+            eventsPanel.add(createEventBtn);
 
-        createEventDetailsPanel();
-        mainPanel.add(eventDetailsCaptionPanel);
-        eventDetailsCaptionPanel.setVisible(false);
+            createEventDetailsPanel();
+            mainPanel.add(eventDetailsCaptionPanel);
+            eventDetailsCaptionPanel.setVisible(false);
 
-        fillEvents();
+            fillEvents();
+        } else {
+            createEventDetailsPanel();
+            mainPanel.add(eventDetailsCaptionPanel);
+            
+            fillRegattas();
+        }
     }
 
     private void createEventDetailsPanel() {
@@ -121,6 +131,10 @@ public class EventStructureManagementPanel extends SimplePanel {
         eventVenueLabel = new Label("");
         eventDetailsPanel.add(eventVenueLabel);
 
+        createRegattaDetails(eventDetailsPanel);
+    }
+
+    private void createRegattaDetails(Panel parentPanel) {
         // regatta table
         TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
             @Override
@@ -208,10 +222,10 @@ public class EventStructureManagementPanel extends SimplePanel {
 
         regattaProvider = new ListDataProvider<RegattaDTO>();
         regattaProvider.addDataDisplay(regattaTable);
-        eventDetailsPanel.add(regattaTable);
+        parentPanel.add(regattaTable);
 
         Button addRegattaBtn = new Button("Add regatta");
-        eventDetailsPanel.add(addRegattaBtn);
+        parentPanel.add(addRegattaBtn);
         addRegattaBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -219,7 +233,7 @@ public class EventStructureManagementPanel extends SimplePanel {
             }
         });
     }
-
+    
     private void onEventSelectionChanged() {
         int selIndex = eventsComboBox.getSelectedIndex();
         String selItemText = eventsComboBox.getItemText(selIndex);
@@ -250,7 +264,14 @@ public class EventStructureManagementPanel extends SimplePanel {
     }
 
     private void openCreateRegattaDialog() {
-        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(Collections.unmodifiableCollection(selectedEvent.regattas), stringMessages,
+        Collection<RegattaDTO> existingRegattas = null;
+        if(supportEvents) {
+            existingRegattas = Collections.unmodifiableCollection(selectedEvent.regattas);
+        } else {
+            existingRegattas = Collections.unmodifiableCollection(regattaProvider.getList());
+        }
+        
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, stringMessages,
                 new AsyncCallback<RegattaDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -282,8 +303,23 @@ public class EventStructureManagementPanel extends SimplePanel {
                     regattaProvider.getList().addAll(regattas);
                 }
             });
-
         }
+    }
+
+    private void fillRegattas() {
+        // load the regattas for this event
+        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
+            @Override
+            public void onFailure(Throwable t) {
+                errorReporter.reportError("Error trying to read regattas of event " + selectedEvent.name + ": " + t.getMessage());
+            }
+
+            @Override
+            public void onSuccess(List<RegattaDTO> regattas) {
+                regattaProvider.getList().clear();
+                regattaProvider.getList().addAll(regattas);
+            }
+        });
     }
 
     private void createNewEvent(final EventDTO newEvent) {
