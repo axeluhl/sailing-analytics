@@ -76,9 +76,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             contentScrollPanel.setWidget(leaderboardPanel);
             breadcrumbPanel = createBreadcrumbPanel();
         }
-        if (breadcrumbPanel != null) {
-            mainPanel.addNorth(breadcrumbPanel, 30);
-        }
+
         mainPanel.add(contentScrollPanel);
     }
     

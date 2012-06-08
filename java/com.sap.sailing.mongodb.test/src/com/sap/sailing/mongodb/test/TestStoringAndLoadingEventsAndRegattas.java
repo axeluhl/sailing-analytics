@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
@@ -56,6 +57,8 @@ import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLead
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 
 public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest {
+    private static final Logger logger = Logger.getLogger(TestStoringAndLoadingEventsAndRegattas.class.getName());
+    
     @Test
     public void testLoadStoreSimpleEvent() {
         final String eventName = "Event Name";
@@ -138,9 +141,13 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 regattaProxy.getSeries(), regattaProxy.isPersistent());
         trackedRegatta[0] = new DynamicTrackedRegattaImpl(regatta);
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
+        logColumnsInRegatta(regatta);
         RegattaLeaderboard regattaLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
         final RaceColumnInSeries q2 = regatta.getSeriesByName("Qualifying").getRaceColumnByName("Q2");
         final Fleet yellow = q2.getFleetByName("Yellow");
+        logColumnsInRegatta(regatta);
+        logColumnsInRegattaLeaderboard(regattaLeaderboard);
+        assertNotNull(regattaLeaderboard.getRaceColumnByName(q2.getName()));
         res.apply(new ConnectTrackedRaceToLeaderboardColumn(regattaLeaderboard.getName(), q2.getName(), yellow
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
         res.apply(new UpdateLeaderboardMaxPointsReason(regattaLeaderboard.getName(), q2.getName(), hasso.getId().toString(),
@@ -170,6 +177,27 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
         MaxPointsReason hassosLoadedMaxPointsReason = loadedLeaderboard.getScoreCorrection().getMaxPointsReason(hasso, loadedQ2);
         assertEquals(MaxPointsReason.DNF, hassosLoadedMaxPointsReason);
+    }
+
+    private void logColumnsInRegattaLeaderboard(RegattaLeaderboard regattaLeaderboard) {
+        StringBuilder rlbrcNames = new StringBuilder();
+        for (RaceColumn rlbrc : regattaLeaderboard.getRaceColumns()) {
+            rlbrcNames.append("; ");
+            rlbrcNames.append(rlbrc.getName());
+        }
+        logger.info("columns in regatta leaderboard for regatta "+regattaLeaderboard.getRegatta().getName()+" ("+
+                regattaLeaderboard.getRegatta().hashCode()+"): "+rlbrcNames);
+    }
+
+    private void logColumnsInRegatta(Regatta regatta) {
+        StringBuilder rrcNames = new StringBuilder();
+        for (Series series : regatta.getSeries()) {
+            for (RaceColumn raceColumn : series.getRaceColumns()) {
+                rrcNames.append("; ");
+                rrcNames.append(raceColumn.getName());
+            }
+        }
+        logger.info("columns in regatta: "+rrcNames);
     }
 
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final TrackedRace q2YellowTrackedRace) {
