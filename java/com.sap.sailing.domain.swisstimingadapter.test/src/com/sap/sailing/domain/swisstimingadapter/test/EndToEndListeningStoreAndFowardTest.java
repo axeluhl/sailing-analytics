@@ -69,6 +69,7 @@ public class EndToEndListeningStoreAndFowardTest {
         logger.info("EndToEndListeningStoreAndFowardTest.setUp");
         MongoDBService mongoDBService = MongoDBService.INSTANCE;
         db = mongoDBService.getDB();
+        db.getCollection(com.sap.sailing.domain.persistence.impl.CollectionNames.REGATTAS.name()).drop();
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         swissTimingAdapterPersistence.dropAllMessageData();
         swissTimingAdapterPersistence.dropAllRaceMasterData();
@@ -83,7 +84,7 @@ public class EndToEndListeningStoreAndFowardTest {
         lastMessageCountCollection.update(new BasicDBObject(),
                 new BasicDBObject().append(FieldNames.LAST_MESSAGE_COUNT.name(), 0l),
                 /* upsert */true, /* multi */false);
-        racingEventService = new RacingEventServiceImpl();
+        racingEventService = new RacingEventServiceImpl(mongoDBService);
         raceHandles = new ArrayList<RacesHandle>();
     }
 
@@ -105,9 +106,9 @@ public class EndToEndListeningStoreAndFowardTest {
         setUpUsingScript(racesToTrack, scriptName);
 
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
-        for (Regatta event : allEvents) {
-            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
+        Iterable<Regatta> allRegattas = racingEventService.getAllRegattas();
+        for (Regatta regatta : allRegattas) {
+            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
             Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
             for (TrackedRace trackedRace : trackedRaces) {
                 allTrackedRaces.add(trackedRace);
@@ -134,9 +135,9 @@ public class EndToEndListeningStoreAndFowardTest {
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
 
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
-        for (Regatta event : allEvents) {
-            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
+        Iterable<Regatta> allRegattas = racingEventService.getAllRegattas();
+        for (Regatta regatta : allRegattas) {
+            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
             Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
             for (TrackedRace trackedRace : trackedRaces) {
                 allTrackedRaces.add(trackedRace);

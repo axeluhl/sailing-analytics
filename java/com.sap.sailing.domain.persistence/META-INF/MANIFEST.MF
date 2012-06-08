@@ -10,4 +10,4 @@ Require-Bundle: com.sap.sailing.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
  com.sap.sailing.domain.common
 Export-Package: com.sap.sailing.domain.persistence,
- com.sap.sailing.domain.persistence.impl;x-friends:="com.sap.sailing.mongodb.test"
+ com.sap.sailing.domain.persistence.impl;x-friends:="com.sap.sailing.mongodb.test,com.sap.sailing.domain.swisstimingadapter.test"

@@ -8,4 +8,6 @@ public interface ParserFactory {
     ResultListParser createResultListParser();
 
     StartberichtParser createStartberichtParser();
+    
+    ZipFileParser createZipFileParser();
 }
