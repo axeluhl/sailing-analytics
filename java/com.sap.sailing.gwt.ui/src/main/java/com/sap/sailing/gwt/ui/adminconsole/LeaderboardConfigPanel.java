@@ -44,6 +44,8 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -89,6 +91,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     private final CaptionPanel selectedLeaderBoardPanel;
     private final CaptionPanel trackedRacesCaptionPanel;
+    private final List<RegattaDTO> allRegattas;
 
     private TextBox filterLeaderboardTextbox;
 
@@ -120,6 +123,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
         leaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
+        allRegattas = new ArrayList<RegattaDTO>(); 
         raceColumnAndFleetNameList = new ListDataProvider<Pair<RaceColumnDTO, String>>();
         this.errorReporter = errorReporter;
         this.availableLeaderboardList = new ArrayList<StrippedLeaderboardDTO>();
@@ -213,7 +217,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     otherExistingLeaderboard.addAll(availableLeaderboardList);
                     otherExistingLeaderboard.remove(object);
                     LeaderboardEditDialog dialog = new LeaderboardEditDialog(Collections
-                            .unmodifiableCollection(otherExistingLeaderboard), object, stringMessages, errorReporter,
+                            .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
+                            object, stringMessages, errorReporter,
                             new AsyncCallback<StrippedLeaderboardDTO>() {
                                 @Override
                                 public void onFailure(Throwable arg0) {
@@ -758,8 +763,11 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> result) {
-        trackedRacesListComposite.fillRegattas(result);
+    public void fillRegattas(List<RegattaDTO> regattas) {
+        trackedRacesListComposite.fillRegattas(regattas);
+        
+        allRegattas.clear();
+        allRegattas.addAll(regattas);
     }
 
     @Override
@@ -773,8 +781,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     }
 
     private void addNewLeaderboard() {
-        LeaderboardCreateDialog dialog = new LeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList)
-                , stringMessages, errorReporter, new AsyncCallback<StrippedLeaderboardDTO>() {
+        LeaderboardCreateDialog dialog = new LeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
+                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter, new AsyncCallback<StrippedLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable arg0) {
             }
@@ -788,24 +796,45 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     }
 
     private void createNewLeaderboard(final StrippedLeaderboardDTO newLeaderboard) {
-        sailingService.createFlexibleLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
-                new AsyncCallback<StrippedLeaderboardDTO>() {
-                    @Override
-                    public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to create new leaderboard " + newLeaderboard.name
-                                + ": " + t.getMessage());
-                    }
+        if(newLeaderboard.regatta == null) {
+            sailingService.createFlexibleLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
+                    new AsyncCallback<StrippedLeaderboardDTO>() {
+                        @Override
+                        public void onFailure(Throwable t) {
+                            errorReporter.reportError("Error trying to create new flexible leaderboard " + newLeaderboard.name
+                                    + ": " + t.getMessage());
+                        }
 
-                    @Override
-                    public void onSuccess(StrippedLeaderboardDTO result) {
-                        leaderboardList.getList().add(result);
-                        availableLeaderboardList.add(result);
-                        selectedLeaderboard = result;
-                        leaderboardSelectionChanged();
-                    }
-                });
+                        @Override
+                        public void onSuccess(StrippedLeaderboardDTO result) {
+                            addLeaderboard(result);
+                        }
+                    });
+        } else {
+            RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.regatta.name); 
+            sailingService.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.discardThresholds,
+                    new AsyncCallback<StrippedLeaderboardDTO>() {
+                        @Override
+                        public void onFailure(Throwable t) {
+                            errorReporter.reportError("Error trying to create new regatta leaderboard " + newLeaderboard.name
+                                    + ": " + t.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(StrippedLeaderboardDTO result) {
+                            addLeaderboard(result);
+                        }
+                    });
+        }
     }
 
+    private void addLeaderboard(StrippedLeaderboardDTO result) {
+        leaderboardList.getList().add(result);
+        availableLeaderboardList.add(result);
+        selectedLeaderboard = result;
+        leaderboardSelectionChanged();
+    }
+    
     private void updateLeaderboard(final String oldLeaderboardName, final StrippedLeaderboardDTO leaderboardToUdate) {
         sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUdate.name,
                 leaderboardToUdate.discardThresholds, new AsyncCallback<Void>() {

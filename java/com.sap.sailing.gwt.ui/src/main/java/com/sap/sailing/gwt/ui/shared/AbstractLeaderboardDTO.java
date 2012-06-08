@@ -18,6 +18,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public Map<CompetitorDTO, LeaderboardRowDTO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
+    public RegattaDTO regatta;
 
     public AbstractLeaderboardDTO() {
         races = new ArrayList<RaceColumnDTO>();

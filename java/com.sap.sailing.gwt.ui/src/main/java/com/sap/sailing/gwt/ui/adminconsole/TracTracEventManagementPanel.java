@@ -513,9 +513,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         RegattaDTO oldRegattaSelection = getSelectedRegatta();
         regattaListBox.clear();
-        regattaListBox.addItem("No regatta");
+        regattaListBox.addItem(stringConstants.noRegatta());
         if (!regattas.isEmpty()) {
-            regattaListBox.addItem("No regatta");
             for (RegattaDTO regatta : regattas) {
                 regattaListBox.addItem(regatta.name);
                 if(oldRegattaSelection != null && oldRegattaSelection.name.equals(regatta.name)) {

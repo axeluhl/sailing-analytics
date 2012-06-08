@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -14,6 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 
@@ -21,6 +23,8 @@ public abstract class LeaderboardDialog extends DataEntryDialog<StrippedLeaderbo
     protected final StringMessages stringConstants;
     protected TextBox entryField;
     protected StrippedLeaderboardDTO leaderboard;
+    protected ListBox regattaListBox;
+    protected Collection<RegattaDTO> existingRegattas;
     
     protected LongBox[] discardThresholdBoxes;
     protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
@@ -69,10 +73,11 @@ public abstract class LeaderboardDialog extends DataEntryDialog<StrippedLeaderbo
         }
     }
     
-    public LeaderboardDialog(StrippedLeaderboardDTO leaderboardDTO,  StringMessages stringConstants,
+    public LeaderboardDialog(StrippedLeaderboardDTO leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<StrippedLeaderboardDTO> callback) {
         super(stringConstants.leaderboardName(), null, stringConstants.ok(),
                 stringConstants.cancel(), validator, callback);
+        this.existingRegattas = existingRegattas;
         this.stringConstants = stringConstants;
         this.leaderboard = leaderboardDTO;
     }
@@ -92,6 +97,7 @@ public abstract class LeaderboardDialog extends DataEntryDialog<StrippedLeaderbo
         }
         leaderboard.name = entryField.getValue();
         leaderboard.discardThresholds = discardThresholdsBoxContents;
+        leaderboard.regatta = getSelectedRegatta();
         return leaderboard;
     }
 
@@ -103,8 +109,20 @@ public abstract class LeaderboardDialog extends DataEntryDialog<StrippedLeaderbo
             panel.add(additionalWidget);
         }
         panel.add(entryField);
+        
+        HorizontalPanel regattaPanel = new HorizontalPanel();
+        regattaPanel.setSpacing(3);
+        regattaPanel.add(new Label(stringConstants.regatta() + ":"));
+        regattaListBox.addItem(stringConstants.noRegatta());
+        for (RegattaDTO regatta : existingRegattas) {
+            regattaListBox.addItem(regatta.name);
+        }
+        regattaPanel.add(regattaListBox);
+        panel.add(regattaPanel);
+        
         panel.add(new Label(stringConstants.discardRacesFromHowManyStartedRacesOn()));
         HorizontalPanel hp = new HorizontalPanel();
+        hp.setSpacing(3);
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
             hp.add(new Label("" + (i + 1) + "."));
             hp.add(discardThresholdBoxes[i]);
@@ -113,6 +131,21 @@ public abstract class LeaderboardDialog extends DataEntryDialog<StrippedLeaderbo
         return panel;
     }
 
+    public RegattaDTO getSelectedRegatta() {
+        RegattaDTO result = null;
+        int selIndex = regattaListBox.getSelectedIndex();
+        if(selIndex > 0) { // the zero index represents the 'no selection' text
+            String itemText = regattaListBox.getItemText(selIndex);
+            for(RegattaDTO regattaDTO: existingRegattas) {
+                if(regattaDTO.name.equals(itemText)) {
+                    result = regattaDTO;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
     @Override
     public void show() {
         super.show();
