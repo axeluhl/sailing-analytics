@@ -23,16 +23,16 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.Crewmember;
+import com.sap.sailing.kiworesultimport.ParserFactory;
 import com.sap.sailing.kiworesultimport.Race;
 import com.sap.sailing.kiworesultimport.Races;
 import com.sap.sailing.kiworesultimport.ResultList;
 import com.sap.sailing.kiworesultimport.ResultListParser;
-import com.sap.sailing.kiworesultimport.ParserFactory;
 import com.sap.sailing.kiworesultimport.Skipper;
-import com.sap.sailing.kiworesultimport.Verteilung;
 
 public class ParserTest {
     private static final String RESOURCES = "resources/";
@@ -63,7 +63,7 @@ public class ParserTest {
         ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
         ResultList resultList = parser.parse(getSampleInputStream());
         assertNotNull(resultList);
-        assertNull(resultList.getVerteilung().getBoatBySailID("SWE 1196").getCrew().getSkipper().getIsaf());
+        assertNull(resultList.getBoatBySailID("SWE 1196").getCrew().getSkipper().getIsaf());
     }
     
     @Test
@@ -71,7 +71,9 @@ public class ParserTest {
         ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
         ResultList resultList = parser.parse(getSampleInputStream());
         assertNotNull(resultList);
-        assertNull(resultList.getVerteilung().getBoatBySailID("SWE 1196").getRaces().getRaces().iterator().next().getStatus());
+        assertNull(resultList.getBoatBySailID("SWE 1196").getRaces().getRaces().iterator().next().getStatus());
+        assertEquals(MaxPointsReason.NONE, resultList.getBoatBySailID("SWE 1196").getRaces().getRaces()
+                .iterator().next().getMaxPointsReason());
     }
     
     @Test
@@ -79,7 +81,9 @@ public class ParserTest {
         ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
         ResultList resultList = parser.parse(getSampleInputStream());
         assertNotNull(resultList);
-        assertEquals("DNC", resultList.getVerteilung().getBoatBySailID("GER 1199").getRaces().getRaces().iterator().next().getStatus());
+        assertEquals("DNC", resultList.getBoatBySailID("GER 1199").getRaces().getRaces().iterator().next().getStatus());
+        assertEquals(MaxPointsReason.DNC, resultList.getBoatBySailID("GER 1199").getRaces().getRaces()
+                .iterator().next().getMaxPointsReason());
     }
     
     @Test
@@ -89,12 +93,10 @@ public class ParserTest {
         assertNotNull(resultList);
         assertEquals("D:\\Programme\\KWSailing\\eventlogos\\KielerWoche_Ergebnislistenkopf_2011.jpg", resultList.getImagePfad());
         assertEquals(new String(new byte[] { (byte) 160  /* non-breaking space */}), resultList.getLegende());
-        final Verteilung verteilung = resultList.getVerteilung();
-        assertNotNull(verteilung);
-        Iterable<Boat> boats = verteilung.getBoats();
+        Iterable<Boat> boats = resultList.getBoats();
         assertFalse(Util.isEmpty(boats));
         assertEquals(48, Util.size(boats));
-        Boat DEN9 = verteilung.getBoatBySailID("DEN 9");
+        Boat DEN9 = resultList.getBoatBySailID("DEN 9");
         assertNotNull(DEN9);
         assertEquals(7, (int) DEN9.getPosition());
         Skipper DEN9Skipper = DEN9.getCrew().getSkipper();
