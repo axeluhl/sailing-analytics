@@ -48,7 +48,8 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         public String getErrorMessage(RegattaDTO regattaToValidate) {
             String errorMessage = null;
             boolean nameNotEmpty = regattaToValidate.name != null && regattaToValidate.name.length() > 0;
-            boolean boatClassNotEmpty = regattaToValidate.boatClass != null && regattaToValidate.boatClass.name.length() > 0;
+            boolean boatClassNotEmpty = regattaToValidate.boatClass != null
+                    && regattaToValidate.boatClass.name.length() > 0;
 
             boolean unique = true;
             for (RegattaDTO regatta : existingRegattas) {
@@ -66,14 +67,14 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
                 errorMessage = stringConstants.regattaWithThisNameAlreadyExists();
             }
 
-            if(errorMessage == null) {
+            if (errorMessage == null) {
                 List<SeriesDTO> seriesToValidate = regattaToValidate.series;
                 int index = 0;
                 boolean seriesNameNotEmpty = true;
 
                 for (SeriesDTO series : seriesToValidate) {
                     seriesNameNotEmpty = series.name != null && series.name.length() > 0;
-                    if(!seriesNameNotEmpty) {
+                    if (!seriesNameNotEmpty) {
                         break;
                     }
                     index++;
@@ -81,10 +82,10 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
 
                 int index2 = 0;
                 boolean seriesUnique = true;
-                
+
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
                 for (SeriesDTO series : seriesToValidate) {
-                    if(!setToFindDuplicates.add(series.name)) {
+                    if (!setToFindDuplicates.add(series.name)) {
                         seriesUnique = false;
                         break;
                     }
@@ -92,21 +93,23 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
                 }
 
                 if (!seriesNameNotEmpty) {
-                    errorMessage = stringConstants.series() + " " + (index + 1) + ": " + stringConstants.pleaseEnterNonEmptyName();
+                    errorMessage = stringConstants.series() + " " + (index + 1) + ": "
+                            + stringConstants.pleaseEnterNonEmptyName();
                 } else if (!seriesUnique) {
-                    errorMessage = stringConstants.series() + " " + (index2 + 1) + ": " + stringConstants.seriesWithThisNameAlreadyExists();
+                    errorMessage = stringConstants.series() + " " + (index2 + 1) + ": "
+                            + stringConstants.seriesWithThisNameAlreadyExists();
                 }
-                
+
             }
-            
+
             return errorMessage;
         }
 
     }
 
-    public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
-            AsyncCallback<RegattaDTO> callback) {
-        super(stringConstants.regatta(), null, stringConstants.ok(), stringConstants.cancel(),  
+    public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
+            StringMessages stringConstants, AsyncCallback<RegattaDTO> callback) {
+        super(stringConstants.regatta(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RegattaParameterValidator(stringConstants, existingRegattas), callback);
         this.stringConstants = stringConstants;
         this.regatta = new RegattaDTO();
@@ -140,67 +143,68 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         }
         Grid formGrid = new Grid(2, 2);
         panel.add(formGrid);
-        
-        formGrid.setWidget(0,  0, new Label(stringConstants.name() + ":"));
+
+        formGrid.setWidget(0, 0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 0, new Label(stringConstants.boatClass() + ":"));
         formGrid.setWidget(1, 1, boatClassEntryField);
-        
+
         panel.add(createHeadlineLabel(stringConstants.series()));
         panel.add(seriesGrid);
-        
+
         Button addSeriesButton = new Button("Add series");
         addSeriesButton.addClickHandler(new ClickHandler() {
-            
+
             @Override
             public void onClick(ClickEvent event) {
                 RegattaDTO result = getResult();
-                
-                SeriesWithFleetsCreateDialog dialog = new SeriesWithFleetsCreateDialog(Collections.unmodifiableCollection(result.series), stringConstants,
-                        new AsyncCallback<SeriesDTO>() {
-                            @Override
-                            public void onFailure(Throwable t) {
-                            }
 
-                            @Override
-                            public void onSuccess(SeriesDTO newSeries) {
-                                createdSeries.add(newSeries);
-                                updateSeriesGrid(panel);
-                            }
-                        });
+                SeriesWithFleetsCreateDialog dialog = new SeriesWithFleetsCreateDialog(Collections
+                        .unmodifiableCollection(result.series), stringConstants, new AsyncCallback<SeriesDTO>() {
+                    @Override
+                    public void onFailure(Throwable t) {
+                    }
+
+                    @Override
+                    public void onSuccess(SeriesDTO newSeries) {
+                        createdSeries.add(newSeries);
+                        updateSeriesGrid(panel);
+                    }
+                });
                 dialog.show();
             }
         });
         panel.add(addSeriesButton);
-        
+
         return panel;
     }
 
     private void updateSeriesGrid(VerticalPanel parentPanel) {
         int widgetIndex = parentPanel.getWidgetIndex(seriesGrid);
         parentPanel.remove(seriesGrid);
-        
+
         int seriesCount = createdSeries.size();
         seriesGrid = new Grid(seriesCount * 2, 3);
         seriesGrid.setCellSpacing(3);
 
-        for(int i = 0; i < seriesCount; i++) {
+        for (int i = 0; i < seriesCount; i++) {
             SeriesDTO seriesDTO = createdSeries.get(i);
-            Label seriesLabel = new Label((i+1) + ". " + stringConstants.series() + ":");
+            Label seriesLabel = new Label((i + 1) + ". " + stringConstants.series() + ":");
             seriesLabel.setWordWrap(false);
             seriesLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-            seriesGrid.setWidget(i*2, 0, seriesLabel);
-            seriesGrid.setHTML(i*2, 1, seriesDTO.name);
-            if(seriesDTO.getFleets() != null && seriesDTO.getFleets().size() > 0) {
-                seriesGrid.setHTML(i*2+1, 1, seriesDTO.getFleets().size() + " fleets: " + seriesDTO.getFleets().toString());
+            seriesGrid.setWidget(i * 2, 0, seriesLabel);
+            seriesGrid.setHTML(i * 2, 1, seriesDTO.name);
+            if (seriesDTO.getFleets() != null && seriesDTO.getFleets().size() > 0) {
+                seriesGrid.setHTML(i * 2 + 1, 1, seriesDTO.getFleets().size() + " fleets: "
+                        + seriesDTO.getFleets().toString());
             } else {
-                seriesGrid.setHTML(i*2+1, 1, seriesDTO.getFleets().size() + " No fleets defined.");
+                seriesGrid.setHTML(i * 2 + 1, 1, seriesDTO.getFleets().size() + " No fleets defined.");
             }
         }
 
         parentPanel.insert(seriesGrid, widgetIndex);
     }
-    
+
     @Override
     public void show() {
         super.show();

@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -90,7 +92,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                     }
                     index2++;
                 }
-
+                
                 if (!fleetNameNotEmpty) {
                     errorMessage = stringConstants.fleet() + " " + (index + 1) + ": " + stringConstants.pleaseEnterNonEmptyName();
                 } else if (!fleetUnique) {
@@ -136,10 +138,38 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     }
 
     private Widget createFleetColorWidget(Color defaultColor) {
-        ListBox listBox = createListBox(false); 
+        final ListBox listBox = createListBox(false);
+        final int fleetIndex = fleetNameEntryFields.size(); 
+        listBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                // set default order no of the selected color
+                int selIndex = listBox.getSelectedIndex();
+                IntegerBox orderNoBox = fleetOrderNoEntryFields.get(fleetIndex-1);
+                if(selIndex == 0) {
+                    orderNoBox.setValue(0);
+                } else {
+                    String value = listBox.getValue(selIndex);
+                    for(FleetColors color: FleetColors.values()) {
+                        if(color.name().equals(value)) {
+                            orderNoBox.setValue(color.getDefaultOrderNo());
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+        
+        listBox.addItem(stringConstants.noColor());
         for(FleetColors value: FleetColors.values())
             listBox.addItem(value.name());
+
+        if(defaultColor == null) {
+            listBox.setSelectedIndex(0);
+        }
+
         fleetColorEntryFields.add(listBox);
+
         return listBox; 
     }
 
@@ -160,7 +190,11 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
             FleetDTO fleetDTO = new FleetDTO();
             fleetDTO.name = fleetNameEntryFields.get(i).getValue();
             fleetDTO.setColor(getSelectedColor(fleetColorEntryFields.get(i)));
-            fleetDTO.setOrderNo(fleetOrderNoEntryFields.get(i).getValue());
+            int orderNo = -1;
+            if(fleetOrderNoEntryFields.get(i).getValue() != null) {
+                orderNo = fleetOrderNoEntryFields.get(i).getValue();
+            }
+            fleetDTO.setOrderNo(orderNo);
             fleets.add(fleetDTO);
         }
         
@@ -172,7 +206,8 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     private Color getSelectedColor(ListBox colorListBox) {
         Color result = null;
         int selIndex = colorListBox.getSelectedIndex();
-        if(selIndex >= 0) {
+        // the zero index represents the 'no color' option
+        if(selIndex > 0) {
             String value = colorListBox.getValue(selIndex);
             for(FleetColors color: FleetColors.values()) {
                 if(color.name().equals(value)) {
