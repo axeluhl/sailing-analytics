@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.net.UnknownHostException;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.BasicDBObject;
@@ -26,6 +27,13 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
     private static final String WIND_TEST_COLLECTION = "wind_test_collection";
+    
+    @Before
+    @Override
+    public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {
+        super.dropTestDB();
+        db.getCollection(WIND_TEST_COLLECTION).drop();
+    }
     
     @Test
     public void testDBConnection() throws UnknownHostException, MongoException {
@@ -57,8 +65,8 @@ public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
             DBCollection coll = db.getCollection(WIND_TEST_COLLECTION);
             assertNotNull(coll);
             DBObject object = coll.findOne();
-            assertEquals(object.get("truebearingdeg"), 234.3);
-            assertEquals(object.get("knotspeed"), 10.7);
+            assertEquals(234.3, object.get("truebearingdeg"));
+            assertEquals(10.7, object.get("knotspeed"));
         }
     }
     
@@ -74,7 +82,7 @@ public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
         }
         
         {
-            Thread.sleep(1000); // wait until MongoDB has recorded the change and made it visible
+            Thread.sleep(3000); // wait until MongoDB has recorded the change and made it visible
             Mongo mongo = newMongo();
             assertNotNull(mongo);
             DB db = mongo.getDB(getDBConfiguration().getDatabaseName());

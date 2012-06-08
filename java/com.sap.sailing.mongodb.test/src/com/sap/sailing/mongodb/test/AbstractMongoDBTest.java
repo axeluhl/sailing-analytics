@@ -10,6 +10,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
 import com.sap.sailing.mongodb.MongoDBService;
 
@@ -42,9 +43,9 @@ public abstract class AbstractMongoDBTest {
         assertNotNull(db);
     }
 
-    private void dropAllCollections(DB theDB) {
-        for (String collectionName : theDB.getCollectionNames()) {
-            DBCollection c = theDB.getCollection(collectionName);
+    private void dropAllCollections(DB theDB) throws InterruptedException {
+        for (CollectionNames collectionName : CollectionNames.values()) {
+            DBCollection c = theDB.getCollection(collectionName.name());
             c.drop();
         }
     }

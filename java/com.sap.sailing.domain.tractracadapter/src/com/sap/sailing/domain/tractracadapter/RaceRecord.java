@@ -99,7 +99,7 @@ public class RaceRecord {
     public String getName() {
         return name;
     }
-
+    
     public String getEventName() {
         return regattaName;
     }
