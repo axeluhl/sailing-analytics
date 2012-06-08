@@ -18,17 +18,17 @@ public class StartImpl extends AbstractNodeWrapper implements Start {
     }
 
     @Override
-    public String getBootsklasse() {
+    public String getBoatClass() {
         return getNode().getAttributes().getNamedItem("bootsklasse").getNodeValue();
     }
 
     @Override
-    public Integer getWettfahrt() {
+    public Integer getRaceNumber() {
         return Integer.valueOf(getNode().getAttributes().getNamedItem("wettfahrt").getNodeValue());
     }
 
     @Override
-    public String getStartgruppe() {
+    public String getFleetName() {
         return getNode().getAttributes().getNamedItem("startgruppe").getNodeValue();
     }
 

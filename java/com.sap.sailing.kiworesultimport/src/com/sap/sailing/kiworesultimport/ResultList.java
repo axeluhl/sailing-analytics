@@ -17,6 +17,9 @@ public interface ResultList {
     
     String getDate();
     
+    /**
+     * Point in time when this result list was published
+     */
     TimePoint getTimePoint();
     
     Iterable<Boat> getBoats();

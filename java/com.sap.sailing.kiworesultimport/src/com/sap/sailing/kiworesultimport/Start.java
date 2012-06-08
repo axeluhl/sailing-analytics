@@ -5,11 +5,11 @@ import java.text.ParseException;
 import com.sap.sailing.domain.common.TimePoint;
 
 public interface Start {
-    String getBootsklasse();
+    String getBoatClass();
     
-    Integer getWettfahrt();
+    Integer getRaceNumber();
     
-    String getStartgruppe();
+    String getFleetName();
     
     String getKurs();
     
