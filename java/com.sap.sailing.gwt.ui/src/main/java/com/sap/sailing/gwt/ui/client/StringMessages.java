@@ -318,4 +318,5 @@ public interface StringMessages extends Messages {
     String color();
     String medalSeries();
     String noColor();
+    String noRegatta();
 }
