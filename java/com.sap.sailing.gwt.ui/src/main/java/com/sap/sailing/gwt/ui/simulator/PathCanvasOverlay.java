@@ -51,47 +51,52 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
     }
     
     protected void drawWindField(final List<WindDTO> windDTOList) {
-            
+
+        int numPoints = windDTOList.size();
+        String title = "Path at " + numPoints + " points.";
+        long totalTime = windDTOList.get(numPoints-1).timepoint - windDTOList.get(0).timepoint;
+
+        LatLng start = LatLng.newInstance(windDTOList.get(0).position.latDeg, windDTOList.get(0).position.latDeg);
+        LatLng end = LatLng.newInstance(windDTOList.get(numPoints-1).position.latDeg, windDTOList.get(numPoints-1).position.latDeg);
+        
+        double distance = start.distanceFrom(end)/Mile.METERS_PER_NAUTICAL_MILE;
+        
+        Point startPx = getMap().convertLatLngToDivPixel(start);
+        Point endPx = getMap().convertLatLngToDivPixel(end);
+        double rcLengthPx = Math.sqrt(Math.pow(startPx.getX()-endPx.getX(),2) + Math.pow(startPx.getY()-endPx.getY(),2));
+        //System.out.print("Race Course Pixel Length: "+rcLengthPx+"\n");
+
+        double arrowDistPx = 60;
+        long arrowInterleave = Math.max(1, Math.round(arrowDistPx * numPoints / rcLengthPx));
+        //System.out.print("Arrow Interleave: "+arrowInterleave+"\n");
+        
         if (windDTOList != null && windDTOList.size() > 0) {
             Iterator<WindDTO> windDTOIter = windDTOList.iterator();
             int index = 0;
             WindDTO prevWindDTO = null;
-            double length = 12;
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
                 if (prevWindDTO != null) {
                     drawLine(prevWindDTO, windDTO);
                 }
+                prevWindDTO = windDTO;
 
-                WindDTO windDTONext = null;
-                if (windDTOIter.hasNext()) {
-                    windDTONext = windDTOIter.next();
-                    drawLine(windDTO, windDTONext); 
-                    prevWindDTO = windDTONext;
-                }
-                
-                if (displayWindAlongPath) {
+                if ((displayWindAlongPath)&&((index % arrowInterleave) == 0)) {
                     DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
-                    drawScaledArrow(windDTO, dbi.getRadians(), ++index);
-                    if (windDTONext != null) {
-                        dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
-                        drawScaledArrow(windDTONext, dbi.getRadians(), ++index);
-                    }
-                }   
+                    //System.out.print("index: "+index+"\n");
+                    drawScaledArrow(windDTO, dbi.getRadians(), index);
+                }
+
+                index++;
             }
-            int numPoints = windDTOList.size();
-            String title = "Path at " + numPoints + " points.";
-            long totalTime = windDTOList.get(numPoints-1).timepoint - windDTOList.get(0).timepoint;
-            LatLng start = LatLng.newInstance(windDTOList.get(0).position.latDeg, windDTOList.get(0).position.latDeg);
-            LatLng end = LatLng.newInstance(windDTOList.get(numPoints-1).position.latDeg, windDTOList.get(numPoints-1).position.latDeg);
-            double distance = start.distanceFrom(end)/Mile.METERS_PER_NAUTICAL_MILE;
+
             //MeterDistance meterDistance = new MeterDistance(distance);
             Date timeDiffDate = new Date(totalTime);
             TimeZone gmt = TimeZone.createTimeZone(0);
             title += " " + NumberFormat.getFormat("0.00").format(distance) + " nmi";
             title += " in " + DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND).format(timeDiffDate, gmt);
            
-            logger.info(title);
+            //logger.info(title);
             getCanvas().setTitle(title);
         }
     }
@@ -114,6 +119,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
         this.pointColor = "Black";
         drawPoint(x1, y1);
         drawLine(x1, y1, x2, y2, 3/* weight */, pathColor);
+        //System.out.print("x1:"+x1+" y1:"+y1+" x2:"+x2+" y2:"+y2+"\n");
         drawPoint(x2, y2);
     }
 }
