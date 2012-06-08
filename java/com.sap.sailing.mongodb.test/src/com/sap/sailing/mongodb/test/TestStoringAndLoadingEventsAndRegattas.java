@@ -115,8 +115,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     @Test
     public void testLoadStoreRegattaLeaderboardWithScoreCorrections() {
         // for some reason the dropping of collections doesn't work reliably on Linux... explicitly drop those collections that we depend on
-        db.getCollection(CollectionNames.LEADERBOARDS.name()).drop();
-        db.getCollection(CollectionNames.REGATTAS.name()).drop();
+        getMongoService().getDB().getCollection(CollectionNames.LEADERBOARDS.name()).drop();
+        getMongoService().getDB().getCollection(CollectionNames.REGATTAS.name()).drop();
         Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         final DynamicTrackedRegatta[] trackedRegatta = new DynamicTrackedRegatta[1];
