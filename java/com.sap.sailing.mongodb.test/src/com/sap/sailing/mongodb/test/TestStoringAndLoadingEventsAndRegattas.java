@@ -143,6 +143,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
         logColumnsInRegatta(regatta);
         RegattaLeaderboard regattaLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
+        assertSame(regatta, regattaLeaderboard.getRegatta());
         final RaceColumnInSeries q2 = regatta.getSeriesByName("Qualifying").getRaceColumnByName("Q2");
         final Fleet yellow = q2.getFleetByName("Yellow");
         logColumnsInRegatta(regatta);
@@ -187,6 +188,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         }
         logger.info("columns in regatta leaderboard for regatta "+regattaLeaderboard.getRegatta().getName()+" ("+
                 regattaLeaderboard.getRegatta().hashCode()+"): "+rlbrcNames);
+        logColumnsInRegatta(regattaLeaderboard.getRegatta());
     }
 
     private void logColumnsInRegatta(Regatta regatta) {
@@ -197,7 +199,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 rrcNames.append(raceColumn.getName());
             }
         }
-        logger.info("columns in regatta: "+rrcNames);
+        logger.info("columns in regatta "+regatta.getName()+" ("+regatta.hashCode()+") : "+rrcNames);
     }
 
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final TrackedRace q2YellowTrackedRace) {
