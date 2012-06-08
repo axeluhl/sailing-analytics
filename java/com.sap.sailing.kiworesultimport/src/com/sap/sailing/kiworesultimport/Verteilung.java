@@ -1,5 +1,5 @@
 package com.sap.sailing.kiworesultimport;
 
-public class ResultDocumentParser {
+public interface Verteilung {
 
 }
