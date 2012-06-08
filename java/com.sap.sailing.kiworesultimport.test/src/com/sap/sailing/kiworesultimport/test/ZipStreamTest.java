@@ -10,7 +10,7 @@ import java.util.zip.ZipInputStream;
 import org.junit.Test;
 
 public class ZipStreamTest {
-    private final static String ZIP_EXAMPLE_FILE = "RESOURCES/Kieler_Woche_2011_Export.zip";
+    private final static String ZIP_EXAMPLE_FILE = "resources/Kieler_Woche_2011_Export.zip";
     
     @Test
     public void testOpenZip() throws IOException {
