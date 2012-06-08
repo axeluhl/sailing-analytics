@@ -134,9 +134,9 @@ public class EndToEndListeningStoreAndFowardTest {
         setUpUsingScript(racesToTrack, scriptName1, scriptName2);
 
         Set<TrackedRace> allTrackedRaces = new HashSet<TrackedRace>();
-        Iterable<Regatta> allEvents = racingEventService.getAllRegattas();
-        for (Regatta event : allEvents) {
-            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(event);
+        Iterable<Regatta> allRegattas = racingEventService.getAllRegattas();
+        for (Regatta regatta : allRegattas) {
+            DynamicTrackedRegatta trackedRegatta = racingEventService.getTrackedRegatta(regatta);
             Iterable<TrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
             for (TrackedRace trackedRace : trackedRaces) {
                 allTrackedRaces.add(trackedRace);
