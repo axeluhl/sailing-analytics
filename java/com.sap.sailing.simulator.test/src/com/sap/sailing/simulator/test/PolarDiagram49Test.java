@@ -170,8 +170,8 @@ public class PolarDiagram49Test {
     	SpeedWithBearing newWind = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
     	polarDiagram.setWind(newWind);
     	
-    	System.out.println(polarDiagram.getSpeedAtBearing(new DegreeBearingImpl(52)));
-    	//for (Bearing b: polarDiagram.optimalDirectionsUpwind()) System.out.println(b);
+    	System.out.println(polarDiagram.getSpeedAtBearing(new DegreeBearingImpl(-100)));
+    	for (Bearing b: polarDiagram.optimalDirectionsUpwind()) System.out.println(b);
     	
     	assertEquals("no test",1,1);
     	

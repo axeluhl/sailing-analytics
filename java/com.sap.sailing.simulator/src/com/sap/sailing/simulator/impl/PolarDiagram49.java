@@ -60,13 +60,12 @@ public class PolarDiagram49 implements PolarDiagram {
 	@Override
 	public SpeedWithBearing getSpeedAtBearing(Bearing bearing) {
 				
-		//TODO
 		Bearing relativeBearing = wind.getBearing().reverse().getDifferenceTo(bearing);
 		if (relativeBearing.getDegrees() < 0) relativeBearing = relativeBearing.getDifferenceTo(new DegreeBearingImpl(0));
 		
 		Speed floorWind = speedTable.floorKey(wind);
 		Speed ceilingWind = speedTable.ceilingKey(wind);
-		
+			
 		NavigableMap<Bearing, Speed> floorSpeeds = speedTable.get(floorWind);
 		NavigableMap<Bearing, Speed> ceilingSpeeds = speedTable.get(ceilingWind);
 		
@@ -75,31 +74,48 @@ public class PolarDiagram49 implements PolarDiagram {
 		Speed floorSpeed2 = floorSpeeds.ceilingEntry(relativeBearing).getValue();
 		Bearing floorBearing1 = floorSpeeds.floorKey(relativeBearing);
 		Bearing floorBearing2 = floorSpeeds.ceilingKey(relativeBearing);
-		double floorSpeed = floorSpeed1.getKnots() 
-				+ (relativeBearing.getRadians() - floorBearing1.getRadians())
-				* (floorSpeed2.getKnots() - floorSpeed1.getKnots())
-				/ (floorBearing2.getRadians() - floorBearing1.getRadians());
+		double floorSpeed;
+		if (floorSpeed1.equals(floorSpeed2)) {
+			floorSpeed = floorSpeed1.getKnots();
+		}
+		else {
+			floorSpeed = floorSpeed1.getKnots() 
+					+ (relativeBearing.getRadians() - floorBearing1.getRadians())
+					* (floorSpeed2.getKnots() - floorSpeed1.getKnots())
+					/ (floorBearing2.getRadians() - floorBearing1.getRadians());
+		}
 		
 		Speed ceilingSpeed1 = ceilingSpeeds.floorEntry(relativeBearing).getValue();
 		Speed ceilingSpeed2 = ceilingSpeeds.ceilingEntry(relativeBearing).getValue();
 		Bearing ceilingBearing1 = ceilingSpeeds.floorKey(relativeBearing);
 		Bearing ceilingBearing2 = ceilingSpeeds.ceilingKey(relativeBearing);
-		double ceilingSpeed = ceilingSpeed1.getKnots()
-				+ (relativeBearing.getRadians() - ceilingBearing1.getRadians())
-				* (ceilingSpeed2.getKnots() - ceilingSpeed2.getKnots())
-				/ (ceilingBearing2.getRadians() - ceilingBearing1.getRadians());
+		double ceilingSpeed;
+		if (ceilingSpeed1.equals(ceilingSpeed2)) {
+			ceilingSpeed = ceilingSpeed1.getKnots();
+		}
+		else {
+			ceilingSpeed = ceilingSpeed1.getKnots()
+					+ (relativeBearing.getRadians() - ceilingBearing1.getRadians())
+					* (ceilingSpeed2.getKnots() - ceilingSpeed2.getKnots())
+					/ (ceilingBearing2.getRadians() - ceilingBearing1.getRadians());
+		}
 		
-		double speed = floorSpeed 
-				+ (wind.getKnots() - floorWind.getKnots())
-				* (ceilingSpeed - floorSpeed)
-				/ (ceilingWind.getKnots() - floorWind.getKnots());
+		double speed;
+		if (floorWind.equals(ceilingWind)) {
+			speed = floorSpeed;
+		}
+		else {
+			speed = floorSpeed 
+					+ (wind.getKnots() - floorWind.getKnots())
+					* (ceilingSpeed - floorSpeed)
+					/ (ceilingWind.getKnots() - floorWind.getKnots());
+		}
 		
 		return new KnotSpeedWithBearingImpl(speed, bearing);
 	}
 
 	@Override
 	public Bearing[] optimalDirectionsUpwind() {
-		//TODO
 		Bearing windBearing = wind.getBearing().reverse();
 		Bearing floorBeatAngle = beatAngles.floorEntry(wind).getValue();
 		Bearing ceilingBeatAngle = beatAngles.ceilingEntry(wind).getValue();
@@ -107,12 +123,16 @@ public class PolarDiagram49 implements PolarDiagram {
 		if(ceilingBeatAngle == null) ceilingBeatAngle = new DegreeBearingImpl(0);
 		Speed floorSpeed = beatAngles.floorKey(wind);
 		Speed ceilingSpeed = beatAngles.ceilingKey(wind);
-		System.out.println(floorSpeed);
-		System.out.println(ceilingSpeed);
-		double beatAngle = floorBeatAngle.getRadians() 
-				+ (wind.getKnots() - floorSpeed.getKnots())
-				* (ceilingBeatAngle.getRadians() - floorBeatAngle.getRadians())
-				/ (ceilingSpeed.getKnots() - floorSpeed.getKnots());
+		double beatAngle;
+		if (floorSpeed.equals(ceilingSpeed)) {
+			beatAngle = floorBeatAngle.getRadians();
+		}
+		else {
+			beatAngle = floorBeatAngle.getRadians() 
+					+ (wind.getKnots() - floorSpeed.getKnots())
+					* (ceilingBeatAngle.getRadians() - floorBeatAngle.getRadians())
+					/ (ceilingSpeed.getKnots() - floorSpeed.getKnots());
+		}
 		Bearing estBeatAngle = new RadianBearingImpl(beatAngle);
 		return new Bearing[] { 
 				windBearing.add(estBeatAngle), 
@@ -130,10 +150,16 @@ public class PolarDiagram49 implements PolarDiagram {
 		if(ceilingGybeAngle == null) ceilingGybeAngle = new DegreeBearingImpl(0);
 		Speed floorSpeed = gybeAngles.floorKey(wind);
 		Speed ceilingSpeed = gybeAngles.ceilingKey(wind);
-		double gybeAngle = floorGybeAngle.getRadians() 
-				+ (wind.getKnots() - floorSpeed.getKnots())
-				* (ceilingGybeAngle.getRadians() - floorGybeAngle.getRadians())
-				/ (ceilingSpeed.getKnots() - floorSpeed.getKnots());
+		double gybeAngle;
+		if (floorSpeed.equals(ceilingSpeed)) {
+			gybeAngle = floorGybeAngle.getRadians();
+		}
+		else {
+			gybeAngle = floorGybeAngle.getRadians() 
+					+ (wind.getKnots() - floorSpeed.getKnots())
+					* (ceilingGybeAngle.getRadians() - floorGybeAngle.getRadians())
+					/ (ceilingSpeed.getKnots() - floorSpeed.getKnots());
+		}
 		Bearing estGybeAngle = new RadianBearingImpl(gybeAngle);
 		return new Bearing[] { 
 				windBearing.add(estGybeAngle), 

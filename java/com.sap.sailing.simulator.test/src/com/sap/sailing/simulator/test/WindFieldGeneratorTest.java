@@ -25,6 +25,7 @@ import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
 import com.sap.sailing.simulator.impl.WindFieldGeneratorBlastImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
+import com.sap.sailing.simulator.impl.WindFieldGeneratorCombined;
 import com.sap.sailing.simulator.impl.WindFieldGeneratorImpl;
 import com.sap.sailing.simulator.impl.WindFieldGeneratorOscillationImpl;
 
@@ -95,9 +96,10 @@ public class WindFieldGeneratorTest {
         Position[][] positionGrid = wf.getPositionsGrid();
         TimePoint startTime = new MillisecondsTimePoint(0);
         TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
+       
+       
         wf.generate(startTime, null, timeStep);
         wf.setTimeScale(1.0);
-        
         SpeedWithBearing speed = new KilometersPerHourSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
 
         /*
@@ -208,6 +210,66 @@ public class WindFieldGeneratorTest {
         // Check the speed
         assertEquals("StartTime First Wind Speed ", 10, windList.get(0).getKnots(), 0);
     }
+    
+    @Test
+    public void testWindFieldGeneratorCombinedNoBlast() {
+        Position start = new DegreePosition(54.32447456461419, 10.15613079071045);
+        Position end = new DegreePosition(54.32877915239163, 10.156173706054688);
+        List<Position> course = new LinkedList<Position>();
+        course.add(start);
+        course.add(end);
+
+        WindControlParameters windParameters = new WindControlParameters(10, 0);
+        //Set Oscillation from testWindFieldGeneratorTest
+        windParameters.leftWindSpeed = 70.0;
+        windParameters.middleWindSpeed = 80.0;
+        windParameters.rightWindSpeed = 90.0;
+        windParameters.frequency = 0.375;
+        windParameters.amplitude = 20.0;
+        //No Blast
+        windParameters.blastProbability = 0.0;
+        windParameters.maxBlastSize = 1.0;
+        windParameters.blastWindSpeed = 0.0;
+        windParameters.blastWindSpeedVar = 0.0;
+
+        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
+        WindFieldGeneratorCombined wf = new WindFieldGeneratorCombined(bd, windParameters);
+        int hSteps = 30;
+        int vSteps = 15;
+
+        wf.setPositionGrid(bd.extractGrid(hSteps, vSteps));
+        Position[][] positionGrid = wf.getPositionsGrid();
+        TimePoint startTime = new MillisecondsTimePoint(0);
+        TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
+        wf.generate(startTime, null, timeStep);
+
+        SpeedWithBearing speed = new KilometersPerHourSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
+
+        /*
+         * Check the speed & angle at the start time
+         */
+        List<Wind> windList = new ArrayList<Wind>();
+        for (int i = 0; i < vSteps; ++i) {
+            for (int j = 0; j < hSteps; ++j) {
+                Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(startTime, positionGrid[i][j], speed));
+                //logger.info("Wind[" + i + "][" + j + "]" + localWind.toString());
+                windList.add(localWind);
+            }
+        }
+        assertEquals("Size of windList ", hSteps * vSteps, windList.size());
+        double epsilon = 1e-6;
+        // Check the speed
+        assertEquals("StartTime First Wind Speed ", 7, windList.get(0).getKnots(), 0);
+        assertEquals("StartTime Last Wind Speed in first row ", 9, windList.get(hSteps - 1).getKnots(), 0);
+        assertEquals("StartTime One before Middle Wind Speed ", 7.928571, windList.get(windList.size() / 2 - 2)
+                .getKnots(), epsilon);
+        assertEquals("StartTime Middle Wind Speed ", 8, windList.get(windList.size() / 2 - 1).getKnots(), 0);
+        assertEquals("StartTime Last Wind Speed ", windList.get(windList.size() - 1).getKnots(), 9, 0);
+        // Check the angle
+        assertEquals("StartTime First Wind Angle ", 0, windList.get(0).getBearing().getRadians(), 0);
+       
+    }
+    
     private Pair<Integer, Integer> getIndex(int listIndex, int numCols) {
         Pair<Integer, Integer> indexPair = new Pair<Integer, Integer>(1 + (listIndex - 1) / numCols, 1
                 + (listIndex - 1) % numCols);

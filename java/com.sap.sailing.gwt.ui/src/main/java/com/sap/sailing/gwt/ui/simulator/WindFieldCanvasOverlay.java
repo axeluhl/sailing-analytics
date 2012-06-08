@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
@@ -17,6 +18,7 @@ import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.client.TimeListener;
+import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -32,14 +34,14 @@ import com.sap.sailing.gwt.ui.simulator.util.WindFieldMapMouseMoveHandler;
  * @author Nidhi Sawhney(D054070)
  * 
  */
-public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeListener {
+public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeListenerWithStoppingCriteria {
 
     /* The wind field that is to be displayed in the overlay */
     protected WindFieldDTO wl;
     /*
      * Map containing the windfield for easy retrieval with key as time point.
      */
-    protected TreeMap<Long, List<WindDTO>> timePointWindDTOMap;
+    protected SortedMap<Long, List<WindDTO>> timePointWindDTOMap;
     
     /* The points where ToolTip is to be displayed */
     protected Map<ToolTip, WindDTO> windFieldPoints;
@@ -79,7 +81,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     public void setWindField(WindFieldDTO wl) {
         this.wl = wl;
-        /*
+        
         timePointWindDTOMap.clear();
         if (wl != null) {
             for(WindDTO w : wl.getMatrix()) {
@@ -89,7 +91,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
                 timePointWindDTOMap.get(w.timepoint).add(w);
             }
         }
-        */
+        
     }
 
     public void setArrowColor(String arrowColor, String arrowHeadColor) {
@@ -104,10 +106,12 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         if (timer != null) {
             this.timer.addTimeListener(this);
         }
+        setVisible(true);
     }
 
     @Override
     protected void remove() {
+        setVisible(false);
         getMap().removeMapMouseMoveHandler(mmHandler);
         if (timer != null) {
             this.timer.removeTimeListener(this);
@@ -226,26 +230,30 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     @Override
     public void timeChanged(Date date) {
-        // canvas.getContext2d().clearRect(canvas.getAbsoluteLeft(), canvas.getAbsoluteTop(),
-        // canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+       
         List<WindDTO> windDTOToDraw = new ArrayList<WindDTO>();
-        for (WindDTO windDTO : wl.getMatrix()) {
-            if (windDTO.timepoint.equals(date.getTime())) {
-                windDTOToDraw.add(windDTO);
-            }
+     
+        SortedMap<Long, List<WindDTO>> headMap = (timePointWindDTOMap.headMap(date.getTime()+1));
+    
+        if (!headMap.isEmpty()) {
+          windDTOToDraw = headMap.get(headMap.lastKey());
         }
-        /*
-        Entry<Long, List<WindDTO>> entry = (timePointWindDTOMap.floorEntry(date.getTime()));
-        
-        if(entry != null) {
-          windDTOToDraw = entry.getValue();
-        }*/
         logger.info("In WindFieldCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points" + " @ "
                 + date);
-        if (windDTOToDraw.size() == 0) {
-            timer.stop();
+        
+        drawWindField(windDTOToDraw);
+        
+    }
+
+    @Override
+    public int stop() {
+       if (!this.isVisible() || timePointWindDTOMap == null || timer == null) {
+           return 0;
+       }
+        if (timePointWindDTOMap.lastKey() < timer.getTime().getTime()) {
+            return 0;
         } else {
-            drawWindField(windDTOToDraw);
+            return 1;
         }
     }
 

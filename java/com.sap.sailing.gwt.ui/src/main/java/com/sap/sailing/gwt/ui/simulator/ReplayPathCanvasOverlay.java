@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 public class ReplayPathCanvasOverlay extends PathCanvasOverlay  {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
+    private  List<WindDTO> windDTOToDraw;
     
     public ReplayPathCanvasOverlay(Timer timer) {
         super(timer);
@@ -29,17 +30,27 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay  {
         
        canvas.getContext2d().clearRect(0/*canvas.getAbsoluteLeft()*/, 0/*canvas.getAbsoluteTop()*/, 
                canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
-        List<WindDTO> windDTOToDraw = new ArrayList<WindDTO>();
+       
+        windDTOToDraw = new ArrayList<WindDTO>();
         for(WindDTO windDTO : wl.getMatrix()) {
             if (windDTO.timepoint <= date.getTime()) {
                 windDTOToDraw.add(windDTO);
             }
         }
         logger.info("In ReplayPathCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points");
-        if (windDTOToDraw.size() == wl.getMatrix().size()) {
-            timer.stop();
-        }
+        
         drawWindField(windDTOToDraw);
     }
 
+    @Override
+    public int stop() {
+        if (!isVisible() || windDTOToDraw == null || wl == null) {
+            return 0;
+        }
+        if (windDTOToDraw.size() == wl.getMatrix().size()) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
 }
