@@ -43,7 +43,7 @@ public abstract class AbstractMongoDBTest {
         assertNotNull(db);
     }
 
-    private void dropAllCollections(DB theDB) {
+    private void dropAllCollections(DB theDB) throws InterruptedException {
         for (CollectionNames collectionName : CollectionNames.values()) {
             DBCollection c = theDB.getCollection(collectionName.name());
             c.drop();
