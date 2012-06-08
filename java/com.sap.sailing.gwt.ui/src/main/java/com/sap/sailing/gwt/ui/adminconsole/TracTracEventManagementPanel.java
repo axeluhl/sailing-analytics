@@ -34,10 +34,12 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -453,10 +455,15 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
         String liveURI = liveURIBox.getValue();
         String storedURI = storedURIBox.getValue();
+        RegattaDTO selectedRegatta = trackedRacesListComposite.getSelectedRegatta();
+        RegattaIdentifier regattaIdentifier = null;
+        if(selectedRegatta != null) {
+            regattaIdentifier = new RegattaName(selectedRegatta.name);
+        }
         for (final TracTracRaceRecordDTO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
-                sailingService.trackWithTracTrac(/* regattaToAddTo */ null, // TODO allow user to optionally select a pre-defined regatta
-                        rr, liveURI, storedURI, trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
+                sailingService.trackWithTracTrac(regattaIdentifier, rr, liveURI, storedURI, trackWind, 
+                        correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register race " + rr.name + " for tracking: "

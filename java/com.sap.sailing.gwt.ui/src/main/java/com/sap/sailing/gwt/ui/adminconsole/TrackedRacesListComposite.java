@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -82,6 +83,10 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
     
     private Iterable<RaceDTO> allRaces;
 
+    private Iterable<RegattaDTO> allRegattas;
+
+    private ListBox regattaListBox;
+    
     private final VerticalPanel panel;
 
     private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(
@@ -124,9 +129,6 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
             StringMessages stringMessages, boolean hasMultiSelection) {
-        if (regattaRefresher == null) {
-            throw new IllegalArgumentException("regattaRefresher must not be null");
-        }
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
@@ -141,13 +143,26 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
         panel = new VerticalPanel();
         setWidget(panel);
+
+        // the regatta selection for a tracked race
+        HorizontalPanel regattaPanel = new HorizontalPanel();
+        panel.add(regattaPanel);
+        Label lblRegattas = new Label("Regatta used for the tracked race:");
+        lblRegattas.setWordWrap(false);
+        regattaPanel.setCellVerticalAlignment(lblRegattas, HasVerticalAlignment.ALIGN_MIDDLE);
+        regattaPanel.setSpacing(5);
+        regattaPanel.add(lblRegattas);
+        regattaListBox = new ListBox();
+        regattaPanel.add(regattaListBox);
+        regattaPanel.setCellVerticalAlignment(regattaListBox, HasVerticalAlignment.ALIGN_MIDDLE);
+
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
-        Label lblFilterEvents = new Label(stringMessages.filterRacesByName() + ":");
-        lblFilterEvents.setWordWrap(false);
+        Label lblFilterRaces = new Label(stringMessages.filterRacesByName() + ":");
+        lblFilterRaces.setWordWrap(false);
         filterPanel.setSpacing(5);
-        filterPanel.add(lblFilterEvents);
-        filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
+        filterPanel.add(lblFilterRaces);
+        filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
         filterRacesTextbox = new TextBox();
         filterRacesTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -438,8 +453,11 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
     }
 
     @Override
-    public void fillRegattas(List<RegattaDTO> events) {
-        if (events.isEmpty()) {
+    public void fillRegattas(List<RegattaDTO> regattas) {
+        RegattaDTO oldRegattaSelection = getSelectedRegatta();
+        regattaListBox.clear();
+        if (regattas.isEmpty()) {
+            regattaListBox.addItem("No regatta");
             raceTable.setVisible(false);
             btnUntrack.setVisible(false);
             btnRemoveRace.setVisible(false);
@@ -453,10 +471,19 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
             btnRemoveRace.setEnabled(false);
             noTrackedRacesLabel.setVisible(false);
             btnSetDelayToLive.setVisible(true);
+            regattaListBox.addItem("No regatta");
+            for (RegattaDTO regatta : regattas) {
+                regattaListBox.addItem(regatta.name);
+                if(oldRegattaSelection != null && oldRegattaSelection.name.equals(regatta.name)) {
+                    regattaListBox.setSelectedIndex(regattaListBox.getItemCount()-1);
+                }
+            }
         }
         List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
+        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
         List<RegattaAndRaceIdentifier> newAllRaceIdentifiers = new ArrayList<RegattaAndRaceIdentifier>();
-        for (RegattaDTO regatta : events) {
+        for (RegattaDTO regatta : regattas) {
+            newAllRegattas.add(regatta);
             for (RaceDTO race : regatta.races) {
                 if (race != null) {
                     newAllRaces.add(race);
@@ -465,6 +492,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
             }
         }
         allRaces = newAllRaces;
+        allRegattas = newAllRegattas;
         fillRaceListFromAvailableRacesApplyingFilter();
         raceSelectionProvider.setAllRaces(newAllRaceIdentifiers); // have this object be notified; triggers onRaceSelectionChange
     }
@@ -516,6 +544,21 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
                 });
     }
 
+    public RegattaDTO getSelectedRegatta() {
+        RegattaDTO result = null;
+        int selIndex = regattaListBox.getSelectedIndex();
+        if(selIndex > 0) { // the zero index represents the 'no selection' text
+            String itemText = regattaListBox.getItemText(selIndex);
+            for(RegattaDTO regattaDTO: allRegattas) {
+                if(regattaDTO.name.equals(itemText)) {
+                    result = regattaDTO;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
     private void fillRaceListFromAvailableRacesApplyingFilter() {
         String text = filterRacesTextbox.getText();
         List<String> wordsToFilter = Arrays.asList(text.split(" "));
