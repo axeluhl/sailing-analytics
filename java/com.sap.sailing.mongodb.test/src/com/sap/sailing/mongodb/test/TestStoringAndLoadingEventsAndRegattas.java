@@ -185,7 +185,9 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
             rlbrcNames.append("; ");
             rlbrcNames.append(rlbrc.getName());
         }
-        logger.info("columns in regatta leaderboard: "+rlbrcNames);
+        logger.info("columns in regatta leaderboard for regatta "+regattaLeaderboard.getRegatta().getName()+" ("+
+                regattaLeaderboard.getRegatta().hashCode()+"): "+rlbrcNames);
+        logColumnsInRegatta(regattaLeaderboard.getRegatta());
     }
 
     private void logColumnsInRegatta(Regatta regatta) {
@@ -196,7 +198,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 rrcNames.append(raceColumn.getName());
             }
         }
-        logger.info("columns in regatta: "+rrcNames);
+        logger.info("columns in regatta "+regatta.getName()+" ("+regatta.hashCode()+") : "+rrcNames);
     }
 
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final TrackedRace q2YellowTrackedRace) {
