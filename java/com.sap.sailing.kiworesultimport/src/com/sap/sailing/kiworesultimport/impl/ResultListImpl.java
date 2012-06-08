@@ -11,14 +11,12 @@ public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
 
     @Override
     public String getLegende() {
-        // TODO Auto-generated method stub
-        return null;
+        return getNode().getAttributes().getNamedItem("legende").getNodeValue();
     }
 
     @Override
     public String getImagePfad() {
-        // TODO Auto-generated method stub
-        return null;
+        return getNode().getAttributes().getNamedItem("imagePfad").getNodeValue();
     }
 
     @Override
