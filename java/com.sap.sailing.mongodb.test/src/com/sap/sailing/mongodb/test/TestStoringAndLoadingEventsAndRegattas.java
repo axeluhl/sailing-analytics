@@ -198,7 +198,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 rrcNames.append(raceColumn.getName());
             }
         }
-        logger.info("columns in regatta: "+rrcNames);
+        logger.info("columns in regatta "+regatta.getName()+" ("+regatta.hashCode()+") : "+rrcNames);
     }
 
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final TrackedRace q2YellowTrackedRace) {
