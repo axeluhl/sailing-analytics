@@ -2,6 +2,7 @@ package com.sap.sailing.kiworesultimport.impl;
 
 import org.w3c.dom.Node;
 
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.kiworesultimport.Race;
 
 public class RaceImpl extends AbstractNodeWrapper implements Race {
@@ -26,4 +27,15 @@ public class RaceImpl extends AbstractNodeWrapper implements Race {
         return namedItem == null || namedItem.getNodeValue() == null || namedItem.getNodeValue().trim().length() == 0 ? null : namedItem.getNodeValue();
     }
 
+    @Override
+    public MaxPointsReason getMaxPointsReason() {
+        MaxPointsReason result;
+        String status = getStatus();
+        if (status != null) {
+            result = MaxPointsReason.valueOf(status);
+        } else {
+            result = MaxPointsReason.NONE;
+        }
+        return result;
+    }
 }
