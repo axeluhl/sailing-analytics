@@ -48,6 +48,7 @@ public abstract class AbstractMongoDBTest {
             DBCollection c = theDB.getCollection(collectionName.name());
             c.drop();
         }
+        Thread.sleep(1000);
     }
 
     protected MongoDBService getMongoService() {
