@@ -82,7 +82,7 @@ public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
         }
         
         {
-            Thread.sleep(3000); // wait until MongoDB has recorded the change and made it visible
+            Thread.sleep(1000); // wait until MongoDB has recorded the change and made it visible
             Mongo mongo = newMongo();
             assertNotNull(mongo);
             DB db = mongo.getDB(getDBConfiguration().getDatabaseName());

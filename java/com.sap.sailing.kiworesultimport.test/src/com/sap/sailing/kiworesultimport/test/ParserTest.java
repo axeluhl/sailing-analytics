@@ -3,6 +3,7 @@ package com.sap.sailing.kiworesultimport.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +30,7 @@ import com.sap.sailing.kiworesultimport.Race;
 import com.sap.sailing.kiworesultimport.Races;
 import com.sap.sailing.kiworesultimport.ResultList;
 import com.sap.sailing.kiworesultimport.ResultListParser;
-import com.sap.sailing.kiworesultimport.ResultListParserFactory;
+import com.sap.sailing.kiworesultimport.ParserFactory;
 import com.sap.sailing.kiworesultimport.Skipper;
 import com.sap.sailing.kiworesultimport.Verteilung;
 
@@ -58,8 +59,32 @@ public class ParserTest {
     }
     
     @Test
+    public void testEmptyIsafID() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
+        ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
+        ResultList resultList = parser.parse(getSampleInputStream());
+        assertNotNull(resultList);
+        assertNull(resultList.getVerteilung().getBoatBySailID("SWE 1196").getCrew().getSkipper().getIsaf());
+    }
+    
+    @Test
+    public void testEmptyStatus() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
+        ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
+        ResultList resultList = parser.parse(getSampleInputStream());
+        assertNotNull(resultList);
+        assertNull(resultList.getVerteilung().getBoatBySailID("SWE 1196").getRaces().getRaces().iterator().next().getStatus());
+    }
+    
+    @Test
+    public void testNonEmptyStatus() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
+        ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
+        ResultList resultList = parser.parse(getSampleInputStream());
+        assertNotNull(resultList);
+        assertEquals("DNC", resultList.getVerteilung().getBoatBySailID("GER 1199").getRaces().getRaces().iterator().next().getStatus());
+    }
+    
+    @Test
     public void testObtainingResultList() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
-        ResultListParser parser = ResultListParserFactory.INSTANCE.createResultListParser();
+        ResultListParser parser = ParserFactory.INSTANCE.createResultListParser();
         ResultList resultList = parser.parse(getSampleInputStream());
         assertNotNull(resultList);
         assertEquals("D:\\Programme\\KWSailing\\eventlogos\\KielerWoche_Ergebnislistenkopf_2011.jpg", resultList.getImagePfad());

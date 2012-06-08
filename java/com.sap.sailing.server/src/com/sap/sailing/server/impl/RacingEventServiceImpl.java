@@ -293,11 +293,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public RaceColumn addColumnToLeaderboard(String columnName, String leaderboardName, boolean medalRace) {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        if (leaderboard != null && leaderboard instanceof FlexibleLeaderboard) {
-            // uses the default fleet as the single fleet for the new column
-            RaceColumn result = ((FlexibleLeaderboard) leaderboard).addRaceColumn(columnName, medalRace, leaderboard.getFleet(null));
-            updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
-            return result;
+        if (leaderboard != null) {
+            if (leaderboard instanceof FlexibleLeaderboard) {
+                // uses the default fleet as the single fleet for the new column
+                RaceColumn result = ((FlexibleLeaderboard) leaderboard).addRaceColumn(columnName, medalRace,
+                        leaderboard.getFleet(null));
+                updateStoredFlexibleLeaderboard((FlexibleLeaderboard) leaderboard);
+                return result;
+            } else {
+                throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " is not a FlexibleLeaderboard");
+            }
         } else {
             throw new IllegalArgumentException("Leaderboard named " + leaderboardName + " not found");
         }
