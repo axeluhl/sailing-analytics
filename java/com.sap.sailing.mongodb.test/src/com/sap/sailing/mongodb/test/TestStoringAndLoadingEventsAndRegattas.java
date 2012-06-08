@@ -141,15 +141,12 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 regattaProxy.getSeries(), regattaProxy.isPersistent());
         trackedRegatta[0] = new DynamicTrackedRegattaImpl(regatta);
         addRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, regatta);
+        logColumnsInRegatta(regatta);
         RegattaLeaderboard regattaLeaderboard = res.addRegattaLeaderboard(regatta.getRegattaIdentifier(), new int[] { 3, 5 });
         final RaceColumnInSeries q2 = regatta.getSeriesByName("Qualifying").getRaceColumnByName("Q2");
         final Fleet yellow = q2.getFleetByName("Yellow");
-        StringBuilder rlbrcNames = new StringBuilder();
-        for (RaceColumn rlbrc : regattaLeaderboard.getRaceColumns()) {
-            rlbrcNames.append("; ");
-            rlbrcNames.append(rlbrc.getName());
-        }
-        logger.info("columns in regatta leaderboard: "+rlbrcNames);
+        logColumnsInRegatta(regatta);
+        logColumnsInRegattaLeaderboard(regattaLeaderboard);
         assertNotNull(regattaLeaderboard.getRaceColumnByName(q2.getName()));
         res.apply(new ConnectTrackedRaceToLeaderboardColumn(regattaLeaderboard.getName(), q2.getName(), yellow
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
@@ -180,6 +177,26 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
         MaxPointsReason hassosLoadedMaxPointsReason = loadedLeaderboard.getScoreCorrection().getMaxPointsReason(hasso, loadedQ2);
         assertEquals(MaxPointsReason.DNF, hassosLoadedMaxPointsReason);
+    }
+
+    private void logColumnsInRegattaLeaderboard(RegattaLeaderboard regattaLeaderboard) {
+        StringBuilder rlbrcNames = new StringBuilder();
+        for (RaceColumn rlbrc : regattaLeaderboard.getRaceColumns()) {
+            rlbrcNames.append("; ");
+            rlbrcNames.append(rlbrc.getName());
+        }
+        logger.info("columns in regatta leaderboard: "+rlbrcNames);
+    }
+
+    private void logColumnsInRegatta(Regatta regatta) {
+        StringBuilder rrcNames = new StringBuilder();
+        for (Series series : regatta.getSeries()) {
+            for (RaceColumn raceColumn : series.getRaceColumns()) {
+                rrcNames.append("; ");
+                rrcNames.append(raceColumn.getName());
+            }
+        }
+        logger.info("columns in regatta: "+rrcNames);
     }
 
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final TrackedRace q2YellowTrackedRace) {
