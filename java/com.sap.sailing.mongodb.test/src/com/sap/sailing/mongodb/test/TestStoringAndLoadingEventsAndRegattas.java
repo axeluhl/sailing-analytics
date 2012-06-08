@@ -187,6 +187,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         }
         logger.info("columns in regatta leaderboard for regatta "+regattaLeaderboard.getRegatta().getName()+" ("+
                 regattaLeaderboard.getRegatta().hashCode()+"): "+rlbrcNames);
+        logColumnsInRegatta(regattaLeaderboard.getRegatta());
     }
 
     private void logColumnsInRegatta(Regatta regatta) {
