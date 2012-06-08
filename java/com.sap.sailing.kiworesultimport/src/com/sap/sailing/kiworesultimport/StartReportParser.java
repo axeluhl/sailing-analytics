@@ -7,6 +7,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-public interface ResultListParser {
-    ResultList parse(InputStream inputStream, String sourceName) throws SAXException, IOException, ParserConfigurationException;
+public interface StartReportParser {
+    StartReport parse(InputStream inputStream, String sourceName) throws SAXException, IOException, ParserConfigurationException;
 }

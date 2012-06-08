@@ -9,18 +9,19 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import com.sap.sailing.kiworesultimport.ResultList;
-import com.sap.sailing.kiworesultimport.ResultListParser;
+import com.sap.sailing.kiworesultimport.StartReport;
+import com.sap.sailing.kiworesultimport.StartReportParser;
 
-public class ResultListParserImpl implements ResultListParser {
+public class StartReportParserImpl implements StartReportParser {
+
     private Document parseDocument(InputStream inputStream) throws SAXException, IOException, ParserConfigurationException {
         return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
     }
 
     @Override
-    public ResultList parse(InputStream inputStream, String sourceName) throws SAXException, IOException, ParserConfigurationException {
+    public StartReport parse(InputStream inputStream, String sourceName) throws SAXException, IOException, ParserConfigurationException {
         Document doc = parseDocument(inputStream);
-        ResultList result = new ResultListImpl(doc.getElementsByTagName("ResultList").item(0), sourceName);
+        StartReport result = new StartReportImpl(doc.getElementsByTagName("star:startbericht").item(0), sourceName);
         return result;
     }
 

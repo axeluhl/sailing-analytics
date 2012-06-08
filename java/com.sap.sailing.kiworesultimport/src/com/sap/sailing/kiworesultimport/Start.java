@@ -11,17 +11,17 @@ public interface Start {
     
     String getFleetName();
     
-    String getKurs();
+    String getCourseName();
     
-    String getStartzeit();
+    String getStartTimeAsString();
     
     TimePoint getTimePoint() throws ParseException;
     
-    String getStartflagge();
+    String getStartFlag();
     
-    String getBemerkung();
+    String getComment();
     
-    Boolean getDoppelteWertung();
+    Boolean isDoubleScore();
     
-    Boolean getStreichbar();
+    Boolean isDiscardable();
 }
