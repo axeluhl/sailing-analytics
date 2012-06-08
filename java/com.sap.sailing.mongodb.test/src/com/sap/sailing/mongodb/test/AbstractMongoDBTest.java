@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import org.junit.Before;
 
 import com.mongodb.DB;
+import com.mongodb.DBCollection;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
@@ -37,8 +38,15 @@ public abstract class AbstractMongoDBTest {
         mongo = newMongo();
         assertNotNull(mongo);
         db = mongo.getDB(getDBConfiguration().getDatabaseName());
-        db.dropDatabase();
+        dropAllCollections(db);
         assertNotNull(db);
+    }
+
+    private void dropAllCollections(DB theDB) {
+        for (String collectionName : theDB.getCollectionNames()) {
+            DBCollection c = theDB.getCollection(collectionName);
+            c.drop();
+        }
     }
 
     protected MongoDBService getMongoService() {
