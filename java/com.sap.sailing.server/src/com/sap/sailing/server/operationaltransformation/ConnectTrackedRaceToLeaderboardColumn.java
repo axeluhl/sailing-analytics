@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -49,7 +50,10 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
                 success = true;
                 updateDB(toState, leaderboard, raceColumn);
             } else {
-                logger.info("unable to find race column "+getColumnName()+" in leaderboard "+leaderboard.getName());
+                final String leaderboardAsString = leaderboard.getName() + (leaderboard instanceof RegattaLeaderboard ?
+                        (" for regatta "+((RegattaLeaderboard) leaderboard).getRegatta().getName()+
+                                " ("+((RegattaLeaderboard) leaderboard).getRegatta().hashCode()+")"): "");
+                logger.info("unable to find race column "+getColumnName()+" in leaderboard "+leaderboardAsString);
             }
         } else {
             logger.info("unable to find leaderboard "+getLeaderboardName()+" in server "+toState);
