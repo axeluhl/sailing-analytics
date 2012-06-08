@@ -156,9 +156,12 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
             int index = 0;
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
-                int width = (int) Math.max(1, Math.min(2, Math.round(windDTO.trueWindSpeedInMetersPerSecond)));
+                //int aWidth = (int) Math.max(1, Math.min(2, Math.round(windDTO.trueWindSpeedInMetersPerSecond)));
+                double aWidth = Math.max(1., (windDTO.trueWindSpeedInMetersPerSecond/3.));
+                double aLength = Math.max(10., (3.*windDTO.trueWindSpeedInMetersPerSecond));
+                logger.info("windspeed: "+windDTO.trueWindSpeedInMetersPerSecond+", aWidth: "+aWidth+", aLength: "+aLength);
                 DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
-                drawArrow(windDTO, dbi.getRadians(), arrowLength, width, ++index);
+                drawArrow(windDTO, dbi.getRadians(), aLength, aWidth, ++index);
 
             }
             String title = "Wind Field at " + windDTOList.size() + " points.";
@@ -191,7 +194,9 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
         double theta = Math.atan2(-dy, dx);
 
-        drawHead(x1, y1, theta, length / 2, weight);
+        double hLength = Math.max(6.,6.+(10./(60.-10.))*Math.max(length-6.,0));
+        logger.info("headlength: "+hLength+", arrowlength: "+length);
+        drawHead(x1, y1, theta, hLength, weight);
         //String text = "P" + index;// + NumberFormat.getFormat("0.00").format(windDTO.trueWindBearingDeg) + "°";
         //drawPointWithText(x, y, text);
         drawPoint(x, y);
@@ -206,12 +211,16 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         if (t2 <= (-Math.PI))
             t2 += 2 * Math.PI;
 
-        double x1 = Math.round(x - Math.cos(t) * headLength);
-        double y1 = Math.round(y + Math.sin(t) * headLength);
-        double x2 = Math.round(x - Math.cos(t2) * headLength);
-        double y2 = Math.round(y + Math.sin(t2) * headLength);
-        drawLine(x, y, x1, y1, weight, arrowHeadColor);
-        drawLine(x, y, x2, y2, weight, arrowHeadColor);
+        double x1 = (x - Math.cos(t) * headLength);
+        double y1 = (y + Math.sin(t) * headLength);
+        double x1o = (x + Math.cos(t) * weight/2);
+        double y1o = (y - Math.sin(t) * weight/2);
+        double x2 = (x - Math.cos(t2) * headLength);
+        double y2 = (y + Math.sin(t2) * headLength);
+        double x2o = (x + Math.cos(t2) * weight/2);
+        double y2o = (y - Math.sin(t2) * weight/2);
+        drawLine(x1o, y1o, x1, y1, weight, arrowHeadColor);
+        drawLine(x2o, y2o, x2, y2, weight, arrowHeadColor);
 
     }
 

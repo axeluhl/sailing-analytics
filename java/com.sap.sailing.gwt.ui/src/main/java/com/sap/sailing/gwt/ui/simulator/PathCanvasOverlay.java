@@ -113,9 +113,9 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
         int x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         int y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
-        this.pointColor = pathColor;
+        this.pointColor = "Black";
         drawPoint(x1, y1);
-        drawLine(x1, y1, x2, y2, 1/* weight */, pathColor);
+        drawLine(x1, y1, x2, y2, 3/* weight */, pathColor);
         drawPoint(x2, y2);
     }
 }
