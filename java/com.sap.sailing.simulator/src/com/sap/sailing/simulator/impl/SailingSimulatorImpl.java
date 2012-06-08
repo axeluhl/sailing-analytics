@@ -219,6 +219,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 			for (Position p : unvisited) {
 				if( tentativeDistances.get(p) < minTentativeDistance ) {
 					currentPosition = p;
+					minTentativeDistance = tentativeDistances.get(p);
 					currentTime = new MillisecondsTimePoint(minTentativeDistance);
 				}
 			
