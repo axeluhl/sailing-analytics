@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,6 +21,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.Crewmember;
@@ -87,5 +89,6 @@ public class ParserTest {
         Race r2 = i.next();
         assertEquals(1.00, r2.getPoints(), 0.0000000001);
         assertEquals(2, (int) r2.getNumber());
+        assertEquals(new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 18, 16, 26).getTime()), resultList.getTimePoint());
     }
 }
