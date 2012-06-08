@@ -64,8 +64,8 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
         context2d.setStrokeStyle(pointColor);
         context2d.setLineWidth(3);
         context2d.beginPath();
-        context2d.moveTo(x, y);
-        context2d.lineTo(x, y);
+        context2d.moveTo(x-1, y-1);
+        context2d.lineTo(x+1, y+1);
         context2d.closePath();
         context2d.stroke();
         

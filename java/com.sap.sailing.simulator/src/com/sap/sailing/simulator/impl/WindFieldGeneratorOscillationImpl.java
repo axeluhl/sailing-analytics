@@ -58,11 +58,13 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
         double middleSpeed = windParameters.baseWindSpeed*windParameters.middleWindSpeed/100.0;
         double rightSpeed = windParameters.baseWindSpeed*windParameters.rightWindSpeed/100.0;
         int midPoint = ncol/2;
-        for (int i = 0; i < midPoint; ++i) {
-            speed[i] = new KnotSpeedImpl(leftSpeed + i*(middleSpeed-leftSpeed)/(midPoint-1)); 
+        for (int i = 0; i <= midPoint; ++i) {
+            speed[i] = new KnotSpeedImpl(leftSpeed + i*(middleSpeed-leftSpeed)/(midPoint)); 
+            logger.info("index: "+i+"speed: "+speed[i]);
         }
-        for (int i = 1; i <= ncol - midPoint; ++i) {
-            speed[midPoint -1 + i] = new KnotSpeedImpl(middleSpeed + i*(rightSpeed-middleSpeed)/(ncol - midPoint)); 
+        for (int i = 1; i < ncol - midPoint; ++i) {
+            speed[midPoint + i] = new KnotSpeedImpl(middleSpeed + i*(rightSpeed-middleSpeed)/(ncol - midPoint -1)); 
+            logger.info("index: "+(midPoint+i)+"speed: "+speed[midPoint-1+i]);
         }
     
     }
@@ -92,7 +94,11 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
             //double t = (timeIndex+(timeIndex+rowIndex)*vStep);
             double vStep = 1.0/(positions.length-1);
             double t = (timeIndex+rowIndex)*vStep*timeScale;
-            Bearing angle = new DegreeBearingImpl(Math.sin(2*Math.PI*t*windParameters.frequency)*windParameters.amplitude);
+            double oAngle = Math.sin(2*Math.PI*t*windParameters.frequency)*windParameters.amplitude;
+            Bearing angle = new DegreeBearingImpl(oAngle);
+            //logger.severe("timeIndex: "+timeIndex+" rowIndex: "+rowIndex+" timeScale: "+timeScale+" vStep: "+vStep+" t: "+t);
+            //System.out.print("timeIndex: "+timeIndex+" rowIndex: "+rowIndex+" timeScale: "+timeScale+" vStep: "+vStep+" t: "+t+"\n");
+            //System.out.print("oAngle: "+oAngle+" angle: "+angle.getDegrees()+"\n");
             angle = angle.add(phi0);
             return angle;
         } else {

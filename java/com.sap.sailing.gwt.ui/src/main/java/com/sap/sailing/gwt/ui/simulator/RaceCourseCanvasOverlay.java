@@ -105,7 +105,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
             if (startMarker != null) {
                 startMarker.setLatLng(startPoint);
             } else {
-                startMarker = new Marker(startPoint);
+// default markers are too large cluttering race display
+/*                startMarker = new Marker(startPoint);
                 map.addOverlay(startMarker);
                 /*
                  * startMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler () {
@@ -137,7 +138,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
             if (endMarker != null) {
                 endMarker.setLatLng(endPoint);
             } else {
-                endMarker = new Marker(endPoint);
+// default markers are too large cluttering race display
+/*                endMarker = new Marker(endPoint);
                 map.addOverlay(endMarker);
                 
                 endMarker.addMarkerMouseOverHandler(new RaceCourseMarkerMouseOverHandler());
@@ -149,7 +151,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
                         map.getInfoWindow().close();
                     }
 
-                });
+                });*/
             }
 
         }
