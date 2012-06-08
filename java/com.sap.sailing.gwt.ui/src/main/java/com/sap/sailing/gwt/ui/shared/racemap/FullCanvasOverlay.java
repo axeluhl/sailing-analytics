@@ -88,6 +88,39 @@ public abstract class FullCanvasOverlay extends CanvasOverlay {
     }
     
     /**
+     * Draw a circle centred at x,y with given radius
+     * @param x
+     * @param y
+     * @param radius
+     */
+    protected void drawCircle(double x, double y, double radius) {
+        Context2d context2d = canvas.getContext2d();
+        context2d.setLineWidth(3);
+        context2d.setStrokeStyle(pointColor);
+        context2d.beginPath();
+        context2d.arc(x,y,radius,0,2*Math.PI);
+        context2d.closePath();
+        context2d.stroke();
+        
+    }
+    
+    /**
+     * Draw a circle centred at x,y with given radius
+     * @param x
+     * @param y
+     * @param text
+     */
+    protected void drawCircleWithText(double x, double y, double radius, String text) {
+        
+        Context2d context2d = canvas.getContext2d();
+        drawCircle(x, y,radius);
+        context2d.setFillStyle(textColor);
+        context2d.setFont("italic 15pt Calibri");
+        context2d.fillText(text, x, y);
+       
+    }
+    
+    /**
      * Draw a line from (x,y) to (x1,y1) on the canvas
      * @param x
      * @param y
