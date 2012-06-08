@@ -71,13 +71,11 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
                 }
                 
                 if (displayWindAlongPath) {
-                    int width = (int) Math.max(1, Math.min(2, Math.round(windDTO.trueWindSpeedInMetersPerSecond)));
                     DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
-                    drawArrow(windDTO, dbi.getRadians(), length, width, ++index);
+                    drawScaledArrow(windDTO, dbi.getRadians(), ++index);
                     if (windDTONext != null) {
-                        width = (int) Math.max(1, Math.min(2, Math.round(windDTO.trueWindSpeedInMetersPerSecond)));
                         dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
-                        drawArrow(windDTONext, dbi.getRadians(), length, width, ++index);
+                        drawScaledArrow(windDTONext, dbi.getRadians(), ++index);
                     }
                 }   
             }
