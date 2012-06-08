@@ -1,5 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -8,6 +10,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardColumnOperation<Boolean> {
+    private static final Logger logger = Logger.getLogger(ConnectTrackedRaceToLeaderboardColumn.class.getName());
     private static final long serialVersionUID = -1336511401516212508L;
     private final RaceIdentifier raceToConnect;
     private final String fleetName;
@@ -43,9 +46,13 @@ public class ConnectTrackedRaceToLeaderboardColumn extends AbstractLeaderboardCo
                 } else {
                     raceColumn.setRaceIdentifier(raceColumn.getFleetByName(fleetName), raceToConnect);
                 }
+                success = true;
+                updateDB(toState, leaderboard, raceColumn);
+            } else {
+                logger.info("unable to find race column "+getColumnName()+" in leaderboard "+leaderboard.getName());
             }
-            success = true;
-            updateDB(toState, leaderboard, raceColumn);
+        } else {
+            logger.info("unable to find leaderboard "+getLeaderboardName()+" in server "+toState);
         }
         return success;
     }
