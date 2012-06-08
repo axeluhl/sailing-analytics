@@ -154,14 +154,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
 				graph.put(p, Arrays.asList(sailGrid[i+1]));
 			}	
 		}
-		for(Position p: sailGrid[gridv-1]) {
+		for(Position p : sailGrid[gridv-1]) {
 			graph.put(p, Arrays.asList(end));
 		}
 		
 		//create backwards adjacency graph, required to reconstruct the optimal path
 		Map<Position, List<Position>> backGraph = new HashMap<Position, List<Position>>();
 		backGraph.put(end, Arrays.asList(sailGrid[gridv-1]));
-		for(int i = gridv-2; i>0; i--) {
+		for(int i = gridv-1; i>0; i--) {
 			for(Position p: sailGrid[i]) {
 				backGraph.put(p, Arrays.asList(sailGrid[i-1]));
 			}
@@ -171,69 +171,93 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		}
 		
 		//create tentative distance matrix
-		Map<Position, Double> tentativeDistances = new HashMap<Position, Double>();
+		Map<Position, Long> tentativeDistances = new HashMap<Position, Long>();
 		for(Position p : graph.keySet()) {
-			tentativeDistances.put(p, Double.POSITIVE_INFINITY);
+			tentativeDistances.put(p, Long.MAX_VALUE);
 		}
-		tentativeDistances.put(start, 0.0);
+		tentativeDistances.put(start, 0L);
+		tentativeDistances.put(end, Long.MAX_VALUE);
 		
 		//create set of unvisited nodes
-		List<Position> unvisited = new ArrayList<Position>(graph.keySet());		
+		List<Position> unvisited = new ArrayList<Position>(graph.keySet());
+		unvisited.add(end);
 		
 		//set the initial node as current
 		Position currentPosition = start;
 		TimePoint currentTime = startTime;
 		
 		//search loop
-		while(unvisited.contains(end)) {
-			
+		//ends when the end is visited
+		while(currentPosition != end) {	
+			//set the polar diagram to the wind at the current position and time
 			TimedPosition currentTimedPosition = new TimedPositionImpl(currentTime, currentPosition);
 			SpeedWithBearing currentWind = windField.getWind(currentTimedPosition);
 			polarDiagram.setWind(currentWind);
 			
-			List<Position> unvisitedNeighbours = graph.get(currentPosition);
+			//compute the tentative distance to all the unvisited neighbours of the current node
+			//and replace it in the matrix if is smaller than the previous one
+			List<Position> unvisitedNeighbours = new LinkedList<Position>(graph.get(currentPosition));
 			unvisitedNeighbours.retainAll(unvisited);
 			for(Position p : unvisitedNeighbours) {
 				Bearing bearingToP = currentPosition.getBearingGreatCircle(p);
 				Distance distanceToP = currentPosition.getDistance(p);
 				Speed speedToP = polarDiagram.getSpeedAtBearing(bearingToP);
 				//multiplied by 1000 to have milliseconds
-				Double timeToP = 1000 * (distanceToP.getMeters() / speedToP.getMetersPerSecond());
-				Double tentativeDistanceToP = currentTime.asMillis() + timeToP;
+				Long timeToP = (long) (1000 * (distanceToP.getMeters() / speedToP.getMetersPerSecond()));
+				Long tentativeDistanceToP = currentTime.asMillis() + timeToP;
 				if (tentativeDistanceToP < tentativeDistances.get(p)) {
 					tentativeDistances.put(p, tentativeDistanceToP);
 				}
 			}
+			
+			//mark current node as visited
 			unvisited.remove(currentPosition);
 			
-			Map<Position, Double> unvisitedTentativeDistances =  new HashMap<Position, Double>(tentativeDistances);
-			unvisitedTentativeDistances.entrySet().retainAll(unvisited);
-			Double minTentativeDistance = Collections.min(unvisitedTentativeDistances.values());
-			for (Position p : unvisitedTentativeDistances.keySet()) {
-				if( unvisitedTentativeDistances.get(p) == minTentativeDistance ) {
+			//select the unvisited node with the smallest tentative distance
+			//and set it as current
+			Long minTentativeDistance = Long.MAX_VALUE;
+			for (Position p : unvisited) {
+				if( tentativeDistances.get(p) < minTentativeDistance ) {
 					currentPosition = p;
-					currentTime = new MillisecondsTimePoint(minTentativeDistance.longValue());
-					break;
+					currentTime = new MillisecondsTimePoint(minTentativeDistance);
 				}
-			}
 			
-		}	
+			}	
+		}
+		//I need to add the end point to the distances matrix
+		tentativeDistances.put(end,currentTime.asMillis());
+		
+		//at this point currentPosition = end
+		//currentTime = total duration of the course
 		
 		//reconstruct the optimal path by going from start to end
-		currentPosition = end;
-		Position nextPosition = end;
-		while(nextPosition!=start) {
+		while(currentPosition != start) {
+			TimedPositionWithSpeed currentTimedPositionWithSpeed = new TimedPositionWithSpeedImpl(currentTime, currentPosition, null );
+			lst.addFirst(currentTimedPositionWithSpeed);
 			List<Position> currentPredecessors = backGraph.get(currentPosition);
-			
-			currentTime = new MillisecondsTimePoint(tentativeDistances.get(currentPosition).longValue());
-			TimedPosition currentTimedPosition = new TimedPositionImpl(currentTime, end);
-			SpeedWithBearing currentWind = windField.getWind(currentTimedPosition);
-			polarDiagram.setWind(currentWind);
-			SpeedWithBearing currentSpeed;
-			//TimedPositionWithSpeed = new TimedPositionWithSpeedImpl(currentTime, currentPosition, );
-		
+			Long minTime = Long.MAX_VALUE;
+			for(Position p : currentPredecessors) {
+				if(tentativeDistances.get(p) < minTime) {
+					minTime = tentativeDistances.get(p);
+					currentPosition = p;
+					currentTime = new MillisecondsTimePoint(minTime);
+				}
+			}		
 		}
+		//I need to add the first point to the path
+		lst.addFirst(new TimedPositionWithSpeedImpl(startTime, start, null));
+		
+		
 		return new PathImpl(lst);
+	}
+
+	@Override
+	public Map<String, Path> getAllPaths() {
+		Map<String, Path> allPaths = new HashMap<String, Path>();
+		allPaths.put("Dummy", createDummy());
+		allPaths.put("Heuristic", createHeuristic());
+		allPaths.put("Djikstra", createDjikstra());
+		return allPaths;
 	}
 	
 }
