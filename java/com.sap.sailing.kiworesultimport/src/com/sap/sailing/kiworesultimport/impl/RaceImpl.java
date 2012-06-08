@@ -12,7 +12,7 @@ public class RaceImpl extends AbstractNodeWrapper implements Race {
 
     @Override
     public Double getPoints() {
-        return Double.valueOf(getNode().getAttributes().getNamedItem("points").getNodeValue());
+        return Double.valueOf(getNode().getAttributes().getNamedItem("points").getNodeValue().replace(',', '.'));
     }
 
     @Override
