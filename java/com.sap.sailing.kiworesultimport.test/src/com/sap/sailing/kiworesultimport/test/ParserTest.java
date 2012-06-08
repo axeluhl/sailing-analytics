@@ -3,6 +3,7 @@ package com.sap.sailing.kiworesultimport.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,6 +56,14 @@ public class ParserTest {
 
     private InputStream getSampleInputStream() throws FileNotFoundException, IOException {
         return getInputStream("2011-06-18_49er_Wettfahrt_2_Extra.xml");
+    }
+    
+    @Test
+    public void testEmptyIsafID() throws FileNotFoundException, SAXException, IOException, ParserConfigurationException {
+        ResultListParser parser = ResultListParserFactory.INSTANCE.createResultListParser();
+        ResultList resultList = parser.parse(getSampleInputStream());
+        assertNotNull(resultList);
+        assertNull(resultList.getVerteilung().getBoatBySailID("SWE 1196").getCrew().getSkipper().getIsaf());
     }
     
     @Test

@@ -16,7 +16,11 @@ public class SkipperImpl extends NamedImpl implements Skipper {
 
     @Override
     public URL getIsaf() throws MalformedURLException, DOMException {
-        return new URL(getNode().getAttributes().getNamedItem("isaf").getNodeValue());
+        final String nodeValue = getNode().getAttributes().getNamedItem("isaf").getNodeValue();
+        URL result = null;
+        if (nodeValue != null && nodeValue.trim().length() > 0) {
+            result = new URL(nodeValue);
+        }
+        return result;
     }
-
 }
