@@ -1,5 +1,10 @@
 package com.sap.sailing.kiworesultimport.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.kiworesultimport.Boat;
 import com.sap.sailing.kiworesultimport.RaceSummary;
@@ -31,7 +36,17 @@ public class RegattaSummaryImpl implements RegattaSummary {
 
     @Override
     public Iterable<RaceSummary> getRaces() {
-        return races;
+        List<RaceSummary> result = new ArrayList<RaceSummary>();
+        for (RaceSummary race : races) {
+            result.add(race);
+        }
+        Collections.sort(result, new Comparator<RaceSummary>() {
+            @Override
+            public int compare(RaceSummary o1, RaceSummary o2) {
+                return o1.getRaceNumber() - o2.getRaceNumber();
+            }
+        });
+        return result;
     }
 
     @Override
