@@ -6,12 +6,19 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safecss.shared.SafeStyles;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 
 public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
+
+    interface ImagesBarTemplates extends SafeHtmlTemplates {
+        @SafeHtmlTemplates.Template("<div name=\"{0}\" style=\"{1}\" title=\"{2}\">{3}</div>")
+        SafeHtml cell(String name, SafeStyles styles, String title, SafeHtml value);
+    }
 
     public ImagesBarCell() {
         super(SimpleSafeHtmlRenderer.getInstance(), "click", "keydown");
