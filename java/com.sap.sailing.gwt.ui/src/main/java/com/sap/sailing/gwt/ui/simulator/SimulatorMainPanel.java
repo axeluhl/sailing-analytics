@@ -308,7 +308,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         final SliderBar sliderBar = new SliderBar(minValue, maxValue);
 
-        sliderBar.setStepSize(maxValue / 10, false);
+        sliderBar.setStepSize(Math.round(maxValue / 10.), false);
         sliderBar.setNumTicks(10);
         sliderBar.setNumTickLabels(1);
 
