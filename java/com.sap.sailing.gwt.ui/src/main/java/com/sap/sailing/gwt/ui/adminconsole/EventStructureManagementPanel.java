@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -18,6 +19,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -215,12 +217,28 @@ public class EventStructureManagementPanel extends SimplePanel implements Regatt
             }
         };
 
+        ImagesBarColumn<RegattaDTO, RegattaConfigImagesBarCell> regattaActionColumn = new ImagesBarColumn<RegattaDTO, RegattaConfigImagesBarCell>(
+                new RegattaConfigImagesBarCell(stringMessages));
+        regattaActionColumn.setFieldUpdater(new FieldUpdater<RegattaDTO, String>() {
+            @Override
+            public void update(int index, RegattaDTO regatta, String value) {
+                if ("ACTION_REMOVE".equals(value)) {
+                    if (Window.confirm("Do you really want to remove the regatta: '" + regatta.name + "' ?")) {
+                        removeRegatta(regatta);
+                    }
+                } else if ("ACTION_EDIT".equals(value)) {
+                } else if ("ACTION_EDIT_RACES".equals(value)) {
+                }
+            }
+        });
+        
         regattaTable = new CellTable<RegattaDTO>(200, tableRes);
         regattaTable.setWidth("100%");
         regattaTable.addColumn(regattaNameColumn, stringMessages.regattaName());
         regattaTable.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         regattaTable.addColumn(regattaSeriesColumn, stringMessages.series());
         regattaTable.addColumn(regattaFleetsColumn, stringMessages.fleets());
+        regattaTable.addColumn(regattaActionColumn, stringMessages.actions());
         
         regattaSelectionModel = new SingleSelectionModel<RegattaDTO>();
         regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -234,6 +252,10 @@ public class EventStructureManagementPanel extends SimplePanel implements Regatt
         regattaProvider = new ListDataProvider<RegattaDTO>();
         regattaProvider.addDataDisplay(regattaTable);
         parentPanel.add(regattaTable);
+    }
+    
+    private void removeRegatta(RegattaDTO regatta) {
+        
     }
     
     private void onEventSelectionChanged() {

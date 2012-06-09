@@ -3,13 +3,13 @@ package com.sap.sailing.kiworesultimport;
 import com.sap.sailing.domain.common.TimePoint;
 
 public interface ResultList {
-    String getLegende();
+    String getLegend();
     
-    String getImagePfad();
+    String getImagePath();
     
     String getStatus();
     
-    String getBoatClass();
+    String getBoatClassName();
     
     String getEvent();
     
@@ -20,7 +20,7 @@ public interface ResultList {
     /**
      * Point in time when this result list was published
      */
-    TimePoint getTimePoint();
+    TimePoint getTimePointPublished();
     
     Iterable<Boat> getBoats();
     
@@ -30,4 +30,8 @@ public interface ResultList {
      * @return <code>null</code> if no such {@link Boat} is found in {@link #getBoats}, or the boat found otherwise.
      */
     Boat getBoatBySailID(String sailID);
+
+    String getSourceName();
+
+    Iterable<Integer> getRaceNumbers();
 }

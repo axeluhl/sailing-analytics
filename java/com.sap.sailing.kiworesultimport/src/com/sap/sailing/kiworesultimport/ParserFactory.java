@@ -7,7 +7,7 @@ public interface ParserFactory {
     
     ResultListParser createResultListParser();
 
-    StartberichtParser createStartberichtParser();
+    StartReportParser createStartReportParser();
     
     ZipFileParser createZipFileParser();
 }

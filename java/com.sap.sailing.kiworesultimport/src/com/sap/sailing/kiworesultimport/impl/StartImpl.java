@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -19,52 +20,53 @@ public class StartImpl extends AbstractNodeWrapper implements Start {
 
     @Override
     public String getBoatClass() {
-        return getNode().getAttributes().getNamedItem("bootsklasse").getNodeValue();
+        final Node item = ((Element) getNode()).getElementsByTagName("bootsklasse").item(0);
+        return item == null ? null : item.getFirstChild().getNodeValue();
     }
 
     @Override
     public Integer getRaceNumber() {
-        return Integer.valueOf(getNode().getAttributes().getNamedItem("wettfahrt").getNodeValue());
+        return Integer.valueOf(((Element) getNode()).getElementsByTagName("wettfahrt").item(0).getFirstChild().getNodeValue());
     }
 
     @Override
     public String getFleetName() {
-        return getNode().getAttributes().getNamedItem("startgruppe").getNodeValue();
+        return ((Element) getNode()).getElementsByTagName("startgruppe").item(0).getFirstChild().getNodeValue();
     }
 
     @Override
-    public String getKurs() {
-        return getNode().getAttributes().getNamedItem("kurs").getNodeValue();
+    public String getCourseName() {
+        return ((Element) getNode()).getElementsByTagName("kurs").item(0).getFirstChild().getNodeValue();
     }
 
     @Override
-    public String getStartzeit() {
-        return getNode().getAttributes().getNamedItem("startzeit").getNodeValue();
+    public String getStartTimeAsString() {
+        return ((Element) getNode()).getElementsByTagName("startzeit").item(0).getFirstChild().getNodeValue();
     }
 
     @Override
     public TimePoint getTimePoint() throws ParseException {
-        return new MillisecondsTimePoint(df.parse(getStartzeit()));
+        return new MillisecondsTimePoint(df.parse(getStartTimeAsString()));
     }
 
     @Override
-    public String getStartflagge() {
-        return getNode().getAttributes().getNamedItem("startflagge").getNodeValue();
+    public String getStartFlag() {
+        return ((Element) getNode()).getElementsByTagName("startflagge").item(0).getFirstChild().getNodeValue();
     }
 
     @Override
-    public String getBemerkung() {
-        return getNode().getAttributes().getNamedItem("bemerkung").getNodeValue();
+    public String getComment() {
+        return ((Element) getNode()).getElementsByTagName("bemerkung").item(0).getFirstChild().getNodeValue();
     }
 
     @Override
-    public Boolean getDoppelteWertung() {
-        return Boolean.valueOf(getNode().getAttributes().getNamedItem("doppelte_Wertung").getNodeValue());
+    public Boolean isDoubleScore() {
+        return Boolean.valueOf(((Element) getNode()).getElementsByTagName("doppelte_Wertung").item(0).getFirstChild().getNodeValue());
     }
 
     @Override
-    public Boolean getStreichbar() {
-        return Boolean.valueOf(getNode().getAttributes().getNamedItem("streichbar").getNodeValue());
+    public Boolean isDiscardable() {
+        return Boolean.valueOf(((Element) getNode()).getElementsByTagName("streichbar").item(0).getFirstChild().getNodeValue());
     }
 
 }
