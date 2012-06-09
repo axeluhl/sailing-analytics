@@ -16,6 +16,7 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay  {
     public ReplayPathCanvasOverlay(Timer timer) {
         super(timer);
         this.displayWindAlongPath = false;
+        windDTOToDraw = null;
         //this.timer.addTimeListener(this);
         canvas.setStyleName("replayPanel");
     }
