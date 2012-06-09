@@ -13,6 +13,9 @@ public interface RegattaSummary {
     
     String getBoatClassName();
     
+    /**
+     * Returns the races in ascending race number order
+     */
     Iterable<RaceSummary> getRaces();
     
     RaceSummary getRace(int raceNumberOneBased);
