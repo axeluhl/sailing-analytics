@@ -271,7 +271,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDTO result = null;
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             result = new LeaderboardDTO();
             final TimePoint timePoint = new MillisecondsTimePoint(date);
@@ -304,12 +304,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 result.competitors.add(competitorDTO);
                 Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
                 for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    final Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
                     RunnableFuture<LeaderboardEntryDTO> future = new FutureTask<LeaderboardEntryDTO>(new Callable<LeaderboardEntryDTO>() {
                         @Override
                         public LeaderboardEntryDTO call() {
                             try {
-                               return getLeaderboardEntryDTO(entry, raceColumn.getTrackedRace(competitor), competitor, timePoint,
+                                Entry entry = leaderboard.getEntry(competitor, raceColumn, timePoint);
+                                return getLeaderboardEntryDTO(entry, raceColumn.getTrackedRace(competitor), competitor, timePoint,
                                        namesOfRaceColumnsForWhichToLoadLegDetails != null
                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()));
                             } catch (NoWindException e) {
@@ -389,6 +389,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 entryDTO.legDetails.add(legEntry);
             }
         }
+        final Fleet fleet = entry.getFleet();
+        entryDTO.fleet = fleet == null ? null : createFleetDTO(fleet);
         final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace.getWindwardDistanceToOverallLeader(competitor, timePoint);
         entryDTO.windwardDistanceToOverallLeaderInMeters = windwardDistanceToOverallLeader == null ? null : windwardDistanceToOverallLeader.getMeters();
         final Distance averageCrossTrackError = trackedRace == null ? null : trackedRace.getAverageCrossTrackError(competitor, timePoint);
@@ -495,7 +497,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private SeriesDTO createSeriesDTO(Series series) {
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
         for (Fleet fleet : series.getFleets()) {
-            fleets.add(new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor()));
+            fleets.add(createFleetDTO(fleet));
         }
         List<String> raceColumnNames = new ArrayList<String>();
         for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
@@ -503,6 +505,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumnNames, series.isMedal());
         return result;
+    }
+
+    private FleetDTO createFleetDTO(Fleet fleet) {
+        return new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor());
     }
 
     private List<RaceDTO> getRaceDTOs(Regatta regatta) {

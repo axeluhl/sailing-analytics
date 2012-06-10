@@ -77,7 +77,10 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         private final int totalPoints;
         private final MaxPointsReason maxPointsReason;
         private final boolean discarded;
-        private EntryImpl(int trackedPoints, int netPoints, boolean isNetPointsCorrected, int totalPoints, MaxPointsReason maxPointsReason, boolean discarded) {
+        private final Fleet fleet;
+
+        private EntryImpl(int trackedPoints, int netPoints, boolean isNetPointsCorrected, int totalPoints,
+                MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
             super();
             this.trackedPoints = trackedPoints;
             this.netPoints = netPoints;
@@ -85,6 +88,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
             this.totalPoints = totalPoints;
             this.maxPointsReason = maxPointsReason;
             this.discarded = discarded;
+            this.fleet = fleet;
         }
         @Override
         public int getTrackedPoints() {
@@ -109,6 +113,10 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         @Override
         public boolean isDiscarded() {
             return discarded;
+        }
+        @Override
+        public Fleet getFleet() {
+            return fleet;
         }
     }
 
@@ -286,7 +294,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), correctedResults.isCorrected(),
                 discarded ? 0
                         : correctedResults.getCorrectedScore() * (race.isMedalRace() ? MEDAL_RACE_FACTOR : 1),
-                        correctedResults.getMaxPointsReason(), discarded);
+                        correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
     }
     
     @Override
@@ -312,7 +320,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 Entry entry = new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(),
                         correctedResults.isCorrected(), discarded ? 0 : correctedResults.getCorrectedScore()
-                                * (raceColumn.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded);
+                                * (raceColumn.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded,
+                                raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
         }
