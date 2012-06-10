@@ -19,7 +19,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -31,8 +30,8 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
     private static final Logger logger = Logger.getLogger(MarkPassingReceiver.class.getName());
     
     public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
-            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) {
-        super(domainFactory, tractracEvent, trackedRegatta, trackedRegattaRegistry);
+            DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta);
     }
 
     /**

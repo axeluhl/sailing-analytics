@@ -64,11 +64,13 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     @Override
     public void setTrackedRace(Fleet fleet, TrackedRace trackedRace) {
         if (trackedRegattaRegistry != null) {
-            TrackedRegatta trackedRegatta = trackedRace.getTrackedRegatta();
-            Regatta regatta = trackedRegatta.getRegatta();
-            if (regatta != getRegatta()) {
-                throw new IllegalArgumentException("Trying to associate tracked race of regatta "+regatta.getName()+
-                        " to a race column of regatta "+getRegatta().getName());
+            if (trackedRace != null) {
+                TrackedRegatta trackedRegatta = trackedRace.getTrackedRegatta();
+                Regatta regatta = trackedRegatta.getRegatta();
+                if (regatta != getRegatta()) {
+                    throw new IllegalArgumentException("Trying to associate tracked race of regatta "
+                            + regatta.getName() + " to a race column of regatta " + getRegatta().getName());
+                }
             }
         }
         // re-associating the TrackedRace needs to happen before the super call because the RaceIdentifier may have changed

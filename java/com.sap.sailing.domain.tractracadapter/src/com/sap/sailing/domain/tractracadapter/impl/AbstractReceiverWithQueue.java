@@ -6,11 +6,10 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.tractrac.clientmodule.Event;
@@ -31,7 +30,6 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final DomainFactory domainFactory;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final DynamicTrackedRegatta trackedRegatta;
-    private final TrackedRegattaRegistry trackedRegattaRegistry;
     private Thread thread;
 
     /**
@@ -41,13 +39,12 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private boolean receivedEventDuringTimeout;
     
     public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent,
-            DynamicTrackedRegatta trackedRegatta, TrackedRegattaRegistry trackedRegattaRegistry) {
+            DynamicTrackedRegatta trackedRegatta) {
         super();
         this.tractracEvent = tractracEvent;
         this.trackedRegatta = trackedRegatta;
         this.domainFactory = domainFactory;
         this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
-        this.trackedRegattaRegistry = trackedRegattaRegistry;
     }
     
     protected synchronized void setAndStartThread(Thread thread) {
@@ -144,7 +141,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     protected DynamicTrackedRace getTrackedRace(Race race) {
         DynamicTrackedRace result = null;
         RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race);
-        com.sap.sailing.domain.base.Regatta domainRegatta = getDomainFactory().getOrCreateRegatta(getTracTracEvent(), trackedRegattaRegistry);
+        com.sap.sailing.domain.base.Regatta domainRegatta = trackedRegatta.getRegatta();
         if (domainRegatta.getRaceByName(raceDefinition.getName()) != null) {
             result = trackedRegatta.getTrackedRace(raceDefinition);
         }
