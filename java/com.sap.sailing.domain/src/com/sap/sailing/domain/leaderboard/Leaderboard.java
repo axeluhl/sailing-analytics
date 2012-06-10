@@ -48,6 +48,12 @@ public interface Leaderboard extends Named {
          * Tells if the net points have been corrected by a {@link ScoreCorrection}
          */
         boolean isNetPointsCorrected();
+        
+        /**
+         * @return <code>null</code>, if the competitor's fleet in the race column cannot be determined, the
+         *         {@link Fleet} otherwise
+         */
+        Fleet getFleet();
     }
     
     /**

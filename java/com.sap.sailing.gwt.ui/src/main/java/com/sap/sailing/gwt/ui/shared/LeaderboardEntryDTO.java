@@ -48,6 +48,13 @@ public class LeaderboardEntryDTO implements IsSerializable {
      */
     public List<LegEntryDTO> legDetails;
 
+    /**
+     * <code>null</code>, if the fleet couldn't be determined, e.g., because the tracked race isn't known and therefore
+     * the link to the fleet is not known; otherwise the description of the fleet in which the competitor scored this
+     * entry
+     */
+    public FleetDTO fleet;
+
     public LeaderboardEntryDTO() { }
     
     @Override
