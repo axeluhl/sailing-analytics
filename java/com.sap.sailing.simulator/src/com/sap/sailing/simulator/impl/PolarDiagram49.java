@@ -136,10 +136,14 @@ public class PolarDiagram49 implements PolarDiagram {
 					* (ceilingBeatAngle.getRadians() - floorBeatAngle.getRadians())
 					/ (ceilingSpeed.getKnots() - floorSpeed.getKnots());
 		}
-		Bearing estBeatAngle = new RadianBearingImpl(beatAngle);
+		Bearing estBeatAngleRight = new RadianBearingImpl(+beatAngle);
+                Bearing estBeatAngleLeft = new RadianBearingImpl(-beatAngle);
+		
 		return new Bearing[] { 
-				windBearing.add(estBeatAngle), 
-				windBearing.add(estBeatAngle.getDifferenceTo(windBearing)) 
+				//windBearing.add(estBeatAngle), 
+				//windBearing.add(estBeatAngle.getDifferenceTo(windBearing)) 
+                                windBearing.add(estBeatAngleLeft), 
+                                windBearing.add(estBeatAngleRight) 
 				};
 	}
 

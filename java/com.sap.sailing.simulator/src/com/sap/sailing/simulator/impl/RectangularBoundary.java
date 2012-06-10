@@ -11,6 +11,9 @@ import com.sap.sailing.simulator.Boundary;
 
 public class RectangularBoundary implements Boundary {
 
+        private Position rcStart;
+        private Position rcEnd;
+    
 	private Position northWest;
 	private Position southEast;
 	private Position southWest;
@@ -37,6 +40,12 @@ public class RectangularBoundary implements Boundary {
 	
 	public RectangularBoundary(Position p1, Position p2, double tlr) {
 		
+	        System.out.println("Start:"+p1);
+                System.out.println("End  :"+p2);
+	    
+                rcStart = p1;
+                rcEnd = p2;
+                
 		tolerance = tlr;
 		
 		north = p1.getBearingGreatCircle(p2);
@@ -47,11 +56,26 @@ public class RectangularBoundary implements Boundary {
 		appHeight = p1.getDistance(p2);
 		appWidth = appHeight.scale(2);
 		
-		appNorthWest = p2.translateGreatCircle(west, appWidth.scale(0.5));
-		appNorthEast = p2.translateGreatCircle(east, appWidth.scale(0.5));
-		appSouthEast = appNorthEast.translateGreatCircle(south, appHeight);
-		appSouthWest = appNorthWest.translateGreatCircle(south, appHeight);
+		// make sure race course stays in the middle
+		appNorthWest = p2.translateGreatCircle(west, appHeight);
+		appNorthEast = p2.translateGreatCircle(east, appHeight);
 		
+		// the following test shows, that numerics appear to be instable:
+		// translating appNorthEast 2xEast should be appNorthWest, but numerically its NOT
+		//Position tstNorthEast = appNorthWest.translateGreatCircle(east, appHeight).translateGreatCircle(east, appHeight);
+		//appSouthEast = appNorthEast.translateGreatCircle(south, appHeight);
+		//appSouthWest = appNorthWest.translateGreatCircle(south, appHeight);
+                
+		appSouthWest = p1.translateGreatCircle(west, appHeight);
+                appSouthEast = p1.translateGreatCircle(east, appHeight);
+
+	        //System.out.println("southWest:"+appSouthWest);
+	        //System.out.println("southEast:"+appSouthEast);
+	        //System.out.println("northWest:"+appNorthWest);
+	        //System.out.println("northEast:"+appNorthEast);
+                //System.out.println("testnEast:"+tstNorthEast);
+
+
 		Distance diag = appNorthWest.getDistance(appSouthEast);
 		
 		Bearing diag1 = appSouthEast.getBearingGreatCircle(appNorthWest);
@@ -108,21 +132,42 @@ public class RectangularBoundary implements Boundary {
 	@Override
 	public Position[][] extractGrid(int hPoints, int vPoints) {
 		
-		Distance hStep = appWidth.scale(1.0/(hPoints-1)); 
-		Distance vStep = appHeight.scale(1.0/(vPoints-1));
-		Position[][] grid = new Position[vPoints][hPoints];
-		
-		for (int i = 0; i < vPoints; i++) {
-			for (int j = 0; j < hPoints; j++) {
-				grid[i][j] = appSouthWest.
-						translateGreatCircle(getNorth(), vStep.scale(i)).
-						translateGreatCircle(getEast(), hStep.scale(j));
-			}
-		}
-		
-		return grid;
-		
-	}
+            Distance hStep = appWidth.scale(1.0/(hPoints-1)); 
+            Distance vStep = appHeight.scale(1.0/(vPoints-1));
+            Position[][] grid = new Position[vPoints][hPoints];
+
+	    // generate grid so that race course stays in the middle
+            for (int i   = 0; i < vPoints; i++) {
+                //System.out.print("nrow "+i+": ");
+
+                Position pv = rcStart.translateGreatCircle(getNorth(), vStep.scale(i));
+                int j=0;
+                // left side
+                while (j < hPoints/2) {
+                    grid[i][j] = pv.translateGreatCircle(getWest(), hStep.scale((hPoints-1)/2.-j));
+                    //System.out.print(""+grid[i][j]+"("+((hPoints-1)/2.-j)+"), ");
+                    j++;
+                }    
+	    
+                // middle
+                if (j%2 == 1) {
+                    grid[i][j] = pv;
+                    //System.out.print(""+grid[i][j]+", ");
+                    j++;
+                }
+                
+                // right side
+                while (j < hPoints) {
+                    grid[i][j] = pv.translateGreatCircle(getEast(), hStep.scale(j-(hPoints-1)/2.));
+                    //System.out.print(""+grid[i][j]+"("+(j-(hPoints-1)/2.)+"), ");
+                    j++;
+                }    
+                //System.out.println();
+            }
+                
+            return grid;
+            
+	}      
 	
 	@Override
 	public List<Position> extractLattice(int hPoints, int vPoints) {

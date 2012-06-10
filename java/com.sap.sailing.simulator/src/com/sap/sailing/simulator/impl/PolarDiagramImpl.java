@@ -28,7 +28,7 @@ public class PolarDiagramImpl implements PolarDiagram {
 	@Override
 	public void setWind(SpeedWithBearing newWind) {
 		wind = newWind;	
-		northWest = wind.getBearing().add(new DegreeBearingImpl(-30));
+		northWest = wind.getBearing().add(new DegreeBearingImpl(330));
 		northEast = wind.getBearing().add(new DegreeBearingImpl(30));
 		southWest = wind.getBearing().add(new DegreeBearingImpl(210));
 		southEast = wind.getBearing().add(new DegreeBearingImpl(150));
