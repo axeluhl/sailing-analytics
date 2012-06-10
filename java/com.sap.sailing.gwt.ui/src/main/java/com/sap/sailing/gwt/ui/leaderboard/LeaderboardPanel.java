@@ -453,7 +453,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (entry != null) {
                 String fleetColorBarStyle = "";
                 if (entry.fleet != null && entry.fleet.getColor() != null) {
-                    fleetColorBarStyle = " border-bottom: 1px solid "+entry.fleet.getColor().getAsHtml()+";";
+                    fleetColorBarStyle = " border-bottom: 3px solid "+entry.fleet.getColor().getAsHtml()+";";
                 }
                 // don't show points if max points / penalty
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
