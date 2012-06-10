@@ -222,6 +222,25 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     @Test
+    public void testTieBreakByMedalRaceScoreOnlyIfEqualTotalScore() throws NoWindException {
+        Competitor[] c = createCompetitors(2).toArray(new Competitor[0]);
+        Competitor[] f1 = new Competitor[] { c[1], c[0] };
+        Competitor[] f2 = new Competitor[] { c[1], c[0] };
+        Competitor[] m1 = new Competitor[] { c[0], c[1] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */2, new String[] { "Default" },
+        /* medal */ true, "testTieBreakWithTwoVersusOneSeconds",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2);
+        createAndAttachTrackedRaces(series.get(2), "Medal", m1);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        // assert that both have equal score
+        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later));
+        // assert that c[0] ranks better than c[1] (reason: c[0] ranked better in medal race)
+        assertEquals(rankedCompetitors.indexOf(c[0]), rankedCompetitors.indexOf(c[1])-1);
+    }
+
+    @Test
     public void testTieBreakWithEqualWinsAndTwoVersusOneSeconds() throws NoWindException {
         Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
         Competitor[] f1 = new Competitor[] { c[2], c[0], c[1], c[3] }; // c[0] scores 16
