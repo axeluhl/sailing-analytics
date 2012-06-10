@@ -34,6 +34,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -187,6 +188,33 @@ public class EventStructureManagementPanel extends SimplePanel implements Regatt
             }
         };
 
+        final SafeHtmlCell regattaRacesCell = new SafeHtmlCell();
+        Column<RegattaDTO, SafeHtml> regattaRacesColumn = new Column<RegattaDTO, SafeHtml>(regattaRacesCell) {
+            @Override
+            public SafeHtml getValue(RegattaDTO regatta) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+
+                int seriesCount = regatta.series.size();
+                int i = 1;
+                for (SeriesDTO serie : regatta.series) {
+                    int raceColumnsCount = serie.getRaceColumns().size();
+                    int j = 1;
+                    for(RaceColumnDTO raceColumn: serie.getRaceColumns()) {
+                        builder.appendEscaped(j + ". " + raceColumn.getRaceColumnName());
+                        if(j < raceColumnsCount) {
+                            builder.appendEscaped(", ");
+                        }
+                        j++;
+                    }
+                    if(i < seriesCount) {
+                        builder.appendHtmlConstant("<br>");
+                    }
+                    i++;
+                }
+                return builder.toSafeHtml();
+            }
+        };
+
         final SafeHtmlCell fleetsCell = new SafeHtmlCell();
         Column<RegattaDTO, SafeHtml> regattaFleetsColumn = new Column<RegattaDTO, SafeHtml>(fleetsCell) {
             @Override
@@ -230,6 +258,7 @@ public class EventStructureManagementPanel extends SimplePanel implements Regatt
                     }
                 } else if ("ACTION_EDIT".equals(value)) {
                 } else if ("ACTION_EDIT_RACES".equals(value)) {
+                    addRaceToRegattaSeries(regatta);
                 }
             }
         });
@@ -239,6 +268,7 @@ public class EventStructureManagementPanel extends SimplePanel implements Regatt
         regattaTable.addColumn(regattaNameColumn, stringMessages.regattaName());
         regattaTable.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         regattaTable.addColumn(regattaSeriesColumn, stringMessages.series());
+        regattaTable.addColumn(regattaRacesColumn, stringMessages.races());
         regattaTable.addColumn(regattaFleetsColumn, stringMessages.fleets());
         regattaTable.addColumn(regattaActionColumn, stringMessages.actions());
         
@@ -256,39 +286,31 @@ public class EventStructureManagementPanel extends SimplePanel implements Regatt
         parentPanel.add(regattaTable);
     }
     
-    private void addRaceToRegattaSeries(final RegattaIdentifier regattaIdentifier, final SeriesDTO series) {
-        List<RaceColumnDTO> raceColumns = series.getRaceColumns();
-        List<FleetDTO> fleets = series.getFleets();
-        
-        List<Pair<RaceColumnDTO, String>> raceColumnAndFleetNameList = new ArrayList<Pair<RaceColumnDTO, String>>(); 
-        for (RaceColumnDTO raceColumn : raceColumns) {
-            for (String fleetName : raceColumn.getFleetNames()) {
-                raceColumnAndFleetNameList.add(new Pair<RaceColumnDTO, String>(raceColumn, fleetName));
-            }
-        }
-
-        final RaceColumnDTO raceInSeries = new RaceColumnDTO();
-        final RaceColumnDialog raceDialog = new RaceColumnDialog(raceColumnAndFleetNameList,
-                raceInSeries, stringMessages, new AsyncCallback<Pair<RaceColumnDTO, String>>() {
+    private void addRaceToRegattaSeries(final RegattaDTO regatta) {
+        final RaceColumnDTO raceInRegttaSeries = new RaceColumnDTO();
+        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
+        RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta,
+                raceInRegttaSeries, stringMessages, new AsyncCallback<Pair<RaceColumnDTO, SeriesDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                     }
 
                     @Override
-                    public void onSuccess(final Pair<RaceColumnDTO, String> result) {
-                        sailingService.addColumnToSeries(regattaIdentifier, series.name, result.getA().getRaceColumnName(), new AsyncCallback<Void>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        errorReporter.reportError("Error trying to add race column "
-                                                + result.getA().getRaceColumnName() + " to series " + series.name
-                                                + ": " + caught.getMessage());
+                    public void onSuccess(final Pair<RaceColumnDTO, SeriesDTO> result) {
+                        sailingService.addColumnToSeries(regattaIdentifier, result.getB().name, result.getA().getRaceColumnName(), new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    errorReporter.reportError("Error trying to add race column "
+                                            + result.getA().getRaceColumnName() + " to series " + result.getB().name
+                                            + ": " + caught.getMessage());
 
-                                    }
+                                }
 
-                                    @Override
-                                    public void onSuccess(Void v) {
-                                    }
-                                });
+                                @Override
+                                public void onSuccess(Void v) {
+                                    regattaRefresher.fillRegattas();
+                                }
+                            });
                     }
                 });
         raceDialog.show();

@@ -619,7 +619,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         List<Pair<RaceColumnDTO, String>> existingRacesWithoutThisRace = new ArrayList<Pair<RaceColumnDTO, String>>();
         existingRacesWithoutThisRace.addAll(raceColumnAndFleetNameList.getList());
         existingRacesWithoutThisRace.remove(object);
-        final RaceColumnDialog raceDialog = new RaceColumnDialog(existingRacesWithoutThisRace,
+        final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(existingRacesWithoutThisRace,
                 object.getA(), stringMessages, new AsyncCallback<Pair<RaceColumnDTO, String>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -692,7 +692,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     private void addRaceColumnToLeaderboard() {
         final RaceColumnDTO raceInLeaderboard = new RaceColumnDTO();
         final String leaderboardName = getSelectedLeaderboardName();
-        final RaceColumnDialog raceDialog = new RaceColumnDialog(raceColumnAndFleetNameList.getList(),
+        final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(raceColumnAndFleetNameList.getList(),
                 raceInLeaderboard, stringMessages, new AsyncCallback<Pair<RaceColumnDTO, String>>() {
                     @Override
                     public void onFailure(Throwable caught) {
