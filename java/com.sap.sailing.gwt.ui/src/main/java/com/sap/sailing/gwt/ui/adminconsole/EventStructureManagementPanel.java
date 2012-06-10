@@ -33,6 +33,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -42,6 +43,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
@@ -254,6 +256,44 @@ public class EventStructureManagementPanel extends SimplePanel implements Regatt
         parentPanel.add(regattaTable);
     }
     
+    private void addRaceToRegattaSeries(final RegattaIdentifier regattaIdentifier, final SeriesDTO series) {
+        List<RaceColumnDTO> raceColumns = series.getRaceColumns();
+        List<FleetDTO> fleets = series.getFleets();
+        
+        List<Pair<RaceColumnDTO, String>> raceColumnAndFleetNameList = new ArrayList<Pair<RaceColumnDTO, String>>(); 
+        for (RaceColumnDTO raceColumn : raceColumns) {
+            for (String fleetName : raceColumn.getFleetNames()) {
+                raceColumnAndFleetNameList.add(new Pair<RaceColumnDTO, String>(raceColumn, fleetName));
+            }
+        }
+
+        final RaceColumnDTO raceInSeries = new RaceColumnDTO();
+        final RaceColumnDialog raceDialog = new RaceColumnDialog(raceColumnAndFleetNameList,
+                raceInSeries, stringMessages, new AsyncCallback<Pair<RaceColumnDTO, String>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
+
+                    @Override
+                    public void onSuccess(final Pair<RaceColumnDTO, String> result) {
+                        sailingService.addColumnToSeries(regattaIdentifier, series.name, result.getA().getRaceColumnName(), new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError("Error trying to add race column "
+                                                + result.getA().getRaceColumnName() + " to series " + series.name
+                                                + ": " + caught.getMessage());
+
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void v) {
+                                    }
+                                });
+                    }
+                });
+        raceDialog.show();
+    }
+
     private void removeRegatta(RegattaDTO regatta) {
         
     }

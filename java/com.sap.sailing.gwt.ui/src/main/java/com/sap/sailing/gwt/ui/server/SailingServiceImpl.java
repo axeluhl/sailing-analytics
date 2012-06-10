@@ -497,11 +497,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         for (Fleet fleet : series.getFleets()) {
             fleets.add(new FleetDTO(fleet.getName(), fleet.getOrdering(), fleet.getColor()));
         }
-        List<String> raceColumnNames = new ArrayList<String>();
+        List<RaceColumnDTO> raceColumns = new ArrayList<RaceColumnDTO>();
         for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
-            raceColumnNames.add(raceColumn.getName());
+            RaceColumnDTO raceColumnDTO = new RaceColumnDTO();
+            raceColumnDTO.setRaceColumnName(raceColumn.getName());
+            raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
+            raceColumns.add(raceColumnDTO);
         }
-        SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumnNames, series.isMedal());
+        SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal());
         return result;
     }
 
