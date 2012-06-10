@@ -187,7 +187,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         }
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was found;
         // in this case, create a default regatta based on the TracTrac event data
-        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateRegatta(tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
+        this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(tractracEvent, trackedRegattaRegistry) : effectiveRegatta;
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
