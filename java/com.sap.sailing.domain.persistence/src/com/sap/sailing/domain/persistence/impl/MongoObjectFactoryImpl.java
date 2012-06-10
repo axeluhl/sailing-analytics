@@ -379,6 +379,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
         DBObject entry = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
         entry.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
-        regattaForRaceIDCollection.update(query, entry);
+        regattaForRaceIDCollection.update(query, entry, /* upsrt */ true, /* multi */ false);
     }
 }
