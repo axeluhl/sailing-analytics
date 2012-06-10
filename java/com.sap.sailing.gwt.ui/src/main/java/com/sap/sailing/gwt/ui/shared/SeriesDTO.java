@@ -6,25 +6,18 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class SeriesDTO extends NamedDTO implements IsSerializable {
     private List<FleetDTO> fleets;
-    private List<String> raceColumnNames;
+    private List<RaceColumnDTO> raceColumns;
     private boolean isMedal;
     
     public SeriesDTO() {}
     
-    public SeriesDTO(String name, List<FleetDTO> fleets, List<String> raceColumnNames, boolean isMedal) {
+    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal) {
         super(name);
         this.fleets = fleets;
-        this.raceColumnNames = raceColumnNames;
+        this.raceColumns = raceColumns;
         this.isMedal = isMedal;
     }
     
-    /**
-     * Names of this series' fleets, if ordered then from best to worst (best first, worst last) 
-     */
-    public List<String> getRaceColumnNames() {
-        return raceColumnNames;
-    }
-
     public boolean isMedal() {
         return isMedal;
     }
@@ -37,11 +30,15 @@ public class SeriesDTO extends NamedDTO implements IsSerializable {
         this.fleets = fleets;
     }
 
-    public void setRaceColumnNames(List<String> raceColumnNames) {
-        this.raceColumnNames = raceColumnNames;
-    }
-
     public void setMedal(boolean isMedal) {
         this.isMedal = isMedal;
+    }
+
+    public List<RaceColumnDTO> getRaceColumns() {
+        return raceColumns;
+    }
+
+    public void setRaceColumns(List<RaceColumnDTO> raceColumns) {
+        this.raceColumns = raceColumns;
     }
 }
