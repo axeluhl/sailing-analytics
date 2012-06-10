@@ -91,7 +91,8 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
             //double vStep = 1.0/((positions.length-1)*timeScale);
             //double t = (timeIndex+(timeIndex+rowIndex)*vStep);
             double vStep = 1.0/(positions.length-1);
-            double t = (timeIndex+rowIndex)*vStep*timeScale;
+            //System.out.println("SliderTime: "+timeIndex*timeStep.asMillis()/1000./60./60.+" RowDeltaTime:"+rowIndex*vStep*timeScale);
+            double t = timeIndex*timeStep.asMillis()/3600000.+rowIndex*vStep*timeScale;
             double oAngle = Math.sin(2*Math.PI*t*windParameters.frequency)*windParameters.amplitude;
             Bearing angle = new DegreeBearingImpl(oAngle);
             //logger.severe("timeIndex: "+timeIndex+" rowIndex: "+rowIndex+" timeScale: "+timeScale+" vStep: "+vStep+" t: "+t);
