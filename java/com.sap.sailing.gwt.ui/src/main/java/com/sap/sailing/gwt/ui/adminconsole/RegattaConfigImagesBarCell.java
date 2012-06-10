@@ -48,7 +48,7 @@ public class RegattaConfigImagesBarCell extends ImagesBarCell {
         SafeHtml rendered = templates.cell("ACTION_EDIT", imgStyle, stringConstants.actionEdit(), ICON_EDIT);
         sb.append(rendered);
 
-        rendered = templates.cell("ACTION_EDIT_RACES", imgStyle, stringConstants.actionRaceEdit(), ICON_EDIT_RACES);
+        rendered = templates.cell("ACTION_EDIT_RACES", imgStyle, stringConstants.actionEditRaces(), ICON_EDIT_RACES);
         sb.append(rendered);
 
         rendered = templates.cell("ACTION_REMOVE", imgStyle, stringConstants.actionRemove(), ICON_REMOVE);

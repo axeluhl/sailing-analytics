@@ -45,4 +45,5 @@ public class RGBColor implements Color {
         }
         return builder.toString().toUpperCase();
     }
+
 }
