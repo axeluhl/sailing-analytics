@@ -86,18 +86,18 @@ public class WindControlParameters {
     
     public void setDefaults() {
         
-        baseWindSpeed = 0.0;
+        baseWindSpeed = 12.0;
         
         baseWindBearing = 0.0;
-        frequency = 0.0;
-        amplitude = 0.0;
+        frequency = 30.0;
+        amplitude = 15.0;
         leftWindSpeed = 100.0;
         middleWindSpeed = 100.0;
         rightWindSpeed = 100.0;
         
-        blastProbability = 50.0;
+        blastProbability = 25.0;
         maxBlastSize = 1.0;
-        blastWindSpeed = 100.0;
-        blastWindSpeedVar = 1e-4;
+        blastWindSpeed = 120.0;
+        blastWindSpeedVar = 10.0;
     }
 }

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.i18n.client.TimeZone;
@@ -71,8 +72,11 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
         //System.out.print("Arrow Interleave: "+arrowInterleave+"\n");
         
         if (windDTOList != null && windDTOList.size() > 0) {
+
+            Context2d context2d = canvas.getContext2d();
+            context2d.setGlobalAlpha(0.8);
+
             Iterator<WindDTO> windDTOIter = windDTOList.iterator();
-            int index = 0;
             WindDTO prevWindDTO = null;
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
@@ -80,15 +84,25 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
                     drawLine(prevWindDTO, windDTO);
                 }
                 prevWindDTO = windDTO;
+            }
+
+            windDTOIter = windDTOList.iterator();
+            int index = 0;
+            while (windDTOIter.hasNext()) {
+                WindDTO windDTO = windDTOIter.next();            
 
                 if ((displayWindAlongPath)&&((index % arrowInterleave) == 0)) {
                     DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                     //System.out.print("index: "+index+"\n");
                     drawScaledArrow(windDTO, dbi.getRadians(), index);
                 }
-
                 index++;
+
+                drawPoint(windDTO);
+
             }
+
+            context2d.setGlobalAlpha(1.0);
 
             //MeterDistance meterDistance = new MeterDistance(distance);
             Date timeDiffDate = new Date(totalTime);
@@ -102,6 +116,9 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
     }
 
     private void drawLine(WindDTO p1, WindDTO p2) {
+
+        double weight = 3.0;
+        
         PositionDTO position = p1.position;
 
         LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
@@ -116,10 +133,26 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
         int x2 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
         int y2 = canvasPositionInPx.getY() - this.getWidgetPosTop();
 
-        this.pointColor = "Black";
-        drawPoint(x1, y1);
-        drawLine(x1, y1, x2, y2, 3/* weight */, pathColor);
+        //Context2d context2d = canvas.getContext2d();
+        //context2d.setShadowBlur(weight);        
+        drawLine(x1, y1, x2, y2, weight, pathColor);
+        //context2d.setShadowBlur(0.0);
         //System.out.print("x1:"+x1+" y1:"+y1+" x2:"+x2+" y2:"+y2+"\n");
-        drawPoint(x2, y2);
     }
+
+    private void drawPoint(WindDTO p) {
+
+        double weight = 3.0;
+        
+        PositionDTO position = p.position;
+
+        LatLng positionLatLng = LatLng.newInstance(position.latDeg, position.lngDeg);
+        Point canvasPositionInPx = getMap().convertLatLngToDivPixel(positionLatLng);
+
+        int x1 = canvasPositionInPx.getX() - this.getWidgetPosLeft();
+        int y1 = canvasPositionInPx.getY() - this.getWidgetPosTop();
+
+        drawCircle(x1, y1, weight/2., pathColor);
+    }
+
 }

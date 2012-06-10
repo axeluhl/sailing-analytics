@@ -12,6 +12,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
+import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
@@ -158,7 +159,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
         double aWidth = Math.max(1., (windDTO.trueWindSpeedInMetersPerSecond/2.));
         double aLength = Math.max(10., (4.*windDTO.trueWindSpeedInMetersPerSecond));
-        //System.out.println("windspeed: "+windDTO.trueWindSpeedInMetersPerSecond+", aWidth: "+aWidth+", aLength: "+aLength);
+        //System.out.println("arrow speed: "+windDTO.trueWindSpeedInMetersPerSecond+" angle:"+angle+" aWidth: "+aWidth+" aLength: "+aLength);
         drawArrow(windDTO, angle, aLength, aWidth, index);
 
     }
@@ -170,6 +171,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
             int index = 0;
             while (windDTOIter.hasNext()) {
                 WindDTO windDTO = windDTOIter.next();
+                //System.out.println("wind angle: "+windDTO.trueWindBearingDeg);
                 DegreeBearingImpl dbi = new DegreeBearingImpl(windDTO.trueWindBearingDeg);
                 drawScaledArrow(windDTO, dbi.getRadians(), ++index);
             }
@@ -208,7 +210,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         drawHead(x1, y1, theta, hLength, weight);
         //String text = "P" + index;// + NumberFormat.getFormat("0.00").format(windDTO.trueWindBearingDeg) + "°";
         //drawPointWithText(x, y, text);
-        drawPoint(x, y);
+        //drawPoint(x, y);
     }
 
     protected void drawHead(double x, double y, double theta, double headLength, double weight) {

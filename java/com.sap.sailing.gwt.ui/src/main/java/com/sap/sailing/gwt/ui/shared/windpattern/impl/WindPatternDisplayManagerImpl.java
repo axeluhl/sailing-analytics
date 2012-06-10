@@ -69,10 +69,10 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
                 "Average Wind Direction (Degrees)", -180, 180, 0);
         display.addSetting(baseWindBearing);
         WindPatternSetting<Double> frequency = new WindPatternSettingSliderBar("frequency",
-                "Oscillation Frequency (per hr)", 0, 60, 12);
+                "Oscillation Frequency (per hr)", 0, 60, 30);
         display.addSetting(frequency);
         WindPatternSetting<Double> amplitude = new WindPatternSettingSliderBar("amplitude",
-                "Oscillation Amplitude (Degrees)", 0, 30, 12);
+                "Oscillation Amplitude (Degrees)", 0, 30, 15);
         display.addSetting(amplitude);
         WindPatternSetting<Double> leftWindSpeed = new WindPatternSettingSliderBar("leftWindSpeed",
                 "Wind Speed Left Side (%)", 0, 200, 100);

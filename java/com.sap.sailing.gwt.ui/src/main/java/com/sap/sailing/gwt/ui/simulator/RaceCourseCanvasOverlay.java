@@ -235,7 +235,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
             Point s = map.convertLatLngToDivPixel(startPoint);
             Point e = map.convertLatLngToDivPixel(currentPoint);
             drawLine(s.getX() - getWidgetPosLeft(), s.getY() - getWidgetPosTop(), e.getX() - getWidgetPosLeft(),
-                    e.getY() - getWidgetPosTop(), 1, color);
+                    e.getY() - getWidgetPosTop(), 2.0, color);
             double distanceInNmi = startPoint.distanceFrom(currentPoint) / Mile.METERS_PER_NAUTICAL_MILE;
             canvas.setTitle("Distance (nmi)  " + NumberFormat.getFormat("0.00").format(distanceInNmi));
         }
