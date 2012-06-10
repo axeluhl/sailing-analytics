@@ -85,6 +85,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     o2ScoreSum += o2Score;
                 }
                 if (raceColumn.isMedalRace()) {
+                    o1MedalRaceScore = o1Score;
+                    o2MedalRaceScore = o2Score;
                     // similar to compareByFleet, however, tracking is not required; having medal race column points (tracked or manual) is sufficient
                     preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
                 }
