@@ -1959,6 +1959,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
+    public void removeColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+        for(String columnName: columnNames) {
+            getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
+        }
+    }
+
+    @Override
     public void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
     }

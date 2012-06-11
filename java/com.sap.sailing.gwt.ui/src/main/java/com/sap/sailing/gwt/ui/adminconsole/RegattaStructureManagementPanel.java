@@ -261,7 +261,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                         removeRegatta(regatta);
                     }
                 } else if (RegattaConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    addRaceToRegattaSeries(regatta);
+                    editRacesOfRegattaSeries(regatta);
                 }
             }
         });
@@ -279,7 +279,6 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-//                Set<RegattaDTO> selectedRegatta = regattaSelectionModel.getSelectedSet();
             }
         });
         regattaTable.setSelectionModel(regattaSelectionModel);
@@ -289,39 +288,71 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         parentPanel.add(regattaTable);
     }
     
-    private void addRaceToRegattaSeries(final RegattaDTO regatta) {
-        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
-        RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta, null,
-                stringMessages, new AsyncCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {
+    private void editRacesOfRegattaSeries(final RegattaDTO regatta) {
+        RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta, stringMessages, 
+                new AsyncCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                     }
 
                     @Override
                     public void onSuccess(final Pair<SeriesDTO, List<RaceColumnDTO>> result) {
-                        List<String> raceColumnNames = new ArrayList<String>();
-                        for(RaceColumnDTO raceColumn: result.getB()) {
-                            raceColumnNames.add(raceColumn.name);
-                        }
-                        sailingService.addColumnsToSeries(regattaIdentifier, result.getA().name, raceColumnNames, new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error trying to add race columns "
-                                            + result.getB() + " to series " + result.getA().name
-                                            + ": " + caught.getMessage());
-
-                                }
-
-                                @Override
-                                public void onSuccess(Void v) {
-                                    regattaRefresher.fillRegattas();
-                                }
-                            });
+                        updateRacesOfRegattaSeries(regatta, result.getA(), result.getB());
                     }
                 });
         raceDialog.show();
     }
 
+    private void updateRacesOfRegattaSeries(final RegattaDTO regatta, final SeriesDTO series, List<RaceColumnDTO> newRaceColumns) {
+        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
+        
+        List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
+        final List<String> raceColumnsToAdd = new ArrayList<String>();
+        final List<String> raceColumnsToRemove = new ArrayList<String>();
+        
+        for(RaceColumnDTO newRaceColumn: newRaceColumns) {
+            if(!existingRaceColumns.contains(newRaceColumn.name)) {
+                raceColumnsToAdd.add(newRaceColumn.name);
+            }
+        }
+
+        for(RaceColumnDTO existingRaceColumn: existingRaceColumns) {
+            if(!newRaceColumns.contains(existingRaceColumn.name)) {
+                raceColumnsToRemove.add(existingRaceColumn.name);
+            }
+        }
+
+        sailingService.addColumnsToSeries(regattaIdentifier, series.name, raceColumnsToAdd, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error trying to add race columns "
+                            + raceColumnsToAdd + " to series " + series.name
+                            + ": " + caught.getMessage());
+
+                }
+
+                @Override
+                public void onSuccess(Void v) {
+                    regattaRefresher.fillRegattas();
+                }
+            });
+        
+        sailingService.removeColumnsFromSeries(regattaIdentifier, series.name, raceColumnsToRemove, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to remove race columns "
+                        + raceColumnsToAdd + " from series " + series.name
+                        + ": " + caught.getMessage());
+
+            }
+
+            @Override
+            public void onSuccess(Void v) {
+                regattaRefresher.fillRegattas();
+            }
+        });
+    }
+    
     private void removeRegatta(final RegattaDTO regatta) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
         sailingService.removeRegatta(regattaIdentifier, new AsyncCallback<Void>() {

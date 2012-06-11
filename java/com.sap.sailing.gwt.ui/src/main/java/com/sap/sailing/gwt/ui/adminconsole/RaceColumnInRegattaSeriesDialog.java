@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -28,7 +27,6 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<SeriesDTO, List<RaceColumnDTO>>> {
     private final RegattaDTO regatta;
-    private final SeriesDTO series; 
     private final ListBox seriesListBox;
     private final ListBox addRacesListBox;
     private Button addRacesBtn;
@@ -95,12 +93,11 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
     }
 
-    public RaceColumnInRegattaSeriesDialog(RegattaDTO regatta, SeriesDTO series, StringMessages stringConstants,
+    public RaceColumnInRegattaSeriesDialog(RegattaDTO regatta, StringMessages stringConstants,
             AsyncCallback<Pair<SeriesDTO, List<RaceColumnDTO>>> callback) {
         super(stringConstants.actionEditRaces(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(regatta, stringConstants), callback);
         this.regatta = regatta;
-        this.series = series;
         this.stringConstants = stringConstants;
         this.hasOneSeries = regatta.series.size() == 1;
         seriesListBox = createListBox(false);
@@ -111,22 +108,29 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         raceColumnsGrid = new Grid(0, 0);
     }
 
-    private Widget createRaceNameWidget(String defaultName) {
+    private Widget createRaceNameWidget(String defaultName, boolean enabled) {
         TextBox textBox = createTextBox(defaultName); 
         textBox.setVisibleLength(40);
+        textBox.setEnabled(enabled);
         raceNameEntryFields.add(textBox);
         return textBox; 
     }
 
     private Widget createRaceNameDeleteButtonWidget() {
-        Button raceNameDeleteBtn = new Button(stringConstants.delete()); 
+        final Button raceNameDeleteBtn = new Button(stringConstants.delete()); 
         raceNameDeleteButtons.add(raceNameDeleteBtn);
-        final int listIndex = raceNameDeleteButtons.size() - 1;
         raceNameDeleteBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                raceNameEntryFields.remove(listIndex);
-                raceNameDeleteButtons.remove(listIndex);
+                int index = 0;
+                for(Button btn: raceNameDeleteButtons) {
+                    if(raceNameDeleteBtn == btn) {
+                        break;
+                    }
+                    index++;
+                }
+                raceNameEntryFields.remove(index);
+                raceNameDeleteButtons.remove(index);
                 updateRaceColumnsGrid(additionalWidgetPanel);
             }
         });
@@ -173,7 +177,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
                     int racesCountToCreate = addRacesListBox.getSelectedIndex()+1;
                     int currentSize = raceNameEntryFields.size();
                     for(int i = 1; i <= racesCountToCreate; i++) {
-                        createRaceNameWidget(racePrefix + (currentSize + i));
+                        createRaceNameWidget(racePrefix + (currentSize + i), true);
                         createRaceNameDeleteButtonWidget();
                     }
                     updateRaceColumnsGrid(additionalWidgetPanel);
@@ -213,6 +217,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
                 } else {
                     raceNamePrefixTextBox.setText(selectedSeries.name.substring(0, 1).toUpperCase());
                 }
+                fillExistingRacesOfSeries();
             }
         });
         
@@ -222,21 +227,42 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         additionalWidgetPanel.add(createHeadlineLabel(stringConstants.races()));
         additionalWidgetPanel.add(raceColumnsGrid);
 
+        if(hasOneSeries) {
+            fillExistingRacesOfSeries();
+        }
+
         return additionalWidgetPanel;
     }
 
+    private void fillExistingRacesOfSeries() {
+        SeriesDTO selectedSeries = getSelectedSeries();
+        raceNameEntryFields.clear();
+        raceNameDeleteButtons.clear();
+        if(selectedSeries != null && !selectedSeries.getRaceColumns().isEmpty()) {
+            for(RaceColumnDTO raceColumn: selectedSeries.getRaceColumns()) {
+                createRaceNameWidget(raceColumn.name, false);
+                createRaceNameDeleteButtonWidget();
+            }
+        }
+        updateRaceColumnsGrid(additionalWidgetPanel);
+    }
+    
     private void updateRaceColumnsGrid(VerticalPanel parentPanel) {
         int widgetIndex = parentPanel.getWidgetIndex(raceColumnsGrid);
         parentPanel.remove(raceColumnsGrid);
         int raceNamesCount = raceNameEntryFields.size();
-        raceColumnsGrid = new Grid(raceNamesCount + 1, 3);
-        raceColumnsGrid.setCellSpacing(4);
-        raceColumnsGrid.setHTML(0, 0, stringConstants.name());
-        for(int i = 0; i < raceNamesCount; i++) {
-            raceColumnsGrid.setWidget(i+1, 0, raceNameEntryFields.get(i));
-            raceColumnsGrid.setWidget(i+1, 1, raceNameDeleteButtons.get(i));
-            
+        if(raceNamesCount > 0) {
+            raceColumnsGrid = new Grid(raceNamesCount + 1, 3);
+            raceColumnsGrid.setCellSpacing(4);
+            raceColumnsGrid.setHTML(0, 0, stringConstants.name());
+            for(int i = 0; i < raceNamesCount; i++) {
+                raceColumnsGrid.setWidget(i+1, 0, raceNameEntryFields.get(i));
+                raceColumnsGrid.setWidget(i+1, 1, raceNameDeleteButtons.get(i));
+            }
+        } else {
+            raceColumnsGrid = new Grid(0, 0);
         }
+
         parentPanel.insert(raceColumnsGrid, widgetIndex);
     }
 

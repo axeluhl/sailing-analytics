@@ -135,6 +135,8 @@ public interface SailingService extends RemoteService {
 
     void addColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
+    void removeColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames);
+
     void removeColumnFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName);
 
     void renameColumnInSeries(RegattaIdentifier regattaIdentifier, String seriesName, String oldColumnName, String newColumnName);
