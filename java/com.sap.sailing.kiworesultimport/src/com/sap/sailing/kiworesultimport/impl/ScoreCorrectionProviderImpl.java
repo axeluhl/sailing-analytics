@@ -13,6 +13,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
+import com.sap.sailing.domain.common.ScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.kiworesultimport.ParserFactory;
@@ -65,6 +66,12 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
             }
         }
         return result;
+    }
+
+    @Override
+    public ScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint millisecondsTimePoint) {
+        // TODO cache previous ZipFile results by event name and boatClassName and TimePoint to be able to deliver now
+        return new ZipFileAsScoreCorrections(/* TODO */ null);
     }
 
 }

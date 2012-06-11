@@ -325,4 +325,6 @@ public interface StringMessages extends Messages {
     String errorLoadingScoreCorrectionProviders(String message);
     String selectResultListToImportFrom();
     String of();
+    String errorObtainingScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
+            String string);
 }
