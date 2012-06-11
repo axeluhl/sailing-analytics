@@ -453,21 +453,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (entry != null) {
                 String fleetColorBarStyle = "";
                 if (entry.fleet != null && entry.fleet.getColor() != null) {
-                    fleetColorBarStyle = " border-bottom: 3px solid "+entry.fleet.getColor().getAsHtml()+";";
+                    fleetColorBarStyle = " style=\"border-bottom: 3px solid "+entry.fleet.getColor().getAsHtml()+";\"";
                 }
+                html.appendHtmlConstant("<div"+fleetColorBarStyle+">");
                 // don't show points if max points / penalty
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
-                        html.appendHtmlConstant("<span style=\"font-weight: bold;"+fleetColorBarStyle+"\">");
+                        html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
                         html.appendHtmlConstant(entry.totalPoints == 0 ? "" : ""+entry.totalPoints);
                         html.appendHtmlConstant("</span>");
                     } else {
-                        html.appendHtmlConstant(" <span style=\"opacity: 0.5;"+fleetColorBarStyle+"\"><del>");
+                        html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
                         html.appendHtmlConstant(entry.netPoints == 0 ? "" : ""+entry.netPoints);
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
-                    html.appendHtmlConstant(" <span style=\"opacity: 0.5;"+fleetColorBarStyle+"\">");
+                    html.appendHtmlConstant(" <span style=\"opacity: 0.5;\">");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
                     }
@@ -477,6 +478,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                     }
                     html.appendHtmlConstant("</span>");
                 }
+                html.appendHtmlConstant("</div>");
             }
         }
 
