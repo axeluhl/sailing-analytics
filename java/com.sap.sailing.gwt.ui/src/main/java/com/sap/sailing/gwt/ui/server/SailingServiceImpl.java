@@ -1023,7 +1023,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 int wayPointNumber = 1;
                 for(Pair<Waypoint, Pair<TimePoint, TimePoint>> markPassingTimes: markPassingsTimes) {
                     MarkPassingTimesDTO markPassingTimesDTO = new MarkPassingTimesDTO();
-                    String name = "L" + wayPointNumber + 1;
+                    String name = "L" + (wayPointNumber - 1);
                     if(wayPointNumber == 1) {
                         name = "S";
                     } else if(wayPointNumber == numberOfWaypoints) {
