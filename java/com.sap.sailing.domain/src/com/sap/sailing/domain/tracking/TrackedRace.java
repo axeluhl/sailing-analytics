@@ -78,6 +78,11 @@ public interface TrackedRace extends Serializable {
      */
     boolean hasStarted(TimePoint at);
     
+    /**
+     * Clients can safely iterate over the iterable returned because it's a non-live copy of the tracked legs of this
+     * tracked race. This implies that should an update to the underlying list of waypoints in this race's {@link Course}
+     * take place after this method has returned, then this won't be reflected in the result returned.
+     */
     Iterable<TrackedLeg> getTrackedLegs();
     
     TrackedLeg getTrackedLeg(Leg leg);

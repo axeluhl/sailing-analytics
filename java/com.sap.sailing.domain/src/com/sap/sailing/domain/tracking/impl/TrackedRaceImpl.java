@@ -450,8 +450,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Iterable<TrackedLeg> getTrackedLegs() {
-        return trackedLegs.values();
+    public synchronized Iterable<TrackedLeg> getTrackedLegs() {
+        return new ArrayList<TrackedLeg>(trackedLegs.values());
     }
 
     @Override
