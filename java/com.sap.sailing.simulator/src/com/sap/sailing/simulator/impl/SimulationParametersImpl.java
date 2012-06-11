@@ -42,7 +42,7 @@ public class SimulationParametersImpl implements SimulationParameters {
 	}
 
 	@Override
-	public Map<String, Object> getSettings() {
+	public Map<String, Double> getSettings() {
 		return null;
 	}
 

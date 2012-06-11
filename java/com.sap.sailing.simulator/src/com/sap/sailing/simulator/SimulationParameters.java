@@ -16,6 +16,6 @@ public interface SimulationParameters {
 	
 	Boundary getBoundaries();
 	
-	Map<String,Object> getSettings();
+	Map<String,Double> getSettings();
 
 }
