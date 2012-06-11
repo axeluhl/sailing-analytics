@@ -170,15 +170,14 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             @Override
             public SafeHtml getValue(RegattaDTO regatta) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-
                 int seriesCount = regatta.series.size();
                 int i = 1;
                 for (SeriesDTO serie : regatta.series) {
                     builder.appendEscaped(i + ". " + serie.name);
-                    if(serie.isMedal()) {
+                    if (serie.isMedal()) {
                         builder.appendEscaped(" (" + stringMessages.medalSeries() + ")");
                     }
-                    if(i < seriesCount) {
+                    if (i < seriesCount) {
                         builder.appendHtmlConstant("<br>");
                     }
                     i++;
@@ -223,7 +222,6 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             @Override
             public SafeHtml getValue(RegattaDTO regatta) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-
                 int seriesCount = regatta.series.size();
                 int i = 1;
                 for (SeriesDTO serie : regatta.series) {
@@ -232,11 +230,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                     for(FleetDTO fleet: serie.getFleets()) {
                         builder.appendEscaped(j + ". " + fleet.name);
                         builder.appendEscaped(" (" + fleet.getOrderNo() + ") ");
-                        if(fleet.getColor() != null) {
-                            builder.appendEscaped(" color: " + fleet.getColor().getAsHtml());
-                        } else {
-                        }
-                        if(j < fleetsCount) {
+                        if (j < fleetsCount) {
                             builder.appendEscaped(", ");
                         }
                         j++;

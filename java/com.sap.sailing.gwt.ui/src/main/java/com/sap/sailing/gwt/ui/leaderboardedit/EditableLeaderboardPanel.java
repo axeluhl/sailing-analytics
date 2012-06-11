@@ -413,6 +413,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             public int compare(Triple<String, String, Pair<String, Date>> o1,
                     Triple<String, String, Pair<String, Date>> o2) {
                 int result;
+                // TODO consider looking for longest common substring to handle things like "470 M" vs. "470 Men"
                 if (boatClassNames.contains(o1.getC().getA())) {
                     if (boatClassNames.contains(o2.getC().getA())) {
                         result = o1.getC().getB().compareTo(o2.getC().getB());
