@@ -15,6 +15,10 @@ import difflib.PatchFailedException;
  * 
  */
 public interface Course extends Named {
+    /**
+     * Clients can safely iterate over the resulting list because it's a copy which therefore won't reflect
+     * waypoint additions and removals. 
+     */
     List<Leg> getLegs();
 
     Iterable<Waypoint> getWaypoints();
