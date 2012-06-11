@@ -57,16 +57,15 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
         @Override
         public void onMouseOver(MarkerMouseOverEvent event) {
-            Double distanceInNmi = startPoint.distanceFrom(endPoint)/ Mile.METERS_PER_NAUTICAL_MILE;
+            Double distanceInNmi = startPoint.distanceFrom(endPoint) / Mile.METERS_PER_NAUTICAL_MILE;
             final String sDistance = NumberFormat.getFormat("0.00").format(distanceInNmi);
-            InfoWindowContent content = new InfoWindowContent("Race Target "
-                    + sDistance + " nmi from Start");
+            InfoWindowContent content = new InfoWindowContent("Race Target " + sDistance + " nmi from Start");
             map.getInfoWindow().open(endMarker, content);
-            
+
         }
-        
+
     }
-    
+
     public RaceCourseCanvasOverlay() {
         super();
         startPoint = null;
@@ -104,15 +103,14 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
         if (startPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(startPoint);
-            //drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "Start");
-            drawCircleWithText(point.getX() - getWidgetPosLeft(),point.getY() - getWidgetPosTop(),racecourseBuoySize,racecourseColor,"Start");
+            drawCircleWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), racecourseBuoySize,
+                    racecourseColor, "Start");
             if (startMarker != null) {
                 startMarker.setLatLng(startPoint);
             } else {
-// default markers are too large cluttering race display
-/*                startMarker = new Marker(startPoint);
-                map.addOverlay(startMarker);
+                // default markers are too large cluttering race display
                 /*
+                 * startMarker = new Marker(startPoint); map.addOverlay(startMarker); /*
                  * startMarker.addMarkerMouseOverHandler(new MarkerMouseOverHandler () {
                  * 
                  * @Override public void onMouseOver(MarkerMouseOverEvent event) { InfoWindowContent content = new
@@ -136,30 +134,24 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
         if (endPoint != null) {
             Point point = getMap().convertLatLngToDivPixel(endPoint);
-            //drawPointWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), "End");
-            drawCircleWithText(point.getX() - getWidgetPosLeft(),point.getY() - getWidgetPosTop(),racecourseBuoySize,racecourseColor,"End");
-            double cLat = (startPoint.getLatitude() + ((endPoint.getLatitude() - startPoint.getLatitude())%180.)/2. + 90.)%180. - 90.;
-            double cLon = (startPoint.getLongitude() + ((endPoint.getLongitude() - startPoint.getLongitude())%360.)/2. + 180.)%360. -180;
-            LatLng centerPoint = LatLng.newInstance(cLat, cLon);
-            //System.out.println("center: "+cLat+","+cLon);
-            getMap().panTo(centerPoint);
+            drawCircleWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), racecourseBuoySize,
+                    racecourseColor, "End");
+       
             if (endMarker != null) {
                 endMarker.setLatLng(endPoint);
             } else {
-// default markers are too large cluttering race display
-/*                endMarker = new Marker(endPoint);
-                map.addOverlay(endMarker);
-                
-                endMarker.addMarkerMouseOverHandler(new RaceCourseMarkerMouseOverHandler());
-
-                endMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
-
-                    @Override
-                    public void onMouseOut(MarkerMouseOutEvent event) {
-                        map.getInfoWindow().close();
-                    }
-
-                });*/
+                // default markers are too large cluttering race display
+                /*
+                 * endMarker = new Marker(endPoint); map.addOverlay(endMarker);
+                 * 
+                 * endMarker.addMarkerMouseOverHandler(new RaceCourseMarkerMouseOverHandler());
+                 * 
+                 * endMarker.addMarkerMouseOutHandler(new MarkerMouseOutHandler() {
+                 * 
+                 * @Override public void onMouseOut(MarkerMouseOutEvent event) { map.getInfoWindow().close(); }
+                 * 
+                 * });
+                 */
             }
 
         }
@@ -202,6 +194,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
                     logger.info("Clicked endPoint " + "here " + endPoint);
                     if (endPoint != null) {
                         setEndPoint(endPoint);
+                        center();
                         getMap().removeMapMouseMoveHandler(raceCourseMapMouseMoveHandler);
                     }
                 }
@@ -213,7 +206,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     @Override
     protected void redraw(boolean force) {
-        System.out.println("method: RaceCourseCanvasOverlay.redraw().");
+        //System.out.println("method: RaceCourseCanvasOverlay.redraw().");
         if (startPoint != null && endPoint != null) {
             setCanvasSettings();
             // drawCanvas();
@@ -241,4 +234,11 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         }
     }
 
+    private void center() {
+        double cLat = (startPoint.getLatitude() + ((endPoint.getLatitude() - startPoint.getLatitude()) % 180.) / 2. + 90.) % 180. - 90.;
+        double cLon = (startPoint.getLongitude() + ((endPoint.getLongitude() - startPoint.getLongitude()) % 360.) / 2. + 180.) % 360. - 180;
+        LatLng centerPoint = LatLng.newInstance(cLat, cLon);
+        // System.out.println("center: "+cLat+","+cLon);
+        getMap().panTo(centerPoint);
+    }
 }
