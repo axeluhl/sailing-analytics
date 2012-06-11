@@ -71,6 +71,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
         }
         speedWithBearing = new KnotSpeedWithBearingImpl[timeUnits][ncol];
 
+        //System.out.println("Blast Wind:");
         for (int i = 0; i < timeUnits; ++i) {
             for (int j = 0; j < ncol; ++j) {
                 if (isBlastSeed()) {
@@ -78,13 +79,15 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
                     double blastSpeed = getBlastSpeed();
                     double blastAngle = getBlastAngle();
                     SpeedWithBearing blastSpeedWithBearing = new KnotSpeedWithBearingImpl(blastSpeed,
-                            new DegreeBearingImpl(blastAngle));
+                            new DegreeBearingImpl(blastAngle+defaultWindBearing));
                     growBlast(i, j, blastSpeedWithBearing);
-                } else {   
+
+                } else {
                     if (speedWithBearing[i][j] == null) {
                         speedWithBearing[i][j] = defaultSpeedWithBearing;
                     }
                 }
+                //System.out.println("speed: "+speedWithBearing[i][j].getMetersPerSecond()+" angle: "+speedWithBearing[i][j].getBearing().getDegrees());
             }
         }
     }
@@ -146,9 +149,11 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     }
 
     private double getBlastSpeed() {
-        return Math.abs(NormalGen.nextDouble(new LFSR113("BlastSpeedStream"), windParameters.baseWindSpeed
-                * windParameters.blastWindSpeed / 100.0,
-                windParameters.baseWindSpeed * Math.sqrt(windParameters.blastWindSpeedVar / 100.0)));
+        double bSpeedMean = windParameters.baseWindSpeed * (windParameters.blastWindSpeed / 100.0 - (defaultWindSpeed==0 ? 1. : 0.));
+        double bSpeedVar = windParameters.baseWindSpeed * windParameters.blastWindSpeed / 100.0 * windParameters.blastWindSpeedVar / 100.0;
+        //System.out.println("blast par speed: "+windParameters.blastWindSpeed+" var: "+windParameters.blastWindSpeedVar);
+        //System.out.println("blast speed mean: "+bSpeedMean+" var: "+bSpeedVar);
+        return NormalGen.nextDouble(new LFSR113("BlastSpeedStream"), bSpeedMean, bSpeedVar);
 
     }
 
@@ -157,7 +162,7 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     }
 
     private double getBlastAngle() {
-        return NormalGen.nextDouble(new LFSR113("BlastAngleStream"), blastBearingMean, Math.sqrt(blastBearingVar));
+        return NormalGen.nextDouble(new LFSR113("BlastAngleStream"), blastBearingMean, blastBearingVar);
 
     }
 

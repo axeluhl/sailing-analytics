@@ -60,11 +60,9 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
         int midPoint = ncol/2;
         for (int i = 0; i <= midPoint; ++i) {
             speed[i] = new KnotSpeedImpl(leftSpeed + i*(middleSpeed-leftSpeed)/(midPoint)); 
-            logger.info("index: "+i+"speed: "+speed[i]);
         }
         for (int i = 1; i < ncol - midPoint; ++i) {
             speed[midPoint + i] = new KnotSpeedImpl(middleSpeed + i*(rightSpeed-middleSpeed)/(ncol - midPoint -1)); 
-            logger.info("index: "+(midPoint+i)+"speed: "+speed[midPoint-1+i]);
         }
     
     }
@@ -93,7 +91,8 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
             //double vStep = 1.0/((positions.length-1)*timeScale);
             //double t = (timeIndex+(timeIndex+rowIndex)*vStep);
             double vStep = 1.0/(positions.length-1);
-            double t = (timeIndex+rowIndex)*vStep*timeScale;
+            //System.out.println("SliderTime: "+timeIndex*timeStep.asMillis()/1000./60./60.+" RowDeltaTime:"+rowIndex*vStep*timeScale);
+            double t = timeIndex*timeStep.asMillis()/3600000.+rowIndex*vStep*timeScale;
             double oAngle = Math.sin(2*Math.PI*t*windParameters.frequency)*windParameters.amplitude;
             Bearing angle = new DegreeBearingImpl(oAngle);
             //logger.severe("timeIndex: "+timeIndex+" rowIndex: "+rowIndex+" timeScale: "+timeScale+" vStep: "+vStep+" t: "+t);

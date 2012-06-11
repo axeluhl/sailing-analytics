@@ -2,7 +2,8 @@ package com.sap.sailing.gwt.ui.simulator.util;
 
 public class ColorPaletteGenerator implements ColorPalette {
     
-    private String[] colors = {"Green","Red","Blue","Yellow","Black"};
+    //private String[] colors = {"Green","Red","Blue","Yellow","Black"};
+    private String[] colors = {"#00ED00","#FFBB00","Blue","Yellow","Black"};
     private int currentIndex = -1;
     
     public ColorPaletteGenerator() {
