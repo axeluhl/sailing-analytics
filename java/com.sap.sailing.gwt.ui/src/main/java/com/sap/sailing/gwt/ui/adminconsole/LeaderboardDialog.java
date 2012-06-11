@@ -49,7 +49,9 @@ public abstract class LeaderboardDialog extends DataEntryDialog<StrippedLeaderbo
                 // TODO what are correct values for discarding Thresholds?
                 if (0 < leaderboardToValidate.discardThresholds.length){ 
                     discardThresholdsAscending = discardThresholdsAscending
-                            && leaderboardToValidate.discardThresholds[i - 1] < leaderboardToValidate.discardThresholds[i];
+                            && leaderboardToValidate.discardThresholds[i - 1] < leaderboardToValidate.discardThresholds[i]
+                    // and if one box is empty, all subsequent boxes need to be empty too
+                    && (leaderboardToValidate.discardThresholds[i] == 0 || leaderboardToValidate.discardThresholds[i-1] > 0);
                 }
             }
             
@@ -85,10 +87,15 @@ public abstract class LeaderboardDialog extends DataEntryDialog<StrippedLeaderbo
     @Override
     protected StrippedLeaderboardDTO getResult() {
         List<Integer> discardThresholds = new ArrayList<Integer>();
-        for (int i = 0; i < discardThresholdBoxes.length; i++) {
-            if (discardThresholdBoxes[i].getValue() != null
-                    && discardThresholdBoxes[i].getValue().toString().length() > 0) {
-                discardThresholds.add(discardThresholdBoxes[i].getValue().intValue());
+        // go backwards; starting from first non-zero element, add them; take over leading zeroes which validator shall discard
+        for (int i = discardThresholdBoxes.length-1; i>=0; i--) {
+            if ((discardThresholdBoxes[i].getValue() != null
+                    && discardThresholdBoxes[i].getValue().toString().length() > 0) || !discardThresholds.isEmpty()) {
+                if (discardThresholdBoxes[i].getValue() == null) {
+                    discardThresholds.add(0, 0);
+                } else {
+                    discardThresholds.add(0, discardThresholdBoxes[i].getValue().intValue());
+                }
             }
         }
         int[] discardThresholdsBoxContents = new int[discardThresholds.size()];
