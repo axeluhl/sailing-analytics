@@ -286,21 +286,24 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
     
     private void addRaceToRegattaSeries(final RegattaDTO regatta) {
-        final RaceColumnDTO raceInRegttaSeries = new RaceColumnDTO();
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
-        RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta,
-                raceInRegttaSeries, stringMessages, new AsyncCallback<Pair<RaceColumnDTO, SeriesDTO>>() {
+        RaceColumnInRegattaSeriesDialog raceDialog = new RaceColumnInRegattaSeriesDialog(regatta, null,
+                stringMessages, new AsyncCallback<Pair<SeriesDTO, List<RaceColumnDTO>>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                     }
 
                     @Override
-                    public void onSuccess(final Pair<RaceColumnDTO, SeriesDTO> result) {
-                        sailingService.addColumnToSeries(regattaIdentifier, result.getB().name, result.getA().getRaceColumnName(), new AsyncCallback<Void>() {
+                    public void onSuccess(final Pair<SeriesDTO, List<RaceColumnDTO>> result) {
+                        List<String> raceColumnNames = new ArrayList<String>();
+                        for(RaceColumnDTO raceColumn: result.getB()) {
+                            raceColumnNames.add(raceColumn.name);
+                        }
+                        sailingService.addColumnsToSeries(regattaIdentifier, result.getA().name, raceColumnNames, new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error trying to add race column "
-                                            + result.getA().getRaceColumnName() + " to series " + result.getB().name
+                                    errorReporter.reportError("Error trying to add race columns "
+                                            + result.getB() + " to series " + result.getA().name
                                             + ": " + caught.getMessage());
 
                                 }

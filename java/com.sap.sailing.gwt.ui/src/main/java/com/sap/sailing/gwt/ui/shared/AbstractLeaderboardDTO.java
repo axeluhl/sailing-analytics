@@ -102,7 +102,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         RaceColumnDTO result = getRaceInLeaderboardByName(raceColumnName);
         if (result == null) {
             result = new RaceColumnDTO();
-            result.setRaceColumnName(raceColumnName);
+            result.name = raceColumnName;
             races.add(result);
         }
         return result;
@@ -142,7 +142,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
             RegattaAndRaceIdentifier trackedRaceIdentifier, int index) {
         assert fleetName != null;
         RaceColumnDTO raceInLeaderboardDTO = new RaceColumnDTO();
-        raceInLeaderboardDTO.setRaceColumnName(raceColumnName);
+        raceInLeaderboardDTO.name = raceColumnName;
         raceInLeaderboardDTO.setMedalRace(medalRace);
         raceInLeaderboardDTO.addFleetName(fleetName);
         raceInLeaderboardDTO.setRaceIdentifier(fleetName, trackedRaceIdentifier);
@@ -151,7 +151,7 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     
     public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace) {
         RaceColumnDTO raceColumn = new RaceColumnDTO();
-        raceColumn.setRaceColumnName(raceColumnName);
+        raceColumn.name = raceColumnName;
         raceColumn.setMedalRace(medalRace);
         races.add(raceColumn);
         return raceColumn;

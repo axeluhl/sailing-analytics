@@ -165,8 +165,8 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         series.name = nameEntryField.getText();
         series.setMedal(isMedalSeriesCheckbox.getValue());
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
-        int groupsCount = fleetNameEntryFields.size();
-        for(int i = 0; i < groupsCount; i++) {
+        int fleetsCount = fleetNameEntryFields.size();
+        for(int i = 0; i < fleetsCount; i++) {
             FleetDTO fleetDTO = new FleetDTO();
             fleetDTO.name = fleetNameEntryFields.get(i).getValue();
             fleetDTO.setColor(getSelectedColor(fleetColorEntryFields.get(i)));

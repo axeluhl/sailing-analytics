@@ -12,8 +12,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
-public class RaceColumnDTO implements IsSerializable {
-    private String raceColumnName;
+public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     private boolean medalRace;
     private List<String> fleetNames;
     private Map<String, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
@@ -25,18 +24,14 @@ public class RaceColumnDTO implements IsSerializable {
         fleetNames = new ArrayList<String>();
     }
     
+    public String getRaceColumnName() {
+        return name;
+    }
+    
     public boolean hasTrackedRace(RaceIdentifier raceIdentifier) {
         return trackedRaceIdentifiersPerFleet.values().contains(raceIdentifier);
     }
     
-    public String getRaceColumnName() {
-        return raceColumnName;
-    }
-
-    public void setRaceColumnName(String raceColumnName) {
-        this.raceColumnName = raceColumnName;
-    }
-
     public boolean isMedalRace() {
         return medalRace;
     }
@@ -131,7 +126,7 @@ public class RaceColumnDTO implements IsSerializable {
         int result = 1;
         result = prime * result + ((fleetNames == null) ? 0 : fleetNames.hashCode());
         result = prime * result + (medalRace ? 1231 : 1237);
-        result = prime * result + ((raceColumnName == null) ? 0 : raceColumnName.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((racesPerFleet == null) ? 0 : racesPerFleet.hashCode());
         result = prime * result
                 + ((trackedRaceIdentifiersPerFleet == null) ? 0 : trackedRaceIdentifiersPerFleet.hashCode());
@@ -154,10 +149,10 @@ public class RaceColumnDTO implements IsSerializable {
             return false;
         if (medalRace != other.medalRace)
             return false;
-        if (raceColumnName == null) {
-            if (other.raceColumnName != null)
+        if (name == null) {
+            if (other.name != null)
                 return false;
-        } else if (!raceColumnName.equals(other.raceColumnName))
+        } else if (!name.equals(other.name))
             return false;
         if (racesPerFleet == null) {
             if (other.racesPerFleet != null)
@@ -184,10 +179,5 @@ public class RaceColumnDTO implements IsSerializable {
 
     public void addFleetName(String fleetName) {
         fleetNames.add(fleetName);
-    }
-
-    @Override
-    public String toString() {
-        return getRaceColumnName();
     }
 }
