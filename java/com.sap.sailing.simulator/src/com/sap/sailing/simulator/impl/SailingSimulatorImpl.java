@@ -81,10 +81,13 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		Position currentPosition = start;
 		TimePoint currentTime = startTime;
 		
+		Double targetTolerance = simulationParameters.getProperty("Heuristic.targetTolerance[double]");
+		long timeResolution = simulationParameters.getProperty("Heuristic.timeResolution[long]").longValue();
+		
 		//while there is more than 0.5% of the total distance to the finish 
-		while ( currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(0.005)) > 0) {
+		while ( currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(targetTolerance)) > 0) {
 			
-			TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
+			TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeResolution);
 			
 			pd.setWind(wf.getWind(new TimedPositionWithSpeedImpl(nextTime, currentPosition, null)));
 			
@@ -139,8 +142,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
 				
 		//initiate grid
-		int gridv = 30; // number of vertical grid steps
-		int gridh = 200; // number of horizontal grid steps
+		int gridv = simulationParameters.getProperty("Djikstra.gridv[int]").intValue(); // number of vertical grid steps
+		int gridh = simulationParameters.getProperty("Djikstra.gridh[int]").intValue(); // number of horizontal grid steps
 		Position[][] sailGrid = boundary.extractGrid(gridh, gridv);
 		
 		//create adjacency graph including start and end 

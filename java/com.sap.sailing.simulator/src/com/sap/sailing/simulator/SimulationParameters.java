@@ -17,5 +17,9 @@ public interface SimulationParameters {
 	Boundary getBoundaries();
 	
 	Map<String,Double> getSettings();
+	
+	void setProperty(String name, Double value);
+	
+	Double getProperty(String name);
 
 }
