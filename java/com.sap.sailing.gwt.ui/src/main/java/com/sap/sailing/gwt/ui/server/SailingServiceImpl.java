@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,10 +32,11 @@ import java.util.logging.Logger;
 
 import javax.jms.JMSException;
 import javax.servlet.ServletContext;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
+import org.xml.sax.SAXException;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.BoatClass;
@@ -265,28 +267,38 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     /**
      * Asks the OSGi system for registered score correction provider services
-     * @throws InvalidSyntaxException 
      */
     private ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
             BundleContext bundleContext) {
-        return new ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider>(bundleContext,
+        ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> tracker = new ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider>(bundleContext,
                 ScoreCorrectionProvider.class.getName(),
                 /* customizer */null);
+        tracker.open();
+        return tracker;
     }
     
     @Override
-    public Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviders() {
+    public Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviders() throws Exception {
         List<ScoreCorrectionProviderDTO> result = new ArrayList<ScoreCorrectionProviderDTO>();
-        for (Object scoreCorrectionProvider : scoreCorrectionProviderServiceTracker.getServices()) {
-            result.add(createScoreCorrectionProviderDTO((ScoreCorrectionProvider) scoreCorrectionProvider));
+        final Object[] services = scoreCorrectionProviderServiceTracker.getServices();
+        if (services != null) {
+            for (Object scoreCorrectionProvider : services) {
+                result.add(createScoreCorrectionProviderDTO((ScoreCorrectionProvider) scoreCorrectionProvider));
+            }
         }
         return result;
     }
     
-    private ScoreCorrectionProviderDTO createScoreCorrectionProviderDTO(ScoreCorrectionProvider scoreCorrectionProvider) {
-        Map<String, Pair<String, Date>> hasResultsForBoatClassFromDateByEventName = new HashMap<String, Pair<String,Date>>();
-        for (Map.Entry<String, Pair<String, TimePoint>> e : scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName().entrySet()) {
-            hasResultsForBoatClassFromDateByEventName.put(e.getKey(), new Pair<String, Date>(e.getValue().getA(), e.getValue().getB().asDate()));
+    private ScoreCorrectionProviderDTO createScoreCorrectionProviderDTO(ScoreCorrectionProvider scoreCorrectionProvider)
+            throws IOException, SAXException, ParserConfigurationException {
+        Map<String, Set<Pair<String, Date>>> hasResultsForBoatClassFromDateByEventName = new HashMap<String, Set<Pair<String,Date>>>();
+        for (Map.Entry<String, Set<Pair<String, TimePoint>>> e : scoreCorrectionProvider
+                .getHasResultsForBoatClassFromDateByEventName().entrySet()) {
+            Set<Pair<String, Date>> set = new HashSet<Pair<String, Date>>();
+            for (Pair<String, TimePoint> p : e.getValue()) {
+                set.add(new Pair<String, Date>(p.getA(), p.getB().asDate()));
+            }
+            hasResultsForBoatClassFromDateByEventName.put(e.getKey(), set);
         }
         return new ScoreCorrectionProviderDTO(scoreCorrectionProvider.getName(), hasResultsForBoatClassFromDateByEventName);
     }
@@ -2021,7 +2033,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public RegattaDTO createRegatta(String regattaName, String boatClassName, Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent) {
+    public RegattaDTO createRegatta(String regattaName, String boatClassName, LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent) {
         Regatta regatta = getService().apply(
                 new AddSpecificRegatta(regattaName, boatClassName, seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent));
         return getRegattaDTO(regatta);

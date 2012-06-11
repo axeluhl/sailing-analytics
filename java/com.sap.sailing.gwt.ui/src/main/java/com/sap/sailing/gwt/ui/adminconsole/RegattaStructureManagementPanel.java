@@ -3,9 +3,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -458,8 +457,9 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
 
     private void createNewRegatta(final RegattaDTO newRegatta) {
-        Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesStructure = new HashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>>();
-        for(SeriesDTO seriesDTO : newRegatta.series) {
+        LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesStructure =
+                new LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>>();
+        for (SeriesDTO seriesDTO : newRegatta.series) {
             List<Triple<String, Integer, Color>> fleets = new ArrayList<Triple<String, Integer, Color>>();
             for(FleetDTO fleetDTO : seriesDTO.getFleets()) {
                 Triple<String, Integer, Color> fleetTriple = new Triple<String, Integer, Color>(fleetDTO.name, fleetDTO.getOrderNo(), fleetDTO.getColor());

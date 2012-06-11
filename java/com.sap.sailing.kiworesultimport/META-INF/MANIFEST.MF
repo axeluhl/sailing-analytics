@@ -10,3 +10,4 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain,
  org.eclipse.osgi;bundle-version="3.7.1"
 Export-Package: com.sap.sailing.kiworesultimport
+Bundle-Activator: com.sap.sailing.kiworesultimport.impl.Activator

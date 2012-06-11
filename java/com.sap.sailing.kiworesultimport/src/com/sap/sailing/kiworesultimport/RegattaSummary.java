@@ -25,5 +25,5 @@ public interface RegattaSummary {
      */
     Iterable<Boat> getBoats();
     
-    String getEvent();
+    String getEventName();
 }

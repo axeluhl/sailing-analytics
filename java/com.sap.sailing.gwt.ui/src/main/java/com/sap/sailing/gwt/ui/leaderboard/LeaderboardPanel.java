@@ -223,6 +223,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
     }
 
+    protected StringMessages getStringMessages() {
+        return stringMessages;
+    }
+    
     @Override
     public Widget getEntryWidget() {
         return this;

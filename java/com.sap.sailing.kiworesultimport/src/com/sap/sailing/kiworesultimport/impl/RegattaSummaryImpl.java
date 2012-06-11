@@ -68,7 +68,7 @@ public class RegattaSummaryImpl implements RegattaSummary {
     }
 
     @Override
-    public String getEvent() {
+    public String getEventName() {
         return event;
     }
 
