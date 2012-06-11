@@ -7,5 +7,6 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.common,
- com.sap.sailing.domain
+ com.sap.sailing.domain,
+ org.eclipse.osgi;bundle-version="3.7.1"
 Export-Package: com.sap.sailing.kiworesultimport

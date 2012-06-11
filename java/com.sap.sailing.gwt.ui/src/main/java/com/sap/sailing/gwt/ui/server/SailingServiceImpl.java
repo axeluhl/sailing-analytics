@@ -33,6 +33,7 @@ import javax.jms.JMSException;
 import javax.servlet.ServletContext;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -72,6 +73,7 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -143,6 +145,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -215,6 +218,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
     private final ServiceTracker<ReplicationService, ReplicationService> replicationServiceTracker;
+    
+    private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
 
     private final MongoObjectFactory mongoObjectFactory;
     
@@ -239,6 +244,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
+        scoreCorrectionProviderServiceTracker = createAndOpenScoreCorrectionProviderServiceTracker(context);
         mongoObjectFactory = MongoFactory.INSTANCE.getDefaultMongoObjectFactory();
         domainObjectFactory = MongoFactory.INSTANCE.getDefaultDomainObjectFactory();
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
@@ -257,6 +263,34 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
     
+    /**
+     * Asks the OSGi system for registered score correction provider services
+     * @throws InvalidSyntaxException 
+     */
+    private ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> createAndOpenScoreCorrectionProviderServiceTracker(
+            BundleContext bundleContext) {
+        return new ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider>(bundleContext,
+                ScoreCorrectionProvider.class.getName(),
+                /* customizer */null);
+    }
+    
+    @Override
+    public Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviders() {
+        List<ScoreCorrectionProviderDTO> result = new ArrayList<ScoreCorrectionProviderDTO>();
+        for (Object scoreCorrectionProvider : scoreCorrectionProviderServiceTracker.getServices()) {
+            result.add(createScoreCorrectionProviderDTO((ScoreCorrectionProvider) scoreCorrectionProvider));
+        }
+        return result;
+    }
+    
+    private ScoreCorrectionProviderDTO createScoreCorrectionProviderDTO(ScoreCorrectionProvider scoreCorrectionProvider) {
+        Map<String, Pair<String, Date>> hasResultsForBoatClassFromDateByEventName = new HashMap<String, Pair<String,Date>>();
+        for (Map.Entry<String, Pair<String, TimePoint>> e : scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName().entrySet()) {
+            hasResultsForBoatClassFromDateByEventName.put(e.getKey(), new Pair<String, Date>(e.getValue().getA(), e.getValue().getB().asDate()));
+        }
+        return new ScoreCorrectionProviderDTO(scoreCorrectionProvider.getName(), hasResultsForBoatClassFromDateByEventName);
+    }
+
     protected ServiceTracker<ReplicationService, ReplicationService> createAndOpenReplicationServiceTracker(
             BundleContext context) {
         ServiceTracker<ReplicationService, ReplicationService> result = new ServiceTracker<ReplicationService, ReplicationService>(

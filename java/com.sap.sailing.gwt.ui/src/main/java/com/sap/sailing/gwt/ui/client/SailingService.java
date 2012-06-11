@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
@@ -223,4 +224,6 @@ public interface SailingService extends RemoteService {
     void renameEvent(String oldName, String newName);
 
     EventDTO getEventByName(String eventName);
+
+    Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviders();
 }

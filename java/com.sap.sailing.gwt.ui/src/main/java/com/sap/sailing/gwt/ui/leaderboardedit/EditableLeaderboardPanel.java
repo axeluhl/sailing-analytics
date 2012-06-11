@@ -38,6 +38,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 
 /**
  * An editable version of the {@link LeaderboardPanel} which allows a user to enter carried / accumulated
@@ -348,25 +349,35 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     public EditableLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, ErrorReporter errorReporter,
-            StringMessages stringConstants, UserAgentTypes userAgentType) {
+            final StringMessages stringMessages, UserAgentTypes userAgentType) {
         super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                 /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
-                leaderboardName, leaderboardGroupName, errorReporter, stringConstants, userAgentType);
+                leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
         ImageResource importIcon = resources.importIcon();
         Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
         getRefreshAndSettingsPanel().insert(importAnchor, 0);
         importAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                performImport();
+                performImport(stringMessages);
             }
         });
     }
 
-    private void performImport() {
-        // TODO continue here:
-        Window.setStatus("This would have been an import");
+    private void performImport(final StringMessages stringMessages) {
+        getSailingService().getScoreCorrectionProviders(new AsyncCallback<Iterable<ScoreCorrectionProviderDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                getErrorReporter().reportError(stringMessages.errorLoadingScoreCorrectionProviders(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(Iterable<ScoreCorrectionProviderDTO> result) {
+                Window.setStatus("This would have been an import");
+                // TODO show popup dialog from which to select the provider as first step
+            }
+        });
     }
 
     /**

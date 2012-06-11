@@ -322,4 +322,5 @@ public interface StringMessages extends Messages {
     String noRegatta();
     String addFleet();
     String doYouReallyWantToRemoveRegatta(String name);
+    String errorLoadingScoreCorrectionProviders(String message);
 }
