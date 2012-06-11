@@ -161,7 +161,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
             for (DBObject o : leaderboardCollection.find()) {
-                result.add(loadLeaderboard(o, regattaRegistry));
+                final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry);
+                if (loadedLeaderboard != null) {
+                    result.add(loadedLeaderboard);
+                }
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
@@ -172,8 +175,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     /**
-     * If the DBObject has a field {@link FieldNames#REGATTA_NAME} then the object represents a {@link RegattaLeaderboard}. Otherwise,
-     * a {@link FlexibleLeaderboard} will be loaded.
+     * If the DBObject has a field {@link FieldNames#REGATTA_NAME} then the object represents a
+     * {@link RegattaLeaderboard}. Otherwise, a {@link FlexibleLeaderboard} will be loaded.
+     * 
+     * @return <code>null</code> in case the leaderboard couldn't be loaded, e.g., because the regatta referenced by a
+     *         {@link RegattaLeaderboard} cannot be found; the leaderboard loaded, otherwise
      */
     private Leaderboard loadLeaderboard(DBObject dbLeaderboard, RegattaRegistry regattaRegistry) {
         SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
@@ -191,11 +197,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else {
             result = loadRegattaLeaderboard(regattaName, dbLeaderboard, scoreCorrection, resultDiscardingRule, regattaRegistry);
         }
-        DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
-        loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections);
+        if (result != null) {
+            DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
+            loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections);
+        }
         return result;
     }
 
+    /**
+     * @return <code>null</code> if the regatta cannot be resolved; otherwise the leaderboard for the regatta specified
+     */
     private RegattaLeaderboard loadRegattaLeaderboard(String regattaName, DBObject dbLeaderboard, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, RegattaRegistry regattaRegistry) {
         RegattaLeaderboard result = null;
@@ -349,18 +360,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     private LeaderboardGroup loadLeaderboardGroup(DBObject o, RegattaRegistry regattaRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
-        
         String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
         String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
         ArrayList<Leaderboard> leaderboards = new ArrayList<Leaderboard>();
-        
         BasicDBList dbLeaderboardIds = (BasicDBList) o.get(FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name());
         for (Object object : dbLeaderboardIds) {
             ObjectId dbLeaderboardId = (ObjectId) object;
             DBObject dbLeaderboard = leaderboardCollection.findOne(dbLeaderboardId);
-            leaderboards.add(loadLeaderboard(dbLeaderboard, regattaRegistry));
+            final Leaderboard loadedLeaderboard = loadLeaderboard(dbLeaderboard, regattaRegistry);
+            if (loadedLeaderboard != null) {
+                leaderboards.add(loadedLeaderboard);
+            }
         }
-        
         return new LeaderboardGroupImpl(name, description, leaderboards);
     }
     
