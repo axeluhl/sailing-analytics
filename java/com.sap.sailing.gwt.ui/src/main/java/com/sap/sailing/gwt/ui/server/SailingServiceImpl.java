@@ -287,7 +287,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
                     }
-                    result.addRace(raceColumn.getName(), fleet.getName(), raceColumn.isMedalRace(),
+                    result.addRace(raceColumn.getName(), createFleetDTO(fleet), raceColumn.isMedalRace(),
                             raceIdentifier, /* StrippedRaceDTO */ null);
                 }
                 result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
@@ -1304,7 +1304,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                     }
                 }
-                leaderboardDTO.addRace(raceColumn.getName(), fleet.getName(), raceColumn.isMedalRace(), raceIdentifier, race);
+                leaderboardDTO.addRace(raceColumn.getName(), createFleetDTO(fleet), raceColumn.isMedalRace(), raceIdentifier, race);
             }
         }
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
@@ -1956,6 +1956,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void addColumnToSeries(RegattaIdentifier regattaIdentifier, String seriesName, String columnName) {
         getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+    }
+
+    @Override
+    public void removeColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+        for(String columnName: columnNames) {
+            getService().apply(new RemoveColumnFromSeries(regattaIdentifier, seriesName, columnName));
+        }
     }
 
     @Override

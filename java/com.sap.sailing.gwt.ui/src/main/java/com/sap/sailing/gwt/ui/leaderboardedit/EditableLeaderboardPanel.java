@@ -10,11 +10,18 @@ import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.SelectionCell;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Anchor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -40,6 +47,8 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
  *
  */
 public class EditableLeaderboardPanel extends LeaderboardPanel {
+    private static EditableLeaderboardResources resources = GWT.create(EditableLeaderboardResources.class);
+
     private class EditableCarryColumn extends CarryColumn {
         public EditableCarryColumn() {
             super(new EditTextCell());
@@ -344,6 +353,20 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, leaderboardGroupName, errorReporter, stringConstants, userAgentType);
+        ImageResource importIcon = resources.importIcon();
+        Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
+        getRefreshAndSettingsPanel().insert(importAnchor, 0);
+        importAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                performImport();
+            }
+        });
+    }
+
+    private void performImport() {
+        // TODO continue here:
+        Window.setStatus("This would have been an import");
     }
 
     /**
@@ -379,4 +402,5 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         return list;
     }
 
+    
 }

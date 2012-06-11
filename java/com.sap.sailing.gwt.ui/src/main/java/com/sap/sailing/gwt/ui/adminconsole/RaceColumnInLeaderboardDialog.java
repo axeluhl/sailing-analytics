@@ -10,16 +10,17 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 /**
  * Fills a {@link RaceColumnDTO} object by setting its {@link RaceColumnDTO#setMedalRace(boolean) medal race} property and its name.
- * As {@link RaceColumnDTO#getFleetNames()} fleet, a single default fleet is added.
+ * As {@link RaceColumnDTO#getFleets()} fleet, a single default fleet is added.
  * 
  * @author Axel Uhl (D043530)
  *
  */
-public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColumnDTO, String>> {
+public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColumnDTO, FleetDTO>> {
     private final static String DEFAULT_FLEET_NAME = "Default";
     
     private final TextBox raceNameBox;
@@ -27,18 +28,18 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColu
 
     private RaceColumnDTO raceInLeaderboard;
 
-    private static class RaceDialogValidator implements Validator<Pair<RaceColumnDTO, String>> {
+    private static class RaceDialogValidator implements Validator<Pair<RaceColumnDTO, FleetDTO>> {
 
         private StringMessages stringConstants;
-        private Collection<Pair<RaceColumnDTO, String>> existingRaces;
+        private Collection<Pair<RaceColumnDTO, FleetDTO>> existingRaces;
 
-        public RaceDialogValidator(StringMessages stringConstants, Collection<Pair<RaceColumnDTO, String>> existingRaceColumnsAndFleetNames) {
+        public RaceDialogValidator(StringMessages stringConstants, Collection<Pair<RaceColumnDTO, FleetDTO>> existingRaceColumnsAndFleetNames) {
             this.stringConstants = stringConstants;
             this.existingRaces = existingRaceColumnsAndFleetNames;
         }
 
         @Override
-        public String getErrorMessage(Pair<RaceColumnDTO, String> valueToValidate) {
+        public String getErrorMessage(Pair<RaceColumnDTO, FleetDTO> valueToValidate) {
             String errorMessage;
             String racename = valueToValidate.getA().getRaceColumnName();
             Boolean isMedalRace = valueToValidate.getA().isMedalRace();
@@ -46,7 +47,7 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColu
             boolean medalRaceNotNull = isMedalRace != null;
 
             boolean unique = true;
-            for (Pair<RaceColumnDTO, String> raceColumnAndFleetName : existingRaces) {
+            for (Pair<RaceColumnDTO, FleetDTO> raceColumnAndFleetName : existingRaces) {
                 if (raceColumnAndFleetName.getA().getRaceColumnName().equals(valueToValidate.getA().getRaceColumnName())) {
                     unique = false;
                 }
@@ -66,9 +67,9 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColu
 
     }
 
-    public RaceColumnInLeaderboardDialog(Collection<Pair<RaceColumnDTO, String>> existingRaces,
+    public RaceColumnInLeaderboardDialog(Collection<Pair<RaceColumnDTO, FleetDTO>> existingRaces,
             RaceColumnDTO raceInLeaderboard, StringMessages stringConstants,
-            AsyncCallback<Pair<RaceColumnDTO, String>> callback) {
+            AsyncCallback<Pair<RaceColumnDTO, FleetDTO>> callback) {
         super(stringConstants.name(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(stringConstants, existingRaces), callback);
         this.raceInLeaderboard = raceInLeaderboard;
@@ -78,11 +79,11 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColu
     }
 
     @Override
-    protected Pair<RaceColumnDTO, String> getResult() {
+    protected Pair<RaceColumnDTO, FleetDTO> getResult() {
         raceInLeaderboard.name = raceNameBox.getValue();
         raceInLeaderboard.setMedalRace(isMedalRace.getValue());
-        raceInLeaderboard.addFleetName(DEFAULT_FLEET_NAME);
-        return new Pair<RaceColumnDTO, String>(raceInLeaderboard, raceInLeaderboard.getFleetNames().iterator().next());
+        raceInLeaderboard.addFleet(new FleetDTO(DEFAULT_FLEET_NAME, /* ordering */ 0, /* color */ null));
+        return new Pair<RaceColumnDTO, FleetDTO>(raceInLeaderboard, raceInLeaderboard.getFleets().iterator().next());
     }
 
     @Override

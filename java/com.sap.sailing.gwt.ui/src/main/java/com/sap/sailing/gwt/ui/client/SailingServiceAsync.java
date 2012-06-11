@@ -381,4 +381,7 @@ public interface SailingServiceAsync {
 
     void addColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
+
+    void removeColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
+            AsyncCallback<Void> callback);
 }

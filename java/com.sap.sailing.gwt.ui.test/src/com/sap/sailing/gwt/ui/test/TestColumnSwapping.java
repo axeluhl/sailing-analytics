@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
@@ -22,6 +23,7 @@ public class TestColumnSwapping {
     private LeaderboardDTO lb = null;
     private static final String LEADERBOARDNAME = "test";
     private static final String DEFAULT_FLEET_NAME = "Default";
+    private static final FleetDTO DEFAULT_FLEET = new FleetDTO(DEFAULT_FLEET_NAME, /* ordering */ 0, /* color */ null);
     private SailingServiceImpl service;
     private LeaderboardDTO leaderboardOriginalDTO;
     private LeaderboardDTO leaderboardDTO;
@@ -50,9 +52,9 @@ public class TestColumnSwapping {
         try {
             // get Leaderboard with name and current date
             leaderboardOriginalDTO = new LeaderboardDTO();
-            leaderboardOriginalDTO.addRace("Race1", DEFAULT_FLEET_NAME, true, null, null);
-            leaderboardOriginalDTO.addRace("Race3", DEFAULT_FLEET_NAME, true, null, null);
-            leaderboardOriginalDTO.addRace("Race2", DEFAULT_FLEET_NAME, true, null, null);
+            leaderboardOriginalDTO.addRace("Race1", DEFAULT_FLEET, true, null, null);
+            leaderboardOriginalDTO.addRace("Race3", DEFAULT_FLEET, true, null, null);
+            leaderboardOriginalDTO.addRace("Race2", DEFAULT_FLEET, true, null, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -101,9 +103,9 @@ public class TestColumnSwapping {
     public void testLeaderBoardDTOMethods() {
         lb = new LeaderboardDTO();
         assertNotNull("Leaderboard != NULL", lb);
-        lb.addRace("1", DEFAULT_FLEET_NAME, false, null, null);
-        lb.addRace("2", DEFAULT_FLEET_NAME, false, null, null);
-        lb.addRace("3", DEFAULT_FLEET_NAME, true, null, null);
+        lb.addRace("1", DEFAULT_FLEET, false, null, null);
+        lb.addRace("2", DEFAULT_FLEET, false, null, null);
+        lb.addRace("3", DEFAULT_FLEET, true, null, null);
         lb.moveRaceDown("1");
         String[] s = new String[] { "2", "1", "3" };
         for (int i = 0; i < lb.getRaceList().size(); i++)

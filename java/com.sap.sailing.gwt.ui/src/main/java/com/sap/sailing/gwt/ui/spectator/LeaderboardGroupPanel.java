@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -139,7 +140,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 };
                 leaderboardsTable.addColumn(leaderboardColumn, leaderboard.name);
                 // add an artificial RaceColumn for the "Overview" link at position 0
-                leaderboard.createRaceColumnAt(stringConstants.overview(), /* fleetName */ "", /* medal race */ false, /* tracked race identifier */ null, 0);
+                leaderboard.createRaceColumnAt(stringConstants.overview(), new FleetDTO("Default", 0, /* color */ null), /* medal race */ false, /* tracked race identifier */ null, 0);
                 maxRacesNum = maxRacesNum < leaderboard.getRaceList().size() ? leaderboard
                         .getRaceList().size() : maxRacesNum;
             }
@@ -196,17 +197,17 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 link += "&viewMode=" + viewMode;
             b.append(ANCHORTEMPLATE.anchor(link, raceColumnDisplayName, STYLE_NAME_PREFIX + "ActiveLeaderboard"));
         } else {
-            final Iterable<String> fleetNames = race.getFleetNames();
-            boolean singleFleet = Util.size(fleetNames) < 2;
-            for (String fleetName : fleetNames) {
+            final Iterable<FleetDTO> fleets = race.getFleets();
+            boolean singleFleet = Util.size(fleets) < 2;
+            for (FleetDTO fleet: fleets) {
                 String linkText;
                 if (singleFleet) {
                     linkText = raceColumnDisplayName;
                 } else {
-                    linkText = raceColumnDisplayName +" ("+fleetName+")";
+                    linkText = raceColumnDisplayName +" ("+fleet.name+")";
                 }
-                if (race.getRaceIdentifier(fleetName) != null) {
-                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleetName);
+                if (race.getRaceIdentifier(fleet) != null) {
+                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
                             + "&raceName=" + raceId.getRaceName() + "&regattaName=" + raceId.getRegattaName()
                             + "&leaderboardGroupName=" + group.name + "&root=" + root);
@@ -229,17 +230,17 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         for (RaceColumnDTO race : leaderboard.getRaceList()) {
-            final Iterable<String> fleetNames = race.getFleetNames();
-            boolean singleFleet = Util.size(fleetNames) < 2;
-            for (String fleetName : fleetNames) {
+            final Iterable<FleetDTO> fleets = race.getFleets();
+            boolean singleFleet = Util.size(fleets) < 2;
+            for (FleetDTO fleet : fleets) {
                 String linkText;
                 if (singleFleet) {
                     linkText = race.getRaceColumnName();
                 } else {
-                    linkText = race.getRaceColumnName() + " (" + fleetName + ")";
+                    linkText = race.getRaceColumnName() + " (" + fleet.name + ")";
                 }
-                if (race.getRaceIdentifier(fleetName) != null) {
-                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleetName);
+                if (race.getRaceIdentifier(fleet) != null) {
+                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
                             + "&raceName=" + raceId.getRaceName() + "&root=" + root + raceId.getRaceName()
                             + "&regattaName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + group.name);
