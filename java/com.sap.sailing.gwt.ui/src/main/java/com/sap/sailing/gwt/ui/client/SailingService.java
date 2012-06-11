@@ -172,8 +172,6 @@ public interface SailingService extends RemoteService {
 
     void sendSwissTimingDummyRace(String racMessage, String stlMesssage, String ccgMessage) throws IllegalArgumentException;
 
-    void stressTestLeaderboardByName(String leaderboardName, int times) throws Exception;
-    
     String[] getCountryCodes();
     
     Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RaceIdentifier raceIdentifier,

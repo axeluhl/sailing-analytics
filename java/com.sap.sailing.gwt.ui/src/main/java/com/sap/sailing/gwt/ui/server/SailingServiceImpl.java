@@ -349,24 +349,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    @Override
-    public void stressTestLeaderboardByName(String leaderboardName, int times) throws Exception {
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        if (leaderboard != null) {
-            List<String> raceColumnNames = new ArrayList<String>();
-            for (RaceColumn column : leaderboard.getRaceColumns()) {
-                raceColumnNames.add(column.getName());
-            }
-            int i=0;
-            for (Date date = new Date(); i<times; date = new Date(date.getTime()-10)) {
-                getLeaderboardByName(leaderboardName, date, raceColumnNames);
-                i++;
-            }
-        } else {
-            logger.warning("stressTestLeaderboardByName: couldn't find leaderboard "+leaderboardName);
-        }
-    }
-    
     private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint, boolean addLegDetails) throws NoWindException {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();

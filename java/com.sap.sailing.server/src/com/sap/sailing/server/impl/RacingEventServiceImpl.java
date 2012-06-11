@@ -977,6 +977,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         if (regatta.isPersistent()) {
             mongoObjectFactory.removeRegatta(regatta);
         }
+        regattasByName.remove(regatta.getName());
+        regatta.removeRegattaListener(this);
     }
     
     @Override
