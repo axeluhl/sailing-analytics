@@ -53,7 +53,6 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         public String getErrorMessage(SeriesDTO seriesToValidate) {
             String errorMessage = null;
             boolean nameNotEmpty = seriesToValidate.name != null && seriesToValidate.name.length() > 0;
-
             boolean unique = true;
             for (SeriesDTO series : existingSeries) {
                 if (series.name.equals(seriesToValidate.name)) {
@@ -61,29 +60,24 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                     break;
                 }
             }
-
             if (!nameNotEmpty) {
                 errorMessage = stringConstants.pleaseEnterNonEmptyName();
             } else if (!unique) {
                 errorMessage = stringConstants.seriesWithThisNameAlreadyExists();
             }
-
-            if(errorMessage == null) {
+            if (errorMessage == null) {
                 List<FleetDTO> fleetsToValidate = seriesToValidate.getFleets();
                 int index = 0;
                 boolean fleetNameNotEmpty = true;
-
                 for (FleetDTO fleet : fleetsToValidate) {
                     fleetNameNotEmpty = fleet.name != null && fleet.name.length() > 0;
-                    if(!fleetNameNotEmpty) {
+                    if (!fleetNameNotEmpty) {
                         break;
                     }
                     index++;
                 }
-
                 int index2 = 0;
                 boolean fleetUnique = true;
-                
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
                 for (FleetDTO fleet: fleetsToValidate) {
                     if(!setToFindDuplicates.add(fleet.name)) {
@@ -92,18 +86,14 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                     }
                     index2++;
                 }
-                
                 if (!fleetNameNotEmpty) {
                     errorMessage = stringConstants.fleet() + " " + (index + 1) + ": " + stringConstants.pleaseEnterNonEmptyName();
                 } else if (!fleetUnique) {
                     errorMessage = stringConstants.fleet() + " " + (index2 + 1) + ": " + stringConstants.fleetWithThisNameAlreadyExists();
                 }
-                
             }
-            
             return errorMessage;
         }
-
     }
 
     public SeriesWithFleetsCreateDialog(Collection<SeriesDTO> existingSeries, StringMessages stringConstants,
@@ -112,64 +102,55 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 new SeriesParameterValidator(stringConstants, existingSeries), callback);
         this.stringConstants = stringConstants;
         this.series = new SeriesDTO();
-
         nameEntryField = createTextBox(null);
-        nameEntryField.setWidth("200px");
-
+        nameEntryField.setVisibleLength(40);
         isMedalSeriesCheckbox = createCheckbox(stringConstants.medalSeries());
-        
         fleetNameEntryFields = new ArrayList<TextBox>();
         fleetColorEntryFields = new ArrayList<ListBox>();
         fleetOrderNoEntryFields = new ArrayList<IntegerBox>(); 
-
         fleetsGrid = new Grid(0, 0);
-        
         // create at least one fleet
-        createFleetNameWidget("Default");
-        createFleetOrderNoWidget(0);
-        createFleetColorWidget(null);
+        addFleetWidget("Default", 0, null);
     }
 
     private Widget createFleetNameWidget(String defaultName) {
         TextBox textBox = createTextBox(defaultName); 
-        textBox.setWidth("175px");
+        textBox.setVisibleLength(40);
         fleetNameEntryFields.add(textBox);
         return textBox; 
     }
 
     private Widget createFleetColorWidget(Color defaultColor) {
         final ListBox listBox = createListBox(false);
-        final int fleetIndex = fleetNameEntryFields.size(); 
+        final int fleetIndex = fleetNameEntryFields.size()-1;
         listBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 // set default order no of the selected color
                 int selIndex = listBox.getSelectedIndex();
-                IntegerBox orderNoBox = fleetOrderNoEntryFields.get(fleetIndex-1);
-                if(selIndex == 0) {
+                IntegerBox orderNoBox = fleetOrderNoEntryFields.get(fleetIndex);
+                TextBox nameBox = fleetNameEntryFields.get(fleetIndex);
+                if (selIndex == 0) {
                     orderNoBox.setValue(0);
                 } else {
                     String value = listBox.getValue(selIndex);
-                    for(FleetColors color: FleetColors.values()) {
-                        if(color.name().equals(value)) {
-                            orderNoBox.setValue(color.getDefaultOrderNo());
-                            break;
-                        }
+                    final FleetColors color = FleetColors.valueOf(value);
+                    if (color != null) {
+                        orderNoBox.setValue(color.getDefaultOrderNo());
+                        nameBox.setValue(""+color.name().charAt(0)+color.name().toLowerCase().substring(1));
                     }
                 }
+                validate();
             }
         });
-        
         listBox.addItem(stringConstants.noColor());
-        for(FleetColors value: FleetColors.values())
+        for(FleetColors value: FleetColors.values()) {
             listBox.addItem(value.name());
-
+        }
         if(defaultColor == null) {
             listBox.setSelectedIndex(0);
         }
-
         fleetColorEntryFields.add(listBox);
-
         return listBox; 
     }
 
@@ -183,7 +164,6 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     protected SeriesDTO getResult() {
         series.name = nameEntryField.getText();
         series.setMedal(isMedalSeriesCheckbox.getValue());
-
         List<FleetDTO> fleets = new ArrayList<FleetDTO>();
         int groupsCount = fleetNameEntryFields.size();
         for(int i = 0; i < groupsCount; i++) {
@@ -197,9 +177,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
             fleetDTO.setOrderNo(orderNo);
             fleets.add(fleetDTO);
         }
-        
         series.setFleets(fleets);
-
         return series;
     }
 
@@ -216,7 +194,6 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
                 }
             }
         }
-            
         return result;
     }
     
@@ -229,50 +206,44 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         }
         Grid formGrid = new Grid(2, 2);
         panel.add(formGrid);
-        
         formGrid.setWidget(0,  0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 1, isMedalSeriesCheckbox);
-        
         panel.add(createHeadlineLabel(stringConstants.fleets()));
         panel.add(fleetsGrid);
-        
-        Button addGroupButton = new Button("Add fleet");
-        addGroupButton.addClickHandler(new ClickHandler() {
-            
+        Button addFleetButton = new Button(stringConstants.addFleet());
+        addFleetButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                createFleetNameWidget(null);
-                createFleetOrderNoWidget(0);
-                createFleetColorWidget(null);
+                addFleetWidget(null, 0, null);
                 updateFleetsGrid(panel);
             }
         });
-        panel.add(addGroupButton);
-        
+        panel.add(addFleetButton);
         updateFleetsGrid(panel);
-        
         return panel;
+    }
+    
+    private void addFleetWidget(String fleetName, int ordering, Color color) {
+        createFleetNameWidget(fleetName);
+        createFleetOrderNoWidget(ordering);
+        createFleetColorWidget(color);
     }
 
     private void updateFleetsGrid(VerticalPanel parentPanel) {
         int widgetIndex = parentPanel.getWidgetIndex(fleetsGrid);
         parentPanel.remove(fleetsGrid);
-        
         int fleetCount = fleetNameEntryFields.size();
         fleetsGrid = new Grid(fleetCount + 1, 3);
         fleetsGrid.setCellSpacing(4);
-
-        fleetsGrid.setHTML(0, 0, stringConstants.name());
-        fleetsGrid.setHTML(0, 1, stringConstants.rank());
-        fleetsGrid.setHTML(0, 2, stringConstants.color());
-
+        fleetsGrid.setHTML(0, 0, stringConstants.color());
+        fleetsGrid.setHTML(0, 1, stringConstants.name());
+        fleetsGrid.setHTML(0, 2, stringConstants.rank());
         for(int i = 0; i < fleetCount; i++) {
-            fleetsGrid.setWidget(i+1, 0, fleetNameEntryFields.get(i));
-            fleetsGrid.setWidget(i+1, 1, fleetOrderNoEntryFields.get(i));
-            fleetsGrid.setWidget(i+1, 2, fleetColorEntryFields.get(i));
+            fleetsGrid.setWidget(i+1, 0, fleetColorEntryFields.get(i));
+            fleetsGrid.setWidget(i+1, 1, fleetNameEntryFields.get(i));
+            fleetsGrid.setWidget(i+1, 2, fleetOrderNoEntryFields.get(i));
         }
-
         parentPanel.insert(fleetsGrid, widgetIndex);
     }
     

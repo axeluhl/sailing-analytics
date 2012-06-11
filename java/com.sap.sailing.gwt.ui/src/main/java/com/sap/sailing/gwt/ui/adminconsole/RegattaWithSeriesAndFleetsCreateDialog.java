@@ -115,9 +115,9 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         this.regatta = new RegattaDTO();
 
         nameEntryField = createTextBox(null);
-        nameEntryField.setWidth("200px");
+        nameEntryField.setVisibleLength(40);
         boatClassEntryField = createTextBox(null);
-        boatClassEntryField.setWidth("150px");
+        boatClassEntryField.setVisibleLength(20);
 
         createdSeries = new ArrayList<SeriesDTO>();
         seriesGrid = new Grid(0, 0);
@@ -127,10 +127,8 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
     protected RegattaDTO getResult() {
         regatta.name = nameEntryField.getText();
         regatta.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
-
         regatta.series = new ArrayList<SeriesDTO>();
         regatta.series.addAll(createdSeries);
-
         return regatta;
     }
 
@@ -143,22 +141,17 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         }
         Grid formGrid = new Grid(2, 2);
         panel.add(formGrid);
-
         formGrid.setWidget(0, 0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 0, new Label(stringConstants.boatClass() + ":"));
         formGrid.setWidget(1, 1, boatClassEntryField);
-
         panel.add(createHeadlineLabel(stringConstants.series()));
         panel.add(seriesGrid);
-
         Button addSeriesButton = new Button("Add series");
         addSeriesButton.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
                 RegattaDTO result = getResult();
-
                 SeriesWithFleetsCreateDialog dialog = new SeriesWithFleetsCreateDialog(Collections
                         .unmodifiableCollection(result.series), stringConstants, new AsyncCallback<SeriesDTO>() {
                     @Override
@@ -175,7 +168,6 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
             }
         });
         panel.add(addSeriesButton);
-
         return panel;
     }
 
