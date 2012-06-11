@@ -23,6 +23,10 @@ import com.sap.sailing.domain.tracking.WindTrack;
 public interface DomainObjectFactory {
     WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage);
 
+    /**
+     * @return the leaderboard loaded, if successful, or <code>null</code> if the leaderboard couldn't be loaded,
+     * e.g., because the regatta for a regatta leaderboard couldn't be found
+     */
     Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry);
 
     Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry);
