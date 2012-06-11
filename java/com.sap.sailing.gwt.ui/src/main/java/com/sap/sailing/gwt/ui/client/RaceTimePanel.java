@@ -180,11 +180,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             break;
         case Replay:
             // set time to end of race
-            if (newRaceTimesInfo.getLastMarkPassingTimes() != null && newRaceTimesInfo.getLastMarkPassingTimes().firstPassingDate != null) {
-                timer.setTime(newRaceTimesInfo.getLastMarkPassingTimes().firstPassingDate.getTime());
-            } else  if (newRaceTimesInfo.endOfRace != null) {
-                timer.setTime(newRaceTimesInfo.endOfRace.getTime());
-            } else  if (newRaceTimesInfo.startOfRace != null) {
+            if (newRaceTimesInfo.startOfRace != null) {
                 timer.setTime(newRaceTimesInfo.startOfRace.getTime());
             }
             break;
