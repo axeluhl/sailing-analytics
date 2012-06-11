@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -158,7 +157,7 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public List<Leg> getLegs() {
-        return Collections.unmodifiableList(legs);
+        return new ArrayList<Leg>(legs);
     }
 
     @Override
