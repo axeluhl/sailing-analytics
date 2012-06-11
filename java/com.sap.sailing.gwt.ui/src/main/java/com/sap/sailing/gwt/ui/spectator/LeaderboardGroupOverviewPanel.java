@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
@@ -424,19 +425,19 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             @Override
             public SafeHtml getValue(RaceColumnDTO race) {
                 SafeHtml name = null;
-                Iterable<String> fleetNames = race.getFleetNames();
-                boolean singleFleet = Util.size(fleetNames) < 2;
-                for (String fleetName : fleetNames) {
+                Iterable<FleetDTO> fleets = race.getFleets();
+                boolean singleFleet = Util.size(fleets) < 2;
+                for (FleetDTO fleet : fleets) {
                     String raceDisplayName;
                     if (singleFleet) {
                         raceDisplayName = race.getRaceColumnName();
                     } else {
-                        raceDisplayName = race.getRaceColumnName() + "("+fleetName+")";
+                        raceDisplayName = race.getRaceColumnName() + "("+fleet+")";
                     }
-                    if (race.getRaceIdentifier(fleetName) != null) {
+                    if (race.getRaceIdentifier(fleet) != null) {
                         LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                         StrippedLeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
-                        RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleetName);
+                        RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
                         String debugParam = Window.Location.getParameter("gwt.codesvr");
                         String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName="
                                 + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
@@ -457,8 +458,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             public String getValue(RaceColumnDTO race) {
                 StringBuilder result = new StringBuilder();
                 boolean first = true;
-                for (String fleetName : race.getFleetNames()) {
-                    Date raceStart = race.getStartDate(fleetName);
+                for (FleetDTO fleet : race.getFleets()) {
+                    Date raceStart = race.getStartDate(fleet);
                     if (first) {
                         first = false;
                     } else {

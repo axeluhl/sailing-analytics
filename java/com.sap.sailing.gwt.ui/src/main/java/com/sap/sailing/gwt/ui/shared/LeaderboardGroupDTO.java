@@ -37,8 +37,8 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         leaderboardsLoop:
         for (StrippedLeaderboardDTO leaderboard : leaderboards) {
             for (RaceColumnDTO raceInLeaderboard : leaderboard.getRaceList()) {
-                for (String fleetName : raceInLeaderboard.getFleetNames()) {
-                    final RegattaAndRaceIdentifier raceIdentifierForFleet = raceInLeaderboard.getRaceIdentifier(fleetName);
+                for (FleetDTO fleet : raceInLeaderboard.getFleets()) {
+                    final RegattaAndRaceIdentifier raceIdentifierForFleet = raceInLeaderboard.getRaceIdentifier(fleet);
                     if (raceIdentifierForFleet != null && raceIdentifierForFleet.equals(race)) {
                         containsRace = true;
                         break leaderboardsLoop;

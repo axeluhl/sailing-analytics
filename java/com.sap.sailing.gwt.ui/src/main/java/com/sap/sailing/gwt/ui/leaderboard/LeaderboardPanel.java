@@ -65,6 +65,7 @@ import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
@@ -1044,13 +1045,20 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         setWidget(contentPanel);
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
     }
+    
+    /**
+     * Largely for subclasses to add more stuff to this panel, such as more toolbar buttons.
+     */
+    protected HorizontalPanel getRefreshAndSettingsPanel() {
+        return refreshAndSettingsPanel;
+    }
 
     private RaceColumnDTO getRaceByName(String raceName) {
         if (getLeaderboard() != null) {
             for (RaceColumnDTO race : getLeaderboard().getRaceList()) {
-                for (String fleetName : race.getFleetNames()) {
-                    if (race.getRaceIdentifier(fleetName) != null
-                            && raceName.equals(race.getRaceIdentifier(fleetName).getRaceName())) {
+                for (FleetDTO fleet : race.getFleets()) {
+                    if (race.getRaceIdentifier(fleet) != null
+                            && raceName.equals(race.getRaceIdentifier(fleet).getRaceName())) {
                         return race;
                     }
                 }
@@ -1075,8 +1083,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
             if (column instanceof RaceColumn<?>) {
                 RaceColumnDTO raceInLeaderboard = ((RaceColumn<?>) column).getRace();
-                for (String fleetName : raceInLeaderboard.getFleetNames()) {
-                    final RegattaAndRaceIdentifier raceIdentifier = raceInLeaderboard.getRaceIdentifier(fleetName);
+                for (FleetDTO fleet : raceInLeaderboard.getFleets()) {
+                    final RegattaAndRaceIdentifier raceIdentifier = raceInLeaderboard.getRaceIdentifier(fleet);
                     if (raceIdentifier != null && raceIdentifier.getRaceName().equals(raceName)) {
                         return (RaceColumn<?>) column;
                     }
@@ -1764,9 +1772,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private List<RegattaAndRaceIdentifier> getTrackedRacesIdentifiers() {
         List<RegattaAndRaceIdentifier> result = new ArrayList<RegattaAndRaceIdentifier>();
         for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
-            for (String fleetName : raceColumn.getFleetNames()) {
-                if (raceColumn.getRaceIdentifier(fleetName) != null) {
-                    result.add(raceColumn.getRaceIdentifier(fleetName));
+            for (FleetDTO fleet : raceColumn.getFleets()) {
+                if (raceColumn.getRaceIdentifier(fleet) != null) {
+                    result.add(raceColumn.getRaceIdentifier(fleet));
                 }
             }
         }

@@ -56,6 +56,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -71,17 +72,17 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     private final ListDataProvider<StrippedLeaderboardDTO> leaderboardList;
 
-    private final ListDataProvider<Pair<RaceColumnDTO, String>> raceColumnAndFleetNameList;
+    private final ListDataProvider<Pair<RaceColumnDTO, FleetDTO>> raceColumnAndFleetList;
 
     private final ErrorReporter errorReporter;
 
     private final CellTable<StrippedLeaderboardDTO> leaderboardTable;
 
-    private final CellTable<Pair<RaceColumnDTO, String>> raceColumnTable;
+    private final CellTable<Pair<RaceColumnDTO, FleetDTO>> raceColumnTable;
 
     private StrippedLeaderboardDTO selectedLeaderboard;
 
-    private Pair<RaceColumnDTO, String> selectedRaceInLeaderboard;
+    private Pair<RaceColumnDTO, FleetDTO> selectedRaceInLeaderboard;
 
     private final Button addColumnButton;
 
@@ -95,7 +96,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     private TextBox filterLeaderboardTextbox;
 
-    final SingleSelectionModel<Pair<RaceColumnDTO, String>> raceColumnTableSelectionModel;
+    final SingleSelectionModel<Pair<RaceColumnDTO, FleetDTO>> raceColumnTableSelectionModel;
 
     private List<StrippedLeaderboardDTO> availableLeaderboardList;
 
@@ -124,7 +125,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         this.sailingService = sailingService;
         leaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
         allRegattas = new ArrayList<RegattaDTO>(); 
-        raceColumnAndFleetNameList = new ListDataProvider<Pair<RaceColumnDTO, String>>();
+        raceColumnAndFleetList = new ListDataProvider<Pair<RaceColumnDTO, FleetDTO>>();
         this.errorReporter = errorReporter;
         this.availableLeaderboardList = new ArrayList<StrippedLeaderboardDTO>();
         VerticalPanel mainPanel = new VerticalPanel();
@@ -300,9 +301,9 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
         // ------------ races of the selected leaderboard ----------------
         AnchorCell raceAnchorCell = new AnchorCell();
-        Column<Pair<RaceColumnDTO, String>, SafeHtml> raceLinkColumn = new Column<Pair<RaceColumnDTO, String>, SafeHtml>(raceAnchorCell) {
+        Column<Pair<RaceColumnDTO, FleetDTO>, SafeHtml> raceLinkColumn = new Column<Pair<RaceColumnDTO, FleetDTO>, SafeHtml>(raceAnchorCell) {
             @Override
-            public SafeHtml getValue(Pair<RaceColumnDTO, String> raceInLeaderboardDTOAndFleetName) {
+            public SafeHtml getValue(Pair<RaceColumnDTO, FleetDTO> raceInLeaderboardDTOAndFleetName) {
                 if (raceInLeaderboardDTOAndFleetName.getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB()) != null) {
                     RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceInLeaderboardDTOAndFleetName
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
@@ -317,41 +318,41 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 }
             }
         };
-        TextColumn<Pair<RaceColumnDTO, String>> fleetNameColumn = new TextColumn<Pair<RaceColumnDTO, String>>() {
+        TextColumn<Pair<RaceColumnDTO, FleetDTO>> fleetNameColumn = new TextColumn<Pair<RaceColumnDTO, FleetDTO>>() {
             @Override
-            public String getValue(Pair<RaceColumnDTO, String> object) {
-                return object.getB();
+            public String getValue(Pair<RaceColumnDTO, FleetDTO> object) {
+                return object.getB().name;
             }
         };
 
-        Column<Pair<RaceColumnDTO, String>, Boolean> isMedalRaceCheckboxColumn = new Column<Pair<RaceColumnDTO, String>, Boolean>(
+        Column<Pair<RaceColumnDTO, FleetDTO>, Boolean> isMedalRaceCheckboxColumn = new Column<Pair<RaceColumnDTO, FleetDTO>, Boolean>(
                 new CheckboxCell()) {
             @Override
-            public Boolean getValue(Pair<RaceColumnDTO, String> race) {
+            public Boolean getValue(Pair<RaceColumnDTO, FleetDTO> race) {
                 return race.getA().isMedalRace();
             }
         };
-        isMedalRaceCheckboxColumn.setFieldUpdater(new FieldUpdater<Pair<RaceColumnDTO, String>, Boolean>() {
+        isMedalRaceCheckboxColumn.setFieldUpdater(new FieldUpdater<Pair<RaceColumnDTO, FleetDTO>, Boolean>() {
             @Override
-            public void update(int index, Pair<RaceColumnDTO, String> object, Boolean value) {
+            public void update(int index, Pair<RaceColumnDTO, FleetDTO> object, Boolean value) {
                 setIsMedalRace(selectedLeaderboard.name, object.getA(), value);
             }
         });
         isMedalRaceCheckboxColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 
-        TextColumn<Pair<RaceColumnDTO, String>> isLinkedRaceColumn = new TextColumn<Pair<RaceColumnDTO, String>>() {
+        TextColumn<Pair<RaceColumnDTO, FleetDTO>> isLinkedRaceColumn = new TextColumn<Pair<RaceColumnDTO, FleetDTO>>() {
             @Override
-            public String getValue(Pair<RaceColumnDTO, String> raceColumnAndFleetName) {
+            public String getValue(Pair<RaceColumnDTO, FleetDTO> raceColumnAndFleetName) {
                 boolean isTrackedRace = raceColumnAndFleetName.getA().isTrackedRace(raceColumnAndFleetName.getB());
                 return isTrackedRace ? stringMessages.yes() : stringMessages.no();
             }
         };
-        ImagesBarColumn<Pair<RaceColumnDTO, String>, LeaderboardRaceConfigImagesBarCell> raceActionColumn =
-                new ImagesBarColumn<Pair<RaceColumnDTO, String>, LeaderboardRaceConfigImagesBarCell>(
+        ImagesBarColumn<Pair<RaceColumnDTO, FleetDTO>, LeaderboardRaceConfigImagesBarCell> raceActionColumn =
+                new ImagesBarColumn<Pair<RaceColumnDTO, FleetDTO>, LeaderboardRaceConfigImagesBarCell>(
                         new LeaderboardRaceConfigImagesBarCell(stringMessages));
-        raceActionColumn.setFieldUpdater(new FieldUpdater<Pair<RaceColumnDTO, String>, String>() {
+        raceActionColumn.setFieldUpdater(new FieldUpdater<Pair<RaceColumnDTO, FleetDTO>, String>() {
             @Override
-            public void update(int index, Pair<RaceColumnDTO, String> object, String value) {
+            public void update(int index, Pair<RaceColumnDTO, FleetDTO> object, String value) {
                 if ("ACTION_REMOVE".equals(value)) {
                     if (Window.confirm(stringMessages.reallyRemoveRace(object.getA().getRaceColumnName()))) {
                         removeRaceColumn(object.getA());
@@ -367,15 +368,15 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         Label lblRaceNamesIn = new Label(stringMessages.races());
         vPanel.add(lblRaceNamesIn);
 
-        raceColumnTable = new CellTable<Pair<RaceColumnDTO, String>>(/* pageSize */200, tableRes);
+        raceColumnTable = new CellTable<Pair<RaceColumnDTO, FleetDTO>>(/* pageSize */200, tableRes);
         raceColumnTable.addColumn(raceLinkColumn, stringMessages.name());
         raceColumnTable.addColumn(fleetNameColumn, stringMessages.fleet());
         raceColumnTable.addColumn(isMedalRaceCheckboxColumn, stringMessages.medalRace());
         raceColumnTable.addColumn(isLinkedRaceColumn, stringMessages.islinked());
         raceColumnTable.addColumn(raceActionColumn, stringMessages.actions());
-        raceColumnAndFleetNameList.addDataDisplay(raceColumnTable);
+        raceColumnAndFleetList.addDataDisplay(raceColumnTable);
         raceColumnTable.setWidth("500px");
-        raceColumnTableSelectionModel = new SingleSelectionModel<Pair<RaceColumnDTO, String>>();
+        raceColumnTableSelectionModel = new SingleSelectionModel<Pair<RaceColumnDTO, FleetDTO>>();
 
         raceColumnTable.setSelectionModel(raceColumnTableSelectionModel);
 
@@ -442,9 +443,9 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     }
     
-    private void unlinkRaceColumnFromTrackedRace(final String raceColumnName, final String fleetName) {
+    private void unlinkRaceColumnFromTrackedRace(final String raceColumnName, final FleetDTO fleet) {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
-        sailingService.disconnectLeaderboardColumnFromTrackedRace(selectedLeaderboardName, raceColumnName, fleetName,
+        sailingService.disconnectLeaderboardColumnFromTrackedRace(selectedLeaderboardName, raceColumnName, fleet.name,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -455,8 +456,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     @Override
                     public void onSuccess(Void arg0) {
                         trackedRacesListComposite.clearSelection();
-                        getSelectedRaceColumnAndFleetName().getA().setRaceIdentifier(fleetName, null);
-                        raceColumnAndFleetNameList.refresh();
+                        getSelectedRaceColumnAndFleetName().getA().setRaceIdentifier(fleet, null);
+                        raceColumnAndFleetList.refresh();
                     }
                 });
     }
@@ -473,9 +474,9 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
                     @Override
                     public void onSuccess(Void arg0) {
-                        Iterator<Pair<RaceColumnDTO, String>> rowIter = raceColumnAndFleetNameList.getList().iterator();
+                        Iterator<Pair<RaceColumnDTO, FleetDTO>> rowIter = raceColumnAndFleetList.getList().iterator();
                         while (rowIter.hasNext()) {
-                            Pair<RaceColumnDTO, String> next = rowIter.next();
+                            Pair<RaceColumnDTO, FleetDTO> next = rowIter.next();
                             if (raceColumnTableSelectionModel.isSelected(next)) {
                                 raceColumnTableSelectionModel.setSelected(next, false);
                             }
@@ -549,9 +550,9 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     private void selectTrackedRaceInRaceList() {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
-        final Pair<RaceColumnDTO, String> selectedRaceColumnAndFleetNameInLeaderboard = getSelectedRaceColumnAndFleetName();
+        final Pair<RaceColumnDTO, FleetDTO> selectedRaceColumnAndFleetNameInLeaderboard = getSelectedRaceColumnAndFleetName();
         final String selectedRaceColumnName = selectedRaceColumnAndFleetNameInLeaderboard.getA().getRaceColumnName();
-        final String selectedFleetName = selectedRaceColumnAndFleetNameInLeaderboard.getB();
+        final String selectedFleetName = selectedRaceColumnAndFleetNameInLeaderboard.getB().name;
         sailingService.getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(selectedLeaderboardName,
                 selectedRaceColumnName, new AsyncCallback<Map<String, RegattaAndRaceIdentifier>>() {
                     @Override
@@ -582,24 +583,24 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         trackedRacesListComposite.selectRaceByIdentifier(raceIdentifier);
     }
 
-    private Pair<RaceColumnDTO, String> getSelectedRaceColumnAndFleetName() {
-        Pair<RaceColumnDTO, String> raceInLeaderboardAndFleetName = raceColumnTableSelectionModel.getSelectedObject();
+    private Pair<RaceColumnDTO, FleetDTO> getSelectedRaceColumnAndFleetName() {
+        Pair<RaceColumnDTO, FleetDTO> raceInLeaderboardAndFleetName = raceColumnTableSelectionModel.getSelectedObject();
         return raceInLeaderboardAndFleetName;
     }
 
-    private void editRaceColumnOfLeaderboard(final Pair<RaceColumnDTO, String> object) {
+    private void editRaceColumnOfLeaderboard(final Pair<RaceColumnDTO, FleetDTO> object) {
         final String oldRaceName = object.getA().getRaceColumnName();
-        List<Pair<RaceColumnDTO, String>> existingRacesWithoutThisRace = new ArrayList<Pair<RaceColumnDTO, String>>();
-        existingRacesWithoutThisRace.addAll(raceColumnAndFleetNameList.getList());
+        List<Pair<RaceColumnDTO, FleetDTO>> existingRacesWithoutThisRace = new ArrayList<Pair<RaceColumnDTO, FleetDTO>>();
+        existingRacesWithoutThisRace.addAll(raceColumnAndFleetList.getList());
         existingRacesWithoutThisRace.remove(object);
         final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(existingRacesWithoutThisRace,
-                object.getA(), stringMessages, new AsyncCallback<Pair<RaceColumnDTO, String>>() {
+                object.getA(), stringMessages, new AsyncCallback<Pair<RaceColumnDTO, FleetDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                     }
 
                     @Override
-                    public void onSuccess(final Pair<RaceColumnDTO, String> result) {
+                    public void onSuccess(final Pair<RaceColumnDTO, FleetDTO> result) {
                         sailingService.renameLeaderboardColumn(getSelectedLeaderboardName(), oldRaceName,
                                 result.getA().getRaceColumnName(), new AsyncCallback<Void>() {
 
@@ -631,19 +632,19 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         raceDialog.show();
     }
 
-    private void reloadRaceInLeaderboardRow(String oldRaceName, String oldFleetName, Pair<RaceColumnDTO, String> newRaceColumnAndFleetName) {
+    private void reloadRaceInLeaderboardRow(String oldRaceName, FleetDTO oldFleet, Pair<RaceColumnDTO, FleetDTO> newRaceColumnAndFleet) {
         int index = -1;
-        for (int i = 0; i < raceColumnAndFleetNameList.getList().size(); i++) {
-            Pair<RaceColumnDTO, String> raceColumnAndFleetName = raceColumnAndFleetNameList.getList().get(i);
-            if (raceColumnAndFleetName.getA().getRaceColumnName().equals(oldRaceName) && raceColumnAndFleetName.getB().equals(oldFleetName)) {
+        for (int i = 0; i < raceColumnAndFleetList.getList().size(); i++) {
+            Pair<RaceColumnDTO, FleetDTO> raceColumnAndFleetName = raceColumnAndFleetList.getList().get(i);
+            if (raceColumnAndFleetName.getA().getRaceColumnName().equals(oldRaceName) && raceColumnAndFleetName.getB().equals(oldFleet)) {
                 index = i;
                 break;
             }
         }
         if (index != -1) {
-            raceColumnAndFleetNameList.getList().set(index, newRaceColumnAndFleetName);
+            raceColumnAndFleetList.getList().set(index, newRaceColumnAndFleet);
         }
-        raceColumnAndFleetNameList.refresh();
+        raceColumnAndFleetList.refresh();
     }
 
     private void setIsMedalRace(String leaderboardName, final RaceColumnDTO raceInLeaderboard,
@@ -665,14 +666,14 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     private void addRaceColumnToLeaderboard() {
         final RaceColumnDTO raceInLeaderboard = new RaceColumnDTO();
         final String leaderboardName = getSelectedLeaderboardName();
-        final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(raceColumnAndFleetNameList.getList(),
-                raceInLeaderboard, stringMessages, new AsyncCallback<Pair<RaceColumnDTO, String>>() {
+        final RaceColumnInLeaderboardDialog raceDialog = new RaceColumnInLeaderboardDialog(raceColumnAndFleetList.getList(),
+                raceInLeaderboard, stringMessages, new AsyncCallback<Pair<RaceColumnDTO, FleetDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                     }
 
                     @Override
-                    public void onSuccess(final Pair<RaceColumnDTO, String> result) {
+                    public void onSuccess(final Pair<RaceColumnDTO, FleetDTO> result) {
                         sailingService.addColumnToLeaderboard(result.getA().getRaceColumnName(), leaderboardName,
                                 result.getA().isMedalRace(), new AsyncCallback<Void>() {
                                     @Override
@@ -686,7 +687,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                                     @Override
                                     public void onSuccess(Void v) {
                                         // columnNamesInSelectedLeaderboardListBox.addItem(columnNameAndMedalRace.getA());
-                                        raceColumnAndFleetNameList.getList().add(result);
+                                        raceColumnAndFleetList.getList().add(result);
                                         // selectedLeaderboard.raceNamesAndMedalRaceAndTracked.put(columnNameAndMedalRace.getA(),
                                         // new Pair<Boolean, Boolean>(/* medal race */ columnNameAndMedalRace.getB(),
                                         // /* tracked */ false));
@@ -716,10 +717,10 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
             }
         });
         if (selectedLeaderboard != null) {
-            raceColumnAndFleetNameList.getList().clear();
+            raceColumnAndFleetList.getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
-                for (String fleetName : raceColumn.getFleetNames()) {
-                    raceColumnAndFleetNameList.getList().add(new Pair<RaceColumnDTO, String>(raceColumn, fleetName));
+                for (FleetDTO fleet : raceColumn.getFleets()) {
+                    raceColumnAndFleetList.getList().add(new Pair<RaceColumnDTO, FleetDTO>(raceColumn, fleet));
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);
@@ -745,12 +746,12 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     @Override
     public void changeTrackingRace(RegattaNameAndRaceName regattaNameAndRaceName, boolean isTracked) {
-        for (Pair<RaceColumnDTO, String> raceColumnAndFleetName : raceColumnAndFleetNameList.getList()) {
+        for (Pair<RaceColumnDTO, FleetDTO> raceColumnAndFleetName : raceColumnAndFleetList.getList()) {
             if (raceColumnAndFleetName.getA().getRaceColumnName().equals(regattaNameAndRaceName.getRaceName())) {
                 raceColumnAndFleetName.getA().setRaceIdentifier(raceColumnAndFleetName.getB(), regattaNameAndRaceName);
             }
         }
-        raceColumnAndFleetNameList.refresh();
+        raceColumnAndFleetList.refresh();
     }
 
     private void addNewLeaderboard() {
@@ -856,7 +857,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     @Override
     public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         // if no leaderboard column is selected, ignore the race selection change
-        Pair<RaceColumnDTO, String> selectedRaceColumnAndFleetName = getSelectedRaceColumnAndFleetName();
+        Pair<RaceColumnDTO, FleetDTO> selectedRaceColumnAndFleetName = getSelectedRaceColumnAndFleetName();
         if (selectedRaceColumnAndFleetName != null) {
             if (selectedRaces.isEmpty()) {
                 unlinkRaceColumnFromTrackedRace(selectedRaceColumnAndFleetName.getA().getRaceColumnName(), selectedRaceColumnAndFleetName.getB());
@@ -868,9 +869,9 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     }
 
     private void linkTrackedRaceToSelectedRaceColumn(final RaceColumnDTO selectedRaceInLeaderboard,
-            final String fleetName, final RegattaAndRaceIdentifier selectedRace) {
+            final FleetDTO fleet, final RegattaAndRaceIdentifier selectedRace) {
         sailingService.connectTrackedRaceToLeaderboardColumn(getSelectedLeaderboardName(), selectedRaceInLeaderboard
-                .getRaceColumnName(), fleetName, selectedRace,
+                .getRaceColumnName(), fleet.name, selectedRace,
                 new AsyncCallback<Boolean>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -884,8 +885,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     public void onSuccess(Boolean success) {
                         if (success) {
                             // TODO consider enabling the Unlink button
-                            selectedRaceInLeaderboard.setRaceIdentifier(fleetName, selectedRace);
-                            raceColumnAndFleetNameList.refresh();
+                            selectedRaceInLeaderboard.setRaceIdentifier(fleet, selectedRace);
+                            raceColumnAndFleetList.refresh();
                         }
                     }
                 });

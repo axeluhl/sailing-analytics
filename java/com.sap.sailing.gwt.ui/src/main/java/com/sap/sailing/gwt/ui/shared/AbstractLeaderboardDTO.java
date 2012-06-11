@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.impl.Util;
 
 public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public String name;
@@ -83,8 +82,8 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public boolean raceIsTracked(String raceColumnName) {
         for (RaceColumnDTO race : races) {
             if (race.getRaceColumnName().equals(raceColumnName)) {
-                for (String fleetName : race.getFleetNames()) {
-                    if (race.isTrackedRace(fleetName)) {
+                for (FleetDTO fleet : race.getFleets()) {
+                    if (race.isTrackedRace(fleet)) {
                         return true;
                     }
                 }
@@ -114,38 +113,45 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
      * yet, it's added to the race column's fleet name list. The <code>trackedRaceIdentifier</code> and
      * <code>race</code> are associated with the column for the fleet identified by <code>fleetName</code>.
      * 
-     * @param fleetName
+     * @param fleetDTO
      *            must not be null
      */
-    public void addRace(String raceColumnName, String fleetName, boolean medalRace,
+    public void addRace(String raceColumnName, FleetDTO fleetDTO, boolean medalRace,
             RegattaAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
-        assert fleetName != null;
+        assert fleetDTO != null;
         RaceColumnDTO raceInLeaderboardDTO = getOrCreateRaceColumn(raceColumnName);
-        if (!Util.contains(raceInLeaderboardDTO.getFleetNames(), fleetName)) {
-            raceInLeaderboardDTO.addFleetName(fleetName);
+        boolean contains = false;
+        for (FleetDTO fleet : raceInLeaderboardDTO.getFleets()) {
+            if (fleet.name.equals(fleetDTO.name)) {
+                contains = true;
+                break;
+            }
+        }
+        if (!contains) {
+            raceInLeaderboardDTO.addFleet(fleetDTO);
         }
         raceInLeaderboardDTO.setMedalRace(medalRace);
-        raceInLeaderboardDTO.setRaceIdentifier(fleetName, trackedRaceIdentifier);
-        raceInLeaderboardDTO.setRace(fleetName, race);
+        raceInLeaderboardDTO.setRaceIdentifier(fleetDTO, trackedRaceIdentifier);
+        raceInLeaderboardDTO.setRace(fleetDTO, race);
     }
 
     /**
      * A new {@link RaceColumnDTO} by the name <code>raceColumnName</code> is created and added to this leaderboard at
-     * position <code>index</code>. The single fleet named <code>fleetName</code> is added to the column. The
+     * position <code>index</code>. The single fleet <code>fleet</code> is added to the column. The
      * <code>trackedRaceIdentifier</code> and <code>race</code> are associated with the column for the fleet identified
      * by <code>fleetName</code>.
      * 
-     * @param fleetName
+     * @param fleet
      *            must not be null
      */
-    public void createRaceColumnAt(String raceColumnName, String fleetName, boolean medalRace,
+    public void createRaceColumnAt(String raceColumnName, FleetDTO fleet, boolean medalRace,
             RegattaAndRaceIdentifier trackedRaceIdentifier, int index) {
-        assert fleetName != null;
+        assert fleet != null;
         RaceColumnDTO raceInLeaderboardDTO = new RaceColumnDTO();
         raceInLeaderboardDTO.name = raceColumnName;
         raceInLeaderboardDTO.setMedalRace(medalRace);
-        raceInLeaderboardDTO.addFleetName(fleetName);
-        raceInLeaderboardDTO.setRaceIdentifier(fleetName, trackedRaceIdentifier);
+        raceInLeaderboardDTO.addFleet(fleet);
+        raceInLeaderboardDTO.setRaceIdentifier(fleet, trackedRaceIdentifier);
         races.add(index, raceInLeaderboardDTO);
     }
     
@@ -206,8 +212,8 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public Date getStartDate() {
         Date leaderboardStart = null;
         for (RaceColumnDTO race : getRaceList()) {
-            for (String fleetName : race.getFleetNames()) {
-                Date raceStart = race.getStartDate(fleetName);
+            for (FleetDTO fleet: race.getFleets()) {
+                Date raceStart = race.getStartDate(fleet);
                 if (raceStart != null) {
                     if (leaderboardStart == null) {
                         leaderboardStart = new Date();
