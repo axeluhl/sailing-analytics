@@ -66,7 +66,8 @@ public class ZipFileImpl implements ZipFile {
                 raceSummaries.add(new RaceSummaryImpl(boatClassNameAndLatestResultList.getKey(), resultsPerBoat,
                         fleetNamesPerBoatClassAndRaceNumber.get(boatClassNameAndLatestResultList.getKey()).get(raceNumber), raceNumber));
             }
-            RegattaSummary regattaSummary = new RegattaSummaryImpl(raceSummaries, boatClassNameAndLatestResultList.getKey(), resultList.getBoats(),
+            RegattaSummary regattaSummary = new RegattaSummaryImpl(boatClassNameAndLatestResultList.getValue()
+                    .getEvent(), raceSummaries, boatClassNameAndLatestResultList.getKey(), resultList.getBoats(),
                     resultList.getTimePointPublished());
             regattaSummaryByBoatClass.put(regattaSummary.getBoatClassName(), regattaSummary);
         }

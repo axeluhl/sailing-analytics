@@ -55,7 +55,7 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
  * @author Frank Mittag (C5163974)
  * 
  */
-public class EventStructureManagementPanel extends SimplePanel implements RegattaDisplayer {
+public class RegattaStructureManagementPanel extends SimplePanel implements RegattaDisplayer {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -75,7 +75,7 @@ public class EventStructureManagementPanel extends SimplePanel implements Regatt
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private boolean supportEvents = false;
 
-    public EventStructureManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public RegattaStructureManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages, RegattaRefresher regattaRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
