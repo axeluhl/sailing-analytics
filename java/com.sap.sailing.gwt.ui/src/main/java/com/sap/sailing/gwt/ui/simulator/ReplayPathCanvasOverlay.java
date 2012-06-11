@@ -13,8 +13,8 @@ public class ReplayPathCanvasOverlay extends PathCanvasOverlay  {
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     private  List<WindDTO> windDTOToDraw;
     
-    public ReplayPathCanvasOverlay(Timer timer) {
-        super(timer);
+    public ReplayPathCanvasOverlay(String name, Timer timer) {
+        super(name, timer);
         this.displayWindAlongPath = false;
         windDTOToDraw = null;
         //this.timer.addTimeListener(this);

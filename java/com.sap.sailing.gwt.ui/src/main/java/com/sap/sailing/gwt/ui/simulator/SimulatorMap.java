@@ -40,9 +40,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private WindFieldGenParamsDTO windParams;
     private WindFieldCanvasOverlay windFieldCanvasOverlay;
     private List<PathCanvasOverlay> pathCanvasOverlays;
-    private List<ReplayPathCanvasOverlay> replayPathCanvasOverlays;
+    private List<PathCanvasOverlay> replayPathCanvasOverlays;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
-
+    private PathLegendCanvasOverlay legendCanvasOverlay;
+    
     private List<TimeListenerWithStoppingCriteria> timeListeners;
 
     private final SimulatorServiceAsync simulatorSvc;
@@ -88,14 +89,14 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 WindFieldDTO pathWindDTO = new WindFieldDTO();
                 pathWindDTO.setMatrix(paths[i].getMatrix());
                 if (summaryView) {
-                    PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay();
+                    PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay(paths[i].name);
                     pathCanvasOverlays.add(pathCanvasOverlay);
                     pathCanvasOverlay.pathColor = colorPalette.getNextColor();
                     mapw.addOverlay(pathCanvasOverlay);
                     pathCanvasOverlay.setWindField(pathWindDTO);    
                     pathCanvasOverlay.redraw(true); 
                 } else {
-                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(timer);
+                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(paths[i].name, timer);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.pathColor = colorPalette.getNextColor();
                     mapw.addOverlay(replayPathCanvasOverlay);
@@ -146,28 +147,34 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             removeOverlays();
             pathCanvasOverlays.clear();
             replayPathCanvasOverlays.clear();
-
+            mapw.addOverlay(legendCanvasOverlay);
             colorPalette.reset();
             for (int i = 0; i < paths.length; ++i) {
                 /* TODO Revisit for now creating a WindFieldDTO from the path */
                 WindFieldDTO pathWindDTO = new WindFieldDTO();
                 pathWindDTO.setMatrix(paths[i].getMatrix());
                 if (summaryView) {
-                    PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay();
+                    
+                    PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay(paths[i].name);
                     pathCanvasOverlays.add(pathCanvasOverlay);
                     pathCanvasOverlay.pathColor = colorPalette.getNextColor();
                     mapw.addOverlay(pathCanvasOverlay);
                     pathCanvasOverlay.setWindField(pathWindDTO);    
                     pathCanvasOverlay.redraw(true); 
+                    legendCanvasOverlay.setPathOverlays(pathCanvasOverlays);
+                    
                 } else {
-                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(timer);
+                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(paths[i].name,timer);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.pathColor = colorPalette.getNextColor();
                     mapw.addOverlay(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
+                    legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
+                   
+                    
                 }
             }
-
+            legendCanvasOverlay.redraw(true);
             if (!summaryView) {
                 WindFieldDTO windFieldDTO = result.windField;
                 logger.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
@@ -249,8 +256,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windFieldCanvasOverlay = new WindFieldCanvasOverlay(timer);
         // mapw.addOverlay(windFieldCanvasOverlay);
         pathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
-        replayPathCanvasOverlays = new ArrayList<ReplayPathCanvasOverlay>();
+        replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         // timeListeners.add(replayPathCanvasOverlay);
+        legendCanvasOverlay = new PathLegendCanvasOverlay();
+        
         overlaysInitialized = true;
     }
 
@@ -347,6 +356,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 mapw.removeOverlay(replayPathCanvasOverlays.get(i));
                 num++;
             }
+            mapw.removeOverlay(legendCanvasOverlay);
             logger.info("Removed " + num + " overlays");
         }
     }
