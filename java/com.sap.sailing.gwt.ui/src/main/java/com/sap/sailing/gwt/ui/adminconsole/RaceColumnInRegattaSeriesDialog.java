@@ -87,10 +87,16 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<RaceCo
         HorizontalPanel seriesPanel = new HorizontalPanel();
         seriesPanel.setSpacing(3);
         seriesPanel.add(new Label(stringConstants.series() + ":"));
-        seriesListBox.addItem("Please select a series");
-        for (SeriesDTO series : regatta.series) {
-            seriesListBox.addItem(series.name);
+        if(regatta.series.size() == 1) {
+            seriesListBox.addItem(regatta.series.get(0).name);
+            seriesListBox.setSelectedIndex(0);
+        } else {
+            seriesListBox.addItem("Please select a series");
+            for (SeriesDTO series : regatta.series) {
+                seriesListBox.addItem(series.name);
+            }
         }
+        
         seriesPanel.add(seriesListBox);
         panel.add(seriesPanel);
 
