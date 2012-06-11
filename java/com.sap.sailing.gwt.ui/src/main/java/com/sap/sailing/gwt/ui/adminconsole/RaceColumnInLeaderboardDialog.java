@@ -79,7 +79,7 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<Pair<RaceColu
 
     @Override
     protected Pair<RaceColumnDTO, String> getResult() {
-        raceInLeaderboard.setRaceColumnName(raceNameBox.getValue());
+        raceInLeaderboard.name = raceNameBox.getValue();
         raceInLeaderboard.setMedalRace(isMedalRace.getValue());
         raceInLeaderboard.addFleetName(DEFAULT_FLEET_NAME);
         return new Pair<RaceColumnDTO, String>(raceInLeaderboard, raceInLeaderboard.getFleetNames().iterator().next());

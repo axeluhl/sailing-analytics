@@ -378,4 +378,7 @@ public interface SailingServiceAsync {
     void createRegatta(String regattaName, String boatClassName,
             Map<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, AsyncCallback<RegattaDTO> callback);
+
+    void addColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
+            AsyncCallback<Void> callback);
 }

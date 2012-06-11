@@ -484,7 +484,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         List<RaceColumnDTO> raceColumns = new ArrayList<RaceColumnDTO>();
         for (RaceColumnInSeries raceColumn : series.getRaceColumns()) {
             RaceColumnDTO raceColumnDTO = new RaceColumnDTO();
-            raceColumnDTO.setRaceColumnName(raceColumn.getName());
+            raceColumnDTO.name = raceColumn.getName();
             raceColumnDTO.setMedalRace(raceColumn.isMedalRace());
             raceColumns.add(raceColumnDTO);
         }
@@ -1938,6 +1938,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public void removeRegatta(RegattaIdentifier regattaIdentifier) {
         getService().apply(new RemoveRegatta(regattaIdentifier));
+    }
+
+    @Override
+    public void addColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames) {
+        for(String columnName: columnNames) {
+            getService().apply(new AddColumnToSeries(regattaIdentifier, seriesName, columnName));
+        }
     }
 
     @Override
