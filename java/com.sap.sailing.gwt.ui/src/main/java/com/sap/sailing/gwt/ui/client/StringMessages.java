@@ -320,4 +320,6 @@ public interface StringMessages extends Messages {
     String medalSeries();
     String noColor();
     String noRegatta();
+    String addFleet();
+    String doYouReallyWantToRemoveRegatta(String name);
 }

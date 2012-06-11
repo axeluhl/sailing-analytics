@@ -252,12 +252,11 @@ public class EventStructureManagementPanel extends SimplePanel implements Regatt
         regattaActionColumn.setFieldUpdater(new FieldUpdater<RegattaDTO, String>() {
             @Override
             public void update(int index, RegattaDTO regatta, String value) {
-                if ("ACTION_REMOVE".equals(value)) {
-                    if (Window.confirm("Do you really want to remove the regatta: '" + regatta.name + "' ?")) {
+                if (RegattaConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
+                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.name))) {
                         removeRegatta(regatta);
                     }
-                } else if ("ACTION_EDIT".equals(value)) {
-                } else if ("ACTION_EDIT_RACES".equals(value)) {
+                } else if (RegattaConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     addRaceToRegattaSeries(regatta);
                 }
             }
