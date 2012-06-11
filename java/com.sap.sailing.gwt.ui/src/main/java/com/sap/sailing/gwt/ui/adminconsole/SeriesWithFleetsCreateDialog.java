@@ -116,6 +116,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     private Widget createFleetNameWidget(String defaultName) {
         TextBox textBox = createTextBox(defaultName); 
         textBox.setVisibleLength(40);
+        textBox.setWidth("175px");
         fleetNameEntryFields.add(textBox);
         return textBox; 
     }
