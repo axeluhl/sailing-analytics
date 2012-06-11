@@ -81,7 +81,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		TimePoint currentTime = startTime;
 		
 		//while there is more than 5% of the total distance to the finish 
-		while ( currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(0.05)) > 0) {
+		while ( currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(0.005)) > 0) {
 			
 			TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
 			
@@ -138,8 +138,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
 				
 		//initiate grid
-		int gridv = 10; // number of vertical grid steps
-		int gridh = 30; // number of horizontal grid steps
+		int gridv = 30; // number of vertical grid steps
+		int gridh = 200; // number of horizontal grid steps
 		Position[][] sailGrid = boundary.extractGrid(gridh, gridv);
 		
 		//create adjacency graph including start and end 
@@ -189,6 +189,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 			TimedPosition currentTimedPosition = new TimedPositionImpl(currentTime, currentPosition);
 			SpeedWithBearing currentWind = windField.getWind(currentTimedPosition);
 			polarDiagram.setWind(currentWind);
+			//System.out.println(currentWind);
 			
 			//compute the tentative distance to all the unvisited neighbours of the current node
 			//and replace it in the matrix if is smaller than the previous one
@@ -198,9 +199,15 @@ public class SailingSimulatorImpl implements SailingSimulator {
 				Bearing bearingToP = currentPosition.getBearingGreatCircle(p);
 				Distance distanceToP = currentPosition.getDistance(p);
 				Speed speedToP = polarDiagram.getSpeedAtBearing(bearingToP);
+				if ( speedToP.getKnots() == 0 )	{
+					System.out.println("polar: "+polarDiagram.getWind());
+					System.out.println("actual: "+currentWind);
+					
+				}
 				//multiplied by 1000 to have milliseconds
 				Long timeToP = (long) (1000 * (distanceToP.getMeters() / speedToP.getMetersPerSecond()));
 				Long tentativeDistanceToP = currentTime.asMillis() + timeToP;
+				//System.out.println(tentativeDistanceToP);
 				if (tentativeDistanceToP < tentativeDistances.get(p)) {
 					tentativeDistances.put(p, tentativeDistanceToP);
 				}
@@ -253,7 +260,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		Map<String, Path> allPaths = new HashMap<String, Path>();
 		allPaths.put("Dummy", createDummy());
 		allPaths.put("Heuristic", createHeuristic());
-		//allPaths.put("Djikstra", createDjikstra());
+		allPaths.put("Djikstra", createDjikstra());
 		return allPaths;
 	}
 
