@@ -198,8 +198,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private RegattaLeaderboard loadRegattaLeaderboard(String regattaName, DBObject dbLeaderboard, SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, RegattaRegistry regattaRegistry) {
+        RegattaLeaderboard result = null;
         Regatta regatta = regattaRegistry.getRegatta(new RegattaName(regattaName));
-        RegattaLeaderboard result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
+        if (regatta == null) {
+            logger.info("Couldn't find regatta "+regattaName+" for corresponding regatta leaderboard. Not loading regatta leaderboard.");
+        } else {
+            result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
+        }
         return result;
     }
 
@@ -368,7 +373,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
                     + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0; }");
             for (DBObject o : leaderboardCollection.find(query)) {
-                result.add(loadLeaderboard(o, regattaRegistry));
+                final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry);
+                if (loadedLeaderboard != null) {
+                    result.add(loadedLeaderboard);
+                }
             }
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
