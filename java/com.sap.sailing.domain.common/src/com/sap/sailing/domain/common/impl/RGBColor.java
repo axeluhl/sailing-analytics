@@ -73,5 +73,10 @@ public class RGBColor implements Color {
             return false;
         return true;
     }
+    
+    @Override
+    public String toString() {
+        return getAsHtml();
+    }
 
 }
