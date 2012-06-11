@@ -2065,6 +2065,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private ScoreCorrectionDTO createScoreCorrection(ScoreCorrections scoreCorrections) {
         // TODO Auto-generated method stub
-        return null;
+        return new ScoreCorrectionDTO();
     }
 }

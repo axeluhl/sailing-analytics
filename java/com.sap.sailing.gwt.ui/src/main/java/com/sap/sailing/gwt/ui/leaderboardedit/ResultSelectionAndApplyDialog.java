@@ -20,6 +20,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final LinkedHashMap<String, Triple<String, String, Pair<String, Date>>> values;
+    private ListBox listBox;
 
     public ResultSelectionAndApplyDialog(
             LeaderboardDTO leaderboard,
@@ -90,7 +91,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
     
     @Override
     protected Widget getAdditionalWidget() {
-        ListBox listBox = createListBox(/* isMultipleSelect */ false);
+        listBox = createListBox(/* isMultipleSelect */ false);
         for (String value : values.keySet()) {
             listBox.addItem(value);
         }
@@ -100,8 +101,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
 
     @Override
     protected Triple<String, String, Pair<String, Date>> getResult() {
-        // TODO Auto-generated method stub
-        return null;
+        return values.get(listBox.getValue(listBox.getSelectedIndex()));
     }
 
 }
