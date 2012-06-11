@@ -3,8 +3,10 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -21,6 +23,14 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
 
     public AbstractLeaderboardDTO() {
         races = new ArrayList<RaceColumnDTO>();
+    }
+    
+    public Set<BoatClassDTO> getBoatClasses() {
+        Set<BoatClassDTO> result = new HashSet<BoatClassDTO>();
+        for (CompetitorDTO competitor : rows.keySet()) {
+            result.add(competitor.boatClass);
+        }
+        return result;
     }
 
     public String getDisplayName(CompetitorDTO competitor) {
