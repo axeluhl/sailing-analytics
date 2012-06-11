@@ -76,6 +76,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
+import com.sap.sailing.domain.common.ScoreCorrections;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -147,6 +148,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.ScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
@@ -278,12 +280,21 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviders() throws Exception {
+    public Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviderDTOs() throws Exception {
         List<ScoreCorrectionProviderDTO> result = new ArrayList<ScoreCorrectionProviderDTO>();
+        final Iterable<ScoreCorrectionProvider> services = getScoreCorrectionProviders2();
+        for (ScoreCorrectionProvider scoreCorrectionProvider : services) {
+            result.add(createScoreCorrectionProviderDTO((ScoreCorrectionProvider) scoreCorrectionProvider));
+        }
+        return result;
+    }
+
+    private Iterable<ScoreCorrectionProvider> getScoreCorrectionProviders2() {
         final Object[] services = scoreCorrectionProviderServiceTracker.getServices();
+        List<ScoreCorrectionProvider> result = new ArrayList<ScoreCorrectionProvider>();
         if (services != null) {
-            for (Object scoreCorrectionProvider : services) {
-                result.add(createScoreCorrectionProviderDTO((ScoreCorrectionProvider) scoreCorrectionProvider));
+            for (Object service : services) {
+                result.add((ScoreCorrectionProvider) service);
             }
         }
         return result;
@@ -2039,4 +2050,21 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return getRegattaDTO(regatta);
     }
 
+    @Override
+    public ScoreCorrectionDTO getScoreCorrections(String scoreCorrectionProviderName, String eventName,
+            String boatClassName, Date timePointWhenResultPublished) {
+        ScoreCorrectionDTO result = null;
+        for (ScoreCorrectionProvider scp : getScoreCorrectionProviders2()) {
+            if (scp.getName().equals(scoreCorrectionProviderName)) {
+                result = createScoreCorrection(scp.getScoreCorrections(eventName, boatClassName,
+                        new MillisecondsTimePoint(timePointWhenResultPublished)));
+            }
+        }
+        return result;
+    }
+
+    private ScoreCorrectionDTO createScoreCorrection(ScoreCorrections scoreCorrections) {
+        // TODO Auto-generated method stub
+        return new ScoreCorrectionDTO();
+    }
 }

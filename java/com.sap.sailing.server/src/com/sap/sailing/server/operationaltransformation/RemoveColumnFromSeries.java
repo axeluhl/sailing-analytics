@@ -18,7 +18,7 @@ public class RemoveColumnFromSeries extends AbstractColumnInSeriesOperation<Void
         if (series != null) {
             series.removeRaceColumn(getColumnName());
             if (series.getRegatta().isPersistent()) {
-                // TODO update regatta in DB
+                toState.updateStoredRegatta(series.getRegatta());
             }
         }
         return null;

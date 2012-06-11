@@ -372,7 +372,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     private void performImport(final StringMessages stringMessages) {
-        getSailingService().getScoreCorrectionProviders(new AsyncCallback<Iterable<ScoreCorrectionProviderDTO>>() {
+        getSailingService().getScoreCorrectionProviderDTOs(new AsyncCallback<Iterable<ScoreCorrectionProviderDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 getErrorReporter().reportError(stringMessages.errorLoadingScoreCorrectionProviders(caught.getMessage()));
@@ -398,28 +398,29 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
         sortOfficialResultsByRelevance(providerNameAndEventNameBoatClassNameCapturedWhen);
         new ResultSelectionAndApplyDialog(getLeaderboard(), getSailingService(), getStringMessages(),
-                providerNameAndEventNameBoatClassNameCapturedWhen).show();
+                providerNameAndEventNameBoatClassNameCapturedWhen, getErrorReporter()).show();
     }
 
     private void sortOfficialResultsByRelevance(
             List<Triple<String, String, Pair<String, Date>>> providerNameAndEventNameBoatClassNameCapturedWhen) {
         final Set<BoatClassDTO> boatClasses = getLeaderboard().getBoatClasses();
-        final Set<String> boatClassNames = new HashSet<String>();
+        final Set<String> lowercaseBoatClassNames = new HashSet<String>();
         for (BoatClassDTO boatClass : boatClasses) {
-            boatClassNames.add(boatClass.name);
+            lowercaseBoatClassNames.add(boatClass.name.toLowerCase());
         }
         Collections.sort(providerNameAndEventNameBoatClassNameCapturedWhen, new Comparator<Triple<String, String, Pair<String, Date>>>() {
             @Override
             public int compare(Triple<String, String, Pair<String, Date>> o1,
                     Triple<String, String, Pair<String, Date>> o2) {
                 int result;
-                if (boatClassNames.contains(o1.getC().getA())) {
-                    if (boatClassNames.contains(o2.getC().getA())) {
+                // TODO consider looking for longest common substring to handle things like "470 M" vs. "470 Men"
+                if (lowercaseBoatClassNames.contains(o1.getC().getA().toLowerCase())) {
+                    if (lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
                         result = o1.getC().getB().compareTo(o2.getC().getB());
                     } else {
                         result = -1; // o1 scores "better", comes first, because it has the right boat class name
                     }
-                } else if (boatClassNames.contains(o2.getC().getA())) {
+                } else if (lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
                     result = 1;
                 } else {
                     // both don't seem to have the right boat class; compare by time stamp
