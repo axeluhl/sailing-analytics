@@ -11,10 +11,12 @@ public interface Path {
 	
 	void setPathPoints(List<TimedPositionWithSpeed> pointsList);
 	
-	TimedPosition getPositionAtTime(TimePoint t);
+	TimedPositionWithSpeed getPositionAtTime(TimePoint t);
 	
-	List<TimedPosition> getEvenTimedPoints(long milliseconds);
+	List<TimedPositionWithSpeed> getEvenTimedPoints(long milliseconds);
 	
-	List<TimedPosition> getEvenDistancedPoints(Distance dist);
+	List<TimedPositionWithSpeed> getEvenDistancedPoints(Distance dist);
+	
+	void setWindField(WindField wf);
 
 }
