@@ -15,9 +15,12 @@ public class RegattaSummaryImpl implements RegattaSummary {
     private final String boatClassName;
     private final Iterable<Boat> boats;
     private final TimePoint timePointPublished;
+    private final String event;
     
-    public RegattaSummaryImpl(Iterable<RaceSummary> races, String boatClassName, Iterable<Boat> boats, TimePoint timePointPublished) {
+    public RegattaSummaryImpl(String event, Iterable<RaceSummary> races, String boatClassName, Iterable<Boat> boats,
+            TimePoint timePointPublished) {
         super();
+        this.event = event;
         this.races = races;
         this.boatClassName = boatClassName;
         this.boats = boats;
@@ -62,6 +65,11 @@ public class RegattaSummaryImpl implements RegattaSummary {
     @Override
     public Iterable<Boat> getBoats() {
         return boats;
+    }
+
+    @Override
+    public String getEvent() {
+        return event;
     }
 
 }
