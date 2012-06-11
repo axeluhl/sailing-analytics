@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
+import com.sap.sailing.domain.base.impl.CourseChangeImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
@@ -80,24 +82,85 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		Position currentPosition = start;
 		TimePoint currentTime = startTime;
 		
+		int prevDirection = -1;
+		long turnloss = 4000;  // time lost when doing a turn
+		long windpred = 3000;  // time used to predict wind, i.e. hypothetical sailors prediction
+		TimePoint directTime;
+                TimePoint leftTime;
+                TimePoint rightTime;
+                
 		//while there is more than 5% of the total distance to the finish 
 		while ( currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(0.05)) > 0) {
 			
-			TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
+			//TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
+		        long nextTimeVal = currentTime.asMillis() + 30000;
+                        TimePoint nextTime = new MillisecondsTimePoint(nextTimeVal);
+		    
+			Wind cWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
+			System.out.println("cWind speed:"+cWind.getKnots()+" angle:"+cWind.getBearing().getDegrees());
+			pd.setWind(cWind);
+
+			// get wind of direction
+                        Bearing wLft = pd.optimalDirectionsUpwind()[0];
+                        Bearing wRght = pd.optimalDirectionsUpwind()[1];
+                        Bearing wDirect = currentPosition.getBearingGreatCircle(end);
+                        
+                        SpeedWithBearing sWDirect = pd.getSpeedAtBearing(wDirect);
+                        SpeedWithBearing sWLft= pd.getSpeedAtBearing(wLft);
+                        SpeedWithBearing sWRght = pd.getSpeedAtBearing(wRght);
+                        System.out.println("left boat speed:"+sWLft.getKnots()+" angle:"+sWLft.getBearing().getDegrees()+"  right boat speed:"+sWRght.getKnots()+" angle:"+sWRght.getBearing().getDegrees());
 			
-			pd.setWind(wf.getWind(new TimedPositionWithSpeedImpl(nextTime, currentPosition, null)));
+                        TimePoint wTime = new MillisecondsTimePoint(currentTime.asMillis()+windpred);
+                        Position pWDirect = sWDirect.travelTo(currentPosition, currentTime, wTime);
+                        Position pWLft = sWLft.travelTo(currentPosition, currentTime, wTime);
+                        Position pWRght = sWRght.travelTo(currentPosition, currentTime, wTime);
 			
-			Bearing lft = pd.optimalDirectionsDownwind()[0];
-			Bearing rght = pd.optimalDirectionsUpwind()[1];
-			Bearing direct = currentPosition.getBearingGreatCircle(end);
-			
-			SpeedWithBearing sdirect = pd.getSpeedAtBearing(direct);
-			SpeedWithBearing slft= pd.getSpeedAtBearing(lft);
+                        System.out.println("current Pos:"+currentPosition.getLatDeg()+","+currentPosition.getLngDeg());
+                        System.out.println("left    Pos:"+pWLft.getLatDeg()+","+pWLft.getLngDeg());
+                        System.out.println("right   Pos:"+pWRght.getLatDeg()+","+pWRght.getLngDeg());
+                                                
+			// calculate next step
+                        Wind dWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, pWDirect, null));
+                        System.out.println("dWind speed:"+dWind.getKnots()+" angle:"+dWind.getBearing().getDegrees());
+                        pd.setWind(dWind);
+                        Bearing direct = currentPosition.getBearingGreatCircle(end);
+                        SpeedWithBearing sdirect = pd.getSpeedAtBearing(direct);
+
+                        Wind lWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, pWLft, null));
+                        System.out.println("lWind speed:"+lWind.getKnots()+" angle:"+lWind.getBearing().getDegrees());
+                        pd.setWind(lWind);
+                        Bearing lft = pd.optimalDirectionsUpwind()[0];
+                        SpeedWithBearing slft= pd.getSpeedAtBearing(lft);
+                        
+                        Wind rWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, pWRght, null));
+                        System.out.println("rWind speed:"+rWind.getKnots()+" angle:"+rWind.getBearing().getDegrees());
+                        pd.setWind(rWind);
+			Bearing rght = pd.optimalDirectionsUpwind()[1];			
 			SpeedWithBearing srght = pd.getSpeedAtBearing(rght);
 			
-			Position pdirect = sdirect.travelTo(currentPosition, currentTime, nextTime);
-			Position plft = slft.travelTo(currentPosition, currentTime, nextTime);
-			Position prght = srght.travelTo(currentPosition, currentTime, nextTime);
+			System.out.println("left boat speed:"+slft.getKnots()+" angle:"+slft.getBearing().getDegrees()+"  right boat speed:"+srght.getKnots()+" angle:"+srght.getBearing().getDegrees());
+			
+			if (prevDirection==0) {
+			    directTime = new MillisecondsTimePoint(nextTimeVal);
+			    leftTime = new MillisecondsTimePoint(nextTimeVal - turnloss);
+			    rightTime = new MillisecondsTimePoint(nextTimeVal - turnloss);
+			} else if (prevDirection==1) {
+                            directTime = new MillisecondsTimePoint(nextTimeVal - turnloss);
+                            leftTime = new MillisecondsTimePoint(nextTimeVal);
+                            rightTime = new MillisecondsTimePoint(nextTimeVal - turnloss);
+                        } else if (prevDirection==2) {
+                            directTime = new MillisecondsTimePoint(nextTimeVal - turnloss);
+                            leftTime = new MillisecondsTimePoint(nextTimeVal - turnloss);
+                            rightTime = new MillisecondsTimePoint(nextTimeVal);
+                        } else {
+                            directTime = new MillisecondsTimePoint(nextTimeVal);
+                            leftTime = new MillisecondsTimePoint(nextTimeVal);
+                            rightTime = new MillisecondsTimePoint(nextTimeVal);                            
+                        }
+			
+			Position pdirect = sdirect.travelTo(currentPosition, currentTime, directTime);
+			Position plft = slft.travelTo(currentPosition, currentTime, leftTime);
+			Position prght = srght.travelTo(currentPosition, currentTime, rightTime);
 			
 			Distance ddirect = pdirect.getDistance(end);
 			Distance dlft = plft.getDistance(end);
@@ -106,16 +169,19 @@ public class SailingSimulatorImpl implements SailingSimulator {
 			if(ddirect.compareTo(dlft)<=0 && ddirect.compareTo(drght)<=0) {
 				lst.add(new TimedPositionWithSpeedImpl(nextTime, pdirect, sdirect));
 				currentPosition = pdirect;
+				prevDirection = 0;
 			}
 				
 			if(dlft.compareTo(ddirect)<=0 && dlft.compareTo(drght)<=0) {
 				lst.add(new TimedPositionWithSpeedImpl(nextTime, plft, slft));
 				currentPosition = plft;
+				prevDirection = 1;
 			}
 				
 			if(drght.compareTo(dlft)<=0 && drght.compareTo(ddirect)<=0) {
 				lst.add(new TimedPositionWithSpeedImpl(nextTime, prght, srght));
 				currentPosition = prght;
+				prevDirection = 2;
 			}
 			
 			currentTime = nextTime;

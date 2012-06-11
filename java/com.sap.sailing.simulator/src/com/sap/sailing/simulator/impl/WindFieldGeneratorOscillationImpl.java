@@ -57,13 +57,21 @@ public class WindFieldGeneratorOscillationImpl extends WindFieldGeneratorImpl im
         double leftSpeed = windParameters.baseWindSpeed*windParameters.leftWindSpeed/100.0;
         double middleSpeed = windParameters.baseWindSpeed*windParameters.middleWindSpeed/100.0;
         double rightSpeed = windParameters.baseWindSpeed*windParameters.rightWindSpeed/100.0;
-        int midPoint = ncol/2;
-        for (int i = 0; i <= midPoint; ++i) {
-            speed[i] = new KnotSpeedImpl(leftSpeed + i*(middleSpeed-leftSpeed)/(midPoint)); 
+        double midPoint = (ncol-1.)/2.;
+        for (int i = 0; i < ncol/2; ++i) {
+            speed[i] = new KnotSpeedImpl(leftSpeed + i*(middleSpeed-leftSpeed)/midPoint);
         }
-        for (int i = 1; i < ncol - midPoint; ++i) {
-            speed[midPoint + i] = new KnotSpeedImpl(middleSpeed + i*(rightSpeed-middleSpeed)/(ncol - midPoint -1)); 
+        if (ncol%2==1) {
+            speed[ncol/2] = new KnotSpeedImpl(middleSpeed);
         }
+        for (int i = 0; i < ncol/2; ++i) {
+            speed[ncol-1-i] = new KnotSpeedImpl(rightSpeed + i*(middleSpeed-rightSpeed)/midPoint);
+        }
+        /*System.out.println("wspeed:");
+        for(int i = 0; i<ncol; i++) {
+            System.out.print(""+speed[i]+", ");
+        }
+        System.out.println("");*/
     
     }
     

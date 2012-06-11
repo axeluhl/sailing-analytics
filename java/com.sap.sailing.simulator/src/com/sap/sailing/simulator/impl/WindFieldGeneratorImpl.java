@@ -27,12 +27,8 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
 
     protected Boundary boundary;
     protected WindControlParameters windParameters;
-    
-    protected List<Position> sortedPositionList;
-    
     protected Position[][] positions;
     protected Map<Pair<Integer, Integer>, Position> indexPositionMap;
-    protected TreeMap<Position,Pair<Integer, Integer>> positionIndexMap;
     
     protected Map<TimePoint, SpeedWithBearing[][]> timeSpeedWithBearingMap;
 
@@ -73,32 +69,6 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         this.windParameters = windParameters;
         this.positions = null;
         this.indexPositionMap = new HashMap<Pair<Integer, Integer>, Position>();
-        this.positionIndexMap = new TreeMap<Position, Pair<Integer, Integer>>(new LatLngComparator());
-    }
-
-    private List<Position> extractLattice(int hPoints, int vPoints) {
-        sortedPositionList = boundary.extractLattice(hPoints, vPoints);
-        Collections.sort(sortedPositionList, new LatLngComparator());
-        assert (sortedPositionList.size() == hPoints * vPoints);
-        positions = new Position[vPoints][hPoints];
-        indexPositionMap = new HashMap<Pair<Integer, Integer>, Position>();
-        int i = 0;
-        int j = 0;
-        for (Position p : sortedPositionList) {
-            if (j < hPoints) {
-                positions[i][j] = p;
-                indexPositionMap.put(new Pair<Integer, Integer>(i, j), p);
-                ++j;
-            } else {
-                j = 0;
-                ++i;
-                positions[i][j] = p;
-                indexPositionMap.put(new Pair<Integer, Integer>(i, j), p);
-                ++j;
-            }
-        }
-
-        return sortedPositionList;
     }
 
     @Override
@@ -129,7 +99,6 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     public void setPositionGrid(Position[][] positions) {
         this.positions = positions;
         indexPositionMap.clear();
-        positionIndexMap.clear();
         if (positions == null || positions.length < 1) {
             return;
         }
@@ -137,7 +106,6 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
             for (int j = 0; j < positions[0].length; ++j) {
                 Pair<Integer,Integer> index = new Pair<Integer, Integer>(i, j);
                 indexPositionMap.put(index, positions[i][j]);
-                positionIndexMap.put(positions[i][j],index);
             }
         }
         
@@ -150,11 +118,12 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
     }
     
     public Pair<Integer,Integer> getPositionIndex(Position p) {
-        Entry<Position,Pair<Integer,Integer>> entry = positionIndexMap.floorEntry(p);
-        if (entry != null) {
-            return entry.getValue();
+        Pair<Integer,Integer> gIdx = boundary.getGridIndex(p);
+        if ((gIdx.getA()!=null)&&(gIdx.getB()!=null)) {
+            return gIdx;
+        } else {
+            return null;
         }
-        return null;
     }
     
     /**

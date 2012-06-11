@@ -41,6 +41,7 @@ import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.WindFieldGenerator;
 import com.sap.sailing.simulator.WindFieldGeneratorFactory;
+import com.sap.sailing.simulator.impl.PolarDiagram49;
 import com.sap.sailing.simulator.impl.PolarDiagramImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
@@ -192,9 +193,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             throw new WindPatternNotFoundException("Please select a valid wind pattern.");
         }
 
-        List<Position> lattice = bd.extractLattice(params.getxRes(), params.getyRes());// wf.extractLattice(params.getxRes(),
-                                                                                       // params.getyRes());
-        wf.setPositionGrid(bd.extractGrid(params.getxRes(), params.getyRes()));
+        Position[][] grid = bd.extractGrid(params.getxRes(), params.getyRes()); 
+        wf.setPositionGrid(grid);
 
         TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());// new
                                                                                          // MillisecondsTimePoint(0);
@@ -206,14 +206,16 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         wf.generate(startTime, null, timeStep);
         List<WindDTO> wList = new ArrayList<WindDTO>();
 
-        if (lattice != null) {
+        if (grid != null) {
             TimePoint t = startTime;
             while (t.compareTo(endTime) <= 0) {
-                for (Position p : lattice) {
-                    Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(t, p, null));
-                    logger.finer(localWind.toString());
-                    WindDTO w = createWindDTO(localWind);
-                    wList.add(w);
+                for (int i=0; i<grid.length; i++) {
+                    for(int j=0; j<grid[0].length; j++) {
+                        Wind localWind = wf.getWind(new TimedPositionWithSpeedImpl(t, grid[i][j], null));
+                        logger.finer(localWind.toString());
+                        WindDTO w = createWindDTO(localWind);
+                        wList.add(w);
+                    }
                 }
                 t = new MillisecondsTimePoint(t.asMillis() + timeStep.asMillis());
             }
@@ -301,7 +303,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     private PathDTO[] getSimulatedPaths(List<Position> course, WindField wf) {
 
-        PolarDiagram pd = new PolarDiagramImpl(1);
+        PolarDiagram pd = PolarDiagram49.CreateStandard49(); //new PolarDiagramImpl(1);
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 
