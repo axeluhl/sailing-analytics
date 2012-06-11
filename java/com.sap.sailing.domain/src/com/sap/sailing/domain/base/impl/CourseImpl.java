@@ -156,7 +156,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public List<Leg> getLegs() {
+    public synchronized List<Leg> getLegs() {
         return new ArrayList<Leg>(legs);
     }
 
