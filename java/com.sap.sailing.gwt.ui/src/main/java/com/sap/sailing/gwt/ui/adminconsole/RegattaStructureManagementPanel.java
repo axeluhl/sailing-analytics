@@ -315,8 +315,19 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         raceDialog.show();
     }
 
-    private void removeRegatta(RegattaDTO regatta) {
-        
+    private void removeRegatta(final RegattaDTO regatta) {
+        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.name);
+        sailingService.removeRegatta(regattaIdentifier, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error trying to remove regatta " + regatta.name + ": " + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                regattaRefresher.fillRegattas();
+            }
+        });
     }
     
     private void onEventSelectionChanged() {
