@@ -298,15 +298,6 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         hPanel.setSpacing(5);
         vPanel.add(hPanel);
 
-        Button stressTestButton = new Button(stringMessages.stressTest());
-        hPanel.add(stressTestButton);
-        stressTestButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                performStressTestForSelectedLeaderboard();
-            }
-        });
-
         // ------------ races of the selected leaderboard ----------------
         AnchorCell raceAnchorCell = new AnchorCell();
         Column<Pair<RaceColumnDTO, String>, SafeHtml> raceLinkColumn = new Column<Pair<RaceColumnDTO, String>, SafeHtml>(raceAnchorCell) {
@@ -451,24 +442,6 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     }
     
-    private void performStressTestForSelectedLeaderboard() {
-        if (selectedLeaderboard != null) {
-            final String leaderboardName = selectedLeaderboard.name;
-            sailingService.stressTestLeaderboardByName(leaderboardName, 100, new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    errorReporter.reportError("Error during leaderboard stress test for " + leaderboardName + ": "
-                            + caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    errorReporter.reportError("Stress test for " + leaderboardName + " finished successfully ");
-                }
-            });
-        }
-    }
-
     private void unlinkRaceColumnFromTrackedRace(final String raceColumnName, final String fleetName) {
         final String selectedLeaderboardName = getSelectedLeaderboardName();
         sailingService.disconnectLeaderboardColumnFromTrackedRace(selectedLeaderboardName, raceColumnName, fleetName,
