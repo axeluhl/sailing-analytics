@@ -1005,7 +1005,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             }
         };
         ImageResource chartIcon = resources.chartIcon();
-        ImageResource settingsIcon = resources.settingsIcon();
+        ImageResource leaderboardSettingsIcon = resources.leaderboardSettingsIcon();
         pauseIcon = resources.pauseIcon();
         playIcon = resources.playIcon();
         refreshAndSettingsPanel = new HorizontalPanel();
@@ -1029,7 +1029,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 compareCompetitors();
             }
         });
-        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(settingsIcon).getSafeHtml());
+        Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(leaderboardSettingsIcon).getSafeHtml());
         settingsAnchor.setTitle(stringMessages.settings());
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
         refreshAndSettingsPanel.add(chartsAnchor);
