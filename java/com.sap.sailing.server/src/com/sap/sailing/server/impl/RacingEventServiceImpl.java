@@ -225,6 +225,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         for (Regatta regatta : domainObjectFactory.loadAllRegattas(this)) {
             logger.info("putting regatta "+regatta.getName()+" ("+regatta.hashCode()+") into regattasByName");
             regattasByName.put(regatta.getName(), regatta);
+            regatta.addRegattaListener(this);
         }
     }
 

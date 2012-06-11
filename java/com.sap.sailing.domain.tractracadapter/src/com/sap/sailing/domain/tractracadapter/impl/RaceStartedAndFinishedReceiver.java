@@ -13,7 +13,6 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.ICallbackData;
@@ -32,8 +31,8 @@ import com.tractrac.clientmodule.data.StartStopTimesData;
 public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Race, StartStopTimesData, Boolean> {
     private static final Logger logger = Logger.getLogger(RaceStartedAndFinishedReceiver.class.getName());
 
-    public RaceStartedAndFinishedReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) {
-        super(domainFactory, tractracEvent, trackedRegatta, trackedRegattaRegistry);
+    public RaceStartedAndFinishedReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta);
     }
 
     /**

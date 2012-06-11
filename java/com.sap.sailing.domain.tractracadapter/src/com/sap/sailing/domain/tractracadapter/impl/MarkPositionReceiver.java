@@ -16,7 +16,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -68,8 +67,8 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
      *            particularly the mark position loading will be constrained to this end time.
      */
     public MarkPositionReceiver(final DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
-            TimePoint startOfTracking, TimePoint endOfTracking, final DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry) {
-        super(domainFactory, tractracEvent, trackedRegatta, trackedRegattaRegistry);
+            TimePoint startOfTracking, TimePoint endOfTracking, final DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta);
         this.startOfTracking = startOfTracking;
         this.endOfTracking = endOfTracking;
         // assumption: there is currently only one race per TracTrac Event object

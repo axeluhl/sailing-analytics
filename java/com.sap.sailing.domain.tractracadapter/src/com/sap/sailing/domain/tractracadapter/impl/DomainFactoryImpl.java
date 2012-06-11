@@ -237,7 +237,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Regatta getOrCreateRegatta(com.tractrac.clientmodule.Event event, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public Regatta getOrCreateDefaultRegatta(com.tractrac.clientmodule.Event event, TrackedRegattaRegistry trackedRegattaRegistry) {
         synchronized (regattaCache) {
             // FIXME Dialog with Lasse by Skype on 2011-06-17:
             //            [6:20:04 PM] Axel Uhl: Lasse, can Event.getCompetitorClassList() ever produce more than one result?
@@ -262,6 +262,9 @@ public class DomainFactoryImpl implements DomainFactory {
                 Pair<String, String> key = new Pair<String, String>(event.getName(), boatClass == null ? null
                         : boatClass.getName());
                 result = regattaCache.get(key);
+                // FIXME When a Regatta is removed from RacingEventService, it isn't removed here. We use a "stale" regatta here.
+                // This is particularly bad if a persistent regatta was loaded but a default regatta was accidentally created.
+                // Then, there is no way but restart the server to get rid of this stale cache entry here.
                 if (result == null) {
                     result = new RegattaImpl(event.getName(), boatClass, trackedRegattaRegistry);
                     regattaCache.put(key, result);
@@ -284,23 +287,23 @@ public class DomainFactoryImpl implements DomainFactory {
                 result.add(new RaceCourseReceiver(
                         this, trackedRegatta, tractracEvent, windStore,
                         raceDefinitionSetToUpdate, delayToLiveInMillis, 
-                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, trackedRegattaRegistry));
+                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
-                        trackedRegatta, tractracEvent, startOfTracking, endOfTracking, this, trackedRegattaRegistry));
+                        trackedRegatta, tractracEvent, startOfTracking, endOfTracking, this));
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(
-                        trackedRegatta, tractracEvent, this, trackedRegattaRegistry));
+                        trackedRegatta, tractracEvent, this));
                 break;
             case MARKPASSINGS:
                 result.add(new MarkPassingReceiver(
-                        trackedRegatta, tractracEvent, this, trackedRegattaRegistry));
+                        trackedRegatta, tractracEvent, this));
                 break;
             case RACESTARTFINISH:
                 result.add(new RaceStartedAndFinishedReceiver(
-                        trackedRegatta, tractracEvent, this, trackedRegattaRegistry));
+                        trackedRegatta, tractracEvent, this));
                 break;
             }
         }
