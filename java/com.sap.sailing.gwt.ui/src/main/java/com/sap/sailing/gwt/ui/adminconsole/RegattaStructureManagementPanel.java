@@ -199,12 +199,16 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
                 for (SeriesDTO serie : regatta.series) {
                     int raceColumnsCount = serie.getRaceColumns().size();
                     int j = 1;
-                    for(RaceColumnDTO raceColumn: serie.getRaceColumns()) {
-                        builder.appendEscaped(j + ". " + raceColumn.getRaceColumnName());
-                        if(j < raceColumnsCount) {
-                            builder.appendEscaped(", ");
+                    if(!serie.getRaceColumns().isEmpty()) {
+                        for(RaceColumnDTO raceColumn: serie.getRaceColumns()) {
+                            builder.appendEscaped(j + ". " + raceColumn.getRaceColumnName());
+                            if(j < raceColumnsCount) {
+                                builder.appendEscaped(", ");
+                            }
+                            j++;
                         }
-                        j++;
+                    } else {
+                        builder.appendEscaped(stringMessages.noRacesYet());
                     }
                     if(i < seriesCount) {
                         builder.appendHtmlConstant("<br>");

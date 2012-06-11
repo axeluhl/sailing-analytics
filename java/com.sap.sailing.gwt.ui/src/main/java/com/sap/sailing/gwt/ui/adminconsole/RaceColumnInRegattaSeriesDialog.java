@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -31,6 +33,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
     private Button addRacesBtn;
     private final List<TextBox> raceNameEntryFields;
     private final StringMessages stringConstants;
+    private final TextBox raceNamePrefixTextBox;
     private final boolean hasOneSeries;
     private Grid raceColumnsGrid;
 
@@ -99,6 +102,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         this.hasOneSeries = regatta.series.size() == 1;
         seriesListBox = createListBox(false);
         addRacesListBox = createListBox(false);
+        raceNamePrefixTextBox = createTextBox(null);
         raceNameEntryFields = new ArrayList<TextBox>();
         raceColumnsGrid = new Grid(0, 0);
     }
@@ -138,17 +142,19 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
             addRacesListBox.addItem("" + i);
         }
         addRacesListBox.setSelectedIndex(0);
+        raceNamePrefixTextBox.setWidth("20px");
+        addRacesPanel.add(raceNamePrefixTextBox);
         addRacesBtn = new Button(stringConstants.add());
         addRacesBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 SeriesDTO selectedSeries = getSelectedSeries();
                 if(selectedSeries != null) {
-                    String firstLetter = selectedSeries.name.substring(0, 1).toUpperCase();
+                    String racePrefix = raceNamePrefixTextBox.getText();
                     int racesCountToCreate = addRacesListBox.getSelectedIndex()+1;
                     int currentSize = raceNameEntryFields.size();
                     for(int i = 1; i <= racesCountToCreate; i++) {
-                        createRaceNameWidget(firstLetter + (currentSize + i));
+                        createRaceNameWidget(racePrefix + (currentSize + i));
                     }
                     updateRaceColumnsGrid(panel);
                 } else {
@@ -163,14 +169,32 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         seriesPanel.setSpacing(3);
         seriesPanel.add(new Label(stringConstants.series() + ":"));
         if(hasOneSeries) {
-            seriesListBox.addItem(regatta.series.get(0).name);
+            String seriesName = regatta.series.get(0).name;
+            seriesListBox.addItem(seriesName);
             seriesListBox.setSelectedIndex(0);
+            if("Default".equals(seriesName)) {
+                raceNamePrefixTextBox.setText("R");
+            } else {
+                raceNamePrefixTextBox.setText(seriesName.substring(0, 1).toUpperCase());
+            }
         } else {
             seriesListBox.addItem("Please select a series");
             for (SeriesDTO series : regatta.series) {
                 seriesListBox.addItem(series.name);
             }
         }
+        
+        seriesListBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                SeriesDTO selectedSeries = getSelectedSeries();
+                if(selectedSeries == null) {
+                    raceNamePrefixTextBox.setText("");
+                } else {
+                    raceNamePrefixTextBox.setText(selectedSeries.name.substring(0, 1).toUpperCase());
+                }
+            }
+        });
         
         seriesPanel.add(seriesListBox);
         panel.add(seriesPanel);
@@ -213,5 +237,4 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
     public void show() {
         super.show();
     }
-
 }
