@@ -27,15 +27,16 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<SeriesDTO, List<RaceColumnDTO>>> {
     private final RegattaDTO regatta;
-    private final SeriesDTO series; 
     private final ListBox seriesListBox;
     private final ListBox addRacesListBox;
     private Button addRacesBtn;
     private final List<TextBox> raceNameEntryFields;
+    private final List<Button> raceNameDeleteButtons;
     private final StringMessages stringConstants;
     private final TextBox raceNamePrefixTextBox;
     private final boolean hasOneSeries;
     private Grid raceColumnsGrid;
+    private VerticalPanel additionalWidgetPanel;
 
     private static class RaceDialogValidator implements Validator<Pair<SeriesDTO, List<RaceColumnDTO>>> {
         private StringMessages stringConstants;
@@ -92,28 +93,50 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
     }
 
-    public RaceColumnInRegattaSeriesDialog(RegattaDTO regatta, SeriesDTO series, StringMessages stringConstants,
+    public RaceColumnInRegattaSeriesDialog(RegattaDTO regatta, StringMessages stringConstants,
             AsyncCallback<Pair<SeriesDTO, List<RaceColumnDTO>>> callback) {
         super(stringConstants.actionEditRaces(), null, stringConstants.ok(), stringConstants.cancel(),
                 new RaceDialogValidator(regatta, stringConstants), callback);
         this.regatta = regatta;
-        this.series = series;
         this.stringConstants = stringConstants;
         this.hasOneSeries = regatta.series.size() == 1;
         seriesListBox = createListBox(false);
         addRacesListBox = createListBox(false);
         raceNamePrefixTextBox = createTextBox(null);
         raceNameEntryFields = new ArrayList<TextBox>();
+        raceNameDeleteButtons = new ArrayList<Button>();
         raceColumnsGrid = new Grid(0, 0);
     }
 
-    private TextBox createRaceNameWidget(String defaultName) {
+    private Widget createRaceNameWidget(String defaultName, boolean enabled) {
         TextBox textBox = createTextBox(defaultName); 
         textBox.setVisibleLength(40);
+        textBox.setEnabled(enabled);
         raceNameEntryFields.add(textBox);
         return textBox; 
     }
 
+    private Widget createRaceNameDeleteButtonWidget() {
+        final Button raceNameDeleteBtn = new Button(stringConstants.delete()); 
+        raceNameDeleteButtons.add(raceNameDeleteBtn);
+        raceNameDeleteBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                int index = 0;
+                for(Button btn: raceNameDeleteButtons) {
+                    if(raceNameDeleteBtn == btn) {
+                        break;
+                    }
+                    index++;
+                }
+                raceNameEntryFields.remove(index);
+                raceNameDeleteButtons.remove(index);
+                updateRaceColumnsGrid(additionalWidgetPanel);
+            }
+        });
+        return raceNameDeleteBtn; 
+    }
+    
     @Override
     protected Pair<SeriesDTO, List<RaceColumnDTO>> getResult() {
         List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
@@ -128,10 +151,10 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
 
     @Override
     protected Widget getAdditionalWidget() {
-        final VerticalPanel panel = new VerticalPanel();
+        additionalWidgetPanel = new VerticalPanel();
         Widget additionalWidget = super.getAdditionalWidget();
         if (additionalWidget != null) {
-            panel.add(additionalWidget);
+            additionalWidgetPanel.add(additionalWidget);
         }
         
         HorizontalPanel addRacesPanel = new HorizontalPanel();
@@ -154,16 +177,17 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
                     int racesCountToCreate = addRacesListBox.getSelectedIndex()+1;
                     int currentSize = raceNameEntryFields.size();
                     for(int i = 1; i <= racesCountToCreate; i++) {
-                        createRaceNameWidget(racePrefix + (currentSize + i));
+                        createRaceNameWidget(racePrefix + (currentSize + i), true);
+                        createRaceNameDeleteButtonWidget();
                     }
-                    updateRaceColumnsGrid(panel);
+                    updateRaceColumnsGrid(additionalWidgetPanel);
                 } else {
                     Window.alert("Please select a series first.");
                 }
             }
         });
         addRacesPanel.add(addRacesBtn);
-        panel.add(addRacesPanel);
+        additionalWidgetPanel.add(addRacesPanel);
         
         HorizontalPanel seriesPanel = new HorizontalPanel();
         seriesPanel.setSpacing(3);
@@ -193,28 +217,52 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
                 } else {
                     raceNamePrefixTextBox.setText(selectedSeries.name.substring(0, 1).toUpperCase());
                 }
+                fillExistingRacesOfSeries();
             }
         });
         
         seriesPanel.add(seriesListBox);
-        panel.add(seriesPanel);
+        additionalWidgetPanel.add(seriesPanel);
 
-        panel.add(createHeadlineLabel(stringConstants.races()));
-        panel.add(raceColumnsGrid);
+        additionalWidgetPanel.add(createHeadlineLabel(stringConstants.races()));
+        additionalWidgetPanel.add(raceColumnsGrid);
 
-        return panel;
+        if(hasOneSeries) {
+            fillExistingRacesOfSeries();
+        }
+
+        return additionalWidgetPanel;
     }
 
+    private void fillExistingRacesOfSeries() {
+        SeriesDTO selectedSeries = getSelectedSeries();
+        raceNameEntryFields.clear();
+        raceNameDeleteButtons.clear();
+        if(selectedSeries != null && !selectedSeries.getRaceColumns().isEmpty()) {
+            for(RaceColumnDTO raceColumn: selectedSeries.getRaceColumns()) {
+                createRaceNameWidget(raceColumn.name, false);
+                createRaceNameDeleteButtonWidget();
+            }
+        }
+        updateRaceColumnsGrid(additionalWidgetPanel);
+    }
+    
     private void updateRaceColumnsGrid(VerticalPanel parentPanel) {
         int widgetIndex = parentPanel.getWidgetIndex(raceColumnsGrid);
         parentPanel.remove(raceColumnsGrid);
         int raceNamesCount = raceNameEntryFields.size();
-        raceColumnsGrid = new Grid(raceNamesCount + 1, 3);
-        raceColumnsGrid.setCellSpacing(4);
-        raceColumnsGrid.setHTML(0, 0, stringConstants.name());
-        for(int i = 0; i < raceNamesCount; i++) {
-            raceColumnsGrid.setWidget(i+1, 0, raceNameEntryFields.get(i));
+        if(raceNamesCount > 0) {
+            raceColumnsGrid = new Grid(raceNamesCount + 1, 3);
+            raceColumnsGrid.setCellSpacing(4);
+            raceColumnsGrid.setHTML(0, 0, stringConstants.name());
+            for(int i = 0; i < raceNamesCount; i++) {
+                raceColumnsGrid.setWidget(i+1, 0, raceNameEntryFields.get(i));
+                raceColumnsGrid.setWidget(i+1, 1, raceNameDeleteButtons.get(i));
+            }
+        } else {
+            raceColumnsGrid = new Grid(0, 0);
         }
+
         parentPanel.insert(raceColumnsGrid, widgetIndex);
     }
 
