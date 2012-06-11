@@ -24,4 +24,6 @@ public interface RegattaSummary {
      * All {@link Boat} objects that participated in this regatta
      */
     Iterable<Boat> getBoats();
+    
+    String getEvent();
 }
