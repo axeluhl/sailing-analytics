@@ -6,29 +6,48 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 
 public class LogoAndTitlePanel extends FlowPanel {
+    protected Label titleLabel; 
+    protected Label subTitleLabel;
 
-    protected final Label titleLabel; 
+    public LogoAndTitlePanel(StringMessages stringConstants) {
+        this(null, null, stringConstants);
+    }
+
     public LogoAndTitlePanel(String title, StringMessages stringConstants) {
+        this(title, null, stringConstants);
+    }
+
+    public LogoAndTitlePanel(String title, String subTitle, StringMessages stringConstants) {
         Anchor sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/gwt/images/sap_66_transparent.png\"/>").toSafeHtml());
         sapLogo.setHref("http://www.sap.com");
         sapLogo.addStyleName("sapLogo");
         this.add(sapLogo);
         
-        FlowPanel labelPanel = new FlowPanel();
+        FlowPanel sailingAnalyticsLabelPanel = new FlowPanel();
         Label sailingAnalyticsLabel = new Label(stringConstants.sapSailingAnalytics());
-        labelPanel.add(sailingAnalyticsLabel);
-        labelPanel.addStyleName("sailingAnalyticsLabelPanel");
+        sailingAnalyticsLabelPanel.add(sailingAnalyticsLabel);
+        sailingAnalyticsLabelPanel.addStyleName("sailingAnalyticsLabelPanel");
         sailingAnalyticsLabel.addStyleName("sailingAnalyticsLabel boldLabel");
-        this.add(labelPanel);
+        this.add(sailingAnalyticsLabelPanel);
         
-        FlowPanel titleLabelWrapper = new FlowPanel();
-        titleLabelWrapper.addStyleName("titleLabelWrapper");
-        titleLabel = new Label(title);
-        titleLabel.addStyleName("titleLabel");
-        titleLabelWrapper.add(titleLabel);
-        this.add(titleLabelWrapper);
+        if(title != null) {
+            FlowPanel subTitleLabelWrapper = new FlowPanel();
+            subTitleLabelWrapper.addStyleName("titleLabelWrapper");
+            titleLabel = new Label(title);
+            titleLabel.addStyleName("titleLabel");
+            subTitleLabelWrapper.add(titleLabel);
+            this.add(subTitleLabelWrapper);
+        }
         
+        if(subTitle != null) {
+            FlowPanel subTitleLabelWrapper = new FlowPanel();
+            subTitleLabelWrapper.addStyleName("subTitleLabelWrapper");
+            subTitleLabel = new Label(subTitle);
+            subTitleLabel.addStyleName("subTitleLabel");
+            subTitleLabelWrapper.add(subTitleLabel);
+            this.add(subTitleLabelWrapper);
+        }
     }
-
+    
 }
