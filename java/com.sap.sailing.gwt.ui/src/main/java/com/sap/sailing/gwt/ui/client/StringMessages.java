@@ -327,4 +327,5 @@ public interface StringMessages extends Messages {
     String of();
     String errorObtainingScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
             String string);
+    String assignRaceNumbersToRaceColumns();
 }

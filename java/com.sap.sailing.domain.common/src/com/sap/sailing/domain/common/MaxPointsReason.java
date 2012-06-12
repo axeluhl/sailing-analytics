@@ -21,6 +21,16 @@ public enum MaxPointsReason {
     OCS(true),
     /** Disqualified, non-discardable */
     DND(false),
+    /** 20 % penalty under rule 30.2 */
+    ZFP(true),
+    /** Took a Scoring penalty under rule 44.3 (a) */
+    SCP(true),
+    /** Disqualification not excludable under rule 90.3 (b) */
+    DNE(false),
+    /** Disqualification for gross misconduct not excludable under rule 90.3 (b) */
+    DGM(false),
+    /** Redress given */
+    RDG(true),
     /** Black Flag Disqualified */
     BFD(true),
     /** Did Not Compete */
