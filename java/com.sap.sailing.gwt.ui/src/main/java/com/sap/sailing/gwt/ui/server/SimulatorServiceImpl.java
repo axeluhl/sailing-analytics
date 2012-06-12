@@ -302,8 +302,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     private PathDTO[] getSimulatedPaths(List<Position> course, WindField wf) {
-
-        PolarDiagram pd = PolarDiagram49.CreateStandard49(); //new PolarDiagramImpl(1);
+        logger.info("Retrieving simulated paths");
+        //PolarDiagram pd = new PolarDiagramImpl(1);//PolarDiagram49.CreateStandard49();
+        PolarDiagram pd = PolarDiagram49.CreateStandard49();
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 

@@ -47,6 +47,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 	public Path getOptimumPath() {
 		
 		//calls either createDummy or createHeuristic()
+		//use getAllPaths() instead
 		
 		return createHeuristic();
 	}
@@ -67,7 +68,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		lst.add(p1);
 		lst.add(p2);
 		
-		return new PathImpl(lst);
+		return new PathImpl(lst, wf);
 	}
 	
 	private Path createHeuristic() {
@@ -188,7 +189,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 			
 		}
 		
-		return new PathImpl(lst);
+		return new PathImpl(lst, wf);
 	}
 	
 	private Path createDjikstra() {
@@ -204,8 +205,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
 				
 		//initiate grid
-		int gridv = 10; // number of vertical grid steps
-		int gridh = 30; // number of horizontal grid steps
+		int gridv = simulationParameters.getProperty("Djikstra.gridv[int]").intValue(); // number of vertical grid steps
+		int gridh = simulationParameters.getProperty("Djikstra.gridh[int]").intValue(); // number of horizontal grid steps
 		Position[][] sailGrid = boundary.extractGrid(gridh, gridv);
 		
 		//create adjacency graph including start and end 
@@ -311,7 +312,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		lst.addFirst(new TimedPositionWithSpeedImpl(startTime, start, null));
 		
 		
-		return new PathImpl(lst);
+		return new PathImpl(lst, windField);
 	}
 
 	@Override
@@ -319,7 +320,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		Map<String, Path> allPaths = new HashMap<String, Path>();
 		allPaths.put("Dummy", createDummy());
 		allPaths.put("Heuristic", createHeuristic());
-		//allPaths.put("Djikstra", createDjikstra());
+		allPaths.put("Djikstra", createDjikstra());
 		return allPaths;
 	}
 

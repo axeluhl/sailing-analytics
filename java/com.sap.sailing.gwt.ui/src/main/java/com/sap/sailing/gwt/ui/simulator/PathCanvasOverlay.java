@@ -13,6 +13,7 @@ import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.sap.sailing.domain.common.Mile;
+import com.sap.sailing.domain.common.Named;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -25,23 +26,32 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
  * @author D054070
  * 
  */
-public class PathCanvasOverlay extends WindFieldCanvasOverlay {
+public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
+
+    /**
+     * Generated serial version id.
+     */
+    private static final long serialVersionUID = -6284996043723173190L;
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
-
+    
+    protected String name;
+    
     public String pathColor = "Green";
     /**
      * Whether or not to display the wind directions for the points on the optimal path.
      */
     public boolean displayWindAlongPath = true;
 
-    public PathCanvasOverlay() {
+    public PathCanvasOverlay(String name) {
         super();
+        this.name = name;
     }
 
 
-    public PathCanvasOverlay(Timer timer) {
+    public PathCanvasOverlay(String name, Timer timer) {
         super(timer);
+        this.name = name;
     }
     
     @Override
@@ -155,4 +165,16 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay {
         drawCircle(x1, y1, weight/2., pathColor);
     }
 
+
+    @Override
+    public String getName() {
+       return name;
+    }
+
+    public long getPathTime() {
+        List<WindDTO> windDTOList  = wl.getMatrix();
+        int numPoints = windDTOList.size();
+        long totalTime = windDTOList.get(numPoints-1).timepoint - windDTOList.get(0).timepoint;
+        return totalTime;
+    }
 }
