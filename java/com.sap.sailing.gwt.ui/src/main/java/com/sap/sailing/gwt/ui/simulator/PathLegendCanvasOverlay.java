@@ -117,8 +117,8 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
         Context2d context2d = canvas.getContext2d();
         drawRectangle(x, y, color);
         context2d.setFillStyle(textColor);
-        context2d.setFont("normal 10pt Calibri");
-        context2d.fillText(text, x + rectWidth + 5.0, y + rectHeight / 2.0);
+        context2d.setFont("normal 12pt Calibri");
+        context2d.fillText(text, x + rectWidth + 5.0, y + 12.0+4.0);
     }
 
     protected String getFormattedTime(long pathTime) {
