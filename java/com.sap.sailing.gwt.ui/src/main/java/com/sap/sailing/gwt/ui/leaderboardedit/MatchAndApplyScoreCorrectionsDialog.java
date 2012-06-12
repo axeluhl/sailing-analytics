@@ -1,28 +1,20 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.ScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCorrectionsApplicationInstructions> {
 
-    public MatchAndApplyScoreCorrectionsDialog(String title, String message, String okButtonName,
-            String cancelButtonName,
-            com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator<ScoreCorrectionsApplicationInstructions> validator,
-            AsyncCallback<ScoreCorrectionsApplicationInstructions> callback) {
-        super(title, message, okButtonName, cancelButtonName, validator, callback);
-        // TODO Auto-generated constructor stub
-    }
-
     public MatchAndApplyScoreCorrectionsDialog(LeaderboardDTO leaderboard, StringMessages stringMessages,
-            SailingServiceAsync sailingService, ErrorReporter errorReporter, ScoreCorrectionDTO result) {
+            SailingServiceAsync sailingService, ErrorReporter errorReporter, RegattaScoreCorrectionDTO result) {
         super(stringMessages.assignRaceNumbersToRaceColumns(), stringMessages.assignRaceNumbersToRaceColumns(),
                 stringMessages.ok(), stringMessages.cancel(), new Validator(), new Callback());
-        // TODO Auto-generated constructor stub
     }
 
     @Override
@@ -31,6 +23,12 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
         return null;
     }
     
+    @Override
+    protected Widget getAdditionalWidget() {
+        // TODO Auto-generated method stub
+        return super.getAdditionalWidget();
+    }
+
     private static class Validator implements DataEntryDialog.Validator<ScoreCorrectionsApplicationInstructions> {
         @Override
         public String getErrorMessage(ScoreCorrectionsApplicationInstructions valueToValidate) {

@@ -76,7 +76,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.domain.common.ScoreCorrections;
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -148,7 +148,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
-import com.sap.sailing.gwt.ui.shared.ScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
@@ -2051,9 +2051,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public ScoreCorrectionDTO getScoreCorrections(String scoreCorrectionProviderName, String eventName,
-            String boatClassName, Date timePointWhenResultPublished) {
-        ScoreCorrectionDTO result = null;
+    public RegattaScoreCorrectionDTO getScoreCorrections(String scoreCorrectionProviderName, String eventName,
+            String boatClassName, Date timePointWhenResultPublished) throws Exception {
+        RegattaScoreCorrectionDTO result = null;
         for (ScoreCorrectionProvider scp : getScoreCorrectionProviders2()) {
             if (scp.getName().equals(scoreCorrectionProviderName)) {
                 result = createScoreCorrection(scp.getScoreCorrections(eventName, boatClassName,
@@ -2063,8 +2063,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    private ScoreCorrectionDTO createScoreCorrection(ScoreCorrections scoreCorrections) {
+    private RegattaScoreCorrectionDTO createScoreCorrection(RegattaScoreCorrections scoreCorrections) {
         // TODO Auto-generated method stub
-        return new ScoreCorrectionDTO();
+        return new RegattaScoreCorrectionDTO();
     }
 }

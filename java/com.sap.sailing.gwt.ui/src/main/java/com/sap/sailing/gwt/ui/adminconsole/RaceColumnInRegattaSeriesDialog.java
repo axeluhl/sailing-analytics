@@ -156,39 +156,7 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         if (additionalWidget != null) {
             additionalWidgetPanel.add(additionalWidget);
         }
-        
-        HorizontalPanel addRacesPanel = new HorizontalPanel();
-        addRacesPanel.setSpacing(3);
-        addRacesPanel.add(new Label("Add a number of races:"));
-        addRacesPanel.add(addRacesListBox);
-        for(int i = 1; i <= 10; i++) {
-            addRacesListBox.addItem("" + i);
-        }
-        addRacesListBox.setSelectedIndex(0);
-        raceNamePrefixTextBox.setWidth("20px");
-        addRacesPanel.add(raceNamePrefixTextBox);
-        addRacesBtn = new Button(stringConstants.add());
-        addRacesBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                SeriesDTO selectedSeries = getSelectedSeries();
-                if(selectedSeries != null) {
-                    String racePrefix = raceNamePrefixTextBox.getText();
-                    int racesCountToCreate = addRacesListBox.getSelectedIndex()+1;
-                    int currentSize = raceNameEntryFields.size();
-                    for(int i = 1; i <= racesCountToCreate; i++) {
-                        createRaceNameWidget(racePrefix + (currentSize + i), true);
-                        createRaceNameDeleteButtonWidget();
-                    }
-                    updateRaceColumnsGrid(additionalWidgetPanel);
-                } else {
-                    Window.alert("Please select a series first.");
-                }
-            }
-        });
-        addRacesPanel.add(addRacesBtn);
-        additionalWidgetPanel.add(addRacesPanel);
-        
+
         HorizontalPanel seriesPanel = new HorizontalPanel();
         seriesPanel.setSpacing(3);
         seriesPanel.add(new Label(stringConstants.series() + ":"));
@@ -223,7 +191,44 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
         
         seriesPanel.add(seriesListBox);
         additionalWidgetPanel.add(seriesPanel);
-
+        
+        // add races controls
+        HorizontalPanel addRacesPanel = new HorizontalPanel();
+        addRacesPanel.setSpacing(3);
+        addRacesPanel.add(new Label("Add a number of races:"));
+        addRacesPanel.add(addRacesListBox);
+        for(int i = 1; i <= 10; i++) {
+            addRacesListBox.addItem("" + i);
+        }
+        addRacesListBox.setSelectedIndex(0);
+        raceNamePrefixTextBox.setWidth("20px");
+        addRacesPanel.add(raceNamePrefixTextBox);
+        addRacesBtn = new Button(stringConstants.add());
+        addRacesBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                SeriesDTO selectedSeries = getSelectedSeries();
+                if(selectedSeries != null) {
+                    String racePrefix = raceNamePrefixTextBox.getText();
+                    int racesCountToCreate = addRacesListBox.getSelectedIndex()+1;
+                    int currentSize = raceNameEntryFields.size();
+                    for(int i = 1; i <= racesCountToCreate; i++) {
+                        String raceName = racePrefix;
+                        if(racesCountToCreate != 1 || selectedSeries.getRaceColumns().size() > 0) {
+                            raceName += (currentSize + i);
+                        }
+                        createRaceNameWidget(raceName, true);
+                        createRaceNameDeleteButtonWidget();
+                    }
+                    updateRaceColumnsGrid(additionalWidgetPanel);
+                } else {
+                    Window.alert("Please select a series first.");
+                }
+            }
+        });
+        addRacesPanel.add(addRacesBtn);
+        additionalWidgetPanel.add(addRacesPanel);
+        
         additionalWidgetPanel.add(createHeadlineLabel(stringConstants.races()));
         additionalWidgetPanel.add(raceColumnsGrid);
 

@@ -22,4 +22,6 @@ public interface RaceSummary {
      * Retrieves the {@link BoatResultInRace} data that <code>boat</code> achieved in the race summarized by this object
      */
     BoatResultInRace getBoatResults(Boat boat);
+
+    Boat getBoat(String sailingNumber);
 }

@@ -36,7 +36,6 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -172,7 +171,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final RaceIdentifier preSelectedRace;
 
     private final VerticalPanel contentPanel;
-    private final DockPanel headerPanel;
     private final HorizontalPanel refreshAndSettingsPanel;
 
     private boolean isEmbedded = false;
@@ -234,7 +232,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     @Override
     public Widget getHeaderWidget() {
-        return headerPanel;
+        return null;
     }
 
     @Override
@@ -985,19 +983,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             isEmbedded = true;
         }
         contentPanel = new VerticalPanel();
-        headerPanel = new DockPanel();
+        contentPanel.setStyleName("leaderboardContent");
         DockPanel toolbarPanel = new DockPanel();
+        toolbarPanel.setStyleName("leaderboardContent-toolbar");
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         if (!isEmbedded) {
             toolbarPanel.add(busyIndicator, DockPanel.WEST);
         }
-        headerPanel.setWidth("100%");
-        headerPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         toolbarPanel.setWidth("100%");
         toolbarPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-        Label leaderboardLabel = new Label(stringMessages.leaderboard() + " " + leaderboardName.toUpperCase());
-        leaderboardLabel.addStyleName("leaderboardLabel boldLabel");
-        headerPanel.add(leaderboardLabel, DockPanel.WEST);
         ClickHandler playPauseHandler = new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -1019,7 +1013,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshPanel.setSpacing(5);
         refreshPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         refreshPanel.addStyleName("refreshPanel");
-        headerPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         toolbarPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
         toolbarPanel.addStyleName("refreshAndSettings");
         playPause = new Anchor(getPlayPauseImgHtml(timer.getPlayState()));
@@ -1042,7 +1035,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshAndSettingsPanel.add(settingsAnchor);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
         if (!isEmbedded) {
-            contentPanel.add(headerPanel);
             contentPanel.add(toolbarPanel);
         }
         contentPanel.add(getLeaderboardTable());
