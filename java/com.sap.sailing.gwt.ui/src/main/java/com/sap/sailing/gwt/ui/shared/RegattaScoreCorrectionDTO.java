@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class ScoreCorrectionDTO implements IsSerializable {
+public class RegattaScoreCorrectionDTO implements IsSerializable {
     public class ScoreCorrectionEntryDTO implements IsSerializable {
         public ScoreCorrectionEntryDTO() {}
         
@@ -13,9 +13,9 @@ public class ScoreCorrectionDTO implements IsSerializable {
     private String providerName;
     private Map<Integer, Map<CompetitorDTO, ScoreCorrectionEntryDTO>> scoreCorrectionsByRaceNumber;
     
-    public ScoreCorrectionDTO() {}
+    public RegattaScoreCorrectionDTO() {}
     
-    public ScoreCorrectionDTO(String providerName,
+    public RegattaScoreCorrectionDTO(String providerName,
             Map<Integer, Map<CompetitorDTO, ScoreCorrectionEntryDTO>> scoreCorrectionsByRaceNumber) {
         super();
         this.providerName = providerName;
