@@ -6,6 +6,7 @@ import java.util.NavigableSet;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Leg;
@@ -273,7 +274,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public DynamicTrackedRegatta getTrackedEvent() {
+    public DynamicTrackedRegatta getTrackedRegatta() {
         return new DynamicTrackedRegatta() {
             private static final long serialVersionUID = 2651590861333064588L;
 
@@ -284,7 +285,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public String getName() {
-                        return "A Mocked Test Event";
+                        return "A Mocked Test Regatta";
                     }
 
                     @Override
@@ -350,6 +351,30 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                         // TODO Auto-generated method stub
                         return null;
                     }
+
+                    @Override
+                    public Series getSeriesByName(String seriesName) {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
+
+                    @Override
+                    public boolean isPersistent() {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
+
+                    @Override
+                    public void addRaceColumnListener(RaceColumnListener listener) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void removeRaceColumnListener(RaceColumnListener listener) {
+                        // TODO Auto-generated method stub
+                        
+                    }
                 };
             }
 
@@ -409,7 +434,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
-                    long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+                    long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
                     DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
                 // TODO Auto-generated method stub
                 return null;
@@ -599,6 +624,30 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public long getDelayToLiveInMillis() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public void setDelayToLiveInMillis(long delayToLiveInMillis) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setAndFixDelayToLiveInMillis(long delayToLiveInMillis) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         // TODO Auto-generated method stub
         return null;
     }

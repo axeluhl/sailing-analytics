@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -11,21 +12,24 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RacesHandle;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class RaceTrackerTest {
+    private static final Logger logger = Logger.getLogger(RaceTrackerTest.class.getName());
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
     private final URL paramUrl;
@@ -55,13 +59,20 @@ public class RaceTrackerTest {
     @Before
     public void setUp() throws Exception {
         service = new RacingEventServiceImpl();
+        logger.info("Calling service.addTracTracRace");
         raceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
-        raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Event
+        logger.info("Calling raceHandle.getRaces()");
+        Set<RaceDefinition> races = raceHandle.getRaces(); // wait for RaceDefinition to be completely wired in Regatta
+        logger.info("Obtained races: "+races);
+        assertTrue(!races.isEmpty());
+        // TODO the following assertion fails; this suggests that the race obtained above hasn't properly been entered into the regatta. Why???
+        assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
     }
     
     @After
     public void tearDown() throws MalformedURLException, IOException, InterruptedException {
-        service.stopTracking(raceHandle.getRegatta());
+        logger.info("calling stopTrackingAndRemove("+raceHandle.getRegatta().getName()+" ("+raceHandle.getRegatta().hashCode()+"))");
+        service.stopTrackingAndRemove(raceHandle.getRegatta());
     }
 
     private TrackedRace getTrackedRace(TrackedRegatta trackedRegatta) throws InterruptedException {
@@ -88,22 +99,27 @@ public class RaceTrackerTest {
 
     @Test
     public void testInitialization() throws InterruptedException {
+        logger.entering(getClass().getName(), "testInitialization");
         Set<RaceDefinition> races = raceHandle.getRaces();
         assertNotNull(races);
         assertFalse(races.isEmpty());
-        assertNotNull(getTrackedRace(raceHandle.getTrackedEvent()));
+        assertNotNull(getTrackedRace(raceHandle.getTrackedRegatta()));
+        logger.exiting(getClass().getName(), "testInitialization");
     }
     
     @Test
     public void testStopTracking() throws Exception {
-        TrackedRegatta oldTrackedEvent = raceHandle.getTrackedEvent();
-        TrackedRace oldTrackedRace = getTrackedRace(oldTrackedEvent);
+        logger.entering(getClass().getName(), "testStopTracking");
+        assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
+        TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedRegatta();
+        TrackedRace oldTrackedRace = getTrackedRace(oldTrackedRegatta);
         RaceDefinition oldRaceDefinition = oldTrackedRace.getRace();
-        service.removeEvent(raceHandle.getRegatta());
+        assertTrue(!Util.isEmpty(raceHandle.getRegatta().getAllRaces()));
+        service.removeRegatta(raceHandle.getRegatta());
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
-        TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedEvent();
-        assertNotSame(oldTrackedEvent, newTrackedEvent);
-        TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
+        TrackedRegatta newTrackedRegatta = myRaceHandle.getTrackedRegatta();
+        assertNotSame(oldTrackedRegatta, newTrackedRegatta);
+        TrackedRace newTrackedRace = getTrackedRace(newTrackedRegatta);
         // expecting a new tracked race to be created when starting over with tracking
         try {
             assertNotSame(oldTrackedRace, newTrackedRace);
@@ -111,6 +127,7 @@ public class RaceTrackerTest {
         } finally {
             service.stopTracking(myRaceHandle.getRegatta());
         }
+        logger.exiting(getClass().getName(), "testStopTracking");
     }
 
     /**
@@ -120,10 +137,11 @@ public class RaceTrackerTest {
      */
     @Test
     public void testTrackingSameRaceWithoutStopping() throws Exception {
-        TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedEvent();
+        logger.entering(getClass().getName(), "testTrackingSameRaceWithoutStopping");
+        TrackedRegatta oldTrackedRegatta = raceHandle.getTrackedRegatta();
         TrackedRace oldTrackedRace = getTrackedRace(oldTrackedRegatta);
         RacesHandle myRaceHandle = service.addTracTracRace(paramUrl, liveUri, storedUri, EmptyWindStore.INSTANCE, /* timeoutInMilliseconds */ 60000);
-        TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedEvent();
+        TrackedRegatta newTrackedEvent = myRaceHandle.getTrackedRegatta();
         TrackedRace newTrackedRace = getTrackedRace(newTrackedEvent);
         // expecting a new tracked race to be created when starting over with tracking
         try {
@@ -132,5 +150,6 @@ public class RaceTrackerTest {
         } finally {
             service.stopTracking(myRaceHandle.getRegatta());
         }
+        logger.exiting(getClass().getName(), "testStopTracking");
     }
 }

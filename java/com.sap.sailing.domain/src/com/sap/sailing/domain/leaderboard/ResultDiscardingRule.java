@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.TimePoint;
 
 /**

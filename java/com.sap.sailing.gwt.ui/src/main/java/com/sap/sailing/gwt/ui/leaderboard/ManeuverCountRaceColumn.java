@@ -31,7 +31,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
 
     private abstract class AbstractManeuverDetailField<T extends Comparable<?>> implements LegDetailField<T> {
         public T get(LeaderboardRowDTO row) {
-            LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+            LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceName());
             if (fieldsForRace == null) {
                 return null;
             } else {
@@ -138,7 +138,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
         Double totalNumberOfTacks = null;
         Double totalNumberOfJibes = null;
         Double totalNumberOfPenaltyCircles = null;
-        LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceName.get(getRaceName());
+        LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceName());
         if (fieldsForRace != null && fieldsForRace.legDetails != null) {
             for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
                 if (legDetail != null) {

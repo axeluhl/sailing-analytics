@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<erg:ergebnisliste xmlns:erg="http://www.bmiag.de/KWSailing/Ergebnisliste">
+  <bootsklasse>49er</bootsklasse>
+  <datum>2011-06-18+02:00</datum>
+  <uhrzeit>17:30:21.390+02:00</uhrzeit>
+  <status>vorlauefig</status>
+  <veranstaltung>Kieler Woche 2011</veranstaltung>
+  <wettfahrtanzahl>3</wettfahrtanzahl>
+  <pdfDateiname>2011-06-18_49er_Wettfahrt_3.pdf</pdfDateiname>
+</erg:ergebnisliste>

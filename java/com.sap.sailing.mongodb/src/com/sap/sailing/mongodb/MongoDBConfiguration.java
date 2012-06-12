@@ -18,8 +18,7 @@ public class MongoDBConfiguration {
     private int port;
     private String databaseName;
 
-    public static MongoDBConfiguration getDefaultConfiguration()
-    {
+    public static MongoDBConfiguration getDefaultConfiguration() {
         String defaultHostName = System.getProperty(MONGO_HOSTNAME, "127.0.0.1");
         int defaultPort = Integer.valueOf(System.getProperty(MONGO_PORT, "27017"));
         String defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_DB_NAME);
@@ -27,8 +26,7 @@ public class MongoDBConfiguration {
         return new MongoDBConfiguration(defaultHostName, defaultPort, defaultDatabaseName);
     }
 
-    public static MongoDBConfiguration getDefaultTestConfiguration()
-    {
+    public static MongoDBConfiguration getDefaultTestConfiguration() {
         String defaultHostName = System.getProperty(MONGO_HOSTNAME, "127.0.0.1");
         int defaultPort = Integer.valueOf(System.getProperty(MONGO_PORT, "27017"));
         String defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_TEST_DB_NAME);

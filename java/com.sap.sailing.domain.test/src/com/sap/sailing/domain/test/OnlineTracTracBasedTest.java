@@ -90,11 +90,11 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), EmptyWindStore.INSTANCE,
-                /* startOfTracking */ null, /* endOfTracking */ null, new DynamicRaceDefinitionSet() {
+                /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                }, receiverTypes)) {
+                }, /* trackedRegattaRegistry */ null, receiverTypes)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);
@@ -114,7 +114,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         for (Receiver receiver : receivers) {
             receiver.join();
         }
-        trackedRace = getTrackedEvent().getTrackedRace(race);
+        trackedRace = getTrackedRegatta().getTrackedRace(race);
     }
 
 
@@ -131,7 +131,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         if (domainFactory == null) {
             domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
         }
-        domainEvent = domainFactory.getOrCreateEvent(getTracTracEvent());
+        domainEvent = domainFactory.getOrCreateDefaultRegatta(getTracTracEvent(), /* trackedRegattaRegistry */ null);
         trackedRegatta = new DynamicTrackedRegattaImpl(domainEvent);
     }
     
@@ -205,7 +205,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         return domainEvent;
     }
 
-    protected DynamicTrackedRegatta getTrackedEvent() {
+    protected DynamicTrackedRegatta getTrackedRegatta() {
         return trackedRegatta;
     }
 

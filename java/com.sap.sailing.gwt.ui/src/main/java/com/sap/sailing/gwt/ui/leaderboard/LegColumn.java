@@ -295,7 +295,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
 
     private LegEntryDTO getLegEntry(LeaderboardRowDTO row, int theLegIndex) {
         LegEntryDTO legEntry = null;
-        LeaderboardEntryDTO entry = row.fieldsByRaceName.get(getRaceName());
+        LeaderboardEntryDTO entry = row.fieldsByRaceColumnName.get(getRaceName());
         if (entry != null && entry.legDetails != null) {
             legEntry = entry.legDetails.get(theLegIndex);
         }
@@ -326,7 +326,7 @@ public class LegColumn extends ExpandableSortableColumn<String> {
     @Override
     public String getValue(LeaderboardRowDTO row) {
         LegEntryDTO legEntry = getLegEntry(row);
-        if (legEntry != null) {
+        if (legEntry != null && legEntry.rank != 0) {
             return ""+legEntry.rank;
         } else {
             return "";

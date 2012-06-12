@@ -90,7 +90,7 @@ public abstract class TrackBasedTest {
     protected DynamicTrackedRace createTestTrackedRace(String regattaName, String raceName, String boatClassName,
             Iterable<Competitor> competitors, TimePoint timePointForFixes) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(regattaName, boatClass);
+        Regatta regatta = new RegattaImpl(regattaName, boatClass, /* trackedRegattaRegistry */ null);
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         // create a two-lap upwind/downwind course:
@@ -106,6 +106,7 @@ public abstract class TrackBasedTest {
         Course course = new CourseImpl(raceName, waypoints);
         RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitors);
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, EmptyWindStore.INSTANCE,
+                /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0);
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate

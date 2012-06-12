@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -93,7 +93,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             // e.g., in case we have an untracked race and the number of competitors is estimated incorrectly
             Integer correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
             if (correctedNonMaxedScore == null) {
-                result = getMaxPoints(raceColumn.getTrackedRace(), numberOfCompetitorsInLeaderboard);
+                result = getMaxPoints(raceColumn.getTrackedRace(competitor), numberOfCompetitorsInLeaderboard);
             } else {
                 result = correctedNonMaxedScore;
             }
@@ -119,9 +119,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     /**
      * Under the assumption that the competitor is not assigned the maximum score due to disqualification or other
-     * reasons, computes the corrected score. This default implementation uses <code>uncorrectedScore</code> without
-     * changes. Subclasses may wish to allow for optionally overwriting this uncorrected score to handle, e.g.,
-     * differences between what the tracking results suggest and what the jury or race committee decided.
+     * reasons, computes the corrected score. If {@link #correctedScores} contains an entry for the <code>competitor</code>'s key,
+     * it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
      */
     protected int getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn, int uncorrectedScore) {
         Integer correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));

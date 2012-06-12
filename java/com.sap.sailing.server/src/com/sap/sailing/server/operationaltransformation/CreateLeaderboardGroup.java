@@ -31,6 +31,7 @@ public class CreateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Le
 
     @Override
     public LeaderboardGroup internalApplyTo(RacingEventService toState) {
+        // TODO see bug 729: try to move addLeaderboardGroup implementation here and synthesize and apply this operation there
         return toState.addLeaderboardGroup(getLeaderboardGroupName(), description, leaderboardNames);
     }
 

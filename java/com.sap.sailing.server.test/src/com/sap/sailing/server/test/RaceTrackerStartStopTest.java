@@ -57,7 +57,7 @@ public class RaceTrackerStartStopTest {
     public void setUp() {
         racingEventService = new RacingEventServiceImplMock();
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
-        regatta = new RegattaImpl(EVENTNAME, boatClass);
+        regatta = new RegattaImpl(EVENTNAME, boatClass, /* trackedRegattaRegistry */ null);
         racingEventService.getEventsByName().put(EVENTNAME, regatta);
         TrackedRegatta trackedRegatta1 = racingEventService.getOrCreateTrackedRegatta(regatta);
         racingEventService.getEventsByNameMap().put(EVENTNAME, regatta);
@@ -66,13 +66,13 @@ public class RaceTrackerStartStopTest {
         raceDef2 = new RaceDefinitionImpl(RACENAME2, new CourseImpl("Course2", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         raceDef3 = new RaceDefinitionImpl(RACENAME3, new CourseImpl("Course3", new ArrayList<Waypoint>()), boatClass, new ArrayList<Competitor>());
         regatta.addRace(raceDef1);
-        trackedRegatta1.createTrackedRace(raceDef1, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
+        trackedRegatta1.createTrackedRace(raceDef1, /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         regatta.addRace(raceDef2);
-        trackedRegatta1.createTrackedRace(raceDef2, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
+        trackedRegatta1.createTrackedRace(raceDef2, /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         regatta.addRace(raceDef3);
-        trackedRegatta1.createTrackedRace(raceDef3, /* windStore */ EmptyWindStore.INSTANCE, /* millisecondsOverWhichToAverageWind */ 0l,
+        trackedRegatta1.createTrackedRace(raceDef3, /* windStore */ EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l, /* millisecondsOverWhichToAverageWind */ 0l,
                 /* millisecondsOverWhichToAverageSpeed */ 0l, /* raceDefinitionSetToUpdate */ null);
         Set<RaceDefinition> raceDefinitionSetRace1 = new HashSet<RaceDefinition>();
         raceDefinitionSetRace1.add(raceDef1);
@@ -135,6 +135,7 @@ public class RaceTrackerStartStopTest {
             assertSame(raceTracker1, currentTracker);
         }
     }
+    
     /**
      * This test methods checks if the {@link RacingEventService#removeRace(Regatta, RaceDefinition) removeRace} method works correctly
      */

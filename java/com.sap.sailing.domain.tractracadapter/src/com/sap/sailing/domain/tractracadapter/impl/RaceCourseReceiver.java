@@ -36,15 +36,17 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final static Logger logger = Logger.getLogger(RaceCourseReceiver.class.getName());
     
     private final long millisecondsOverWhichToAverageWind;
+    private final long delayToLiveInMillis;
     private final WindStore windStore;
     private final DynamicRaceDefinitionSet raceDefinitionSetToUpdate;
     
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind) {
         super(domainFactory, tractracEvent, trackedRegatta);
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
+        this.delayToLiveInMillis = delayToLiveInMillis;
         this.windStore = windStore;
         this.raceDefinitionSetToUpdate = raceDefinitionSetToUpdate;
     }
@@ -81,7 +83,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             // Therefore, don't create TrackedRace again because it already exists.
             try {
                 getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), event.getB().getPoints());
-                if (getTrackedEvent().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
+                if (getTrackedRegatta().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
                     createTrackedRace(existingRaceDefinitionForRace);
                 }
             } catch (PatchFailedException e) {
@@ -91,14 +93,14 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
             // create race definition and add to event
-            getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(getTrackedEvent(), event.getC(), course,
-                    windStore, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+            getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(getTrackedRegatta(), event.getC(), course,
+                    windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
         }
     }
 
     private void createTrackedRace(RaceDefinition race) {
-        getTrackedEvent().createTrackedRace(race,
-                windStore, millisecondsOverWhichToAverageWind,
+        getTrackedRegatta().createTrackedRace(race,
+                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
     }

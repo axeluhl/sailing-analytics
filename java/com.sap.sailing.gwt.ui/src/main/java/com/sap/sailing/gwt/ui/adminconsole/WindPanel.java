@@ -1,12 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,11 +41,11 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeZoomModel;
@@ -185,8 +183,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         });
         windSourceSelectionPanel.add(showConfigAnchor);
         grid.setWidget(1, 0, windSourceSelectionPanel);
-        WindChartSettings windChartSettings = new WindChartSettings(false, true, new HashSet<WindSourceType>(Arrays.asList(WindSourceType.values())));
-        windChart = new WindChart(sailingService, raceSelectionProvider, new Timer(PlayModes.Replay), new TimeZoomModel(), windChartSettings, stringMessages, asyncActionsExecutor, errorReporter, false);
+        windChart = new WindChart(sailingService, raceSelectionProvider, new Timer(PlayModes.Replay), new TimeZoomModel(), new WindChartSettings(), stringMessages, asyncActionsExecutor, errorReporter, false);
         windChart.onResize();
         grid.setWidget(2, 0, windChart.getEntryWidget());
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
@@ -211,7 +208,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         sailingService.getAveragedWindInfo(raceIdentifier,
         // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
                 null, null, // use race start and time of newest event as default time period
-                WindChart.DEFAULT_RESOLUTION_IN_MILLISECONDS,
+                WindChartSettings.DEFAULT_RESOLUTION_IN_MILLISECONDS,
                 null, // retrieve data on all wind sources
                 new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override

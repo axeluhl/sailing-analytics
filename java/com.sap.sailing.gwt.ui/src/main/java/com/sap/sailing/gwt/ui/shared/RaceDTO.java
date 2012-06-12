@@ -18,9 +18,11 @@ public class RaceDTO extends NamedDTO implements IsSerializable {
 
     public Date startOfRace;
     public Date startOfTracking;
+    public Date endOfTracking;
     public Date timePointOfLastEvent;
     public Date timePointOfNewestEvent;
     public Date endOfRace;
+    public long delayToLiveInMs;
     
     private RegattaDTO regatta;
     

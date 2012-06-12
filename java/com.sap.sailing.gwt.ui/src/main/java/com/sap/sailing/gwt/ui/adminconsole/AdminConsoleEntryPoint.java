@@ -35,8 +35,12 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         tabPanel.setAnimationEnabled(true);
         rootPanel.add(tabPanel); //, 10, 10);
         tabPanel.setSize("95%", "95%");
-        
+
         regattaDisplayers = new HashSet<RegattaDisplayer>();
+        
+        RegattaStructureManagementPanel eventStructureManagementPanel = new RegattaStructureManagementPanel(sailingService, this, stringMessages, this);
+        tabPanel.add(eventStructureManagementPanel, stringMessages.regattas());
+        regattaDisplayers.add(eventStructureManagementPanel);
         TracTracEventManagementPanel tractracEventManagementPanel = new TracTracEventManagementPanel(sailingService, this, this, stringMessages);
         regattaDisplayers.add(tractracEventManagementPanel);
         tractracEventManagementPanel.setSize("90%", "90%");
@@ -90,7 +94,7 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
     @Override
     public void fillRegattas() {
-        sailingService.listEvents(new AsyncCallback<List<RegattaDTO>>() {
+        sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
             @Override
             public void onSuccess(List<RegattaDTO> result) {
                 for (RegattaDisplayer regattaDisplayer : regattaDisplayers) {
@@ -100,9 +104,8 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
 
             @Override
             public void onFailure(Throwable caught) {
-                reportError("Remote Procedure Call listEvents() - Failure");
+                reportError("Remote Procedure Call getRegattas() - Failure");
             }
         });
     }
-
 }

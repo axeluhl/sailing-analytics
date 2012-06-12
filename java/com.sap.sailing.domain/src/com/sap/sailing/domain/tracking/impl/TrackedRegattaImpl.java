@@ -60,17 +60,21 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     @Override
     public void addTrackedRace(TrackedRace trackedRace) {
         synchronized (trackedRaces) {
-            trackedRaces.put(trackedRace.getRace(), trackedRace);
-            Collection<TrackedRace> coll = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
-            if (coll == null) {
-                coll = new ArrayList<TrackedRace>();
-                trackedRacesByBoatClass.put(trackedRace.getRace().getBoatClass(), coll);
+            logger.info("adding tracked race for "+trackedRace.getRace()+" to tracked regatta "+getRegatta().getName()+
+                    " with regatta hash code "+getRegatta().hashCode());
+            TrackedRace oldTrackedRace = trackedRaces.put(trackedRace.getRace(), trackedRace);
+            if (oldTrackedRace != trackedRace) {
+                Collection<TrackedRace> coll = trackedRacesByBoatClass.get(trackedRace.getRace().getBoatClass());
+                if (coll == null) {
+                    coll = new ArrayList<TrackedRace>();
+                    trackedRacesByBoatClass.put(trackedRace.getRace().getBoatClass(), coll);
+                }
+                coll.add(trackedRace);
+                for (RaceListener listener : raceListeners) {
+                    listener.raceAdded(trackedRace);
+                }
+                trackedRaces.notifyAll();
             }
-            coll.add(trackedRace);
-            for (RaceListener listener : raceListeners) {
-                listener.raceAdded(trackedRace);
-            }
-            trackedRaces.notifyAll();
         }
     }
     
@@ -156,11 +160,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
 
     @Override
-    public TrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore, long millisecondsOverWhichToAverageWind,
+    public TrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         logger.log(Level.INFO, "Creating DynamicTrackedRaceImpl for RaceDefinition "+raceDefinition.getName());
         DynamicTrackedRaceImpl result = new DynamicTrackedRaceImpl(this, raceDefinition,
-                windStore, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
         if (raceDefinitionSetToUpdate != null) {
             raceDefinitionSetToUpdate.addRaceDefinition(raceDefinition);
         }

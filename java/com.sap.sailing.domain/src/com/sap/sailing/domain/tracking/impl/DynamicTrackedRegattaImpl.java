@@ -26,9 +26,9 @@ public class DynamicTrackedRegattaImpl extends TrackedRegattaImpl implements Dyn
 
     @Override
     public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
-        DynamicTrackedRace result = (DynamicTrackedRace) super.createTrackedRace(raceDefinition, windStore, millisecondsOverWhichToAverageWind,
+        DynamicTrackedRace result = (DynamicTrackedRace) super.createTrackedRace(raceDefinition, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, raceDefinitionSetToUpdate);
         addTrackedRace(result);
         return result;

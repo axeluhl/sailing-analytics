@@ -49,7 +49,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.server.operationaltransformation.AddRegatta;
+import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
@@ -73,7 +73,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
                 new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
         final String baseEventName = "Test Event";
-        AddRegatta addEventOperation = new AddRegatta(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true);
+        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName);
         Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
@@ -88,7 +88,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         trackedRegatta = master.apply(new TrackRegatta(raceIdentifier));
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory()),
+                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory()), /* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
     }
     

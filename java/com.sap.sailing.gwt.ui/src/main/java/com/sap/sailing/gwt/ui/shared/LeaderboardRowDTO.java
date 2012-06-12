@@ -12,7 +12,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class LeaderboardRowDTO implements IsSerializable {
     public CompetitorDTO competitor;
-    public Map<String, LeaderboardEntryDTO> fieldsByRaceName;
+    public Map<String, LeaderboardEntryDTO> fieldsByRaceColumnName;
     public Integer carriedPoints;
     
     @Override
@@ -21,7 +21,7 @@ public class LeaderboardRowDTO implements IsSerializable {
         int result = 1;
         result = prime * result + ((carriedPoints == null) ? 0 : carriedPoints.hashCode());
         result = prime * result + ((competitor == null) ? 0 : competitor.hashCode());
-        result = prime * result + ((fieldsByRaceName == null) ? 0 : fieldsByRaceName.hashCode());
+        result = prime * result + ((fieldsByRaceColumnName == null) ? 0 : fieldsByRaceColumnName.hashCode());
         return result;
     }
     
@@ -44,10 +44,10 @@ public class LeaderboardRowDTO implements IsSerializable {
                 return false;
         } else if (!competitor.equals(other.competitor))
             return false;
-        if (fieldsByRaceName == null) {
-            if (other.fieldsByRaceName != null)
+        if (fieldsByRaceColumnName == null) {
+            if (other.fieldsByRaceColumnName != null)
                 return false;
-        } else if (!fieldsByRaceName.equals(other.fieldsByRaceName))
+        } else if (!fieldsByRaceColumnName.equals(other.fieldsByRaceColumnName))
             return false;
         return true;
     }

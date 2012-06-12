@@ -43,12 +43,11 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     protected Date minTimepoint;
     protected Date maxTimepoint;
     
-    protected boolean ignoreClickOnce;
-
     protected RaceIdentifier selectedRaceIdentifier;
     protected RaceTimesInfoDTO lastRaceTimesInfo;
 
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
+    protected final DateTimeFormat dateFormatHoursMinutes = DateTimeFormat.getFormat("HH:mm");
 
     protected final StringMessages stringMessages;
     protected final ErrorReporter errorReporter;
@@ -56,8 +55,12 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
     protected final SailingServiceAsync sailingService;
 
     protected boolean isLoading = false;
+    protected boolean isZoomed = false;
     
-    private int NUMBER_OF_TICKS = 9;
+    /** the tick count must be the same as TimeSlider.TICKCOUNT, otherwise the time ticks will be not synchronized */  
+    private final int TICKCOUNT = 10;
+
+    private boolean ignoreNextClickEvent;
     
     public RaceChart(SailingServiceAsync sailingService, Timer timer, TimeZoomProvider timeZoomProvider, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
@@ -81,68 +84,81 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
                 minTimepoint = raceMinMax.getA();
                 maxTimepoint = raceMinMax.getB();
                 updateMinMax = true;
-            } else {
-                if(minTimepoint.getTime() != raceMinMax.getA().getTime() || maxTimepoint.getTime() != raceMinMax.getB().getTime()) {
-                    minTimepoint = raceMinMax.getA();
-                    maxTimepoint = raceMinMax.getB();
-                    updateMinMax = true;
-                }
+            } else if(minTimepoint.getTime() != raceMinMax.getA().getTime() || maxTimepoint.getTime() != raceMinMax.getB().getTime()) {
+                minTimepoint = raceMinMax.getA();
+                maxTimepoint = raceMinMax.getB();
+                updateMinMax = true;
             }
         }
         if(updateMinMax) {
             chart.getXAxis().setMin(minTimepoint.getTime());
             chart.getXAxis().setMax(maxTimepoint.getTime());
+            chart.getXAxis().setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), false, false);
+            
+            long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
+            chart.getXAxis().setTickInterval(tickInterval);
         }
     }
 
     protected void showLoading(String message) {
-        chart.showLoading(message);
+        if(timer.getPlayMode() != PlayModes.Live) {
+            chart.showLoading(message);
+        }
         isLoading = true;
     }
 
     protected void hideLoading() {
-        chart.hideLoading();
+        if (timer.getPlayMode() != PlayModes.Live) {
+            chart.hideLoading();
+        }
         isLoading = false;
     }
 
-    protected void onSelectionChange(ChartSelectionEvent chartSelectionEvent) {
+    protected boolean onXAxisSelectionChange(ChartSelectionEvent chartSelectionEvent) {
         try {
             long xAxisMin = chartSelectionEvent.getXAxisMinAsLong();
             long xAxisMax = chartSelectionEvent.getXAxisMaxAsLong();
+            if (!isZoomed) {
+                isZoomed = true;
+            }
             timeZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
-
-            ignoreClickOnce = true;
         } catch (Throwable t) {
+            // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
             timeZoomProvider.resetTimeZoom(this);
-            //Redrawing, or the chart wouldn't rezoom
+            // Trigger the redrawing... otherwise chart wouldn't reset the zoom
             chart.redraw();
+            isZoomed = false;
+            // after the selection change event, another click event is sent with the mouse position on the "Reset Zoom" button; ignore that
+            ignoreNextClickEvent = true;
         }
+        return true;
     }
 
-    protected void onClick(ChartClickEvent chartClickEvent) {
-        if(!isLoading) {
-            if (ignoreClickOnce) {
-                ignoreClickOnce = false;
-            } else {
+    protected boolean onClick(ChartClickEvent chartClickEvent) {
+        if (ignoreNextClickEvent) {
+            ignoreNextClickEvent = false;
+        } else {
+            if (!isLoading) {
                 timer.setPlayMode(PlayModes.Replay);
                 timer.setTime(chartClickEvent.getXAxisValueAsLong());
             }
         }
+        return true;
     }
 
-    protected void changeMinMaxInterval(Date minIntervalTimepoint, Date maxIntervalTimepoint, long numTicks) {
+    protected void changeMinMaxInterval(Date minIntervalTimepoint, Date maxIntervalTimepoint) {
         XAxis xAxis = chart.getXAxis();
         xAxis.setExtremes(minIntervalTimepoint.getTime(), maxIntervalTimepoint.getTime(), true, true);
     }
     
     public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
-        changeMinMaxInterval(zoomStartTimepoint, zoomEndTimepoint, NUMBER_OF_TICKS);
+        changeMinMaxInterval(zoomStartTimepoint, zoomEndTimepoint);
         // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
         // chart.showResetZoom();
     }
 
     public void onTimeZoomReset() {
-        changeMinMaxInterval(minTimepoint, maxTimepoint, NUMBER_OF_TICKS);
+        changeMinMaxInterval(minTimepoint, maxTimepoint);
     }
 
     /**
@@ -152,7 +168,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
      * visibility state.
      */
     protected void useCheckboxesToShowAndHide(final Chart chart) {
-        chart.setLegend(new Legend().setEnabled(true).setBorderWidth(0).setSymbolPadding(20)); // make room for checkbox
+        chart.setLegend(new Legend().setEnabled(true).setBorderWidth(0).setSymbolPadding(25)); // make room for checkbox
         chart.setSeriesPlotOptions(new SeriesPlotOptions().setSeriesCheckboxClickEventHandler(new SeriesCheckboxClickEventHandler() {
                     @Override
                     public boolean onClick(SeriesCheckboxClickEvent seriesCheckboxClickEvent) {

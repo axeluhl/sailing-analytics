@@ -65,7 +65,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             }
         };
         List<TypeController> listeners = new ArrayList<TypeController>();
-        Regatta regatta = domainFactory.getOrCreateEvent(getTracTracEvent());
+        Regatta regatta = domainFactory.getOrCreateDefaultRegatta(getTracTracEvent(), /* trackedRegattaRegistry */ null);
         DynamicTrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         trackedRegatta.addRaceListener(new RaceListener() {
             @Override
@@ -78,21 +78,21 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             }
         });
         for (Receiver receiver : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), /* start of tracking */ null,
-                /* end of tracking */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                /* end of tracking */ null, /* delayToLiveInMillis */ 0l, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                })) {
+                }, /* trackedRegattaRegistry */ null)) {
             for (TypeController raceListener : receiver.getTypeControllersAndStart()) {
                 listeners.add(raceListener);
             }
         }
         addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
-                /* start of tracking */ null, /* end of tracking */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                /* start of tracking */ null, /* end of tracking */ null, /* delayToLiveInMillis */ 0l, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
-                }));
+                }, /* trackedRegattaRegistry */ null));
     }
 
     @Test

@@ -96,6 +96,7 @@ public interface StringMessages extends Messages {
     String event();
     String startTime();
     String regatta();
+    String regattas();
     String startTracking();
     String stopTracking();
     String connections();
@@ -184,11 +185,12 @@ public interface StringMessages extends Messages {
     String actionEditScores();
     String actionOpenBrowser();
     String actionRemove();
+    String actionEditRaces();
     String actionRaceEdit();
     String actionRaceUnlink();
     String actionRaceRemove();
     String filterLeaderboardsByName();
-    String windwardDistanceToOverallLeader();
+    String windwardDistanceToLeader();
     String actions();
     String islinked();
     String yes();
@@ -239,6 +241,7 @@ public interface StringMessages extends Messages {
     String noLeaderboardGroupWithNameFound(String groupName);
     String overview();
     String welcomeToSailingAnalytics();
+    String welcomeToSailingAnalyticsBody();
     String home();
     String clickAndDragToZoomIn();
     String windSpeed();
@@ -300,4 +303,28 @@ public interface StringMessages extends Messages {
     String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
     String showWindSpeedSeries();
     String showWindDirectionSeries();
+    String fleet();
+    String boatClass();
+    String setDelayToLive();
+    String pleaseEnterNonEmptyVenue();
+    String eventWithThisNameAlreadyExists();
+    String venue();
+    String pleaseSelectABoatClass();
+    String regattaWithThisNameAlreadyExists();
+    String seriesWithThisNameAlreadyExists();
+    String fleetWithThisNameAlreadyExists();
+    String fleets();
+    String series();
+    String splitFleet();
+    String color();
+    String medalSeries();
+    String noColor();
+    String noRegatta();
+    String addFleet();
+    String doYouReallyWantToRemoveRegatta(String name);
+    String errorLoadingScoreCorrectionProviders(String message);
+    String selectResultListToImportFrom();
+    String of();
+    String errorObtainingScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
+            String string);
 }

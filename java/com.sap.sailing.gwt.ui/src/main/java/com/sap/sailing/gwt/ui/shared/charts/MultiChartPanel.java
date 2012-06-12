@@ -30,7 +30,7 @@ public class MultiChartPanel extends AbstractChartPanel<MultiChartSettings> impl
             Timer timer, TimeZoomProvider timeZoomProvider, final StringMessages stringMessages, ErrorReporter errorReporter, boolean compactChart,
             boolean allowTimeAdjust) {
         super(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer, timeZoomProvider, stringMessages, errorReporter,
-                /*show initially*/ DetailType.DISTANCE_TRAVELED, compactChart, allowTimeAdjust);
+                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, compactChart, allowTimeAdjust);
     }
 
     @Override

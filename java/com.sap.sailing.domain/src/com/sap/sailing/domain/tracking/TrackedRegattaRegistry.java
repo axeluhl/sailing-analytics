@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.tracking;
 
+import java.io.Serializable;
+
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 
 /**
@@ -25,4 +28,17 @@ public interface TrackedRegattaRegistry {
     
     void removeTrackedRegatta(Regatta regatta);
 
+    /**
+     * A race needs to be associated with a {@link Regatta} so that {@link Regatta#getAllRaces()} returns it. Which
+     * regatta to associate the race with should usually be decided by the user. Once explicitly decided and stored in
+     * this registry by calling {@link #setRegattaForRace(Regatta, RaceDefinition)}, this information is preserved by
+     * this registry for future use so that when the race's {@link RaceDefinition#getId() ID} is recognized, the same
+     * regatta will be returned.
+     * <p>
+     * 
+     * If no such explicit assignment has been performed, <code>null</code> is returned.
+     * 
+     * @param raceID the ID as obtained from {@link RaceDefinition#getId()}
+     */
+    Regatta getRememberedRegattaForRace(Serializable raceID);
 }

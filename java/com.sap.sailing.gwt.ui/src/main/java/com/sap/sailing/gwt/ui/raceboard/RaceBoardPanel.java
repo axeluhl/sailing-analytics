@@ -1,10 +1,8 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -12,17 +10,18 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -33,6 +32,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.TimeZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
@@ -139,15 +139,13 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         }
 
         timePanel = new RaceTimePanel(timer, stringMessages, raceTimesInfoProvider);
+        timeZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
         raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
         timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
     
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, FlowPanel mainPanel) {
-        componentsNavigationPanel = new FlowPanel();
-        componentsNavigationPanel.addStyleName("raceBoardNavigation");
-
         // create the default leaderboard and select the right race
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName);
         RaceMap raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionModel, stringMessages);
@@ -163,8 +161,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
         components.add(competitorChart);
 
-        WindChartSettings windChartSettings = new WindChartSettings(false, true, new HashSet<WindSourceType>(Arrays.asList(WindSourceType.values())));
-        windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeZoomModel, windChartSettings,
+        windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeZoomModel, new WindChartSettings(),
                 stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
         windChart.setVisible(false);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(windChart);
@@ -178,24 +175,10 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
             mainPanel.add(componentViewer.getViewerWidget());
         }
 
-        settingsPanel = new FlowPanel();
-        settingsPanel.addStyleName("raceBoardNavigation-settingsButtonPanel");
-        Label settingsLabel = new Label("Settings: ");
-        settingsLabel.addStyleName("raceBoardNavigation-settingsLabel");
-        settingsLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        settingsLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        settingsPanel.add(settingsLabel);
-
-        addSettingsMenuButton(settingsPanel, leaderboardPanel);
-        addSettingsMenuButton(settingsPanel, raceMap);
-        addSettingsMenuButton(settingsPanel, windChart);
-        addSettingsMenuButton(settingsPanel, competitorChart);
-
-        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel);
-        //addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, raceMap);
-        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, windChart);
-        addComponentAsToogleButtonToNavigationMenu(leaderboardAndMapViewer, competitorChart);
-        
+        addComponentToNavigationMenu(leaderboardAndMapViewer, leaderboardPanel, true);
+        addComponentToNavigationMenu(leaderboardAndMapViewer, windChart,  true);
+        addComponentToNavigationMenu(leaderboardAndMapViewer, competitorChart, true);
+        addComponentToNavigationMenu(leaderboardAndMapViewer, raceMap, false);
     }
 
     @SuppressWarnings("unused")
@@ -209,23 +192,6 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         }
     }
     
-    private <SettingsType> void addSettingsMenuButton(FlowPanel settingsPanel, final Component<SettingsType> component) {
-        if(component.hasSettings()) {
-            Button settingsButton = new Button(component.getLocalizedShortName());
-            settingsButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    new SettingsDialog<SettingsType>(component, stringMessages).show();
-                }
-            });
-            settingsButton.addStyleName("raceBoardNavigation-settingsButton");
-            settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-            settingsButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
-            
-            settingsPanel.add(settingsButton);
-        }
-    }
-    
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName) {
         LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
                 .createNewSettingsForPlayMode(timer.getPlayMode(), /* nameOfRaceToSort */
@@ -236,10 +202,57 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                 userAgentType);
      }
 
-    private void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,
+    private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,
+            final Component<SettingsType> component, boolean withCheckbox) {
+        final CheckBox checkBox= new CheckBox(component.getLocalizedShortName());
+        checkBox.getElement().getStyle().setFloat(Style.Float.LEFT);
+
+        checkBox.setEnabled(withCheckbox);
+        checkBox.setValue(component.isVisible());
+        checkBox.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
+        checkBox.addStyleName("raceBoardNavigation-innerElement");
+
+        checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> newValue) {
+                // make the map invisible is this is not supported yet due to problems with disabling the center element
+                // of a DockPanel
+                if (component instanceof RaceMap)
+                    return;
+
+                boolean visible = checkBox.getValue();
+                setComponentVisible(componentViewer, component, visible);
+
+                if (visible && component instanceof TimeListener) {
+                    // trigger the component to update its data
+                    ((TimeListener) component).timeChanged(timer.getTime());
+                }
+            }
+        });
+
+        componentsNavigationPanel.add(checkBox);
+        
+        if(component.hasSettings()) {
+            Button settingsButton = new Button("");
+            settingsButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    new SettingsDialog<SettingsType>(component, stringMessages).show();
+                }
+            });
+            settingsButton.addStyleName("raceBoardNavigation-settingsButton");
+            settingsButton.getElement().getStyle().setFloat(Style.Float.LEFT);
+            settingsButton.setTitle(stringMessages.settingsForComponent(component.getLocalizedShortName()));
+            
+            componentsNavigationPanel.add(settingsButton);
+        }
+
+    }
+    
+    public void addComponentAsToogleButtonToNavigationMenu(final ComponentViewer componentViewer,
             final Component<?> component) {
         final ToggleButton toggleButton = new ToggleButton(component.getLocalizedShortName(),
-                component.getLocalizedShortName());
+                "\u2713 " + component.getLocalizedShortName());
         toggleButton.getElement().getStyle().setFloat(Style.Float.LEFT);
         toggleButton.setDown(component.isVisible());
         toggleButton.setTitle(stringMessages.showHideComponent(component.getLocalizedShortName()));
@@ -254,8 +267,9 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                 boolean visible = toggleButton.isDown();
                 setComponentVisible(componentViewer, component, visible);
 
-                if (visible && component instanceof LeaderboardPanel) {
-                    leaderboardPanel.timeChanged(timer.getTime());
+                if (visible && component instanceof TimeListener) {
+                    // trigger the component to update its data
+                    ((TimeListener) component).timeChanged(timer.getTime());
                 }
             }
         });

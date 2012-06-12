@@ -35,15 +35,17 @@ import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.components.CollapsablePanel;
 
 /**
@@ -80,14 +82,14 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     
     private FlowPanel groupDetailsPanel;
     private HTML groupDescriptionHTML;
-    private CellTable<LeaderboardDTO> leaderboardsTable;
-    private ListDataProvider<LeaderboardDTO> leaderboardsDataProvider;
-    private SingleSelectionModel<LeaderboardDTO> leaderboardsSelectionModel;
+    private CellTable<StrippedLeaderboardDTO> leaderboardsTable;
+    private ListDataProvider<StrippedLeaderboardDTO> leaderboardsDataProvider;
+    private SingleSelectionModel<StrippedLeaderboardDTO> leaderboardsSelectionModel;
     
     private FlowPanel leaderboardDetailsPanel;
-    private CellTable<RaceInLeaderboardDTO> racesTable;
-    private NoSelectionModel<RaceInLeaderboardDTO> racesSelectionModel;
-    private ListDataProvider<RaceInLeaderboardDTO> racesDataProvider;
+    private CellTable<RaceColumnDTO> racesTable;
+    private NoSelectionModel<RaceColumnDTO> racesSelectionModel;
+    private ListDataProvider<RaceColumnDTO> racesDataProvider;
     
     private List<LeaderboardGroupDTO> availableGroups;
 
@@ -230,7 +232,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             public String getValue(LeaderboardGroupDTO group) {
                 StringBuilder sb = new StringBuilder();
                 boolean first = true;
-                for (LeaderboardDTO leaderboard : group.leaderboards) {
+                for (StrippedLeaderboardDTO leaderboard : group.leaderboards) {
                     if (!first) {
                         sb.append(", ");
                     }
@@ -330,9 +332,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         groupDetailsLabel.getElement().getStyle().setPadding(5, Unit.PX);
         groupDetailsPanel.add(groupDetailsLabel);
         
-        TextColumn<LeaderboardDTO> leaderboardsLocationColumn = new TextColumn<LeaderboardDTO>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardsLocationColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(LeaderboardDTO leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 PlacemarkOrderDTO leaderboardPlaces = leaderboard.getPlaces();
                 return leaderboardPlaces == null ? LeaderboardGroupOverviewPanel.this.stringMessages
                         .notAvailable() : leaderboardPlaces.placemarksAsString();
@@ -340,9 +342,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         };
         
         AnchorCell leaderboardsNameAnchorCell = new AnchorCell();
-        Column<LeaderboardDTO, SafeHtml> leaderboardsNameColumn = new Column<LeaderboardDTO, SafeHtml>(leaderboardsNameAnchorCell) {
+        Column<StrippedLeaderboardDTO, SafeHtml> leaderboardsNameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(leaderboardsNameAnchorCell) {
             @Override
-            public SafeHtml getValue(LeaderboardDTO leaderboard) {
+            public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
@@ -352,12 +354,12 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
         };
         
-        TextColumn<LeaderboardDTO> leaderboardsRacesColumn = new TextColumn<LeaderboardDTO>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardsRacesColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(LeaderboardDTO leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 StringBuilder sb = new StringBuilder();
                 boolean first = true;
-                for (RaceInLeaderboardDTO race : leaderboard.getRaceList()) {
+                for (RaceColumnDTO race : leaderboard.getRaceList()) {
                     if (!first) {
                         sb.append(", ");
                     }
@@ -368,18 +370,18 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
         };
         
-        TextColumn<LeaderboardDTO> leaderboardsStartDateColumn = new TextColumn<LeaderboardDTO>() {
+        TextColumn<StrippedLeaderboardDTO> leaderboardsStartDateColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
-            public String getValue(LeaderboardDTO leaderboard) {
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
                 Date leaderboardStart = leaderboard.getStartDate();
                 return leaderboardStart == null ? LeaderboardGroupOverviewPanel.this.stringMessages.untracked()
                         : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(leaderboardStart);
             }
         };
         
-        leaderboardsTable = new CellTable<LeaderboardDTO>(200, tableResources);
+        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
         leaderboardsTable.setWidth("100%");
-        leaderboardsSelectionModel = new SingleSelectionModel<LeaderboardDTO>();
+        leaderboardsSelectionModel = new SingleSelectionModel<StrippedLeaderboardDTO>();
         leaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             
             @Override
@@ -395,7 +397,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         leaderboardsTable.addColumn(leaderboardsStartDateColumn, this.stringMessages.startDate());
         groupDetailsPanel.add(leaderboardsTable);
         
-        leaderboardsDataProvider = new ListDataProvider<LeaderboardDTO>();
+        leaderboardsDataProvider = new ListDataProvider<StrippedLeaderboardDTO>();
         leaderboardsDataProvider.addDataDisplay(leaderboardsTable);
 
         //Build leaderboard details GUI
@@ -410,47 +412,69 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         leaderboardDetailsLabel.getElement().getStyle().setPadding(5, Unit.PX);
         leaderboardDetailsPanel.add(leaderboardDetailsLabel);
         
-        TextColumn<RaceInLeaderboardDTO> racesLocationColumn = new TextColumn<RaceInLeaderboardDTO>() {
+        TextColumn<RaceColumnDTO> racesLocationColumn = new TextColumn<RaceColumnDTO>() {
             @Override
-            public String getValue(RaceInLeaderboardDTO race) {
+            public String getValue(RaceColumnDTO race) {
                 PlacemarkOrderDTO racePlaces = race.getPlaces();
                 return racePlaces == null ? LeaderboardGroupOverviewPanel.this.stringMessages.locationNotAvailable() : racePlaces.placemarksAsString();
             }
         };
         
         AnchorCell racesNameAnchorCell = new AnchorCell();
-        Column<RaceInLeaderboardDTO, SafeHtml> racesNameColumn = new Column<RaceInLeaderboardDTO, SafeHtml>(racesNameAnchorCell) {
+        Column<RaceColumnDTO, SafeHtml> racesNameColumn = new Column<RaceColumnDTO, SafeHtml>(racesNameAnchorCell) {
             @Override
-            public SafeHtml getValue(RaceInLeaderboardDTO race) {
+            public SafeHtml getValue(RaceColumnDTO race) {
                 SafeHtml name = null;
-                if (race.getRaceIdentifier() != null) {
-                    LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
-                    LeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
-                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier();
-                    String debugParam = Window.Location.getParameter("gwt.codesvr");
-                    String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName()
-                            + "&regattaName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
-                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                    name = ANCHORTEMPLATE.anchor(link, raceId.getRaceName());
-                } else {
-                    name = new SafeHtmlBuilder().appendHtmlConstant(race.getRaceColumnName()).toSafeHtml();
+                Iterable<FleetDTO> fleets = race.getFleets();
+                boolean singleFleet = Util.size(fleets) < 2;
+                for (FleetDTO fleet : fleets) {
+                    String raceDisplayName;
+                    if (singleFleet) {
+                        raceDisplayName = race.getRaceColumnName();
+                    } else {
+                        raceDisplayName = race.getRaceColumnName() + "("+fleet+")";
+                    }
+                    if (race.getRaceIdentifier(fleet) != null) {
+                        LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
+                        StrippedLeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
+                        RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
+                        String debugParam = Window.Location.getParameter("gwt.codesvr");
+                        String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName="
+                                + selectedLeaderboard.name + "&raceName=" + raceId.getRaceName() + "&regattaName="
+                                + raceId.getRegattaName() + "&leaderboardGroupName=" + selectedGroup.name
+                                + "&root=overview"
+                                + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                        name = ANCHORTEMPLATE.anchor(link, raceDisplayName);
+                    } else {
+                        name = new SafeHtmlBuilder().appendHtmlConstant(raceDisplayName).toSafeHtml();
+                    }
                 }
                 return name;
             }
         };
         
-        TextColumn<RaceInLeaderboardDTO> racesStartDateColumn = new TextColumn<RaceInLeaderboardDTO>() {
+        TextColumn<RaceColumnDTO> racesStartDateColumn = new TextColumn<RaceColumnDTO>() {
             @Override
-            public String getValue(RaceInLeaderboardDTO race) {
-                Date raceStart = race.getStartDate();
-                return raceStart == null ? LeaderboardGroupOverviewPanel.this.stringMessages.untracked()
-                        : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(raceStart);
+            public String getValue(RaceColumnDTO race) {
+                StringBuilder result = new StringBuilder();
+                boolean first = true;
+                for (FleetDTO fleet : race.getFleets()) {
+                    Date raceStart = race.getStartDate(fleet);
+                    if (first) {
+                        first = false;
+                    } else {
+                        result.append(", ");
+                    }
+                    result.append(raceStart == null ? LeaderboardGroupOverviewPanel.this.stringMessages.untracked()
+                            : DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT).format(raceStart));
+                }
+                return result.toString();
             }
         };
         
-        racesTable = new CellTable<RaceInLeaderboardDTO>(200, tableResources);
+        racesTable = new CellTable<RaceColumnDTO>(200, tableResources);
         racesTable.setWidth("100%");
-        racesSelectionModel = new NoSelectionModel<RaceInLeaderboardDTO>();
+        racesSelectionModel = new NoSelectionModel<RaceColumnDTO>();
         racesTable.setSelectionModel(racesSelectionModel);
         
         racesTable.addColumn(racesLocationColumn, this.stringMessages.location());
@@ -458,7 +482,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         racesTable.addColumn(racesStartDateColumn, this.stringMessages.startDate());
         leaderboardDetailsPanel.add(racesTable);
         
-        racesDataProvider = new ListDataProvider<RaceInLeaderboardDTO>();
+        racesDataProvider = new ListDataProvider<RaceColumnDTO>();
         racesDataProvider.addDataDisplay(racesTable);
         
         return collapsableDetailsPanel;
@@ -481,7 +505,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     
     private void onGroupSelectionChanged() {
         LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
-        LeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
+        StrippedLeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
         
         if (selectedGroup != null) {
             setGroupDetailsVisible(true);
@@ -510,7 +534,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     }
     
     private void onLeaderboardSelectionChanged() {
-        LeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
+        StrippedLeaderboardDTO selectedLeaderboard = leaderboardsSelectionModel.getSelectedObject();
         setLeaderboardDetailsVisible(selectedLeaderboard != null);
         if (selectedLeaderboard != null) {
             fillLeaderboardDetails(selectedLeaderboard);
@@ -521,7 +545,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         leaderboardDetailsPanel.setVisible(visible);
     }
     
-    private void fillLeaderboardDetails(LeaderboardDTO leaderboard) {
+    private void fillLeaderboardDetails(StrippedLeaderboardDTO leaderboard) {
         racesDataProvider.getList().clear();
         racesDataProvider.getList().addAll(leaderboard.getRaceList());
     }
@@ -572,12 +596,12 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     
     private boolean checkSearchCriteria(LeaderboardGroupDTO forGroup, String location, String name, boolean onlyLive, Date from, Date until) {
         boolean result = true;
-        if (result && location != null && !location.equals("")) {
+        if (result && location != null && location.length() > 0) {
             result = textContainsStringsToCheck(
                     PlacemarkOrderDTO.placemarksOfAllOrderAsSeperatedString(forGroup.getGroupPlaces(), true),
                     location.split("\\s"));
         }
-        if (result && name != null && !name.equals("")) {
+        if (result && name != null && name.length() > 0) {
             result = textContainsStringsToCheck(forGroup.name, name.split("\\s"));
         }
         if (result && onlyLiveCheckBox.getValue()) {
@@ -601,8 +625,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     private boolean textContainsStringsToCheck(String text, String[] stringsToCheck) {
         boolean contains = false;
         for (String stringToCheck : stringsToCheck) {
-            contains = text.contains(stringToCheck);
-            if (contains) {
+            contains = text.toLowerCase().contains(stringToCheck.toLowerCase());
+            if (!contains) {
                 break;
             }
         }

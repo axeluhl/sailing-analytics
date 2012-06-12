@@ -1,6 +1,7 @@
 package com.sap.sailing.server.replication.test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,6 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -42,19 +44,49 @@ public abstract class AbstractServerReplicationTest {
     protected RacingEventServiceImpl master;
     private MessageBrokerManager brokerMgr;
     private File brokerPersistenceDir;
+    private ReplicaDescriptor replicaDescriptor;
+    private ReplicationServiceImpl masterReplicator;
     
     /**
-     * Sets up master and replica, starts the JMS message broker and registers the replica with the master.
+     * Drops the test DB. Sets up master and replica, starts the JMS message broker and registers the replica with the master.
      */
     @Before
     public void setUp() throws Exception {
+        Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(true, /* master=null means create a new one */ null,
+                /* replica=null means create a new one */ null);
+        result.getA().startToReplicateFrom(result.getB());
+    }
+
+    /**
+     * Drops the test DB.
+     * 
+     * @param master
+     *            if not <code>null</code>, the value will be used for {@link #master}; otherwise, a new racing event
+     *            service will be created as master
+     * @param replica
+     *            if not <code>null</code>, the value will be used for {@link #replica}; otherwise, a new racing event
+     *            service will be created as replica
+     */
+    protected Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> basicSetUp(
+            boolean dropDB, RacingEventServiceImpl master, RacingEventServiceImpl replica) throws FileNotFoundException, Exception,
+            JMSException, UnknownHostException {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
-        mongoDBService.getDB().dropDatabase();
+        if (dropDB) {
+            mongoDBService.getDB().dropDatabase();
+        }
         resolveAgainst = DomainFactory.INSTANCE;
-        master = new RacingEventServiceImpl(mongoDBService);
-        replica = new RacingEventServiceImpl(mongoDBService);
+        if (master != null) {
+            this.master = master;
+        } else {
+            this.master = new RacingEventServiceImpl(mongoDBService);
+        }
+        if (replica != null) {
+            this.replica = replica;
+        } else {
+            this.replica = new RacingEventServiceImpl(mongoDBService);
+        }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
-        final String IN_VM_BROKER_URL = "vm://localhost-jms-connection";
+        final String IN_VM_BROKER_URL = "vm://localhost-jms-connection?broker.useJmx=false";
         final String activeMQPersistenceParentDir = System.getProperty("java.io.tmpdir");
         final String brokerName = "local_in-VM_test_broker";
         brokerPersistenceDir = new File(activeMQPersistenceParentDir, brokerName);
@@ -63,8 +95,8 @@ public abstract class AbstractServerReplicationTest {
                 IN_VM_BROKER_URL, activeMQPersistenceParentDir));
         brokerMgr.startMessageBroker(/* useJmx */ false);
         brokerMgr.createAndStartConnection();
-        ReplicationService masterReplicator = new ReplicationServiceImpl(rim, brokerMgr, master);
-        ReplicaDescriptor replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost());
+        masterReplicator = new ReplicationServiceImpl(rim, brokerMgr, this.master);
+        replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost());
         masterReplicator.registerReplica(replicaDescriptor);
         ReplicationMasterDescriptor masterDescriptor = new ReplicationMasterDescriptor() {
             @Override
@@ -100,19 +132,22 @@ public abstract class AbstractServerReplicationTest {
                 return null;
             }
         };
-        ReplicationService replicaReplicator = new ReplicationServiceTestImpl(resolveAgainst, rim, brokerMgr, replicaDescriptor, replica, master, masterReplicator);
-        replicaReplicator.startToReplicateFrom(masterDescriptor);
+        ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(resolveAgainst, rim, brokerMgr,
+                replicaDescriptor, this.replica, this.master, masterReplicator);
+        Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
+        return result;
     }
 
     @After
     public void tearDown() throws Exception {
+        masterReplicator.unregisterReplica(replicaDescriptor);
         brokerMgr.closeSessions();
         brokerMgr.closeConnections();
         brokerMgr.stopMessageBroker();
         Activator.removeTemporaryTestBrokerPersistenceDirectory(brokerPersistenceDir);
     }
 
-    private static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
+    static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
         private final DomainFactory resolveAgainst;
         private final RacingEventService master;
         private final ReplicaDescriptor replicaDescriptor;
@@ -134,11 +169,19 @@ public abstract class AbstractServerReplicationTest {
         @Override
         public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException,
                 ClassNotFoundException, JMSException {
+            Replicator replicator = startToReplicateFromButDontYetFetchInitialLoad(master, /* startReplicatorSuspended */ true);
+            initialLoad();
+            replicator.setSuspended(false); // resume after initial load
+        }
+
+        protected Replicator startToReplicateFromButDontYetFetchInitialLoad(ReplicationMasterDescriptor master, boolean startReplicatorSuspended)
+                throws JMSException, UnknownHostException {
             masterReplicationService.registerReplica(replicaDescriptor);
             registerReplicaUuidForMaster(replicaDescriptor.getUuid().toString(), master);
             TopicSubscriber replicationSubscription = master.getTopicSubscriber(replicaDescriptor.getUuid().toString());
-            replicationSubscription.setMessageListener(new Replicator(master, this));
-            initialLoad();
+            final Replicator replicator = new Replicator(master, this, startReplicatorSuspended);
+            replicationSubscription.setMessageListener(replicator);
+            return replicator;
         }
 
         /**
@@ -146,7 +189,7 @@ public abstract class AbstractServerReplicationTest {
          * {@link RacingEventServiceImpl#serializeForInitialReplication(ObjectOutputStream)} and
          * {@link RacingEventServiceImpl#initiallyFillFrom(ObjectInputStream)} through a piped input/output stream.
          */
-        private void initialLoad() throws IOException, ClassNotFoundException {
+        protected void initialLoad() throws IOException, ClassNotFoundException {
             PipedOutputStream pos = new PipedOutputStream();
             PipedInputStream pis = new PipedInputStream(pos);
             final ObjectOutputStream oos = new ObjectOutputStream(pos);

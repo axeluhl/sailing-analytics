@@ -1,16 +1,13 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import java.util.Date;
-
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard.Entry;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -18,14 +15,14 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
     private static final long serialVersionUID = -492130952256848047L;
     private final String competitorIdAsString;
     private final MaxPointsReason newMaxPointsReason;
-    private final Date date;
+    private final TimePoint timePoint;
     
     public UpdateLeaderboardMaxPointsReason(String leaderboardName, String columnName, String competitorIdAsString,
-            MaxPointsReason newMaxPointsReason, Date date) {
+            MaxPointsReason newMaxPointsReason, TimePoint timePoint) {
         super(leaderboardName, columnName);
         this.competitorIdAsString = competitorIdAsString;
         this.newMaxPointsReason = newMaxPointsReason;
-        this.date = date;
+        this.timePoint = timePoint;
     }
 
     @Override
@@ -42,7 +39,6 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
 
     @Override
     public Pair<Integer, Integer> internalApplyTo(RacingEventService toState) throws NoWindException {
-        TimePoint timePoint = new MillisecondsTimePoint(date);
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
@@ -52,7 +48,7 @@ public class UpdateLeaderboardMaxPointsReason extends AbstractLeaderboardColumnO
                     throw new IllegalArgumentException("Didn't find race "+getColumnName()+" in leaderboard "+getLeaderboardName());
                 }
                 leaderboard.getScoreCorrection().setMaxPointsReason(competitor, raceColumn, newMaxPointsReason);
-                toState.updateStoredLeaderboard(leaderboard);
+                updateStoredLeaderboard(toState, leaderboard);
                 Entry updatedEntry = leaderboard.getEntry(competitor, raceColumn, timePoint);
                 return new Pair<Integer, Integer>(updatedEntry.getNetPoints(), updatedEntry.getTotalPoints());
             } else {

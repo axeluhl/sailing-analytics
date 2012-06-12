@@ -14,13 +14,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.gwt.ui.server.SailingServiceImpl;
+import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 
 public class TestColumnSwapping {
 
     private LeaderboardDTO lb = null;
     private static final String LEADERBOARDNAME = "test";
+    private static final String DEFAULT_FLEET_NAME = "Default";
+    private static final FleetDTO DEFAULT_FLEET = new FleetDTO(DEFAULT_FLEET_NAME, /* ordering */ 0, /* color */ null);
     private SailingServiceImpl service;
     private LeaderboardDTO leaderboardOriginalDTO;
     private LeaderboardDTO leaderboardDTO;
@@ -37,7 +40,7 @@ public class TestColumnSwapping {
     public void prepareColumnSwapping() {
         service = new SailingServiceImplMock();
         int[] disc = { 5, 8, 9, 0, 7, 5, 43 };
-        service.createLeaderboard(LEADERBOARDNAME, disc);
+        service.createFlexibleLeaderboard(LEADERBOARDNAME, disc);
         service.addColumnToLeaderboard("Race1", LEADERBOARDNAME, true);
         service.addColumnToLeaderboard("Race2", LEADERBOARDNAME, true);
         service.addColumnToLeaderboard("Race3", LEADERBOARDNAME, true);
@@ -49,9 +52,9 @@ public class TestColumnSwapping {
         try {
             // get Leaderboard with name and current date
             leaderboardOriginalDTO = new LeaderboardDTO();
-            leaderboardOriginalDTO.addRace("Race1", true, null, null);
-            leaderboardOriginalDTO.addRace("Race3", true, null, null);
-            leaderboardOriginalDTO.addRace("Race2", true, null, null);
+            leaderboardOriginalDTO.addRace("Race1", DEFAULT_FLEET, true, null, null);
+            leaderboardOriginalDTO.addRace("Race3", DEFAULT_FLEET, true, null, null);
+            leaderboardOriginalDTO.addRace("Race2", DEFAULT_FLEET, true, null, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -69,7 +72,7 @@ public class TestColumnSwapping {
         sailingService = new SailingServiceImplMock();
         assertNotNull("Sailingservice != NULL", sailingService);
         int td[] = { 5, 8 };
-        sailingService.createLeaderboard(TEST_LEADERBOARD_NAME, td);
+        sailingService.createFlexibleLeaderboard(TEST_LEADERBOARD_NAME, td);
         for (int i = 0; i < races.length; i++)
             sailingService.addColumnToLeaderboard(races[i], TEST_LEADERBOARD_NAME, isMedalRace[i]);
         sailingService.moveLeaderboardColumnDown(TEST_LEADERBOARD_NAME, races[0]);
@@ -100,9 +103,9 @@ public class TestColumnSwapping {
     public void testLeaderBoardDTOMethods() {
         lb = new LeaderboardDTO();
         assertNotNull("Leaderboard != NULL", lb);
-        lb.addRace("1", false, null, null);
-        lb.addRace("2", false, null, null);
-        lb.addRace("3", true, null, null);
+        lb.addRace("1", DEFAULT_FLEET, false, null, null);
+        lb.addRace("2", DEFAULT_FLEET, false, null, null);
+        lb.addRace("3", DEFAULT_FLEET, true, null, null);
         lb.moveRaceDown("1");
         String[] s = new String[] { "2", "1", "3" };
         for (int i = 0; i < lb.getRaceList().size(); i++)
@@ -120,13 +123,13 @@ public class TestColumnSwapping {
         }
 
         // check if leaderboardDTO an dleaderboardOriginalDTO same
-        List<RaceInLeaderboardDTO> leaderboardList = leaderboardDTO.getRaceList();
-        List<RaceInLeaderboardDTO> leaderboardOriginalList = leaderboardOriginalDTO.getRaceList();
+        List<RaceColumnDTO> leaderboardList = leaderboardDTO.getRaceList();
+        List<RaceColumnDTO> leaderboardOriginalList = leaderboardOriginalDTO.getRaceList();
 
         // ??????? assert races in list
         assertArrayEquals(leaderboardList.toArray(), leaderboardOriginalList.toArray());
 
-        for (RaceInLeaderboardDTO raceDTO : leaderboardOriginalList) {
+        for (RaceColumnDTO raceDTO : leaderboardOriginalList) {
             assert leaderboardDTO.raceIsMedalRace(raceDTO.getRaceColumnName()) == leaderboardOriginalDTO.raceIsMedalRace(raceDTO.getRaceColumnName());
             assert leaderboardDTO.raceIsTracked(raceDTO.getRaceColumnName()) == leaderboardOriginalDTO.raceIsTracked(raceDTO.getRaceColumnName());
         }

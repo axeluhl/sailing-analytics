@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -87,6 +86,14 @@ public class CourseImpl extends NamedImpl implements Course {
     @Override
     public synchronized void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
         waypoints.add(zeroBasedPosition, waypointToAdd);
+        Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
+        updatesToWaypointIndexes.put(waypointToAdd, zeroBasedPosition);
+        for (Map.Entry<Waypoint, Integer> e : waypointIndexes.entrySet()) {
+            if (e.getValue() >= zeroBasedPosition) {
+                updatesToWaypointIndexes.put(e.getKey(), e.getValue()+1);
+            }
+        }
+        waypointIndexes.putAll(updatesToWaypointIndexes);
         int legStartWaypointIndex;
         if (zeroBasedPosition == waypoints.size()-1) {   // added to end
             legStartWaypointIndex = zeroBasedPosition-1;
@@ -104,6 +111,14 @@ public class CourseImpl extends NamedImpl implements Course {
         if (zeroBasedPosition >= 0) {
             boolean isLast = zeroBasedPosition == waypoints.size()-1;
             Waypoint removedWaypoint = waypoints.remove(zeroBasedPosition);
+            waypointIndexes.remove(removedWaypoint);
+            Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
+            for (Map.Entry<Waypoint, Integer> e : waypointIndexes.entrySet()) {
+                if (e.getValue() > zeroBasedPosition) { // only > because the entry with == was just removed
+                    updatesToWaypointIndexes.put(e.getKey(), e.getValue()-1);
+                }
+            }
+            waypointIndexes.putAll(updatesToWaypointIndexes);
             if (isLast) {
                 if (waypoints.size() > 0) { // if we had only one waypoint, we didn't have any legs
                     // last waypoint was removed; remove last leg
@@ -141,8 +156,8 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public List<Leg> getLegs() {
-        return Collections.unmodifiableList(legs);
+    public synchronized List<Leg> getLegs() {
+        return new ArrayList<Leg>(legs);
     }
 
     @Override
@@ -167,7 +182,7 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
-    public int getIndexOfWaypoint(Waypoint waypoint) {
+    public synchronized int getIndexOfWaypoint(Waypoint waypoint) {
         int result = -1;
         Integer indexEntry = waypointIndexes.get(waypoint);
         if (indexEntry != null) {

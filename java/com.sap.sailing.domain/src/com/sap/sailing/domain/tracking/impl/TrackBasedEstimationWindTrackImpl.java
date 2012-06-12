@@ -284,9 +284,13 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 cacheInvalidationTimer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        synchronized (scheduledInvalidationInterval) {
-                            cacheInvalidationTimer.cancel(); // terminates the timer thread
-                            invalidateCache();
+                        // to avoid deadlock with another invalidateCache() and with scheduleCacheInvalidation we need
+                        // to obtain the TrackBasedEstimationWindTrackImpl.this monitor first (see bug 746).
+                        synchronized (TrackBasedEstimationWindTrackImpl.this) {
+                            synchronized (scheduledInvalidationInterval) {
+                                cacheInvalidationTimer.cancel(); // terminates the timer thread
+                                invalidateCache();
+                            }
                         }
                     }
                 }, delayForCacheInvalidationInMilliseconds);
@@ -339,6 +343,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     
     @Override
     public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
+    }
+
+    @Override
+    public void delayToLiveChanged(long delayToLiveInMillis) {
     }
 
     private void invalidateForNewWind(Wind wind) {

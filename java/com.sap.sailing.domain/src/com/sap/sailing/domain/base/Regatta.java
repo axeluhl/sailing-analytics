@@ -21,14 +21,18 @@ public interface Regatta extends Named {
     Iterable<? extends Series> getSeries();
     
     /**
+     * @return the first series from {@link #getSeries} whose {@link Series#getName() name} equals
+     *         <code>seriesName<code>,
+     * or <code>null</code> if no such series exists
+     */
+    Series getSeriesByName(String seriesName);
+
+    /**
      * Please note that the {@link RaceDefinition}s of the {@link Regatta} are not necessarily in sync with the
      * {@link TrackedRace}s of the {@link TrackedRegatta} whose {@link TrackedRegatta#getRegatta() regatta} is this regatta.
      * For example, it may be the case that a {@link RaceDefinition} is returned by this method for which no
      * {@link TrackedRace} exists in the corresponding {@link TrackedRegatta}. This could be the case, e.g., during
      * the initialization of the tracker as well as during removing a race from the server.<p>
-     * 
-     * Callers iterating over the result that anticipate concurrent modifications shall synchronize the iteration
-     * on the result.
      */
     Iterable<RaceDefinition> getAllRaces();
     
@@ -60,4 +64,16 @@ public interface Regatta extends Named {
      * may require the base name to which the boat class name will be appended. This method emits the base name.
      */
     String getBaseName();
+
+    /**
+     * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
+     * durably and don't contain valuable information worth being preserved; or they are constructed explicitly
+     * with series and race columns in which case this data needs to be protected. This flag indicates whether
+     * the data of this regatta needs to be maintained persistently.
+     */
+    boolean isPersistent();
+
+    void addRaceColumnListener(RaceColumnListener listener);
+
+    void removeRaceColumnListener(RaceColumnListener listener);
 }

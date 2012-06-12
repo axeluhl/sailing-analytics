@@ -50,7 +50,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         if (raceTimesInfo == null) { 
             // in case the race is not tracked anymore we reset the timer
             reset();
-        } else { 
+        } else {
+            // check if the live delay is already been set
+            if (!isUserExplicitlyChangedLivePlayDelay() && timer.getLivePlayDelayInMillis() != raceTimesInfo.delayToLiveInMs) {
+                timer.setLivePlayDelayInMillis(raceTimesInfo.delayToLiveInMs);
+            }
+            
             if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && 
                     (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null)) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
@@ -62,19 +67,42 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     timer.setPlayMode(PlayModes.Live);
                 }
                 
-                boolean timerAlreadyInitialized = getMin() != null && getMax() != null && sliderBar.getCurrentValue() != null;
-                initMinMax(raceTimesInfo);
-                if (!timerAlreadyInitialized) {
-                    initTimerPosition(raceTimesInfo);
+                boolean timerAlreadyInitialized = getMin() != null && getMax() != null && timeSlider.getCurrentValue() != null;
+                if(!isTimeZoomed) {
+                    initMinMax(raceTimesInfo);
+                    if (!timerAlreadyInitialized) {
+                        initTimerPosition(raceTimesInfo);
+                    }
+                    updateLegMarkers(raceTimesInfo);
                 }
-                updateLegMarkers(raceTimesInfo);
             } else {
                 // the tracked race did not start yet or has no events yet
                 // maybe show a special state for this like "Race did not start yet"
             }
         }
+        lastRaceTimesInfo = raceTimesInfo;
     } 
     
+    @Override
+    public void onTimeZoom(Date zoomStartTimepoint, Date zoomEndTimepoint) {
+        isTimeZoomed = true;
+        timeSlider.setZoomed(true);
+        timer.setAutoAdvance(false);
+        setMinMax(zoomStartTimepoint, zoomEndTimepoint, false);
+        timeSlider.clearMarkersAndLabelsAndTicks();
+        redrawAllMarkers(lastRaceTimesInfo);
+    }
+
+    @Override
+    public void onTimeZoomReset() {
+        isTimeZoomed = false;
+        timeSlider.setZoomed(false);
+        timer.setAutoAdvance(true);
+        initMinMax(this.lastRaceTimesInfo);
+        timeSlider.clearMarkersAndLabelsAndTicks();
+        redrawAllMarkers(lastRaceTimesInfo);
+    }
+
     @Override
     protected boolean isLiveModeToBeMadePossible() {
         long livePlayDelayInMillis = timer.getLivePlayDelayInMillis();
@@ -152,11 +180,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             break;
         case Replay:
             // set time to end of race
-            if (newRaceTimesInfo.getLastMarkPassingTimes() != null) {
-                timer.setTime(newRaceTimesInfo.getLastMarkPassingTimes().firstPassingDate.getTime());
-            } else  if (newRaceTimesInfo.endOfRace != null) {
-                timer.setTime(newRaceTimesInfo.endOfRace.getTime());
-            } else  if (newRaceTimesInfo.startOfRace != null) {
+            if (newRaceTimesInfo.startOfRace != null) {
                 timer.setTime(newRaceTimesInfo.startOfRace.getTime());
             }
             break;
@@ -165,7 +189,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
 
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
-        List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
         boolean requiresMarkerUpdate = true;
         
         // updating the sliderbar markers requires a lot of time, therefore we need to do this only if required
@@ -173,7 +196,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             requiresMarkerUpdate = false;
             int numberOfLegs = newRaceTimesInfo.markPassingTimes.size();
             for(int i = 0; i < numberOfLegs; i++) {
-                if(newRaceTimesInfo.markPassingTimes.get(i).firstPassingDate.getTime() != lastRaceTimesInfo.markPassingTimes.get(i).firstPassingDate.getTime()) {
+                if(newRaceTimesInfo.markPassingTimes.get(i).firstPassingDate != lastRaceTimesInfo.markPassingTimes.get(i).firstPassingDate) {
                     requiresMarkerUpdate = true;
                     break;
                 }
@@ -184,18 +207,23 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 requiresMarkerUpdate = true;
             }
         }
-        if (requiresMarkerUpdate && sliderBar.isMinMaxInitialized()) {
-            sliderBar.clearMarkers();
-            for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
-              sliderBar.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
-            }
-            if(newRaceTimesInfo.endOfRace != null) {
-                sliderBar.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
-            }
-                
-            sliderBar.redraw(); 
+        if (requiresMarkerUpdate && timeSlider.isMinMaxInitialized()) {
+            redrawAllMarkers(newRaceTimesInfo);
         }
-        lastRaceTimesInfo = newRaceTimesInfo;
+    }
+    
+    private void redrawAllMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
+        List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
+        timeSlider.clearMarkers();
+        for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
+            if (markPassingTimesDTO.firstPassingDate != null) {
+                timeSlider.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
+            }
+        }
+        if (newRaceTimesInfo.endOfRace != null) {
+            timeSlider.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
+        }
+        timeSlider.redraw(); 
     }
     
     @Override

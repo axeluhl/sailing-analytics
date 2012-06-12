@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.impl.Util;
@@ -24,6 +24,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.CourseImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.MarkImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.RaceImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 import difflib.PatchFailedException;
 
@@ -31,7 +32,7 @@ public class SimpleDomainFactoryTest {
     @Test
     public void testCourseConfigForBuoy() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Regatta regatta = new RegattaImpl("TestEvent", /* boatClass */ null);
+        Regatta regatta = new RegattaImpl("TestEvent", /* boatClass */ null, new RacingEventServiceImpl());
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);
@@ -55,7 +56,7 @@ public class SimpleDomainFactoryTest {
     @Test
     public void testCourseConfigForGate() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
-        Regatta regatta = new RegattaImpl("TestEvent", /* boatClass */ null);
+        Regatta regatta = new RegattaImpl("TestEvent", /* boatClass */ null, new RacingEventServiceImpl());
         Race race = new RaceImpl("1234", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
         StartList startList = new StartListImpl("1234", competitors);

@@ -1,8 +1,14 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.cell.client.CompositeCell;
@@ -10,11 +16,17 @@ import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.SelectionCell;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AbstractImagePrototype;
+import com.google.gwt.user.client.ui.Anchor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -26,11 +38,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 
 /**
  * An editable version of the {@link LeaderboardPanel} which allows a user to enter carried / accumulated
@@ -40,6 +54,8 @@ import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
  *
  */
 public class EditableLeaderboardPanel extends LeaderboardPanel {
+    private static EditableLeaderboardResources resources = GWT.create(EditableLeaderboardResources.class);
+
     private class EditableCarryColumn extends CarryColumn {
         public EditableCarryColumn() {
             super(new EditTextCell());
@@ -147,7 +163,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     private class EditableRaceColumn extends RaceColumn<LeaderboardRowDTO> implements RowUpdateWhiteboardOwner<LeaderboardRowDTO> {
         private RowUpdateWhiteboard<LeaderboardRowDTO> currentRowUpdateWhiteboard;
         
-        public EditableRaceColumn(RaceInLeaderboardDTO race, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> cellList) {
+        public EditableRaceColumn(RaceColumnDTO race, List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> cellList) {
             super(race,
                     /* expandable */ false, // we don't want leg expansion when editing scores
                     new CompositeCellRememberingRenderingContextAndObject(cellList),
@@ -221,10 +237,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                                 @Override
                                 public void onSuccess(Pair<Integer, Integer> newNetAndTotalPoints) {
-                                    row.fieldsByRaceName.get(raceName).reasonForMaxPoints = value == null
+                                    row.fieldsByRaceColumnName.get(raceName).reasonForMaxPoints = value == null
                                             || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
-                                    row.fieldsByRaceName.get(raceName).netPoints = newNetAndTotalPoints.getA();
-                                    row.fieldsByRaceName.get(raceName).totalPoints = newNetAndTotalPoints.getB();
+                                    row.fieldsByRaceColumnName.get(raceName).netPoints = newNetAndTotalPoints.getA();
+                                    row.fieldsByRaceColumnName.get(raceName).totalPoints = newNetAndTotalPoints.getB();
                                     getCell().setViewData(row, null); // ensure that getValue() is called again
                                     whiteboard.setObjectWithWhichToUpdateRow(row);
                                 }
@@ -235,7 +251,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceName);
             MaxPointsReason reasonForMaxPoints = null;
             if (leaderboardEntryDTO != null) {
                 reasonForMaxPoints = leaderboardEntryDTO.reasonForMaxPoints;
@@ -283,7 +299,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
 
         private boolean isNetPointsCorrected() {
-            LeaderboardEntryDTO leaderboardEntryDTO = getCurrentlyRendering().fieldsByRaceName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = getCurrentlyRendering().fieldsByRaceColumnName.get(raceName);
             return leaderboardEntryDTO.netPointsCorrected;
         }
 
@@ -313,7 +329,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                         @Override
                         public void onSuccess(Triple<Integer, Integer, Boolean> newNetAndTotalPointsAndIsCorrected) {
-                            final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceName.get(raceName);
+                            final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceName);
                                     leaderboardEntryDTO.netPoints = value == null || value.length() == 0 ? newNetAndTotalPointsAndIsCorrected
                                             .getA() : Integer.valueOf(value.trim());
                                     leaderboardEntryDTO.totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
@@ -328,7 +344,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceName);
             String result = "";
             if (leaderboardEntryDTO != null) {
                 result = result+leaderboardEntryDTO.netPoints;
@@ -339,11 +355,80 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     public EditableLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, ErrorReporter errorReporter,
-            StringMessages stringConstants, UserAgentTypes userAgentType) {
+            final StringMessages stringMessages, UserAgentTypes userAgentType) {
         super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                 /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
-                leaderboardName, leaderboardGroupName, errorReporter, stringConstants, userAgentType);
+                leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
+        ImageResource importIcon = resources.importIcon();
+        Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
+        getRefreshAndSettingsPanel().insert(importAnchor, 0);
+        importAnchor.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                performImport(stringMessages);
+            }
+        });
+    }
+
+    private void performImport(final StringMessages stringMessages) {
+        getSailingService().getScoreCorrectionProviderDTOs(new AsyncCallback<Iterable<ScoreCorrectionProviderDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                getErrorReporter().reportError(stringMessages.errorLoadingScoreCorrectionProviders(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(Iterable<ScoreCorrectionProviderDTO> result) {
+                showScoreCorrectionSelectionDialog(result);
+            }
+        });
+    }
+
+    private void showScoreCorrectionSelectionDialog(Iterable<ScoreCorrectionProviderDTO> result) {
+        List<Triple<String, String, Pair<String, Date>>> providerNameAndEventNameBoatClassNameCapturedWhen =
+                new ArrayList<Triple<String,String, Pair<String,Date>>>();
+        for (ScoreCorrectionProviderDTO scp : result) {
+            for (Entry<String, Set<Pair<String, Date>>> e : scp.getHasResultsForBoatClassFromDateByEventName().entrySet()) {
+                for (Pair<String, Date> se : e.getValue()) {
+                    providerNameAndEventNameBoatClassNameCapturedWhen.add(new Triple<String, String, Pair<String, Date>>(
+                            scp.name, e.getKey(), se));
+                }
+            }
+        }
+        sortOfficialResultsByRelevance(providerNameAndEventNameBoatClassNameCapturedWhen);
+        new ResultSelectionAndApplyDialog(getLeaderboard(), getSailingService(), getStringMessages(),
+                providerNameAndEventNameBoatClassNameCapturedWhen, getErrorReporter()).show();
+    }
+
+    private void sortOfficialResultsByRelevance(
+            List<Triple<String, String, Pair<String, Date>>> providerNameAndEventNameBoatClassNameCapturedWhen) {
+        final Set<BoatClassDTO> boatClasses = getLeaderboard().getBoatClasses();
+        final Set<String> lowercaseBoatClassNames = new HashSet<String>();
+        for (BoatClassDTO boatClass : boatClasses) {
+            lowercaseBoatClassNames.add(boatClass.name.toLowerCase());
+        }
+        Collections.sort(providerNameAndEventNameBoatClassNameCapturedWhen, new Comparator<Triple<String, String, Pair<String, Date>>>() {
+            @Override
+            public int compare(Triple<String, String, Pair<String, Date>> o1,
+                    Triple<String, String, Pair<String, Date>> o2) {
+                int result;
+                // TODO consider looking for longest common substring to handle things like "470 M" vs. "470 Men"
+                if (lowercaseBoatClassNames.contains(o1.getC().getA().toLowerCase())) {
+                    if (lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
+                        result = o1.getC().getB().compareTo(o2.getC().getB());
+                    } else {
+                        result = -1; // o1 scores "better", comes first, because it has the right boat class name
+                    }
+                } else if (lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
+                    result = 1;
+                } else {
+                    // both don't seem to have the right boat class; compare by time stamp
+                    result = o1.getC().getB().compareTo(o2.getC().getB());
+                }
+                return result;
+            }
+        });
     }
 
     /**
@@ -367,11 +452,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     @Override
-    protected RaceColumn<?> createRaceColumn(RaceInLeaderboardDTO race) {
+    protected RaceColumn<?> createRaceColumn(RaceColumnDTO race) {
         return new EditableRaceColumn(race, getCellList(race));
     }
 
-    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getCellList(RaceInLeaderboardDTO race) {
+    private List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> getCellList(RaceColumnDTO race) {
         List<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>> list =
                 new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
         list.add(new MaxPointsDropDownCellProvider(race.getRaceColumnName()));
@@ -379,4 +464,5 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         return list;
     }
 
+    
 }

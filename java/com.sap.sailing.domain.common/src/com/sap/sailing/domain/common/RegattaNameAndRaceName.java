@@ -30,7 +30,7 @@ public class RegattaNameAndRaceName extends RegattaName implements RegattaAndRac
     }
     @Override
     public String toString() {
-        return raceName;
+        return getRegattaName()+"/"+getRaceName();
     }
 
     @Override

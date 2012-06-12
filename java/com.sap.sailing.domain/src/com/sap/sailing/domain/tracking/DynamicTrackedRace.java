@@ -57,7 +57,19 @@ public interface DynamicTrackedRace extends TrackedRace {
 
     void setMillisecondsOverWhichToAverageWind(long millisecondsOverWhichToAverageWind);
     
-    DynamicTrackedRegatta getTrackedEvent();
+    /**
+     * Same as {@link #setDelayToLiveInMillis(long)}, except that afterwards, a {@link #setDelayToLiveInMillis(long)} will no longer
+     * take effect.
+     */
+    void setAndFixDelayToLiveInMillis(long delayToLiveInMillis);
+    
+    /**
+     * Updates the value returned by {@link #getDelayToLiveInMillis()}, except that {@link #setAndFixDelayToLiveInMillis(long)} was called
+     * on this object before, in which case this call takes no effect.
+     */
+    void setDelayToLiveInMillis(long delayToLiveInMillis);
+    
+    DynamicTrackedRegatta getTrackedRegatta();
 
     /**
      * If and only if <code>raceIsKnownToStartUpwind</code> is <code>true</code>, this tracked race is allowed to use

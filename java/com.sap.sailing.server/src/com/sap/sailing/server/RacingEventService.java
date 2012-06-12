@@ -15,28 +15,34 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.RegattaRegistry;
+import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.RaceFetcher;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.RaceFetcher;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceColumn;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RacesHandle;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -62,20 +68,10 @@ import com.sap.sailing.expeditionconnector.ExpeditionListener;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RaceFetcher {
-    /**
-     * @return a thread-safe copy of the regattas currently known by the service; it's safe for callers to iterate over
-     *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
-     */
-    Iterable<Regatta> getAllRegattas();
-
-    Regatta getRegattaByName(String name);
-    
+public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher {
     @Override
     Regatta getRegatta(RegattaName regattaName);
     
-    Regatta getRegatta(RegattaIdentifier regattaIdentifier);
-
     @Override
     RaceDefinition getRace(RegattaAndRaceIdentifier raceIdentifier);
 
@@ -142,9 +138,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Same as {@link #addTracTracRace(URL, URI, URI, WindStore, long)}, only that start and end of tracking are
      * specified which may help reducing the amount of stored data (particularly mark positions) that needs to be
      * loaded.
+     * 
+     * @param regattaToAddTo
+     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
+     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
+     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
+     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
+     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      */
-    RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, TimePoint trackingStartTime,
-            TimePoint trackingEndTime, WindStore windStore, long timeoutForReceivingRaceDefinitionInMilliseconds)
+    RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI,
+            TimePoint trackingStartTime, TimePoint trackingEndTime, WindStore windStore, long timeoutForReceivingRaceDefinitionInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
@@ -157,10 +160,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
     
     /**
-     * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race} from
-     * this service. If it was the last {@link RaceDefinition} in its {@link Regatta}, the <code>regatta</code> is removed
-     * as well and will no longer be returned by {@link #getAllRegattas()}. The wind tracking is stopped for
-     * <code>race</code>.
+     * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race}
+     * from this service. If it was the last {@link RaceDefinition} in its {@link Regatta} and the regatta
+     * {@link Regatta#isPersistent() is not stored persistently}, the <code>regatta</code> is removed as well and will no
+     * longer be returned by {@link #getAllRegattas()}. The wind tracking is stopped for <code>race</code>.
      * <p>
      * 
      * Any {@link RaceTracker} for which <code>race</race> is the last race tracked that is still reachable
@@ -168,10 +171,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
      * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its
-     * {@link RaceColumn#getTrackedRace()}.
+     * {@link RaceColumn#getTrackedRace(Fleet)}.
      * 
      * @param regatta
-     *            the event to remove
+     *            the regatta from which to remove the race
      * @param race
      *            the race to remove
      */
@@ -230,7 +233,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * 
      * @return the leaderboard created
      */
-    Leaderboard addLeaderboard(String name, int[] discardThresholds);
+    FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds);
+    
+    RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds);
 
     void removeLeaderboard(String leaderboardName);
     
@@ -256,10 +261,26 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Updates the leaderboard data in the persistent store
      */
-    void updateStoredLeaderboard(Leaderboard leaderboard);
+    void updateStoredFlexibleLeaderboard(FlexibleLeaderboard leaderboard);
+    
+    void updateStoredRegattaLeaderboard(RegattaLeaderboard leaderboard);
 
-    RacesHandle addSwissTimingRace(String raceID, String hostname, int port, boolean canSendRequests,
-            WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException,
+    void updateStoredRegatta(Regatta regatta);
+
+    long getDelayToLiveInMillis();
+
+    void setDelayToLiveInMillis(long delayToLiveInMillis);
+
+    /**
+     * @param regattaToAddTo
+     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
+     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
+     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
+     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
+     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
+     */
+    RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname, int port,
+            boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) throws InterruptedException, UnknownHostException,
             IOException, ParseException, Exception;
 
     SwissTimingFactory getSwissTimingFactory();
@@ -268,7 +289,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
-    void removeEvent(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
+    void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
 
     TrackedRace getExistingTrackedRace(RaceIdentifier raceIdentifier);
     
@@ -324,15 +345,26 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     void removeExpeditionListener(ExpeditionListener listener);
 
     /**
-     * @param windStore must not be <code>null</code>, but can, e.g., be an {@link EmptyWindStore}
+     * @param regattaToAddTo
+     *            if <code>null</code> or no regatta by that identifier is found, an existing regatta by the name of the
+     *            TracTrac event with the boat class name appended in parentheses will be looked up; if not found, a
+     *            default regatta with that name will be created, with a single default series and a single default
+     *            fleet. If a valid {@link RegattaIdentifier} is specified, a regatta lookup is performed with that
+     *            identifier; if the regatta is found, it is used to add the races to, and
+     *            {@link #setRegattaForRace(Regatta, RaceDefinition)} is called to remember the association
+     *            persistently. Otherwise, a default regatta as described above will be created and used.
+     * @param windStore
+     *            must not be <code>null</code>, but can, e.g., be an {@link EmptyWindStore}
      */
-    RacesHandle addRace(RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
+    RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params, WindStore windStore, long timeoutInMilliseconds)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed);
 
-    Regatta getOrCreateRegatta(String regattaName, String boatClassName, boolean boatClassTypicallyStartsUpwind);
+    Regatta getOrCreateRegatta(String regattaName, String boatClassName);
+
+    Regatta createRegatta(String baseName, String boatClassName, Iterable<? extends Series> series, boolean persistent);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -378,4 +410,26 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * <b>Caution:</b> All relevant contents of this service instance will be replaced by the stream contents.
      */
     void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException;
+
+
+    /**
+     * @return a thread-safe copy of the events currently known by the service; it's safe for callers to iterate over
+     *         the iterable returned, and no risk of a {@link ConcurrentModificationException} exists
+     */
+    Iterable<Event> getAllEvents();
+
+    /**
+     * Creates a new event with the name <code>eventName</code>, the description <code>desciption</code> and the
+     * regattas with the names in <code>regattaNames</code> and saves it in the database.
+     * 
+     * @param eventName
+     *            The name of the new event
+     * @param venue
+     *            The venue of the new event
+     * @param regattaNames
+     *            The names of the regattas contained in the new event.<br />
+     * @return The new event
+     */
+    Event addEvent(String eventName, String venue, List<String> regattaNames);
+
 }

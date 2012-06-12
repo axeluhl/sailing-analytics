@@ -21,6 +21,9 @@ import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEventHandler;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
+import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
@@ -76,6 +79,12 @@ implements CompetitorSelectionChangeListener, RequiresResize {
     private long stepSize = 5000;
     private DetailType dataToShow;
     private final CompetitorSelectionProvider competitorSelectionProvider;
+    
+    /**
+     * When the chart is not visible and the competitor selection changes, no loading is performed. However, in this case
+     * we need to remember that loading will be necessary as soon as the chart becomes visible.
+     */
+    private boolean needToLoadWhenMadeVisible;
 
     public AbstractChartPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
@@ -101,6 +110,14 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         timer.addTimeListener(this);
         timeZoomProvider.addTimeZoomChangeListener(this);
     }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (needToLoadWhenMadeVisible) {
+            loadData(/* showBusyIndicator */ true);
+        }
+    }
 
     /**
      * Creates a new chart for the given {@link DetailType} <code>dataToShow</code> and also 
@@ -110,13 +127,13 @@ implements CompetitorSelectionChangeListener, RequiresResize {
      */
     private Chart createChart(DetailType dataToShow) {
         Chart chart = new Chart().setZoomType(Chart.ZoomType.X)
+                .setPersistent(true)
                 .setWidth100()
                 .setHeight100()
                 .setMarginLeft(65)
                 .setMarginRight(65)
                 .setBorderColor(new Color("#A6A6A6"))
                 .setBorderWidth(1)
-//                .setBackgroundColor(new Color("#C6C6C6"))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(new Marker().setEnabled(false).setHoverState(
                                                 new Marker().setEnabled(true).setRadius(4))).setShadow(false)
@@ -128,15 +145,13 @@ implements CompetitorSelectionChangeListener, RequiresResize {
             chart.setClickEventHandler(new ChartClickEventHandler() {
                 @Override
                 public boolean onClick(ChartClickEvent chartClickEvent) {
-                    AbstractChartPanel.this.onClick(chartClickEvent);
-                    return true;
+                    return AbstractChartPanel.this.onClick(chartClickEvent);
                 }
             });
             chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
                 @Override
                 public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
-                    AbstractChartPanel.this.onSelectionChange(chartSelectionEvent);
-                    return true;
+                    return AbstractChartPanel.this.onXAxisSelectionChange(chartSelectionEvent);
                 }
             });
         }
@@ -148,9 +163,15 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
         chart.getYAxis().setReversed((dataToShow == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER || 
                                       dataToShow == DetailType.GAP_TO_LEADER_IN_SECONDS) ? true : false);
-        chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(10000) // ten seconds
-                .setAxisTitleText(stringMessages.time())
-                .setTickInterval(1000 * 60 * 10);
+        chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(60 * 1000) // 1 minute
+                .setAxisTitleText(stringMessages.time());
+        chart.getXAxis().setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
+            @Override
+            public String format(AxisLabelsData axisLabelsData) {
+                return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
+            }
+        }));
+        
         String decimalPlaces = "";
         for (int i = 0; i < dataToShow.getPrecision(); i++) {
             if (i == 0) {
@@ -202,60 +223,70 @@ implements CompetitorSelectionChangeListener, RequiresResize {
      * @param showBusyIndicator If <code>true</code> is the busy indicator shown while loading the data from the server.
      */
     protected void loadData(boolean showBusyIndicator) {
-        if (needsDataLoading()) {
-            if (showBusyIndicator) {
-                setWidget(chart);
-                showLoading("Loading competitor data...");
-            }
-            if (chartData == null || chartData.getDetailType() != getDataToShow()) {
-                chartData = new MultiCompetitorRaceDataDTO(getDataToShow());
-            }
-            
-//            Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
-            final ArrayList<Pair<Date, CompetitorDTO>> dataQuery = new ArrayList<Pair<Date, CompetitorDTO>>();
-            for (CompetitorDTO competitor : getVisibleCompetitors()) {
-                Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
-                Date competitorDateOfNewestData = chartData.contains(competitor) ? chartData.getCompetitorData(competitor).getDateOfNewestData() : null;
-                if (!chartData.contains(competitor)) {
-                    dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
-                } else if (competitorDateOfNewestData.before(chartDataDateOfNewestData) || competitorDateOfNewestData.before(maxTimepoint)) {
-                    dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime() + getStepSize()), competitor));
+        if (isVisible()) {
+            if (hasVisibleCompetitors()) {
+                needToLoadWhenMadeVisible = false; // we're loading it now
+                if (showBusyIndicator) {
+                    setWidget(chart);
+                    showLoading("Loading competitor data...");
                 }
-            }
-            
-            GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
-                        selectedRaceIdentifier, dataQuery, maxTimepoint, getStepSize(), getDataToShow(),
-                    new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+                if (chartData == null || chartData.getDetailType() != getDataToShow()) {
+                    chartData = new MultiCompetitorRaceDataDTO(getDataToShow());
+                }
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                                errorReporter.reportError(getStringMessages().failedToLoadRaceData() + ": " + caught.toString(),
+                // Date toDate = new Date(System.currentTimeMillis() - timer.getLivePlayDelayInMillis());
+                final ArrayList<Pair<Date, CompetitorDTO>> dataQuery = new ArrayList<Pair<Date, CompetitorDTO>>();
+                for (CompetitorDTO competitor : getVisibleCompetitors()) {
+                    Date chartDataDateOfNewestData = chartData.getDateOfNewestData();
+                    Date competitorDateOfNewestData = chartData.contains(competitor) ? chartData.getCompetitorData(
+                            competitor).getDateOfNewestData() : null;
+                    if (!chartData.contains(competitor)) {
+                        dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(0), competitor));
+                    } else if (competitorDateOfNewestData.before(chartDataDateOfNewestData)
+                            || competitorDateOfNewestData.before(maxTimepoint)) {
+                        dataQuery.add(new Pair<Date, CompetitorDTO>(new Date(competitorDateOfNewestData.getTime()
+                                + getStepSize()), competitor));
+                    }
+                }
+
+                GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(
+                        sailingService, selectedRaceIdentifier, dataQuery, maxTimepoint, getStepSize(),
+                        getDataToShow(), new AsyncCallback<MultiCompetitorRaceDataDTO>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(
+                                        getStringMessages().failedToLoadRaceData() + ": " + caught.toString(),
                                         timer.getPlayMode() == PlayModes.Live);
                                 hideLoading();
-                        }
+                            }
 
-                        @Override
-                        public void onSuccess(MultiCompetitorRaceDataDTO result) {
-                            if (result != null) {
-                                for (CompetitorRaceDataDTO competitorData : result.getAllRaceData()) {
-                                    if (chartData.contains(competitorData.getCompetitor())) {
-                                        chartData.addCompetitorRaceData(competitorData);
-                                        chartData.setCompetitorMarkPassingsData(competitorData);
-                                    } else {
-                                        chartData.setCompetitorData(competitorData.getCompetitor(), competitorData);
+                            @Override
+                            public void onSuccess(MultiCompetitorRaceDataDTO result) {
+                                if (result != null) {
+                                    for (CompetitorRaceDataDTO competitorData : result.getAllRaceData()) {
+                                        if (chartData.contains(competitorData.getCompetitor())) {
+                                            chartData.addCompetitorRaceData(competitorData);
+                                            chartData.setCompetitorMarkPassingsData(competitorData);
+                                        } else {
+                                            chartData.setCompetitorData(competitorData.getCompetitor(), competitorData);
+                                        }
                                     }
                                 }
-                            }
-                            chart.getXAxis().setMin(minTimepoint.getTime());
-                            chart.getXAxis().setMax(maxTimepoint.getTime());
+                                chart.getXAxis().setMin(minTimepoint.getTime());
+                                chart.getXAxis().setMax(maxTimepoint.getTime());
 
-                            drawChartData();
-                            chart.hideLoading();
-                        }
-                    });
-                    asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
+                                drawChartData();
+                                hideLoading();
+                            }
+                        });
+                asyncActionsExecutor.execute(getCompetitorsRaceDataAction);
+            } else {
+                setWidget(noCompetitorsSelectedLabel);
+            }
         } else {
-            setWidget(noCompetitorsSelectedLabel);            
+            // not visible; don't load data but remember that data needs to be loaded as soon as the chart becomes visible
+            needToLoadWhenMadeVisible = true;
         }
     }
 
@@ -551,15 +582,6 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         return new Pair<Boolean, Boolean>(everyPassingInRange, twoPassingsInRangeBeforeError);
     }
 
-    @Override 
-    public void setVisible(boolean isVisible) {
-        super.setVisible(isVisible);
-        
-        if(isVisible) {
-            loadData(true);
-        }
-    }
-    
     @Override
     public void timeChanged(Date date) {
         if (getChartData() != null) {
@@ -570,10 +592,6 @@ implements CompetitorSelectionChangeListener, RequiresResize {
         }
     }
     
-    private boolean needsDataLoading() {
-        return hasVisibleCompetitors() && isVisible();
-    }
-
     @Override
     public void onResize() {
         if(getChartData() != null) {

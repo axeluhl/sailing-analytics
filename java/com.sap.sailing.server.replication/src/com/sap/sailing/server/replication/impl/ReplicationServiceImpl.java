@@ -66,7 +66,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private final Map<ReplicationMasterDescriptor, String> replicaUUIDs;
     
     public ReplicationServiceImpl(final ReplicationInstancesManager replicationInstancesManager,
-            final MessageBrokerManager messageBrokerManager) {
+            final MessageBrokerManager messageBrokerManager) throws Exception {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
         this.messageBrokerManager = messageBrokerManager;
@@ -179,10 +179,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         String uuid = registerReplicaWithMaster(master);
         TopicSubscriber replicationSubscription = master.getTopicSubscriber(uuid);
         URL initialLoadURL = master.getInitialLoadURL();
-        replicationSubscription.setMessageListener(new Replicator(master, this));
+        final Replicator replicator = new Replicator(master, this, /* startSuspended */ true);
+        replicationSubscription.setMessageListener(replicator);
         InputStream is = initialLoadURL.openStream();
         ObjectInputStream ois = new ObjectInputStream(is);
         getRacingEventService().initiallyFillFrom(ois);
+        replicator.setSuspended(false); // apply queued operations
     }
 
     /**

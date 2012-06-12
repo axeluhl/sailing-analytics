@@ -1,0 +1,31 @@
+package com.sap.sailing.domain.common;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
+import com.sap.sailing.domain.common.impl.Util.Pair;
+
+/**
+ * Describes sources of official regatta results which may be imported and applied to <code>ScoreCorrection</code>
+ * objects to update our leaderboards from the official scoring systems where necessary and applicable.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public interface ScoreCorrectionProvider extends Named {
+    /**
+     * Returns a valid map whose keys are event names such as "Kieler Woche 2011" or "IDM Travemünde 2011" and whose
+     * values are sets of pairs of boat class names and the times for which it has score corrections. If there are multiple
+     * score corrections taken at different times. Later score corrections are expected to be cumulative, meaning they
+     * also contain all previous corrections.
+     */
+    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws IOException,
+            SAXException, ParserConfigurationException;
+
+    public ScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint millisecondsTimePoint);
+}
