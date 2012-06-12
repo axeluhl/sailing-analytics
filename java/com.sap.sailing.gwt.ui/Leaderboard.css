@@ -47,14 +47,14 @@ h1 {
 table {
   border-collapse: separate; }
 
-table td,table th {
+.leaderboardContent {
+  margin: 5px;
+}
+
+.leaderboardContent td, .leaderboardContent th {
 	vertical-align: bottom;
 	line-height: 1.3;
 	padding-top: 2px;
-}
-
-.leaderboardContent {
-  margin: 5px;
 }
 
 .leaderboardContent-toolbar {
@@ -117,4 +117,8 @@ body, table td, select, button {
 	font-size: 18px;
 	color: #fff;
 	margin-top: 22px;
+}
+
+.gwt-DialogBox {
+	z-index: 20;
 }

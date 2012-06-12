@@ -28,6 +28,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
@@ -47,6 +48,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
@@ -1024,7 +1026,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         chartsAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                compareCompetitors();
+                showCompareCompetitorsDialog();
             }
         });
         Anchor settingsAnchor = new Anchor(AbstractImagePrototype.create(leaderboardSettingsIcon).getSafeHtml());
@@ -1758,11 +1760,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         oldPlayMode = playMode;
     }
     
-    private void compareCompetitors() {
-        List<RegattaAndRaceIdentifier> races = getTrackedRacesIdentifiers();
-        CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races,
-                competitorSelectionProvider, timer, stringMessages, errorReporter);
-        chartDialog.show();
+    private void showCompareCompetitorsDialog() {
+        int selectedCompetitorsCount = Util.size(competitorSelectionProvider.getSelectedCompetitors());
+        if(selectedCompetitorsCount < 1) {
+            Window.alert(stringMessages.selectAtLeastOneCompetitor());
+        } else {
+            List<RegattaAndRaceIdentifier> races = getTrackedRacesIdentifiers();
+            CompareCompetitorsChartDialog chartDialog = new CompareCompetitorsChartDialog(sailingService, races,
+                    competitorSelectionProvider, timer, stringMessages, errorReporter);
+            chartDialog.show();
+        }
     }
     
     private List<RegattaAndRaceIdentifier> getTrackedRacesIdentifiers() {
