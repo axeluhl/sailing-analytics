@@ -229,25 +229,25 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		
 		//create adjacency graph including start and end 
 		Map<Position,List<Position>> graph = new HashMap<Position, List<Position>>();
-		graph.put(start, Arrays.asList(sailGrid[0]));
-		for(int i = 0; i < gridv-1; i++) {
+		graph.put(start, Arrays.asList(sailGrid[1]));
+		for(int i = 1; i < gridv-2; i++) {
 			for(Position p : sailGrid[i]) {
 				graph.put(p, Arrays.asList(sailGrid[i+1]));
 			}	
 		}
-		for(Position p : sailGrid[gridv-1]) {
+		for(Position p : sailGrid[gridv-2]) {
 			graph.put(p, Arrays.asList(end));
 		}
 		
 		//create backwards adjacency graph, required to reconstruct the optimal path
 		Map<Position, List<Position>> backGraph = new HashMap<Position, List<Position>>();
-		backGraph.put(end, Arrays.asList(sailGrid[gridv-1]));
-		for(int i = gridv-1; i>0; i--) {
+		backGraph.put(end, Arrays.asList(sailGrid[gridv-2]));
+		for(int i = gridv-2; i > 1; i--) {
 			for(Position p: sailGrid[i]) {
 				backGraph.put(p, Arrays.asList(sailGrid[i-1]));
 			}
 		}
-		for(Position p : sailGrid[0]) {
+		for(Position p : sailGrid[1]) {
 			backGraph.put(p, Arrays.asList(start));
 		}
 		
@@ -316,6 +316,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		while(currentPosition != start) {
 			TimedPositionWithSpeed currentTimedPositionWithSpeed = new TimedPositionWithSpeedImpl(currentTime, currentPosition, null );
 			lst.addFirst(currentTimedPositionWithSpeed);
+			System.out.println(boundary.getGridIndex(currentTimedPositionWithSpeed.getPosition()));
 			List<Position> currentPredecessors = backGraph.get(currentPosition);
 			Long minTime = Long.MAX_VALUE;
 			for(Position p : currentPredecessors) {
