@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -82,10 +83,9 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
 
                         @Override
                         public void onSuccess(ScoreCorrectionDTO result) {
-                            // TODO Display what was obtained and link race number to RaceColumn and sail ID to sail IDs of competitors
+                            new MatchAndApplyScoreCorrectionsDialog(leaderboard, stringMessages, sailingService, errorReporter, result).show();
                         }
             });
-            // TODO Auto-generated method stub
         }
     }
     
