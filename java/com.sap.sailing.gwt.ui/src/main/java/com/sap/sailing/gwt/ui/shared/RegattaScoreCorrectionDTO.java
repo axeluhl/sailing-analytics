@@ -3,30 +3,61 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.MaxPointsReason;
 
 public class RegattaScoreCorrectionDTO implements IsSerializable {
-    public class ScoreCorrectionEntryDTO implements IsSerializable {
-        public ScoreCorrectionEntryDTO() {}
+    public static class ScoreCorrectionEntryDTO implements IsSerializable {
+        private Double score;
+        private Boolean discarded;
+        private MaxPointsReason maxPointsReason;
         
+        public ScoreCorrectionEntryDTO() {}
+
+        public ScoreCorrectionEntryDTO(Double score, Boolean discarded, MaxPointsReason maxPointsReason) {
+            super();
+            this.score = score;
+            this.discarded = discarded;
+            this.maxPointsReason = maxPointsReason;
+        }
+
+        public Double getScore() {
+            return score;
+        }
+
+        public Boolean getDiscarded() {
+            return discarded;
+        }
+
+        public MaxPointsReason getMaxPointsReason() {
+            return maxPointsReason;
+        }
     }
     
     private String providerName;
-    private Map<Integer, Map<CompetitorDTO, ScoreCorrectionEntryDTO>> scoreCorrectionsByRaceNumber;
+    
+    /**
+     * Key is the race name or number as String; values are maps whose key is the sailID.
+     */
+    private Map<String, Map<String, ScoreCorrectionEntryDTO>> scoreCorrectionsByRaceNameOrNumber;
     
     public RegattaScoreCorrectionDTO() {}
     
+    /**
+     * @param scoreCorrectionsByRaceNameOrNumber
+     *            Key is the race name or number as String; values are maps whose key is the sailID.
+     */
     public RegattaScoreCorrectionDTO(String providerName,
-            Map<Integer, Map<CompetitorDTO, ScoreCorrectionEntryDTO>> scoreCorrectionsByRaceNumber) {
+            Map<String, Map<String, ScoreCorrectionEntryDTO>> scoreCorrectionsByRaceNameOrNumber) {
         super();
         this.providerName = providerName;
-        this.scoreCorrectionsByRaceNumber = scoreCorrectionsByRaceNumber;
+        this.scoreCorrectionsByRaceNameOrNumber = scoreCorrectionsByRaceNameOrNumber;
     }
 
     public String getProviderName() {
         return providerName;
     }
     
-    public Map<Integer, Map<CompetitorDTO, ScoreCorrectionEntryDTO>> getScoreCorrectionsByRaceNumber() {
-        return scoreCorrectionsByRaceNumber;
+    public Map<String, Map<String, ScoreCorrectionEntryDTO>> getScoreCorrectionsByRaceNameOrNumber() {
+        return scoreCorrectionsByRaceNameOrNumber;
     }
 }

@@ -75,8 +75,10 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
+import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
+import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
+import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
@@ -145,10 +147,11 @@ import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
-import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
@@ -282,14 +285,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     @Override
     public Iterable<ScoreCorrectionProviderDTO> getScoreCorrectionProviderDTOs() throws Exception {
         List<ScoreCorrectionProviderDTO> result = new ArrayList<ScoreCorrectionProviderDTO>();
-        final Iterable<ScoreCorrectionProvider> services = getScoreCorrectionProviders2();
+        final Iterable<ScoreCorrectionProvider> services = getScoreCorrectionProviders();
         for (ScoreCorrectionProvider scoreCorrectionProvider : services) {
             result.add(createScoreCorrectionProviderDTO((ScoreCorrectionProvider) scoreCorrectionProvider));
         }
         return result;
     }
 
-    private Iterable<ScoreCorrectionProvider> getScoreCorrectionProviders2() {
+    private Iterable<ScoreCorrectionProvider> getScoreCorrectionProviders() {
         final Object[] services = scoreCorrectionProviderServiceTracker.getServices();
         List<ScoreCorrectionProvider> result = new ArrayList<ScoreCorrectionProvider>();
         if (services != null) {
@@ -2054,17 +2057,32 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public RegattaScoreCorrectionDTO getScoreCorrections(String scoreCorrectionProviderName, String eventName,
             String boatClassName, Date timePointWhenResultPublished) throws Exception {
         RegattaScoreCorrectionDTO result = null;
-        for (ScoreCorrectionProvider scp : getScoreCorrectionProviders2()) {
+        for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
             if (scp.getName().equals(scoreCorrectionProviderName)) {
                 result = createScoreCorrection(scp.getScoreCorrections(eventName, boatClassName,
                         new MillisecondsTimePoint(timePointWhenResultPublished)));
+                break;
             }
         }
         return result;
     }
 
     private RegattaScoreCorrectionDTO createScoreCorrection(RegattaScoreCorrections scoreCorrections) {
-        // TODO Auto-generated method stub
-        return new RegattaScoreCorrectionDTO();
+        // Key is the race name or number as String; values are maps whose key is the sailID.
+        Map<String, Map<String, ScoreCorrectionEntryDTO>> map = new HashMap<String, Map<String, ScoreCorrectionEntryDTO>>();
+        for (ScoreCorrectionsForRace sc4r : scoreCorrections.getScoreCorrectionsForRaces()) {
+            Map<String, ScoreCorrectionEntryDTO> entryMap = new HashMap<String, RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO>();
+            for (String sailID : sc4r.getSailIDs()) {
+                entryMap.put(sailID, createScoreCorrectionEntryDTO(sc4r.getScoreCorrectionForCompetitor(sailID)));
+            }
+            map.put(sc4r.getRaceNameOrNumber(), entryMap);
+        }
+        return new RegattaScoreCorrectionDTO(scoreCorrections.getProvider().getName(), map);
+    }
+
+    private ScoreCorrectionEntryDTO createScoreCorrectionEntryDTO(
+            ScoreCorrectionForCompetitorInRace scoreCorrectionForCompetitor) {
+        return new ScoreCorrectionEntryDTO(scoreCorrectionForCompetitor.getPoints(),
+                scoreCorrectionForCompetitor.isDiscarded(), scoreCorrectionForCompetitor.getMaxPointsReason());
     }
 }

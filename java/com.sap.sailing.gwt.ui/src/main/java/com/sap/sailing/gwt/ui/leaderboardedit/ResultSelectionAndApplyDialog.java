@@ -96,7 +96,12 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
 
     @Override
     protected Triple<String, String, Pair<String, Date>> getResult() {
-        return values.get(listBox.getValue(listBox.getSelectedIndex()));
+        final int selectedIndex = listBox.getSelectedIndex();
+        if (selectedIndex != -1) {
+            return values.get(listBox.getValue(selectedIndex));
+        } else {
+            return null;
+        }
     }
 
 }

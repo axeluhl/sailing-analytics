@@ -15,6 +15,11 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
             SailingServiceAsync sailingService, ErrorReporter errorReporter, RegattaScoreCorrectionDTO result) {
         super(stringMessages.assignRaceNumbersToRaceColumns(), stringMessages.assignRaceNumbersToRaceColumns(),
                 stringMessages.ok(), stringMessages.cancel(), new Validator(), new Callback());
+        createAdditionalWidget(result);
+    }
+
+    private void createAdditionalWidget(RegattaScoreCorrectionDTO result) {
+        // TODO Auto-generated method stub
     }
 
     @Override
