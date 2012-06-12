@@ -194,7 +194,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 	
 	private Path createDjikstra() {
 		//retrieve simulation parameters
-		Boundary boundary = simulationParameters.getBoundaries();
+		Boundary boundary = new RectangularBoundary(simulationParameters.getCourse().get(0),simulationParameters.getCourse().get(1));//simulationParameters.getBoundaries();
 		WindField windField = simulationParameters.getWindField();
 		PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
 		Position start = simulationParameters.getCourse().get(0);
@@ -318,8 +318,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
 	@Override
 	public Map<String, Path> getAllPaths() {
 		Map<String, Path> allPaths = new HashMap<String, Path>();
-		allPaths.put("Dummy", createDummy());
-		allPaths.put("Heuristic", createHeuristic());
+		//allPaths.put("Dummy", createDummy());
+		//allPaths.put("Heuristic", createHeuristic());
 		allPaths.put("Djikstra", createDjikstra());
 		return allPaths;
 	}
