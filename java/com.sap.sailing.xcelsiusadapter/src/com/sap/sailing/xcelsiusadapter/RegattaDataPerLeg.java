@@ -23,8 +23,8 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -250,8 +250,6 @@ public class RegattaDataPerLeg extends Action {
         int speedCounter = 0;
         
         int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis())/resolutionInMilliseconds);
-        TimePoint newestEvent = trackedRace.getTimePointOfNewestEvent();
-
         WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
         TimePoint timePoint = fromTimePoint;
         for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
