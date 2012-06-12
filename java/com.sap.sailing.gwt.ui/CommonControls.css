@@ -144,6 +144,18 @@
 }
 
 .titleLabelWrapper {
+    text-align: center;
+    vertical-align: middle;
+    font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
+    font-size: 20px;
+    color: #fff;
+}
+
+.titleLabel {
+    height: 26px;
+}
+
+.subTitleLabelWrapper {
 	position: absolute;
     min-width: 400px;
     text-align: right;
@@ -156,7 +168,7 @@
     //background: url(images/titleLabelWrapper.png) right center no-repeat;
 }
 
-.titleLabel {
+.subTitleLabel {
     background: url(images/titleLabelInner.png) left center no-repeat;
     height: 26px;
     padding: 42px 7px 0 130px;
