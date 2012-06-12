@@ -27,5 +27,5 @@ public interface ScoreCorrectionProvider extends Named {
     public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws IOException,
             SAXException, ParserConfigurationException;
 
-    public ScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint millisecondsTimePoint);
+    public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint millisecondsTimePoint) throws IOException, SAXException, ParserConfigurationException;
 }

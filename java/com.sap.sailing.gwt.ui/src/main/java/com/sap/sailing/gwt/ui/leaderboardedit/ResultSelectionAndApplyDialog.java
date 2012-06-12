@@ -9,17 +9,14 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.ScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 
 public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String, String, Pair<String, Date>>> {
-    private final StringMessages stringMessages;
-    private final ErrorReporter errorReporter;
     private final LinkedHashMap<String, Triple<String, String, Pair<String, Date>>> values;
     private ListBox listBox;
 
@@ -31,8 +28,6 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
         super(stringMessages.selectResultListToImportFrom(), stringMessages.selectResultListToImportFrom(),
                 stringMessages.ok(), stringMessages.cancel(), new Validator(),
                 new Callback(sailingService, leaderboard, errorReporter, stringMessages));
-        this.stringMessages = stringMessages;
-        this.errorReporter = errorReporter;
         this.values = new LinkedHashMap<String, Triple<String, String, Pair<String, Date>>>();
         for (Triple<String, String, Pair<String, Date>> v : values) {
             this.values.put("" + v.getA() + ": " + v.getB() + " - " + v.getC().getA() + " "
@@ -74,7 +69,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
             final String boatClassName = result.getC().getA();
             final Date timePointWhenResultPublished = result.getC().getB();
             sailingService.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
-                    new AsyncCallback<ScoreCorrectionDTO>() {
+                    new AsyncCallback<RegattaScoreCorrectionDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorObtainingScoreCorrections(scoreCorrectionProviderName,
@@ -82,7 +77,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
                         }
 
                         @Override
-                        public void onSuccess(ScoreCorrectionDTO result) {
+                        public void onSuccess(RegattaScoreCorrectionDTO result) {
                             new MatchAndApplyScoreCorrectionsDialog(leaderboard, stringMessages, sailingService, errorReporter, result).show();
                         }
             });
@@ -101,7 +96,12 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
 
     @Override
     protected Triple<String, String, Pair<String, Date>> getResult() {
-        return values.get(listBox.getValue(listBox.getSelectedIndex()));
+        final int selectedIndex = listBox.getSelectedIndex();
+        if (selectedIndex != -1) {
+            return values.get(listBox.getValue(selectedIndex));
+        } else {
+            return null;
+        }
     }
 
 }
