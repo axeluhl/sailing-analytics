@@ -36,6 +36,9 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     
     public ScoreCorrectionProviderImpl(File scanDir) {
         super();
+        if (!scanDir.exists()) {
+            scanDir.mkdirs();
+        }
         if (!scanDir.isDirectory()) {
             throw new IllegalArgumentException("scanDir "+scanDir+" must be a directory");
         }
@@ -51,21 +54,15 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
             throws IOException, SAXException, ParserConfigurationException {
         Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String, TimePoint>>>();
-        ZipFileParser zipFileParser = ParserFactory.INSTANCE.createZipFileParser();
-        for (File file : scanDir.listFiles()) {
-            String eventName = null;
-            if (file.getName().toLowerCase().endsWith(".zip")) {
-                ZipFile zipFile = zipFileParser.parse(new FileInputStream(file));
-                Set<Pair<String, TimePoint>> resultTimesForBoatClassNames = new HashSet<Pair<String, TimePoint>>();
-                for (RegattaSummary regattaSummary : zipFile.getRegattaSummaries()) {
-                    resultTimesForBoatClassNames.add(new Pair<String, TimePoint>(regattaSummary.getBoatClassName(),
-                            regattaSummary.getTimePointPublished()));
-                    eventName = regattaSummary.getEventName();
-                }
-                if (eventName != null) {
-                    result.put(eventName, resultTimesForBoatClassNames);
-                }
+        for (RegattaSummary regattaSummary : getAllRegattaSummaries()) {
+            String eventName = regattaSummary.getEventName();
+            Set<Pair<String, TimePoint>> resultTimesForBoatClassNames = result.get(eventName);
+            if (resultTimesForBoatClassNames == null) {
+                resultTimesForBoatClassNames = new HashSet<Pair<String, TimePoint>>();
+                result.put(eventName, resultTimesForBoatClassNames);
             }
+            resultTimesForBoatClassNames.add(new Pair<String, TimePoint>(regattaSummary.getBoatClassName(),
+                    regattaSummary.getTimePointPublished()));
         }
         return result;
     }
