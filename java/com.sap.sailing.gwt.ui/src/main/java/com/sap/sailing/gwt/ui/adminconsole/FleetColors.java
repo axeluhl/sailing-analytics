@@ -4,14 +4,14 @@ import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.impl.RGBColor;
 
 public enum FleetColors {
-    GOLD (255, 215, 0, 1), 
-    SILVER (201, 192, 187, 2),
-    BRONZE (205, 127, 50, 3), 
-    EMERALD (0, 201, 87, 4),
-    BLUE (0, 0, 255, 0),
-    YELLOW (255,255,0, 0),
-    GREEN (0, 255, 0, 0),
-    RED (255, 0, 0, 0);
+    GOLD (222, 138, 46, 1), 
+    SILVER (192, 192, 192, 2),
+    BRONZE (140, 120, 83, 3), 
+    EMERALD (109, 201, 59, 4),
+    BLUE (39, 140, 194, 0),
+    YELLOW (251,186,0, 0),
+    GREEN (138, 181, 78, 0),
+    RED (232, 74, 26, 0);
     
     private Color color;
     
