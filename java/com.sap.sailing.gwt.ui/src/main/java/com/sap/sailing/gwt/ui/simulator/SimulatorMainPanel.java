@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -66,7 +67,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private ListBox patternSelector;
     private Map<String, WindPatternDTO> patternNameDTOMap;
     private ListBox boatSelector;
-
+    private ListBox directionSelector;
+    
     private final Timer timer;
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
@@ -178,6 +180,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         currentWPPanel = null;
 
         boatSelector = new ListBox();
+        directionSelector = new ListBox();
         timer = new Timer(PlayModes.Replay, 1000l);
         timer.setPlaySpeedFactor(30);
         timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
@@ -371,8 +374,15 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         hp.add(boatSelector);
 
         sailingPanel.add(hp);
-        hp.setSize("80%", "10%");
-
+       // hp.setSize("80%", "10%");
+        hp.setWidth("80%");
+        Panel raceDirection = createRaceDirectionSelector();
+        sailingPanel.add(raceDirection);
+        raceDirection.setWidth("80%");
+        
+        Panel strategySelector = createStrategySelector();
+        sailingPanel.add(strategySelector);
+        strategySelector.setWidth("80%");
     }
 
     private void createMapOptionsPanel() {
@@ -517,4 +527,36 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     }
 
+    private Panel createRaceDirectionSelector() {
+        Label raceDirectionLabel = new Label(stringMessages.raceDirection());
+        HorizontalPanel hp = new HorizontalPanel();
+        hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+        hp.add(raceDirectionLabel);
+        
+        if (directionSelector != null) {
+            directionSelector.addItem(stringMessages.upWind());
+            directionSelector.addItem(stringMessages.downWind());
+            hp.add(directionSelector);
+        }
+        return hp;
+    }
+    
+    private Panel createStrategySelector() {
+        FlowPanel fp = new FlowPanel();
+        Label label = new Label(stringMessages.strategies());
+        label.getElement().getStyle().setFloat(Style.Float.LEFT);
+        fp.add(label);
+        VerticalPanel vp = new VerticalPanel();
+        CheckBox cb = new CheckBox(stringMessages.omniscient());
+        cb.setValue(true);
+        //cb.getElement().getStyle().setFloat(Style.Float.RIGHT);
+        vp.add(cb);
+        cb = new CheckBox(stringMessages.opportunistic());
+        cb.setValue(true);
+        vp.add(cb);
+        vp.getElement().getStyle().setFloat(Style.Float.RIGHT);
+        fp.add(vp);
+        return fp;
+        
+    }
 }
