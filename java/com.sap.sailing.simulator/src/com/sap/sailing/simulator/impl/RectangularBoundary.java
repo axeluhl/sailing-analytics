@@ -210,13 +210,13 @@ public class RectangularBoundary implements Boundary {
             System.out.println();
         }
 
-        System.out.println("Grid Index Test:");
+        /*System.out.println("Grid Index Test:");
         for (int i =0; i<vPoints; i++) {
             for (int j=0; j<hPoints; j++) {
                 System.out.print(""+this.getGridIndex(grid[i][j])+", ");
             }
             System.out.println();
-        }
+        }*/
         return grid;
 
     }      
@@ -229,9 +229,10 @@ public class RectangularBoundary implements Boundary {
 
         double sPrd = scX[0]*nvHor[0]+scX[1]*nvHor[1];
 
-        int vIdx = (int) Math.round(scX[0]*nvVrt[0]+scX[1]*nvVrt[1]);
-        int hIdx = (int) Math.round(sPrd+(hPoints-1)/2.);
+        int vIdx = Math.min(Math.max(0, (int) Math.round(scX[0]*nvVrt[0]+scX[1]*nvVrt[1])), vPoints-1);
+        int hIdx = Math.min(Math.max(0, (int) Math.round(sPrd+(hPoints-1)/2.)), hPoints-1);
 
+        //System.out.println("getGridIndex: "+vIdx+","+hIdx+"("+vPoints+","+hPoints+")");
         return new Pair<Integer, Integer>(vIdx,hIdx);
 
     }               
