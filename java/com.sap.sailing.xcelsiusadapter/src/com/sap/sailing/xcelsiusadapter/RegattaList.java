@@ -15,8 +15,8 @@ import com.sap.sailing.domain.base.*;
 
 import com.sap.sailing.server.RacingEventService;
 
-public class EventList extends Action {
-	public EventList(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
+public class RegattaList extends Action {
+	public RegattaList(HttpServletRequest req, HttpServletResponse res, RacingEventService service, int maxRows) {
 		super(req, res, service, maxRows);
 	}
 

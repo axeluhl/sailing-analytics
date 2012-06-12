@@ -48,12 +48,12 @@ public class XcelsiusApp extends Servlet {
                     final RankPerRace a = new RankPerRace(req, res, getService(), maxRows);
                     a.perform();
                     return;                
-                } else if ("getEventDataPerLeg".equals(action)) {
-                    final EventDataPerLeg a = new EventDataPerLeg(req, res, getService(), maxRows);
+                } else if ("getRegattaDataPerLeg".equals(action)) {
+                    final RegattaDataPerLeg a = new RegattaDataPerLeg(req, res, getService(), maxRows);
                     a.perform();
                     return;
-                }else if ("getEventList".equals(action)) {
-                    final EventList a = new EventList(req, res, getService(), maxRows);
+                }else if ("getRegattaList".equals(action)) {
+                    final RegattaList a = new RegattaList(req, res, getService(), maxRows);
                     a.perform();
                     return;
                 }else {
