@@ -2069,7 +2069,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private RegattaScoreCorrectionDTO createScoreCorrection(RegattaScoreCorrections scoreCorrections) {
         // Key is the race name or number as String; values are maps whose key is the sailID.
-        Map<String, Map<String, ScoreCorrectionEntryDTO>> map = new HashMap<String, Map<String, ScoreCorrectionEntryDTO>>();
+        LinkedHashMap<String, Map<String, ScoreCorrectionEntryDTO>> map = new LinkedHashMap<String, Map<String, ScoreCorrectionEntryDTO>>();
         for (ScoreCorrectionsForRace sc4r : scoreCorrections.getScoreCorrectionsForRaces()) {
             Map<String, ScoreCorrectionEntryDTO> entryMap = new HashMap<String, RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO>();
             for (String sailID : sc4r.getSailIDs()) {

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -38,7 +39,7 @@ public class RegattaScoreCorrectionDTO implements IsSerializable {
     /**
      * Key is the race name or number as String; values are maps whose key is the sailID.
      */
-    private Map<String, Map<String, ScoreCorrectionEntryDTO>> scoreCorrectionsByRaceNameOrNumber;
+    private LinkedHashMap<String, Map<String, ScoreCorrectionEntryDTO>> scoreCorrectionsByRaceNameOrNumber;
     
     public RegattaScoreCorrectionDTO() {}
     
@@ -47,7 +48,7 @@ public class RegattaScoreCorrectionDTO implements IsSerializable {
      *            Key is the race name or number as String; values are maps whose key is the sailID.
      */
     public RegattaScoreCorrectionDTO(String providerName,
-            Map<String, Map<String, ScoreCorrectionEntryDTO>> scoreCorrectionsByRaceNameOrNumber) {
+            LinkedHashMap<String, Map<String, ScoreCorrectionEntryDTO>> scoreCorrectionsByRaceNameOrNumber) {
         super();
         this.providerName = providerName;
         this.scoreCorrectionsByRaceNameOrNumber = scoreCorrectionsByRaceNameOrNumber;
@@ -57,7 +58,7 @@ public class RegattaScoreCorrectionDTO implements IsSerializable {
         return providerName;
     }
     
-    public Map<String, Map<String, ScoreCorrectionEntryDTO>> getScoreCorrectionsByRaceNameOrNumber() {
+    public LinkedHashMap<String, Map<String, ScoreCorrectionEntryDTO>> getScoreCorrectionsByRaceNameOrNumber() {
         return scoreCorrectionsByRaceNameOrNumber;
     }
 }
