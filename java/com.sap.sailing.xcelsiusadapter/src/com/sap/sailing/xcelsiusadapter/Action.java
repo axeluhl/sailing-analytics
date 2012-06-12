@@ -1,13 +1,29 @@
 package com.sap.sailing.xcelsiusadapter;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
+
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.output.DOMOutputter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
@@ -180,6 +196,14 @@ public class Action {
             this.currentRow.addContent(col);
         }
     }
+    
+    public void addNamedColumn(String content, String columnName) {
+        if (maxRows == -1 || rowCount <= maxRows) {
+            final Element col = new Element(columnName);
+            col.setText(content);
+            this.currentRow.addContent(col);
+        }
+    }
 
     public static void say(String msg, HttpServletResponse res) throws IOException {
         final Document doc = new Document();
@@ -200,6 +224,70 @@ public class Action {
     public void say(String msg) throws IOException {
         say(msg, this.res);
     }
+    public void sendDocument(Document doc, String fileName){
+    	ServletOutputStream stream = null;
+    	 BufferedInputStream buf = null;
+		try {
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			
+			Result outputTarget = new StreamResult(outputStream);
+			DOMOutputter outputter = new DOMOutputter() ;
+			
+				org.w3c.dom.Document w3cDoc = outputter.output(doc);
+				Source xmlSource = new DOMSource(w3cDoc);
+			
+			
+			
+		   
+		    
+		
+				stream = res.getOutputStream();
+			
+		      
+		      res.setContentType("text/xml");
+		      res.addHeader("Content-Disposition", "attachment; filename="
+		          + fileName);
+			TransformerFactory.newInstance().newTransformer().transform(xmlSource, outputTarget);
+			InputStream is = new ByteArrayInputStream(outputStream.toByteArray());
+		   
+			buf = new BufferedInputStream(is);
+		      int readBytes = 0;
+		      while ((readBytes = buf.read()) != -1)
+		        stream.write(readBytes);
+		    
+		} catch(TransformerConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch(TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch(TransformerFactoryConfigurationError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}catch (JDOMException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+    	catch (IOException e) {
+    		e.printStackTrace();
+	    }finally {
+	      if (stream != null)
+			try {
+				stream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	      if (buf != null)
+			try {
+				buf.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+		//
+	}
 
     public static String getXMLAsString(Object context) {
         return getXMLAsString(context, "UTF-8");
