@@ -77,7 +77,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     }
 
     public void createErrorPage(String message) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("", stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 
         RootPanel.get().add(logoAndTitlePanel);

@@ -3,8 +3,10 @@ package com.sap.sailing.kiworesultimport.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,8 +14,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.domain.common.ScoreCorrections;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.kiworesultimport.ParserFactory;
@@ -34,6 +36,9 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     
     public ScoreCorrectionProviderImpl(File scanDir) {
         super();
+        if (!scanDir.exists()) {
+            scanDir.mkdirs();
+        }
         if (!scanDir.isDirectory()) {
             throw new IllegalArgumentException("scanDir "+scanDir+" must be a directory");
         }
@@ -48,30 +53,44 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     @Override
     public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName()
             throws IOException, SAXException, ParserConfigurationException {
-        Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String,TimePoint>>>();
+        Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String, TimePoint>>>();
+        for (RegattaSummary regattaSummary : getAllRegattaSummaries()) {
+            String eventName = regattaSummary.getEventName();
+            Set<Pair<String, TimePoint>> resultTimesForBoatClassNames = result.get(eventName);
+            if (resultTimesForBoatClassNames == null) {
+                resultTimesForBoatClassNames = new HashSet<Pair<String, TimePoint>>();
+                result.put(eventName, resultTimesForBoatClassNames);
+            }
+            resultTimesForBoatClassNames.add(new Pair<String, TimePoint>(regattaSummary.getBoatClassName(),
+                    regattaSummary.getTimePointPublished()));
+        }
+        return result;
+    }
+
+    private Iterable<RegattaSummary> getAllRegattaSummaries() throws IOException, SAXException, ParserConfigurationException {
+        List<RegattaSummary> result = new ArrayList<RegattaSummary>();
         ZipFileParser zipFileParser = ParserFactory.INSTANCE.createZipFileParser();
         for (File file : scanDir.listFiles()) {
-            String eventName = null;
             if (file.getName().toLowerCase().endsWith(".zip")) {
                 ZipFile zipFile = zipFileParser.parse(new FileInputStream(file));
-                Set<Pair<String, TimePoint>> resultTimesForBoatClassNames = new HashSet<Pair<String, TimePoint>>();
                 for (RegattaSummary regattaSummary : zipFile.getRegattaSummaries()) {
-                    resultTimesForBoatClassNames.add(new Pair<String, TimePoint>(regattaSummary.getBoatClassName(),
-                            regattaSummary.getTimePointPublished()));
-                    eventName = regattaSummary.getEventName();
-                }
-                if (eventName != null) {
-                    result.put(eventName, resultTimesForBoatClassNames);
+                    result.add(regattaSummary);
                 }
             }
         }
         return result;
     }
-
+    
     @Override
-    public ScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint millisecondsTimePoint) {
-        // TODO cache previous ZipFile results by event name and boatClassName and TimePoint to be able to deliver now
-        return new ZipFileAsScoreCorrections(/* TODO */ null);
+    public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
+            TimePoint timePointPublished) throws IOException, SAXException, ParserConfigurationException {
+        for (RegattaSummary regattaSummary : getAllRegattaSummaries()) {
+            if (regattaSummary.getEventName().equals(eventName) && regattaSummary.getBoatClassName().equals(boatClassName) &&
+                    regattaSummary.getTimePointPublished().equals(timePointPublished)) {
+                return new RegattaSummaryAsScoreCorrections(regattaSummary, this);
+            }
+        }
+        return null;
     }
 
 }

@@ -53,44 +53,12 @@ table td,table th {
 	padding-top: 2px;
 }
 
-.LogoAndTitlePanel {
-	height: 68px;
-	font-family: Arial, Verdana, sans-serif;
-	position: fixed;
-	width: 100%;
-	top: 0;
-	background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
-	background-position: center top, 0 0;
-	background-repeat: no-repeat, repeat-x;
-	box-shadow: 0 0 20px #858585;
-	-moz-box-shadow: 0 0 20px #858585;
-	-webkit-box-shadow: 0 0 20px #858585;
+.leaderboardContent {
+  margin: 5px;
 }
 
-.LogoAndTitlePanel:after {
-	content: " ";
-	display: block;
-	height: 0;
-	clear: both;
-	visibility: hidden;
-}
-
-
-.sapLogo {
-	float: left;
-	margin: 13px 0 0 12px;
-}
-
-.sailingAnalyticsLabelPanel {
-	margin: 10px 0 0 0;
-}
-
-.sailingAnalyticsLabel {
-	float: left;
-	color: #fff;
-	font-size: 14px;
-	font-weight: bold;
-	margin: 15px 0 0 0;
+.leaderboardContent-toolbar {
+	
 }
 
 .leaderboardLabel {
@@ -105,16 +73,12 @@ table td,table th {
   border-top: 2px solid #fff; 
   height: 30px; }
 
-  .refreshAndSettings table td {
+.refreshAndSettings table td {
     padding: 0 10px 0 0;}
-  .refreshAndSettings table table td{
+
+.refreshAndSettings table table td{
     padding: 0 0 0 0;}
 
-.race-name {
-  margin: 2px 10px 0 0;
-  line-height: 1.0;
-  float: left;}
-  
 input.magnifier{
 	display: block;
 	margin: 3px auto 0 auto !important;
@@ -131,32 +95,6 @@ body, table td, select, button {
 
 .errorLabel {
 	color: #FF0000;
-}
-
-.raceBoardNavigation {
-	float: right;
-	margin:6px 0 0 0;
-	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
-}
-
-.raceBoardNavigation-navigationitem {
-	color: #dddcdc;
-	text-transform: uppercase;
-	font-weight: 500;
-	margin: 0 12px 0 0;
-	padding: 0 0 5px 0;
-}
-
-.raceBoardNavigation-navigationitem:hover {
-	border-bottom: 4px solid #f0ab00;
-	color: #dddcdc;
-	text-decoration: none;
-}
-
-.raceBoardNavigation-navigationitem:active {
-	border-bottom: 4px solid #f0ab00;
-	color: #dddcdc;
-	text-decoration: none;
 }
 
 .abstractChartPanel-importantMessageOfChart {
