@@ -293,7 +293,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 				Speed speedToP = polarDiagram.getSpeedAtBearing(bearingToP);
 				//multiplied by 1000 to have milliseconds
 				Long timeToP = (long) (1000 * (distanceToP.getMeters() / speedToP.getMetersPerSecond()));
-				if (previousBearing != null) {
+				/*if (previousBearing != null) {
 					Bearing windBearingFrom = currentWind.getBearing().reverse();
 					if( (PolarDiagram49.bearingComparator.compare(bearingToP, windBearingFrom) > 0) 
 							&& (PolarDiagram49.bearingComparator.compare(previousBearing, windBearingFrom) < 0) )
@@ -301,7 +301,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 					if( (PolarDiagram49.bearingComparator.compare(bearingToP, windBearingFrom) < 0) 
 							&& (PolarDiagram49.bearingComparator.compare(previousBearing, windBearingFrom) > 0) )
 						timeToP = timeToP + 4000;
-				}
+				}*/
 						
 				Long tentativeDistanceToP = currentTime.asMillis() + timeToP;
 				if (tentativeDistanceToP < tentativeDistances.get(p).getA()) {
@@ -367,6 +367,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		allPaths.put("Omniscient", createDjikstra());
 		return allPaths;
 	}
-
 	
+	public Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(long millisecondsStep) {
+		
+		Map<String, List<TimedPositionWithSpeed>> allPaths= new HashMap<String, List<TimedPositionWithSpeed>>();
+		//allPaths.put("Dummy", createDummy().getEvenTimedPoints(millisecondsStep));
+		allPaths.put("Opportunistic", createHeuristic().getEvenTimedPoints(millisecondsStep));
+		allPaths.put("Omniscient", createDjikstra().getEvenTimedPoints(millisecondsStep));
+		return allPaths;
+	}
+
 }

@@ -1,5 +1,6 @@
 package com.sap.sailing.simulator;
 
+import java.util.List;
 import java.util.Map;
 
 public interface SailingSimulator {
@@ -9,5 +10,6 @@ public interface SailingSimulator {
 	
 	Path getOptimumPath();
 	Map<String, Path> getAllPaths();
+	Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(long millisecondsStep);
 
 }
