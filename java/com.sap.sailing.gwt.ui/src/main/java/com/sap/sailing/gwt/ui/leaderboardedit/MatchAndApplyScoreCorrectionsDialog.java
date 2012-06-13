@@ -216,12 +216,14 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     // apply the score correction of the cell:
                     String raceNameOrNumber = getSelectedString(raceNameOrNumberChoosers, raceColumn);
                     String officialSailID = getSelectedString(officialSailIDChoosers, competitor);
-                    ScoreCorrectionEntryDTO officialCorrectionEntry =
-                            regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
-                            .get(raceNameOrNumber).get(officialSailID);
-                    result.addMaxPointsReasonUpdate(competitor, raceColumn, officialCorrectionEntry.getMaxPointsReason());
-                    result.addScoreUpdate(competitor, raceColumn,
-                            (int) Math.round(officialCorrectionEntry.getScore().doubleValue()));
+                    if (officialSailID != null) {
+                        ScoreCorrectionEntryDTO officialCorrectionEntry = regattaScoreCorrection
+                                .getScoreCorrectionsByRaceNameOrNumber().get(raceNameOrNumber).get(officialSailID);
+                        result.addMaxPointsReasonUpdate(competitor, raceColumn,
+                                officialCorrectionEntry.getMaxPointsReason());
+                        result.addScoreUpdate(competitor, raceColumn,
+                                (int) Math.round(officialCorrectionEntry.getScore().doubleValue()));
+                    }
                 }
             }
         }
