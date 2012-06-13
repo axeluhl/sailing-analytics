@@ -33,12 +33,13 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
             this.values.put("" + v.getA() + ": " + v.getB() + " - " + v.getC().getA() + " "
                     + stringMessages.of() + " " + v.getC().getB(), v);
         }
+        listBox = createListBox(/* isMultipleSelect */ false);
     }
 
     private static class Validator implements DataEntryDialog.Validator<Triple<String, String, Pair<String, Date>>> {
         @Override
         public String getErrorMessage(Triple<String, String, Pair<String, Date>> valueToValidate) {
-            // TODO Auto-generated method stub
+            // nothing can go wrong here
             return null;
         }
     }
@@ -86,13 +87,17 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
     
     @Override
     protected Widget getAdditionalWidget() {
-        listBox = createListBox(/* isMultipleSelect */ false);
         for (String value : values.keySet()) {
             listBox.addItem(value);
         }
         return listBox;
     }
 
+    @Override
+    public void show() {
+        super.show();
+        listBox.setFocus(true);
+    }
 
     @Override
     protected Triple<String, String, Pair<String, Date>> getResult() {

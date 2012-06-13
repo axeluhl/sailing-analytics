@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.dev.util.collect.HashSet;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -13,6 +15,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
@@ -31,7 +34,6 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
     private static final RegExp p = RegExp.compile("^([A-Z][A-Z][A-Z])[^0-9]*([0-9]*)$");
 
     private final LeaderboardDTO leaderboard;
-    private final Map<String, CompetitorDTO> sailIDToCompetitor;
     private final Map<CompetitorDTO, String> defaultOfficialSailIDsForCompetitors;
     private final Set<String> allOfficialRaceIDs;
     private final Map<RaceColumnDTO, String> raceColumnToOfficialRaceNameOrNumber;
@@ -51,11 +53,40 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
         this.leaderboard = leaderboard;
         this.allOfficialRaceIDs = new HashSet<String>();
         this.defaultOfficialSailIDsForCompetitors = new HashMap<CompetitorDTO, String>();
-        this.sailIDToCompetitor = mapCompetitorsAndInitializeAllOfficialRaceIDs(leaderboard, result);
+        mapCompetitorsAndInitializeAllOfficialRaceIDs(leaderboard, result);
         this.raceColumnToOfficialRaceNameOrNumber = createRaceColumnNameToOfficialRaceNameOrNumberSuggestion(leaderboard, result);
         competitorCheckboxes = new HashMap<CompetitorDTO, CheckBox>();
+        for (final CompetitorDTO competitor : leaderboard.competitors) {
+            CheckBox checkbox = createCheckbox(stringMessages.selectAll());
+            checkbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    for (RaceColumnDTO raceColumn : MatchAndApplyScoreCorrectionsDialog.this.leaderboard.getRaceList()) {
+                        cellCheckboxes.get(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
+                    }
+                }
+            });
+            competitorCheckboxes.put(competitor, checkbox);
+        }
         raceColumnCheckboxes = new HashMap<RaceColumnDTO, CheckBox>();
-        cellCheckboxes = new HashMap<Pair<CompetitorDTO,RaceColumnDTO>, CheckBox>();
+        for (final RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+            CheckBox checkbox = createCheckbox(stringMessages.selectAll());
+            checkbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    for (CompetitorDTO competitor : MatchAndApplyScoreCorrectionsDialog.this.leaderboard.competitors) {
+                        cellCheckboxes.get(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)).setValue(event.getValue());
+                    }
+                }
+            });
+            raceColumnCheckboxes.put(raceColumn, checkbox);
+        }
+        cellCheckboxes = new HashMap<Pair<CompetitorDTO, RaceColumnDTO>, CheckBox>();
+        for (final CompetitorDTO competitor : leaderboard.competitors) {
+            for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+                cellCheckboxes.put(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn), createCheckbox(stringMessages.apply()));
+            }
+        }
         raceNameOrNumberChoosers = new HashMap<RaceColumnDTO, ListBox>();
         officialSailIDChoosers = new HashMap<CompetitorDTO, ListBox>();
         grid = new Grid(leaderboard.competitors.size()+1, leaderboard.getRaceList().size()+1);
@@ -143,20 +174,17 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
      * @return a map mapping the sailIDs as found in <code>result</code> to the {@link CompetitorDTO}s used in <code>leaderboard</code>;
      * values may be <code>null</code> if no competitor was found for the sail ID in the leaderboard
      */
-    private Map<String, CompetitorDTO> mapCompetitorsAndInitializeAllOfficialRaceIDs(LeaderboardDTO leaderboard,
+    private void mapCompetitorsAndInitializeAllOfficialRaceIDs(LeaderboardDTO leaderboard,
             RegattaScoreCorrectionDTO regattaScoreCorrection) {
-        Map<String, CompetitorDTO> result = new HashMap<String, CompetitorDTO>();
         Map<String, CompetitorDTO> canonicalizedLeaderboardSailIDToCompetitors = canonicalizeLeaderboardSailIDs(leaderboard);
         for (Map<String, ScoreCorrectionEntryDTO> scoreCorrectionsBySailID : regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber().values()) {
             for (String officialSailID : scoreCorrectionsBySailID.keySet()) {
                 allOfficialRaceIDs.add(officialSailID);
                 String canonicalizedResultSailID = canonicalizeSailID(officialSailID, /* defaultNationality */ null);
                 CompetitorDTO competitor = canonicalizedLeaderboardSailIDToCompetitors.get(canonicalizedResultSailID);
-                result.put(officialSailID, competitor);
                 defaultOfficialSailIDsForCompetitors.put(competitor, officialSailID);
             }
         }
-        return result;
     }
     
     private String canonicalizeSailID(String sailID, String defaultNationality) {
@@ -206,32 +234,60 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
     private void updateGridContents(Grid grid) {
         int c = 1;
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-            grid.setWidget(0, c, /* TODO */ new Label(raceColumn.name+" vs. "+raceColumnToOfficialRaceNameOrNumber.get(raceColumn.name)));
+            VerticalPanel vp = new VerticalPanel();
+            vp.add(new Label(raceColumn.name));
+            vp.add(raceNameOrNumberChoosers.get(raceColumn));
+            vp.add(raceColumnCheckboxes.get(raceColumn));
+            grid.setWidget(0, c, vp);
             c++;
         }
         int row=1;
-        for (Map.Entry<String, CompetitorDTO> officialSailIDAndCompetitor : sailIDToCompetitor.entrySet()) {
+        for (CompetitorDTO competitor : leaderboard.competitors) {
+            String officialSailID = getSelectedString(officialSailIDChoosers, competitor);
             int column = 0;
-            grid.setWidget(row, column++, new Label(officialSailIDAndCompetitor.getKey()+"/"+officialSailIDAndCompetitor.getValue().sailID));
-            LeaderboardRowDTO leaderboardRow = leaderboard.rows.get(officialSailIDAndCompetitor.getValue());
+            VerticalPanel vp = new VerticalPanel();
+            vp.add(new Label(competitor.sailID+" "+competitor.name));
+            vp.add(this.officialSailIDChoosers.get(competitor));
+            vp.add(competitorCheckboxes.get(competitor));
+            grid.setWidget(row, column++, vp);
+            LeaderboardRowDTO leaderboardRow = leaderboard.rows.get(competitor);
             for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
                 LeaderboardEntryDTO entry = leaderboardRow.fieldsByRaceColumnName.get(raceColumn.name);
-                ScoreCorrectionEntryDTO officialCorrectionEntry =
+                String raceNameOrNumber = getSelectedString(raceNameOrNumberChoosers, raceColumn);
+                VerticalPanel cell = new VerticalPanel();
+                cell.add(new Label(entry.netPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
+                        (entry.discarded?"/discarded":"")));
+                if (officialSailID != null) {
+                    ScoreCorrectionEntryDTO officialCorrectionEntry =
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
-                        .get(raceColumnToOfficialRaceNameOrNumber.get(raceColumn.name))
-                        .get(officialSailIDAndCompetitor.getKey());
-                grid.setWidget(row, column++, new Label(entry.netPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
-                (entry.discarded?"/discarded":""+" vs. "+officialCorrectionEntry.getScore()+"/"+officialCorrectionEntry.getMaxPointsReason()+
-                        (officialCorrectionEntry.getDiscarded()?"/discarded":""))));
+                        .get(raceNameOrNumber).get(officialSailID);
+                    cell.add(new Label(officialCorrectionEntry.getScore()+"/"+officialCorrectionEntry.getMaxPointsReason()+
+                        (officialCorrectionEntry.getDiscarded()?"/discarded":"")));
+                }
+                cell.add(cellCheckboxes.get(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)));
+                grid.setWidget(row, column++, cell);
             }
             row++;
         }
     }
 
+    private <T> String getSelectedString(Map<T, ListBox> choosersByT, T t) {
+        String result = null;
+        ListBox chooser = choosersByT.get(t);
+        int selectedIndex = chooser.getSelectedIndex();
+        if (selectedIndex != -1) {
+            result = chooser.getItemText(selectedIndex);
+            if (result.length() == 0) {
+                result = null;
+            }
+        }
+        return result;
+    }
+
     private static class Validator implements DataEntryDialog.Validator<ScoreCorrectionsApplicationInstructions> {
         @Override
         public String getErrorMessage(ScoreCorrectionsApplicationInstructions valueToValidate) {
-            // TODO Auto-generated method stub
+            // so far, nothing can go wrong :-)
             return null;
         }
     }

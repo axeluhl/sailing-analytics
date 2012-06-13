@@ -329,4 +329,6 @@ public interface StringMessages extends Messages {
             String string);
     String assignRaceNumbersToRaceColumns();
     String importOfficialResults();
+    String selectAll();
+    String apply();
 }
