@@ -15,6 +15,9 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
     private final Integer correctedScore;
     private final TimePoint timePoint;
     
+    /**
+     * @param timePoint the time point for which to deliver leaderboard results as the result of this operation
+     */
     public UpdateLeaderboardScoreCorrection(String leaderboardName, String columnName, String competitorIdAsString,
             Integer correctedScore, TimePoint timePoint) {
         super(leaderboardName, columnName);

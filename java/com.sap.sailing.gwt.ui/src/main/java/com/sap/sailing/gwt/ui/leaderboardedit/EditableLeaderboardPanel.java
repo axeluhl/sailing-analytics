@@ -199,10 +199,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     
     private class MaxPointsDropDownCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final SelectionCell dropDownCell;
-        private final String raceName;
+        private final String raceColumnName;
         
-        public MaxPointsDropDownCellProvider(String raceName) {
-            this.raceName = raceName;
+        public MaxPointsDropDownCellProvider(String raceColumnName) {
+            this.raceColumnName = raceColumnName;
             List<String> selectionCellContents = new ArrayList<String>();
             selectionCellContents.add(""); // represents "no" max points reason
             for (MaxPointsReason maxPointReason : MaxPointsReason.values()) {
@@ -225,7 +225,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id,
-                            raceName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
+                            raceColumnName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
                             getLeaderboardDisplayDate(), new AsyncCallback<Pair<Integer, Integer>>() {
                                 @Override
                                 public void onFailure(Throwable t) {
@@ -237,10 +237,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                                 @Override
                                 public void onSuccess(Pair<Integer, Integer> newNetAndTotalPoints) {
-                                    row.fieldsByRaceColumnName.get(raceName).reasonForMaxPoints = value == null
+                                    row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints = value == null
                                             || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
-                                    row.fieldsByRaceColumnName.get(raceName).netPoints = newNetAndTotalPoints.getA();
-                                    row.fieldsByRaceColumnName.get(raceName).totalPoints = newNetAndTotalPoints.getB();
+                                    row.fieldsByRaceColumnName.get(raceColumnName).netPoints = newNetAndTotalPoints.getA();
+                                    row.fieldsByRaceColumnName.get(raceColumnName).totalPoints = newNetAndTotalPoints.getB();
                                     getCell().setViewData(row, null); // ensure that getValue() is called again
                                     whiteboard.setObjectWithWhichToUpdateRow(row);
                                 }
@@ -251,7 +251,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
             MaxPointsReason reasonForMaxPoints = null;
             if (leaderboardEntryDTO != null) {
                 reasonForMaxPoints = leaderboardEntryDTO.reasonForMaxPoints;
