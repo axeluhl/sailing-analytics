@@ -3,13 +3,18 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
+import com.google.gwt.dev.util.collect.HashSet;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -27,8 +32,16 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
 
     private final LeaderboardDTO leaderboard;
     private final Map<String, CompetitorDTO> sailIDToCompetitor;
-    private final Map<String, String> raceColumnNameToOfficialRaceNameOrNumber;
+    private final Map<CompetitorDTO, String> defaultOfficialSailIDsForCompetitors;
+    private final Set<String> allOfficialRaceIDs;
+    private final Map<RaceColumnDTO, String> raceColumnToOfficialRaceNameOrNumber;
     private final RegattaScoreCorrectionDTO regattaScoreCorrection;
+    private final Map<CompetitorDTO, CheckBox> competitorCheckboxes;
+    private final Map<RaceColumnDTO, CheckBox> raceColumnCheckboxes;
+    private final Map<Pair<CompetitorDTO, RaceColumnDTO>, CheckBox> cellCheckboxes;
+    private final Grid grid;
+    private final Map<RaceColumnDTO, ListBox> raceNameOrNumberChoosers;
+    private final Map<CompetitorDTO, ListBox> officialSailIDChoosers;
 
     public MatchAndApplyScoreCorrectionsDialog(LeaderboardDTO leaderboard, StringMessages stringMessages,
             SailingServiceAsync sailingService, ErrorReporter errorReporter, RegattaScoreCorrectionDTO result) {
@@ -36,21 +49,86 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
                 stringMessages.ok(), stringMessages.cancel(), new Validator(), new Callback());
         this.regattaScoreCorrection = result;
         this.leaderboard = leaderboard;
-        this.sailIDToCompetitor = mapCompetitors(leaderboard, result);
-        this.raceColumnNameToOfficialRaceNameOrNumber = createRaceColumnNameToOfficialRaceNameOrNumberSuggestion(leaderboard, result);
+        this.allOfficialRaceIDs = new HashSet<String>();
+        this.defaultOfficialSailIDsForCompetitors = new HashMap<CompetitorDTO, String>();
+        this.sailIDToCompetitor = mapCompetitorsAndInitializeAllOfficialRaceIDs(leaderboard, result);
+        this.raceColumnToOfficialRaceNameOrNumber = createRaceColumnNameToOfficialRaceNameOrNumberSuggestion(leaderboard, result);
+        competitorCheckboxes = new HashMap<CompetitorDTO, CheckBox>();
+        raceColumnCheckboxes = new HashMap<RaceColumnDTO, CheckBox>();
+        cellCheckboxes = new HashMap<Pair<CompetitorDTO,RaceColumnDTO>, CheckBox>();
+        raceNameOrNumberChoosers = new HashMap<RaceColumnDTO, ListBox>();
+        officialSailIDChoosers = new HashMap<CompetitorDTO, ListBox>();
+        grid = new Grid(leaderboard.competitors.size()+1, leaderboard.getRaceList().size()+1);
+        fillRaceNameOrNumberChoosers();
+        fillOfficialSailIDChoosers();
+    }
+
+    private void fillRaceNameOrNumberChoosers() {
+        for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+            ListBox listbox = createRaceNameOrNumberListBox(/* select */ raceColumnToOfficialRaceNameOrNumber.get(raceColumn));
+            raceNameOrNumberChoosers.put(raceColumn, listbox);
+        }
+    }
+
+    private ListBox createRaceNameOrNumberListBox(String selectedItem) {
+        ListBox result = createListBox(/* isMultipleSelect */ false);
+        result.addItem("");
+        int i=1;
+        int selectionIndex = -1;
+        for (String raceNameOrNumber : regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber().keySet()) {
+            result.addItem(raceNameOrNumber);
+            if (selectedItem != null && selectedItem.equals(raceNameOrNumber)) {
+                selectionIndex = i;
+            }
+            i++;
+        }
+        if (selectionIndex != -1) {
+            result.setSelectedIndex(selectionIndex);
+        }
+        return result;
+    }
+
+    /**
+     * Creates a list box with all official sail IDs and a leading empty string representing "no mapping"
+     * 
+     * @param selectedItem which item in the list to select; if <code>null</code>, no selection will be performed
+     */
+    private ListBox createOfficialSailIDListBox(String selectedItem) {
+        ListBox result = createListBox(/* isMultipleSelect */ false);
+        result.addItem("");
+        int i=1;
+        int selectionIndex = -1;
+        for (String officialSailID : allOfficialRaceIDs) {
+            result.addItem(officialSailID);
+            if (selectedItem != null && selectedItem.equals(officialSailID)) {
+                selectionIndex = i;
+            }
+            i++;
+        }
+        if (selectionIndex != -1) {
+            result.setSelectedIndex(selectionIndex);
+        }
+        return result;
+    }
+
+    private void fillOfficialSailIDChoosers() {
+        for (CompetitorDTO competitor : leaderboard.competitors) {
+            ListBox listbox = createOfficialSailIDListBox(/* selection */ defaultOfficialSailIDsForCompetitors.get(competitor));
+            officialSailIDChoosers.put(competitor, listbox);
+        }
     }
 
     /**
      * The default suggestion made for the mapping of leaderboard race column names to the official race name/number scheme
      * is by their ordering.
      */
-    private Map<String, String> createRaceColumnNameToOfficialRaceNameOrNumberSuggestion(
+    private Map<RaceColumnDTO, String> createRaceColumnNameToOfficialRaceNameOrNumberSuggestion(
             LeaderboardDTO leaderboard, RegattaScoreCorrectionDTO regattaScoreCorretion) {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<RaceColumnDTO, String> result = new HashMap<RaceColumnDTO, String>();
         Iterator<RaceColumnDTO> raceColumnIter = leaderboard.getRaceList().iterator();
         Iterator<String> officialRaceNameOrNumberIter = regattaScoreCorretion.getScoreCorrectionsByRaceNameOrNumber().keySet().iterator();
         while (raceColumnIter.hasNext() && officialRaceNameOrNumberIter.hasNext()) {
-            result.put(raceColumnIter.next().name, officialRaceNameOrNumberIter.next());
+            result.put(raceColumnIter.next(), officialRaceNameOrNumberIter.next());
         }
         return result;
     }
@@ -62,18 +140,20 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
      * prepended before comparing to <code>result</code>'s sail IDs. The sail ID number is extracted by trimming and using all
      * trailing digits.
      * 
-     * @return a map mapping the sailIDs as found in <code>result</code> to the {@link CompetitorDTO}s used in <code>leaderboard</code>
+     * @return a map mapping the sailIDs as found in <code>result</code> to the {@link CompetitorDTO}s used in <code>leaderboard</code>;
+     * values may be <code>null</code> if no competitor was found for the sail ID in the leaderboard
      */
-    private Map<String, CompetitorDTO> mapCompetitors(LeaderboardDTO leaderboard, RegattaScoreCorrectionDTO regattaScoreCorrection) {
+    private Map<String, CompetitorDTO> mapCompetitorsAndInitializeAllOfficialRaceIDs(LeaderboardDTO leaderboard,
+            RegattaScoreCorrectionDTO regattaScoreCorrection) {
         Map<String, CompetitorDTO> result = new HashMap<String, CompetitorDTO>();
         Map<String, CompetitorDTO> canonicalizedLeaderboardSailIDToCompetitors = canonicalizeLeaderboardSailIDs(leaderboard);
         for (Map<String, ScoreCorrectionEntryDTO> scoreCorrectionsBySailID : regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber().values()) {
-            for (String resultSailID : scoreCorrectionsBySailID.keySet()) {
-                String canonicalizedResultSailID = canonicalizeSailID(resultSailID, /* defaultNationality */ null);
+            for (String officialSailID : scoreCorrectionsBySailID.keySet()) {
+                allOfficialRaceIDs.add(officialSailID);
+                String canonicalizedResultSailID = canonicalizeSailID(officialSailID, /* defaultNationality */ null);
                 CompetitorDTO competitor = canonicalizedLeaderboardSailIDToCompetitors.get(canonicalizedResultSailID);
-                if (competitor != null) {
-                    result.put(resultSailID, competitor);
-                }
+                result.put(officialSailID, competitor);
+                defaultOfficialSailIDsForCompetitors.put(competitor, officialSailID);
             }
         }
         return result;
@@ -119,10 +199,14 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
         // and the suggested correction plus a checkbox each. Each row and each column has a checkbox as well.
         // If a row/column checkbox is toggled, it sets all checkboxes in the row/column to the new state.
         // When OKing the dialog, for all ticked cells the corrections are applied.
-        Grid grid = new Grid(leaderboard.competitors.size()+1, leaderboard.getRaceList().size()+1);
-        int c = 0;
+        updateGridContents(grid);
+        return grid;
+    }
+
+    private void updateGridContents(Grid grid) {
+        int c = 1;
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-            grid.setWidget(0, c, /* TODO */ new Label(raceColumn.name+" vs. "+raceColumnNameToOfficialRaceNameOrNumber.get(raceColumn.name)));
+            grid.setWidget(0, c, /* TODO */ new Label(raceColumn.name+" vs. "+raceColumnToOfficialRaceNameOrNumber.get(raceColumn.name)));
             c++;
         }
         int row=1;
@@ -134,7 +218,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
                 LeaderboardEntryDTO entry = leaderboardRow.fieldsByRaceColumnName.get(raceColumn.name);
                 ScoreCorrectionEntryDTO officialCorrectionEntry =
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
-                        .get(raceColumnNameToOfficialRaceNameOrNumber.get(raceColumn.name))
+                        .get(raceColumnToOfficialRaceNameOrNumber.get(raceColumn.name))
                         .get(officialSailIDAndCompetitor.getKey());
                 grid.setWidget(row, column++, new Label(entry.netPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
                 (entry.discarded?"/discarded":""+" vs. "+officialCorrectionEntry.getScore()+"/"+officialCorrectionEntry.getMaxPointsReason()+
@@ -142,7 +226,6 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
             }
             row++;
         }
-        return grid;
     }
 
     private static class Validator implements DataEntryDialog.Validator<ScoreCorrectionsApplicationInstructions> {
