@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.regexp.shared.MatchResult;
@@ -116,6 +118,12 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
         if (selectionIndex != -1) {
             result.setSelectedIndex(selectionIndex);
         }
+        result.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                updateGridContents(grid);
+            }
+        });
         return result;
     }
 
@@ -232,6 +240,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
     }
 
     private void updateGridContents(Grid grid) {
+        grid.clear();
         int c = 1;
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
             VerticalPanel vp = new VerticalPanel();
