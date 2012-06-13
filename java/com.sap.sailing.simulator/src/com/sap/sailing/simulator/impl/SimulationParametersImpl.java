@@ -8,16 +8,16 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
-import com.sap.sailing.simulator.WindField;
+import com.sap.sailing.simulator.WindFieldGenerator;
 
 public class SimulationParametersImpl implements SimulationParameters {
 
 	List<Position> course;
 	PolarDiagram polarDiagram;
-	WindField windField;
+	WindFieldGenerator windField;
 	Map<String, Double> settings;
 	
-	public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindField wf) {
+	public SimulationParametersImpl(List<Position> crs, PolarDiagram pd, WindFieldGenerator wf) {
 		course = crs;
 		polarDiagram = pd;
 		windField = wf;
@@ -26,8 +26,8 @@ public class SimulationParametersImpl implements SimulationParameters {
 		
 		settings.put("Heuristic.targetTolerance[double]", 0.05);
 		settings.put("Heuristic.timeResolution[long]", 30000.0);
-		settings.put("Djikstra.gridv[int]", 30.0);
-		settings.put("Djikstra.gridh[int]", 200.0);
+		settings.put("Djikstra.gridv[int]", 10.0);
+		settings.put("Djikstra.gridh[int]", 100.0);
 	}
 	
 	@Override
@@ -41,7 +41,7 @@ public class SimulationParametersImpl implements SimulationParameters {
 	}
 
 	@Override
-	public WindField getWindField() {
+	public WindFieldGenerator getWindField() {
 		return windField;
 	}
 

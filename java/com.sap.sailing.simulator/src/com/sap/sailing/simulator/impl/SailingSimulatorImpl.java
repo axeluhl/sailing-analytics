@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.simulator.Boundary;
 import com.sap.sailing.simulator.Path;
@@ -25,6 +26,7 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPosition;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindField;
+import com.sap.sailing.simulator.WindFieldGenerator;
 
 public class SailingSimulatorImpl implements SailingSimulator {
 
@@ -56,11 +58,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
 	private static Logger logger = Logger.getLogger("com.sap.sailing");
 	private Path createDummy() {
 		Boundary boundary = simulationParameters.getBoundaries();
-		WindField wf = simulationParameters.getWindField();
+		WindFieldGenerator wf = simulationParameters.getWindField();
 		PolarDiagram pd = simulationParameters.getBoatPolarDiagram();
 		Position start = simulationParameters.getCourse().get(0);
 		Position end = simulationParameters.getCourse().get(1);
-		TimePoint startTime = new MillisecondsTimePoint(0);
+		TimePoint startTime = wf.getStartTime();//new MillisecondsTimePoint(0);
 		List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
 		
 		pd.setWind(wf.getWind(new TimedPositionWithSpeedImpl(startTime, start, null)));
@@ -75,11 +77,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
 	
 	private Path createHeuristic() {
 		Boundary boundary = simulationParameters.getBoundaries();
-		WindField wf = simulationParameters.getWindField();
+		WindFieldGenerator wf = simulationParameters.getWindField();
 		PolarDiagram pd = simulationParameters.getBoatPolarDiagram();
 		Position start = simulationParameters.getCourse().get(0);
 		Position end = simulationParameters.getCourse().get(1);
-		TimePoint startTime = new MillisecondsTimePoint(0);
+		TimePoint startTime = wf.getStartTime();//new MillisecondsTimePoint(0);
 		List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
 	
 		Position currentPosition = start;
@@ -98,12 +100,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 Bearing bearStart = currentPosition.getBearingGreatCircle(end);
                 SpeedWithBearing spdStart = pd.getSpeedAtBearing(bearStart);
                 lst.add(new TimedPositionWithSpeedImpl(startTime, start, spdStart));
-                
+                long timeStep =  wf.getTimeStep().asMillis();
+                logger.info("Time step :" + timeStep);
 		//while there is more than 5% of the total distance to the finish 
 		while ( currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(0.05)) > 0) {
 			
 			//TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
-		        long nextTimeVal = currentTime.asMillis() + 30000;
+		        
+		        long nextTimeVal = currentTime.asMillis() + timeStep;// + 30000;
                         TimePoint nextTime = new MillisecondsTimePoint(nextTimeVal);
 		    
 			Wind cWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
@@ -197,7 +201,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 			
 		}
 
-                long nextTimeVal = currentTime.asMillis() + 30000;
+                long nextTimeVal = currentTime.asMillis() + timeStep;//30000;
                 TimePoint nextTime = new MillisecondsTimePoint(nextTimeVal);
 
                 Wind wndEnd = wf.getWind(new TimedPositionWithSpeedImpl(nextTime, end, null));
@@ -213,11 +217,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
 	private Path createDjikstra() {
 		//retrieve simulation parameters
 		Boundary boundary = new RectangularBoundary(simulationParameters.getCourse().get(0),simulationParameters.getCourse().get(1));//simulationParameters.getBoundaries();
-		WindField windField = simulationParameters.getWindField();
+		WindFieldGenerator windField = simulationParameters.getWindField();
 		PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
 		Position start = simulationParameters.getCourse().get(0);
 		Position end = simulationParameters.getCourse().get(1);
-		TimePoint startTime = new MillisecondsTimePoint(0);
+		TimePoint startTime = windField.getStartTime();//new MillisecondsTimePoint(0);
 		
 		//the solution path
 		LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
@@ -239,6 +243,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 			graph.put(p, Arrays.asList(end));
 		}
 		
+		/*
 		//create backwards adjacency graph, required to reconstruct the optimal path
 		Map<Position, List<Position>> backGraph = new HashMap<Position, List<Position>>();
 		backGraph.put(end, Arrays.asList(sailGrid[gridv-2]));
@@ -249,15 +254,17 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		}
 		for(Position p : sailGrid[1]) {
 			backGraph.put(p, Arrays.asList(start));
-		}
+		}*/
 		
 		//create tentative distance matrix
-		Map<Position, Long> tentativeDistances = new HashMap<Position, Long>();
+		//additional to tentative distances, the matrix also contains the root of each position
+		//that can be </null> if unavailable
+		Map<Position, Pair<Long, Position>> tentativeDistances = new HashMap<Position, Pair<Long, Position>>();
 		for(Position p : graph.keySet()) {
-			tentativeDistances.put(p, Long.MAX_VALUE);
+			tentativeDistances.put(p, new Pair<Long, Position>(Long.MAX_VALUE, null));
 		}
-		tentativeDistances.put(start, 0L);
-		tentativeDistances.put(end, Long.MAX_VALUE);
+		tentativeDistances.put(start, new Pair<Long, Position>(startTime.asMillis(), null));
+		tentativeDistances.put(end,  new Pair<Long, Position>(Long.MAX_VALUE, null));
 		
 		//create set of unvisited nodes
 		List<Position> unvisited = new ArrayList<Position>(graph.keySet());
@@ -266,6 +273,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		//set the initial node as current
 		Position currentPosition = start;
 		TimePoint currentTime = startTime;
+		Bearing previousBearing = null;
 		
 		//search loop
 		//ends when the end is visited
@@ -285,9 +293,19 @@ public class SailingSimulatorImpl implements SailingSimulator {
 				Speed speedToP = polarDiagram.getSpeedAtBearing(bearingToP);
 				//multiplied by 1000 to have milliseconds
 				Long timeToP = (long) (1000 * (distanceToP.getMeters() / speedToP.getMetersPerSecond()));
+				if (previousBearing != null) {
+					Bearing windBearingFrom = currentWind.getBearing().reverse();
+					if( (PolarDiagram49.bearingComparator.compare(bearingToP, windBearingFrom) > 0) 
+							&& (PolarDiagram49.bearingComparator.compare(previousBearing, windBearingFrom) < 0) )
+						timeToP = timeToP + 4000;
+					if( (PolarDiagram49.bearingComparator.compare(bearingToP, windBearingFrom) < 0) 
+							&& (PolarDiagram49.bearingComparator.compare(previousBearing, windBearingFrom) > 0) )
+						timeToP = timeToP + 4000;
+				}
+						
 				Long tentativeDistanceToP = currentTime.asMillis() + timeToP;
-				if (tentativeDistanceToP < tentativeDistances.get(p)) {
-					tentativeDistances.put(p, tentativeDistanceToP);
+				if (tentativeDistanceToP < tentativeDistances.get(p).getA()) {
+					tentativeDistances.put(p, new Pair<Long, Position>(tentativeDistanceToP, currentPosition));
 				}
 			}
 			
@@ -298,22 +316,23 @@ public class SailingSimulatorImpl implements SailingSimulator {
 			//and set it as current
 			Long minTentativeDistance = Long.MAX_VALUE;
 			for (Position p : unvisited) {
-				if( tentativeDistances.get(p) < minTentativeDistance ) {
+				if( tentativeDistances.get(p).getA() < minTentativeDistance ) {
 					currentPosition = p;
-					minTentativeDistance = tentativeDistances.get(p);
+					minTentativeDistance = tentativeDistances.get(p).getA();
+					previousBearing = tentativeDistances.get(p).getB().getBearingGreatCircle(currentPosition);
 					currentTime = new MillisecondsTimePoint(minTentativeDistance);
 				}
 			
-			}	
+			}
 		}
 		//I need to add the end point to the distances matrix
-		tentativeDistances.put(end,currentTime.asMillis());
+		//tentativeDistances.put(end,currentTime.asMillis());
 		
 		//at this point currentPosition = end
 		//currentTime = total duration of the course
 		
 		//reconstruct the optimal path by going from start to end
-		while(currentPosition != start) {
+		/*while(currentPosition != start) {
 			TimedPositionWithSpeed currentTimedPositionWithSpeed = new TimedPositionWithSpeedImpl(currentTime, currentPosition, null );
 			lst.addFirst(currentTimedPositionWithSpeed);
 			System.out.println(boundary.getGridIndex(currentTimedPositionWithSpeed.getPosition()));
@@ -328,8 +347,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
 			}		
 		}
 		//I need to add the first point to the path
-		lst.addFirst(new TimedPositionWithSpeedImpl(startTime, start, null));
-		
+		lst.addFirst(new TimedPositionWithSpeedImpl(startTime, start, null));*/
+		while (currentPosition != null) {
+			currentTime = new MillisecondsTimePoint(tentativeDistances.get(currentPosition).getA()); 
+			SpeedWithBearing windAtPoint = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+			TimedPositionWithSpeed current = new TimedPositionWithSpeedImpl(currentTime, currentPosition, windAtPoint);
+			lst.addFirst(current);
+			currentPosition = tentativeDistances.get(currentPosition).getB();
+		}
 		
 		return new PathImpl(lst, windField);
 	}
@@ -463,9 +488,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
 	public Map<String, Path> getAllPaths() {
 		Map<String, Path> allPaths = new HashMap<String, Path>();
 		//allPaths.put("Dummy", createDummy());
-		//allPaths.put("Opportunistic", createHeuristic());
-		//allPaths.put("Djikstra", createDjikstra());
-                allPaths.put("Djikstra2", createDjikstra2());
+		allPaths.put("Opportunistic", createHeuristic());
+		allPaths.put("Omniscient", createDjikstra());
 		return allPaths;
 	}
 

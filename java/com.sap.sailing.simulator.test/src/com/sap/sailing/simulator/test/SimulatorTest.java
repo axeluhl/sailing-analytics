@@ -5,11 +5,13 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import java.util.logging.Logger;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
@@ -26,6 +28,7 @@ import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindControlParameters;
 import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.WindFieldGenerator;
+import com.sap.sailing.simulator.impl.PolarDiagram49;
 import com.sap.sailing.simulator.impl.PolarDiagramImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
@@ -37,175 +40,36 @@ import com.sap.sailing.simulator.impl.WindFieldImpl;
 
 public class SimulatorTest {
     private static Logger logger = Logger.getLogger("com.sap.sailing");
-
-    @Test
-    public void testSailingSimulator() {
-
-        Position start = new DegreePosition(48.401856, -140.001526);
-        Position end = new DegreePosition(49.143987, -139.987783);
-
-        List<Position> course = new LinkedList<Position>();
-        course.add(start);
-        course.add(end);
-        PolarDiagram pd = new PolarDiagramImpl(0);
-        RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
-        KilometersPerHourSpeedImpl kmhrSpeed = new KilometersPerHourSpeedImpl(7.2);
-        WindControlParameters windParameters = new WindControlParameters(kmhrSpeed.getKnots(), 45);
-        WindField wf = new WindFieldImpl(bd, windParameters);
-        SimulationParameters param = new SimulationParametersImpl(course, pd, wf);
-
-        SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
-        Path path = sailingSim.getOptimumPath();
-        //logger.info("Path with " + path.getPathPoints().size() + "points");
-        assertEquals("Number of path points", 2612, path.getPathPoints().size());
-        /*
-         * for(TimedPositionWithSpeed p : path.getPathPoints()) { logger.info("Position: " + p.getPosition() + " Wind: "
-         * + wf.getWind(new TimedPositionWithSpeedSimple(p.getPosition()))); }
-         */
-
-    }
-
-    @Test
-    public void testSailingSimulator2() {
-        Position p1 = new DegreePosition(25.661333, -90.752563);
-        Position p2 = new DegreePosition(24.522137, -90.774536);
-
-        Boundary b = new RectangularBoundary(p1, p2, 0.1);
-
-        Distance dist = p1.getDistance(p2);
-        // the Speed required to go from p1 to p2 in 10 minutes
-        Speed requiredSpeed10 = dist.inTime(600000);
-
-        // I am creating the WindField such as the course goes mainly against the wind (as it should)
-        // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
-        WindControlParameters windParameters = new WindControlParameters(requiredSpeed10.getKnots(), b.getSouth().getDegrees());
-        WindField wf = new WindFieldImpl(b, windParameters);
-        PolarDiagram pd = new PolarDiagramImpl(1);
-        List<Position> course = new ArrayList<Position>();
-        course.add(p1);
-        course.add(p2);
-        SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
-        SailingSimulator solver = new SailingSimulatorImpl(sp);
-
-        Path pth = solver.getOptimumPath();
-        //logger.info("Path with " + pth.getPathPoints().size() + "points");
-       /* for (TimedPositionWithSpeed p : pth.getPathPoints()) {
-            // the null in the Wind output is the timestamp - this Wind is time-invariant!
-            System.out.println("Position: " + p.getPosition() + " Wind: "
-                    + wf.getWind(new TimedPositionWithSpeedSimple(p.getPosition())));
-            System.out.println("Position: " + p.getPosition() + " Wind: "
-                    + wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
-            // Wind wind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
-        }*/
-
-        assertEquals("Number of path points", 37, pth.getPathPoints().size());
-    }
     
     @Test
-    public void testSailingSimulatorWithOscillation() {
-        Position p1 = new DegreePosition(25.661333, -90.752563);
-        Position p2 = new DegreePosition(24.522137, -90.774536);
-
-        Boundary b = new RectangularBoundary(p1, p2, 0.1);
-
-        Distance dist = p1.getDistance(p2);
-        // the Speed required to go from p1 to p2 in 10 minutes
-        Speed requiredSpeed10 = dist.inTime(600000);
-
-        // I am creating the WindField such as the course goes mainly against the wind (as it should)
-        // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
-        WindControlParameters windParameters = new WindControlParameters(requiredSpeed10.getKnots(), b.getSouth().getDegrees());
-        WindFieldGeneratorOscillationImpl wf = new WindFieldGeneratorOscillationImpl(b, windParameters);
-       
-        
-        wf.setPositionGrid(b.extractGrid(10, 5));
-        TimePoint start = new MillisecondsTimePoint(0);
-        TimePoint timeStep = new MillisecondsTimePoint(30*1000);
-        wf.generate(start,null,timeStep);
-        wf.setTimeScale(1);
-        
-        PolarDiagram pd = new PolarDiagramImpl(1);
-        List<Position> course = new ArrayList<Position>();
-        course.add(p1);
-        course.add(p2);
-        SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
-        SailingSimulator solver = new SailingSimulatorImpl(sp);
-
-        Path pth = solver.getOptimumPath();
-        //logger.info("Path with " + pth.getPathPoints().size() + " points");
-       /* for (TimedPositionWithSpeed p : pth.getPathPoints()) {
-            System.out.println("Position: " + p.getPosition() + " Wind: "
-                    + wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
-            // Wind wind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
-        }*/
-
-        assertEquals("Number of path points", 37, pth.getPathPoints().size());
-    }
-    
-    @Test
-    public void testSailingSimulatorWithBlast() {
-        Position p1 = new DegreePosition(25.661333, -90.752563);
-        Position p2 = new DegreePosition(24.522137, -90.774536);
-
-        Boundary b = new RectangularBoundary(p1, p2, 0.1);
-
-        Distance dist = p1.getDistance(p2);
-        // the Speed required to go from p1 to p2 in 10 minutes
-        Speed requiredSpeed10 = dist.inTime(600000);
-
-        // I am creating the WindField such as the course goes mainly against the wind (as it should)
-        // and the speed of the wind would go over the course in 10 minutes (for the sake of the running time)
-        WindControlParameters windParameters = new WindControlParameters(requiredSpeed10.getKnots(), b.getSouth().getDegrees());
-        windParameters.blastProbability = 100.0;
-        windParameters.blastWindSpeedVar = 100.0;
-        WindFieldGenerator wf = new WindFieldGeneratorBlastImpl(b, windParameters);
-        
-        
-        wf.setPositionGrid(b.extractGrid(5, 5));
-        TimePoint start = new MillisecondsTimePoint(0);
-        TimePoint timeStep = new MillisecondsTimePoint(30*1000);
-        wf.generate(start,start,timeStep);
-
-        PolarDiagram pd = new PolarDiagramImpl(1);
-        List<Position> course = new ArrayList<Position>();
-        course.add(p1);
-        course.add(p2);
-        SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
-        SailingSimulator solver = new SailingSimulatorImpl(sp);
-
-        Path pth = solver.getOptimumPath();
-        //logger.info("Path with " + pth.getPathPoints().size() + " points");
-        /*for (TimedPositionWithSpeed p : pth.getPathPoints()) {
-            System.out.println("Position: " + p.getPosition() + " Wind: "
-                    + wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
-            // Wind wind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
-        }*/
-
-        assertEquals("Number of path points", 47, pth.getPathPoints().size());
-        
-    }
-    
-    @Test
-    public void testSailingSimulatorDjikstra() {
-
-        Position start = new DegreePosition(48.401856, -140.001526);
+    public void testSailingSImulatorALL() {
+    	Position start = new DegreePosition(48.401856, -140.001526);
         Position end = new DegreePosition(49.143987, -139.987783);
         //System.out.println(start.getDistance(end).getKilometers());
 
         List<Position> course = new LinkedList<Position>();
         course.add(start);
         course.add(end);
-        PolarDiagram pd = new PolarDiagramImpl(0);
+        PolarDiagram pd = PolarDiagram49.CreateStandard49();
         RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
-        KilometersPerHourSpeedImpl kmhrSpeed = new KilometersPerHourSpeedImpl(7.2);
-        WindControlParameters windParameters = new WindControlParameters(kmhrSpeed.getKnots(), 45);
+        RectangularBoundary new_bd = new RectangularBoundary(start, end, 0.1);
+        Speed knotSpeed = new KnotSpeedImpl(8);
+        WindControlParameters windParameters = new WindControlParameters(10, 180);
         WindField wf = new WindFieldImpl(bd, windParameters);
         SimulationParameters param = new SimulationParametersImpl(course, pd, wf);
+        param.setProperty("Heuristic.targetTolerance[double]", 0.05);
+        param.setProperty("Heuristic.timeResolution[long]", 30000.0);
+        param.setProperty("Djikstra.gridv[int]", 10.0);
+        param.setProperty("Djikstra.gridh[int]", 100.0);
+
 
         SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
-        Path path = sailingSim.getAllPaths().get("Djikstra");
-        System.out.println(path.getPathPoints().size());
-        assertEquals("none", 1, 1);
+        
+        Map <String, Path> paths = sailingSim.getAllPaths();
+        System.out.println(paths.get("Djikstra").getPathPoints().size());
+        System.out.println(paths.get("Heuristic").getPathPoints().size());
+        
+        	
     }
     
 }

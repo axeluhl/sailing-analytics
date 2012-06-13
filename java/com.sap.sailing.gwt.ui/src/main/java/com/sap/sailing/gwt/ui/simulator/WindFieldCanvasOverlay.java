@@ -254,7 +254,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
 
     @Override
     public int stop() {
-       if (!this.isVisible() || timePointWindDTOMap == null || timer == null) {
+       if (!this.isVisible() || timePointWindDTOMap == null || timer == null   || timePointWindDTOMap.isEmpty()) {
            return 0;
        }
         if (timePointWindDTOMap.lastKey() < timer.getTime().getTime()) {

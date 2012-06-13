@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<erg:ergebnisliste xmlns:erg="http://www.bmiag.de/KWSailing/Ergebnisliste">
+  <bootsklasse>2.4 mR</bootsklasse>
+  <datum>2011-06-18+02:00</datum>
+  <uhrzeit>14:38:22.547+02:00</uhrzeit>
+  <status>vorlauefig</status>
+  <veranstaltung>Kieler Woche 2011</veranstaltung>
+  <wettfahrtanzahl>1</wettfahrtanzahl>
+  <pdfDateiname>2011-06-18_2 4 mR_Wettfahrt_1.pdf</pdfDateiname>
+</erg:ergebnisliste>

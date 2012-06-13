@@ -257,8 +257,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         // wf.extractLattice(params.getxRes(),
         // params.getyRes());
         wf.setPositionGrid(bd.extractGrid(params.getxRes(), params.getyRes()));
-        TimePoint start = new MillisecondsTimePoint(0);
-        TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
+        TimePoint start = new MillisecondsTimePoint(params.getStartTime().getTime());
+        TimePoint timeStep = new MillisecondsTimePoint(params.getTimeStep().getTime());
         wf.generate(start, null, timeStep);
         /*
         // TODO Get all the paths that need to be displayed
@@ -275,7 +275,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return pathDTO;
     }
 
-    private List<WindDTO> getOptimumPath(List<Position> course, WindField wf) {
+    private List<WindDTO> getOptimumPath(List<Position> course, WindFieldGenerator wf) {
 
         PolarDiagram pd = new PolarDiagramImpl(1);
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
@@ -301,7 +301,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     }
 
-    private PathDTO[] getSimulatedPaths(List<Position> course, WindField wf) {
+    private PathDTO[] getSimulatedPaths(List<Position> course, WindFieldGenerator wf) {
         logger.info("Retrieving simulated paths");
         //PolarDiagram pd = new PolarDiagramImpl(1);//PolarDiagram49.CreateStandard49();
         PolarDiagram pd = PolarDiagram49.CreateStandard49();
@@ -385,8 +385,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         Position[][] positionGrid = bd.extractGrid(params.getxRes(), params.getyRes());
         wf.setPositionGrid(positionGrid);
 
-        TimePoint startTime = new MillisecondsTimePoint(0);
-        TimePoint timeStep = new MillisecondsTimePoint(30 * 1000);
+        TimePoint startTime = new MillisecondsTimePoint(params.getStartTime().getTime());
+        TimePoint timeStep = new MillisecondsTimePoint(params.getTimeStep().getTime());
         wf.generate(startTime, null, timeStep);
         
         Long longestPathTime = 0L; 
