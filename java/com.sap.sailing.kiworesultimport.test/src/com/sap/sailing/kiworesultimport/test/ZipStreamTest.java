@@ -15,13 +15,17 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.kiworesultimport.Boat;
+import com.sap.sailing.kiworesultimport.BoatResultInRace;
 import com.sap.sailing.kiworesultimport.ParserFactory;
 import com.sap.sailing.kiworesultimport.RegattaSummary;
 import com.sap.sailing.kiworesultimport.ZipFile;
 
 public class ZipStreamTest {
     private final static String ZIP_EXAMPLE_FILE = "resources/Kieler_Woche_2011_Export.zip";
+    private final static String ZIP_EXAMPLE_FILE_YES = "resources/2012 Young Europeans Sailing-Export.zip";
     
     @Test
     public void testOpenZip() throws IOException {
@@ -45,5 +49,15 @@ public class ZipStreamTest {
         Util.contains(zipFile.getBoatClassNames(), "Laser");
         RegattaSummary laser = zipFile.getRegattaSummary("Laser");
         assertEquals(9, Util.size(laser.getRaces()));
+    }
+    
+    @Test
+    public void twentyPercentTest() throws FileNotFoundException, IOException, SAXException, ParserConfigurationException {
+        // test GER1899 in YES 29er regatta, race number 1
+        ZipFile zipFile = ParserFactory.INSTANCE.createZipFileParser().parse(new FileInputStream(ZIP_EXAMPLE_FILE_YES));
+        RegattaSummary twentyNiner = zipFile.getRegattaSummary("29er");
+        Boat ger1899 = twentyNiner.getRace(1).getBoat("GER 1899");
+        BoatResultInRace ger1899results = ger1899.getResultsInRace(1);
+        assertEquals(MaxPointsReason.ZFP, ger1899results.getMaxPointsReason());
     }
 }

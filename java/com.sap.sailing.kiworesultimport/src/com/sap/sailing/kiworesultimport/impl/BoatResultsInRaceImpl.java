@@ -1,6 +1,7 @@
 package com.sap.sailing.kiworesultimport.impl;
 
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.Node;
 
@@ -9,7 +10,8 @@ import com.sap.sailing.kiworesultimport.BoatResultInRace;
 
 public class BoatResultsInRaceImpl extends AbstractNodeWrapper implements BoatResultInRace {
     private static final Logger logger = Logger.getLogger(BoatResultsInRaceImpl.class.getName());
-    
+    private static final Pattern leadingPercentagePattern = Pattern.compile("^[0-9][0-9]*%.*$");
+
     public BoatResultsInRaceImpl(Node node) {
         super(node);
     }
@@ -52,11 +54,19 @@ public class BoatResultsInRaceImpl extends AbstractNodeWrapper implements BoatRe
         MaxPointsReason result;
         String status = getStatus();
         if (status != null) {
-            result = MaxPointsReason.valueOf(status.substring(0, 3));
+            if (startsWithPercentage(status)) {
+                result = MaxPointsReason.ZFP;
+            } else {
+                result = MaxPointsReason.valueOf(status.substring(0, 3));
+            }
         } else {
             result = MaxPointsReason.NONE;
         }
         return result;
+    }
+
+    private boolean startsWithPercentage(String status) {
+        return leadingPercentagePattern.matcher(status).matches();
     }
 
     @Override

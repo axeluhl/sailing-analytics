@@ -73,7 +73,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
                         @Override
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError(stringMessages.errorObtainingScoreCorrections(scoreCorrectionProviderName,
-                                    eventName, boatClassName, timePointWhenResultPublished.toString()));
+                                    eventName, boatClassName, timePointWhenResultPublished.toString(), caught.getMessage()));
                         }
 
                         @Override
