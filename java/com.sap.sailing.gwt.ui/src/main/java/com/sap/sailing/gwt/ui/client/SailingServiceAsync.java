@@ -216,7 +216,7 @@ public interface SailingServiceAsync {
     void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Integer carriedPoints, AsyncCallback<Void> callback);
 
     void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString, String raceColumnName,
-            MaxPointsReason maxPointsReason, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
+            MaxPointsReason maxPointsReason, Date date, AsyncCallback<Triple<Integer, Integer, Boolean>> asyncCallback);
 
     void updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString, String columnName,
             Integer correctedScore, Date date, AsyncCallback<Triple<Integer, Integer, Boolean>> asyncCallback);

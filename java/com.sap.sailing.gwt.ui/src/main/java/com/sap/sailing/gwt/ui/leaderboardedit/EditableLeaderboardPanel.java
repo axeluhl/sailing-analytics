@@ -226,7 +226,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id,
                             raceColumnName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
-                            getLeaderboardDisplayDate(), new AsyncCallback<Pair<Integer, Integer>>() {
+                            getLeaderboardDisplayDate(), new AsyncCallback<Triple<Integer, Integer, Boolean>>() {
                                 @Override
                                 public void onFailure(Throwable t) {
                                     getErrorReporter().reportError(
@@ -236,11 +236,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 }
 
                                 @Override
-                                public void onSuccess(Pair<Integer, Integer> newNetAndTotalPoints) {
+                                public void onSuccess(Triple<Integer, Integer, Boolean> newNetAndTotalPointsAndIsCorrected) {
                                     row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints = value == null
                                             || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
-                                    row.fieldsByRaceColumnName.get(raceColumnName).netPoints = newNetAndTotalPoints.getA();
-                                    row.fieldsByRaceColumnName.get(raceColumnName).totalPoints = newNetAndTotalPoints.getB();
+                                    row.fieldsByRaceColumnName.get(raceColumnName).netPoints = newNetAndTotalPointsAndIsCorrected.getA();
+                                    row.fieldsByRaceColumnName.get(raceColumnName).totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
+                                    row.fieldsByRaceColumnName.get(raceColumnName).netPointsCorrected = newNetAndTotalPointsAndIsCorrected.getC();
                                     getCell().setViewData(row, null); // ensure that getValue() is called again
                                     whiteboard.setObjectWithWhichToUpdateRow(row);
                                 }
@@ -398,7 +399,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         }
         sortOfficialResultsByRelevance(providerNameAndEventNameBoatClassNameCapturedWhen);
-        new ResultSelectionAndApplyDialog(getLeaderboard(), getSailingService(), getStringMessages(),
+        new ResultSelectionAndApplyDialog(this, getSailingService(), getStringMessages(),
                 providerNameAndEventNameBoatClassNameCapturedWhen, getErrorReporter()).show();
     }
 

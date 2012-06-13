@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,6 +13,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -48,12 +50,13 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     private final Map<RaceColumnDTO, ListBox> raceNameOrNumberChoosers;
     private final Map<CompetitorDTO, ListBox> officialSailIDChoosers;
 
-    public MatchAndApplyScoreCorrectionsDialog(LeaderboardDTO leaderboard, StringMessages stringMessages,
+    public MatchAndApplyScoreCorrectionsDialog(EditableLeaderboardPanel leaderboardPanel, StringMessages stringMessages,
             SailingServiceAsync sailingService, ErrorReporter errorReporter, RegattaScoreCorrectionDTO result) {
         super(stringMessages.assignRaceNumbersToRaceColumns(), stringMessages.assignRaceNumbersToRaceColumns(),
-                stringMessages.ok(), stringMessages.cancel(), new Validator(), new Callback());
+                stringMessages.ok(), stringMessages.cancel(), new Validator(), new Callback(leaderboardPanel,
+                        sailingService, stringMessages, errorReporter));
         this.regattaScoreCorrection = result;
-        this.leaderboard = leaderboard;
+        this.leaderboard = leaderboardPanel.getLeaderboard();
         this.allOfficialRaceIDs = new HashSet<String>();
         this.defaultOfficialSailIDsForCompetitors = new HashMap<CompetitorDTO, String>();
         mapCompetitorsAndInitializeAllOfficialRaceIDs(leaderboard, result);
@@ -204,7 +207,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
 
     @Override
     protected BulkScoreCorrectionDTO getResult() {
-        BulkScoreCorrectionDTO result = new BulkScoreCorrectionDTO();
+        BulkScoreCorrectionDTO result = new BulkScoreCorrectionDTO(leaderboard.name);
         for (CompetitorDTO competitor : leaderboard.competitors) {
             for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
                 Pair<CompetitorDTO, RaceColumnDTO> key = new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn);
@@ -217,7 +220,8 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                             regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                             .get(raceNameOrNumber).get(officialSailID);
                     result.addMaxPointsReasonUpdate(competitor, raceColumn, officialCorrectionEntry.getMaxPointsReason());
-                    result.addScoreUpdate(competitor, raceColumn, officialCorrectionEntry.getScore().intValue());
+                    result.addScoreUpdate(competitor, raceColumn,
+                            (int) Math.round(officialCorrectionEntry.getScore().doubleValue()));
                 }
             }
         }
@@ -301,14 +305,39 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     }
 
     private static class Callback implements AsyncCallback<BulkScoreCorrectionDTO> {
-        @Override
-        public void onFailure(Throwable caught) {
-            // TODO Auto-generated method stub
+        private final SailingServiceAsync sailingService;
+        private final StringMessages stringMessages;
+        private final ErrorReporter errorReporter;
+        private final EditableLeaderboardPanel leaderboardPanel;
+        
+        public Callback(EditableLeaderboardPanel leaderboardPanel, SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter) {
+            super();
+            this.leaderboardPanel = leaderboardPanel;
+            this.sailingService = sailingService;
+            this.stringMessages = stringMessages;
+            this.errorReporter = errorReporter;
         }
 
         @Override
-        public void onSuccess(BulkScoreCorrectionDTO result) {
-            // TODO Auto-generated method stub
+        public void onFailure(Throwable caught) {
+            // user has canceled the dialog
+        }
+
+        @Override
+        public void onSuccess(final BulkScoreCorrectionDTO result) {
+            sailingService.updateLeaderboardScoreCorrectionsAndMaxPointsReasons(result, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError(stringMessages.errorUpdatingScoresForLeaderboard(result.getLeaderboardName(),
+                            caught.getMessage()));
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    Window.setStatus(stringMessages.successfullyUpdatedScores());
+                    leaderboardPanel.timeChanged(new Date()); // reload leaderboard contents to reflect changes
+                }
+            });
         }
     }
 }
