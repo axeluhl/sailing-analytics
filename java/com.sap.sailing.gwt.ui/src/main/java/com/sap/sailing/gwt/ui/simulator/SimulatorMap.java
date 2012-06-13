@@ -230,13 +230,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 // Window.alert("Number of windDTO : " + wl.getMatrix().size());
                 mapw.addOverlay(windFieldCanvasOverlay);
                 refreshWindFieldOverlay(wl);
+                timeListeners.clear();
+                timeListeners.add(windFieldCanvasOverlay);
             }
         });
 
     }
 
     private void refreshWindFieldOverlay(final WindFieldDTO wl) {
-        windFieldCanvasOverlay.setWindField(wl);
+        windFieldCanvasOverlay.setWindField(wl);  
+        timer.setTime(windParams.getStartTime().getTime());
         windFieldCanvasOverlay.redraw(true);
     }
 
@@ -311,8 +314,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         //removeOverlays();
         windParams.setDefaultTimeSettings();
         generateWindField(windPatternDisplay,true);
-        timeListeners.clear();
-        timeListeners.add(windFieldCanvasOverlay);
+        //timeListeners.clear();
+        //timeListeners.add(windFieldCanvasOverlay);
     }
 
     public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay) {

@@ -186,7 +186,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         windParams = new WindFieldGenParamsDTO();
         timer = new Timer(PlayModes.Replay, 1000l);
         timer.setPlaySpeedFactor(30);
+        timer.setTime(windParams.getStartTime().getTime());
         timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
+        timePanel.setVisible(false);
         resetTimer();
 
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.simulator(), stringMessages);
@@ -420,13 +422,13 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     // TODO Get the right dates and times
     private void resetTimer() {
-        windParams.setDefaultTimeSettings();
+        //windParams.setDefaultTimeSettings();
         Date startDate = windParams.getStartTime();
-        timer.setTime(startDate.getTime());
+        //timer.setTime(startDate.getTime());
         if (timePanel != null) {
             timePanel.reset();
             timePanel.setMinMax(startDate,  windParams.getEndTime(), false);
-            timePanel.setVisible(false);
+            //timePanel.setVisible(false);
         }
 
     }
