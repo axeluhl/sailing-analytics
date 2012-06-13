@@ -260,7 +260,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             if (leaderboardEntryDTO != null) {
                 reasonForMaxPoints = leaderboardEntryDTO.reasonForMaxPoints;
             }
-            return reasonForMaxPoints == null || reasonForMaxPoints == MaxPointsReason.NONE ? "" : reasonForMaxPoints.name();
+            return reasonForMaxPoints == null ? "" : reasonForMaxPoints.name();
         }
     }
     
