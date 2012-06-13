@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCorrectionsApplicationInstructions> {
-    private static final RegExp p = RegExp.compile("^\\(A-ZA-ZA-Z\\)[^0-9]\\([0-9]*\\)$");
+    private static final RegExp p = RegExp.compile("^([A-Z][A-Z][A-Z])[^0-9]*([0-9]*)$");
 
     private final LeaderboardDTO leaderboard;
     private final Map<String, CompetitorDTO> sailIDToCompetitor;
@@ -122,7 +122,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
         Grid grid = new Grid(leaderboard.competitors.size()+1, leaderboard.getRaceList().size()+1);
         int c = 0;
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-            grid.setWidget(0, c, /* TODO */ new Label(raceColumn.name));
+            grid.setWidget(0, c, /* TODO */ new Label(raceColumn.name+" vs. "+raceColumnNameToOfficialRaceNameOrNumber.get(raceColumn.name)));
             c++;
         }
         int row=1;
@@ -136,7 +136,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                         .get(raceColumnNameToOfficialRaceNameOrNumber.get(raceColumn.name))
                         .get(officialSailIDAndCompetitor.getKey());
-                grid.setWidget(row, column++, /* TODO */ new Label(entry.netPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
+                grid.setWidget(row, column++, new Label(entry.netPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
                 (entry.discarded?"/discarded":""+" vs. "+officialCorrectionEntry.getScore()+"/"+officialCorrectionEntry.getMaxPointsReason()+
                         (officialCorrectionEntry.getDiscarded()?"/discarded":""))));
             }
