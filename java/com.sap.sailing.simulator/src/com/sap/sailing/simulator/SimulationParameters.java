@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.simulator.WindField;
 
 public interface SimulationParameters {
 	
@@ -12,7 +11,7 @@ public interface SimulationParameters {
 	
 	PolarDiagram getBoatPolarDiagram();
 	
-	WindField getWindField();
+	WindFieldGenerator getWindField();
 	
 	Boundary getBoundaries();
 	
