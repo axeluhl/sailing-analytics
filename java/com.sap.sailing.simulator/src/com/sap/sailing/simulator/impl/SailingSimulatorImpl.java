@@ -358,7 +358,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		
 		return new PathImpl(lst, windField);
 	}
-
+        
 	@Override
 	public Map<String, Path> getAllPaths() {
 		Map<String, Path> allPaths = new HashMap<String, Path>();
