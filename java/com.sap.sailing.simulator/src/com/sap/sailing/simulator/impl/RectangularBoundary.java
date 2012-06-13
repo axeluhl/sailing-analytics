@@ -47,8 +47,8 @@ public class RectangularBoundary implements Boundary {
 
     public RectangularBoundary(Position p1, Position p2, double tlr) {
 
-        System.out.println("Start:"+p1);
-        System.out.println("End  :"+p2);
+        //System.out.println("Start:"+p1);
+        //System.out.println("End  :"+p2);
 
         rcStart = p1;
         rcEnd = p2;
