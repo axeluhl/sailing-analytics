@@ -43,6 +43,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
+import com.sap.sailing.gwt.ui.shared.NamedDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -161,7 +162,8 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         TextColumn<RegattaDTO> regattaBoatClassColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
-                return regatta.boatClass.name;
+                final NamedDTO boatClass = regatta.boatClass;
+                return boatClass==null?"(null)":boatClass.name;
             }
         };
 
