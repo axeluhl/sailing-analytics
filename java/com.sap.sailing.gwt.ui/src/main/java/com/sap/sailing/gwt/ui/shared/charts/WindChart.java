@@ -197,7 +197,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         series.select(true); // ensures that the checkbox will be ticked
                     }
                 } else {
-                    if(visibleSeries.contains(series)) {
+                    if (visibleSeries.contains(series)) {
                         chart.removeSeries(series, false);
                     }
                 }
@@ -205,7 +205,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         } else {
             for (Map.Entry<WindSource, Series> e : windSourceDirectionSeries.entrySet()) {
                 Series series = e.getValue();
-                if(visibleSeries.contains(series)) {
+                if (visibleSeries.contains(series)) {
                     chart.removeSeries(series, false);
                 }
             }
@@ -220,7 +220,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
                         series.select(true); // ensures that the checkbox will be ticked
                     }
                 } else {
-                    if(visibleSeries.contains(series)) {
+                    if (visibleSeries.contains(series)) {
                         chart.removeSeries(series, false);
                     }
                 }
@@ -228,7 +228,7 @@ public class WindChart extends RaceChart implements Component<WindChartSettings>
         } else {
             for (Map.Entry<WindSource, Series> e : windSourceSpeedSeries.entrySet()) {
                 Series series = e.getValue();
-                if(visibleSeries.contains(series)) {
+                if (visibleSeries.contains(series)) {
                     chart.removeSeries(series, false);
                 }
             }
