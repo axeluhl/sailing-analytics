@@ -13,21 +13,20 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 
 public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String, String, Pair<String, Date>>> {
     private final LinkedHashMap<String, Triple<String, String, Pair<String, Date>>> values;
-    private ListBox listBox;
+    private final ListBox listBox;
 
     public ResultSelectionAndApplyDialog(
-            LeaderboardDTO leaderboard,
+            EditableLeaderboardPanel leaderboardPanel,
             SailingServiceAsync sailingService,
             StringMessages stringMessages,
             List<Triple<String, String, Pair<String, Date>>> values, ErrorReporter errorReporter) {
         super(stringMessages.selectResultListToImportFrom(), stringMessages.selectResultListToImportFrom(),
                 stringMessages.ok(), stringMessages.cancel(), new Validator(),
-                new Callback(sailingService, leaderboard, errorReporter, stringMessages));
+                new Callback(sailingService, leaderboardPanel, errorReporter, stringMessages));
         this.values = new LinkedHashMap<String, Triple<String, String, Pair<String, Date>>>();
         for (Triple<String, String, Pair<String, Date>> v : values) {
             this.values.put("" + v.getA() + ": " + v.getB() + " - " + v.getC().getA() + " "
@@ -45,15 +44,15 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
     }
     
     private static class Callback implements AsyncCallback<Triple<String, String, Pair<String, Date>>> {
-        private final LeaderboardDTO leaderboard;
+        private final EditableLeaderboardPanel leaderboardPanel;
         private final SailingServiceAsync sailingService;
         private final StringMessages stringMessages;
         private final ErrorReporter errorReporter;
         
-        public Callback(SailingServiceAsync sailingService, LeaderboardDTO leaderboard, ErrorReporter errorReporter,
+        public Callback(SailingServiceAsync sailingService, EditableLeaderboardPanel leaderboardPanel, ErrorReporter errorReporter,
                 StringMessages stringMessages) {
             this.sailingService = sailingService;
-            this.leaderboard = leaderboard;
+            this.leaderboardPanel = leaderboardPanel;
             this.stringMessages = stringMessages;
             this.errorReporter = errorReporter;
         }
@@ -79,7 +78,8 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
 
                         @Override
                         public void onSuccess(RegattaScoreCorrectionDTO result) {
-                            new MatchAndApplyScoreCorrectionsDialog(leaderboard, stringMessages, sailingService, errorReporter, result).show();
+                            new MatchAndApplyScoreCorrectionsDialog(leaderboardPanel, stringMessages, sailingService,
+                                    errorReporter, result).show();
                         }
             });
         }

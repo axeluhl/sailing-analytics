@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -49,13 +50,13 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     private final Map<RaceColumnDTO, ListBox> raceNameOrNumberChoosers;
     private final Map<CompetitorDTO, ListBox> officialSailIDChoosers;
 
-    public MatchAndApplyScoreCorrectionsDialog(LeaderboardDTO leaderboard, StringMessages stringMessages,
+    public MatchAndApplyScoreCorrectionsDialog(EditableLeaderboardPanel leaderboardPanel, StringMessages stringMessages,
             SailingServiceAsync sailingService, ErrorReporter errorReporter, RegattaScoreCorrectionDTO result) {
         super(stringMessages.assignRaceNumbersToRaceColumns(), stringMessages.assignRaceNumbersToRaceColumns(),
-                stringMessages.ok(), stringMessages.cancel(), new Validator(), new Callback(sailingService,
-                        stringMessages, errorReporter));
+                stringMessages.ok(), stringMessages.cancel(), new Validator(), new Callback(leaderboardPanel,
+                        sailingService, stringMessages, errorReporter));
         this.regattaScoreCorrection = result;
-        this.leaderboard = leaderboard;
+        this.leaderboard = leaderboardPanel.getLeaderboard();
         this.allOfficialRaceIDs = new HashSet<String>();
         this.defaultOfficialSailIDsForCompetitors = new HashMap<CompetitorDTO, String>();
         mapCompetitorsAndInitializeAllOfficialRaceIDs(leaderboard, result);
@@ -307,9 +308,11 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         private final SailingServiceAsync sailingService;
         private final StringMessages stringMessages;
         private final ErrorReporter errorReporter;
+        private final EditableLeaderboardPanel leaderboardPanel;
         
-        public Callback(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter) {
+        public Callback(EditableLeaderboardPanel leaderboardPanel, SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter) {
             super();
+            this.leaderboardPanel = leaderboardPanel;
             this.sailingService = sailingService;
             this.stringMessages = stringMessages;
             this.errorReporter = errorReporter;
@@ -332,6 +335,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 @Override
                 public void onSuccess(Void result) {
                     Window.setStatus(stringMessages.successfullyUpdatedScores());
+                    leaderboardPanel.timeChanged(new Date()); // reload leaderboard contents to reflect changes
                 }
             });
         }
