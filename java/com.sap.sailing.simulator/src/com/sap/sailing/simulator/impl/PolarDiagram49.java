@@ -305,7 +305,7 @@ public class PolarDiagram49 implements PolarDiagram {
     	beatAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(36.3));
     	beatAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(36.9));
     	
-    	double beatScale = 4.0;
+    	double beatScale = 1.1;
     	NavigableMap<Speed, Speed> beatSOG = new TreeMap<Speed, Speed>();
     	beatSOG.put(new KnotSpeedImpl(0), new KnotSpeedImpl(0));
     	beatSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(5.85*beatScale));
