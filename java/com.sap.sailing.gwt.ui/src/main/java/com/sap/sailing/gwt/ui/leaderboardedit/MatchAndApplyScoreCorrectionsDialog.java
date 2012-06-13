@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
@@ -32,7 +33,7 @@ import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 
-public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCorrectionsApplicationInstructions> {
+public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkScoreCorrectionDTO> {
     private static final RegExp p = RegExp.compile("^([A-Z][A-Z][A-Z])[^0-9]*([0-9]*)$");
 
     private final LeaderboardDTO leaderboard;
@@ -97,20 +98,21 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
     }
 
     private void fillRaceNameOrNumberChoosers() {
+        final Set<String> entries = regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber().keySet();
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-            ListBox listbox = createRaceNameOrNumberListBox(/* select */ raceColumnToOfficialRaceNameOrNumber.get(raceColumn));
+            ListBox listbox = createListBoxWithGridUpdateChangeHandler(entries, /* select */ raceColumnToOfficialRaceNameOrNumber.get(raceColumn));
             raceNameOrNumberChoosers.put(raceColumn, listbox);
         }
     }
 
-    private ListBox createRaceNameOrNumberListBox(String selectedItem) {
+    private ListBox createListBoxWithGridUpdateChangeHandler(Set<String> entries, String selectedItem) {
         ListBox result = createListBox(/* isMultipleSelect */ false);
         result.addItem("");
         int i=1;
         int selectionIndex = -1;
-        for (String raceNameOrNumber : regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber().keySet()) {
-            result.addItem(raceNameOrNumber);
-            if (selectedItem != null && selectedItem.equals(raceNameOrNumber)) {
+        for (String entry : entries) {
+            result.addItem(entry);
+            if (selectedItem != null && selectedItem.equals(entry)) {
                 selectionIndex = i;
             }
             i++;
@@ -127,32 +129,10 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
         return result;
     }
 
-    /**
-     * Creates a list box with all official sail IDs and a leading empty string representing "no mapping"
-     * 
-     * @param selectedItem which item in the list to select; if <code>null</code>, no selection will be performed
-     */
-    private ListBox createOfficialSailIDListBox(String selectedItem) {
-        ListBox result = createListBox(/* isMultipleSelect */ false);
-        result.addItem("");
-        int i=1;
-        int selectionIndex = -1;
-        for (String officialSailID : allOfficialRaceIDs) {
-            result.addItem(officialSailID);
-            if (selectedItem != null && selectedItem.equals(officialSailID)) {
-                selectionIndex = i;
-            }
-            i++;
-        }
-        if (selectionIndex != -1) {
-            result.setSelectedIndex(selectionIndex);
-        }
-        return result;
-    }
-
     private void fillOfficialSailIDChoosers() {
         for (CompetitorDTO competitor : leaderboard.competitors) {
-            ListBox listbox = createOfficialSailIDListBox(/* selection */ defaultOfficialSailIDsForCompetitors.get(competitor));
+            ListBox listbox = createListBoxWithGridUpdateChangeHandler(allOfficialRaceIDs, /* selection */
+                    defaultOfficialSailIDsForCompetitors.get(competitor));
             officialSailIDChoosers.put(competitor, listbox);
         }
     }
@@ -223,9 +203,25 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
     }
 
     @Override
-    protected ScoreCorrectionsApplicationInstructions getResult() {
-        // TODO Auto-generated method stub
-        return null;
+    protected BulkScoreCorrectionDTO getResult() {
+        BulkScoreCorrectionDTO result = new BulkScoreCorrectionDTO();
+        for (CompetitorDTO competitor : leaderboard.competitors) {
+            for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
+                Pair<CompetitorDTO, RaceColumnDTO> key = new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn);
+                CheckBox cellCheckbox = cellCheckboxes.get(key);
+                if (cellCheckbox.getValue()) {
+                    // apply the score correction of the cell:
+                    String raceNameOrNumber = getSelectedString(raceNameOrNumberChoosers, raceColumn);
+                    String officialSailID = getSelectedString(officialSailIDChoosers, competitor);
+                    ScoreCorrectionEntryDTO officialCorrectionEntry =
+                            regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
+                            .get(raceNameOrNumber).get(officialSailID);
+                    result.addMaxPointsReasonUpdate(competitor, raceColumn, officialCorrectionEntry.getMaxPointsReason());
+                    result.addScoreUpdate(competitor, raceColumn, officialCorrectionEntry.getScore().intValue());
+                }
+            }
+        }
+        return result;
     }
     
     @Override
@@ -280,6 +276,9 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
         }
     }
 
+    /**
+     * @return <code>null</code> if the empty string was selected
+     */
     private <T> String getSelectedString(Map<T, ListBox> choosersByT, T t) {
         String result = null;
         ListBox chooser = choosersByT.get(t);
@@ -293,22 +292,22 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<ScoreCo
         return result;
     }
 
-    private static class Validator implements DataEntryDialog.Validator<ScoreCorrectionsApplicationInstructions> {
+    private static class Validator implements DataEntryDialog.Validator<BulkScoreCorrectionDTO> {
         @Override
-        public String getErrorMessage(ScoreCorrectionsApplicationInstructions valueToValidate) {
+        public String getErrorMessage(BulkScoreCorrectionDTO valueToValidate) {
             // so far, nothing can go wrong :-)
             return null;
         }
     }
 
-    private static class Callback implements AsyncCallback<ScoreCorrectionsApplicationInstructions> {
+    private static class Callback implements AsyncCallback<BulkScoreCorrectionDTO> {
         @Override
         public void onFailure(Throwable caught) {
             // TODO Auto-generated method stub
         }
 
         @Override
-        public void onSuccess(ScoreCorrectionsApplicationInstructions result) {
+        public void onSuccess(BulkScoreCorrectionDTO result) {
             // TODO Auto-generated method stub
         }
     }

@@ -120,6 +120,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
+import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
@@ -1527,6 +1528,23 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return getService().apply(
                 new UpdateLeaderboardScoreCorrection(leaderboardName, columnName, competitorIdAsString, correctedScore,
                         new MillisecondsTimePoint(date)));
+    }
+    
+    @Override
+    public void updateLeaderboardScoreCorrectionsAndMaxPointsReasons(BulkScoreCorrectionDTO updates) throws NoWindException {
+        Date dateForResults = new Date(); // we don't care about the result date/time here; use current date as default
+        for (Map.Entry<String, Map<String, Integer>> e : updates.getScoreUpdatesForRaceColumnByCompetitorIdAsString().entrySet()) {
+            for (Map.Entry<String, Integer> raceColumnNameAndCorrectedScore : e.getValue().entrySet()) {
+                updateLeaderboardScoreCorrection(updates.getLeaderboardName(), e.getKey(),
+                        raceColumnNameAndCorrectedScore.getKey(), raceColumnNameAndCorrectedScore.getValue(), dateForResults);
+            }
+        }
+        for (Map.Entry<String, Map<String, MaxPointsReason>> e : updates.getMaxPointsUpdatesForRaceColumnByCompetitorIdAsString().entrySet()) {
+            for (Map.Entry<String, MaxPointsReason> raceColumnNameAndNewMaxPointsReason : e.getValue().entrySet()) {
+                updateLeaderboardMaxPointsReason(updates.getLeaderboardName(), e.getKey(),
+                        raceColumnNameAndNewMaxPointsReason.getKey(), raceColumnNameAndNewMaxPointsReason.getValue(), dateForResults);
+            }
+        }
     }
     
     @Override
