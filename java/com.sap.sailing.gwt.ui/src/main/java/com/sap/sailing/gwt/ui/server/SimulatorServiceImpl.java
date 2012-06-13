@@ -275,7 +275,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return pathDTO;
     }
 
-    private List<WindDTO> getOptimumPath(List<Position> course, WindField wf) {
+    private List<WindDTO> getOptimumPath(List<Position> course, WindFieldGenerator wf) {
 
         PolarDiagram pd = new PolarDiagramImpl(1);
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
@@ -301,7 +301,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     }
 
-    private PathDTO[] getSimulatedPaths(List<Position> course, WindField wf) {
+    private PathDTO[] getSimulatedPaths(List<Position> course, WindFieldGenerator wf) {
         logger.info("Retrieving simulated paths");
         //PolarDiagram pd = new PolarDiagramImpl(1);//PolarDiagram49.CreateStandard49();
         PolarDiagram pd = PolarDiagram49.CreateStandard49();

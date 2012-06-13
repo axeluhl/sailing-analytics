@@ -444,8 +444,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     }
 
     private void update() {
-        resetTimer();
-
+      
         if (windDisplayButton.getValue()) {
             timePanel.setVisible(true);
             simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay);
@@ -456,6 +455,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
             timePanel.setVisible(true);
             simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay);
         }
+        resetTimer();
 
     }
 
@@ -495,9 +495,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
+                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay);
                 resetTimer();
                 timePanel.setVisible(true);
-                simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay);
             }
 
         });
@@ -508,9 +508,9 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
+                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay);
                 resetTimer();
                 timePanel.setVisible(true);
-                simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay);
             }
 
         });
