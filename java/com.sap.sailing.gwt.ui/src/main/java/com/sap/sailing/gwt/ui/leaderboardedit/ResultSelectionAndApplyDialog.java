@@ -68,16 +68,19 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Triple<String
             final String eventName = result.getB();
             final String boatClassName = result.getC().getA();
             final Date timePointWhenResultPublished = result.getC().getB();
+            leaderboardPanel.getBusyIndicator().setBusy(true);
             sailingService.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
                     new AsyncCallback<RegattaScoreCorrectionDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
+                            leaderboardPanel.getBusyIndicator().setBusy(false);
                             errorReporter.reportError(stringMessages.errorObtainingScoreCorrections(scoreCorrectionProviderName,
-                                    eventName, boatClassName, timePointWhenResultPublished.toString()));
+                                    eventName, boatClassName, timePointWhenResultPublished.toString(), caught.getMessage()));
                         }
 
                         @Override
                         public void onSuccess(RegattaScoreCorrectionDTO result) {
+                            leaderboardPanel.getBusyIndicator().setBusy(false);
                             new MatchAndApplyScoreCorrectionsDialog(leaderboardPanel, stringMessages, sailingService,
                                     errorReporter, result).show();
                         }

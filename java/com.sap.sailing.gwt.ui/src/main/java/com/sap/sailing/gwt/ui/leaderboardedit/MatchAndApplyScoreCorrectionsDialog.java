@@ -346,9 +346,11 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
 
         @Override
         public void onSuccess(final BulkScoreCorrectionDTO result) {
+            leaderboardPanel.getBusyIndicator().setBusy(true);
             sailingService.updateLeaderboardScoreCorrectionsAndMaxPointsReasons(result, new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
+                    leaderboardPanel.getBusyIndicator().setBusy(false);
                     errorReporter.reportError(stringMessages.errorUpdatingScoresForLeaderboard(result.getLeaderboardName(),
                             caught.getMessage()));
                 }
@@ -357,6 +359,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 public void onSuccess(Void result) {
                     Window.setStatus(stringMessages.successfullyUpdatedScores());
                     leaderboardPanel.timeChanged(new Date()); // reload leaderboard contents to reflect changes
+                    // leaderboard panel sets busy indicator to non-busy after done with updating
                 }
             });
         }
