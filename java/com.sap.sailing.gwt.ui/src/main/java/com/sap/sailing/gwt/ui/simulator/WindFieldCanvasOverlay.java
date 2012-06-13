@@ -131,7 +131,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
         super.redraw(force);
         if (wl != null) {
             clear();
-            drawCanvas();
+            //drawCanvas();
             drawWindField();
         }
 
