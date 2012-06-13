@@ -32,11 +32,9 @@ import java.util.logging.Logger;
 
 import javax.jms.JMSException;
 import javax.servlet.ServletContext;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.xml.sax.SAXException;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.base.BoatClass;
@@ -304,7 +302,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     private ScoreCorrectionProviderDTO createScoreCorrectionProviderDTO(ScoreCorrectionProvider scoreCorrectionProvider)
-            throws IOException, SAXException, ParserConfigurationException {
+            throws Exception {
         Map<String, Set<Pair<String, Date>>> hasResultsForBoatClassFromDateByEventName = new HashMap<String, Set<Pair<String,Date>>>();
         for (Map.Entry<String, Set<Pair<String, TimePoint>>> e : scoreCorrectionProvider
                 .getHasResultsForBoatClassFromDateByEventName().entrySet()) {
