@@ -263,7 +263,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		for(Position p : graph.keySet()) {
 			tentativeDistances.put(p, new Pair<Long, Position>(Long.MAX_VALUE, null));
 		}
-		tentativeDistances.put(start, new Pair<Long, Position>(0L, null));
+		tentativeDistances.put(start, new Pair<Long, Position>(startTime.asMillis(), null));
 		tentativeDistances.put(end,  new Pair<Long, Position>(Long.MAX_VALUE, null));
 		
 		//create set of unvisited nodes
