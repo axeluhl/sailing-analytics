@@ -175,7 +175,7 @@ public class RectangularBoundary implements Boundary {
         Position[][] grid = new Position[vPoints][hPoints];     
         Position pv;
         for (int i = 0; i < vPoints; i++) {
-            System.out.print("nrow "+i+": ");
+            //System.out.print("nrow "+i+": ");
 
             if (i == 0) {
                 pv = rcStart;
@@ -189,25 +189,24 @@ public class RectangularBoundary implements Boundary {
             // left side
             while (j < hPoints/2) {
                 grid[i][j] = new DegreePosition(pv.getLatDeg() - ((hPoints-1)/2.-j)/(hPoints-1)*nHor[0]*2.*lscVrt, pv.getLngDeg() - ((hPoints-1)/2.-j)/(hPoints-1)*nHor[1]*2.*lscVrt);
-                System.out.print(""+grid[i][j]+"("+((hPoints-1)/2.-j)+"), ");
+                //System.out.print(""+grid[i][j]+"("+((hPoints-1)/2.-j)+"), ");
                 j++;
             }    
 
             // middle
             if (hPoints%2 == 1) {
                 grid[i][j] = pv;
-                System.out.print(""+grid[i][j]+", ");
+                //System.out.print(""+grid[i][j]+", ");
                 j++;
             }
 
             // right side
             while (j < hPoints) {
                 grid[i][j] = new DegreePosition(pv.getLatDeg() + (j-(hPoints-1)/2.)/(hPoints-1)*nHor[0]*2.*lscVrt, pv.getLngDeg() + (j-(hPoints-1)/2.)/(hPoints-1)*nHor[1]*2.*lscVrt);
-                //grid[i][j] = pv.translateGreatCircle(getEast(), hStep.scale(j-(hPoints-1)/2.));
-                System.out.print(""+grid[i][j]+"("+(j-(hPoints-1)/2.)+"), ");
+                //System.out.print(""+grid[i][j]+"("+(j-(hPoints-1)/2.)+"), ");
                 j++;
             }    
-            System.out.println();
+            //System.out.println();
         }
 
         /*System.out.println("Grid Index Test:");
