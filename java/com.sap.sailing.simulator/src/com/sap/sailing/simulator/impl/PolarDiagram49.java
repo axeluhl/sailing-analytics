@@ -99,7 +99,7 @@ public class PolarDiagram49 implements PolarDiagram {
 		else {
 			ceilingSpeed = ceilingSpeed1.getKnots()
 					+ (relativeBearing.getRadians() - ceilingBearing1.getRadians())
-					* (ceilingSpeed2.getKnots() - ceilingSpeed2.getKnots())
+					* (ceilingSpeed2.getKnots() - ceilingSpeed1.getKnots())
 					/ (ceilingBearing2.getRadians() - ceilingBearing1.getRadians());
 		}
 		
@@ -305,15 +305,16 @@ public class PolarDiagram49 implements PolarDiagram {
     	beatAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(36.3));
     	beatAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(36.9));
     	
+    	double beatScale = 4.0;
     	NavigableMap<Speed, Speed> beatSOG = new TreeMap<Speed, Speed>();
     	beatSOG.put(new KnotSpeedImpl(0), new KnotSpeedImpl(0));
-    	beatSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(5.85));
-    	beatSOG.put(new KnotSpeedImpl(8), new KnotSpeedImpl(6.98));
-    	beatSOG.put(new KnotSpeedImpl(10), new KnotSpeedImpl(7.39));
-    	beatSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(7.68));
-    	beatSOG.put(new KnotSpeedImpl(14), new KnotSpeedImpl(7.89));
-    	beatSOG.put(new KnotSpeedImpl(16), new KnotSpeedImpl(7.92));
-    	beatSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(7.94));
+    	beatSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(5.85*beatScale));
+    	beatSOG.put(new KnotSpeedImpl(8), new KnotSpeedImpl(6.98*beatScale));
+    	beatSOG.put(new KnotSpeedImpl(10), new KnotSpeedImpl(7.39*beatScale));
+    	beatSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(7.68*beatScale));
+    	beatSOG.put(new KnotSpeedImpl(14), new KnotSpeedImpl(7.89*beatScale));
+    	beatSOG.put(new KnotSpeedImpl(16), new KnotSpeedImpl(7.92*beatScale));
+    	beatSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(7.94*beatScale));
     	
     	NavigableMap<Speed, Bearing> gybeAngles = new TreeMap<Speed, Bearing>();
     	gybeAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(120));
