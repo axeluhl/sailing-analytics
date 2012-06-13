@@ -64,6 +64,9 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     protected void drawWindField(final List<WindDTO> windDTOList) {
 
         int numPoints = windDTOList.size();
+        if (numPoints < 1) {
+            return;
+        }
         String title = "Path at " + numPoints + " points.";
         long totalTime = windDTOList.get(numPoints-1).timepoint - windDTOList.get(0).timepoint;
 
