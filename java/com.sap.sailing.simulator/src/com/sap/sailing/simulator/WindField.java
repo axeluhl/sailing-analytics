@@ -1,10 +1,12 @@
 package com.sap.sailing.simulator;
 
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Wind;
 
 public interface WindField {
 	
-	Wind getWind(TimedPosition coordinates);
-	Boundary getBoundaries();
+	public Wind getWind(TimedPosition coordinates);
+
+	public Boundary getBoundaries();
 
 }

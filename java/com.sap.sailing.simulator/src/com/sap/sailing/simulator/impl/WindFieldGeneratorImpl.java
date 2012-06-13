@@ -142,4 +142,20 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
         this.timeStep = step;
     }
     
+    @Override
+    public TimePoint getStartTime() {
+        return this.startTime;
+    }
+    
+    @Override
+    public TimePoint getTimeStep() {
+        return this.timeStep;
+    }
+    
+    
+    @Override
+    public TimePoint getEndTime() {
+        return this.endTime;
+    }
+    
 }
