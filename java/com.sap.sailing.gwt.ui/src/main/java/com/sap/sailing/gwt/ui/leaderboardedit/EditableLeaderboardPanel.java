@@ -363,6 +363,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         ImageResource importIcon = resources.importIcon();
         Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
         getRefreshAndSettingsPanel().insert(importAnchor, 0);
+        importAnchor.setTitle(stringMessages.importOfficialResults());
         importAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

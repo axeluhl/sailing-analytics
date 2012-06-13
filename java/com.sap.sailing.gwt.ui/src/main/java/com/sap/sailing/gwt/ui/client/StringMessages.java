@@ -328,4 +328,7 @@ public interface StringMessages extends Messages {
     String errorObtainingScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
             String string);
     String assignRaceNumbersToRaceColumns();
+    String importOfficialResults();
+    String selectAll();
+    String apply();
 }
