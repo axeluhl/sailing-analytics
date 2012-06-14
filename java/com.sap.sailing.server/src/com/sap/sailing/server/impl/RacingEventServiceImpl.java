@@ -1373,6 +1373,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
             leaderboardsByName.clear();
             leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
+            logger.info("Done with initial replication on "+this);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassloader);
         }

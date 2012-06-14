@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -182,7 +183,17 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         final Replicator replicator = new Replicator(master, this, /* startSuspended */ true);
         replicationSubscription.setMessageListener(replicator);
         InputStream is = initialLoadURL.openStream();
-        ObjectInputStream ois = new ObjectInputStream(is);
+        ObjectInputStream ois = new ObjectInputStream(is) {
+            @Override
+            protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                try {
+                    return super.resolveClass(desc);
+                } catch (ClassNotFoundException ex) {
+                    String name = desc.getName();
+                    return getClass().getClassLoader().loadClass(name);
+                }
+            }
+        };
         getRacingEventService().initiallyFillFrom(ois);
         replicator.setSuspended(false); // apply queued operations
     }
