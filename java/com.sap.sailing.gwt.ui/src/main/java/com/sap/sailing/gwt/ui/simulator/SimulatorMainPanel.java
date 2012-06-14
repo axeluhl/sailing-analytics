@@ -209,7 +209,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         rightPanel.add(timePanel);
 
-        this.addWest(leftPanel, 508);
+        this.addWest(leftPanel, 470);
         // leftPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
 
         this.add(rightPanel);
