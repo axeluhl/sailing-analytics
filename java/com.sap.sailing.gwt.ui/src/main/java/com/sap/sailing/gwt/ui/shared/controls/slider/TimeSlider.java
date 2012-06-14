@@ -23,63 +23,61 @@ public class TimeSlider extends SliderBar {
         isZoomed = false;
     }
     
+    private void calculateTicks() {
+        if (!isMinMaxInitialized())
+            return;
+
+        calculatedTimeTicks.clear();
+        
+        long minMaxDiffInMs = maxValue.longValue() - minValue.longValue();
+        long tickInterval = minMaxDiffInMs / TICKCOUNT; 
+        NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
+        calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
+    }
+    
     /**
-     * Draw the tick along the line.
+     * Draw the ticks along the line.
      */
     protected void drawTicks() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
 
-        long minMaxDiffInMs = maxValue.longValue() - minValue.longValue();
-        long tickInterval = minMaxDiffInMs / TICKCOUNT; 
-        NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
-        calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
-
-        boolean debug = false;
-        if(debug) {
-            System.out.println("Diff: " + minMaxDiffInMs);
-            System.out.println("Tick count: " + normalizedTimeTickInterval.count);
-            System.out.println("Unit name: " + normalizedTimeTickInterval.unitName);
-            System.out.println("Unit range: " + normalizedTimeTickInterval.unitRange);
-            System.out.println("Calculated ticks count: " + calculatedTimeTicks.size());
-        }
-
         // Draw the ticks
         int lineWidth = lineElement.getOffsetWidth();
-            // Create the ticks or make them visible
-            for (int i = 0; i < calculatedTimeTicks.size(); i++) {
-                TickPosition tickPosition = calculatedTimeTicks.get(i);
-                
-                Element tick = null;
-                if (i < tickElements.size()) {
-                    tick = tickElements.get(i);
-                } else { // Create the new tick
-                    tick = DOM.createDiv();
-                    DOM.setStyleAttribute(tick, "position", "absolute");
-                    DOM.setStyleAttribute(tick, "display", "none");
-                    DOM.appendChild(getElement(), tick);
-                    tickElements.add(tick);
-                }
-                if (enabled) {
-                    DOM.setElementProperty(tick, "className", "gwt-SliderBar-tick");
-                } else {
-                    DOM.setElementProperty(tick, "className", "gwt-SliderBar-tick gwt-SliderBar-tick-disabled");
-                }
-                // Position the tick and make it visible
-                DOM.setStyleAttribute(tick, "visibility", "hidden");
-                DOM.setStyleAttribute(tick, "display", "");
-                int tickWidth = tick.getOffsetWidth();
-                long pos = (tickPosition.time.getTime() - minValue.longValue()) * lineWidth / (maxValue.longValue() - minValue.longValue());
-                int tickLeftOffset = lineLeftOffset + (int) pos - (tickWidth / 2);
-                tickLeftOffset = Math.min(tickLeftOffset, lineLeftOffset + lineWidth - tickWidth);
-                DOM.setStyleAttribute(tick, "left", tickLeftOffset + "px");
-                DOM.setStyleAttribute(tick, "visibility", "visible");
+        // Create the ticks or make them visible
+        for (int i = 0; i < calculatedTimeTicks.size(); i++) {
+            TickPosition tickPosition = calculatedTimeTicks.get(i);
+            
+            Element tick = null;
+            if (i < tickElements.size()) {
+                tick = tickElements.get(i);
+            } else { // Create the new tick
+                tick = DOM.createDiv();
+                DOM.setStyleAttribute(tick, "position", "absolute");
+                DOM.setStyleAttribute(tick, "display", "none");
+                DOM.appendChild(getElement(), tick);
+                tickElements.add(tick);
             }
+            if (enabled) {
+                DOM.setElementProperty(tick, "className", "gwt-SliderBar-tick");
+            } else {
+                DOM.setElementProperty(tick, "className", "gwt-SliderBar-tick gwt-SliderBar-tick-disabled");
+            }
+            // Position the tick and make it visible
+            DOM.setStyleAttribute(tick, "visibility", "hidden");
+            DOM.setStyleAttribute(tick, "display", "");
+            int tickWidth = tick.getOffsetWidth();
+            long pos = (tickPosition.getPosition().getTime() - minValue.longValue()) * lineWidth / (maxValue.longValue() - minValue.longValue());
+            int tickLeftOffset = lineLeftOffset + (int) pos - (tickWidth / 2);
+            tickLeftOffset = Math.min(tickLeftOffset, lineLeftOffset + lineWidth - tickWidth);
+            DOM.setStyleAttribute(tick, "left", tickLeftOffset + "px");
+            DOM.setStyleAttribute(tick, "visibility", "visible");
+        }
 
-            // Hide unused ticks
-            for (int i = (calculatedTimeTicks.size() + 1); i < tickElements.size(); i++) {
-                DOM.setStyleAttribute(tickElements.get(i), "display", "none");
-            }
+        // Hide unused ticks
+        for (int i = (calculatedTimeTicks.size() + 1); i < tickElements.size(); i++) {
+            DOM.setStyleAttribute(tickElements.get(i), "display", "none");
+        }
     }
 
 
@@ -112,7 +110,7 @@ public class TimeSlider extends SliderBar {
                 }
 
                 // Set the label text
-                double value = tickPosition.time.getTime();
+                double value = tickPosition.getPosition().getTime();
                 DOM.setStyleAttribute(label, "visibility", "hidden");
                 DOM.setStyleAttribute(label, "display", "");
                 DOM.setElementProperty(label, "innerHTML", formatTickLabel(value));
@@ -123,7 +121,7 @@ public class TimeSlider extends SliderBar {
 
                 // Position the label and make it visible
                 int labelWidth = label.getOffsetWidth();
-                long pos = (tickPosition.time.getTime() - minValue.longValue()) * lineWidth / (maxValue.longValue() - minValue.longValue());
+                long pos = (tickPosition.getPosition().getTime() - minValue.longValue()) * lineWidth / (maxValue.longValue() - minValue.longValue());
                 int labelLeftOffset = lineLeftOffset + (int) pos - (labelWidth / 2);
                 labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
                 labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
@@ -187,6 +185,7 @@ public class TimeSlider extends SliderBar {
         } else {
             this.maxValue = maxValue;
         }
+        calculateTicks();
     }
 
     public void setMinValue(Double minValue, boolean fireEvent) {
@@ -195,6 +194,7 @@ public class TimeSlider extends SliderBar {
         } else {
             this.minValue = minValue;
         }
+        calculateTicks();
     }
 
     public void setStepSize(double stepSize, boolean fireEvent) {

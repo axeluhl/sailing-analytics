@@ -48,8 +48,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     private void updateTimeInfo(RaceTimesInfoDTO raceTimesInfo) {
         if (raceTimesInfo == null) { 
-            // in case the race is not tracked anymore we reset the timer
-            reset();
+            // in case the race is not tracked anymore we reset the time slider
+            resetTimeSlider();
         } else {
             // check if the live delay is already been set
             if (!isUserExplicitlyChangedLivePlayDelay() && timer.getLivePlayDelayInMillis() != raceTimesInfo.delayToLiveInMs) {
@@ -69,7 +69,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 
                 boolean timerAlreadyInitialized = getMin() != null && getMax() != null && timeSlider.getCurrentValue() != null;
                 if(!isTimeZoomed) {
-                    initMinMax(raceTimesInfo);
+                    updateMinMax(raceTimesInfo);
                     if (!timerAlreadyInitialized) {
                         initTimerPosition(raceTimesInfo);
                     }
@@ -98,7 +98,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         isTimeZoomed = false;
         timeSlider.setZoomed(false);
         timer.setAutoAdvance(true);
-        initMinMax(this.lastRaceTimesInfo);
+        updateMinMax(this.lastRaceTimesInfo);
         timeSlider.clearMarkersAndLabelsAndTicks();
         redrawAllMarkers(lastRaceTimesInfo);
     }
@@ -145,7 +145,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * constrain it back again here. Therefore, the max value is never reduced here but at best initially set if it
      * was <code>null</code> before, or extended to a later point in time.
      */
-    private void initMinMax(RaceTimesInfoDTO newRaceTimesInfo) {
+    private void updateMinMax(RaceTimesInfoDTO newRaceTimesInfo) {
         Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.caluclateRaceMinMax(timer, newRaceTimesInfo);
         
         Date min = raceMinMax.getA();
@@ -217,11 +217,17 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         timeSlider.clearMarkers();
         for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
             if (markPassingTimesDTO.firstPassingDate != null) {
-                timeSlider.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
+                long markerTime = markPassingTimesDTO.firstPassingDate.getTime();
+                if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+                    timeSlider.addMarker(markPassingTimesDTO.name, new Double(markerTime));
+                }
             }
         }
         if (newRaceTimesInfo.endOfRace != null) {
-            timeSlider.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
+            long markerTime = newRaceTimesInfo.endOfRace.getTime();
+            if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+                timeSlider.addMarker("E", new Double(markerTime));
+            }
         }
         timeSlider.redraw(); 
     }
