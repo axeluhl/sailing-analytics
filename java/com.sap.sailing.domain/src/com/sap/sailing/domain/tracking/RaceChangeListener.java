@@ -16,11 +16,11 @@ public interface RaceChangeListener {
     
     /**
      * Invoked after the mark passings have been updated in the {@link TrackedRace}.
-     * 
+     * @param competitor TODO
      * @param oldMarkPassings
      *            the mark passings replaced by <code>markPassings</code>, keyed by the waypoints
      */
-    void markPassingReceived(Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings);
+    void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings);
 
     void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 
