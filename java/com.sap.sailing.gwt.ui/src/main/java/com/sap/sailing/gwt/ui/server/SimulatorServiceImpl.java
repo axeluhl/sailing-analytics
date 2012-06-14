@@ -270,7 +270,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         List<WindDTO> path1 = getOptimumPath(course, wf);
         pathDTO[1].setMatrix(path1);
         */
-        PathDTO[] pathDTO = getSimulatedPaths(course, wf);
+        PathDTO[] pathDTO = getSimulatedPathsEvenTimed(course, wf);
         
         return pathDTO;
     }
@@ -318,7 +318,38 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
             List<WindDTO> wList = new ArrayList<WindDTO>();
             for (TimedPositionWithSpeed p : path.getPathPoints()) {
 
-                Wind localWind = wf.getWind(path.getPositionAtTime(p.getTimePoint()));
+                Wind localWind = wf.getWind(p);//wf.getWind(path.getPositionAtTime(p.getTimePoint()));
+                
+                logger.finer(localWind.toString());
+                WindDTO w = createWindDTO(localWind);
+           
+                wList.add(w);
+            }
+            pathDTO[pathIndex].setMatrix(wList);
+            ++pathIndex;
+        }
+        return pathDTO;
+    }
+
+    private PathDTO[] getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf) {
+        logger.info("Retrieving simulated paths");
+        //PolarDiagram pd = new PolarDiagramImpl(1);//PolarDiagram49.CreateStandard49();
+        PolarDiagram pd = PolarDiagram49.CreateStandard49();
+        SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
+        SailingSimulator solver = new SailingSimulatorImpl(sp);
+
+        Map<String, List<TimedPositionWithSpeed>> paths = solver.getAllPathsEvenTimed(wf.getTimeStep().asMillis());
+        PathDTO[] pathDTO = new PathDTO[paths.size()];
+        int pathIndex = 0;
+        for(String pathName : paths.keySet()) {
+            logger.info("Path " + pathName);
+            List<TimedPositionWithSpeed> path = paths.get(pathName);
+            pathDTO[pathIndex] = new PathDTO(pathName);
+            List<WindDTO> wList = new ArrayList<WindDTO>();
+            for (TimedPositionWithSpeed p : path) {
+
+                Wind localWind = wf.getWind(p);
+                
                 logger.finer(localWind.toString());
                 WindDTO w = createWindDTO(localWind);
            
@@ -390,7 +421,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         wf.generate(startTime, null, timeStep);
         
         Long longestPathTime = 0L; 
-        PathDTO[] pathDTO = getSimulatedPaths(course, wf);
+        PathDTO[] pathDTO = getSimulatedPathsEvenTimed(course, wf);
         for (int i = 0; i < pathDTO.length; ++i) {
             List<WindDTO> path = pathDTO[i].getMatrix();
             int pathLength = path.size();

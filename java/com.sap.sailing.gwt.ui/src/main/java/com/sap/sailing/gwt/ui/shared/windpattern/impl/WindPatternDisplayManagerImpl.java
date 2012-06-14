@@ -43,46 +43,47 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
 
     private void addBlastParameters(WindPatternDisplay display) {
         WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
-                "Base Wind Speed (kn)", 2, 22, 12);
+                "Base Speed (kn)", 2, 22, 12);
         display.addSetting(windSpeedSetting);
 
         WindPatternSetting<Double> blastProbability = new WindPatternSettingSliderBar("blastProbability",
-                "Gust Probability (%)", 0, 50, 25);
+                "Probability (%)", 0, 50, 25);
         display.addSetting(blastProbability);
         WindPatternSetting<Double> maxBlastSize = new WindPatternSettingSliderBar("maxBlastSize", "Gust Size", 1, 10,
                 1);
         display.addSetting(maxBlastSize);
         WindPatternSetting<Double> blastWindSpeed = new WindPatternSettingSliderBar("blastWindSpeed",
-                "Average Gust Wind Speed (%)", 0, 200, 120);
+                "Average Speed (%)", 0, 200, 120);
         display.addSetting(blastWindSpeed);
         WindPatternSetting<Double> blastWindSpeedVar = new WindPatternSettingSliderBar("blastWindSpeedVar",
-                "Gust Wind Speed Variance (%)", 1e-4, 100, 10);
+                "Speed Variance (%)", 1e-4, 100, 10);
         display.addSetting(blastWindSpeedVar);
     }
 
     private void addOscillationParameters(WindPatternDisplay display) {
         WindPatternSetting<Double> windSpeedSetting = new WindPatternSettingSliderBar("baseWindSpeed",
-                "Base Wind Speed (kn)", 2, 22, 12);
+                "Base Speed (kn)", 2, 22, 12);
         display.addSetting(windSpeedSetting);
 
         WindPatternSetting<Double> baseWindBearing = new WindPatternSettingSliderBar("baseWindBearing",
-                "Average Wind Direction (Degrees)", -20, 20, 0);
+                "Average Direction (Degrees)", -20, 20, 0);
         display.addSetting(baseWindBearing);
-        WindPatternSetting<Double> frequency = new WindPatternSettingSliderBar("frequency",
-                "Oscillation Frequency (per hr)", 0, 60, 30);
-        display.addSetting(frequency);
-        WindPatternSetting<Double> amplitude = new WindPatternSettingSliderBar("amplitude",
-                "Oscillation Amplitude (Degrees)", 0, 30, 15);
-        display.addSetting(amplitude);
         WindPatternSetting<Double> leftWindSpeed = new WindPatternSettingSliderBar("leftWindSpeed",
-                "Wind Speed Left Side (%)", 0, 200, 100);
+                "Speed Left Side (%)", 0, 200, 100);
         display.addSetting(leftWindSpeed);
         WindPatternSetting<Double> middleWindSpeed = new WindPatternSettingSliderBar("middleWindSpeed",
-                "Wind Speed Middle (%)", 0, 200, 100);
+                "Speed Middle (%)", 0, 200, 100);
         display.addSetting(middleWindSpeed);
         WindPatternSetting<Double> rightWindSpeed = new WindPatternSettingSliderBar("rightWindSpeed",
-                "Wind Speed Right Side (%)", 0, 200, 100);
+                "Speed Right Side (%)", 0, 200, 100);
         display.addSetting(rightWindSpeed);
+        WindPatternSetting<Double> frequency = new WindPatternSettingSliderBar("frequency",
+                "Frequency (per hr)", 0, 60, 30);
+        display.addSetting(frequency);
+        WindPatternSetting<Double> amplitude = new WindPatternSettingSliderBar("amplitude",
+                "Amplitude (Degrees)", 0, 30, 15);
+        display.addSetting(amplitude);
+      
     }
 
 }
