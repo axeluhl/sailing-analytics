@@ -5,7 +5,7 @@ import com.google.gwt.resources.client.ImageResource;
 
 interface EditableLeaderboardResources extends ClientBundle {
 
-    @Source("com/sap/sailing/gwt/ui/client/images/import.png")
+    @Source("com/sap/sailing/gwt/ui/client/images/leaderboard_import.png")
     ImageResource importIcon();
 
 }

@@ -1197,14 +1197,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 @Override
                 public void onSuccess(LeaderboardDTO result) {
                     updateLeaderboard(result);
+                    getBusyIndicator().setBusy(false);
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
+                    getBusyIndicator().setBusy(false);
                     getErrorReporter().reportError("Error trying to obtain leaderboard contents: " + caught.getMessage(), timer.getPlayMode() != PlayModes.Live);
                 }
             });
             asyncActionsExecutor.execute(getLeaderboardByNameAction);
+        } else {
+            getBusyIndicator().setBusy(false);
         }
     }
     

@@ -199,10 +199,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     
     private class MaxPointsDropDownCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final SelectionCell dropDownCell;
-        private final String raceName;
+        private final String raceColumnName;
         
-        public MaxPointsDropDownCellProvider(String raceName) {
-            this.raceName = raceName;
+        public MaxPointsDropDownCellProvider(String raceColumnName) {
+            this.raceColumnName = raceColumnName;
             List<String> selectionCellContents = new ArrayList<String>();
             selectionCellContents.add(""); // represents "no" max points reason
             for (MaxPointsReason maxPointReason : MaxPointsReason.values()) {
@@ -224,11 +224,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
+                    getBusyIndicator().setBusy(true);
                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id,
-                            raceName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
-                            getLeaderboardDisplayDate(), new AsyncCallback<Pair<Integer, Integer>>() {
+                            raceColumnName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
+                            getLeaderboardDisplayDate(), new AsyncCallback<Triple<Integer, Integer, Boolean>>() {
                                 @Override
                                 public void onFailure(Throwable t) {
+                                    getBusyIndicator().setBusy(false);
                                     getErrorReporter().reportError(
                                             "Error trying to update max points reason for competitor "
                                                     + row.competitor.name + " in leaderboard " + getLeaderboardName()
@@ -236,11 +238,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 }
 
                                 @Override
-                                public void onSuccess(Pair<Integer, Integer> newNetAndTotalPoints) {
-                                    row.fieldsByRaceColumnName.get(raceName).reasonForMaxPoints = value == null
+                                public void onSuccess(Triple<Integer, Integer, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                                    getBusyIndicator().setBusy(false);
+                                    row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints = value == null
                                             || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
-                                    row.fieldsByRaceColumnName.get(raceName).netPoints = newNetAndTotalPoints.getA();
-                                    row.fieldsByRaceColumnName.get(raceName).totalPoints = newNetAndTotalPoints.getB();
+                                    row.fieldsByRaceColumnName.get(raceColumnName).netPoints = newNetAndTotalPointsAndIsCorrected.getA();
+                                    row.fieldsByRaceColumnName.get(raceColumnName).totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
+                                    row.fieldsByRaceColumnName.get(raceColumnName).netPointsCorrected = newNetAndTotalPointsAndIsCorrected.getC();
                                     getCell().setViewData(row, null); // ensure that getValue() is called again
                                     whiteboard.setObjectWithWhichToUpdateRow(row);
                                 }
@@ -251,12 +255,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceName);
+            LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
             MaxPointsReason reasonForMaxPoints = null;
             if (leaderboardEntryDTO != null) {
                 reasonForMaxPoints = leaderboardEntryDTO.reasonForMaxPoints;
             }
-            return reasonForMaxPoints == null || reasonForMaxPoints == MaxPointsReason.NONE ? "" : reasonForMaxPoints.name();
+            return reasonForMaxPoints == null ? "" : reasonForMaxPoints.name();
         }
     }
     
@@ -316,11 +320,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     final RowUpdateWhiteboard<LeaderboardRowDTO> whiteboard = new RowUpdateWhiteboard<LeaderboardRowDTO>(
                             EditableLeaderboardPanel.this.getData());
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
+                    getBusyIndicator().setBusy(true);
                     getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.id, raceName,
                             value == null || value.trim().length() == 0 ? null : Integer.valueOf(value.trim()), getLeaderboardDisplayDate(),
                     new AsyncCallback<Triple<Integer, Integer, Boolean>>() {
                         @Override
                         public void onFailure(Throwable t) {
+                            getBusyIndicator().setBusy(false);
                             getErrorReporter().reportError("Error trying to update score correction for competitor "+
                                     row.competitor.name+" in leaderboard "+getLeaderboardName()+
                                     " for race "+raceName+": "+t.getMessage()+
@@ -329,6 +335,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                         @Override
                         public void onSuccess(Triple<Integer, Integer, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                            getBusyIndicator().setBusy(false);
                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceName);
                                     leaderboardEntryDTO.netPoints = value == null || value.length() == 0 ? newNetAndTotalPointsAndIsCorrected
                                             .getA() : Integer.valueOf(value.trim());
@@ -363,6 +370,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         ImageResource importIcon = resources.importIcon();
         Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
         getRefreshAndSettingsPanel().insert(importAnchor, 0);
+        importAnchor.setTitle(stringMessages.importOfficialResults());
         importAnchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -372,14 +380,17 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     private void performImport(final StringMessages stringMessages) {
+        getBusyIndicator().setBusy(true);
         getSailingService().getScoreCorrectionProviderDTOs(new AsyncCallback<Iterable<ScoreCorrectionProviderDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
+                EditableLeaderboardPanel.this.getBusyIndicator().setBusy(false);
                 getErrorReporter().reportError(stringMessages.errorLoadingScoreCorrectionProviders(caught.getMessage()));
             }
 
             @Override
             public void onSuccess(Iterable<ScoreCorrectionProviderDTO> result) {
+                EditableLeaderboardPanel.this.getBusyIndicator().setBusy(false);
                 showScoreCorrectionSelectionDialog(result);
             }
         });
@@ -397,7 +408,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         }
         sortOfficialResultsByRelevance(providerNameAndEventNameBoatClassNameCapturedWhen);
-        new ResultSelectionAndApplyDialog(getLeaderboard(), getSailingService(), getStringMessages(),
+        new ResultSelectionAndApplyDialog(this, getSailingService(), getStringMessages(),
                 providerNameAndEventNameBoatClassNameCapturedWhen, getErrorReporter()).show();
     }
 

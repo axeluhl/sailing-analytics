@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -212,13 +213,16 @@ public interface SailingServiceAsync {
     void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> callback);
 
-    void updateLeaderboardCarryValue(String leaderboardName, String competitorID, Integer carriedPoints, AsyncCallback<Void> callback);
+    void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Integer carriedPoints, AsyncCallback<Void> callback);
 
-    void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorID, String raceColumnName,
-            MaxPointsReason maxPointsReason, Date date, AsyncCallback<Pair<Integer, Integer>> asyncCallback);
+    void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString, String raceColumnName,
+            MaxPointsReason maxPointsReason, Date date, AsyncCallback<Triple<Integer, Integer, Boolean>> asyncCallback);
 
     void updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString, String columnName,
             Integer correctedScore, Date date, AsyncCallback<Triple<Integer, Integer, Boolean>> asyncCallback);
+
+    void updateLeaderboardScoreCorrectionsAndMaxPointsReasons(BulkScoreCorrectionDTO updates,
+            AsyncCallback<Void> callback);
 
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorID, String displayName,
             AsyncCallback<Void> callback);

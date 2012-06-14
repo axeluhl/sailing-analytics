@@ -1,12 +1,7 @@
 package com.sap.sailing.domain.common;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 
 import com.sap.sailing.domain.common.impl.Util.Pair;
 
@@ -24,8 +19,7 @@ public interface ScoreCorrectionProvider extends Named {
      * score corrections taken at different times. Later score corrections are expected to be cumulative, meaning they
      * also contain all previous corrections.
      */
-    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws IOException,
-            SAXException, ParserConfigurationException;
+    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception;
 
-    public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint millisecondsTimePoint) throws IOException, SAXException, ParserConfigurationException;
+    public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint millisecondsTimePoint) throws Exception;
 }

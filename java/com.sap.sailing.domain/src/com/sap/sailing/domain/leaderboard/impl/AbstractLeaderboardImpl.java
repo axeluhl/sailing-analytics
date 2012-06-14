@@ -405,7 +405,21 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
                 if (o1 == o2) {
                     comparisonResult = 0;
                 } else {
-                    comparisonResult = netPointsAndFleet.get(o1).getB().compareTo(netPointsAndFleet.get(o2).getB());
+                    final Fleet o1Fleet = netPointsAndFleet.get(o1).getB();
+                    final Fleet o2Fleet = netPointsAndFleet.get(o2).getB();
+                    if (o1Fleet == null) {
+                        if (o2Fleet == null) {
+                            comparisonResult = 0;
+                        } else {
+                            comparisonResult = 1; // o1 ranks "worse" because it doesn't have a fleet set while o2 has
+                        }
+                    } else {
+                        if (o2Fleet == null) {
+                            comparisonResult = -1; // o1 ranks "better" because it has a fleet set while o2 hasn't
+                        } else {
+                            comparisonResult = o1Fleet.compareTo(o2Fleet);
+                        }
+                    }
                     if (comparisonResult == 0) {
                         comparisonResult = scoreComparator.compare(netPointsAndFleet.get(o1).getA(), netPointsAndFleet.get(o2).getA());
                     }

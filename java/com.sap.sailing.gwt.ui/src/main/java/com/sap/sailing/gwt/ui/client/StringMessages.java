@@ -326,6 +326,11 @@ public interface StringMessages extends Messages {
     String selectResultListToImportFrom();
     String of();
     String errorObtainingScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
-            String string);
+            String string, String message);
     String assignRaceNumbersToRaceColumns();
+    String importOfficialResults();
+    String selectAll();
+    String apply();
+    String successfullyUpdatedScores();
+    String errorUpdatingScoresForLeaderboard(String leaderboardName, String message);
 }
