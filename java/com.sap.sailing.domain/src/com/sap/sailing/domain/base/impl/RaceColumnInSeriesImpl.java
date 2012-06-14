@@ -18,7 +18,12 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceColumnInSeries {
     private static final long serialVersionUID = -2199678838624406645L;
     private final Series series;
-    private final TrackedRegattaRegistry trackedRegattaRegistry;
+    
+    /**
+     * Making this transient will leave it <code>null</code> on a replica. This, however, is OK because
+     * no check for matching regatta is required, assuming replication happens on a consistent, correct state.
+     */
+    private transient final TrackedRegattaRegistry trackedRegattaRegistry;
 
     /**
      * @param trackedRegattaRegistry
