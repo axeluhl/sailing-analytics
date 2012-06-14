@@ -142,6 +142,8 @@ public class RectangularBoundary implements Boundary {
         this.vPoints = vPoints;
         this.hPoints = hPoints;
 
+        double xscale = 1.5;
+        
         double alat = (rcEnd.getLatDeg() + rcStart.getLatDeg())/2.;
         lngScale = Math.cos(alat*Math.PI/180.);
 
@@ -164,8 +166,8 @@ public class RectangularBoundary implements Boundary {
         nscHor[1] = dscVrt[0]/lscVrt;
 
         nvHor = new double[2];
-        nvHor[0] = nscHor[0]/2./lscVrt*(hPoints-1);
-        nvHor[1] = nscHor[1]/2./lscVrt*(hPoints-1);
+        nvHor[0] = nscHor[0]/xscale/lscVrt*(hPoints-1);
+        nvHor[1] = nscHor[1]/xscale/lscVrt*(hPoints-1);
 
         double[] nHor = new double[2];
         nHor[0] = nscHor[0];
@@ -188,7 +190,7 @@ public class RectangularBoundary implements Boundary {
             int j=0;
             // left side
             while (j < hPoints/2) {
-                grid[i][j] = new DegreePosition(pv.getLatDeg() - ((hPoints-1)/2.-j)/(hPoints-1)*nHor[0]*2.*lscVrt, pv.getLngDeg() - ((hPoints-1)/2.-j)/(hPoints-1)*nHor[1]*2.*lscVrt);
+                grid[i][j] = new DegreePosition(pv.getLatDeg() - ((hPoints-1)/2.-j)/(hPoints-1)*nHor[0]*xscale*lscVrt, pv.getLngDeg() - ((hPoints-1)/2.-j)/(hPoints-1)*nHor[1]*xscale*lscVrt);
                 //System.out.print(""+grid[i][j]+"("+((hPoints-1)/2.-j)+"), ");
                 j++;
             }    
@@ -202,7 +204,7 @@ public class RectangularBoundary implements Boundary {
 
             // right side
             while (j < hPoints) {
-                grid[i][j] = new DegreePosition(pv.getLatDeg() + (j-(hPoints-1)/2.)/(hPoints-1)*nHor[0]*2.*lscVrt, pv.getLngDeg() + (j-(hPoints-1)/2.)/(hPoints-1)*nHor[1]*2.*lscVrt);
+                grid[i][j] = new DegreePosition(pv.getLatDeg() + (j-(hPoints-1)/2.)/(hPoints-1)*nHor[0]*xscale*lscVrt, pv.getLngDeg() + (j-(hPoints-1)/2.)/(hPoints-1)*nHor[1]*xscale*lscVrt);
                 //System.out.print(""+grid[i][j]+"("+(j-(hPoints-1)/2.)+"), ");
                 j++;
             }    
