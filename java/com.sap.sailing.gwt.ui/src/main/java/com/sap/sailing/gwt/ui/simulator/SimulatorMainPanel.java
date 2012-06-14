@@ -147,6 +147,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 					.getSelectedIndex());
             logger.info(windPattern);
 
+
             if (patternDisplayMap.containsKey(windPattern)) {
                 currentWPDisplay = patternDisplayMap.get(windPattern);
                 if (currentWPPanel != null) {
@@ -181,6 +182,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         rightPanel = new FlowPanel();
         patternSelector = new ListBox();
         patternSelector.addChangeHandler(new PatternSelectorHandler());
+        patternSelector.getElement().getStyle().setProperty("width", "215px");
         patternNameDTOMap = new HashMap<String, WindPatternDTO>();
         patternDisplayMap = new HashMap<String, WindPatternDisplay>();
         patternPanelMap = new HashMap<String, Panel>();
@@ -188,12 +190,17 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         currentWPPanel = null;
 
         boatSelector = new ListBox();
+        boatSelector.getElement().getStyle().setProperty("width", "215px");
         directionSelector = new ListBox();
+        directionSelector.getElement().getStyle().setProperty("width", "215px");
         windParams = new WindFieldGenParamsDTO();
         timer = new Timer(PlayModes.Replay, 1000l);
         timer.setPlaySpeedFactor(30);
         timer.setTime(windParams.getStartTime().getTime());
+        //TO DO make it work for no time panel display
+        FlowPanel fp = new FlowPanel();
         timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
+        //fp.add(timePanel);
         timePanel.setVisible(false);
         resetTimer();
 
@@ -209,7 +216,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         rightPanel.add(timePanel);
 
-        this.addWest(leftPanel, 508);
+        this.addWest(leftPanel, 470);
         // leftPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
 
         this.add(rightPanel);
@@ -396,14 +403,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         sailingPanel.add(hp);
         // hp.setSize("80%", "10%");
-        hp.setWidth("80%");
+        //hp.setWidth("80%");
         Panel raceDirection = createRaceDirectionSelector();
         sailingPanel.add(raceDirection);
-        raceDirection.setWidth("80%");
+        //raceDirection.setWidth("80%");
 
         Panel strategySelector = createStrategySelector();
         sailingPanel.add(strategySelector);
-        strategySelector.setWidth("80%");
+        //strategySelector.setWidth("80%");
     }
 
     private void createMapOptionsPanel() {
@@ -573,6 +580,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         label.getElement().getStyle().setFloat(Style.Float.LEFT);
         fp.add(label);
         VerticalPanel vp = new VerticalPanel();
+        vp.getElement().getStyle().setProperty("width", "215px");
         CheckBox cb = new CheckBox(stringMessages.omniscient());
         cb.setValue(true);
         // cb.getElement().getStyle().setFloat(Style.Float.RIGHT);

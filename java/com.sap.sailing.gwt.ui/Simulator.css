@@ -348,12 +348,13 @@ cursor: col-resize;
 }
 
 .sliderLabel {
-	width: 240px;
+	width: 200px;
 	padding: 12px 0 14px 12px;
 }
 
 .boatClassLabel{
-	width: 240px;
+	width: 235px;
+	margin: 0 0 15px 0;
 }
 
 .sailingPanel{
