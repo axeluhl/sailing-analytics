@@ -1,14 +1,18 @@
 .gwt-SliderBar-shell {
-	width: 98%;
-	height: 50px;
+    background: url(images/simulator/slider_bg.png) 0 0 repeat-x;
+    border-radius: 3px; 
+    -moz-border-radius: 3px; 
+    -webkit-border-radius: 3px; 
+    border: 1px solid #ccc;
+    height: 36px;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-line {
   border: 1px solid #919191;
   background-color: #818181;
   height: 4px;
-  width: 98%;
-  top: 22pt;
+  width: 90%;
+  top: 23px;
   overflow: hidden;
 }
 
@@ -17,7 +21,7 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-knob {
-  top: 14pt;
+  top: 14px;
   width: 11px;
   height: 21px;
   z-index: 1;
@@ -25,7 +29,7 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-tick {
-  top: 16pt;
+  top: 18px;
   width: 1px;
   height: 6pt;
   background: #919191;
@@ -50,7 +54,7 @@
   font-size: 12px;
   cursor: default;
   font-weight: 600;
-  top: 9px;
+  top: 5px;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-markerlabel {
