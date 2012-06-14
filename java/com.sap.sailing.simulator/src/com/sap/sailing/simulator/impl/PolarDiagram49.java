@@ -85,6 +85,14 @@ public class PolarDiagram49 implements PolarDiagram {
         Speed floorWind = speedTable.floorKey(wind);
         Speed ceilingWind = speedTable.ceilingKey(wind);
 
+        if (ceilingWind == null) {
+            ceilingWind = floorWind;
+        }
+        if (floorWind == null) {
+            floorWind = ceilingWind;
+        }
+        
+        
         NavigableMap<Bearing, Speed> floorSpeeds = speedTable.get(floorWind);
         NavigableMap<Bearing, Speed> ceilingSpeeds = speedTable.get(ceilingWind);
 
@@ -132,14 +140,31 @@ public class PolarDiagram49 implements PolarDiagram {
     @Override
     public Bearing[] optimalDirectionsUpwind() {
         Bearing windBearing = wind.getBearing().reverse();
-        Bearing floorBeatAngle = beatAngles.floorEntry(wind).getValue();
-        Bearing ceilingBeatAngle = beatAngles.ceilingEntry(wind).getValue();
+        Bearing floorBeatAngle;
+        if (beatAngles.floorEntry(wind) == null) {
+            floorBeatAngle = beatAngles.ceilingEntry(wind).getValue();
+        } else {
+            floorBeatAngle = beatAngles.floorEntry(wind).getValue();
+        }
+        Bearing ceilingBeatAngle;
+        if (beatAngles.ceilingEntry(wind) == null) {
+            ceilingBeatAngle = beatAngles.floorEntry(wind).getValue();            
+        } else {
+            ceilingBeatAngle = beatAngles.ceilingEntry(wind).getValue();
+        }
         if (floorBeatAngle == null)
             floorBeatAngle = new DegreeBearingImpl(0);
         if (ceilingBeatAngle == null)
             ceilingBeatAngle = new DegreeBearingImpl(0);
+
         Speed floorSpeed = beatAngles.floorKey(wind);
+        if (floorSpeed == null) {
+            floorSpeed = beatAngles.ceilingKey(wind);
+        }
         Speed ceilingSpeed = beatAngles.ceilingKey(wind);
+        if (beatAngles.ceilingKey(wind) == null) {
+            ceilingSpeed = beatAngles.floorKey(wind);
+        }
         double beatAngle;
         if (floorSpeed.equals(ceilingSpeed)) {
             beatAngle = floorBeatAngle.getRadians();
