@@ -382,7 +382,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     @Override
-    public void markPassingReceived(Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
+    public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
         long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
         WindWithConfidence<TimePoint> startOfInvalidation;
         TimePoint endOfInvalidation;

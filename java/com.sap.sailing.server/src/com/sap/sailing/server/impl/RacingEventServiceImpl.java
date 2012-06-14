@@ -832,9 +832,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
 
         @Override
-        public void markPassingReceived(Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
-            replicate(new UpdateMarkPassings(getRaceIdentifier(), markPassings.iterator().next().getCompetitor(),
-                    markPassings));
+        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
+            replicate(new UpdateMarkPassings(getRaceIdentifier(), competitor, markPassings));
         }
 
         @Override

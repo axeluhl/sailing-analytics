@@ -44,7 +44,7 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
-    public void markPassingReceived(Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
+    public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
     }
 
     @Override

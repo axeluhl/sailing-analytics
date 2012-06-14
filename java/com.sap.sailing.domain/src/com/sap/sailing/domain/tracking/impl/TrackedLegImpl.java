@@ -211,7 +211,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
-    public void markPassingReceived(Map<Waypoint, MarkPassing> oldMarkPassing, Iterable<MarkPassing> markPassing) {
+    public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassing, Iterable<MarkPassing> markPassing) {
         clearCaches();
     }
 
