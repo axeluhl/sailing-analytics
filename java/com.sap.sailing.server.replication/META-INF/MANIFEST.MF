@@ -12,7 +12,8 @@ Export-Package: com.sap.sailing.server.replication,
 Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.common,
  com.sap.sailing.domain,
- com.sap.sailing.operationaltransformation
+ com.sap.sailing.operationaltransformation,
+ com.sap.sailing.domain.persistence
 Bundle-ClassPath: .
 Web-ContextPath: /replication
 Import-Package: javax.jms;version="1.1.0",
