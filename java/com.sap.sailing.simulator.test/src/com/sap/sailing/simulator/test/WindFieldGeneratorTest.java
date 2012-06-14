@@ -52,11 +52,13 @@ public class WindFieldGeneratorTest {
         WindFieldGeneratorImpl wf = new WindFieldGeneratorBlastImpl(bd, windParameters);
         int hSteps = 10;
         int vSteps = 5;
-        List<Position> positionList = bd.extractLattice(hSteps, vSteps);
-        assert (positionList.size() == hSteps * vSteps);
+        Position[][] positions = bd.extractGrid(hSteps, vSteps);
+        assert (positions.length*positions[0].length == hSteps * vSteps);
         int index = 0;
-        for (Position p : positionList) {
-            logger.info("P" + ++index + ":" + p);
+        for (int i = 0; i < positions.length; ++i) {
+            for (int j = 0; j < positions[0].length; ++j) {
+                logger.info("P" + ++index + ":" + positions[i][j]);
+            }
         }
         wf.setPositionGrid(bd.extractGrid(hSteps, vSteps));
         Position[][] positionGrid = wf.getPositionGrid();
@@ -119,10 +121,10 @@ public class WindFieldGeneratorTest {
         assertEquals("StartTime First Wind Speed ", 7, windList.get(0).getKnots(), 0);
         assertEquals("StartTime Last Wind Speed in first row ", 9, windList.get(hSteps - 1).getKnots(), 0);
 
-        assertEquals("StartTime One before Middle Wind Speed ", 7.866666, windList.get(windList.size() / 2 - 2)
+        assertEquals("StartTime One before Middle Wind Speed ", 7.896551, windList.get(windList.size() / 2 - 2)
                 .getKnots(), epsilon);
-        assertEquals("StartTime Middle Wind Speed ", 7.9333333, windList.get(windList.size() / 2 - 1).getKnots(), epsilon);
-        assertEquals("StartTime Last Wind Speed ", windList.get(windList.size() - 1).getKnots(), 9, 0);
+        assertEquals("StartTime Middle Wind Speed ", 7.965517, windList.get(windList.size() / 2 - 1).getKnots(), epsilon);
+        assertEquals("StartTime Last Wind Speed ", 9, windList.get(windList.size() - 1).getKnots(), 0);
         // Check the angle
         assertEquals("StartTime First Wind Angle ", 0, windList.get(0).getBearing().getRadians(), 0);
         Pair<Integer, Integer> pairIndex = getIndex(windList.size(), hSteps);
@@ -151,18 +153,18 @@ public class WindFieldGeneratorTest {
         assertEquals("Size of windList ", hSteps * vSteps, windList.size());
 
         // Check the speed
-        assertEquals("One Time Unit First Wind Speed ", windList.get(0).getKnots(), 7, 0);
-        assertEquals("One Time Unit One before Middle Wind Speed ", windList.get(windList.size() / 2 - 2).getKnots(),
-                7.866666, epsilon);
-        assertEquals("One Time Unit Middle Wind Speed ", windList.get(windList.size() / 2 - 1).getKnots(), 7.9333333, epsilon);
-        assertEquals("One Time Unit Last Wind Speed ", windList.get(windList.size() - 1).getKnots(), 9, 0);
+        assertEquals("One Time Unit First Wind Speed ", 7, windList.get(0).getKnots(), 0);
+        assertEquals("One Time Unit One before Middle Wind Speed ", 7.896551, windList.get(windList.size() / 2 - 2).getKnots(),
+                epsilon);
+        assertEquals("One Time Unit Middle Wind Speed ", 7.965517, windList.get(windList.size() / 2 - 1).getKnots(), epsilon);
+        assertEquals("One Time Unit Last Wind Speed ", 9, windList.get(windList.size() - 1).getKnots(), 0);
         // Check the angle
-        assertEquals("One Time Unit First Wind Angle ",0.0584707, windList.get(0).getBearing().getRadians(), epsilon);
-        assertEquals("One Time Unit One before Middle Wind Angle ",  0.34031404, windList.get(windList.size() / 2 - 2).getBearing()
+        assertEquals("One Time Unit First Wind Angle ",0.0068534, windList.get(0).getBearing().getRadians(), epsilon);
+        assertEquals("One Time Unit One before Middle Wind Angle ",  0.3250553, windList.get(windList.size() / 2 - 2).getBearing()
                 .getRadians(), epsilon);
-        assertEquals("One Time Unit Middle Wind Angle ", 0.34031404, windList.get(windList.size() / 2 - 1).getBearing()
+        assertEquals("One Time Unit Middle Wind Angle ", 0.3250553, windList.get(windList.size() / 2 - 1).getBearing()
                .getRadians(), epsilon);
-        assertEquals("One Time Unit Last Wind Angle ",  0.201994, windList.get(windList.size() - 1).getBearing().getRadians(),
+        assertEquals("One Time Unit Last Wind Angle ",  0.241933, windList.get(windList.size() - 1).getBearing().getRadians(),
                 epsilon);
 
     }
@@ -261,10 +263,11 @@ public class WindFieldGeneratorTest {
         // Check the speed
         assertEquals("StartTime First Wind Speed ", 7, windList.get(0).getKnots(), 0);
         assertEquals("StartTime Last Wind Speed in first row ", 9, windList.get(hSteps - 1).getKnots(), 0);
-        assertEquals("StartTime One before Middle Wind Speed ", 7.866666, windList.get(windList.size() / 2 - 2)
+
+        assertEquals("StartTime One before Middle Wind Speed ", 7.896551, windList.get(windList.size() / 2 - 2)
                 .getKnots(), epsilon);
-        assertEquals("StartTime Middle Wind Speed ", 7.933333, windList.get(windList.size() / 2 - 1).getKnots(), epsilon);
-        assertEquals("StartTime Last Wind Speed ", windList.get(windList.size() - 1).getKnots(), 9, 0);
+        assertEquals("StartTime Middle Wind Speed ", 7.965517, windList.get(windList.size() / 2 - 1).getKnots(), epsilon);
+        assertEquals("StartTime Last Wind Speed ", 9, windList.get(windList.size() - 1).getKnots(), 0);
         // Check the angle
         assertEquals("StartTime First Wind Angle ", 0, windList.get(0).getBearing().getRadians(), 0);
        

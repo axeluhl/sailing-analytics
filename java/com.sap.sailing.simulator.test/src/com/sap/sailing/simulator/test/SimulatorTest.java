@@ -2,6 +2,7 @@ package com.sap.sailing.simulator.test;
 
 import static org.junit.Assert.*;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +36,7 @@ import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedSimple;
 import com.sap.sailing.simulator.impl.WindFieldGeneratorBlastImpl;
+import com.sap.sailing.simulator.impl.WindFieldGeneratorImpl;
 import com.sap.sailing.simulator.impl.WindFieldGeneratorOscillationImpl;
 import com.sap.sailing.simulator.impl.WindFieldImpl;
 
@@ -52,10 +54,16 @@ public class SimulatorTest {
         course.add(end);
         PolarDiagram pd = PolarDiagram49.CreateStandard49();
         RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
+        Position[][] positions = bd.extractGrid(10, 10);
         RectangularBoundary new_bd = new RectangularBoundary(start, end, 0.1);
         Speed knotSpeed = new KnotSpeedImpl(8);
         WindControlParameters windParameters = new WindControlParameters(10, 180);
-        WindField wf = new WindFieldImpl(bd, windParameters);
+        WindFieldGenerator wf = new WindFieldGeneratorBlastImpl(bd, windParameters);
+        wf.setPositionGrid(positions);
+        Date startDate = new Date(0);
+        TimePoint startTime = new MillisecondsTimePoint(startDate.getTime());
+        TimePoint timeStep = new MillisecondsTimePoint(30000);
+        wf.generate(startTime, null, timeStep);
         SimulationParameters param = new SimulationParametersImpl(course, pd, wf);
         param.setProperty("Heuristic.targetTolerance[double]", 0.05);
         param.setProperty("Heuristic.timeResolution[long]", 30000.0);
@@ -66,8 +74,8 @@ public class SimulatorTest {
         SailingSimulatorImpl sailingSim = new SailingSimulatorImpl(param);
         
         Map <String, Path> paths = sailingSim.getAllPaths();
-        System.out.println(paths.get("Djikstra").getPathPoints().size());
-        System.out.println(paths.get("Heuristic").getPathPoints().size());
+        System.out.println(paths.get("Opportunistic").getPathPoints().size());
+        System.out.println(paths.get("Omniscient").getPathPoints().size());
         
         	
     }
