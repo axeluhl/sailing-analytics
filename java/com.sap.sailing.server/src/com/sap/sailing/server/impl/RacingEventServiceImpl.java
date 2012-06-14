@@ -776,8 +776,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
             final FlexibleLeaderboard defaultLeaderboard = (FlexibleLeaderboard) leaderboardsByName.get(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
-            defaultLeaderboard.addRace(trackedRace,
-                    trackedRace.getRace().getName(), /* medalRace */false, defaultLeaderboard.getFleet(null));
+            if (defaultLeaderboard != null) {
+                defaultLeaderboard.addRace(trackedRace, trackedRace.getRace().getName(), /* medalRace */false,
+                        defaultLeaderboard.getFleet(null));
+            }
             TrackedRaceReplicator trackedRaceReplicator = new TrackedRaceReplicator(trackedRace);
             trackedRaceReplicators.put(trackedRace, trackedRaceReplicator);
             trackedRace.addListener(trackedRaceReplicator);
@@ -1362,16 +1364,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             // (com.sap.sailing.server) can see
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             regattasByName.clear();
-            regattasByName.putAll((Map<String, Regatta>) ois.readObject());
             regattasObservedForDefaultLeaderboard.clear();
+            regattaTrackingCache.clear();
+            leaderboardGroupsByName.clear();
+            leaderboardsByName.clear();
+            regattasByName.putAll((Map<String, Regatta>) ois.readObject());
+            // it is important that the leaderboards and tracked regattas are cleared before auto-linking to
+            // old leaderboards takes place which then don't match the new ones
             for (DynamicTrackedRegatta trackedRegattaToObserve : (Set<DynamicTrackedRegatta>) ois.readObject()) {
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(trackedRegattaToObserve);
             }
-            regattaTrackingCache.clear();
             regattaTrackingCache.putAll((Map<Regatta, DynamicTrackedRegatta>) ois.readObject());
-            leaderboardGroupsByName.clear();
             leaderboardGroupsByName.putAll((Map<String, LeaderboardGroup>) ois.readObject());
-            leaderboardsByName.clear();
             leaderboardsByName.putAll((Map<String, Leaderboard>) ois.readObject());
             logger.info("Done with initial replication on "+this);
         } finally {
