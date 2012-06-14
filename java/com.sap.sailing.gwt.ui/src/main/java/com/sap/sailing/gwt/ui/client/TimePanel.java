@@ -302,7 +302,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             // Handle it equally for replay and live mode for robustness reasons. This at least allows a user
             // to watch on even if the time panel was off in its assumptions about race end and end of tracking.
             if (time.after(getMax())) {
-                Date newMaxTime = time;
+                Date newMaxTime = new Date(time.getTime());
                 if (newMaxTime.getTime() - getMax().getTime() < MINIMUM_AUTO_ADVANCE_TIME_IN_MS) {
                     newMaxTime.setTime(getMax().getTime() + MINIMUM_AUTO_ADVANCE_TIME_IN_MS); 
                 }
