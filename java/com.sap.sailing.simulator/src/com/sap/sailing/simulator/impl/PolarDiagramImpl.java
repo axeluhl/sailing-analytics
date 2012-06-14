@@ -54,7 +54,7 @@ public class PolarDiagramImpl implements PolarDiagram {
 	@Override
 	public long getTurnLoss() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 4000;
 	}
 
 	@Override
