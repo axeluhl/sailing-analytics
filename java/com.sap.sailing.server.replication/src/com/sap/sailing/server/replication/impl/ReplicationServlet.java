@@ -5,6 +5,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import javax.jms.JMSException;
 import javax.servlet.ServletException;
@@ -27,6 +28,8 @@ import com.sap.sailing.server.replication.ReplicaDescriptor;
  * 
  */
 public class ReplicationServlet extends Servlet {
+    private static final Logger logger = Logger.getLogger(ReplicationServlet.class.getName());
+    
     private static final long serialVersionUID = 4835516998934433846L;
     
     public enum Action { REGISTER, INITIAL_LOAD }
@@ -65,7 +68,14 @@ public class ReplicationServlet extends Servlet {
             break;
         case INITIAL_LOAD:
             ObjectOutputStream oos = new ObjectOutputStream(resp.getOutputStream());
-            getService().serializeForInitialReplication(oos);
+            try {
+                getService().serializeForInitialReplication(oos);
+            } catch (Exception e) {
+                logger.info("Error trying to serialize initial load for replication: "+e.getMessage());
+                logger.throwing(ReplicationServlet.class.getName(), "doGet", e);
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                e.printStackTrace(resp.getWriter());
+            }
             break;
         default:
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "
