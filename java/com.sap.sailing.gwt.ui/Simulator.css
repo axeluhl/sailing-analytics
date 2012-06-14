@@ -368,3 +368,8 @@ cursor: col-resize;
 .MapDisplayOptions label, .gwt-RadioButton label {
 	margin: 0 0 0 5px;
 }
+
+.timeSliderWrapperPanel{
+	-webkit-box-shadow: inset 0px 5px 10px 0px rgba(0, 0, 0, 0.15); /* WebKit */
+	-moz-box-shadow: inset 0px 5px 10px 0px rgba(0, 0, 0, 0.15); /* Firefox */
+	box-shadow: inset 0px 5px 10px 0px rgba(0, 0, 0, 0.15); /* Standard */

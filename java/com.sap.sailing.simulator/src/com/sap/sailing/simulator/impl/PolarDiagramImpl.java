@@ -51,4 +51,16 @@ public class PolarDiagramImpl implements PolarDiagram {
 		return new Bearing[] {southEast, southWest};
 	}
 
+	@Override
+	public long getTurnLoss() {
+		// TODO Auto-generated method stub
+		return 4000;
+	}
+
+	@Override
+	public WindSide getWindSide() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

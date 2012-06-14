@@ -5,6 +5,8 @@ import com.sap.sailing.domain.common.Bearing;
 
 public interface PolarDiagram {
 		
+	enum WindSide {RIGHT, LEFT, FACING, OPPOSING};
+	
 	SpeedWithBearing getWind();
 	
 	void setWind(SpeedWithBearing newWind);
@@ -13,5 +15,9 @@ public interface PolarDiagram {
 	
 	Bearing[] optimalDirectionsUpwind();
 	Bearing[] optimalDirectionsDownwind();
+	
+	long getTurnLoss();
+	WindSide getWindSide();
+	
 	
 }
