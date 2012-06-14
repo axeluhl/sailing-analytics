@@ -52,7 +52,7 @@ public class SimulatorTest {
         List<Position> course = new LinkedList<Position>();
         course.add(start);
         course.add(end);
-        PolarDiagram pd = PolarDiagram49.CreateStandard49();
+        PolarDiagram pd = new PolarDiagram49();//PolarDiagram49.CreateStandard49();
         RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
         Position[][] positions = bd.extractGrid(10, 10);
         RectangularBoundary new_bd = new RectangularBoundary(start, end, 0.1);

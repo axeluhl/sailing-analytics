@@ -38,16 +38,13 @@ import com.sap.sailing.simulator.SailingSimulator;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindControlParameters;
-import com.sap.sailing.simulator.WindField;
 import com.sap.sailing.simulator.WindFieldGenerator;
 import com.sap.sailing.simulator.WindFieldGeneratorFactory;
 import com.sap.sailing.simulator.impl.PolarDiagram49;
-import com.sap.sailing.simulator.impl.PolarDiagramImpl;
 import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.SailingSimulatorImpl;
 import com.sap.sailing.simulator.impl.SimulationParametersImpl;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
-import com.sap.sailing.simulator.impl.TimedPositionWithSpeedSimple;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
@@ -230,8 +227,10 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     /**
-     * Currently the path is a list of WindDTO objects at the path points and only a single optimal path is returned
-     * 
+     * TODO Remove this is no longer used.
+     * @deprecated 
+     * Use SimulatorResultsDTO getSimulatorResults(WindFieldGenParamsDTO params, WindPatternDisplay pattern,
+            boolean withWindField) instead
      * */
     public PathDTO[] getPaths(WindFieldGenParamsDTO params, WindPatternDisplay pattern)
             throws WindPatternNotFoundException {
@@ -275,36 +274,12 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         return pathDTO;
     }
 
-    private List<WindDTO> getOptimumPath(List<Position> course, WindFieldGenerator wf) {
 
-        PolarDiagram pd = new PolarDiagramImpl(1);
-        SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
-        SailingSimulator solver = new SailingSimulatorImpl(sp);
-
-        Path pth = solver.getOptimumPath();
-        int i = 0;
-        List<WindDTO> wList = new ArrayList<WindDTO>();
-        for (TimedPositionWithSpeed p : pth.getPathPoints()) {
-            // the null in the Wind output is the timestamp - this Wind is time-invariant!
-            // System.out.println("Position: " + p.getPosition() + " Wind: "
-            // + wf.getWind(new TimedPositionWithSpeedSimple(p.getPosition())));
-            // System.out.println("Position: " + p.getPosition() + " Wind: " +
-            // wf.getWind(pth.getPositionAtTime(p.getTimePoint())));
-            Wind localWind = wf.getWind(pth.getPositionAtTime(p.getTimePoint()));
-            logger.finer(localWind.toString());
-            WindDTO w = createWindDTO(localWind);
-            // w.trueWindBearingDeg = 10.0*i;
-            ++i;
-            wList.add(w);
-        }
-        return wList;
-
-    }
-
+    @SuppressWarnings("unused")
     private PathDTO[] getSimulatedPaths(List<Position> course, WindFieldGenerator wf) {
         logger.info("Retrieving simulated paths");
-        //PolarDiagram pd = new PolarDiagramImpl(1);//PolarDiagram49.CreateStandard49();
-        PolarDiagram pd = PolarDiagram49.CreateStandard49();
+       
+        PolarDiagram pd = new PolarDiagram49();
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 
@@ -333,8 +308,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
     private PathDTO[] getSimulatedPathsEvenTimed(List<Position> course, WindFieldGenerator wf) {
         logger.info("Retrieving simulated paths");
-        //PolarDiagram pd = new PolarDiagramImpl(1);//PolarDiagram49.CreateStandard49();
-        PolarDiagram pd = PolarDiagram49.CreateStandard49();
+       
+        PolarDiagram pd = new PolarDiagram49(); 
         SimulationParameters sp = new SimulationParametersImpl(course, pd, wf);
         SailingSimulator solver = new SailingSimulatorImpl(sp);
 
