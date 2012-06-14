@@ -198,9 +198,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         timer.setPlaySpeedFactor(30);
         timer.setTime(windParams.getStartTime().getTime());
         //TO DO make it work for no time panel display
-        FlowPanel fp = new FlowPanel();
+        FlowPanel timeSliderWrapperPanel = new FlowPanel();
         timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
-        //fp.add(timePanel);
+        timeSliderWrapperPanel.getElement().getStyle().setProperty("height", "20%");
+        timeSliderWrapperPanel.getElement().setClassName("timeSliderWrapperPanel");
+        timeSliderWrapperPanel.add(timePanel);
         timePanel.setVisible(false);
         resetTimer();
 
@@ -214,7 +216,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         createOptionsPanel();
         createMapOptionsPanel();
 
-        rightPanel.add(timePanel);
+        rightPanel.add(timeSliderWrapperPanel);
 
         this.addWest(leftPanel, 470);
         // leftPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
@@ -441,7 +443,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         // mapPanel.add(mapw);
         // mapw.setSize("100%", "100%");
 
-        simulatorMap.setSize("100%", "82%");
+        simulatorMap.setSize("100%", "80%");
         rightPanel.add(simulatorMap);
 
     }
