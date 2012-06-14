@@ -122,6 +122,9 @@ public class PolarDiagram49 implements PolarDiagram {
             speed = floorSpeed + (wind.getKnots() - floorWind.getKnots()) * (ceilingSpeed - floorSpeed)
                     / (ceilingWind.getKnots() - floorWind.getKnots());
         }
+        if ((Math.abs(relativeBearing.getDegrees()) < 25)||(Math.abs(relativeBearing.getDegrees()) > 335)) {
+            speed = 0.01;
+        }
 
         return new KnotSpeedWithBearingImpl(speed, bearing);
     }
