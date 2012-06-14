@@ -217,11 +217,17 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         timeSlider.clearMarkers();
         for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
             if (markPassingTimesDTO.firstPassingDate != null) {
-                timeSlider.addMarker(markPassingTimesDTO.name, new Double(markPassingTimesDTO.firstPassingDate.getTime()));
+                long markerTime = markPassingTimesDTO.firstPassingDate.getTime();
+                if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+                    timeSlider.addMarker(markPassingTimesDTO.name, new Double(markerTime));
+                }
             }
         }
         if (newRaceTimesInfo.endOfRace != null) {
-            timeSlider.addMarker("E", new Double(newRaceTimesInfo.endOfRace.getTime()));
+            long markerTime = newRaceTimesInfo.endOfRace.getTime();
+            if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+                timeSlider.addMarker("E", new Double(markerTime));
+            }
         }
         timeSlider.redraw(); 
     }

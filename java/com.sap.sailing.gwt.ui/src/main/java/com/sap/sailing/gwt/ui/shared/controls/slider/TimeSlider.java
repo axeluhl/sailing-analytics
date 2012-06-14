@@ -23,17 +23,24 @@ public class TimeSlider extends SliderBar {
         isZoomed = false;
     }
     
+    private void calculateTicks() {
+        if (!isMinMaxInitialized())
+            return;
+
+        calculatedTimeTicks.clear();
+        
+        long minMaxDiffInMs = maxValue.longValue() - minValue.longValue();
+        long tickInterval = minMaxDiffInMs / TICKCOUNT; 
+        NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
+        calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
+    }
+    
     /**
      * Draw the ticks along the line.
      */
     protected void drawTicks() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
-
-        long minMaxDiffInMs = maxValue.longValue() - minValue.longValue();
-        long tickInterval = minMaxDiffInMs / TICKCOUNT; 
-        NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
-        calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
 
         // Draw the ticks
         int lineWidth = lineElement.getOffsetWidth();
@@ -178,6 +185,7 @@ public class TimeSlider extends SliderBar {
         } else {
             this.maxValue = maxValue;
         }
+        calculateTicks();
     }
 
     public void setMinValue(Double minValue, boolean fireEvent) {
@@ -186,6 +194,7 @@ public class TimeSlider extends SliderBar {
         } else {
             this.minValue = minValue;
         }
+        calculateTicks();
     }
 
     public void setStepSize(double stepSize, boolean fireEvent) {

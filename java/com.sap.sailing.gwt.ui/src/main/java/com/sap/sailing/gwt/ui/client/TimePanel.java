@@ -350,8 +350,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
         }
         if (changed) {
-//            timeSlider.setNumTickLabels(numTicks);
-//            timeSlider.setNumTicks(numTicks);
             int numSteps = timeSlider.getElement().getClientWidth();
             if (numSteps > 0) {
                 timeSlider.setStepSize(numSteps, fireEvent);
