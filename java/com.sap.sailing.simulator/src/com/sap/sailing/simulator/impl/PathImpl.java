@@ -71,7 +71,7 @@ public class PathImpl implements Path {
 		TimePoint t = pathPoints.get(0).getTimePoint();
 		TimePoint lastPoint = pathPoints.get(pathPoints.size()-1).getTimePoint();
 
-		while(t.compareTo(lastPoint) <= 0) {
+		while((t.compareTo(lastPoint) <= 0)&&(lst.size()<50)) {  // restrict path length to max. 50 timesteps (timestep 30sec => 25min)
 			lst.add(getPositionAtTime(t));
 			t = new MillisecondsTimePoint(t.asMillis() + milliseconds);
 		}
