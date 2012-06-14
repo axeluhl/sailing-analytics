@@ -353,4 +353,16 @@ public class PolarDiagram49 implements PolarDiagram {
         // return new PolarDiagram49(table, beatAngles, gybeAngles, beatSOG, gybeSOG);
     }
 
+	@Override
+	public long getTurnLoss() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public WindSide getWindSide() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
