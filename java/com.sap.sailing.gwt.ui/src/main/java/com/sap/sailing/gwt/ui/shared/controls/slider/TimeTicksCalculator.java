@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * This calculator emulates the way the HighCharts charting library is computing the chart ticks
+ * in case of a x-axis based on time values.  
+ */
 public class TimeTicksCalculator {
 
     public TimeTicksCalculator() {
@@ -165,7 +169,7 @@ public class TimeTicksCalculator {
 
         // iterate and add tick positions at appropriate values
         while (time < max) {
-            if(time > min)
+            if(time >= min)
                 tickPositions.add(new TickPosition(time));
 
             // if the interval is years, use Date.UTC to increase years
@@ -190,7 +194,7 @@ public class TimeTicksCalculator {
         }
 
         // push the last time
-        if(time < max)
+        if(time <= max)
             tickPositions.add(new TickPosition(time));
 
         // record information on the chosen unit - for dynamic label formatter
@@ -211,14 +215,23 @@ public class TimeTicksCalculator {
             this.unitRange = unitRange;
             this.count = count;
         }
+
+        @Override
+        public String toString() {
+            return "NormalizedInterval [unitName=" + unitName + ", unitRange=" + unitRange + ", count=" + count + "]";
+        }
     }
 
     public class TickPosition {
+        private Date position;
+
         public TickPosition(long time) {
-            this.time = new Date(time);
+            this.position = new Date(time);
         }
 
-        Date time;
+        public Date getPosition() {
+            return position;
+        }
     }
 
     enum TimeUnits {
