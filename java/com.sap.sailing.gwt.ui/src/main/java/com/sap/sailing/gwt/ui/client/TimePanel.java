@@ -229,7 +229,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playSpeedBox = new IntegerBox();
         playSpeedBox.setVisibleLength(3);
         playSpeedBox.setWidth("25px");
-        playSpeedBox.setHeight("11px");
+        playSpeedBox.setHeight("14px");
         playSpeedBox.setValue(1);
         playSpeedBox.setTitle(stringMessages.playSpeedHelp());
         Image playSpeedImage = new Image(playSpeedImg);
