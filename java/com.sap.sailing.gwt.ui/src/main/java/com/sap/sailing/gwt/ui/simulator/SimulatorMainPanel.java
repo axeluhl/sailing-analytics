@@ -433,7 +433,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         initCourseInputButton();
 
         mapOptions.add(courseInputButton);
-        //mapOptions.add(busyIndicator);
+        mapOptions.add(busyIndicator);
         rightPanel.add(mapOptions);
         
         initDisplayOptions(mapOptions);
@@ -552,7 +552,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         });
 
         HorizontalPanel p = new HorizontalPanel();
-        p.add(busyIndicator);
+        //p.add(busyIndicator);
         DecoratorPanel d = new DecoratorPanel();
         p.add(summaryButton);
         p.add(replayButton);
