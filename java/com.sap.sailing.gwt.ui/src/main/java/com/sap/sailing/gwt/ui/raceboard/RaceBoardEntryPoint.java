@@ -128,8 +128,9 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(selectedRace.getRaceIdentifier());
         raceSelectionModel.setSelection(singletonList);
         Timer timer = new Timer(PlayModes.Replay, 1000l);
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, this, singletonList, 5000l /* requestInterval*/);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, user, timer, raceSelectionModel, leaderboardName, leaderboardGroupName,
-                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, new RaceTimesInfoProvider(sailingService, this, singletonList, 1000l));
+                RaceBoardEntryPoint.this, stringMessages, userAgentType, viewMode, raceTimesInfoProvider);
         raceBoardPanel.fillRegattas(regattas);
 
         switch (viewMode) {

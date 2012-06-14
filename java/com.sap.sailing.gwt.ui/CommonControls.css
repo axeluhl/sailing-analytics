@@ -144,15 +144,14 @@
 }
 
 .titleLabelWrapper {
-    text-align: center;
-    vertical-align: middle;
-    font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
-    font-size: 20px;
-    color: #fff;
+	margin: 21px 0 0 400px;
 }
 
 .titleLabel {
-    height: 26px;
+    text-align: left;
+    font-family: 'UbuntuMedium', Arial, Verdana, sans-serif;
+    font-size: 18px;
+    color: #fff;
 }
 
 .subTitleLabelWrapper {

@@ -229,7 +229,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playSpeedBox = new IntegerBox();
         playSpeedBox.setVisibleLength(3);
         playSpeedBox.setWidth("25px");
-        playSpeedBox.setHeight("11px");
+        playSpeedBox.setHeight("14px");
         playSpeedBox.setValue(1);
         playSpeedBox.setTitle(stringMessages.playSpeedHelp());
         Image playSpeedImage = new Image(playSpeedImg);
@@ -336,7 +336,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         assert min != null && max != null;
                 
         boolean changed = false;
-        int numTicks = 8;
         if (!max.equals(this.max)) {
             changed = true;
             this.max = max;
@@ -351,8 +350,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
         }
         if (changed) {
-            timeSlider.setNumTickLabels(numTicks);
-            timeSlider.setNumTicks(numTicks);
             int numSteps = timeSlider.getElement().getClientWidth();
             if (numSteps > 0) {
                 timeSlider.setStepSize(numSteps, fireEvent);
@@ -362,7 +359,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         }
     }
 
-    public void reset() {
+    public void resetTimeSlider() {
         timeSlider.clearMarkers();
         timeSlider.redraw();
     }

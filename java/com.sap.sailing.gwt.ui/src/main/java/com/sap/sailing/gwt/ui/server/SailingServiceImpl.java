@@ -608,7 +608,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.add(new TracTracRaceRecordDTO(raceRecord.getID(), raceRecord.getEventName(), raceRecord.getName(),
                     raceRecord.getParamURL().toString(), raceRecord.getReplayURL(), raceRecord.getLiveURI().toString(),
                     raceRecord.getStoredURI().toString(), raceRecord.getTrackingStartTime().asDate(), raceRecord
-                            .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate()));
+                            .getTrackingEndTime().asDate(), raceRecord.getRaceStartTime().asDate(), raceRecord.getBoatClassNames()));
         }
         return new Pair<String, List<TracTracRaceRecordDTO>>(raceRecords.getA(), result);
     }
