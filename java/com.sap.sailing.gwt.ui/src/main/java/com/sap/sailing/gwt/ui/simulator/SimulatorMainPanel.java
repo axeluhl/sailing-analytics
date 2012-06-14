@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.WindPatternDTO;
 import com.sap.sailing.gwt.ui.shared.controls.slider.SliderBar;
+import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternSetting;
 
@@ -71,6 +72,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private WindFieldGenParamsDTO windParams;
     private final Timer timer;
+    private SimpleBusyIndicator busyIndicator;
     private static Logger logger = Logger.getLogger("com.sap.sailing");
 
     private SimulatorMap simulatorMap;
@@ -203,7 +205,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         //fp.add(timePanel);
         timePanel.setVisible(false);
         resetTimer();
-
+        busyIndicator = new SimpleBusyIndicator(false, 0.8f);
 	LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(
 				stringMessages.simulator(), stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
@@ -429,11 +431,12 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         initCourseInputButton();
 
         mapOptions.add(courseInputButton);
+        //mapOptions.add(busyIndicator);
         rightPanel.add(mapOptions);
-
+        
         initDisplayOptions(mapOptions);
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, windParams);
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, windParams, busyIndicator);
 
         // FlowPanel mapPanel = new FlowPanel();
         // mapPanel.setTitle("Map");
@@ -547,7 +550,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         });
 
         HorizontalPanel p = new HorizontalPanel();
-
+        p.add(busyIndicator);
         DecoratorPanel d = new DecoratorPanel();
         p.add(summaryButton);
         p.add(replayButton);
