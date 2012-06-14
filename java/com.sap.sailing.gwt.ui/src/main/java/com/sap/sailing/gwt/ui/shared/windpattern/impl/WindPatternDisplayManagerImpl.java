@@ -78,7 +78,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
                 "Speed Right Side (%)", 0, 200, 100);
         display.addSetting(rightWindSpeed);
         WindPatternSetting<Double> frequency = new WindPatternSettingSliderBar("frequency",
-                "Frequency (per hr)", 0, 60, 30);
+                "Frequency (per hr)", 0, 20, 6);
         display.addSetting(frequency);
         WindPatternSetting<Double> amplitude = new WindPatternSettingSliderBar("amplitude",
                 "Amplitude (Degrees)", 0, 30, 15);
