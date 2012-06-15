@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -35,31 +34,30 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
      * identity. Serializing a cached hash code therefore leads to an inconsistency. The non-caching of this
      * hash code is tested here.
      */
-    @Ignore // currently, the OSGi environment doesn't find SerializableObjectWithJavaLangObjectHashCode; have to find out what's wrong...
     @Test
     public void testHashCodeOfSerializedPairIsConsistent() throws ClassNotFoundException, IOException {
         DomainFactory receiverDomainFactory = new DomainFactoryImpl();
-        final SerializableObjectWithJavaLangObjectHashCode s1 = new SerializableObjectWithJavaLangObjectHashCode();
-        final SerializableObjectWithJavaLangObjectHashCode s2 = new SerializableObjectWithJavaLangObjectHashCode();
-        Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode> p =
-                new Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode>(
+        final Throwable s1 = new Throwable();
+        final Throwable s2 = new Throwable();
+        Pair<Throwable, Throwable> p =
+                new Pair<Throwable, Throwable>(
                         s1, s2);
-        HashSet<Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode>> s =
-                new HashSet<Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode>>();
+        HashSet<Pair<Throwable, Throwable>> s =
+                new HashSet<Pair<Throwable, Throwable>>();
         s.add(p);
-        Set<Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode>> ss =
+        Set<Pair<Throwable, Throwable>> ss =
                 cloneBySerialization(s, /* resolveAgainst */ receiverDomainFactory);
         
-        Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode> ps = ss.iterator().next();
-        SerializableObjectWithJavaLangObjectHashCode s1Des = ps.getA();
-        SerializableObjectWithJavaLangObjectHashCode s2Des = ps.getB();
+        Pair<Throwable, Throwable> ps = ss.iterator().next();
+        Throwable s1Des = ps.getA();
+        Throwable s2Des = ps.getB();
         assertNotSame(s, ss);
         assertNotSame(s.iterator().next(), ss.iterator().next());
         assertNotSame(s1, s1Des);
         assertNotSame(s2, s2Des);
         assertEquals(1, ss.size());
-        Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode> pNew =
-                new Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode>(s1Des, s2Des);
+        Pair<Throwable, Throwable> pNew =
+                new Pair<Throwable, Throwable>(s1Des, s2Des);
         assertEquals(ps.hashCode(), pNew.hashCode());
         assertTrue(ss.contains(pNew));
     }
