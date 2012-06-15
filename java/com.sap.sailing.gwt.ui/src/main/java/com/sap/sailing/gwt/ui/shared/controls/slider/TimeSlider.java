@@ -91,6 +91,7 @@ public class TimeSlider extends SliderBar {
         // Draw the tick labels
         int lineWidth = lineElement.getOffsetWidth();
             // Create the labels or make them visible
+            Double previousValue = null;
             for (int i = 0; i < calculatedTimeTicks.size(); i++) {
                 TickPosition tickPosition = calculatedTimeTicks.get(i);
                 Element label = null;
@@ -113,7 +114,7 @@ public class TimeSlider extends SliderBar {
                 double value = tickPosition.getPosition().getTime();
                 DOM.setStyleAttribute(label, "visibility", "hidden");
                 DOM.setStyleAttribute(label, "display", "");
-                DOM.setElementProperty(label, "innerHTML", formatTickLabel(value));
+                DOM.setElementProperty(label, "innerHTML", formatTickLabel(value, previousValue));
 
                 // Move to the left so the label width is not clipped by the
                 // shell
@@ -127,6 +128,8 @@ public class TimeSlider extends SliderBar {
                 labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
                 DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
                 DOM.setStyleAttribute(label, "visibility", "visible");
+                
+                previousValue = value;
             }
 
             // Hide unused labels

@@ -417,7 +417,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                             WindTrackInfoDTO windTrackInfoDTO = windInfo.windTrackInfoByWindSource.get(windSource);
                                             switch (windSource.getType()) {
                                                 case EXPEDITION:
-                                                    windSourcesToShow.add(new Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
+                                                    // we filter out measured wind sources with a very little confidence
+                                                    if(windTrackInfoDTO.minWindConfidence > 0.01) {
+                                                        windSourcesToShow.add(new Pair<WindSource, WindTrackInfoDTO>(windSource, windTrackInfoDTO));
+                                                    }
                                                     break;
                                                 case COMBINED:
                                                     showCombinedWindOnMap(windSource, windTrackInfoDTO);

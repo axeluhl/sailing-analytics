@@ -89,7 +89,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          *            the value the label displays
          * @return the text to display for the label
          */
-        String formatLabel(SliderBar slider, double value);
+        String formatLabel(SliderBar slider, Double value, Double previousValue);
     }
 
     /**
@@ -807,9 +807,9 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the value at the label
      * @return the text to put in the label
      */
-    protected String formatTickLabel(double value) {
+    protected String formatTickLabel(Double value, Double previousValue) {
         if (tickLabelFormatter != null) {
-            return tickLabelFormatter.formatLabel(this, value);
+            return tickLabelFormatter.formatLabel(this, value, previousValue);
         } else {
             return (int) (10 * value) / 10.0 + "";
         }
@@ -867,6 +867,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         int lineWidth = lineElement.getOffsetWidth();
         if (numTickLabels > 0) {
             // Create the labels or make them visible
+            Double previousValue = null;
             for (int i = 0; i <= numTickLabels; i++) {
                 Element label = null;
                 if (i < tickLabelElements.size()) {
@@ -888,7 +889,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                 double value = minValue + (getTotalRange() * i / numTickLabels);
                 DOM.setStyleAttribute(label, "visibility", "hidden");
                 DOM.setStyleAttribute(label, "display", "");
-                DOM.setElementProperty(label, "innerHTML", formatTickLabel(value));
+                DOM.setElementProperty(label, "innerHTML", formatTickLabel(value, previousValue));
 
                 // Move to the left so the label width is not clipped by the
                 // shell
@@ -901,6 +902,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                 labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
                 DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
                 DOM.setStyleAttribute(label, "visibility", "visible");
+                
+                previousValue = value;
             }
 
             // Hide unused labels
