@@ -6,8 +6,11 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -22,9 +25,48 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
+    private static class SerializableObjectWithJavaLangObjectHashCode implements Serializable {
+        private static final long serialVersionUID = 696920899165910830L;
+    }
+    
+    /**
+     * Bug 769 was based on an inconsistency of a cached hash code in Pair. The same problem existed for Triple.
+     * Serialization changes the Object IDs of the objects contained and therefore the hash code based on this
+     * identity. Serializing a cached hash code therefore leads to an inconsistency. The non-caching of this
+     * hash code is tested here.
+     */
+    @Test
+    public void testHashCodeOfSerializedPairIsConsistent() throws ClassNotFoundException, IOException {
+        DomainFactory receiverDomainFactory = new DomainFactoryImpl();
+        final SerializableObjectWithJavaLangObjectHashCode s1 = new SerializableObjectWithJavaLangObjectHashCode();
+        final SerializableObjectWithJavaLangObjectHashCode s2 = new SerializableObjectWithJavaLangObjectHashCode();
+        Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode> p =
+                new Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode>(
+                        s1, s2);
+        HashSet<Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode>> s =
+                new HashSet<Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode>>();
+        s.add(p);
+        Set<Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode>> ss =
+                cloneBySerialization(s, /* resolveAgainst */ receiverDomainFactory);
+        
+        Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode> ps = ss.iterator().next();
+        SerializableObjectWithJavaLangObjectHashCode s1Des = ps.getA();
+        SerializableObjectWithJavaLangObjectHashCode s2Des = ps.getB();
+        assertNotSame(s, ss);
+        assertNotSame(s.iterator().next(), ss.iterator().next());
+        assertNotSame(s1, s1Des);
+        assertNotSame(s2, s2Des);
+        assertEquals(1, ss.size());
+        Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode> pNew =
+                new Pair<SerializableObjectWithJavaLangObjectHashCode, SerializableObjectWithJavaLangObjectHashCode>(s1Des, s2Des);
+        assertEquals(ps.hashCode(), pNew.hashCode());
+        assertTrue(ss.contains(pNew));
+    }
+    
     /**
      * We had trouble de-serializing int[] through our specialized ObjectInputStream with its own resolveClass
      * implementation. This test failed initially before we changed the call for loading classes.

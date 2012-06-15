@@ -1388,7 +1388,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private Pair<Placemark, Placemark> getStartFinishPlacemarksForTrackedRace(TrackedRace race) {
         double radiusCalculationFactor = 10.0;
-        Pair<Placemark, Placemark> placemarks = new Pair<Placemark, Placemark>(null, null);
         Placemark startBest = null;
         Placemark finishBest = null;
 
@@ -1439,13 +1438,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
-
-        if (startBest != null) {
-            placemarks.setA(startBest);
-        }
-        if (finishBest != null) {
-            placemarks.setB(finishBest);
-        }
+        Pair<Placemark, Placemark> placemarks = new Pair<Placemark, Placemark>(startBest, finishBest);
         return placemarks;
     }
     
