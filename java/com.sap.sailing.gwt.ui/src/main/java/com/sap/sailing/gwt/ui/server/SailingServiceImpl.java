@@ -826,16 +826,27 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack
                             .getMillisecondsOverWhichToAverageWind();
                     TimePoint timePoint = fromTimePoint;
+                    Double minWindConfidence = 2.0;
+                    Double maxWindConfidence = -1.0;
                     for (int i = 0; i < numberOfFixes; i++) {
                         WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(position, timePoint);
                         
                         if (averagedWindWithConfidence != null) {
                             WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), windTrack, timePoint);
-                            windDTO.confidence = averagedWindWithConfidence.getConfidence();
+                            double confidence = averagedWindWithConfidence.getConfidence();
+                            windDTO.confidence = confidence;
                             windTrackInfoDTO.windFixes.add(windDTO);
+                            if(confidence < minWindConfidence) {
+                                minWindConfidence = confidence;
+                            }
+                            if(confidence > maxWindConfidence) {
+                                maxWindConfidence = confidence;
+                            }
                         }
                         timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
                     }
+                    windTrackInfoDTO.minWindConfidence = minWindConfidence; 
+                    windTrackInfoDTO.maxWindConfidence = maxWindConfidence; 
                 }
             }
         }
@@ -875,27 +886,38 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 // TODO consider parallelizing
                 if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
                     WindTrackInfoDTO windTrackInfoDTO = new WindTrackInfoDTO();
+                    windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                     windTrackInfoDTO.windFixes = new ArrayList<WindDTO>();
                     WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                    windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
                     windTrackInfoDTO.dampeningIntervalInMilliseconds = windTrack
                             .getMillisecondsOverWhichToAverageWind();
                     TimePoint timePoint = from;
+                    Double minWindConfidence = 2.0;
+                    Double maxWindConfidence = -1.0;
                     for (int i = 0; i < numberOfFixes && newestEvent != null && timePoint.compareTo(newestEvent) < 0; i++) {
                         WindWithConfidence<Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack.getAveragedWindWithConfidence(null, timePoint);
                         if (averagedWindWithConfidence != null) {
+                            double confidence = averagedWindWithConfidence.getConfidence();
                             WindDTO windDTO = createWindDTOFromAlreadyAveraged(averagedWindWithConfidence.getObject(), windTrack, timePoint);
-                            windDTO.confidence = averagedWindWithConfidence.getConfidence();
+                            windDTO.confidence = confidence;
                             windTrackInfoDTO.windFixes.add(windDTO);
+                            if(confidence < minWindConfidence) {
+                                minWindConfidence = confidence;
+                            }
+                            if(confidence > maxWindConfidence) {
+                                maxWindConfidence = confidence;
+                            }
                         }
                         timePoint = new MillisecondsTimePoint(timePoint.asMillis() + millisecondsStepWidth);
                     }
+                    windTrackInfoDTO.minWindConfidence = minWindConfidence; 
+                    windTrackInfoDTO.maxWindConfidence = maxWindConfidence; 
                 }
             }
         }
         return result;
     }
-    
+
     @Override
     public WindInfoForRaceDTO getAveragedWindInfo(RaceIdentifier raceIdentifier, Date from, Date to,
             long resolutionInMilliseconds, Collection<String> windSourceTypeNames) {
