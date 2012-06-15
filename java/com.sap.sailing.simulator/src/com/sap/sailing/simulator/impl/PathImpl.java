@@ -67,6 +67,8 @@ public class PathImpl implements Path {
 	@Override
 	public List<TimedPositionWithSpeed> getEvenTimedPoints(long milliseconds) {
 		
+	        if (milliseconds == 0) return null;
+	    
 		List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
 		TimePoint t = pathPoints.get(0).getTimePoint();
 		TimePoint lastPoint = pathPoints.get(pathPoints.size()-1).getTimePoint();
