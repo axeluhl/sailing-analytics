@@ -127,7 +127,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private TimePoint endTime;
 
     /**
-     * The the first and last passing times of all course waypoints
+     * The first and last passing times of all course waypoints
      */
     private final List<Pair<Waypoint, Pair<TimePoint, TimePoint>>> markPassingsTimes;
 
@@ -461,14 +461,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time order
             // of the waypoint times
             Date previousLegPassingTime = null;
-            for (Waypoint waypoint: getRace().getCourse().getWaypoints()) {
-                Pair<TimePoint, TimePoint> timesPair = new Pair<TimePoint, TimePoint>(null, null);
-                markPassingsTimes.add(new Pair<Waypoint, Pair<TimePoint, TimePoint>>(waypoint, timesPair));
+            for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
+                TimePoint firstPassingTime = null;
+                TimePoint lastPassingTime = null;
                 if (wayPointNumber == 1) {
                     // For the first leg the use of "firstPassingDate" is not correct,
                     // because boats can pass the start line before the actual start;
                     // therefore we are using the calculated start time here
-                    timesPair.setA(getStartOfRace());
+                    firstPassingTime = getStartOfRace();
                 } else {
                     NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(waypoint);
                     if (markPassings != null && !markPassings.isEmpty()) {
@@ -480,7 +480,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                             for (MarkPassing currentMarkPassing : markPassings) {
                                 Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
                                 if (previousLegPassingTime == null || currentPassingDate.after(previousLegPassingTime)) {
-                                    timesPair.setA(currentMarkPassing.getTimePoint());
+                                    firstPassingTime = currentMarkPassing.getTimePoint();
                                     previousLegPassingTime = currentPassingDate;
                                     break;
                                 }
@@ -488,6 +488,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         }
                     }
                 }
+                Pair<TimePoint, TimePoint> timesPair = new Pair<TimePoint, TimePoint>(firstPassingTime, lastPassingTime);
+                markPassingsTimes.add(new Pair<Waypoint, Pair<TimePoint, TimePoint>>(waypoint, timesPair));
                 wayPointNumber++;
             }
         }

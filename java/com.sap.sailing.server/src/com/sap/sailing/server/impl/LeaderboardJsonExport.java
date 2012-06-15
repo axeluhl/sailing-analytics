@@ -80,6 +80,7 @@ public class LeaderboardJsonExport extends Servlet {
                             jsonEntry.put("maxPointsReason", leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint));
                             jsonEntry.put("rank", rankedCompetitorsForColumn.indexOf(competitor)+1);
                             jsonEntry.put("isDiscarded", leaderboard.isDiscarded(competitor, raceColumn, timePoint));
+                            jsonEntry.put("isCorrected", leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn));
                         }
                     }
                     jsonLeaderboard.writeJSONString(resp.getWriter());
