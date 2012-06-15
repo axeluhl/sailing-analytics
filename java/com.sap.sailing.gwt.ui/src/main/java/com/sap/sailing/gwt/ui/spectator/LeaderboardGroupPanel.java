@@ -11,6 +11,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -61,6 +62,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     
     private FlowPanel mainPanel;
     private Widget welcomeWidget = null;
+    private boolean allLeaderboardNamesStartWithGroupName = false;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
             ErrorReporter errorReporter, final String groupName, String root, String viewMode) {
@@ -85,6 +87,18 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             public void onSuccess(LeaderboardGroupDTO group) {
                 if (group != null) {
                     LeaderboardGroupPanel.this.group = group;
+                    
+                    if(group.leaderboards.size() > 1) {
+                        allLeaderboardNamesStartWithGroupName = true;
+                        String groupName = group.name; 
+                        for(StrippedLeaderboardDTO leaderboard: group.leaderboards) {
+                            if(!leaderboard.name.startsWith(groupName)) {
+                                allLeaderboardNamesStartWithGroupName = false;
+                                break;
+                            }
+                        }
+                    }
+                    
                     buildGUI();
                 } else {
                     errorReporter.reportError(stringConstants.noLeaderboardGroupWithNameFound(groupName));
@@ -153,6 +167,17 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             leaderboardsTable.setRowData(tableData);
             mainPanel.add(leaderboardsTable);
         } else {
+            TextColumn<StrippedLeaderboardDTO> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
+                    @Override
+                    public String getValue(StrippedLeaderboardDTO strippedLeaderboardDTO) {
+                        if(allLeaderboardNamesStartWithGroupName) {
+                            return shortenLeaderboardName(group.name, strippedLeaderboardDTO.name);
+                        } else {
+                            return strippedLeaderboardDTO.name;
+                        }
+                    }
+                };
+            
             AnchorCell nameAnchorCell = new AnchorCell();
             Column<StrippedLeaderboardDTO, SafeHtml> nameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(nameAnchorCell) {
                 @Override
@@ -161,7 +186,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                             + "&leaderboardGroupName=" + group.name + "&root=" + root
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                    return ANCHORTEMPLATE.anchor(link, leaderboard.name, STYLE_NAME_PREFIX + "ActiveLeaderboard");
+                    return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard");
                 }
             };
 
@@ -173,16 +198,22 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 }
             };
 
-            LeaderboardGroupCompactTableResources tableResources = GWT.create(LeaderboardGroupCompactTableResources.class);
+            LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
             CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
             leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
-            leaderboardsTable.addColumn(nameColumn, stringConstants.name());
-            leaderboardsTable.addColumn(racesColumn, stringConstants.races());
+            leaderboardsTable.addColumn(leaderboardNameColumn, stringConstants.name());
+            leaderboardsTable.addColumn(nameColumn, stringConstants.races());
+            leaderboardsTable.addColumn(racesColumn);
             leaderboardsTable.setRowData(group.leaderboards);
             mainPanel.add(leaderboardsTable);
         }
     }
 
+    private String shortenLeaderboardName(String prefixToCut, String leaderboardName) {
+        String result = leaderboardName.substring(prefixToCut.length(), leaderboardName.length());
+        return result.trim();
+    }
+    
     private SafeHtml raceToRaceBoardLink(StrippedLeaderboardDTO leaderboard, RaceColumnDTO race) {
         String debugParam = Window.Location.getParameter("gwt.codesvr");
         SafeHtmlBuilder b = new SafeHtmlBuilder();

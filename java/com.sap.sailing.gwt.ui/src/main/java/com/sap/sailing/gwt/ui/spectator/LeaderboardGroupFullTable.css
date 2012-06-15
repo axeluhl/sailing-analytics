@@ -1,7 +1,5 @@
 @CHARSET "ISO-8859-1";
 
-
-
 .cellTableWidget {
 	margin: 0 13px;
 	table-layout: auto;
@@ -36,15 +34,16 @@
 .cellTableEvenRowCell { /* th */
 	border: none;
 	background: none;
+	vertical-align: middle;
 }
 
 .cellTableOddRow { /* tr */
 	background: none;
-	
 }
 
 .cellTableOddRowCell { /* td */
 	border: none;
+	vertical-align: middle;
 }
 
 .cellTableHoveredRow {
@@ -52,39 +51,8 @@
 }
 
 .cellTableSelectedRow {
-
 }
-
 
 .cellTableSelectedRowCell {
 
 }
-
-.cellTableRaceColumnHeader {
-
-}
-
-.cellTableLegColumnHeader {
-
-}
-
-.cellTableLegDetailColumnHeader {
-
-}
-
-.cellTableRaceColumn {
-
-}
-
-.cellTableLegColumn {
-
-}
-
-.cellTableLegDetailColumn {
-
-}
-
-.cellTableTotalColumn {
-
-}
-

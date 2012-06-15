@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.ui.spectator;
 
 import com.google.gwt.user.cellview.client.CellTable;
-import com.sap.sailing.gwt.ui.adminconsole.AdminConsoleTableResources.AdminConsoleTableStyle;
+import com.sap.sailing.gwt.ui.spectator.SpectatorViewTableResources.SpectatorViewTableStyle;
 
 public interface LeaderboardGroupFullTableResources extends CellTable.Resources {
     @Source({ CellTable.Style.DEFAULT_CSS, "LeaderboardGroupFullTable.css" })
-    AdminConsoleTableStyle cellTableStyle();
+    SpectatorViewTableStyle cellTableStyle();
     
     interface LeaderboardGroupTableStyle extends CellTable.Style {
     }
