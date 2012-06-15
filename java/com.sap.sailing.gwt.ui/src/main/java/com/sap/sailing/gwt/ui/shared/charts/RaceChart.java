@@ -80,7 +80,7 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
         boolean updateMinMax = false;
         
         if(chart != null) {
-            if(minTimepoint == null || maxTimepoint == null) {
+            if (minTimepoint == null || maxTimepoint == null) {
                 minTimepoint = raceMinMax.getA();
                 maxTimepoint = raceMinMax.getB();
                 updateMinMax = true;
@@ -90,13 +90,18 @@ public abstract class RaceChart extends SimplePanel implements RaceTimesInfoProv
                 updateMinMax = true;
             }
         }
-        if(updateMinMax) {
-            chart.getXAxis().setMin(minTimepoint.getTime());
-            chart.getXAxis().setMax(maxTimepoint.getTime());
-            chart.getXAxis().setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), false, false);
-            
-            long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
-            chart.getXAxis().setTickInterval(tickInterval);
+        if (updateMinMax) {
+            if (minTimepoint != null) {
+                chart.getXAxis().setMin(minTimepoint.getTime());
+            }
+            if (maxTimepoint != null) {
+                chart.getXAxis().setMax(maxTimepoint.getTime());
+            }
+            if (minTimepoint != null && maxTimepoint != null) {
+                chart.getXAxis().setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), false, false);
+                long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
+                chart.getXAxis().setTickInterval(tickInterval);
+            }
         }
     }
 
