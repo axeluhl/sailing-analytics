@@ -145,7 +145,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private void broadcastOperation(RacingEventServiceOperation<?> operation) throws Exception {
         Topic topic = getReplicationTopic();
         Session session = messageBrokerManager.getSession();
-        getMessageProducer(topic).setDeliveryMode(DeliveryMode.PERSISTENT);
+        getMessageProducer(topic).setDeliveryMode(DeliveryMode.NON_PERSISTENT);
         BytesMessage operationAsMessage = session.createBytesMessage();
         // serialize operation into message
         ByteArrayOutputStream bos = new ByteArrayOutputStream();

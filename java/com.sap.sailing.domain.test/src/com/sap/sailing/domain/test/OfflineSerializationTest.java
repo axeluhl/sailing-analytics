@@ -6,7 +6,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,10 +28,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
-    private static class SerializableObjectWithJavaLangObjectHashCode implements Serializable {
-        private static final long serialVersionUID = 696920899165910830L;
-    }
-    
     /**
      * Bug 769 was based on an inconsistency of a cached hash code in Pair. The same problem existed for Triple.
      * Serialization changes the Object IDs of the objects contained and therefore the hash code based on this
