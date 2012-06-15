@@ -52,7 +52,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		//calls either createDummy or createHeuristic()
 		//use getAllPaths() instead
 		
-		return createHeuristic();
+		return createOneTurnLeft();
 	}
 	
 	private static Logger logger = Logger.getLogger("com.sap.sailing");
@@ -359,6 +359,189 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		return new PathImpl(lst, windField);
 	}
         
+	private Path createOneTurnLeft() {
+		//retrieve simulation parameters
+		Boundary boundary = new RectangularBoundary(simulationParameters.getCourse().get(0),simulationParameters.getCourse().get(1));//simulationParameters.getBoundaries();
+		WindFieldGenerator windField = simulationParameters.getWindField();
+		PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
+		Position start = simulationParameters.getCourse().get(0);
+		Position end = simulationParameters.getCourse().get(1);
+		TimePoint startTime = windField.getStartTime();//new MillisecondsTimePoint(0);
+		
+		Distance courseLength = start.getDistance(end);
+				
+		//the solution path
+		LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
+		//the minimal one-turn time
+		
+		Long timeResolution = 120000L;
+		boolean turned = true;
+		boolean outOfBounds = false;
+		Long minTurn = Long.MAX_VALUE;
+		int turningStep = 0;
+		
+		while ( turned ) {	
+			LinkedList<TimedPositionWithSpeed> tempLst = new LinkedList<TimedPositionWithSpeed>();
+			Position currentPosition = start;
+			TimePoint currentTime = startTime;
+			turned = false;
+			outOfBounds = false;
+			turningStep++;
+			int currentStep = 0;
+			
+			while(true) {
+				
+				SpeedWithBearing currWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+				polarDiagram.setWind(currWind);
+				TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeResolution);
+				tempLst.add(new TimedPositionWithSpeedImpl(currentTime, currentPosition, currWind));
+				
+				if (currentStep >= turningStep) turned = true;
+				
+				if(!turned) {
+					Bearing direction = polarDiagram.optimalDirectionsUpwind()[0];
+					//for(Bearing b: polarDiagram.optimalDirectionsUpwind())
+						//if(polarDiagram.getWindSide(b) == PolarDiagram.WindSide.LEFT)
+							//direction = b;
+					SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
+					currentPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
+				}
+				if(turned) {
+					Bearing direction1 = currentPosition.getBearingGreatCircle(end);
+					Bearing direction2 = polarDiagram.optimalDirectionsUpwind()[1];
+					//for(Bearing b: polarDiagram.optimalDirectionsUpwind())
+						//if(polarDiagram.getWindSide(b) == PolarDiagram.WindSide.RIGHT)
+							//direction2 = b;
+					SpeedWithBearing currSpeed1 = polarDiagram.getSpeedAtBearing(direction1);
+					SpeedWithBearing currSpeed2 = polarDiagram.getSpeedAtBearing(direction2);
+					Position nextPosition1 = currSpeed1.travelTo(currentPosition, currentTime, nextTime);
+					Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
+					if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) > 0) 
+						currentPosition = nextPosition2;
+					else
+						currentPosition = nextPosition1;	
+				}
+				
+				currentStep++;
+				//System.out.println(currentStep + "/" + turningStep + "/" + turned);
+				currentTime = nextTime;
+				
+				if(currentTime.asMillis() > minTurn) { 
+					//System.out.println("out of time");
+				 	break;
+				}
+				if(!boundary.isWithinBoundaries(currentPosition)) {
+					outOfBounds = true;
+					//System.out.println("out of bounds");
+					break;
+				}
+				if(currentPosition.getDistance(end).compareTo(courseLength.scale(0.005)) < 0) {
+					minTurn = currentTime.asMillis();
+					lst = new LinkedList<TimedPositionWithSpeed>(tempLst);
+					//System.out.println("end reached!!!");
+					break;
+				}
+				
+			}
+			
+		}
+		
+		lst.addLast(new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end, lst.getLast().getSpeed()));
+		return new PathImpl(lst, windField);
+		
+	}
+	
+	private Path createOneTurnRight() {
+		//retrieve simulation parameters
+				Boundary boundary = new RectangularBoundary(simulationParameters.getCourse().get(0),simulationParameters.getCourse().get(1));//simulationParameters.getBoundaries();
+				WindFieldGenerator windField = simulationParameters.getWindField();
+				PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
+				Position start = simulationParameters.getCourse().get(0);
+				Position end = simulationParameters.getCourse().get(1);
+				TimePoint startTime = windField.getStartTime();//new MillisecondsTimePoint(0);
+				
+				Distance courseLength = start.getDistance(end);
+						
+				//the solution path
+				LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
+				//the minimal one-turn time
+				
+				Long timeResolution = 120000L;
+				boolean turned = true;
+				boolean outOfBounds = false;
+				Long minTurn = Long.MAX_VALUE;
+				int turningStep = 0;
+				
+				while ( turned ) {	
+					LinkedList<TimedPositionWithSpeed> tempLst = new LinkedList<TimedPositionWithSpeed>();
+					Position currentPosition = start;
+					TimePoint currentTime = startTime;
+					turned = false;
+					outOfBounds = false;
+					turningStep++;
+					int currentStep = 0;
+					
+					while(true) {
+						
+						SpeedWithBearing currWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+						polarDiagram.setWind(currWind);
+						TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeResolution);
+						tempLst.add(new TimedPositionWithSpeedImpl(currentTime, currentPosition, currWind));
+						
+						if (currentStep >= turningStep) turned = true;
+						
+						if(!turned) {
+							Bearing direction = polarDiagram.optimalDirectionsUpwind()[1];
+							//for(Bearing b: polarDiagram.optimalDirectionsUpwind())
+								//if(polarDiagram.getWindSide(b) == PolarDiagram.WindSide.LEFT)
+									//direction = b;
+							SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
+							currentPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
+						}
+						if(turned) {
+							Bearing direction1 = currentPosition.getBearingGreatCircle(end);
+							Bearing direction2 = polarDiagram.optimalDirectionsUpwind()[0];
+							//for(Bearing b: polarDiagram.optimalDirectionsUpwind())
+								//if(polarDiagram.getWindSide(b) == PolarDiagram.WindSide.RIGHT)
+									//direction2 = b;
+							SpeedWithBearing currSpeed1 = polarDiagram.getSpeedAtBearing(direction1);
+							SpeedWithBearing currSpeed2 = polarDiagram.getSpeedAtBearing(direction2);
+							Position nextPosition1 = currSpeed1.travelTo(currentPosition, currentTime, nextTime);
+							Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
+							if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) > 0) 
+								currentPosition = nextPosition2;
+							else
+								currentPosition = nextPosition1;	
+						}
+						
+						currentStep++;
+						//System.out.println(currentStep + "/" + turningStep + "/" + turned);
+						currentTime = nextTime;
+						
+						if(currentTime.asMillis() > minTurn) { 
+							//System.out.println("out of time");
+						 	break;
+						}
+						if(!boundary.isWithinBoundaries(currentPosition)) {
+							outOfBounds = true;
+							//System.out.println("out of bounds");
+							break;
+						}
+						if(currentPosition.getDistance(end).compareTo(courseLength.scale(0.005)) < 0) {
+							minTurn = currentTime.asMillis();
+							lst = new LinkedList<TimedPositionWithSpeed>(tempLst);
+							//System.out.println("end reached!!!");
+							break;
+						}
+						
+					}
+					
+				}
+				
+				lst.addLast(new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end, lst.getLast().getSpeed()));
+				return new PathImpl(lst, windField);
+				
+	}
 	@Override
 	public Map<String, Path> getAllPaths() {
 		Map<String, Path> allPaths = new HashMap<String, Path>();
@@ -372,8 +555,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
 		
 		Map<String, List<TimedPositionWithSpeed>> allPaths= new HashMap<String, List<TimedPositionWithSpeed>>();
 		//allPaths.put("Dummy", createDummy().getEvenTimedPoints(millisecondsStep));
-		allPaths.put("Opportunistic", createHeuristic().getEvenTimedPoints(millisecondsStep));
-		allPaths.put("Omniscient", createDjikstra().getEvenTimedPoints(millisecondsStep));
+		//allPaths.put("Opportunistic", createHeuristic().getEvenTimedPoints(millisecondsStep));
+		allPaths.put("Opportunistic", createOneTurnLeft().getEvenTimedPoints(millisecondsStep));
+		//allPaths.put("Omniscient", createDjikstra().getEvenTimedPoints(millisecondsStep));
+		allPaths.put("Omniscient", createOneTurnRight().getEvenTimedPoints(millisecondsStep));
 		return allPaths;
 	}
 
