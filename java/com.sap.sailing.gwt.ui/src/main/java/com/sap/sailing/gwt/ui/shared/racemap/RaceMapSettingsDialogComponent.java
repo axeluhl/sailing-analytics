@@ -97,7 +97,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         //Run zoomSettingsChanged to set the checkboxes to their correct state
         zoomSettingsChanged();
         
-        Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypes());
+        Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypesToShowWhenCompetitorIsClicked());
         vp.add(maneuversLabel);
         for (ManeuverType maneuverType : ManeuverType.values()) {
             CheckBox checkbox = dialog.createCheckbox(ManeuverTypeFormatter.format(maneuverType, stringMessages));

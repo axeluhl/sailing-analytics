@@ -333,4 +333,5 @@ public interface StringMessages extends Messages {
     String apply();
     String successfullyUpdatedScores();
     String errorUpdatingScoresForLeaderboard(String leaderboardName, String message);
+    String maneuverTypesToShowWhenCompetitorIsClicked();
 }
