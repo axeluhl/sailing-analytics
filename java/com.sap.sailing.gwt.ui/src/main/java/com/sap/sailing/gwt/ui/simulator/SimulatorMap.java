@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
+import com.sap.sailing.gwt.ui.shared.panels.SimpleBusyIndicator;
 import com.sap.sailing.gwt.ui.shared.windpattern.WindPatternDisplay;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
@@ -50,7 +51,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final Timer timer;
-
+    private final SimpleBusyIndicator busyIndicator;
+    
     private ColorPalette colorPalette;
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
@@ -122,11 +124,12 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     timeListeners.add(replayPathCanvasOverlays.get(i));
                 }
             }
+            busyIndicator.setBusy(false);
         }
 
     }
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
-            int xRes, int yRes, Timer timer, WindFieldGenParamsDTO windParams) {
+            int xRes, int yRes, Timer timer, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator) {
         this.simulatorSvc = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -135,6 +138,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.timer = timer;
         timer.addTimeListener(this);
         this.windParams = windParams;
+        this.busyIndicator = busyIndicator;
         colorPalette = new ColorPaletteGenerator();
 
         dataInitialized = false;
@@ -214,7 +218,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setSouthEast(endPointDTO);
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
-
+        busyIndicator.setBusy(true);
         simulatorSvc.getWindField(windParams, windPatternDisplay, new AsyncCallback<WindFieldDTO>() {
             @Override
             public void onFailure(Throwable message) {
@@ -232,6 +236,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 refreshWindFieldOverlay(wl);
                 timeListeners.clear();
                 timeListeners.add(windFieldCanvasOverlay);
+                busyIndicator.setBusy(false);
             }
         });
 
@@ -258,7 +263,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setSouthEast(endPointDTO);
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
-
+        busyIndicator.setBusy(true);
         //simulatorSvc.getPaths(windParams, windPatternDisplay, new PathManager(windPatternDisplay, summaryView));
         simulatorSvc.getSimulatorResults(windParams, windPatternDisplay, !summaryView, 
                 new ResultManager(summaryView));
