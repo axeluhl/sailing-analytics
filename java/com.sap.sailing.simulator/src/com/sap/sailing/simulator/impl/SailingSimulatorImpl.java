@@ -408,17 +408,17 @@ public class SailingSimulatorImpl implements SailingSimulator {
 				}
 				if(turned) {
 					Bearing direction1 = currentPosition.getBearingGreatCircle(end);
-					Bearing direction2 = polarDiagram.optimalDirectionsUpwind()[1];
+					//Bearing direction2 = polarDiagram.optimalDirectionsUpwind()[1];
 					//for(Bearing b: polarDiagram.optimalDirectionsUpwind())
 						//if(polarDiagram.getWindSide(b) == PolarDiagram.WindSide.RIGHT)
 							//direction2 = b;
 					SpeedWithBearing currSpeed1 = polarDiagram.getSpeedAtBearing(direction1);
-					SpeedWithBearing currSpeed2 = polarDiagram.getSpeedAtBearing(direction2);
+				//	SpeedWithBearing currSpeed2 = polarDiagram.getSpeedAtBearing(direction2);
 					Position nextPosition1 = currSpeed1.travelTo(currentPosition, currentTime, nextTime);
-					Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
-					if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) > 0) 
-						currentPosition = nextPosition2;
-					else
+					//Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
+					//if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) > 0) 
+						//currentPosition = nextPosition2;
+					//else
 						currentPosition = nextPosition1;	
 				}
 				
@@ -500,17 +500,17 @@ public class SailingSimulatorImpl implements SailingSimulator {
 						}
 						if(turned) {
 							Bearing direction1 = currentPosition.getBearingGreatCircle(end);
-							Bearing direction2 = polarDiagram.optimalDirectionsUpwind()[0];
+							//Bearing direction2 = polarDiagram.optimalDirectionsUpwind()[0];
 							//for(Bearing b: polarDiagram.optimalDirectionsUpwind())
 								//if(polarDiagram.getWindSide(b) == PolarDiagram.WindSide.RIGHT)
 									//direction2 = b;
 							SpeedWithBearing currSpeed1 = polarDiagram.getSpeedAtBearing(direction1);
-							SpeedWithBearing currSpeed2 = polarDiagram.getSpeedAtBearing(direction2);
+							//SpeedWithBearing currSpeed2 = polarDiagram.getSpeedAtBearing(direction2);
 							Position nextPosition1 = currSpeed1.travelTo(currentPosition, currentTime, nextTime);
-							Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
-							if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) > 0) 
-								currentPosition = nextPosition2;
-							else
+							//Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
+							//if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) > 0) 
+								//currentPosition = nextPosition2;
+							//else
 								currentPosition = nextPosition1;	
 						}
 						
