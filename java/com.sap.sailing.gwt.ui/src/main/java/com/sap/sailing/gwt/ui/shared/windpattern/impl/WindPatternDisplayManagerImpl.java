@@ -81,7 +81,7 @@ public class WindPatternDisplayManagerImpl implements WindPatternDisplayManager 
                 "Frequency (per hr)", 0, 20, 6);
         display.addSetting(frequency);
         WindPatternSetting<Double> amplitude = new WindPatternSettingSliderBar("amplitude",
-                "Amplitude (Degrees)", 0, 30, 15);
+                "Amplitude (Degrees)", -30, 30, 0);
         display.addSetting(amplitude);
       
     }
