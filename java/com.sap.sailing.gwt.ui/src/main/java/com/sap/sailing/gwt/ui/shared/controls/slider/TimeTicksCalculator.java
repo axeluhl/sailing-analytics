@@ -69,11 +69,6 @@ public class TimeTicksCalculator {
         // round to a tenfold of 1, 2, 2.5 or 5
         normalized = interval / magnitude;
 
-        // multiples for a linear scale
-        if (magnitude == 1) {
-            multiples = new int[] { 1, 2, 5, 10 };
-        }
-
         // normalize the interval to the nearest multiple
         for (int i = 0; i < multiples.length; i++) {
             interval = multiples[i];
@@ -196,11 +191,6 @@ public class TimeTicksCalculator {
         // push the last time
         if(time <= max)
             tickPositions.add(new TickPosition(time));
-
-        // record information on the chosen unit - for dynamic label formatter
-        // tickPositions.info = extend(normalizedInterval, {
-        // totalRange: interval * count
-        // });
 
         return tickPositions;
     }

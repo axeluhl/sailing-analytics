@@ -127,12 +127,11 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         timeSlider = new TimeSlider();
         timeSlider.setEnabled(true);
         timeSlider.setLabelFormatter(new SliderBar.LabelFormatter() {
-            final DateTimeFormat formatter = DateTimeFormat.getFormat("HH:mm"); 
+            final DateTimeFormat timeWithMinutesFormatter = DateTimeFormat.getFormat("HH:mm"); 
             @Override
-            public String formatLabel(SliderBar slider, double value) {
-                Date date = new Date();
-                date.setTime((long) value);
-                return formatter.format(date);
+            public String formatLabel(SliderBar slider, Double value, Double previousValue) {
+                Date date = new Date(value.longValue());
+                return timeWithMinutesFormatter.format(date); 
             }
         });
 
