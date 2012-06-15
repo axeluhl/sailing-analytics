@@ -73,13 +73,13 @@ public class PathImpl implements Path {
 		TimePoint t = pathPoints.get(0).getTimePoint();
 		TimePoint lastPoint = pathPoints.get(pathPoints.size()-1).getTimePoint();
 
-		while((t.compareTo(lastPoint) <= 0)) {
+		while((t.compareTo(lastPoint) <= 0)&&(lst.size() < 50)) { // paths with more than 50 points lead to performance issues
 			lst.add(getPositionAtTime(t));
 			t = new MillisecondsTimePoint(t.asMillis() + milliseconds);
 		}
-		/*if (t.compareTo(lastPoint)> 0) {
+		if (t.compareTo(lastPoint)> 0) { // without this, the path may not reach end
                     lst.add(getPositionAtTime(t));
-		}*/
+		}
 		
 		return lst;
 	}
