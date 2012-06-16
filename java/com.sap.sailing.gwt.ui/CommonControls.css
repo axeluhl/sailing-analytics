@@ -463,3 +463,13 @@
 .gwt-DialogBox .gwt-Label {
 	line-height: 1.4;
 }
+
+.playPauseImage:hover{
+  background: url(images/playbutton-hover.png) 0 0 no-repeat !important;
+  cursor: pointer;
+}
+
+.playPauseImagePause:hover {
+  background: url(images/playbuttonPause-hover.png) 0 0 no-repeat !important;
+  cursor: pointer;
+}
