@@ -434,8 +434,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 } else if (lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
                     result = 1;
                 } else {
-                    // both don't seem to have the right boat class; compare by time stamp
-                    result = o1.getC().getB().compareTo(o2.getC().getB());
+                    // both don't seem to have the right boat class; compare by time stamp; newest first
+                    result = o2.getC().getB().compareTo(o1.getC().getB());
                 }
                 return result;
             }
