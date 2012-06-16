@@ -59,18 +59,22 @@ public abstract class AbstractRaceColumn implements RaceColumn {
     @Override
     public void setTrackedRace(Fleet fleet, TrackedRace trackedRace) {
         TrackedRace previouslyLinkedRace = this.trackedRaces.get(fleet);
-        if (trackedRace == null) {
-            setRaceIdentifier(fleet, null);
-            this.trackedRaces.remove(fleet);
-        } else {
-            this.trackedRaces.put(fleet, trackedRace);
-            this.setRaceIdentifier(fleet, trackedRace.getRaceIdentifier());
-        }
-        if (previouslyLinkedRace != null) {
-            notifyListenersAboutTrackedRaceUnlinked(fleet, previouslyLinkedRace);
-        }
-        if (trackedRace != null) {
-            notifyListenersAboutTrackedRaceLinked(fleet, trackedRace);
+        if (trackedRace != previouslyLinkedRace) {
+            synchronized (this) {
+                if (trackedRace == null) {
+                    setRaceIdentifier(fleet, null);
+                    this.trackedRaces.remove(fleet);
+                } else {
+                    this.trackedRaces.put(fleet, trackedRace);
+                    this.setRaceIdentifier(fleet, trackedRace.getRaceIdentifier());
+                }
+            }
+            if (previouslyLinkedRace != null) {
+                notifyListenersAboutTrackedRaceUnlinked(fleet, previouslyLinkedRace);
+            }
+            if (trackedRace != null) {
+                notifyListenersAboutTrackedRaceLinked(fleet, trackedRace);
+            }
         }
     }
 
@@ -104,7 +108,7 @@ public abstract class AbstractRaceColumn implements RaceColumn {
     }
 
     @Override
-    public void releaseTrackedRace(Fleet fleet) {
+    public synchronized void releaseTrackedRace(Fleet fleet) {
         trackedRaces.remove(fleet);
     }
 

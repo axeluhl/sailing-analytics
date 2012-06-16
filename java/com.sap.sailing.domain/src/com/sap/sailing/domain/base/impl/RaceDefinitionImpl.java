@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -22,7 +24,11 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<Competitor> competitors, Serializable id) {
         super(name);
         this.course = course;
-        this.competitors = competitors;
+        Set<Competitor> competitorsAsLinkedHashSet = new LinkedHashSet<Competitor>();
+        for (Competitor competitor : competitors) {
+            competitorsAsLinkedHashSet.add(competitor);
+        }
+        this.competitors = competitorsAsLinkedHashSet;
         this.boatClass = boatClass;
         this.id = id;
     }
