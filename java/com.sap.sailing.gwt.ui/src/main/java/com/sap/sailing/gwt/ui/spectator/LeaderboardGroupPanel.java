@@ -318,7 +318,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         }
 
         for(Map<String,Pair<FleetDTO, List<RaceColumnDTO>>> fleetGroup: fleetGroups) {
-            b.appendHtmlConstant("<div style=\"float:left\">");
+            b.appendHtmlConstant("<div style=\"float:left; margin-left:20px;\">");
             for(String fleetName: fleetGroup.keySet()) {
                 Pair<FleetDTO, List<RaceColumnDTO>> pair = fleetGroup.get(fleetName);
                 FleetDTO fleet = pair.getA();
