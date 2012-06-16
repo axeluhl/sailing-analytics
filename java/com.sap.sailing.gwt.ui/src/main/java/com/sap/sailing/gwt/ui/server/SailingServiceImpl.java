@@ -1729,11 +1729,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                             .asDate(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
                 }
             }
-            for (long i = competitorQuery.getA().before(startTime.asDate()) ? startTime.asMillis() : competitorQuery.getA()
-                    .getTime(); i <= endTime.asMillis(); i += stepSize) {
-                MillisecondsTimePoint time = new MillisecondsTimePoint(i);
-                raceData.add(new Pair<Date, Double>(time.asDate(), getCompetitorRaceDataEntry(detailType, race, competitor,
-                        time)));
+            if (startTime != null && endTime != null) {
+                for (long i = competitorQuery.getA().before(startTime.asDate()) ? startTime.asMillis()
+                        : competitorQuery.getA().getTime(); i <= endTime.asMillis(); i += stepSize) {
+                    MillisecondsTimePoint time = new MillisecondsTimePoint(i);
+                    raceData.add(new Pair<Date, Double>(time.asDate(), getCompetitorRaceDataEntry(detailType, race,
+                            competitor, time)));
+                }
             }
             // Adding fetched data to the container
             data.setCompetitorData(competitorQuery.getB(), new CompetitorRaceDataDTO(competitorQuery.getB(),
