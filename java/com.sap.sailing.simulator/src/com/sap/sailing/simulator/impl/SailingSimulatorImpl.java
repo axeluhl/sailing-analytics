@@ -740,6 +740,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 if(currentPosition.getDistance(end).compareTo(courseLength.scale(0.005)) < 0) {
                     minTurn = currentTime.asMillis();
                     lst = new LinkedList<TimedPositionWithSpeed>(tempLst);
+                    Bearing directionToEnd = currentPosition.getBearingGreatCircle(end);
+                    SpeedWithBearing crtWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+                    polarDiagram.setWind(crtWind);
+                    Speed speedToEnd = polarDiagram.getSpeedAtBearing(directionToEnd);
+                    Distance distanceToEnd = currentPosition.getDistance(end);
+                    Long timeToEnd =  (long) (1000.0 * distanceToEnd.getMeters() / speedToEnd.getMetersPerSecond());
+                    TimePoint endTime = new MillisecondsTimePoint(currentTime.asMillis() + timeToEnd);
+                    lst.addLast(new TimedPositionWithSpeedImpl(endTime,end,crtWind));
                     //System.out.println("end reached!!!");
                     break;
                 }
@@ -749,7 +757,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         }
 
         if(lst != null) {
-        	lst.addLast(new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end, lst.getLast().getSpeed()));
+        	//lst.addLast(new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end, lst.getLast().getSpeed()));
         	return new PathImpl(lst, windField);
         }
         else 
@@ -838,6 +846,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 if(currentPosition.getDistance(end).compareTo(courseLength.scale(0.005)) < 0) {
                     minTurn = currentTime.asMillis();
                     lst = new LinkedList<TimedPositionWithSpeed>(tempLst);
+                    Bearing directionToEnd = currentPosition.getBearingGreatCircle(end);
+                    SpeedWithBearing crtWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+                    polarDiagram.setWind(crtWind);
+                    Speed speedToEnd = polarDiagram.getSpeedAtBearing(directionToEnd);
+                    Distance distanceToEnd = currentPosition.getDistance(end);
+                    Long timeToEnd =  (long) (1000.0 * distanceToEnd.getMeters() / speedToEnd.getMetersPerSecond());
+                    TimePoint endTime = new MillisecondsTimePoint(currentTime.asMillis() + timeToEnd);
+                    lst.addLast(new TimedPositionWithSpeedImpl(endTime,end,crtWind));
                     //System.out.println("end reached!!!");
                     break;
                 }
@@ -847,7 +863,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         }
 
         if(lst != null) {
-        	lst.addLast(new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end, lst.getLast().getSpeed()));
+        	//lst.addLast(new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end, lst.getLast().getSpeed()));
         	return new PathImpl(lst, windField);
         }
         else 
