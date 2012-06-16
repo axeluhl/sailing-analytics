@@ -53,7 +53,9 @@ public interface TrackedRace extends Serializable {
      * is returned. If there are mark passings for the first mark and the start time is less than
      * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} before the first mark passing for the
      * first mark. Otherwise, the first mark passing for the first mark minus
-     * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.
+     * {@link #MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS} is returned as the race start time.<p>
+     * 
+     * If no start time can be determined this way, <code>null</code> is returned.
      */
     TimePoint getStartOfRace();
     
