@@ -696,7 +696,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeResolution);
                 tempLst.add(new TimedPositionWithSpeedImpl(currentTime, currentPosition, currWind));
 
-                if (currentStep >= turningStep) turned = true;
+                if (currentStep >= turningStep) {
+                	turned = true;
+                	nextTime = new MillisecondsTimePoint(nextTime.asMillis() + polarDiagram.getTurnLoss());
+                }
 
                 if(!turned) {
                     Bearing direction = polarDiagram.optimalDirectionsUpwind()[0];
@@ -802,7 +805,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeResolution);
                 tempLst.add(new TimedPositionWithSpeedImpl(currentTime, currentPosition, currWind));
 
-                if (currentStep >= turningStep) turned = true;
+                if (currentStep >= turningStep) {
+                	turned = true;
+                	nextTime = new MillisecondsTimePoint(nextTime.asMillis() + polarDiagram.getTurnLoss());
+                }
 
                 if(!turned) {
                     Bearing direction = polarDiagram.optimalDirectionsUpwind()[1];
