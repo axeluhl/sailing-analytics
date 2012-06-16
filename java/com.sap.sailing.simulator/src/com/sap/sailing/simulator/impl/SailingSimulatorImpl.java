@@ -671,7 +671,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Distance courseLength = start.getDistance(end);
 
         //the solution path
-        LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
+        LinkedList<TimedPositionWithSpeed> lst = null;
         //the minimal one-turn time
 
         Long timeResolution = 120000L;
@@ -708,18 +708,20 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 }
                 if(turned) {
                     Bearing direction1 = currentPosition.getBearingGreatCircle(end);
-                    //Bearing direction2 = polarDiagram.optimalDirectionsUpwind()[1];
+                    Bearing direction2 = polarDiagram.optimalDirectionsUpwind()[1];
                     //for(Bearing b: polarDiagram.optimalDirectionsUpwind())
                     //if(polarDiagram.getWindSide(b) == PolarDiagram.WindSide.RIGHT)
                     //direction2 = b;
                     SpeedWithBearing currSpeed1 = polarDiagram.getSpeedAtBearing(direction1);
-                    //	SpeedWithBearing currSpeed2 = polarDiagram.getSpeedAtBearing(direction2);
+                    SpeedWithBearing currSpeed2 = polarDiagram.getSpeedAtBearing(direction2);
                     Position nextPosition1 = currSpeed1.travelTo(currentPosition, currentTime, nextTime);
-                    //Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
-                    //if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) > 0) 
-                    //currentPosition = nextPosition2;
-                    //else
-                    currentPosition = nextPosition1;	
+                    Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
+                    //nextPosition2.
+                    if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) < 0
+                    		&& Math.abs(direction1.getDifferenceTo(direction2).getDegrees()) < 45.0) 
+                    	currentPosition = nextPosition1;
+                    else
+                    	currentPosition = nextPosition2;	
                 }
 
                 currentStep++;
@@ -746,13 +748,17 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         }
 
-        lst.addLast(new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end, lst.getLast().getSpeed()));
-        return new PathImpl(lst, windField);
+        if(lst != null) {
+        	lst.addLast(new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end, lst.getLast().getSpeed()));
+        	return new PathImpl(lst, windField);
+        }
+        else 
+        	return null;
 
     }
 
     private Path createOneTurnRight() {
-        //retrieve simulation parameters
+    	//retrieve simulation parameters
         Boundary boundary = new RectangularBoundary(simulationParameters.getCourse().get(0),simulationParameters.getCourse().get(1));//simulationParameters.getBoundaries();
         WindFieldGenerator windField = simulationParameters.getWindField();
         PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
@@ -763,7 +769,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Distance courseLength = start.getDistance(end);
 
         //the solution path
-        LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
+        LinkedList<TimedPositionWithSpeed> lst = null;
         //the minimal one-turn time
 
         Long timeResolution = 120000L;
@@ -800,18 +806,20 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 }
                 if(turned) {
                     Bearing direction1 = currentPosition.getBearingGreatCircle(end);
-                    //Bearing direction2 = polarDiagram.optimalDirectionsUpwind()[0];
+                    Bearing direction2 = polarDiagram.optimalDirectionsUpwind()[0];
                     //for(Bearing b: polarDiagram.optimalDirectionsUpwind())
                     //if(polarDiagram.getWindSide(b) == PolarDiagram.WindSide.RIGHT)
                     //direction2 = b;
                     SpeedWithBearing currSpeed1 = polarDiagram.getSpeedAtBearing(direction1);
-                    //SpeedWithBearing currSpeed2 = polarDiagram.getSpeedAtBearing(direction2);
+                    SpeedWithBearing currSpeed2 = polarDiagram.getSpeedAtBearing(direction2);
                     Position nextPosition1 = currSpeed1.travelTo(currentPosition, currentTime, nextTime);
-                    //Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
-                    //if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) > 0) 
-                    //currentPosition = nextPosition2;
-                    //else
-                    currentPosition = nextPosition1;	
+                    Position nextPosition2 = currSpeed2.travelTo(currentPosition, currentTime, nextTime);
+                    //nextPosition2.
+                    if (nextPosition1.getDistance(end).compareTo(nextPosition2.getDistance(end)) < 0
+                    		&& Math.abs(direction1.getDifferenceTo(direction2).getDegrees()) < 45.0) 
+                    	currentPosition = nextPosition1;
+                    else
+                    	currentPosition = nextPosition2;	
                 }
 
                 currentStep++;
@@ -838,8 +846,12 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
         }
 
-        lst.addLast(new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end, lst.getLast().getSpeed()));
-        return new PathImpl(lst, windField);
+        if(lst != null) {
+        	lst.addLast(new TimedPositionWithSpeedImpl(new MillisecondsTimePoint(lst.getLast().getTimePoint().asMillis() + timeResolution), end, lst.getLast().getSpeed()));
+        	return new PathImpl(lst, windField);
+        }
+        else 
+        	return null;
 
     }
 
@@ -861,7 +873,12 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Map<String, List<TimedPositionWithSpeed>> allPaths= new HashMap<String, List<TimedPositionWithSpeed>>();
         //allPaths.put("Dummy", createDummy().getEvenTimedPoints(millisecondsStep));
         //allPaths.put("1-Turner Right", createOneTurnRight().getEvenTimedPoints(millisecondsStep));
-        //allPaths.put("1-Turner Left", createOneTurnLeft().getEvenTimedPoints(millisecondsStep));
+        Path oneLeft = createOneTurnLeft();
+        Path oneRight = createOneTurnRight();
+        if (oneLeft != null)
+        	allPaths.put("1-Turner Left", oneLeft.getEvenTimedPoints(millisecondsStep));
+        if (oneRight != null)
+        	allPaths.put("1-Turner Right", oneRight.getEvenTimedPoints(millisecondsStep));
         allPaths.put("Opportunistic", createHeuristic().getEvenTimedPoints(millisecondsStep));
         allPaths.put("Omniscient", createDjikstra().getEvenTimedPoints(millisecondsStep));
         //allPaths.put("Omniscient", createDP().getEvenTimedPoints(millisecondsStep));
