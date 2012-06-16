@@ -42,6 +42,9 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a class=\"{2}\" href=\"{0}\">{1}</a>")
         SafeHtml anchor(String url, String displayName, String styleClass);
+
+        @SafeHtmlTemplates.Template("<a target=\"{3}\" class=\"{2}\" href=\"{0}\">{1}</a>")
+        SafeHtml anchorWithTarget(String url, String displayName, String styleClass, String target);
     }
     
     interface TextWithClassTemplate extends SafeHtmlTemplates {
@@ -54,29 +57,27 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private static final int MAX_COLUMNS_IN_ROW = 0;
     private static final String STYLE_NAME_PREFIX = "leaderboardGroupPanel-";
     
-    private SailingServiceAsync sailingService;
-    private StringMessages stringConstants;
-    private ErrorReporter errorReporter;
+    private final SailingServiceAsync sailingService;
+    private final StringMessages stringConstants;
+    private final ErrorReporter errorReporter;
     private LeaderboardGroupDTO group;
-    private String root;
-    private String viewMode;
+    private final String root;
+    private final String viewMode;
     
     private FlowPanel mainPanel;
     private Widget welcomeWidget = null;
     private boolean allLeaderboardNamesStartWithGroupName = false;
+    private final boolean embedded;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
-            ErrorReporter errorReporter, final String groupName, String root, String viewMode) {
+            ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded) {
         super();
+        this.embedded = embedded;
         this.sailingService = sailingService;
         this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
-        this.root = root;
+        this.root = (root == null || root.length() == 0) ? "leaderboardGroupPanel" : root;
         this.viewMode = viewMode;
-        if (this.root == null || this.root.length() == 0) {
-            this.root = "leaderboardGroupPanel";
-        }
-
         mainPanel = new FlowPanel();
         add(mainPanel);
         loadGroup(groupName);
@@ -88,7 +89,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             public void onSuccess(LeaderboardGroupDTO group) {
                 if (group != null) {
                     LeaderboardGroupPanel.this.group = group;
-                    
                     if(group.leaderboards.size() > 1) {
                         allLeaderboardNamesStartWithGroupName = true;
                         String groupName = group.name; 
@@ -99,7 +99,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                             }
                         }
                     }
-                    
                     buildGUI();
                 } else {
                     errorReporter.reportError(stringConstants.noLeaderboardGroupWithNameFound(groupName));
@@ -164,7 +163,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             for (int i = 0; i < maxRacesNum; i++) {
                 tableData.add(i);
             }
-            
             leaderboardsTable.setRowData(tableData);
             mainPanel.add(leaderboardsTable);
         } else {
@@ -192,7 +190,12 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                             + "&leaderboardGroupName=" + group.name + "&root=" + root
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                    return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard");
+                    if (embedded) {
+                        return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard");
+                    } else {
+                        return ANCHORTEMPLATE.anchorWithTarget(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard",
+                                /* target */ "_blank");
+                    }
                 }
             };
 
@@ -232,11 +235,17 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         if (race.getRaceColumnName().equals(stringConstants.overview())) {
             String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                     + "&leaderboardGroupName=" + group.name + "&root=" + root);
-            if(debugParam != null && !debugParam.isEmpty())
+            if (debugParam != null && !debugParam.isEmpty()) {
                 link += "&gwt.codesvr=" + debugParam;
-            if(viewMode != null && !viewMode.isEmpty())
+            }
+            if (viewMode != null && !viewMode.isEmpty()) {
                 link += "&viewMode=" + viewMode;
-            b.append(ANCHORTEMPLATE.anchor(link, raceColumnDisplayName, STYLE_NAME_PREFIX + "ActiveLeaderboard"));
+            }
+            if (embedded) {
+                b.append(ANCHORTEMPLATE.anchorWithTarget(link, raceColumnDisplayName, STYLE_NAME_PREFIX + "ActiveLeaderboard", "_blank"));
+            } else {
+                b.append(ANCHORTEMPLATE.anchor(link, raceColumnDisplayName, STYLE_NAME_PREFIX + "ActiveLeaderboard"));
+            }
         } else {
             final Iterable<FleetDTO> fleets = race.getFleets();
             boolean singleFleet = Util.size(fleets) < 2;

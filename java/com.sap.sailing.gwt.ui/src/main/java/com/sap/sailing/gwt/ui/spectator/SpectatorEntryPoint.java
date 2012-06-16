@@ -48,19 +48,22 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         
         RootPanel rootPanel = RootPanel.get();
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
-
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(groupName != null ? groupName
-                : stringMessages.overview(), stringMessages);
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-        rootPanel.add(logoAndTitlePanel);
-        
+        boolean embedded = Window.Location.getParameter("embedded") != null
+                && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
+        if (!embedded) {
+            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(groupName != null ? groupName
+                    : stringMessages.overview(), stringMessages);
+            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+            rootPanel.add(logoAndTitlePanel);
+        }
         if (groupName == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
             groupOverviewPanel.add(new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages));
             rootPanel.add(groupOverviewPanel);
         } else {
-            LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this, groupName, root, viewModeParamValue);
+            LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,
+                    groupName, root, viewModeParamValue, embedded);
             groupPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
             groupPanel.setWelcomeWidget(new SimpleWelcomeWidget( stringMessages.welcomeToSailingAnalytics(), stringMessages.welcomeToSailingAnalyticsBody()));
             SimplePanel feedbackPanel = new SimplePanel();

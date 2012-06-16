@@ -16,14 +16,14 @@ public class RaceMapHelpLinesSettings {
     private final Set<HelpLineTypes> visibleHelpLines;
 
     /**
-     * Creates new RaceMapHelpLinesSettings with the {@link HelpLineTypes} <code>STARTLINE</code>, <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
+     * Creates new RaceMapHelpLinesSettings with the {@link HelpLineTypes} <code>STARTLINE</code>,
+     * <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
      */
     public RaceMapHelpLinesSettings() {
         visibleHelpLines = new HashSet<HelpLineTypes>();
         visibleHelpLines.add(HelpLineTypes.STARTLINE);
         visibleHelpLines.add(HelpLineTypes.FINISHLINE);
         visibleHelpLines.add(HelpLineTypes.ADVANTAGELINE);
-        visibleHelpLines.add(HelpLineTypes.COURSEMIDDLELINE);
     }
     
     public RaceMapHelpLinesSettings(Collection<HelpLineTypes> visibleHelpLines) {
