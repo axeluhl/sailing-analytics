@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.spectator;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -9,8 +11,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
-import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleWelcomeWidget;
 
@@ -55,6 +57,9 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
                     : stringMessages.overview(), stringMessages);
             logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
             rootPanel.add(logoAndTitlePanel);
+        } else {
+            RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
+            RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
         }
         if (groupName == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
@@ -65,22 +70,22 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,
                     groupName, root, viewModeParamValue, embedded);
             groupPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
-            groupPanel.setWelcomeWidget(new SimpleWelcomeWidget( stringMessages.welcomeToSailingAnalytics(), stringMessages.welcomeToSailingAnalyticsBody()));
-            SimplePanel feedbackPanel = new SimplePanel();
-            feedbackPanel.getElement().getStyle().setProperty("clear", "right");
-            feedbackPanel.addStyleName("feedbackPanel");
-            Anchor feedbackLink = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                    "<img class=\"linkNoBorder\" src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());//TODO set image
-            feedbackLink.setHref("mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback");
-            feedbackLink.addStyleName("feedbackLink");
-            feedbackPanel.add(feedbackLink);
-
             groupAndFeedbackPanel.add(groupPanel);
-            groupAndFeedbackPanel.add(feedbackPanel);
-
+            if (!embedded) {
+                groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(stringMessages.welcomeToSailingAnalytics(),
+                        stringMessages.welcomeToSailingAnalyticsBody()));
+                SimplePanel feedbackPanel = new SimplePanel();
+                feedbackPanel.getElement().getStyle().setProperty("clear", "right");
+                feedbackPanel.addStyleName("feedbackPanel");
+                Anchor feedbackLink = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                        "<img class=\"linkNoBorder\" src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());// TODO set image
+                feedbackLink.setHref("mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback");
+                feedbackLink.addStyleName("feedbackLink");
+                feedbackPanel.add(feedbackLink);
+                groupAndFeedbackPanel.add(feedbackPanel);
+            }
             rootPanel.add(groupAndFeedbackPanel);
         }
-        
         fillRegattas();
     }
 
