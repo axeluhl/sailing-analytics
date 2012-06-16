@@ -61,6 +61,7 @@ import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
@@ -995,16 +996,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             result.add(new Label(stringMessages.rank() + ": " + rank));
         }
         result.add(new Label(stringMessages.speed() + ": "
-                + NumberFormat.getDecimalFormat().format(lastFix.speedWithBearing.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()));
+                + NumberFormatterFactory.getDecimalFormat(1).format(lastFix.speedWithBearing.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()));
         result.add(new Label(stringMessages.bearing() + ": "+ (int) lastFix.speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
         if (lastFix.wind != null) {
-            result.add(new Label(stringMessages.degreesBoatToTheWind() + ": " +  NumberFormat.getDecimalFormat().format(Math.abs(
+            result.add(new Label(stringMessages.degreesBoatToTheWind() + ": " +  (int) Math.abs(
                     new DegreeBearingImpl(lastFix.speedWithBearing.bearingInDegrees).getDifferenceTo(
-                    new DegreeBearingImpl(lastFix.wind.dampenedTrueWindFromDeg)).getDegrees())) + " "+stringMessages.degreesShort() ));
+                    new DegreeBearingImpl(lastFix.wind.dampenedTrueWindFromDeg)).getDegrees()) + " "+stringMessages.degreesShort()));
         }
-        //TODO Introduce user role dependent view (Spectator, Admin). Comments underneath are necessary for other views
-//      result.add(new Label("" + lastFix.position));
-//      result.add(new Label("Tack: " + lastFix.tack.name()));
         if (!selectedRaces.isEmpty()) {
             RaceIdentifier race = selectedRaces.get(selectedRaces.size() - 1);
             if (race != null) {
