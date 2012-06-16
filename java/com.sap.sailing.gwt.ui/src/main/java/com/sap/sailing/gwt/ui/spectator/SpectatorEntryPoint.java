@@ -65,22 +65,22 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,
                     groupName, root, viewModeParamValue, embedded);
             groupPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
-            groupPanel.setWelcomeWidget(new SimpleWelcomeWidget( stringMessages.welcomeToSailingAnalytics(), stringMessages.welcomeToSailingAnalyticsBody()));
-            SimplePanel feedbackPanel = new SimplePanel();
-            feedbackPanel.getElement().getStyle().setProperty("clear", "right");
-            feedbackPanel.addStyleName("feedbackPanel");
-            Anchor feedbackLink = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
-                    "<img class=\"linkNoBorder\" src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());//TODO set image
-            feedbackLink.setHref("mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback");
-            feedbackLink.addStyleName("feedbackLink");
-            feedbackPanel.add(feedbackLink);
-
             groupAndFeedbackPanel.add(groupPanel);
-            groupAndFeedbackPanel.add(feedbackPanel);
-
+            if (!embedded) {
+                groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(stringMessages.welcomeToSailingAnalytics(),
+                        stringMessages.welcomeToSailingAnalyticsBody()));
+                SimplePanel feedbackPanel = new SimplePanel();
+                feedbackPanel.getElement().getStyle().setProperty("clear", "right");
+                feedbackPanel.addStyleName("feedbackPanel");
+                Anchor feedbackLink = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
+                        "<img class=\"linkNoBorder\" src=\"/gwt/images/feedbackPanel-bg.png\"/>").toSafeHtml());// TODO set image
+                feedbackLink.setHref("mailto:sailing_analytics%40sap.com?subject=[SAP Sailing] Feedback");
+                feedbackLink.addStyleName("feedbackLink");
+                feedbackPanel.add(feedbackLink);
+                groupAndFeedbackPanel.add(feedbackPanel);
+            }
             rootPanel.add(groupAndFeedbackPanel);
         }
-        
         fillRegattas();
     }
 
