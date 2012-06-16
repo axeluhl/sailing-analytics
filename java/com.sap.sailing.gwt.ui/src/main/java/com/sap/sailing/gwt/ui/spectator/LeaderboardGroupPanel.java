@@ -183,10 +183,10 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                             + "&leaderboardGroupName=" + group.name + "&root=" + root
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                     if (embedded) {
-                        return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard");
-                    } else {
                         return ANCHORTEMPLATE.anchorWithTarget(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard",
                                 /* target */ "_blank");
+                    } else {
+                        return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard");
                     }
                 }
             };
