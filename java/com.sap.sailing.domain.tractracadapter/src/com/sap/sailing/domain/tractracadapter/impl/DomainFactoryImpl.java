@@ -226,7 +226,14 @@ public class DomainFactoryImpl implements DomainFactory {
             boolean interrupted = false;
             while ((timeoutInMilliseconds == -1 || System.currentTimeMillis()-start < timeoutInMilliseconds) && !interrupted && result == null) {
                 try {
-                    raceCache.wait();
+                    if (timeoutInMilliseconds == -1) {
+                        raceCache.wait();
+                    } else {
+                        long timeToWait = timeoutInMilliseconds-(System.currentTimeMillis()-start);
+                        if (timeToWait > 0) {
+                            raceCache.wait(timeToWait);
+                        }
+                    }
                     result = raceCache.get(race);
                 } catch (InterruptedException e) {
                     interrupted = true;
@@ -312,7 +319,9 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
-            com.tractrac.clientmodule.Event tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry) {
+            com.tractrac.clientmodule.Event tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking,
+            long delayToLiveInMillis, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
+            TrackedRegattaRegistry trackedRegattaRegistry) {
         return getUpdateReceivers(trackedRegatta, tractracEvent, windStore, startOfTracking, endOfTracking, delayToLiveInMillis,
                 raceDefinitionSetToUpdate, trackedRegattaRegistry, ReceiverType.RACECOURSE,
                 ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);

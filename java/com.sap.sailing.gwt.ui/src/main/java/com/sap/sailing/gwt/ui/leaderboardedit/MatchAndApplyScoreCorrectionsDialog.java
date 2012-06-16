@@ -232,7 +232,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     // apply the score correction of the cell:
                     String raceNameOrNumber = getSelectedString(raceNameOrNumberChoosers, raceColumn);
                     String officialSailID = getSelectedString(officialSailIDChoosers, competitor);
-                    if (officialSailID != null) {
+                    if (officialSailID != null && raceNameOrNumber != null) {
                         ScoreCorrectionEntryDTO officialCorrectionEntry = regattaScoreCorrection
                                 .getScoreCorrectionsByRaceNameOrNumber().get(raceNameOrNumber).get(officialSailID);
                         result.addMaxPointsReasonUpdate(competitor, raceColumn,
@@ -287,7 +287,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 VerticalPanel cell = new VerticalPanel();
                 cell.add(new Label(entry.netPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
                         (entry.discarded?"/discarded":"")));
-                if (officialSailID != null) {
+                if (officialSailID != null && raceNameOrNumber != null) {
                     ScoreCorrectionEntryDTO officialCorrectionEntry =
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                         .get(raceNameOrNumber).get(officialSailID);

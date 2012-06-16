@@ -222,7 +222,7 @@ public interface DomainFactory {
      * <code>timeoutInMilliseconds</code> in case no modifications happen on the set of races cached by this factory.
      * 
      * @param timeoutInMilliseconds
-     *            passing -1 means an infinite timeout; 0 means return immediately with <code>null</code> result if no
+     *            passing -1 means an infinite timeout; 0 means return immediately with <code>null</code> as result if no
      *            race definition is found for <code>race</code>.
      */
     RaceDefinition getAndWaitForRaceDefinition(Race race, long timeoutInMilliseconds);

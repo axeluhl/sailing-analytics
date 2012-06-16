@@ -33,6 +33,13 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
  */
 public interface RaceTracker {
     /**
+     * By default, wait five minutes for race data; sometimes, a tracking provider's server may be under heavy load and
+     * may serve races one after another. If many races are requested concurrently, this can lead to a queue
+     * of several minutes length.
+     */
+    static long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 300000;
+
+    /**
      * Stops tracking the races.
      */
     void stop() throws MalformedURLException, IOException, InterruptedException;

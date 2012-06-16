@@ -125,31 +125,29 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     }
 
     private void buildGUI() {
-        // Create breadcrumb panel
-        BreadcrumbPanel breadcrumbPanel = createBreadcrumbPanel();
-        if (breadcrumbPanel != null) {
-            mainPanel.add(breadcrumbPanel);
-        }
-        
-        // Create group details GUI
-        FlowPanel groupDetailsPanel = new FlowPanel();
-        groupDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "GroupDetailsPanel");
-        mainPanel.add(groupDetailsPanel);
-
-        Label groupNameLabel = new Label(group.name + ":");
-        groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");
-        groupDetailsPanel.add(groupNameLabel);
-        
-        // Using HTML to display the line breaks in the description
-        HTML groupDescriptionLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(group.description).toSafeHtml());
-        groupDescriptionLabel.setStyleName(STYLE_NAME_PREFIX + "GroupDescription");
-        groupDetailsPanel.add(groupDescriptionLabel);
-        
-        // Create group leaderboards GUI
-        Label leaderboardsTableLabel = new Label(stringConstants.leaderboards());
-        leaderboardsTableLabel.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
-        mainPanel.add(leaderboardsTableLabel);
-        
+        if (!embedded) {
+            // Create breadcrumb panel
+            BreadcrumbPanel breadcrumbPanel = createBreadcrumbPanel();
+            if (breadcrumbPanel != null) {
+                mainPanel.add(breadcrumbPanel);
+            }
+            // Create group details GUI
+            FlowPanel groupDetailsPanel = new FlowPanel();
+            groupDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "GroupDetailsPanel");
+            mainPanel.add(groupDetailsPanel);
+            Label groupNameLabel = new Label(group.name + ":");
+            groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");
+            groupDetailsPanel.add(groupNameLabel);
+            // Using HTML to display the line breaks in the description
+            HTML groupDescriptionLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(group.description)
+                    .toSafeHtml());
+            groupDescriptionLabel.setStyleName(STYLE_NAME_PREFIX + "GroupDescription");
+            groupDetailsPanel.add(groupDescriptionLabel);
+            // Create group leaderboards GUI
+            Label leaderboardsTableLabel = new Label(stringConstants.leaderboards());
+            leaderboardsTableLabel.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
+            mainPanel.add(leaderboardsTableLabel);
+        }        
         if (group.leaderboards.size() <= MAX_COLUMNS_IN_ROW) {
             LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
             CellTable<Integer> leaderboardsTable = new CellTable<Integer>(200, tableResources);
@@ -204,10 +202,10 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                             + "&leaderboardGroupName=" + group.name + "&root=" + root
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                     if (embedded) {
-                        return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard");
-                    } else {
                         return ANCHORTEMPLATE.anchorWithTarget(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard",
                                 /* target */ "_blank");
+                    } else {
+                        return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard");
                     }
                 }
             };
@@ -280,7 +278,11 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     if (viewMode != null && !viewMode.isEmpty()) {
                         link += "&viewMode=" + viewMode;
                     }
-                    b.append(ANCHORTEMPLATE.anchor(link, linkText, STYLE_NAME_PREFIX + "ActiveRace"));
+                    if (embedded) {
+                        b.append(ANCHORTEMPLATE.anchorWithTarget(link, linkText, STYLE_NAME_PREFIX + "ActiveRace", "_blank"));
+                    } else {
+                        b.append(ANCHORTEMPLATE.anchor(link, linkText, STYLE_NAME_PREFIX + "ActiveRace"));
+                    }
                 } else {
                     b.append(TEXTTEMPLATE.textWithClass(linkText, STYLE_NAME_PREFIX + "InactiveRace"));
                 }
@@ -341,7 +343,11 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                         if (viewMode != null && !viewMode.isEmpty()) {
                             link += "&viewMode=" + viewMode;
                         }
-                        b.append(ANCHORTEMPLATE.anchor(link, linkText, STYLE_NAME_PREFIX + "ActiveRace"));
+                        if (embedded) {
+                            b.append(ANCHORTEMPLATE.anchorWithTarget(link, linkText, STYLE_NAME_PREFIX + "ActiveRace", "_blank"));
+                        } else {
+                            b.append(ANCHORTEMPLATE.anchor(link, linkText, STYLE_NAME_PREFIX + "ActiveRace"));
+                        }
                     } else {
                         b.append(TEXTTEMPLATE.textWithClass(linkText, STYLE_NAME_PREFIX + "InactiveRace"));
                     }
