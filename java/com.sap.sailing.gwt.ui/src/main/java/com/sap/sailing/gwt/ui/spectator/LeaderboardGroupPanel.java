@@ -335,7 +335,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 }
                 // show the "fleet" name only if there are more than one fleet in this fleet group and a color has been set
                 String displayFleetName;
-                if (fleetGroup.keySet().size() > 1 && color != null) {
+                if (fleetGroup.keySet().size() > 1 || color != null) {
                     displayFleetName = fleetName;
                 } else {
                     displayFleetName = "";
