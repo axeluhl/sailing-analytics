@@ -67,7 +67,10 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private static final TextWithClassTemplate TEXTTEMPLATE = GWT.create(TextWithClassTemplate.class);
     private static final ColorBoxTemplate COLORBOXTEMPLATE = GWT.create(ColorBoxTemplate.class);
+    
+    // TODO either remove together with code for vertical display or set to a reasonable positive value
     private static final int MAX_COLUMNS_IN_ROW = 0;
+    
     private static final String STYLE_NAME_PREFIX = "leaderboardGroupPanel-";
     
     private final SailingServiceAsync sailingService;
@@ -182,7 +185,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     @Override
                     public SafeHtml getValue(StrippedLeaderboardDTO strippedLeaderboardDTO) {
                         String text = ""; 
-                        if(allLeaderboardNamesStartWithGroupName) {
+                        if (allLeaderboardNamesStartWithGroupName) {
                             text = shortenLeaderboardName(group.name, strippedLeaderboardDTO.name);
                         } else {
                             text = strippedLeaderboardDTO.name;
@@ -299,13 +302,13 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         Map<String, Pair<FleetDTO, List<RaceColumnDTO>>> racesOrderedByFleets = null;
         RaceColumnDTO previousRaceColumn = null;
         for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-            if(previousRaceColumn == null || (previousRaceColumn != null && !hasSameFleets(raceColumn, previousRaceColumn))) {
+            if (previousRaceColumn == null || (previousRaceColumn != null && !hasSameFleets(raceColumn, previousRaceColumn))) {
                 racesOrderedByFleets = new LinkedHashMap<String, Pair<FleetDTO, List<RaceColumnDTO>>>();
                 fleetGroups.add(racesOrderedByFleets);
             }
             for (FleetDTO fleet : raceColumn.getFleets()) {
                 Pair<FleetDTO, List<RaceColumnDTO>> pair = racesOrderedByFleets.get(fleet.name);
-                if(pair == null) {
+                if (pair == null) {
                     List<RaceColumnDTO> raceList = new ArrayList<RaceColumnDTO>();
                     raceList.add(raceColumn);
                     pair = new Pair<FleetDTO, List<RaceColumnDTO>>(fleet, raceList);
@@ -317,21 +320,29 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             previousRaceColumn = raceColumn;
         }
 
-        for(Map<String,Pair<FleetDTO, List<RaceColumnDTO>>> fleetGroup: fleetGroups) {
+        // the fleetGroups each are assumed to correspond to a fleet
+        for (Map<String,Pair<FleetDTO, List<RaceColumnDTO>>> fleetGroup : fleetGroups) {
             b.appendHtmlConstant("<div style=\"float:left; margin-left:20px;\">");
-            for(String fleetName: fleetGroup.keySet()) {
+            // one row per fleet
+            for (String fleetName : fleetGroup.keySet()) {
                 Pair<FleetDTO, List<RaceColumnDTO>> pair = fleetGroup.get(fleetName);
                 FleetDTO fleet = pair.getA();
                 Color color = fleet.getColor();
-                if(color != null) {
+                if (color != null) {
                     b.append(COLORBOXTEMPLATE.colorBox(color.getAsHtml(), STYLE_NAME_PREFIX + "ColorBox"));
                 } else {
                     b.append(COLORBOXTEMPLATE.nocolorBox(STYLE_NAME_PREFIX + "ColorBox"));
                 }
-                b.append(TEXTTEMPLATE.textWithClass(fleetName, 50, STYLE_NAME_PREFIX + "Fleet"));
-                for(RaceColumnDTO race: pair.getB()) {
+                // show the "fleet" name only if there are more than one fleet in this fleet group and a color has been set
+                String displayFleetName;
+                if (fleetGroup.keySet().size() > 1 && color != null) {
+                    displayFleetName = fleetName;
+                } else {
+                    displayFleetName = "";
+                }
+                b.append(TEXTTEMPLATE.textWithClass(displayFleetName, 50, STYLE_NAME_PREFIX + "Fleet"));
+                for (RaceColumnDTO race : pair.getB()) {
                     String linkText = race.getRaceColumnName();
-
                     if (race.getRaceIdentifier(pair.getA()) != null) {
                         RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(pair.getA());
                         String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
