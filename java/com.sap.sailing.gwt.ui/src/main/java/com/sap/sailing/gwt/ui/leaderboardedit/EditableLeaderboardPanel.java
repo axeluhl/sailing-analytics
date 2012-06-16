@@ -427,7 +427,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 // TODO consider looking for longest common substring to handle things like "470 M" vs. "470 Men"
                 if (lowercaseBoatClassNames.contains(o1.getC().getA().toLowerCase())) {
                     if (lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
-                        result = o1.getC().getB().compareTo(o2.getC().getB());
+                        // both don't seem to have the right boat class; compare by time stamp; newest first
+                        result = o2.getC().getB().compareTo(o1.getC().getB());
                     } else {
                         result = -1; // o1 scores "better", comes first, because it has the right boat class name
                     }
