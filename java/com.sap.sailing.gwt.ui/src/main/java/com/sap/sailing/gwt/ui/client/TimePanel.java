@@ -180,6 +180,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playPauseImage.getElement().getStyle().setFloat(Style.Float.LEFT);
         playPauseImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
         playPauseImage.setTitle(stringMessages.startStopPlaying());
+        playPauseImage.getElement().addClassName("playPauseImage");
         playControlPanel.add(playPauseImage);
 
         backToLivePlayButton = new Button(stringMessages.playModeLive());
@@ -371,6 +372,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         switch (playState) {
         case Playing:
             playPauseImage.setResource(pauseButtonImg);
+            playPauseImage.getElement().addClassName("playPauseImagePause");
             if (playMode == PlayModes.Live) {
                 playModeImage.setResource(playModeLiveActiveImg);
             } else {
@@ -378,6 +380,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
             break;
         case Paused:
+        	playPauseImage.getElement().removeClassName("playPauseImagePause");
         case Stopped:
             playPauseImage.setResource(playButtonImg);
             playModeImage.setResource(playModeInactiveImg);
