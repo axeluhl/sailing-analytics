@@ -67,7 +67,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private static final TextWithClassTemplate TEXTTEMPLATE = GWT.create(TextWithClassTemplate.class);
     private static final ColorBoxTemplate COLORBOXTEMPLATE = GWT.create(ColorBoxTemplate.class);
-    private static final int MAX_COLUMNS_IN_ROW = 0;
+    private static final int MAX_COLUMNS_IN_ROW = 10;
     private static final String STYLE_NAME_PREFIX = "leaderboardGroupPanel-";
     
     private final SailingServiceAsync sailingService;
