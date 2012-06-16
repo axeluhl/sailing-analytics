@@ -31,10 +31,11 @@
 	background: none;
 }
 
-.cellTableEvenRowCell { /* th */
+.cellTableEvenRowCell { /* td */
 	border: none;
 	background: none;
 	vertical-align: top;
+	padding: 2px 3px;
 }
 
 .cellTableOddRow { /* tr */
@@ -43,7 +44,9 @@
 
 .cellTableOddRowCell { /* td */
 	border: none;
+	background: none;
 	vertical-align: top;
+	padding: 2px 3px;
 }
 
 .cellTableHoveredRow {
