@@ -10,7 +10,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
@@ -67,9 +66,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private static final TextWithClassTemplate TEXTTEMPLATE = GWT.create(TextWithClassTemplate.class);
     private static final ColorBoxTemplate COLORBOXTEMPLATE = GWT.create(ColorBoxTemplate.class);
-    private static final int MAX_COLUMNS_IN_ROW = 10;
-    // TODO either remove together with code for vertical display or set to a reasonable positive value
-    
     private static final String STYLE_NAME_PREFIX = "leaderboardGroupPanel-";
     
     private final SailingServiceAsync sailingService;
@@ -149,86 +145,60 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             Label leaderboardsTableLabel = new Label(stringConstants.leaderboards());
             leaderboardsTableLabel.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
             mainPanel.add(leaderboardsTableLabel);
-        }        
-        if (group.leaderboards.size() <= MAX_COLUMNS_IN_ROW) {
-            LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
-            CellTable<Integer> leaderboardsTable = new CellTable<Integer>(200, tableResources);
-            leaderboardsTable.setSelectionModel(new NoSelectionModel<Integer>());
-            int maxRacesNum = 0;
-            for (final StrippedLeaderboardDTO leaderboard : group.leaderboards) {
-                SafeHtmlCell leaderboardCell = new SafeHtmlCell();
-                Column<Integer, SafeHtml> leaderboardColumn = new Column<Integer, SafeHtml>(leaderboardCell) {
-                    @Override
-                    public SafeHtml getValue(Integer raceNum) {
-                        List<RaceColumnDTO> races = leaderboard.getRaceList();
-                        return raceNum < races.size() ? raceToRaceBoardLink(leaderboard, races.get(raceNum))
-                                : SafeHtmlUtils.fromString("");
-                    }
-                };
-                leaderboardsTable.addColumn(leaderboardColumn, leaderboard.name);
-                // add an artificial RaceColumn for the "Overview" link at position 0
-                leaderboard.createRaceColumnAt(stringConstants.overview(), new FleetDTO("Default", 0, /* color */ null), /* medal race */ false, /* tracked race identifier */ null, 0);
-                maxRacesNum = maxRacesNum < leaderboard.getRaceList().size() ? leaderboard
-                        .getRaceList().size() : maxRacesNum;
-            }
-
-            ArrayList<Integer> tableData = new ArrayList<Integer>();
-            for (int i = 0; i < maxRacesNum; i++) {
-                tableData.add(i);
-            }
-            leaderboardsTable.setRowData(tableData);
-            mainPanel.add(leaderboardsTable);
-        } else {
-            SafeHtmlCell leaderboardNameCell = new SafeHtmlCell();
-                Column<StrippedLeaderboardDTO, SafeHtml> leaderboardNameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(leaderboardNameCell) {
-                    @Override
-                    public SafeHtml getValue(StrippedLeaderboardDTO strippedLeaderboardDTO) {
-                        String text = ""; 
-                        if (allLeaderboardNamesStartWithGroupName) {
-                            text = shortenLeaderboardName(group.name, strippedLeaderboardDTO.name);
-                        } else {
-                            text = strippedLeaderboardDTO.name;
-                        }
-                        SafeHtmlBuilder b = new SafeHtmlBuilder();
-                        b.append(TEXTTEMPLATE.textWithClass(text, STYLE_NAME_PREFIX + "BoatClass"));
-                        return b.toSafeHtml();
-                    }
-                };
-            
-            AnchorCell nameAnchorCell = new AnchorCell();
-            Column<StrippedLeaderboardDTO, SafeHtml> nameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(nameAnchorCell) {
-                @Override
-                public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
-                    String debugParam = Window.Location.getParameter("gwt.codesvr");
-                    String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
-                            + "&leaderboardGroupName=" + group.name + "&root=" + root
-                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                    if (embedded) {
-                        return ANCHORTEMPLATE.anchorWithTarget(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard",
-                                /* target */ "_blank");
-                    } else {
-                        return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard");
-                    }
-                }
-            };
-
-            SafeHtmlCell racesCell = new SafeHtmlCell();
-            Column<StrippedLeaderboardDTO, SafeHtml> racesColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(racesCell) {
-                @Override
-                public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
-                    return leaderboardRacesToHtml(leaderboard);
-                }
-            };
-
-            LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
-            CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
-            leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
-            leaderboardsTable.addColumn(leaderboardNameColumn, stringConstants.name());
-            leaderboardsTable.addColumn(nameColumn, stringConstants.races());
-            leaderboardsTable.addColumn(racesColumn);
-            leaderboardsTable.setRowData(group.leaderboards);
-            mainPanel.add(leaderboardsTable);
         }
+        SafeHtmlCell leaderboardNameCell = new SafeHtmlCell();
+        Column<StrippedLeaderboardDTO, SafeHtml> leaderboardNameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(
+                leaderboardNameCell) {
+            @Override
+            public SafeHtml getValue(StrippedLeaderboardDTO strippedLeaderboardDTO) {
+                String text = "";
+                if (allLeaderboardNamesStartWithGroupName) {
+                    text = shortenLeaderboardName(group.name, strippedLeaderboardDTO.name);
+                } else {
+                    text = strippedLeaderboardDTO.name;
+                }
+                SafeHtmlBuilder b = new SafeHtmlBuilder();
+                b.append(TEXTTEMPLATE.textWithClass(text, STYLE_NAME_PREFIX + "BoatClass"));
+                return b.toSafeHtml();
+            }
+        };
+
+        AnchorCell nameAnchorCell = new AnchorCell();
+        Column<StrippedLeaderboardDTO, SafeHtml> nameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(
+                nameAnchorCell) {
+            @Override
+            public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
+                String debugParam = Window.Location.getParameter("gwt.codesvr");
+                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
+                        + "&leaderboardGroupName=" + group.name + "&root=" + root
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                if (embedded) {
+                    return ANCHORTEMPLATE.anchorWithTarget(link, stringConstants.overview(), STYLE_NAME_PREFIX
+                            + "ActiveLeaderboard",
+                    /* target */"_blank");
+                } else {
+                    return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX
+                            + "ActiveLeaderboard");
+                }
+            }
+        };
+
+        SafeHtmlCell racesCell = new SafeHtmlCell();
+        Column<StrippedLeaderboardDTO, SafeHtml> racesColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(racesCell) {
+            @Override
+            public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
+                return leaderboardRacesToHtml(leaderboard);
+            }
+        };
+
+        LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
+        CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
+        leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
+        leaderboardsTable.addColumn(leaderboardNameColumn, stringConstants.name());
+        leaderboardsTable.addColumn(nameColumn, stringConstants.races());
+        leaderboardsTable.addColumn(racesColumn);
+        leaderboardsTable.setRowData(group.leaderboards);
+        mainPanel.add(leaderboardsTable);
     }
 
     private String shortenLeaderboardName(String prefixToCut, String leaderboardName) {
@@ -238,59 +208,6 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             result = result.substring(1, result.length()-1);
         }
         return result.trim();
-    }
-    
-    private SafeHtml raceToRaceBoardLink(StrippedLeaderboardDTO leaderboard, RaceColumnDTO race) {
-        String debugParam = Window.Location.getParameter("gwt.codesvr");
-        SafeHtmlBuilder b = new SafeHtmlBuilder();
-        String raceColumnDisplayName = race.getRaceColumnName();
-        // special handling for artificial RaceColumn for "Overview" button
-        if (race.getRaceColumnName().equals(stringConstants.overview())) {
-            String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
-                    + "&leaderboardGroupName=" + group.name + "&root=" + root);
-            if (debugParam != null && !debugParam.isEmpty()) {
-                link += "&gwt.codesvr=" + debugParam;
-            }
-            if (viewMode != null && !viewMode.isEmpty()) {
-                link += "&viewMode=" + viewMode;
-            }
-            if (embedded) {
-                b.append(ANCHORTEMPLATE.anchorWithTarget(link, raceColumnDisplayName, STYLE_NAME_PREFIX + "ActiveLeaderboard", "_blank"));
-            } else {
-                b.append(ANCHORTEMPLATE.anchor(link, raceColumnDisplayName, STYLE_NAME_PREFIX + "ActiveLeaderboard"));
-            }
-        } else {
-            final Iterable<FleetDTO> fleets = race.getFleets();
-            boolean singleFleet = Util.size(fleets) < 2;
-            for (FleetDTO fleet: fleets) {
-                String linkText;
-                if (singleFleet) {
-                    linkText = raceColumnDisplayName;
-                } else {
-                    linkText = raceColumnDisplayName +" ("+fleet.name+")";
-                }
-                if (race.getRaceIdentifier(fleet) != null) {
-                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
-                    String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
-                            + "&raceName=" + raceId.getRaceName() + "&regattaName=" + raceId.getRegattaName()
-                            + "&leaderboardGroupName=" + group.name + "&root=" + root);
-                    if (debugParam != null && !debugParam.isEmpty()) {
-                        link += "&gwt.codesvr=" + debugParam;
-                    }
-                    if (viewMode != null && !viewMode.isEmpty()) {
-                        link += "&viewMode=" + viewMode;
-                    }
-                    if (embedded) {
-                        b.append(ANCHORTEMPLATE.anchorWithTarget(link, linkText, STYLE_NAME_PREFIX + "ActiveRace", "_blank"));
-                    } else {
-                        b.append(ANCHORTEMPLATE.anchor(link, linkText, STYLE_NAME_PREFIX + "ActiveRace"));
-                    }
-                } else {
-                    b.append(TEXTTEMPLATE.textWithClass(linkText, STYLE_NAME_PREFIX + "InactiveRace"));
-                }
-            }
-        }
-        return b.toSafeHtml();
     }
     
     private SafeHtml leaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
