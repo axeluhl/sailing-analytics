@@ -183,10 +183,10 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                             + "&leaderboardGroupName=" + group.name + "&root=" + root
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                     if (embedded) {
-                        return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard");
-                    } else {
                         return ANCHORTEMPLATE.anchorWithTarget(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard",
                                 /* target */ "_blank");
+                    } else {
+                        return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX + "ActiveLeaderboard");
                     }
                 }
             };
@@ -292,7 +292,11 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     if (viewMode != null && !viewMode.isEmpty()) {
                         link += "&viewMode=" + viewMode;
                     }
-                    b.append(ANCHORTEMPLATE.anchor(link, linkText, STYLE_NAME_PREFIX + "ActiveRace"));
+                    if (embedded) {
+                        b.append(ANCHORTEMPLATE.anchorWithTarget(link, linkText, STYLE_NAME_PREFIX + "ActiveRace", "_blank"));
+                    } else {
+                        b.append(ANCHORTEMPLATE.anchor(link, linkText, STYLE_NAME_PREFIX + "ActiveRace"));
+                    }
                 } else {
                     b.append(TEXTTEMPLATE.textWithClass(linkText, STYLE_NAME_PREFIX + "InactiveRace"));
                 }
