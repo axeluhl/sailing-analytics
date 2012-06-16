@@ -43,7 +43,7 @@ public class GlobalNavigationPanel extends FlowPanel {
         }
         
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
-            String leaderBoardLink = leaderboardViewLink + "?name=" + leaderboardName;
+            String leaderBoardLink = leaderboardViewLink + "?name=" + leaderboardName + "&showRaceDetails=true";
             if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
                 leaderBoardLink += "&leaderboardGroupName=" + leaderboardGroupName;
             }

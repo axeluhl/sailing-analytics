@@ -353,6 +353,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
                 LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
+                        + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + "&leaderboardGroupName=" + selectedGroup.name + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.anchor(link, leaderboard.name);

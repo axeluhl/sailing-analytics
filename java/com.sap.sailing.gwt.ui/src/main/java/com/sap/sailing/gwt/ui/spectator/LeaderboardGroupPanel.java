@@ -172,6 +172,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
+                        + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + "&leaderboardGroupName=" + group.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 if (embedded) {
