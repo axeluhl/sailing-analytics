@@ -63,6 +63,12 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     private final Comparator<Integer> scoreComparator;
     
     private Set<RaceColumnListener> raceColumnListeners;
+    
+    /**
+     * Cache for the combined competitors of this leaderboard; taken from the {@link TrackedRace#getRace() races of the
+     * tracked races} associated with this leaderboard. Updated when the set of tracked races changes.
+     */
+    private transient Iterable<Competitor> competitorsCache;
 
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -172,14 +178,17 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     @Override
-    public Iterable<Competitor> getCompetitors() {
-        Set<Competitor> result = new HashSet<Competitor>();
-        for (TrackedRace r : getTrackedRaces()) {
-            for (Competitor c : r.getRace().getCompetitors()) {
-                result.add(c);
+    public synchronized Iterable<Competitor> getCompetitors() {
+        if (competitorsCache == null) {
+            Set<Competitor> result = new HashSet<Competitor>();
+            for (TrackedRace r : getTrackedRaces()) {
+                for (Competitor c : r.getRace().getCompetitors()) {
+                    result.add(c);
+                }
             }
+            competitorsCache = result;
         }
-        return result;
+        return competitorsCache;
     }
     
     @Override
@@ -254,8 +263,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         return getScoreCorrection().getCorrectedScore(getTrackedRank(competitor, raceColumn, timePoint), competitor,
                 raceColumn, timePoint, Util.size(getCompetitors())).getCorrectedScore();
     }
-    
-    
+
     @Override
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         return raceColumn.getTrackedRace(competitor) == null ? MaxPointsReason.NONE : getScoreCorrection()
@@ -457,11 +465,13 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+        competitorsCache = null;
     }
 
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        competitorsCache = null;
     }
 
     private void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
