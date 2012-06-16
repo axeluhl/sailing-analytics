@@ -79,11 +79,13 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private Widget welcomeWidget = null;
     private boolean allLeaderboardNamesStartWithGroupName = false;
     private final boolean embedded;
+    private final boolean showRaceDetails;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
-            ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded) {
+            ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded, boolean showRaceDetails) {
         super();
         this.embedded = embedded;
+        this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.stringConstants = stringConstants;
         this.errorReporter = errorReporter;
@@ -164,7 +166,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         };
 
         AnchorCell nameAnchorCell = new AnchorCell();
-        Column<StrippedLeaderboardDTO, SafeHtml> nameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(
+        Column<StrippedLeaderboardDTO, SafeHtml> overviewColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(
                 nameAnchorCell) {
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
@@ -183,20 +185,22 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             }
         };
 
-        SafeHtmlCell racesCell = new SafeHtmlCell();
-        Column<StrippedLeaderboardDTO, SafeHtml> racesColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(racesCell) {
-            @Override
-            public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
-                return leaderboardRacesToHtml(leaderboard);
-            }
-        };
-
         LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
         CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
         leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
         leaderboardsTable.addColumn(leaderboardNameColumn, stringConstants.name());
-        leaderboardsTable.addColumn(nameColumn, stringConstants.races());
-        leaderboardsTable.addColumn(racesColumn);
+        leaderboardsTable.addColumn(overviewColumn, stringConstants.leaderboard());
+        if (showRaceDetails) {
+            SafeHtmlCell racesCell = new SafeHtmlCell();
+            Column<StrippedLeaderboardDTO, SafeHtml> racesColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(
+                    racesCell) {
+                @Override
+                public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
+                    return leaderboardRacesToHtml(leaderboard);
+                }
+            };
+            leaderboardsTable.addColumn(racesColumn, stringConstants.races());
+        }
         leaderboardsTable.setRowData(group.leaderboards);
         mainPanel.add(leaderboardsTable);
     }
@@ -309,7 +313,8 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         if (root.equals("overview")) {
             String debugParam = Window.Location.getParameter("gwt.codesvr");
             String link = "/gwt/Spectator.html"
-                    + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
+                    + (showRaceDetails ? "?showRaceDetails=true" : "")
+                    + (debugParam != null && !debugParam.isEmpty() ? (showRaceDetails?"":"?")+"gwt.codesvr=" + debugParam : "");
             ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
             breadcrumbLinksData.add(new Pair<String, String>(link, stringConstants.home()));
             breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, group.name);

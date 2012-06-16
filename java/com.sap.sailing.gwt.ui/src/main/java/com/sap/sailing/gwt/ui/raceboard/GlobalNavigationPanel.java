@@ -35,7 +35,7 @@ public class GlobalNavigationPanel extends FlowPanel {
         
         if(showHomeNavigation) {
             if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
-                String leaderBoardGroupLink = spectatorViewLink + "?leaderboardGroupName=" + leaderboardGroupName; 
+                String leaderBoardGroupLink = spectatorViewLink + "?showRaceDetails=true&leaderboardGroupName=" + leaderboardGroupName; 
                 addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", "Go to the Event overview.");
             } else {
                 addNavigationLink(stringMessages.home(), homeLink, "home", "Go to the Event overview.");

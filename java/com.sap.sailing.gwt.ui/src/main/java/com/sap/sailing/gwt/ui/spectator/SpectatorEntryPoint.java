@@ -27,6 +27,8 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         super.onModuleLoad();
         String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
         String viewModeParamValue = Window.Location.getParameter("viewMode");
+        boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null
+                && Window.Location.getParameter("showRaceDetails").equalsIgnoreCase("true");
         final String groupName;
         if (groupParamValue == null || groupParamValue.isEmpty()) {
             groupName = null;
@@ -63,11 +65,11 @@ public class SpectatorEntryPoint extends AbstractEntryPoint implements RegattaRe
         if (groupName == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
-            groupOverviewPanel.add(new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages));
+            groupOverviewPanel.add(new LeaderboardGroupOverviewPanel(sailingService, this, stringMessages, showRaceDetails));
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, stringMessages, this,
-                    groupName, root, viewModeParamValue, embedded);
+                    groupName, root, viewModeParamValue, embedded, showRaceDetails);
             groupPanel.getElement().getStyle().setFloat(Style.Float.LEFT);
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {

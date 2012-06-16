@@ -63,9 +63,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     public static final String STYLE_NAME_PREFIX = "groupOverviewPanel-";
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
-    private SailingServiceAsync sailingService;
-    private ErrorReporter errorReporter;
-    private StringMessages stringMessages;
+    private final SailingServiceAsync sailingService;
+    private final ErrorReporter errorReporter;
+    private final StringMessages stringMessages;
 
     private TextBox locationTextBox;
     private TextBox nameTextBox;
@@ -92,8 +92,11 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     private ListDataProvider<RaceColumnDTO> racesDataProvider;
     
     private List<LeaderboardGroupDTO> availableGroups;
+    private final boolean showRaceDetails;
 
-    public LeaderboardGroupOverviewPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages) {
+    public LeaderboardGroupOverviewPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            StringMessages stringMessages, boolean showRaceDetails) {
+        this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -220,7 +223,9 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.name + "&root=overview"
+                String link = URLFactory.INSTANCE.encode("/gwt/Spectator.html?"+
+                        (showRaceDetails ? "showRaceDetails=true&" : "") +
+                        "leaderboardGroupName=" + group.name + "&root=overview"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.anchor(link, group.name);
             }
