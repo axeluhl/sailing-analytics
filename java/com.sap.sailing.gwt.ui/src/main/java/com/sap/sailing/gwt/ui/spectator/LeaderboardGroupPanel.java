@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.spectator;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -11,7 +13,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -50,7 +51,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
 
     private static final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private static final TextWithClassTemplate TEXTTEMPLATE = GWT.create(TextWithClassTemplate.class);
-    private static final int MAX_COLUMNS_IN_ROW = 10;
+    private static final int MAX_COLUMNS_IN_ROW = 0;
     private static final String STYLE_NAME_PREFIX = "leaderboardGroupPanel-";
     
     private SailingServiceAsync sailingService;
@@ -167,14 +168,19 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             leaderboardsTable.setRowData(tableData);
             mainPanel.add(leaderboardsTable);
         } else {
-            TextColumn<StrippedLeaderboardDTO> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
+            SafeHtmlCell leaderboardNameCell = new SafeHtmlCell();
+                Column<StrippedLeaderboardDTO, SafeHtml> leaderboardNameColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(leaderboardNameCell) {
                     @Override
-                    public String getValue(StrippedLeaderboardDTO strippedLeaderboardDTO) {
+                    public SafeHtml getValue(StrippedLeaderboardDTO strippedLeaderboardDTO) {
+                        String text = ""; 
                         if(allLeaderboardNamesStartWithGroupName) {
-                            return shortenLeaderboardName(group.name, strippedLeaderboardDTO.name);
+                            text = shortenLeaderboardName(group.name, strippedLeaderboardDTO.name);
                         } else {
-                            return strippedLeaderboardDTO.name;
+                            text = strippedLeaderboardDTO.name;
                         }
+                        SafeHtmlBuilder b = new SafeHtmlBuilder();
+                        b.append(TEXTTEMPLATE.textWithClass(text, STYLE_NAME_PREFIX + "Fleet"));
+                        return b.toSafeHtml();
                     }
                 };
             
@@ -211,6 +217,10 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
 
     private String shortenLeaderboardName(String prefixToCut, String leaderboardName) {
         String result = leaderboardName.substring(prefixToCut.length(), leaderboardName.length());
+        result = result.trim();
+        if(result.startsWith("(") && result.endsWith(")")) {
+            result = result.substring(1, result.length()-1);
+        }
         return result.trim();
     }
     
@@ -260,18 +270,30 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private SafeHtml leaderboardRacesToHtml(StrippedLeaderboardDTO leaderboard) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         String debugParam = Window.Location.getParameter("gwt.codesvr");
+        
+        Map<String, Pair<FleetDTO, List<RaceColumnDTO>>> racesOrderedByFleets = new LinkedHashMap<String, Pair<FleetDTO, List<RaceColumnDTO>>>();
         for (RaceColumnDTO race : leaderboard.getRaceList()) {
-            final Iterable<FleetDTO> fleets = race.getFleets();
-            boolean singleFleet = Util.size(fleets) < 2;
-            for (FleetDTO fleet : fleets) {
-                String linkText;
-                if (singleFleet) {
-                    linkText = race.getRaceColumnName();
+            for (FleetDTO fleet : race.getFleets()) {
+                Pair<FleetDTO, List<RaceColumnDTO>> pair = racesOrderedByFleets.get(fleet.name);
+                if(pair == null) {
+                    List<RaceColumnDTO> raceList = new ArrayList<RaceColumnDTO>();
+                    raceList.add(race);
+                    pair = new Pair<FleetDTO, List<RaceColumnDTO>>(fleet, raceList);
+                    racesOrderedByFleets.put(fleet.name, pair);
                 } else {
-                    linkText = race.getRaceColumnName() + " (" + fleet.name + ")";
+                    pair.getB().add(race);
                 }
-                if (race.getRaceIdentifier(fleet) != null) {
-                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
+            }
+        }
+        
+        for(String fleetName: racesOrderedByFleets.keySet()) {
+            Pair<FleetDTO, List<RaceColumnDTO>> pair = racesOrderedByFleets.get(fleetName);
+            b.append(TEXTTEMPLATE.textWithClass(fleetName, STYLE_NAME_PREFIX + "Fleet"));
+            for(RaceColumnDTO race: pair.getB()) {
+                String linkText = race.getRaceColumnName();
+
+                if (race.getRaceIdentifier(pair.getA()) != null) {
+                    RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(pair.getA());
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
                             + "&raceName=" + raceId.getRaceName() + "&root=" + root + raceId.getRaceName()
                             + "&regattaName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + group.name);
@@ -286,10 +308,12 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     b.append(TEXTTEMPLATE.textWithClass(linkText, STYLE_NAME_PREFIX + "InactiveRace"));
                 }
             }
+            b.appendHtmlConstant("<br/>");
         }
+
         return b.toSafeHtml();
     }
-    
+
     private BreadcrumbPanel createBreadcrumbPanel() {
         BreadcrumbPanel breadcrumbPanel = null;
         if (root.equals("overview")) {

@@ -34,7 +34,7 @@
 .cellTableEvenRowCell { /* th */
 	border: none;
 	background: none;
-	vertical-align: middle;
+	vertical-align: top;
 }
 
 .cellTableOddRow { /* tr */
@@ -43,7 +43,7 @@
 
 .cellTableOddRowCell { /* td */
 	border: none;
-	vertical-align: middle;
+	vertical-align: top;
 }
 
 .cellTableHoveredRow {

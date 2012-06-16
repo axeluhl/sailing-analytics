@@ -233,8 +233,17 @@ input.magnifier {
 
 .leaderboardGroupPanel-LeaderboardsTableLabel {
 	margin: 0 13px 10px;
-		font-size: 17px;
+	font-size: 17px;
 	font-weight: 500;
+}
+
+.leaderboardGroupPanel-Fleet {
+	padding: 5px 8px;
+	display: block;
+	float: left;
+	margin: 5px 5px 5px 0;
+	text-decoration: none;
+  	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
 }
 
 .leaderboardGroupPanel-ActiveRace, .leaderboardGroupPanel-ActiveLeaderboard, .leaderboardGroupPanel-InactiveRace {
