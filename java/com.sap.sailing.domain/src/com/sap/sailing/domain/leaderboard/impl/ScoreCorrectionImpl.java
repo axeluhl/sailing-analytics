@@ -2,6 +2,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -82,7 +83,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * <p>
      */
     @Override
-    public Result getCorrectedScore(int uncorrectedScore, final Competitor competitor, final RaceColumn raceColumn,
+    public Result getCorrectedScore(Callable<Integer> uncorrectedScore, final Competitor competitor, final RaceColumn raceColumn,
             TimePoint timePoint, int numberOfCompetitorsInLeaderboard) {
         int result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn);
@@ -122,10 +123,14 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * reasons, computes the corrected score. If {@link #correctedScores} contains an entry for the <code>competitor</code>'s key,
      * it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
      */
-    protected int getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn, int uncorrectedScore) {
+    protected int getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn, Callable<Integer> uncorrectedScore) {
         Integer correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
         if (correctedNonMaxedScore == null) {
-            return uncorrectedScore;
+            try {
+                return uncorrectedScore.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         } else {
             return correctedNonMaxedScore;
         }

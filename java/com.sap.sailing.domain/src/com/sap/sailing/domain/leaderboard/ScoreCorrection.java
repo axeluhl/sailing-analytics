@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard;
 
 import java.io.Serializable;
+import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -36,7 +37,8 @@ public interface ScoreCorrection extends Serializable {
      * @param numberOfCompetitors
      *            the number of competitors to use as the basis for penalty score calculation ("max points")
      */
-    Result getCorrectedScore(int uncorrectedScore, Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, int numberOfCompetitors);
+    Result getCorrectedScore(Callable<Integer> uncorrectedScore, Competitor competitor, RaceColumn raceColumn,
+            TimePoint timePoint, int numberOfCompetitors);
 
     /**
      * Note the difference between what this method does and a more naive comparison of uncorrected and corrected score.
