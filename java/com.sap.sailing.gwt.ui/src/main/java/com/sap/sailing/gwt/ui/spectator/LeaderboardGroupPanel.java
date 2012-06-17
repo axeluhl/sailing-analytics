@@ -185,7 +185,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 }
             }
         };
-
+        
         LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
         CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
         leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
@@ -242,30 +242,36 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         }
 
         // the fleetGroups each are assumed to correspond to a fleet
+        boolean hasMultipleFleetGroups = fleetGroups.size() > 1; 
         for (Map<String,Pair<FleetDTO, List<RaceColumnDTO>>> fleetGroup : fleetGroups) {
             b.appendHtmlConstant("<div style=\"float:left; margin-left:20px;\">");
-            // one row per fleet
+            boolean hasMultipleFleet = fleetGroup.keySet().size() > 1;
             for (String fleetName : fleetGroup.keySet()) {
                 Pair<FleetDTO, List<RaceColumnDTO>> pair = fleetGroup.get(fleetName);
                 FleetDTO fleet = pair.getA();
+                List<RaceColumnDTO> raceColumns = pair.getB();
                 Color color = fleet.getColor();
-                if (color != null) {
-                    b.append(COLORBOXTEMPLATE.colorBox(color.getAsHtml(), STYLE_NAME_PREFIX + "ColorBox"));
-                } else {
-                    b.append(COLORBOXTEMPLATE.nocolorBox(STYLE_NAME_PREFIX + "ColorBox"));
+                // show the "fleet" and the color only if there are more than one fleet in this fleet group and a color has been set
+                if (hasMultipleFleet) {
+                    if(color != null) {
+                        b.append(COLORBOXTEMPLATE.colorBox(color.getAsHtml(), STYLE_NAME_PREFIX + "ColorBox"));
+                    }
+                    b.append(TEXTTEMPLATE.textWithClass(fleetName, 50, STYLE_NAME_PREFIX + "Fleet"));
+                } else if(hasMultipleFleetGroups) {
+                    String displayName = fleetName;
+                    if("Default".equals(fleetName)) {
+                        if(raceColumns.get(0) != null && raceColumns.get(0).isMedalRace()) {
+                            displayName = stringConstants.medalRace(); 
+                        } else {
+                            displayName = stringConstants.race();
+                        }
+                    }
+                    b.append(TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_NAME_PREFIX + "Fleet"));
                 }
-                // show the "fleet" name only if there are more than one fleet in this fleet group and a color has been set
-                String displayFleetName;
-                if (fleetGroup.keySet().size() > 1 || color != null) {
-                    displayFleetName = fleetName;
-                } else {
-                    displayFleetName = "";
-                }
-                b.append(TEXTTEMPLATE.textWithClass(displayFleetName, 50, STYLE_NAME_PREFIX + "Fleet"));
-                for (RaceColumnDTO race : pair.getB()) {
+                for (RaceColumnDTO race : raceColumns) {
                     String linkText = race.getRaceColumnName();
-                    if (race.getRaceIdentifier(pair.getA()) != null) {
-                        RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(pair.getA());
+                    if (race.getRaceIdentifier(fleet) != null) {
+                        RegattaNameAndRaceName raceId = (RegattaNameAndRaceName) race.getRaceIdentifier(fleet);
                         String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?leaderboardName=" + leaderboard.name
                                 + "&raceName=" + raceId.getRaceName() + "&root=" + root + raceId.getRaceName()
                                 + "&regattaName=" + raceId.getRegattaName() + "&leaderboardGroupName=" + group.name);
