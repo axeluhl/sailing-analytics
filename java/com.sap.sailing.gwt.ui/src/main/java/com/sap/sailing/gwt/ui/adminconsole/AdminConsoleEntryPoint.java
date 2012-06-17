@@ -60,7 +60,8 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         leaderboardGroupConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardGroupConfigPanel, stringMessages.leaderboardGroupConfiguration(), /*asHTML*/ false);
         regattaDisplayers.add(leaderboardGroupConfigPanel);
-        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringMessages);
+        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(sailingService, this, this, stringMessages,
+                /* showRaceDetails */ true);
         leaderboardConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         regattaDisplayers.add(leaderboardConfigPanel);

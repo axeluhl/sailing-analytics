@@ -120,7 +120,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
     public LeaderboardConfigPanel(SailingServiceAsync sailingService, AdminConsoleEntryPoint adminConsole,
-            final ErrorReporter errorReporter, StringMessages theStringConstants) {
+            final ErrorReporter errorReporter, StringMessages theStringConstants, final boolean showRaceDetails) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
         leaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
@@ -166,6 +166,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
             public SafeHtml getValue(StrippedLeaderboardDTO object) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + object.name
+                        + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(link, object.name);
             }

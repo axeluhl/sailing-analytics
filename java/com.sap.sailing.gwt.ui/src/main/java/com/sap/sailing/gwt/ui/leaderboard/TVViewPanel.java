@@ -58,7 +58,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     
     public TVViewPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             String leaderboardName, UserAgentTypes userAgentType, UserDTO userDTO, Timer timer,
-            LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel) {
+            LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel, boolean showRaceDetails) {
         setSize("100%", "100%");
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -76,20 +76,19 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         timer.play();
         raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, errorReporter, new ArrayList<RegattaAndRaceIdentifier>(), 1000l);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
-        
-        leaderboardPanel = createLeaderboardPanel(leaderboardName);
+        leaderboardPanel = createLeaderboardPanel(leaderboardName, showRaceDetails);
         leaderboard = null;
         showLeaderboard();
     }
     
-    private LeaderboardPanel createLeaderboardPanel(String leaderboardName) {
+    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, boolean showRaceDetails) {
         LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false); 
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
         Timer timer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
         timer.play();
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), settings,
         /* preSelectedRace */null, selectionModel, timer, leaderboardName, null, errorReporter, stringMessages,
-                userAgentType) {
+                userAgentType, showRaceDetails) {
             @Override
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);

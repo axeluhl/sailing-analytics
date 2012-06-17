@@ -209,6 +209,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * then sort by it. Otherwise, default sorting will default to the overall rank column.
      */
     private String raceNameForDefaultSorting;
+    
+    /**
+     * Can be used to disallow users to drill into the race details.
+     */
+    private final boolean showRaceDetails;
 
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -909,21 +914,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentTypes userAgentType) {
+            final UserAgentTypes userAgentType, boolean showRaceDetails) {
         this(sailingService, asyncActionsExecutor, settings, /* preSelectedRace */null, competitorSelectionProvider, leaderboardName,
-                leaderboardGroupName, errorReporter, stringMessages, userAgentType);
+                leaderboardGroupName, errorReporter, stringMessages, userAgentType, showRaceDetails);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentTypes userAgentType) {
+            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentTypes userAgentType, boolean showRaceDetails) {
         this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
-                leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
+                leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType, showRaceDetails);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentTypes userAgentType) {
+            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentTypes userAgentType, boolean showRaceDetails) {
+        this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.preSelectedRace = preSelectedRace;
@@ -1036,7 +1042,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         refreshAndSettingsPanel.add(refreshPanel);
         refreshAndSettingsPanel.add(settingsAnchor);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
-        if (!isEmbedded) {
+        if (!isEmbedded && showRaceDetails) {
             contentPanel.add(toolbarPanel);
         }
         contentPanel.add(getLeaderboardTable());
@@ -1611,8 +1617,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     protected RaceColumn<?> createRaceColumn(RaceColumnDTO raceInLeaderboard) {
-        TextRaceColumn textRaceColumn = new TextRaceColumn(raceInLeaderboard, raceInLeaderboard.hasTrackedRaces(), RACE_COLUMN_HEADER_STYLE,
-                RACE_COLUMN_STYLE);
+        TextRaceColumn textRaceColumn = new TextRaceColumn(raceInLeaderboard, showRaceDetails
+                && raceInLeaderboard.hasTrackedRaces(), RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
         return textRaceColumn;
     }
 

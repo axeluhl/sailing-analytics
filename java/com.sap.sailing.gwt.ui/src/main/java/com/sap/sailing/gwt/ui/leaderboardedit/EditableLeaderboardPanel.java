@@ -366,7 +366,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                 /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
-                leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType);
+                leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType, /* showRaceDetails */ true);
         ImageResource importIcon = resources.importIcon();
         Anchor importAnchor = new Anchor(AbstractImagePrototype.create(importIcon).getSafeHtml());
         getRefreshAndSettingsPanel().insert(importAnchor, 0);

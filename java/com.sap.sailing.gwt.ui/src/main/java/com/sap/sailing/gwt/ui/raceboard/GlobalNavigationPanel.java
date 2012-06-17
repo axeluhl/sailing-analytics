@@ -35,7 +35,7 @@ public class GlobalNavigationPanel extends FlowPanel {
         
         if(showHomeNavigation) {
             if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
-                String leaderBoardGroupLink = spectatorViewLink + "?leaderboardGroupName=" + leaderboardGroupName; 
+                String leaderBoardGroupLink = spectatorViewLink + "?showRaceDetails=true&leaderboardGroupName=" + leaderboardGroupName; 
                 addNavigationLink(leaderboardGroupName, leaderBoardGroupLink, "leaderBoardGroup", "Go to the Event overview.");
             } else {
                 addNavigationLink(stringMessages.home(), homeLink, "home", "Go to the Event overview.");
@@ -43,7 +43,7 @@ public class GlobalNavigationPanel extends FlowPanel {
         }
         
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
-            String leaderBoardLink = leaderboardViewLink + "?name=" + leaderboardName;
+            String leaderBoardLink = leaderboardViewLink + "?name=" + leaderboardName + "&showRaceDetails=true";
             if (leaderboardGroupName != null && !leaderboardGroupName.isEmpty()) {
                 leaderBoardLink += "&leaderboardGroupName=" + leaderboardGroupName;
             }

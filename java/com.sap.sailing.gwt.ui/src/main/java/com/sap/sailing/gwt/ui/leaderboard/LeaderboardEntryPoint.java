@@ -25,13 +25,15 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
+        final boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null
+                && Window.Location.getParameter("showRaceDetails").equalsIgnoreCase("true");
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
                 leaderboardName = Window.Location.getParameter("name");
                 leaderboardGroupName = Window.Location.getParameter("leaderboardGroupName");
                 if (leaderboardNames.contains(leaderboardName)) {
-                    createUI();
+                    createUI(showRaceDetails);
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
@@ -44,7 +46,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         });
     }
     
-    private void createUI() {
+    private void createUI(boolean showRaceDetails) {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, stringMessages.leaderboard() + " " +leaderboardName, stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 
@@ -59,7 +61,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
             Timer timer = new Timer(PlayModes.Replay, 1000l);
             timer.setLivePlayDelayInMillis(5000l);
             TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
-                    userAgentType, null, timer, logoAndTitlePanel, mainPanel);
+                    userAgentType, null, timer, logoAndTitlePanel, mainPanel, showRaceDetails);
             contentScrollPanel.setWidget(tvViewPanel);
         } else {
             Timer timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
@@ -68,7 +70,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                     LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false),
                     /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true), timer,
                     leaderboardName, leaderboardGroupName,
-                    LeaderboardEntryPoint.this, stringMessages, userAgentType);
+                    LeaderboardEntryPoint.this, stringMessages, userAgentType, showRaceDetails);
             contentScrollPanel.setWidget(leaderboardPanel);
         }
 
