@@ -166,7 +166,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
 
     @Override
-    public void setCompetitors(Iterable<CompetitorDTO> newCompetitors) {
+    public void setCompetitors(Iterable<CompetitorDTO> newCompetitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
         boolean changed = false;
         
         Set<CompetitorDTO> oldCompetitorsToRemove = new HashSet<CompetitorDTO>(allCompetitors);
@@ -184,7 +184,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         }
         
         if (changed) {
-            fireListChanged(getAllCompetitors());
+            fireListChanged(getAllCompetitors(), listenersNotToNotify);
         }
     }
     

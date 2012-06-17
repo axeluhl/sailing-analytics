@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -77,7 +78,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      *
      */
     private class EntryImpl implements Entry {
-        private final int trackedPoints;
+        private final Callable<Integer> trackedPoints;
         private final int netPoints;
         private final boolean isNetPointsCorrected;
         private final int totalPoints;
@@ -85,7 +86,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         private final boolean discarded;
         private final Fleet fleet;
 
-        private EntryImpl(int trackedPoints, int netPoints, boolean isNetPointsCorrected, int totalPoints,
+        private EntryImpl(Callable<Integer> trackedPoints, int netPoints, boolean isNetPointsCorrected, int totalPoints,
                 MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
             super();
             this.trackedPoints = trackedPoints;
@@ -98,7 +99,11 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         }
         @Override
         public int getTrackedPoints() {
-            return trackedPoints;
+            try {
+                return trackedPoints.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
         @Override
         public int getNetPoints() {
@@ -259,8 +264,13 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     @Override
-    public int getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
-        return getScoreCorrection().getCorrectedScore(getTrackedRank(competitor, raceColumn, timePoint), competitor,
+    public int getNetPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint) throws NoWindException {
+        return getScoreCorrection().getCorrectedScore(
+                new Callable<Integer>() {
+                    public Integer call() throws NoWindException {
+                        return getTrackedRank(competitor, raceColumn, timePoint);
+                    }
+                }, competitor,
                 raceColumn, timePoint, Util.size(getCompetitors())).getCorrectedScore();
     }
 
@@ -294,8 +304,12 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     @Override
-    public Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
-        int trackedPoints = getTrackedRank(competitor, race, timePoint);
+    public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint) throws NoWindException {
+        Callable<Integer> trackedPoints = new Callable<Integer>() {
+            public Integer call() throws NoWindException {
+                return getTrackedRank(competitor, race, timePoint);
+            }
+        };
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race,
                 timePoint, Util.size(getCompetitors()));
         boolean discarded = isDiscarded(competitor, race, timePoint);
@@ -306,18 +320,24 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
     
     @Override
-    public Map<Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException {
+    public Map<Pair<Competitor, RaceColumn>, Entry> getContent(final TimePoint timePoint) throws NoWindException {
         Map<Pair<Competitor, RaceColumn>, Entry> result = new HashMap<Pair<Competitor, RaceColumn>, Entry>();
         Map<Competitor, Set<RaceColumn>> discardedRaces = new HashMap<Competitor, Set<RaceColumn>>();
-        for (RaceColumn raceColumn : getRaceColumns()) {
-            for (Competitor competitor : getCompetitors()) {
-                int trackedPoints;
-                final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-                if (trackedRace != null && trackedRace.hasStarted(timePoint)) {
-                    trackedPoints = trackedRace.getRank(competitor, timePoint);
-                } else {
-                    trackedPoints = 0;
-                }
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            for (final Competitor competitor : getCompetitors()) {
+                Callable<Integer> trackedPoints = new Callable<Integer>() {
+                    @Override
+                    public Integer call() throws Exception {
+                        int trackedPoints;
+                        final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+                        if (trackedRace != null && trackedRace.hasStarted(timePoint)) {
+                            trackedPoints = trackedRace.getRank(competitor, timePoint);
+                        } else {
+                            trackedPoints = 0;
+                        }
+                        return trackedPoints;
+                    }
+                };
                 Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, raceColumn,
                         timePoint, Util.size(getCompetitors()));
                 Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);
