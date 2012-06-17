@@ -464,14 +464,14 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     
     @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
         competitorsCache = null;
+        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
     }
 
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
         competitorsCache = null;
+        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
     }
 
     private void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
