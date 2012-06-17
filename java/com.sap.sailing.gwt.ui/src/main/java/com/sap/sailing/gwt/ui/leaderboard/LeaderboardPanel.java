@@ -1253,7 +1253,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     protected void updateLeaderboard(LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
-            competitorSelectionProvider.setCompetitors(leaderboard.competitors);
+            competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */ this);
             selectedRaceColumns.addAll(getRaceColumnsToAddImplicitly(leaderboard));
             setLeaderboard(leaderboard);
             adjustColumnLayout(leaderboard);

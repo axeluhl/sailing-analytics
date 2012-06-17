@@ -37,7 +37,7 @@ public interface CompetitorSelectionProvider {
      * of {@link #getAllCompetitors()} are equal to <code>newCompetitors</code> except for ordering which is not guaranteed
      * to be stable.
      */
-    void setCompetitors(Iterable<CompetitorDTO> newCompetitors);
+    void setCompetitors(Iterable<CompetitorDTO> newCompetitors, CompetitorSelectionChangeListener... listenersNotToNotify);
     
     boolean isSelected(CompetitorDTO competitor);
     
