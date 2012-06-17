@@ -359,9 +359,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private TimePoint getLastPassingOfFinishLine() {
         TimePoint passingTime = null;
         Iterable<MarkPassing> markPassingsInOrder = getMarkPassingsInOrder(getRace().getCourse().getLastWaypoint());
-        synchronized (markPassingsInOrder) {
-            for (MarkPassing passingFinishLine : markPassingsInOrder) {
-                passingTime = passingFinishLine.getTimePoint();
+        if (markPassingsInOrder != null) {
+            synchronized (markPassingsInOrder) {
+                for (MarkPassing passingFinishLine : markPassingsInOrder) {
+                    passingTime = passingFinishLine.getTimePoint();
+                }
             }
         }
         return passingTime;
@@ -370,9 +372,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private TimePoint getFirstPassingTime(Waypoint waypoint) {
         NavigableSet<MarkPassing> markPassingsInOrder = getMarkPassingsInOrderAsNavigableSet(waypoint);
         MarkPassing firstMarkPassing = null;
-        synchronized (markPassingsInOrder) {
-            if (!markPassingsInOrder.isEmpty()) {
-                firstMarkPassing = markPassingsInOrder.first();
+        if (markPassingsInOrder != null) {
+            synchronized (markPassingsInOrder) {
+                if (!markPassingsInOrder.isEmpty()) {
+                    firstMarkPassing = markPassingsInOrder.first();
+                }
             }
         }
         TimePoint timeOfFirstMarkPassing = null;
