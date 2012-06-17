@@ -1365,9 +1365,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         leaderboardDTO.name = leaderboard.getName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            RegattaAndRaceIdentifier raceIdentifier = null;
             StrippedRaceDTO race = null;
             for (Fleet fleet : raceColumn.getFleets()) {
+                RegattaAndRaceIdentifier raceIdentifier = null;
                 if (raceColumn.getTrackedRace(fleet) != null) {
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
@@ -1380,7 +1380,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                         race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                     }
-                }
+                }    
                 leaderboardDTO.addRace(raceColumn.getName(), createFleetDTO(fleet), raceColumn.isMedalRace(), raceIdentifier, race);
             }
         }
