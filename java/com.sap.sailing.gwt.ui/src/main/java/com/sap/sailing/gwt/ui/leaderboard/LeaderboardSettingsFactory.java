@@ -61,7 +61,7 @@ public class LeaderboardSettingsFactory {
                 raceDetails.add(DetailType.DISPLAY_LEGS);
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, namesOfRaceColumnsToShow,
                         namesOfRacesToShow,
-                        /* set autoExpandFirstRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null, /* refresh interval */ null,
+                        /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null, /* refresh interval */ null,
                         /* delay to live */ null, /* name of race to sort */ nameOfRaceToSort, /* ascending */ true);
                 break;
             case Replay:
@@ -83,7 +83,7 @@ public class LeaderboardSettingsFactory {
      *            <code>namesOfRaceColumnsToShow</code> must be <code>null
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
-            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandFirstRace) {
+            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace) {
         if (namesOfRaceColumnsToShow != null && namesOfRacesToShow != null) {
             throw new IllegalArgumentException("Can specify race columns either by column or by race name, not both");
         }
@@ -99,7 +99,7 @@ public class LeaderboardSettingsFactory {
         raceDetails.add(DetailType.DISPLAY_LEGS);
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, namesOfRaceColumnsToShow,
                 namesOfRacesToShow,
-                autoExpandFirstRace, /* refresh interval */ null,
+                autoExpandPreSelectedRace, /* refresh interval */ null,
                 /* delay to live */ null, /* sort by column */ nameOfRaceToSort, /* ascending */ true);
     }
 }

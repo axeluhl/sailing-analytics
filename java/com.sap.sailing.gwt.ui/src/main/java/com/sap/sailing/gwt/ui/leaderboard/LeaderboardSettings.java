@@ -17,7 +17,7 @@ public class LeaderboardSettings {
     private final List<DetailType> maneuverDetailsToShow;
     private final List<DetailType> legDetailsToShow;
     private final List<DetailType> raceDetailsToShow;
-    private final boolean autoExpandFirstRace;
+    private final boolean autoExpandPreSelectedRace;
     private final Long delayBetweenAutoAdvancesInMilliseconds;
     private final Long delayInMilliseconds;
     
@@ -33,7 +33,7 @@ public class LeaderboardSettings {
      * @param legDetailsToShow
      * @param raceDetailsToShow
      * @param namesOfRacesToShow
-     * @param autoExpandFirstRace
+     * @param autoExpandPreSelectedRace
      * @param delayBetweenAutoAdvancesInMilliseconds
      * @param delayInMilliseconds
      * @param nameOfRaceToSort
@@ -42,7 +42,7 @@ public class LeaderboardSettings {
      */
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
             List<DetailType> raceDetailsToShow, List<String> namesOfRaceColumnsToShow,
-            List<String> namesOfRacesToShow, boolean autoExpandFirstRace, Long delayBetweenAutoAdvancesInMilliseconds,
+            List<String> namesOfRacesToShow, boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds,
             Long delayInMilliseconds, String nameOfRaceToSort, boolean sortAscending) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
@@ -51,7 +51,7 @@ public class LeaderboardSettings {
         this.raceDetailsToShow = raceDetailsToShow;
         this.namesOfRacesToShow = namesOfRacesToShow;
         this.namesOfRaceColumnsToShow = namesOfRaceColumnsToShow;
-        this.autoExpandFirstRace = autoExpandFirstRace;
+        this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
         this.maneuverDetailsToShow = meneuverDetailsToShow;
@@ -87,8 +87,8 @@ public class LeaderboardSettings {
         return namesOfRacesToShow;
     }
 
-    public boolean isAutoExpandFirstRace() {
-        return autoExpandFirstRace;
+    public boolean isAutoExpandPreSelectedRace() {
+        return autoExpandPreSelectedRace;
     }
 
     /**

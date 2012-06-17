@@ -154,7 +154,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private final Timer timer;
 
-    private boolean autoExpandFirstRace;
+    private boolean autoExpandPreSelectedRace;
+    
+    /**
+     * Remembers whether the auto-expand of the pre-selected race (see {@link #autoExpandPreSelectedRace}) has been performed
+     * once. It must not be performed another time.
+     */
+    private boolean autoExpandPerformedOnce;
 
     /**
      * This anchor's HTML holds the image tag for the play/pause button that needs to be updated when the {@link #timer}
@@ -304,10 +310,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 }
             }
         }
-        setAutoExpandFirstRace(false); // avoid expansion during updateLeaderboard(...); will expand later if it was expanded before
+        setAutoExpandPreSelectedRace(false); // avoid expansion during updateLeaderboard(...); will expand later if it was expanded before
         // update leaderboard after settings panel column selection change
         updateLeaderboard(leaderboard);
-        setAutoExpandFirstRace(newSettings.isAutoExpandFirstRace());
+        setAutoExpandPreSelectedRace(newSettings.isAutoExpandPreSelectedRace());
 
         if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
@@ -946,7 +952,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         selectedLegDetails.addAll(settings.getLegDetailsToShow());
         selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
         selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
-        setAutoExpandFirstRace(settings.isAutoExpandFirstRace());
+        setAutoExpandPreSelectedRace(settings.isAutoExpandPreSelectedRace());
 
         this.timer = timer;
         timer.addPlayStateListener(this);
@@ -1110,12 +1116,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         timer.setLivePlayDelayInMillis(delayInMilliseconds);
     }
     
-    public boolean isAutoExpandFirstRace() {
-        return autoExpandFirstRace;
+    public boolean isAutoExpandPreSelectedRace() {
+        return autoExpandPreSelectedRace;
     }
     
-    private void setAutoExpandFirstRace(boolean autoExpandFirstRace) {
-        this.autoExpandFirstRace = autoExpandFirstRace;
+    private void setAutoExpandPreSelectedRace(boolean autoExpandPreSelectedRace) {
+        this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
+        if (autoExpandPreSelectedRace) {
+            autoExpandPerformedOnce = false;
+        }
     }
 
     /**
@@ -1250,18 +1259,19 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             adjustColumnLayout(leaderboard);
             getData().getList().clear();
             if (leaderboard != null) {
-                boolean firstRace = true;
                 getData().getList().addAll(getRowsToDisplay(leaderboard));
                 for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
                     SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
                     c.updateMinMax(leaderboard);
-                    // Toggle the first race, if the setting is set and it isn't open yet
-                    if (firstRace && isAutoExpandFirstRace() && c instanceof ExpandableSortableColumn<?>) {
+                    // Toggle pre-selected race, if the setting is set and it isn't open yet
+                    if (!autoExpandPerformedOnce && isAutoExpandPreSelectedRace()
+                            && c instanceof RaceColumn<?>
+                            && ((RaceColumn<?>) c).getRace().hasTrackedRace(preSelectedRace)) {
                         ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
                         if (!expandableSortableColumn.isExpanded()) {
                             expandableSortableColumn.toggleExpansion();
+                            autoExpandPerformedOnce = true;
                         }
-                        firstRace = false;
                     }
                 }
                 Comparator<LeaderboardRowDTO> comparator = getComparatorForSelectedSorting();
@@ -1810,7 +1820,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.unmodifiableList(selectedLegDetails),
                 Collections.unmodifiableList(selectedRaceDetails), /*  All races to select */
                 leaderboard.getRaceList(), selectedRaceColumns,
-                autoExpandFirstRace, timer.getRefreshInterval(), timer.getLivePlayDelayInMillis(), stringMessages);
+                autoExpandPreSelectedRace, timer.getRefreshInterval(), timer.getLivePlayDelayInMillis(), stringMessages);
     }
 
     @Override
