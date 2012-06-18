@@ -159,8 +159,9 @@ public interface Leaderboard extends Named {
     /**
      * Sorts the competitors according to the overall regatta standings, considering the sorting rules for
      * {@link Series}, {@link Fleet}s, medal races, discarding rules and score corrections.
+     * @throws NoWindException 
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
 
     /**
      * Fetches all entries for all competitors of all races tracked by this leaderboard in one sweep. This saves some

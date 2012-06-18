@@ -1659,7 +1659,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Iterable<WindSource> getWindSources() {
-        return windTracks.keySet();
+        synchronized (windTracks) {
+            return new ArrayList<WindSource>(windTracks.keySet());
+        }
     }
 
     @Override

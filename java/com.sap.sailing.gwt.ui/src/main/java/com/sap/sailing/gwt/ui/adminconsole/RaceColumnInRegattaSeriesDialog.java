@@ -139,16 +139,34 @@ public class RaceColumnInRegattaSeriesDialog extends DataEntryDialog<Pair<Series
     
     @Override
     protected Pair<SeriesDTO, List<RaceColumnDTO>> getResult() {
+        SeriesDTO selectedSeries = getSelectedSeries();
         List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
         int racesCount = raceNameEntryFields.size();
         for(int i = 0; i < racesCount; i++) {
-            RaceColumnDTO raceColumnDTO = new RaceColumnDTO();
-            raceColumnDTO.name = raceNameEntryFields.get(i).getValue();
+            String raceColumnName = raceNameEntryFields.get(i).getValue();
+            RaceColumnDTO raceColumnDTO = findRaceColumnInSeriesByName(selectedSeries, raceColumnName);
+            if(raceColumnDTO == null) {
+                raceColumnDTO = new RaceColumnDTO();
+                raceColumnDTO.name = raceColumnName;
+            }
             races.add(raceColumnDTO);
         }
-        return new Pair<SeriesDTO, List<RaceColumnDTO>>(getSelectedSeries(), races);
+        return new Pair<SeriesDTO, List<RaceColumnDTO>>(selectedSeries, races);
     }
 
+    private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {
+        RaceColumnDTO result = null;
+        if(series != null) {
+            for(RaceColumnDTO raceColumn: series.getRaceColumns()) {
+                if(raceColumn.name.equals(raceColumnName)) {
+                    result = raceColumn;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
     @Override
     protected Widget getAdditionalWidget() {
         additionalWidgetPanel = new VerticalPanel();
