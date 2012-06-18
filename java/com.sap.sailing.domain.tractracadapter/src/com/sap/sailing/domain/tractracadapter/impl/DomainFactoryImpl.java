@@ -42,12 +42,12 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -286,7 +286,15 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, TimePoint startOfTracking,
-            TimePoint endOfTracking, long delayToLiveInMillis, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, ReceiverType... types) {
+            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
+            ReceiverType... types) {
+        Simulator simulator;
+        if (simulateWithStartTimeNow) {
+            simulator = new Simulator();
+        } else {
+            simulator = null;
+        }
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
@@ -294,23 +302,23 @@ public class DomainFactoryImpl implements DomainFactory {
                 result.add(new RaceCourseReceiver(
                         this, trackedRegatta, tractracEvent, windStore,
                         raceDefinitionSetToUpdate, delayToLiveInMillis, 
-                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND));
+                        WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, simulator));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
-                        trackedRegatta, tractracEvent, startOfTracking, endOfTracking, this));
+                        trackedRegatta, tractracEvent, startOfTracking, endOfTracking, simulator, this));
                 break;
             case RAWPOSITIONS:
                 result.add(new RawPositionReceiver(
-                        trackedRegatta, tractracEvent, this));
+                        trackedRegatta, tractracEvent, this, simulator));
                 break;
             case MARKPASSINGS:
                 result.add(new MarkPassingReceiver(
-                        trackedRegatta, tractracEvent, this));
+                        trackedRegatta, tractracEvent, simulator, this));
                 break;
             case RACESTARTFINISH:
                 result.add(new RaceStartedAndFinishedReceiver(
-                        trackedRegatta, tractracEvent, this));
+                        trackedRegatta, tractracEvent, simulator, this));
                 break;
             }
         }
@@ -320,11 +328,12 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking,
-            long delayToLiveInMillis, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            TrackedRegattaRegistry trackedRegattaRegistry) {
-        return getUpdateReceivers(trackedRegatta, tractracEvent, windStore, startOfTracking, endOfTracking, delayToLiveInMillis,
-                raceDefinitionSetToUpdate, trackedRegattaRegistry, ReceiverType.RACECOURSE,
-                ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
+            long delayToLiveInMillis, boolean simulateWithStartTimeNow, WindStore windStore,
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry) {
+        return getUpdateReceivers(trackedRegatta, tractracEvent, windStore, startOfTracking, endOfTracking,
+                delayToLiveInMillis, simulateWithStartTimeNow, raceDefinitionSetToUpdate, trackedRegattaRegistry,
+                ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,
+                ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }
     
     @Override
@@ -379,7 +388,7 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public void getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
+    public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(TrackedRegatta trackedRegatta,
             Race race, Course course, WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         synchronized (raceCache) {
@@ -392,19 +401,19 @@ public class DomainFactoryImpl implements DomainFactory {
                 // add to existing regatta only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
-
-                    createTrackedRace(trackedRegatta, raceDefinition, windStore,
+                    DynamicTrackedRace trackedRace = createTrackedRace(trackedRegatta, raceDefinition, windStore,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
                     logger.info("Added race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta());
-
                     synchronized (raceCache) {
                         raceCache.put(race, raceDefinition);
                         raceCache.notifyAll();
                     }
+                    return trackedRace;
                 } else {
                     logger.warning("Not adding race "+raceDefinition+" to regatta "+trackedRegatta.getRegatta()+
                             " because boat class "+raceDefinition.getBoatClass()+" doesn't match regatta's boat class "+
                             trackedRegatta.getRegatta().getBoatClass());
+                    return null;
                 }
             } else {
                 throw new RuntimeException("Race "+race.getName()+" already exists");
@@ -412,7 +421,7 @@ public class DomainFactoryImpl implements DomainFactory {
         }
     }
 
-    private TrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
+    private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate) {
         return trackedRegatta.createTrackedRace(race, 
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,

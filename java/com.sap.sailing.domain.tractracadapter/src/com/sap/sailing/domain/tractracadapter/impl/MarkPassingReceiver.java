@@ -30,8 +30,8 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
     private static final Logger logger = Logger.getLogger(MarkPassingReceiver.class.getName());
     
     public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
-            DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedRegatta);
+            Simulator simulator, DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator);
     }
 
     /**

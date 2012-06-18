@@ -42,12 +42,22 @@ public class UnicodeCharactersInCompetitorNamesTest {
         TracTracRaceTracker fourtyninerYellow_2 = domainFactory
                 .createRaceTracker(
                         new URL(
-                                "http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c"),
-                                tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
-                                        tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED),
-                        /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l, simulateWithStartTimeNow, simulateWithStartTimeNow, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry());
-        
-        Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRaces().iterator().next().getCompetitors();
+                                "http://"
+                                        + TracTracConnectionConstants.HOST_NAME
+                                        + "/events/event_20110609_KielerWoch/clientparams.php?event=event_20110609_KielerWoch&race=5b08a9ee-9933-11e0-85be-406186cbf87c"),
+                        tractracTunnel ? new URI("tcp://" + tractracTunnelHost + ":"
+                                + TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://"
+                                + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE),
+                        tractracTunnel ? new URI("tcp://" + tractracTunnelHost + ":"
+                                + TracTracConnectionConstants.PORT_TUNNEL_STORED)
+                                : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
+                                        + TracTracConnectionConstants.PORT_STORED),
+                        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l,
+                        /* simulateWithStartTimeNow */ false, EmptyWindStore.INSTANCE,
+                        new DummyTrackedRegattaRegistry());
+
+        Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRaces().iterator().next()
+                .getCompetitors();
         for (Competitor competitor : competitors) {
             System.out.println(competitor.getName());
         }

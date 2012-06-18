@@ -244,7 +244,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
         windTracks = new HashMap<WindSource, WindTrack>();
-        windTracks.putAll(windStore.loadWindTracks(trackedRegatta, this, millisecondsOverWhichToAverageWind));
+        final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
+                trackedRegatta, this, millisecondsOverWhichToAverageWind);
+        windTracks.putAll(loadedWindTracks);
         // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
         // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received
         // for them.

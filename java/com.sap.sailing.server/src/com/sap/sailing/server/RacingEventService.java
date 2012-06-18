@@ -145,10 +145,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
      *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
-     * @param simulateWithStartTimeNow TODO
      */
     RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI,
-            TimePoint trackingStartTime, TimePoint trackingEndTime, WindStore windStore, long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow)
+            TimePoint trackingStartTime, TimePoint trackingEndTime, WindStore windStore,
+            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
