@@ -75,9 +75,6 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                         getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
                 if (passed != null) {
                     TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
-                    if (getSimulator() != null) {
-                        time = getSimulator().delayMarkPassingTimePoint(time);
-                    }
                     MarkPassing markPassing = getDomainFactory().createMarkPassing(time, passed,
                             getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
                     passingsByWaypoint.put(passed, markPassing);
@@ -93,8 +90,12 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                     markPassings.add(passing);
                 }
             }
-            trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()),
-                    markPassings);
+            if (getSimulator() != null) {
+                getSimulator().delayMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()), markPassings);
+            } else {
+                trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()),
+                        markPassings);
+            }
         } else {
             logger.warning("Couldn't find tracked race for race " + event.getA().getRace().getName()
                     + ". Dropping mark passing event " + event);

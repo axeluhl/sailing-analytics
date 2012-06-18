@@ -17,7 +17,6 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -115,10 +114,10 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
             if (trackedRace != null) {
                 GPSFixMoving markPosition = getDomainFactory().createGPSFixMoving(event.getB());
                 if (getSimulator() != null) {
-                    markPosition = new GPSFixMovingImpl(markPosition.getPosition(), getSimulator().delay(
-                            markPosition.getTimePoint()), markPosition.getSpeed());
+                    getSimulator().scheduleMarkPosition(buoy, markPosition);
+                } else {
+                    trackedRace.recordFix(buoy, markPosition);
                 }
-                trackedRace.recordFix(buoy, markPosition);
             } else {
                 logger.warning("Couldn't find tracked race for race " + tractracRace.getName()
                         + ". Dropping mark position event " + event);
