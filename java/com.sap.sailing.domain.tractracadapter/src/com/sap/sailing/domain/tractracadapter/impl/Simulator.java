@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.tractracadapter.impl;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
@@ -15,9 +15,11 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 
 public class Simulator {
+    private static final Logger logger = Logger.getLogger(Simulator.class.getName());
+    
     private DynamicTrackedRace trackedRace;
     private WindStore windStore;
-    private long advanceInMillis;
+    private long advanceInMillis = -1;
     /**
      * Creates a wind store which replays the wind store events against a tracked race, correcting the wind fixes with
      * the simulation delay. The wind store returned is an {@link EmptyWindStore}.
@@ -27,9 +29,17 @@ public class Simulator {
         return EmptyWindStore.INSTANCE;
     }
 
-    public void setTrackedRace(DynamicTrackedRace trackedRace) {
+    public synchronized void setTrackedRace(DynamicTrackedRace trackedRace) {
         this.trackedRace = trackedRace;
         startWindPlayer();
+    }
+    
+    /**
+     * This is what everybody is waiting for :-). Notifies all waiters.
+     */
+    public synchronized void setAdvanceInMillis(long advanceInMillis) {
+        this.advanceInMillis = advanceInMillis;
+        notifyAll();
     }
 
     /**
@@ -55,11 +65,23 @@ public class Simulator {
     }
     
     private Wind delayWind(Wind wind) {
-        TimePoint delayedTimePoint = delay(wind);
+        TimePoint delayedTimePoint = delay(wind.getTimePoint());
         return new WindImpl(wind.getPosition(), delayedTimePoint, new KnotSpeedWithBearingImpl(wind.getKnots(), wind.getBearing()));
     }
     
-    private long getAdvanceInMillis() {
+    /**
+     * Waits until {@link #advanceInMillis} is set to something not equal to -1 which is its initial value. Unblocked by
+     * {@link #setAdvanceInMillis(long)}.
+     */
+    private synchronized long getAdvanceInMillis() {
+        while (advanceInMillis == -1) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                logger.throwing(Simulator.class.getName(), "getAdvanceInMillis", e);
+                // ignore; try again
+            }
+        }
         return advanceInMillis;
     }
 
@@ -67,11 +89,10 @@ public class Simulator {
      * Transforms <code>timed</code>'s time point according to this simulator's delay and waits roughly until this time
      * has passed. Then, returns the adjusted time point which therefore should roughly equal "now."
      */
-    private TimePoint delay(Timed timed) {
+    public TimePoint delay(TimePoint timePoint) {
         long now = System.currentTimeMillis();
-        long then = timed.getTimePoint().asMillis();
-        long transformedTimed = then + getAdvanceInMillis();
-        long waitTimeInMillis = transformedTimed - now;
+        TimePoint transformedTimed = advance(timePoint);
+        long waitTimeInMillis = transformedTimed.asMillis() - now;
         do {
             if (waitTimeInMillis > 0) {
                 try {
@@ -79,10 +100,35 @@ public class Simulator {
                     waitTimeInMillis = 0;
                 } catch (InterruptedException e) {
                     // try again:
-                    waitTimeInMillis = transformedTimed - System.currentTimeMillis();
+                    waitTimeInMillis = transformedTimed.asMillis() - System.currentTimeMillis();
                 }
             }
         } while (waitTimeInMillis > 0);
-        return new MillisecondsTimePoint(transformedTimed);
+        return transformedTimed;
+    }
+
+    /**
+     * Like {@link #delay}, only that it doesn't wait until <code>timePoint</code> is reached in wall time.
+     */
+    public TimePoint advance(TimePoint timePoint) {
+        return new MillisecondsTimePoint(timePoint.asMillis()+getAdvanceInMillis());
+    }
+
+    /**
+     * If {@link #advanceInMillis} is already set to a non-negative value, it is left alone, and {@link #delay(TimePoint)} is called.
+     * Otherwise, <code>time</code> is taken to be the original start time of the race which is then used to compute
+     * {@link #advanceInMillis} such that <code>time.asMillis() + advanceInMillis == System.currentTimeMillis()</code>.
+     */
+    public TimePoint delayMarkPassingTimePoint(TimePoint time) {
+        if (isAdvanceInMilliseSet()) {
+            return delay(time);
+        } else {
+            setAdvanceInMillis(System.currentTimeMillis() - time.asMillis());
+            return delay(time);
+        }
+    }
+
+    private boolean isAdvanceInMilliseSet() {
+        return advanceInMillis != -1;
     }
 }

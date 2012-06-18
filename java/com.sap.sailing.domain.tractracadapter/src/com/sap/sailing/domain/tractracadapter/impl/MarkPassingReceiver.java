@@ -75,6 +75,9 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                         getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
                 if (passed != null) {
                     TimePoint time = new MillisecondsTimePoint(passing.getTimestamp());
+                    if (getSimulator() != null) {
+                        time = getSimulator().delayMarkPassingTimePoint(time);
+                    }
                     MarkPassing markPassing = getDomainFactory().createMarkPassing(time, passed,
                             getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()));
                     passingsByWaypoint.put(passed, markPassing);

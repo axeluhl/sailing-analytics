@@ -7,15 +7,17 @@ import java.util.logging.Logger;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -111,7 +113,12 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         for (Race tractracRace : getTracTracEvent().getRaceList()) {
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {
-                trackedRace.recordFix(buoy, getDomainFactory().createGPSFixMoving(event.getB()));
+                GPSFixMoving markPosition = getDomainFactory().createGPSFixMoving(event.getB());
+                if (getSimulator() != null) {
+                    markPosition = new GPSFixMovingImpl(markPosition.getPosition(), getSimulator().delay(
+                            markPosition.getTimePoint()), markPosition.getSpeed());
+                }
+                trackedRace.recordFix(buoy, markPosition);
             } else {
                 logger.warning("Couldn't find tracked race for race " + tractracRace.getName()
                         + ". Dropping mark position event " + event);
