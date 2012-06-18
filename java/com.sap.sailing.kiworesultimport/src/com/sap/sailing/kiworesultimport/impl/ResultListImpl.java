@@ -24,7 +24,7 @@ public class ResultListImpl extends AbstractNodeWrapper implements ResultList {
     
     private final String sourceName;
     
-    private static final SimpleDateFormat df = new SimpleDateFormat("dd. MMM yyyy hh:mm", Locale.GERMAN);
+    private static final SimpleDateFormat df = new SimpleDateFormat("dd. MMM yyyy HH:mm", Locale.GERMAN);
     
     public ResultListImpl(Node node, String sourceName) {
         super(node);
