@@ -64,13 +64,18 @@ public interface SailingServiceAsync {
      * @param liveURI
      *            may be <code>null</code> or the empty string in which case the server will use the
      *            {@link TracTracRaceRecordDTO#liveURI} from the <code>rr</code> race record.
+     * @param simulateWithStartTimeNow
+     *            if <code>true</code>, the connector will adjust the time stamps of all events received such that the
+     *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
+     *            events received such that they seem to be sent in "real-time." So, more or less the time points attached
+     *            to the events sent to the receivers will again approximate the wall time.
      * @param storedURImay
      *            be <code>null</code> or the empty string in which case the server will use the
      *            {@link TracTracRaceRecordDTO#storedURI} from the <code>rr</code> race record.
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo,
             TracTracRaceRecordDTO rr, String liveURI, String storedURI, boolean trackWind, boolean correctWindByDeclination,
-            AsyncCallback<Void> callback);
+            boolean simulateWithStartTimeNow, AsyncCallback<Void> callback);
 
     void getPreviousTracTracConfigurations(AsyncCallback<List<TracTracConfigurationDTO>> callback);
 

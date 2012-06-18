@@ -334,4 +334,5 @@ public interface StringMessages extends Messages {
     String successfullyUpdatedScores();
     String errorUpdatingScoresForLeaderboard(String leaderboardName, String message);
     String maneuverTypesToShowWhenCompetitorIsClicked();
+    String simulateWithStartTimeNow();
 }

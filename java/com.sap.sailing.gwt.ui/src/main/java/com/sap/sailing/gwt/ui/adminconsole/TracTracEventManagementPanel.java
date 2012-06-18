@@ -346,6 +346,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
         
+        final CheckBox simulateWithStartTimeNow = new CheckBox(stringMessages.simulateWithStartTimeNow());
+        simulateWithStartTimeNow.setWordWrap(false);
+        simulateWithStartTimeNow.setValue(false);
+        trackPanel.add(simulateWithStartTimeNow);
+        
         trackedRacesPanel.add(trackedRacesListComposite);
 
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
@@ -357,7 +362,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         btnTrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue());
+                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue(), simulateWithStartTimeNow.getValue());
             }
         });
 
@@ -490,18 +495,18 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         });
     }
 
-    private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination) {
+    private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, final boolean simulateWithStartTimeNow) {
         String liveURI = liveURIBox.getValue();
         String storedURI = storedURIBox.getValue();
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
-        if(selectedRegatta != null) {
+        if (selectedRegatta != null) {
             regattaIdentifier = new RegattaName(selectedRegatta.name);
         }
         for (final TracTracRaceRecordDTO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
                 sailingService.trackWithTracTrac(regattaIdentifier, rr, liveURI, storedURI, trackWind, 
-                        correctWindByDeclination, new AsyncCallback<Void>() {
+                        correctWindByDeclination, simulateWithStartTimeNow, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register race " + rr.name + " for tracking: "

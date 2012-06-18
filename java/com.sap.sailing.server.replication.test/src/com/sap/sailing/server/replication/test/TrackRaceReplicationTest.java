@@ -73,7 +73,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
             }
         });
         trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE.createTrackingConnectivityParameters(paramURL,
-                liveURI, storedURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */ 0l, EmptyWindStore.INSTANCE);
+                liveURI, storedURI, startOfTracking, endOfTracking, /* delayToLiveInMillis */ 0l, simulateWithStartTimeNow, EmptyWindStore.INSTANCE);
     }
 
     private void startTracking() throws Exception, InterruptedException {
