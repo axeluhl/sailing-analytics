@@ -306,13 +306,13 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         final List<String> raceColumnsToRemove = new ArrayList<String>();
         
         for(RaceColumnDTO newRaceColumn: newRaceColumns) {
-            if(!existingRaceColumns.contains(newRaceColumn.name)) {
+            if(!existingRaceColumns.contains(newRaceColumn)) {
                 raceColumnsToAdd.add(newRaceColumn.name);
             }
         }
 
         for(RaceColumnDTO existingRaceColumn: existingRaceColumns) {
-            if(!newRaceColumns.contains(existingRaceColumn.name)) {
+            if(!newRaceColumns.contains(existingRaceColumn)) {
                 raceColumnsToRemove.add(existingRaceColumn.name);
             }
         }
