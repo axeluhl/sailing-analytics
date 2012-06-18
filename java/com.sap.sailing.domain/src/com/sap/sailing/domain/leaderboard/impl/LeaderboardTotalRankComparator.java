@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * Compares two competitors that occur in a {@link Leaderboard#getCompetitors()} set in the context of the
@@ -55,11 +56,29 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         this.leaderboard = leaderboard;
         this.scoreComparator = scoreComparator;
         totalPointsCache = new HashMap<Pair<Competitor, RaceColumn>, Integer>();
+        for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            Iterator<? extends Fleet> fleet = raceColumn.getFleets().iterator();
+            cacheTotalPointsWithLockedTrackedRaceForFleet(fleet, leaderboard, raceColumn, timePoint);
+        }
+    }
+
+    private void cacheTotalPointsWithLockedTrackedRaceForFleet(Iterator<? extends Fleet> fleetIter,
+            Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+        if (fleetIter.hasNext()) {
+            Fleet fleet = fleetIter.next();
+            TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+            if (trackedRace != null)
+                ;
+        } else {
+            cacheTotalPoints(leaderboard, raceColumn, timePoint);
+        }
+    }
+
+    private void cacheTotalPoints(Leaderboard leaderboard, final RaceColumn raceColumn, TimePoint timePoint)
+            throws NoWindException {
         for (Competitor competitor : leaderboard.getCompetitors()) {
-            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                totalPointsCache.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn),
-                        leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
-            }
+            totalPointsCache.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn),
+                    leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
         }
     }
     
