@@ -3,15 +3,17 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 
 /**
@@ -45,75 +47,76 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
  */
 public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final Leaderboard leaderboard;
-    private final TimePoint timePoint;
     private final Comparator<Integer> scoreComparator;
+    private final Map<Pair<Competitor, RaceColumn>, Integer> totalPointsCache;
     
-    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, Comparator<Integer> scoreComparator) {
+    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, Comparator<Integer> scoreComparator) throws NoWindException {
         super();
         this.leaderboard = leaderboard;
-        this.timePoint = timePoint;
         this.scoreComparator = scoreComparator;
+        totalPointsCache = new HashMap<Pair<Competitor, RaceColumn>, Integer>();
+        for (Competitor competitor : leaderboard.getCompetitors()) {
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                totalPointsCache.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn),
+                        leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
+            }
+        }
     }
     
     protected Leaderboard getLeaderboard() {
         return leaderboard;
     }
     
-    protected TimePoint getTimePoint() {
-        return timePoint;
-    }
-
     @Override
     public int compare(Competitor o1, Competitor o2) {
-        try {
-            List<Integer> o1Scores = new ArrayList<Integer>();
-            List<Integer> o2Scores = new ArrayList<Integer>();
-            int o1ScoreSum = 0;
-            int o2ScoreSum = 0;
-            int o1MedalRaceScore = 0;
-            int o2MedalRaceScore = 0;
-            for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
-                int preemptiveColumnResult = 0;
-                final int o1Score = getLeaderboard().getTotalPoints(o1, raceColumn, timePoint);
-                if (o1Score != 0) {
-                    o1Scores.add(o1Score);
-                    o1ScoreSum += o1Score;
-                }
-                final int o2Score = getLeaderboard().getTotalPoints(o2, raceColumn, timePoint);
-                if (o2Score != 0) {
-                    o2Scores.add(o2Score);
-                    o2ScoreSum += o2Score;
-                }
-                if (raceColumn.isMedalRace()) {
-                    o1MedalRaceScore = o1Score;
-                    o2MedalRaceScore = o2Score;
-                    // similar to compareByFleet, however, tracking is not required; having medal race column points (tracked or manual) is sufficient
-                    preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
-                }
-                if (preemptiveColumnResult == 0) {
-                    preemptiveColumnResult = compareByFleet(raceColumn, o1, o2);
-                }
-                if (preemptiveColumnResult != 0) {
-                    return preemptiveColumnResult;
-                }
+        List<Integer> o1Scores = new ArrayList<Integer>();
+        List<Integer> o2Scores = new ArrayList<Integer>();
+        int o1ScoreSum = 0;
+        int o2ScoreSum = 0;
+        int o1MedalRaceScore = 0;
+        int o2MedalRaceScore = 0;
+        for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
+            int preemptiveColumnResult = 0;
+            final int o1Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o1, raceColumn));
+            if (o1Score != 0) {
+                o1Scores.add(o1Score);
+                o1ScoreSum += o1Score;
             }
-            // now count the races in which they scored; if they scored in a different number of races, prefer the competitor
-            // who scored more often; otherwise, prefer the competitor who has a better score sum; if score sums are equal, break
-            // tie by sorting scores and looking for the first score difference.
-            int result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
-            if (result == 0) {
-                result = compareByScoreSum(o1ScoreSum, o2ScoreSum);
-                if (result == 0) {
-                    result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
-                    if (result == 0) {
-                        result = compareByBetterScore(o1Scores, o2Scores);
-                    }
-                }
+            final int o2Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o2, raceColumn));
+            if (o2Score != 0) {
+                o2Scores.add(o2Score);
+                o2ScoreSum += o2Score;
             }
-            return result;
-        } catch (NoWindException e) {
-            throw new NoWindError(e);
+            if (raceColumn.isMedalRace()) {
+                o1MedalRaceScore = o1Score;
+                o2MedalRaceScore = o2Score;
+                // similar to compareByFleet, however, tracking is not required; having medal race column points
+                // (tracked or manual) is sufficient
+                preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
+            }
+            if (preemptiveColumnResult == 0) {
+                preemptiveColumnResult = compareByFleet(raceColumn, o1, o2);
+            }
+            if (preemptiveColumnResult != 0) {
+                return preemptiveColumnResult;
+            }
         }
+        // now count the races in which they scored; if they scored in a different number of races, prefer the
+        // competitor
+        // who scored more often; otherwise, prefer the competitor who has a better score sum; if score sums are equal,
+        // break
+        // tie by sorting scores and looking for the first score difference.
+        int result = compareByNumberOfRacesScored(o1Scores.size(), o2Scores.size());
+        if (result == 0) {
+            result = compareByScoreSum(o1ScoreSum, o2ScoreSum);
+            if (result == 0) {
+                result = compareByMedalRaceScore(o1MedalRaceScore, o2MedalRaceScore);
+                if (result == 0) {
+                    result = compareByBetterScore(o1Scores, o2Scores);
+                }
+            }
+        }
+        return result;
     }
 
     /**

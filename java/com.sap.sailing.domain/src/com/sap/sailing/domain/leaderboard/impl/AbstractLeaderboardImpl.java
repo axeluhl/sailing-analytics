@@ -459,7 +459,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException {
         List<Competitor> result = new ArrayList<Competitor>();
         for (Competitor competitor : getCompetitors()) {
             result.add(competitor);
@@ -468,7 +468,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         return result;
     }
 
-    protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) {
+    protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) throws NoWindException {
         return new LeaderboardTotalRankComparator(this, timePoint, scoreComparator);
     }
 
