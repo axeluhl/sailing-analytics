@@ -42,7 +42,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     @Test
-    public void testOneStartedRaceWithDifferentScores() {
+    public void testOneStartedRaceWithDifferentScores() throws NoWindException {
         List<Competitor> competitors = createCompetitors(10);
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
                 new String[] { "Default" },
@@ -97,7 +97,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     @Test
-    public void testDistributionAcrossQualifyingFleetsWithDifferentScores() {
+    public void testDistributionAcrossQualifyingFleetsWithDifferentScores() throws NoWindException {
         List<Competitor> competitors = createCompetitors(10);
         List<Competitor> yellow = new ArrayList<Competitor>();
         List<Competitor> blue = new ArrayList<Competitor>();
@@ -127,7 +127,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     @Test
-    public void testDistributionAcrossFinalFleetsWithDifferentScores() {
+    public void testDistributionAcrossFinalFleetsWithDifferentScores() throws NoWindException {
         List<Competitor> competitors = createCompetitors(10);
         List<Competitor> gold = new ArrayList<Competitor>();
         List<Competitor> silver = new ArrayList<Competitor>();
@@ -155,7 +155,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     @Test
-    public void testMedalTakesPrecedence() {
+    public void testMedalTakesPrecedence() throws NoWindException {
         final int firstMedalCompetitorIndex = 3;
         List<Competitor> competitors = createCompetitors(20);
         List<Competitor> medal = competitors.subList(firstMedalCompetitorIndex, firstMedalCompetitorIndex+10);
