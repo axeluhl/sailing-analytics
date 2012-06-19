@@ -75,7 +75,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {}
                 }, /* delayToLiveInMillis */ 0l, 
-                /* millisecondsOverWhichToAverageWind */ 30000) {
+                /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null) {
             @Override
             protected void handleEvent(Triple<Route, RouteData, Race> event) {
                 synchronized (routeData) {

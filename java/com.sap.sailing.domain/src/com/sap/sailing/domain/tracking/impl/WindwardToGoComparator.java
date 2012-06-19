@@ -2,6 +2,8 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.common.Distance;
@@ -21,10 +23,12 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor> {
     private final TrackedLeg trackedLeg;
     private final TimePoint timePoint;
+    private final Map<TrackedLegOfCompetitor, Distance> wwdtgCache;
 
     public WindwardToGoComparator(TrackedLeg trackedLeg, TimePoint timePoint) {
         this.trackedLeg = trackedLeg;
         this.timePoint = timePoint;
+        wwdtgCache = new HashMap<TrackedLegOfCompetitor, Distance>();
     }
     
     @Override
@@ -45,8 +49,8 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
                 // both didn't finish the leg yet; check which one has started:
                 if (o1.hasStartedLeg(timePoint)) {
                     if (o2.hasStartedLeg(timePoint)) {
-                        Distance o1d = o1.getWindwardDistanceToGo(timePoint);
-                        Distance o2d = o2.getWindwardDistanceToGo(timePoint);
+                        Distance o1d = getWindwardDistanceToGo(o1);
+                        Distance o2d = getWindwardDistanceToGo(o2);
                         result = o1d==null?(o2d==null?0:1):o2d==null?1:o1d.compareTo(o2d); // smaller distance to go means smaller rank
                     } else {
                         result = -1;
@@ -62,5 +66,14 @@ public class WindwardToGoComparator implements Comparator<TrackedLegOfCompetitor
         } catch (NoWindException e) {
             throw new NoWindError(e);
         }
+    }
+
+    private Distance getWindwardDistanceToGo(TrackedLegOfCompetitor o1) throws NoWindException {
+        Distance result = wwdtgCache.get(o1);
+        if (result == null) {
+            result = o1.getWindwardDistanceToGo(timePoint);
+            wwdtgCache.put(o1, result);
+        }
+        return result;
     }
 }

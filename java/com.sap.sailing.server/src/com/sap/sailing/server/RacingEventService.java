@@ -147,7 +147,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
      */
     RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI, URI storedURI,
-            TimePoint trackingStartTime, TimePoint trackingEndTime, WindStore windStore, long timeoutForReceivingRaceDefinitionInMilliseconds)
+            TimePoint trackingStartTime, TimePoint trackingEndTime, WindStore windStore,
+            long timeoutForReceivingRaceDefinitionInMilliseconds, boolean simulateWithStartTimeNow)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**

@@ -8,10 +8,11 @@ import java.util.logging.Logger;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -43,11 +44,15 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind) {
-        super(domainFactory, tractracEvent, trackedRegatta);
+            long millisecondsOverWhichToAverageWind, Simulator simulator) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator);
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis;
-        this.windStore = windStore;
+        if (simulator == null) {
+            this.windStore = windStore;
+        } else {
+            this.windStore = simulator.simulatingWindStore(windStore);
+        }
         this.raceDefinitionSetToUpdate = raceDefinitionSetToUpdate;
     }
 
@@ -93,8 +98,12 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
             // create race definition and add to event
-            getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(getTrackedRegatta(), event.getC(), course,
-                    windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+            DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
+                    getTrackedRegatta(), event.getC(), course, windStore, delayToLiveInMillis,
+                    millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+            if (getSimulator() != null) {
+                getSimulator().setTrackedRace(trackedRace);
+            }
         }
     }
 

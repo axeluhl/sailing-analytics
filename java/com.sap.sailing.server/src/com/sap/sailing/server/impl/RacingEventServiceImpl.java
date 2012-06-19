@@ -577,10 +577,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
             long timeoutInMilliseconds) throws Exception {
         return addRace(
-                /* regattaToAddTo */ null,
-                getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
-                        /* startOfTracking */ null,
-                        /* endOfTracking */null, delayToLiveInMillis, windStore), windStore, timeoutInMilliseconds);
+        /* regattaToAddTo */null, getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
+        /* startOfTracking */null,
+        /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, windStore), windStore,
+                timeoutInMilliseconds);
     }
     
     @Override
@@ -726,9 +726,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public synchronized RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            WindStore windStore, long timeoutInMilliseconds) throws Exception {
+            WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow) throws Exception {
         return addRace(regattaToAddTo, getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
-                        endOfTracking, delayToLiveInMillis, windStore), windStore, timeoutInMilliseconds);
+                        endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore), windStore, timeoutInMilliseconds);
     }
 
     private void ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(DynamicTrackedRegatta trackedRegatta) {
