@@ -1,4 +1,4 @@
-package com.sap.sailing.server.admin;
+package com.sap.sailing.server.impl;
 
 import java.util.logging.Logger;
 
