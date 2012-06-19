@@ -128,10 +128,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
     
     /**
-     * {@link #scheduleCacheInvalidation(WindWithConfidence, TimePoint)} synchronizes on this object before changing it
+     * {@link #scheduleCacheRefresh(WindWithConfidence, TimePoint)} synchronizes on this object before changing it
      * and when actually invalidating the cache.
      */
-    private final InvalidationInterval scheduledInvalidationInterval;
+    private final InvalidationInterval scheduledRefreshInterval;
 
     /**
      * @param delayForCacheInvalidationInMilliseconds
@@ -139,14 +139,18 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      *            time interval around the time point of the event. If the cache invalidation happens immediately, this
      *            can cause significant load on the server. Delaying the cache refresh just a little will reduce server
      *            load, sacrificing some accuracy of the wind estimation which can carefully be traded by this
-     *            parameter.
+     *            parameter. When the delay is set to 0, the cache contents for the affected time interval are
+     *            immediately removed and will be re-computed upon the next request. If a positive delay is specified,
+     *            the cache contents for the interval affected will be re-computed and will be replaced in the cache
+     *            when the new results are available. Clients therefore won't have to wait for the valued to be
+     *            re-computed but will be served from the old cache values until they will have been replaced.
      */
     public TrackBasedEstimationWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage,
             double baseConfidence, long delayForCacheInvalidationInMilliseconds) {
         super(trackedRace, millisecondsOverWhichToAverage, baseConfidence,
                 WindSourceType.TRACK_BASED_ESTIMATION.useSpeed());
         this.delayForCacheInvalidationInMilliseconds = delayForCacheInvalidationInMilliseconds;
-        this.scheduledInvalidationInterval = new InvalidationInterval();
+        this.scheduledRefreshInterval = new InvalidationInterval();
         cache = new ArrayListNavigableSet<WindWithConfidence<TimePoint>>(
                 new SerializableComparator<WindWithConfidence<TimePoint>>() {
                     private static final long serialVersionUID = 5760349397418542705L;
@@ -227,55 +231,113 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * be bundled, and during live mode the incoming requests for a time point close to the time for which new data is received
      * will not be massively delayed by having to re-calculate the estimation over and over again.
      */
-    private synchronized void scheduleCacheInvalidation(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
-        synchronized (scheduledInvalidationInterval) {
-            if (!scheduledInvalidationInterval.isSet()) {
+    private synchronized void scheduleCacheRefresh(WindWithConfidence<TimePoint> startOfInvalidation, TimePoint endOfInvalidation) {
+        synchronized (scheduledRefreshInterval) {
+            if (!scheduledRefreshInterval.isSet()) {
                 // according to the invariant this implies [1]==null
-                scheduledInvalidationInterval.set(startOfInvalidation, endOfInvalidation);
+                scheduledRefreshInterval.set(startOfInvalidation, endOfInvalidation);
                 startSchedulerForCacheRefresh();
             } else {
                 // this means that an invalidation is already scheduled; as long as we're synchronized on scheduledInvalidationInterval
                 // we can safely extend the interval; the invalidation won't start before we release the lock
-                scheduledInvalidationInterval.extend(startOfInvalidation, endOfInvalidation);
+                scheduledRefreshInterval.extend(startOfInvalidation, endOfInvalidation);
             }
         }
     }
     
     /**
-     * Invalidates the cache based on {@link #scheduledInvalidationInterval} and when done
+     * Invalidates the cache based on {@link #scheduledRefreshInterval} and when done
      * {@link InvalidationInterval#clear() clears} the invalidation interval, indicating that currently no scheduler is
      * running.
      */
     private synchronized void invalidateCache() {
-        synchronized (scheduledInvalidationInterval) {
-            Iterator<WindWithConfidence<TimePoint>> iter = (scheduledInvalidationInterval.getStart() == null ? getCachedFixes()
-                    : getCachedFixes().tailSet(scheduledInvalidationInterval.getStart(), /* inclusive */true)).iterator();
+        synchronized (scheduledRefreshInterval) {
+            Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
+                    : getCachedFixes().tailSet(scheduledRefreshInterval.getStart(), /* inclusive */true)).iterator();
             while (iter.hasNext()) {
                 WindWithConfidence<TimePoint> next = iter.next();
-                if (scheduledInvalidationInterval.getEnd() == null || next.getObject().getTimePoint().compareTo(scheduledInvalidationInterval.getEnd()) < 0) {
+                if (scheduledRefreshInterval.getEnd() == null || next.getObject().getTimePoint().compareTo(scheduledRefreshInterval.getEnd()) < 0) {
                     iter.remove();
                 } else {
                     break;
                 }
             }
-            Iterator<TimePoint> nullIter = (scheduledInvalidationInterval.getStart() == null ? getTimePointsWithCachedNullResult()
-                    : getTimePointsWithCachedNullResult().tailSet(scheduledInvalidationInterval.getStart().getObject().getTimePoint(), /* inclusive */
+            Iterator<TimePoint> nullIter = (scheduledRefreshInterval.getStart() == null ? getTimePointsWithCachedNullResult()
+                    : getTimePointsWithCachedNullResult().tailSet(scheduledRefreshInterval.getStart().getObject().getTimePoint(), /* inclusive */
                     true)).iterator();
             while (nullIter.hasNext()) {
                 TimePoint next = nullIter.next();
-                if (scheduledInvalidationInterval.getEnd() == null || next.compareTo(scheduledInvalidationInterval.getEnd()) < 0) {
+                if (scheduledRefreshInterval.getEnd() == null || next.compareTo(scheduledRefreshInterval.getEnd()) < 0) {
                     nullIter.remove();
                     timePointsWithCachedNullResultFastContains.remove(next);
                 } else {
                     break;
                 }
             }
-            scheduledInvalidationInterval.clear();
+            scheduledRefreshInterval.clear();
+        }
+    }
+
+    /**
+     * Incrementally replaces the cache elements based on {@link #scheduledRefreshInterval} using freshly computed values.
+     */
+    private synchronized void refreshCacheIncrementally() {
+        synchronized (scheduledRefreshInterval) {
+            Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
+                    : getCachedFixes().tailSet(scheduledRefreshInterval.getStart(), /* inclusive */true)).iterator();
+            Iterator<TimePoint> nullIter = (scheduledRefreshInterval.getStart() == null ? getTimePointsWithCachedNullResult()
+                    : getTimePointsWithCachedNullResult().tailSet(scheduledRefreshInterval.getStart().getObject().getTimePoint(), /* inclusive */
+                    true)).iterator();
+            WindWithConfidence<TimePoint> next = null;
+            if (iter.hasNext()) {
+                next = iter.next();
+            }
+            TimePoint nextNull = null;
+            if (nullIter.hasNext()) {
+                nextNull = nullIter.next();
+            }
+            while (next != null || nextNull != null) {
+                if (nextNull == null || nextNull.compareTo(next.getObject().getTimePoint()) <= 0) {
+                    if (scheduledRefreshInterval.getEnd() == null
+                            || next.getObject().getTimePoint().compareTo(scheduledRefreshInterval.getEnd()) < 0) {
+                        TimePoint timePoint = next.getObject().getTimePoint();
+                        Position position = next.getObject().getPosition();
+                        WindWithConfidence<TimePoint> replacementFix = getTrackedRace()
+                                .getEstimatedWindDirectionWithConfidence(position, timePoint);
+                        iter.remove();
+                        cache(timePoint, replacementFix);
+                        if (iter.hasNext()) {
+                            next = iter.next();
+                        } else {
+                            next = null;
+                        }
+                    } else {
+                        next = null;
+                    }
+                } else if (nextNull != null) {
+                    if (scheduledRefreshInterval.getEnd() == null
+                            || nextNull.compareTo(scheduledRefreshInterval.getEnd()) < 0) {
+                        WindWithConfidence<TimePoint> replacementFix = getTrackedRace()
+                                .getEstimatedWindDirectionWithConfidence(/* position */ null, nextNull);
+                        nullIter.remove();
+                        timePointsWithCachedNullResultFastContains.remove(nextNull);
+                        cache(nextNull, replacementFix);
+                        if (nullIter.hasNext()) {
+                            nextNull = nullIter.next();
+                        } else {
+                            nextNull = null;
+                        }
+                    } else {
+                        nextNull = null;
+                    }
+                }
+            }
+            scheduledRefreshInterval.clear();
         }
     }
 
     private void startSchedulerForCacheRefresh() {
-        synchronized (scheduledInvalidationInterval) {
+        synchronized (scheduledRefreshInterval) {
             if (delayForCacheInvalidationInMilliseconds == 0) {
                 invalidateCache();
             } else {
@@ -287,9 +349,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                         // to avoid deadlock with another invalidateCache() and with scheduleCacheInvalidation we need
                         // to obtain the TrackBasedEstimationWindTrackImpl.this monitor first (see bug 746).
                         synchronized (TrackBasedEstimationWindTrackImpl.this) {
-                            synchronized (scheduledInvalidationInterval) {
+                            synchronized (scheduledRefreshInterval) {
                                 cacheInvalidationTimer.cancel(); // terminates the timer thread
-                                invalidateCache();
+                                refreshCacheIncrementally();
                             }
                         }
                     }
@@ -354,7 +416,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(wind
                 .getTimePoint().asMillis() - averagingInterval));
         TimePoint endOfInvalidation = new MillisecondsTimePoint(wind.getTimePoint().asMillis() + averagingInterval);
-        scheduleCacheInvalidation(startOfInvalidation, endOfInvalidation);
+        scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
     }
 
     @Override
@@ -378,7 +440,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(fix
                 .getTimePoint().asMillis() - averagingInterval));
         TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis() + averagingInterval);
-        scheduleCacheInvalidation(startOfInvalidation, endOfInvalidation);
+        scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
     }
 
     @Override
@@ -401,7 +463,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                             - averagingInterval));
                     endOfInvalidation = new MillisecondsTimePoint(interval[1].asMillis() + averagingInterval);
                 }
-                scheduleCacheInvalidation(startOfInvalidation, endOfInvalidation);
+                scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
             }
         }
     }
@@ -419,7 +481,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         WindWithConfidence<TimePoint> startOfInvalidation = interval.getA() == null ? null : getDummyFixWithConfidence(interval.getA());
         TimePoint endOfInvalidation = interval.getB();
         if (startOfInvalidation != null && endOfInvalidation != null) {
-            scheduleCacheInvalidation(startOfInvalidation, endOfInvalidation);
+            scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
         }
     }
 
