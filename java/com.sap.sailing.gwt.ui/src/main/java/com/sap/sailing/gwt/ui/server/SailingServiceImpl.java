@@ -414,6 +414,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (addLegDetails && trackedRace != null) {
             entryDTO.legDetails = new ArrayList<LegEntryDTO>();
             for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
+                // We loop over a copy of the course's legs; during a course change, legs may become "stale," even with
+                // regard to the leg/trackedLeg structures inside the tracked race which is updated by the course change
+                // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
                 LegEntryDTO legEntry;
                 if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
