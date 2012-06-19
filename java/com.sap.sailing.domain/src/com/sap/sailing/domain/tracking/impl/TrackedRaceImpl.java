@@ -588,7 +588,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public TrackedLegOfCompetitor getTrackedLeg(Competitor competitor, Leg leg) {
-        return getTrackedLeg(leg).getTrackedLeg(competitor);
+        final TrackedLeg trackedLeg = getTrackedLeg(leg);
+        return trackedLeg == null ? null : trackedLeg.getTrackedLeg(competitor);
     }
 
     @Override
