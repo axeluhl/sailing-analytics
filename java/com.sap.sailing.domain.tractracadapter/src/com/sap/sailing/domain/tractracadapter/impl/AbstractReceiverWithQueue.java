@@ -31,6 +31,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final DomainFactory domainFactory;
     private final com.tractrac.clientmodule.Event tractracEvent;
     private final DynamicTrackedRegatta trackedRegatta;
+    private final Simulator simulator;
     private Thread thread;
 
     /**
@@ -40,11 +41,12 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private boolean receivedEventDuringTimeout;
     
     public AbstractReceiverWithQueue(DomainFactory domainFactory, Event tractracEvent,
-            DynamicTrackedRegatta trackedRegatta) {
+            DynamicTrackedRegatta trackedRegatta, Simulator simulator) {
         super();
         this.tractracEvent = tractracEvent;
         this.trackedRegatta = trackedRegatta;
         this.domainFactory = domainFactory;
+        this.simulator = simulator;
         this.queue = new LinkedBlockingQueue<Triple<A, B, C>>();
     }
     
@@ -74,6 +76,10 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     @Override
     public void stopAfterProcessingQueuedEvents() {
         queue.add(new Triple<A, B, C>(null, null, null));
+    }
+    
+    protected Simulator getSimulator() {
+        return simulator;
     }
     
     @Override

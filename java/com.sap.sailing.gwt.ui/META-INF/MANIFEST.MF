@@ -38,3 +38,4 @@ Web-ContextPath: /gwt
 Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gwt-maps.jar,
  WEB-INF/lib/gwt-servlet.jar
+TrackLifecycle: true

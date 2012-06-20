@@ -414,6 +414,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (addLegDetails && trackedRace != null) {
             entryDTO.legDetails = new ArrayList<LegEntryDTO>();
             for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
+                // We loop over a copy of the course's legs; during a course change, legs may become "stale," even with
+                // regard to the leg/trackedLeg structures inside the tracked race which is updated by the course change
+                // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
                 LegEntryDTO legEntry;
                 if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
@@ -609,7 +612,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void trackWithTracTrac(RegattaIdentifier regattaToAddTo, TracTracRaceRecordDTO rr, String liveURI, String storedURI,
-            boolean trackWind, final boolean correctWindByDeclination) throws Exception {
+            boolean trackWind, final boolean correctWindByDeclination, final boolean simulateWithStartTimeNow) throws Exception {
         if (liveURI == null || liveURI.trim().length() == 0) {
             liveURI = rr.liveURI;
         }
@@ -620,7 +623,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 new URI(liveURI), new URI(storedURI), new MillisecondsTimePoint(rr.trackingStartTime),
                 new MillisecondsTimePoint(rr.trackingEndTime),
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory),
-                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, simulateWithStartTimeNow);
         if (trackWind) {
             new Thread("Wind tracking starter for race "+rr.regattaName+"/"+rr.name) {
                 public void run() {

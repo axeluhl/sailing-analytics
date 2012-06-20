@@ -85,7 +85,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                 + TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
                 + TracTracConnectionConstants.PORT_LIVE, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
                 + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
-                + ":" + TracTracConnectionConstants.PORT_STORED, false, false, new AsyncCallback<Void>() {
+                + ":" + TracTracConnectionConstants.PORT_STORED, false, false, /* simulateWithStartTimeNow */ false, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {

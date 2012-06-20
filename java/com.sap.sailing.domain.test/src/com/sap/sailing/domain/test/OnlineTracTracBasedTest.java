@@ -90,7 +90,8 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         setStoredDataLoaded(false);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), EmptyWindStore.INSTANCE,
-                /* startOfTracking */ null, /* endOfTracking */ null, /* delayToLiveInMillis */ 0l, new DynamicRaceDefinitionSet() {
+        /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */ false,
+                new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }

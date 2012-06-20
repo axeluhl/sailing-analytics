@@ -11,8 +11,8 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.server.RacingEventService;
 
@@ -20,6 +20,8 @@ public class Activator implements BundleActivator, ServiceListener {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
     
     private static BundleContext fContext;
+
+    private static ExtenderBundleTracker extenderBundleTracker;
     
     public static BundleContext getDefault() {
         return fContext;
@@ -27,6 +29,9 @@ public class Activator implements BundleActivator, ServiceListener {
 
     public void start(BundleContext context) throws Exception {
         fContext = context;
+        
+        extenderBundleTracker = new ExtenderBundleTracker(context);
+        extenderBundleTracker.open();
         RacingEventService service = new RacingEventServiceImpl();
 
         // register the racing service
@@ -38,6 +43,11 @@ public class Activator implements BundleActivator, ServiceListener {
     
     public void stop(BundleContext context) throws Exception {
         fContext = null;
+        
+        if(extenderBundleTracker != null) {
+            extenderBundleTracker.open();
+        }
+
         ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
         
         racingEventServiceTracker.open();

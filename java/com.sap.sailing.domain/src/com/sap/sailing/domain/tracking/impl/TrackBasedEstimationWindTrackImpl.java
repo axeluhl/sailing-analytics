@@ -232,7 +232,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             if (!scheduledInvalidationInterval.isSet()) {
                 // according to the invariant this implies [1]==null
                 scheduledInvalidationInterval.set(startOfInvalidation, endOfInvalidation);
-                startSchedulerForInvalidation();
+                startSchedulerForCacheRefresh();
             } else {
                 // this means that an invalidation is already scheduled; as long as we're synchronized on scheduledInvalidationInterval
                 // we can safely extend the interval; the invalidation won't start before we release the lock
@@ -274,7 +274,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         }
     }
 
-    private void startSchedulerForInvalidation() {
+    private void startSchedulerForCacheRefresh() {
         synchronized (scheduledInvalidationInterval) {
             if (delayForCacheInvalidationInMilliseconds == 0) {
                 invalidateCache();
