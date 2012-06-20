@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -212,17 +214,14 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     protected synchronized void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
-        if (fix == null) {
-            getTimePointsWithCachedNullResult().add(timePoint);
-            timePointsWithCachedNullResultFastContains.add(timePoint);
-        } else {
-            getCachedFixes().add(fix);
+        synchronized (scheduledRefreshInterval) {
+            if (fix == null) {
+                getTimePointsWithCachedNullResult().add(timePoint);
+                timePointsWithCachedNullResultFastContains.add(timePoint);
+            } else {
+                getCachedFixes().add(fix);
+            }
         }
-    }
-    
-    protected synchronized void cacheNull(TimePoint timePoint) {
-        timePointsWithCachedNullResult.add(timePoint);
-        timePointsWithCachedNullResultFastContains.add(timePoint);
     }
     
     /**
@@ -282,58 +281,66 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * Incrementally replaces the cache elements based on {@link #scheduledRefreshInterval} using freshly computed values.
      */
     private synchronized void refreshCacheIncrementally() {
+        Set<WindWithConfidence<TimePoint>> windFixesToRecalculate = new HashSet<WindWithConfidence<TimePoint>>();
+        Set<TimePoint> cachedNullResultsToRecalculate = new HashSet<TimePoint>();
         synchronized (scheduledRefreshInterval) {
             Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
                     : getCachedFixes().tailSet(scheduledRefreshInterval.getStart(), /* inclusive */true)).iterator();
             Iterator<TimePoint> nullIter = (scheduledRefreshInterval.getStart() == null ? getTimePointsWithCachedNullResult()
                     : getTimePointsWithCachedNullResult().tailSet(scheduledRefreshInterval.getStart().getObject().getTimePoint(), /* inclusive */
                     true)).iterator();
-            WindWithConfidence<TimePoint> next = null;
-            if (iter.hasNext()) {
-                next = iter.next();
+            WindWithConfidence<TimePoint> nextFixToRecalculate = null;
+            while (iter.hasNext() &&
+                    ((nextFixToRecalculate = iter.next()).getObject().getTimePoint().compareTo(scheduledRefreshInterval.getEnd()) < 0) ||
+                    scheduledRefreshInterval.getEnd() == null) {
+                windFixesToRecalculate.add(nextFixToRecalculate);
             }
-            TimePoint nextNull = null;
-            if (nullIter.hasNext()) {
-                nextNull = nullIter.next();
+            TimePoint nextNullResultToRecalculate = null;
+            while (nullIter.hasNext() &&
+                    ((nextNullResultToRecalculate = nullIter.next()).compareTo(scheduledRefreshInterval.getEnd()) < 0) ||
+                    scheduledRefreshInterval.getEnd() == null) {
+                cachedNullResultsToRecalculate.add(nextNullResultToRecalculate);
             }
-            while (next != null || nextNull != null) {
-                if (nextNull == null || nextNull.compareTo(next.getObject().getTimePoint()) <= 0) {
-                    if (scheduledRefreshInterval.getEnd() == null
-                            || next.getObject().getTimePoint().compareTo(scheduledRefreshInterval.getEnd()) < 0) {
-                        TimePoint timePoint = next.getObject().getTimePoint();
-                        Position position = next.getObject().getPosition();
-                        WindWithConfidence<TimePoint> replacementFix = getTrackedRace()
-                                .getEstimatedWindDirectionWithConfidence(position, timePoint);
-                        iter.remove();
-                        cache(timePoint, replacementFix);
-                        if (iter.hasNext()) {
-                            next = iter.next();
-                        } else {
-                            next = null;
-                        }
-                    } else {
-                        next = null;
-                    }
-                } else if (nextNull != null) {
-                    if (scheduledRefreshInterval.getEnd() == null
-                            || nextNull.compareTo(scheduledRefreshInterval.getEnd()) < 0) {
-                        WindWithConfidence<TimePoint> replacementFix = getTrackedRace()
-                                .getEstimatedWindDirectionWithConfidence(/* position */ null, nextNull);
-                        nullIter.remove();
-                        timePointsWithCachedNullResultFastContains.remove(nextNull);
-                        cache(nextNull, replacementFix);
-                        if (nullIter.hasNext()) {
-                            nextNull = nullIter.next();
-                        } else {
-                            nextNull = null;
-                        }
-                    } else {
-                        nextNull = null;
-                    }
-                }
-            }
-            scheduledRefreshInterval.clear();
         }
+        Set<TimePoint> nullRemovals = new HashSet<TimePoint>();
+        Set<TimePoint> nullInsertions = new HashSet<TimePoint>();
+        Map<TimePoint, WindWithConfidence<TimePoint>> cacheInsertions = new HashMap<TimePoint, WindWithConfidence<TimePoint>>();
+        for (TimePoint cachedNullResultToRecalculate : cachedNullResultsToRecalculate) {
+            WindWithConfidence<TimePoint> replacementFix = getTrackedRace()
+                    .getEstimatedWindDirectionWithConfidence(/* position */ null, cachedNullResultToRecalculate);
+            if (replacementFix != null) {
+                nullRemovals.add(cachedNullResultToRecalculate);
+                cacheInsertions.put(cachedNullResultToRecalculate, replacementFix);
+            } // else no action required because the result is still null
+        }
+        for (WindWithConfidence<TimePoint> windFixToRecalculate : windFixesToRecalculate) {
+            TimePoint timePoint = windFixToRecalculate.getObject().getTimePoint();
+            Position position = windFixToRecalculate.getObject().getPosition();
+            WindWithConfidence<TimePoint> replacementFix = getTrackedRace()
+                    .getEstimatedWindDirectionWithConfidence(position, timePoint);
+            if (replacementFix == null) {
+                nullInsertions.add(timePoint);
+            } else {
+                cacheInsertions.put(timePoint, replacementFix);
+            }
+        }
+        // apply the computed cache deltas
+        synchronized (scheduledRefreshInterval) {
+            for (TimePoint nullRemoval : nullRemovals) {
+                getTimePointsWithCachedNullResult().remove(nullRemoval);
+                timePointsWithCachedNullResultFastContains.remove(nullRemoval);
+            }
+            for (TimePoint nullInsertion : nullInsertions) {
+                cache(nullInsertion, null);
+            }
+            for (WindWithConfidence<TimePoint> cacheRemoval : windFixesToRecalculate) {
+                getCachedFixes().remove(cacheRemoval);
+            }
+            for (Map.Entry<TimePoint, WindWithConfidence<TimePoint>> cacheInsertion : cacheInsertions.entrySet()) {
+                cache(cacheInsertion.getKey(), cacheInsertion.getValue());
+            }
+        }
+        scheduledRefreshInterval.clear();
     }
 
     private void startSchedulerForCacheRefresh() {
