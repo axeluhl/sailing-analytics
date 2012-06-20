@@ -333,7 +333,6 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     protected class CompetitorColumn extends SortableColumn<LeaderboardRowDTO, String> {
-
         protected CompetitorColumn() {
             super(new TextCell());
         }
@@ -361,6 +360,20 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         @Override
         public String getValue(LeaderboardRowDTO object) {
             return getLeaderboard().getDisplayName(object.competitor);
+        }
+
+        @Override
+        public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
+            String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor);
+            String competitorColorBarStyle;
+            if(LeaderboardPanel.this.isEmbedded) {
+                competitorColorBarStyle = "style=\"border-bottom: 2px solid "+competitorColor+";\"";
+            } else {
+                competitorColorBarStyle = "style=\"border: none;\"";
+            }
+            sb.appendHtmlConstant("<div "+competitorColorBarStyle+">");
+            sb.appendEscaped(getLeaderboard().getDisplayName(object.competitor));
+            sb.appendHtmlConstant("</div>");
         }
     }
 
