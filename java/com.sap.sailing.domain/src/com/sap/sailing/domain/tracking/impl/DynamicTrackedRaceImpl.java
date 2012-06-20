@@ -388,7 +388,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 synchronized (markPassingsForCompetitor) {
                     markPassingsForCompetitor.add(markPassing);
                 }
-                Collection<MarkPassing> markPassingsInOrderForWaypoint = getMarkPassingsInOrderAsNavigableSet(markPassing.getWaypoint());
+                Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing.getWaypoint());
                 synchronized (markPassingsInOrderForWaypoint) {
                     markPassingsInOrderForWaypoint.add(markPassing);
                 }

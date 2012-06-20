@@ -294,6 +294,21 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public Iterable<MarkPassing> getMarkPassingsInOrder(Waypoint waypoint) {
         return getMarkPassingsInOrderAsNavigableSet(waypoint);
     }
+    
+    protected NavigableSet<MarkPassing> getOrCreateMarkPassingsInOrderAsNavigableSet(Waypoint waypoint) {
+        NavigableSet<MarkPassing> result = getMarkPassingsInOrderAsNavigableSet(waypoint);
+        if (result == null) {
+            result = createMarkPassingsCollectionForWaypoint(waypoint);
+        }
+        return result;
+    }
+    
+    protected NavigableSet<MarkPassing> createMarkPassingsCollectionForWaypoint(Waypoint waypoint) {
+        final ConcurrentSkipListSet<MarkPassing> result = new ConcurrentSkipListSet<MarkPassing>(
+                MarkPassingByTimeComparator.INSTANCE);
+        markPassingsForWaypoint.put(waypoint, result);
+        return result;
+    }
 
     @Override
     public TimePoint getStartOfTracking() {
@@ -341,8 +356,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     }
                 }
             } else {
-                startTime = calculateStartOfRaceFromMarkPassings(getMarkPassingsInOrderAsNavigableSet(getRace()
-                        .getCourse().getFirstWaypoint()), getRace().getCompetitors());
+                final NavigableSet<MarkPassing> markPassingsForFirstWaypointInOrder = getMarkPassingsInOrderAsNavigableSet(getRace()
+                        .getCourse().getFirstWaypoint());
+                if (markPassingsForFirstWaypointInOrder != null) {
+                    startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder, getRace().getCompetitors());
+                }
             }
         }
         return startTime;
@@ -1008,8 +1026,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public synchronized void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
-        markPassingsForWaypoint.put(waypointThatGotAdded, new ConcurrentSkipListSet<MarkPassing>(
-                MarkPassingByTimeComparator.INSTANCE));
+        getOrCreateMarkPassingsInOrderAsNavigableSet(waypointThatGotAdded);
         for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
             getOrCreateTrack(buoy);
         }
