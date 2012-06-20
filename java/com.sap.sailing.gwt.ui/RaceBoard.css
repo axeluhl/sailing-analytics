@@ -91,7 +91,12 @@ table {
 	line-height: 1.0;
 }
 
-input.opencoloumn {
+.openColumn {
+	position: relative;
+    vertical-align: middle;
+}
+
+img.openColumn {
 	display: block;
 	margin: 3px auto 3px auto !important;
 }
