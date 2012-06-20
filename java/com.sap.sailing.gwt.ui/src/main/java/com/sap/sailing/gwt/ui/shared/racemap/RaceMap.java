@@ -536,20 +536,22 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     protected void showMarksOnMap(CourseDTO courseDTO) {
         if (map != null && courseDTO != null) {
             Set<MarkDTO> toRemove = new HashSet<MarkDTO>(buoyMarkers.keySet());
-            for (MarkDTO markDTO : courseDTO.buoys) {
-                Marker buoyMarker = buoyMarkers.get(markDTO);
-                if (buoyMarker == null) {
-                    buoyMarker = createBuoyMarker(markDTO);
-                    buoyMarkers.put(markDTO, buoyMarker);
-                    map.addOverlay(buoyMarker);
-                } else {
-                    buoyMarker.setLatLng(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg));
-                    toRemove.remove(markDTO);
+            if (courseDTO.buoys != null) {
+                for (MarkDTO markDTO : courseDTO.buoys) {
+                    Marker buoyMarker = buoyMarkers.get(markDTO);
+                    if (buoyMarker == null) {
+                        buoyMarker = createBuoyMarker(markDTO);
+                        buoyMarkers.put(markDTO, buoyMarker);
+                        map.addOverlay(buoyMarker);
+                    } else {
+                        buoyMarker.setLatLng(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg));
+                        toRemove.remove(markDTO);
+                    }
                 }
-            }
-            for (MarkDTO toRemoveMarkDTO : toRemove) {
-                Marker marker = buoyMarkers.remove(toRemoveMarkDTO);
-                map.removeOverlay(marker);
+                for (MarkDTO toRemoveMarkDTO : toRemove) {
+                    Marker marker = buoyMarkers.remove(toRemoveMarkDTO);
+                    map.removeOverlay(marker);
+                }
             }
         }
     }
