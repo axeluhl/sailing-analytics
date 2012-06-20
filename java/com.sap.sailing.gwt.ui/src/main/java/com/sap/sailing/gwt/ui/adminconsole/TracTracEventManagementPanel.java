@@ -20,6 +20,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -36,6 +37,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
@@ -495,6 +497,26 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         });
     }
 
+    private boolean checkBoatClassMatch(TracTracRaceRecordDTO tracTracRecord, RegattaDTO selectedRegatta) {
+        Iterable<String> boatClassNames = tracTracRecord.boatClassNames;
+        if(boatClassNames != null && Util.size(boatClassNames) > 0) {
+            String tracTracBoatClass = boatClassNames.iterator().next();
+            if(selectedRegatta == null) {
+                // in case no regatta has been selected we check if there would be a matching regatta
+                for(RegattaDTO regatta: allRegattas) {
+                    if(tracTracBoatClass.equalsIgnoreCase(regatta.boatClass.name)) {
+                        return false;
+                    }
+                }
+            } else {
+                if(!tracTracBoatClass.equalsIgnoreCase(selectedRegatta.boatClass.name)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
     private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, final boolean simulateWithStartTimeNow) {
         String liveURI = liveURIBox.getValue();
         String storedURI = storedURIBox.getValue();
@@ -503,6 +525,33 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         if (selectedRegatta != null) {
             regattaIdentifier = new RegattaName(selectedRegatta.name);
         }
+        
+        // Check if the assigned regatta makes sense
+        List<TracTracRaceRecordDTO> racesWithNotMatchingBoatClasses = new ArrayList<TracTracRaceRecordDTO>();  
+        for (TracTracRaceRecordDTO rr : raceList.getList()) {
+            if (raceTable.getSelectionModel().isSelected(rr)) {
+                if(!checkBoatClassMatch(rr, selectedRegatta))
+                    racesWithNotMatchingBoatClasses.add(rr);
+            }
+        }
+
+        if(racesWithNotMatchingBoatClasses.size() > 0) {
+            String warningText = "WARNING\n";
+            if(selectedRegatta != null) {
+                warningText += stringConstants.boatClassDoesNotMatchSelectedRegatta(selectedRegatta.boatClass.name, selectedRegatta.name);
+            } else {
+                warningText += stringConstants.regattaExistForSelectedBoatClass();
+            }
+            warningText += "\n\n";
+            warningText += stringConstants.races() + "\n";
+            for(TracTracRaceRecordDTO record: racesWithNotMatchingBoatClasses) {
+                warningText += record.name + "\n";
+            }
+            if(!Window.confirm(warningText)) {
+                return;
+            }
+        }
+        
         for (final TracTracRaceRecordDTO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
                 sailingService.trackWithTracTrac(regattaIdentifier, rr, liveURI, storedURI, trackWind, 

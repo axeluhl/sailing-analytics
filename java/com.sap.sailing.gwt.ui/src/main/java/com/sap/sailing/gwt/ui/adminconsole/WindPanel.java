@@ -11,12 +11,8 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -26,8 +22,6 @@ import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -48,16 +42,12 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TimeZoomModel;
-import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.shared.charts.WindChartSettings;
-import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
 
 /**
  * Displays a {@link WindChart} and a table of currently tracked races. The user can configure whether a race
@@ -85,8 +75,6 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
     private final WindSourcesToExcludeSelector windSourcesToExcludeSelector;
     private final Map<WindSource, ListDataProvider<WindDTO>> windLists;
     private final CheckBox raceIsKnownToStartUpwindBox;
-    private final WindChart windChart;
-    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
     public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
@@ -172,20 +160,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
                 });
             }
         });
-        ImageResource settingsImage = resources.settingsIcon();
-        Anchor showConfigAnchor = new Anchor(AbstractImagePrototype.create(settingsImage).getSafeHtml());
-        showConfigAnchor.setTitle(stringMessages.configuration());
-        showConfigAnchor.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                new SettingsDialog<WindChartSettings>(windChart, stringMessages).show();
-            }
-        });
-        windSourceSelectionPanel.add(showConfigAnchor);
         grid.setWidget(1, 0, windSourceSelectionPanel);
-        windChart = new WindChart(sailingService, raceSelectionProvider, new Timer(PlayModes.Replay), new TimeZoomModel(), new WindChartSettings(), stringMessages, asyncActionsExecutor, errorReporter, false);
-        windChart.onResize();
-        grid.setWidget(2, 0, windChart.getEntryWidget());
         grid.getCellFormatter().setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
         this.setWidget(grid);
     }
@@ -247,8 +222,6 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         grid.setWidget(3, 0, null);
         VerticalPanel windDisplay = new VerticalPanel();
         grid.setWidget(3, 0, windDisplay);
-        windChart.updateStripChartSeries(result, /* append */ false);
-        windChart.onResize();
         // restrict tabular display to WEB sources; there, the REMOVE button is relevant; for all others, the chart has to do
         for (Map.Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
             if (e.getKey().getType() == WindSourceType.WEB) {
