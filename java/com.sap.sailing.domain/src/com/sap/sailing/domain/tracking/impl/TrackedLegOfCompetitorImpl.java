@@ -410,68 +410,71 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         // time point; else, calculate the windward distance to the leader and divide by
         // the windward speed
         Speed windwardSpeed = getWindwardSpeed(getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(timePoint), timePoint);
+        Double result = null;
         // Has our competitor started the leg already? If not, we won't be able to compute a gap
         if (hasStartedLeg(timePoint)) {
             Iterable<MarkPassing> markPassingsInOrder = getTrackedRace().getMarkPassingsInOrder(getLeg().getTo());
-            MarkPassing firstMarkPassing = null;
-            synchronized (markPassingsInOrder) {
-                Iterator<MarkPassing> markPassingsForLegEnd = markPassingsInOrder.iterator();
-                if (markPassingsForLegEnd.hasNext()) {
-                    firstMarkPassing = markPassingsForLegEnd.next();
+            if (markPassingsInOrder != null) {
+                MarkPassing firstMarkPassing = null;
+                synchronized (markPassingsInOrder) {
+                    Iterator<MarkPassing> markPassingsForLegEnd = markPassingsInOrder.iterator();
+                    if (markPassingsForLegEnd.hasNext()) {
+                        firstMarkPassing = markPassingsForLegEnd.next();
+                    }
                 }
-            }
-            if (firstMarkPassing != null) {
-                // someone has already finished the leg
-                TimePoint whenLeaderFinishedLeg = firstMarkPassing.getTimePoint();
-                // Was it before the requested timePoint?
-                if (whenLeaderFinishedLeg.compareTo(timePoint) <= 0) {
-                    // Has our competitor also already finished this leg?
-                    if (hasFinishedLeg(timePoint)) {
-                        // Yes, so the gap is the time period between the time points at which the leader and
-                        // our competitor finished this leg.
-                        return (getMarkPassingForLegEnd().getTimePoint().asMillis() - whenLeaderFinishedLeg.asMillis()) / 1000.;
+                if (firstMarkPassing != null) {
+                    // someone has already finished the leg
+                    TimePoint whenLeaderFinishedLeg = firstMarkPassing.getTimePoint();
+                    // Was it before the requested timePoint?
+                    if (whenLeaderFinishedLeg.compareTo(timePoint) <= 0) {
+                        // Has our competitor also already finished this leg?
+                        if (hasFinishedLeg(timePoint)) {
+                            // Yes, so the gap is the time period between the time points at which the leader and
+                            // our competitor finished this leg.
+                            return (getMarkPassingForLegEnd().getTimePoint().asMillis() - whenLeaderFinishedLeg
+                                    .asMillis()) / 1000.;
+                        } else {
+                            if (windwardSpeed == null) {
+                                return null;
+                            } else {
+                                // leader has finished already; our competitor hasn't
+                                Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
+                                long millisSinceLeaderPassedMarkToTimePoint = timePoint.asMillis()
+                                        - whenLeaderFinishedLeg.asMillis();
+                                return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond()
+                                        + millisSinceLeaderPassedMarkToTimePoint / 1000.;
+                            }
+                        }
+                    }
+                }
+                // no-one has finished this leg yet at timePoint
+                Competitor leader = getTrackedLeg().getLeader(timePoint);
+                // Maybe our competitor is the leader. Check:
+                if (leader == getCompetitor()) {
+                    return 0.0; // the leader's gap to the leader
+                } else {
+                    if (windwardSpeed == null) {
+                        return null;
                     } else {
-                        if (windwardSpeed == null) {
+                        // no, we're not the leader, so compute our windward distance and divide by our current VMG
+                        Position ourEstimatedPosition = getTrackedRace().getTrack(getCompetitor())
+                                .getEstimatedPosition(timePoint, false);
+                        Position leaderEstimatedPosition = getTrackedRace().getTrack(leader).getEstimatedPosition(
+                                timePoint, false);
+                        if (ourEstimatedPosition == null || leaderEstimatedPosition == null) {
                             return null;
                         } else {
-                            // leader has finished already; our competitor hasn't
-                            Distance windwardDistanceToGo = getWindwardDistanceToGo(timePoint);
-                            long millisSinceLeaderPassedMarkToTimePoint = timePoint.asMillis()
-                                    - whenLeaderFinishedLeg.asMillis();
-                            return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond()
-                                    + millisSinceLeaderPassedMarkToTimePoint / 1000.;
+                            Distance windwardDistanceToGo = getWindwardDistance(ourEstimatedPosition,
+                                    leaderEstimatedPosition, timePoint);
+                            return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
                         }
                     }
                 }
             }
-            // no-one has finished this leg yet at timePoint
-            Competitor leader = getTrackedLeg().getLeader(timePoint);
-            // Maybe our competitor is the leader. Check:
-            if (leader == getCompetitor()) {
-                return 0.0; // the leader's gap to the leader
-            } else {
-                if (windwardSpeed == null) {
-                    return null;
-                } else {
-                    // no, we're not the leader, so compute our windward distance and divide by our current VMG
-                    Position ourEstimatedPosition = getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(
-                            timePoint, false);
-                    Position leaderEstimatedPosition = getTrackedRace().getTrack(leader).getEstimatedPosition(
-                            timePoint, false);
-                    if (ourEstimatedPosition == null || leaderEstimatedPosition == null) {
-                        return null;
-                    } else {
-                        Distance windwardDistanceToGo = getWindwardDistance(ourEstimatedPosition,
-                                leaderEstimatedPosition, timePoint);
-                        return windwardDistanceToGo.getMeters() / windwardSpeed.getMetersPerSecond();
-                    }
-                }
-            }
-        } else {
-            // our competitor hasn't started the leg yet, so we can't compute a gap since we don't
-            // have a speed estimate
-            return null;
         }
+        // else our competitor hasn't started the leg yet, so we can't compute a gap since we don't
+        // have a speed estimate; leave result == null
+        return result;
     }
 
     @Override
