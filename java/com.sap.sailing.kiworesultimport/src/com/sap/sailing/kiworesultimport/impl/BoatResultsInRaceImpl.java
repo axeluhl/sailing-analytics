@@ -1,6 +1,7 @@
 package com.sap.sailing.kiworesultimport.impl;
 
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.Node;
@@ -11,6 +12,7 @@ import com.sap.sailing.kiworesultimport.BoatResultInRace;
 public class BoatResultsInRaceImpl extends AbstractNodeWrapper implements BoatResultInRace {
     private static final Logger logger = Logger.getLogger(BoatResultsInRaceImpl.class.getName());
     private static final Pattern leadingPercentagePattern = Pattern.compile("^[0-9][0-9]*%.*$");
+    private static final Pattern pointsPattern = Pattern.compile("[0-9]*(,[0-9]*)");
 
     public BoatResultsInRaceImpl(Node node) {
         super(node);
@@ -24,14 +26,16 @@ public class BoatResultsInRaceImpl extends AbstractNodeWrapper implements BoatRe
 
     @Override
     public Double getPoints() {
-        final String pointsAsString = getNode().getAttributes().getNamedItem("points").getNodeValue().replace('(', ' ')
-                .replace(')', ' ').replace(',', '.').trim();
+        Matcher m = pointsPattern.matcher(getNode().getAttributes().getNamedItem("points").getNodeValue());
         Double result = null;
-        if (!pointsAsString.trim().equals("-")) {
-            try {
-                result = Double.valueOf(pointsAsString);
-            } catch (NumberFormatException nfe) {
-                logger.throwing(BoatResultsInRaceImpl.class.getName(), "getPoints", nfe);
+        if (m.matches()) {
+            final String pointsAsString = m.group().replace(',', '.').trim();
+            if (!pointsAsString.trim().equals("-")) {
+                try {
+                    result = Double.valueOf(pointsAsString);
+                } catch (NumberFormatException nfe) {
+                    logger.throwing(BoatResultsInRaceImpl.class.getName(), "getPoints", nfe);
+                }
             }
         }
         return result;

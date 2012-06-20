@@ -37,6 +37,8 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEn
 
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkScoreCorrectionDTO> {
     private static final RegExp p = RegExp.compile("^([A-Z][A-Z][A-Z])[^0-9]*([0-9]*)$");
+    
+    private static final double MEDAL_RACE_FACTOR = 2;
 
     private final LeaderboardDTO leaderboard;
     private final Map<CompetitorDTO, String> defaultOfficialSailIDsForCompetitors;
@@ -238,8 +240,9 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                         result.addMaxPointsReasonUpdate(competitor, raceColumn,
                                 officialCorrectionEntry.getMaxPointsReason());
                         if (officialCorrectionEntry.getScore() != null) {
-                            result.addScoreUpdate(competitor, raceColumn,
-                                    (int) Math.round(officialCorrectionEntry.getScore().doubleValue()));
+                            double officialTotalPoints = officialCorrectionEntry.getScore().doubleValue();
+                            double officialNetPoints = raceColumn.isMedalRace() ? officialTotalPoints / MEDAL_RACE_FACTOR : officialTotalPoints;
+                            result.addScoreUpdate(competitor, raceColumn, (int) Math.round(officialNetPoints));
                         }
                     }
                 }
@@ -291,7 +294,10 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     ScoreCorrectionEntryDTO officialCorrectionEntry =
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                         .get(raceNameOrNumber).get(officialSailID);
-                    cell.add(new Label(officialCorrectionEntry.getScore()+"/"+officialCorrectionEntry.getMaxPointsReason()+
+                    final Double officialTotalPoints = officialCorrectionEntry.getScore();
+                    final Double officialNetPoints = officialTotalPoints == null ? null :
+                        raceColumn.isMedalRace() ? officialTotalPoints / MEDAL_RACE_FACTOR : officialTotalPoints;
+                    cell.add(new Label(officialNetPoints+"/"+officialTotalPoints+"/"+officialCorrectionEntry.getMaxPointsReason()+
                         (officialCorrectionEntry.getDiscarded()?"/discarded":"")));
                 }
                 cell.add(cellCheckboxes.get(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)));
