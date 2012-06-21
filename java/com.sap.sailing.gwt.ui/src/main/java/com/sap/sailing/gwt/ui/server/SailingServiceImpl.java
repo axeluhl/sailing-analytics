@@ -1249,6 +1249,30 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
+    public WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier)
+    {
+        WindInfoForRaceDTO result = null;
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            result = new WindInfoForRaceDTO();
+            result.raceIsKnownToStartUpwind = trackedRace.raceIsKnownToStartUpwind();
+            List<WindSource> windSourcesToExclude = new ArrayList<WindSource>();
+            for (WindSource windSourceToExclude : trackedRace.getWindSourcesToExclude()) {
+                windSourcesToExclude.add(windSourceToExclude);
+            }
+            result.windSourcesToExclude = windSourcesToExclude;
+            Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
+            result.windTrackInfoByWindSource = windTrackInfoDTOs;
+            
+            for(WindSource windSource: trackedRace.getWindSources()) {
+                windTrackInfoDTOs.put(windSource, new WindTrackInfoDTO());
+            }
+            windTrackInfoDTOs.put(new WindSourceImpl(WindSourceType.COMBINED), new WindTrackInfoDTO());
+        }
+        return result;
+    }
+
+    @Override
     public void removeWind(RaceIdentifier raceIdentifier, WindDTO windDTO) {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {

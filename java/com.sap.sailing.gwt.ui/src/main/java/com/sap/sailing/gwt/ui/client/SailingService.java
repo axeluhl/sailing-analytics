@@ -235,4 +235,6 @@ public interface SailingService extends RemoteService {
             Date timePointWhenResultPublished) throws Exception;
 
     void updateLeaderboardScoreCorrectionsAndMaxPointsReasons(BulkScoreCorrectionDTO updates) throws NoWindException;
+
+    WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
 }

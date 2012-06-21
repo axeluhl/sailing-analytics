@@ -337,4 +337,5 @@ public interface StringMessages extends Messages {
     String simulateWithStartTimeNow();
     String boatClassDoesNotMatchSelectedRegatta(String boatClass, String regattaName);
     String regattaExistForSelectedBoatClass();
+    String reload();
 }
