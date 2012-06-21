@@ -348,7 +348,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 Entry entry = new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(),
                         correctedResults.isCorrected(), discarded ? 0 : correctedResults.getCorrectedScore()
-                                * (raceColumn.isMedalRace() ? 2 : 1), correctedResults.getMaxPointsReason(), discarded,
+                                * (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1), correctedResults.getMaxPointsReason(), discarded,
                                 raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }

@@ -1169,7 +1169,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 Course course = trackedRace.getRace().getCourse();
                 for (Waypoint waypoint : course.getWaypoints()) {
                     Position waypointPosition = trackedRace.getApproximatePosition(waypoint, dateAsTimePoint);
-                    result.waypointPositions.add(new PositionDTO(waypointPosition.getLatDeg(), waypointPosition.getLngDeg()));
+                    if (waypointPosition != null) {
+                        result.waypointPositions.add(new PositionDTO(waypointPosition.getLatDeg(), waypointPosition.getLngDeg()));
+                    }
                     for (Buoy b : waypoint.getBuoys()) {
                         buoys.add(b);
                     }

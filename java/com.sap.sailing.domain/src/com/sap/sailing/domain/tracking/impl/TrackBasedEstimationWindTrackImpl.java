@@ -213,7 +213,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         return timePointsWithCachedNullResult;
     }
 
-    protected synchronized void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
+    protected void cache(TimePoint timePoint, WindWithConfidence<TimePoint> fix) {
         synchronized (scheduledRefreshInterval) {
             if (fix == null) {
                 getTimePointsWithCachedNullResult().add(timePoint);
@@ -249,7 +249,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * {@link InvalidationInterval#clear() clears} the invalidation interval, indicating that currently no scheduler is
      * running.
      */
-    private synchronized void invalidateCache() {
+    private void invalidateCache() {
         synchronized (scheduledRefreshInterval) {
             Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
                     : getCachedFixes().tailSet(scheduledRefreshInterval.getStart(), /* inclusive */true)).iterator();
@@ -280,7 +280,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     /**
      * Incrementally replaces the cache elements based on {@link #scheduledRefreshInterval} using freshly computed values.
      */
-    private synchronized void refreshCacheIncrementally() {
+    private void refreshCacheIncrementally() {
         Set<WindWithConfidence<TimePoint>> windFixesToRecalculate = new HashSet<WindWithConfidence<TimePoint>>();
         Set<TimePoint> cachedNullResultsToRecalculate = new HashSet<TimePoint>();
         synchronized (scheduledRefreshInterval) {
@@ -355,11 +355,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                     public void run() {
                         // to avoid deadlock with another invalidateCache() and with scheduleCacheInvalidation we need
                         // to obtain the TrackBasedEstimationWindTrackImpl.this monitor first (see bug 746).
-                        synchronized (TrackBasedEstimationWindTrackImpl.this) {
-                            synchronized (scheduledRefreshInterval) {
-                                cacheInvalidationTimer.cancel(); // terminates the timer thread
-                                refreshCacheIncrementally();
-                            }
+                        synchronized (scheduledRefreshInterval) {
+                            cacheInvalidationTimer.cancel(); // terminates the timer thread
+                            refreshCacheIncrementally();
                         }
                     }
                 }, delayForCacheInvalidationInMilliseconds);
@@ -368,10 +366,12 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         
     }
 
-    private synchronized void clearCache() {
-        getCachedFixes().clear();
-        timePointsWithCachedNullResult.clear();
-        timePointsWithCachedNullResultFastContains.clear();
+    private void clearCache() {
+        synchronized (scheduledRefreshInterval) {
+            getCachedFixes().clear();
+            timePointsWithCachedNullResult.clear();
+            timePointsWithCachedNullResultFastContains.clear();
+        }
     }
 
     /**
@@ -380,12 +380,13 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * {@link TrackedRace#getEstimatedWindDirection(Position, TimePoint) wind estimation algorithm} is used to compute
      * it. The result will then be added to the cache.
      */
-    private synchronized WindWithConfidence<TimePoint> getEstimatedWindDirection(Position p, TimePoint timePoint) {
+    private WindWithConfidence<TimePoint> getEstimatedWindDirection(Position p, TimePoint timePoint) {
         WindWithConfidence<TimePoint> result;
         if (nullResultCacheContains(timePoint)) {
             result = null;
         } else {
-            WindWithConfidence<TimePoint> cachedFix = getCachedFixes().floor(getDummyFixWithConfidence(timePoint));
+            WindWithConfidence<TimePoint> cachedFix;
+            cachedFix = getCachedFixes().floor(getDummyFixWithConfidence(timePoint));
             if (cachedFix == null || !cachedFix.getObject().getTimePoint().equals(timePoint)) {
                 result = getTrackedRace().getEstimatedWindDirectionWithConfidence(p, timePoint);
                 cache(timePoint, result);
