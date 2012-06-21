@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,6 +48,11 @@ public class TrackedRegattaImpl implements TrackedRegatta {
         this.raceListeners = new HashSet<RaceListener>();
     }
 
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        synchronized (trackedRaces) {
+            oos.defaultWriteObject();
+        }
+    }
     /**
      * Resolving replaces this de-serialized object (which has a <code>null</code> {@link #raceListeners} collection) by
      * a new one into which all other collection contents are copied.
