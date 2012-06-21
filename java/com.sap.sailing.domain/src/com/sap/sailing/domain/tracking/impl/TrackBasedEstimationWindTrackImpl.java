@@ -386,9 +386,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             result = null;
         } else {
             WindWithConfidence<TimePoint> cachedFix;
-            synchronized (scheduledRefreshInterval) {
-                cachedFix = getCachedFixes().floor(getDummyFixWithConfidence(timePoint));
-            }
+            cachedFix = getCachedFixes().floor(getDummyFixWithConfidence(timePoint));
             if (cachedFix == null || !cachedFix.getObject().getTimePoint().equals(timePoint)) {
                 result = getTrackedRace().getEstimatedWindDirectionWithConfidence(p, timePoint);
                 cache(timePoint, result);

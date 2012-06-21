@@ -48,9 +48,26 @@ public class DeclinationStore {
         if (is != null) {
             result = new QuadTree<Declination>();
             BufferedReader in = new BufferedReader(new InputStreamReader(is));
-            while ((record = readExternal(in)) != null) {
-                synchronized (result) {
-                    result.put(record.getPosition(), record);
+            boolean exceptionOccurred;
+            try {
+                record = readExternal(in);
+                exceptionOccurred = false;
+            } catch (NumberFormatException e) {
+                exceptionOccurred = true;
+                record = null;
+            }
+            while (exceptionOccurred || record != null) {
+                if (record != null) {
+                    synchronized (result) {
+                        result.put(record.getPosition(), record);
+                    }
+                }
+                try {
+                    record = readExternal(in);
+                    exceptionOccurred = false;
+                } catch (NumberFormatException e) {
+                    exceptionOccurred = true;
+                    record = null;
                 }
             }
         }

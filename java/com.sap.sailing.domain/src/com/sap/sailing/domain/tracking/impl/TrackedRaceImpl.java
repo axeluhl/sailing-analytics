@@ -649,7 +649,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     @Override
-    public synchronized int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
         try {
             int result;
             if (getMarkPassings(competitor).isEmpty()) {

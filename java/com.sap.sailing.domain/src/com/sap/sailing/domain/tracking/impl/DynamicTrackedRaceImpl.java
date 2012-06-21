@@ -93,7 +93,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public synchronized void recordFix(Competitor competitor, GPSFixMoving fix) {
+    public void recordFix(Competitor competitor, GPSFixMoving fix) {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         track.addGPSFix(fix); // the track notifies this tracked race which in turn notifies its listeners
     }
