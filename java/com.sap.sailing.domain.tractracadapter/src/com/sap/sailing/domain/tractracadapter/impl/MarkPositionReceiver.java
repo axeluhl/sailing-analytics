@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -87,13 +88,14 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     @Override
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
+        TimePoint now = MillisecondsTimePoint.now();
         TypeController controlPointListener = ControlPointPositionData.subscribe(getTracTracEvent(),
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
                     @Override
                     public void gotData(ControlPoint controlPoint, ControlPointPositionData record, boolean isLiveData) {
                         enqueue(new Triple<ControlPoint, ControlPointPositionData, Boolean>(controlPoint, record, isLiveData));
                     }
-                }, /* fromTime */ startOfTracking == null ? 0l : startOfTracking.asMillis(),
+                }, /* fromTime */ startOfTracking == null ? 0l : startOfTracking.compareTo(now) > 0 ? now.asMillis() : startOfTracking.asMillis(),
                    /* toTime */ endOfTracking == null ? Long.MAX_VALUE : endOfTracking.asMillis());
         result.add(controlPointListener);
         setAndStartThread(new Thread(this, getClass().getName()));
