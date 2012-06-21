@@ -26,14 +26,14 @@ import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
  * 
  * @author Axel Uhl (d043530)
  */
-public class WindSourcesToExcludeSelector extends VerticalPanel {
+public class WindSourcesToExcludeSelectorPanel extends VerticalPanel {
     private final LinkedHashMap<WindSource, CheckBox> checkboxesByWindSource;
     private final StringMessages stringMessages;
     private final SailingServiceAsync service;
     private final ErrorReporter errorReporter;
     private RegattaAndRaceIdentifier raceIdentifier;
 
-    public WindSourcesToExcludeSelector(SailingServiceAsync service,
+    public WindSourcesToExcludeSelectorPanel(SailingServiceAsync service,
             StringMessages stringMessages, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -53,7 +53,7 @@ public class WindSourcesToExcludeSelector extends VerticalPanel {
                 checkbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                     @Override
                     public void onValueChange(ValueChangeEvent<Boolean> selected) {
-                        onWindSourcesToExcludeChanged(WindSourcesToExcludeSelector.this.raceIdentifier);
+                        onWindSourcesToExcludeChanged(WindSourcesToExcludeSelectorPanel.this.raceIdentifier);
                     }
                 });
                 checkboxesByWindSource.put(windSource, checkbox);

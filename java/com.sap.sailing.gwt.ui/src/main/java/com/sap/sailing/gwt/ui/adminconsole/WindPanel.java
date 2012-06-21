@@ -46,12 +46,10 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
-import com.sap.sailing.gwt.ui.shared.charts.WindChart;
-import com.sap.sailing.gwt.ui.shared.charts.WindChartSettings;
 
 /**
- * Displays a {@link WindChart} and a table of currently tracked races. The user can configure whether a race
- * is assumed to start with an upwind leg, show the wind data for the race selected in a chart, and exclude specific
+ * Displays a table of currently tracked races. The user can configure whether a race
+ * is assumed to start with an upwind leg and exclude specific
  * wind sources from the overall (combined) wind computation, e.g., for performance reasons.
  * 
  * @author Axel Uhl (d043530)
@@ -72,7 +70,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
     private final TextColumn<WindDTO> dampenedWindDirectionInDegColumn;
     private final TrackedRacesListComposite trackedRacesListComposite;
     private final RaceSelectionProvider raceSelectionProvider;
-    private final WindSourcesToExcludeSelector windSourcesToExcludeSelector;
+    private final WindSourcesToExcludeSelectorPanel windSourcesToExcludeSelector;
     private final Map<WindSource, ListDataProvider<WindDTO>> windLists;
     private final CheckBox raceIsKnownToStartUpwindBox;
 
@@ -83,7 +81,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         this.stringMessages = stringMessages;
         this.raceSelectionProvider = new RaceSelectionModel();
         windLists = new HashMap<WindSource, ListDataProvider<WindDTO>>();
-        windSourcesToExcludeSelector = new WindSourcesToExcludeSelector(sailingService, stringMessages, errorReporter);
+        windSourcesToExcludeSelector = new WindSourcesToExcludeSelectorPanel(sailingService, stringMessages, errorReporter);
         removeColumn = new IdentityColumn<WindDTO>(new ActionCell<WindDTO>(stringMessages.remove(), new Delegate<WindDTO>() {
             @Override
             public void execute(final WindDTO wind) {
@@ -180,17 +178,14 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
     @Override
     public void showWind(final RegattaAndRaceIdentifier raceIdentifier) {
-        sailingService.getAveragedWindInfo(raceIdentifier,
-        // TODO Time interval should be determined by a selection in the chart but be at most 60s. See bug #121. Consider incremental updates for new data only.
-                null, null, // use race start and time of newest event as default time period
-                WindChartSettings.DEFAULT_RESOLUTION_IN_MILLISECONDS,
-                null, // retrieve data on all wind sources
+        sailingService.getWindSourcesInfo(raceIdentifier, 
                 new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override
                     public void onSuccess(WindInfoForRaceDTO result) {
                         if (result != null) {
                             updateWindSourcesToExclude(result, raceIdentifier);
-                            showWindForRace(result);
+                            raceIsKnownToStartUpwindBox.setValue(result.raceIsKnownToStartUpwind);
+                            // showWindForRace(result);
                             windSettingPanel.setEnabled(true);
                         } else {
                             clearWindDisplay(); // no wind known for untracked race
@@ -199,8 +194,7 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(WindPanel.this.stringMessages.errorFetchingWindInformationForRace()+" " + raceIdentifier + ": "
-                                + caught.getMessage());
+                        errorReporter.reportError("Error reading wind source information: " + caught.getMessage());
                     }
                 });
     }
@@ -217,8 +211,8 @@ public class WindPanel extends FormPanel implements RegattaDisplayer, WindShower
         windSourcesToExcludeSelector.update(null, emptySet, emptySet);
     }
 
+    @SuppressWarnings("unused")
     private void showWindForRace(WindInfoForRaceDTO result) {
-        raceIsKnownToStartUpwindBox.setValue(result.raceIsKnownToStartUpwind);
         grid.setWidget(3, 0, null);
         VerticalPanel windDisplay = new VerticalPanel();
         grid.setWidget(3, 0, windDisplay);
