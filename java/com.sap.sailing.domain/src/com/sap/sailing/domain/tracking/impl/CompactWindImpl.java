@@ -13,6 +13,9 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
     private static final long serialVersionUID = -5059956032663387929L;
     private final double latDeg;
     private final double lngDeg;
+    private final boolean positionIsNull;
+    private final boolean bearingIsNull;
+    private final boolean timePointIsNull;
     private final double speedInKnots;
     private final double degBearing;
     private final long timePointAsMillis;
@@ -55,26 +58,57 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
     }
     
     public CompactWindImpl(Wind wind) {
-        this.degBearing = wind.getBearing().getDegrees();
-        this.latDeg = wind.getPosition().getLatDeg();
-        this.lngDeg = wind.getPosition().getLngDeg();
+        if (wind.getBearing() == null) {
+            bearingIsNull = true;
+            degBearing = 0;
+        } else {
+            this.degBearing = wind.getBearing().getDegrees();
+            bearingIsNull = false;
+        }
+        if (wind.getPosition() == null) {
+            positionIsNull = true;
+            this.latDeg = 0;
+            this.lngDeg = 0;
+        } else {
+            this.latDeg = wind.getPosition().getLatDeg();
+            this.lngDeg = wind.getPosition().getLngDeg();
+            positionIsNull = false;
+        }
         this.speedInKnots = wind.getKnots();
-        this.timePointAsMillis = wind.getTimePoint().asMillis();
+        if (wind.getTimePoint() == null) {
+            timePointIsNull = true;
+            this.timePointAsMillis = 0;
+        } else {
+            timePointIsNull = false;
+            this.timePointAsMillis = wind.getTimePoint().asMillis();
+        }
     }
 
     @Override
     public Position getPosition() {
-        return new CompactPosition();
+        if (positionIsNull) {
+            return null;
+        } else {
+            return new CompactPosition();
+        }
     }
 
     @Override
     public TimePoint getTimePoint() {
-        return new CompactTimePoint();
+        if (timePointIsNull) {
+            return null;
+        } else {
+            return new CompactTimePoint();
+        }
     }
 
     @Override
     public Bearing getBearing() {
-        return new CompactBearing();
+        if (bearingIsNull) {
+            return null;
+        } else {
+            return new CompactBearing();
+        }
     }
 
     @Override
@@ -84,7 +118,11 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
 
     @Override
     public Bearing getFrom() {
-        return getBearing().reverse();
+        if (getBearing() == null) {
+            return null;
+        } else {
+            return getBearing().reverse();
+        }
     }
 
 }
