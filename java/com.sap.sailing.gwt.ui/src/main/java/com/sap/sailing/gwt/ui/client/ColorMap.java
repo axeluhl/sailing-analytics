@@ -27,7 +27,7 @@ public class ColorMap<T> {
         baseColors[3] = new HSVColor(120.0f, 1.0f, 1.0f); // Green
         baseColors[4] = new HSVColor(180.0f, 1.0f, 1.0f); // Cyan
         baseColors[5] = new HSVColor(240.0f, 1.0f, 1.0f); // Blue
-        baseColors[6] = new HSVColor(240.0f, 1.0f, 1.0f); // Pink
+        baseColors[6] = new HSVColor(270.0f, 1.0f, 1.0f); // Pink
         baseColors[7] = new HSVColor(300.0f, 1.0f, 1.0f); // Magenta
 
         idColor = new HashMap<T, String>();
@@ -59,7 +59,7 @@ public class ColorMap<T> {
     private String createHexColor(int index) {
         int baseColorCount = baseColors.length;
         int baseColorsIndex = index % baseColorCount;
-        float brightnessDecrease = Math.round(index / baseColorCount) * 0.75f;
+        float brightnessDecrease = Math.round(index / baseColorCount) * 0.05f;
         float saturationDecrease = Math.round(index / baseColorCount) * 0.05f;
         HSVColor hsvColor = baseColors[baseColorsIndex];
         HSVColor newColor = new HSVColor(hsvColor.getHue(), hsvColor.getSaturation() - saturationDecrease,
