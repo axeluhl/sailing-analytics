@@ -231,6 +231,14 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playSpeedBox.setHeight("14px");
         playSpeedBox.setValue(1);
         playSpeedBox.setTitle(stringMessages.playSpeedHelp());
+        playSpeedBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Integer> event) {
+                Integer newPlaySpeedFactor = playSpeedBox.getValue() == null ? 0 : playSpeedBox.getValue();
+                TimePanel.this.timer.setPlaySpeedFactor(newPlaySpeedFactor);
+            }
+        });
+        
         Image playSpeedImage = new Image(playSpeedImg);
         playSpeedControlPanel.add(playSpeedImage);
         playSpeedControlPanel.add(playSpeedBox);
