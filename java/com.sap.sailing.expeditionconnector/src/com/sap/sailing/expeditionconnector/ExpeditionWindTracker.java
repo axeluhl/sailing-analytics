@@ -1,5 +1,7 @@
 package com.sap.sailing.expeditionconnector;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +32,7 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
     
     private final DeclinationService declinationService;
     
-    private Position lastKnownPosition;
+    private final Map<Integer, Position> lastKnownPositionPerBoatID;
     
     private final UDPExpeditionReceiver receiver;
     
@@ -48,6 +50,7 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
     public ExpeditionWindTracker(DynamicTrackedRace race, DeclinationService declinationService,
             UDPExpeditionReceiver receiver, ExpeditionWindTrackerFactory factory) {
         super();
+        this.lastKnownPositionPerBoatID = new HashMap<Integer, Position>();
         this.race = race;
         this.declinationService = declinationService;
         this.receiver = receiver;
@@ -75,17 +78,17 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
     @Override
     public void received(ExpeditionMessage message) {
         if (message.getGPSFix() != null) {
-            lastKnownPosition = message.getGPSFix().getPosition();
+            lastKnownPositionPerBoatID.put(message.getBoatID(), message.getGPSFix().getPosition());
         }
         SpeedWithBearing windSpeed = message.getTrueWind();
         if (windSpeed != null) {
             if (declinationService != null) {
                 // this tells us that the wind bearing delivered by Expedition hasn't been corrected by the
                 // current local declination, so this has to be done here using the declination service:
-                if (lastKnownPosition != null) {
+                if (lastKnownPositionPerBoatID.get(message.getBoatID()) != null) {
                     try {
                         Declination declination = declinationService.getDeclination(message.getTimePoint(),
-                                lastKnownPosition,
+                                lastKnownPositionPerBoatID.get(message.getBoatID()),
                                 /* timeoutForOnlineFetchInMilliseconds */5000);
                         if (declination != null) {
                             windSpeed = new KnotSpeedWithBearingImpl(windSpeed.getKnots(), new DegreeBearingImpl(
@@ -93,7 +96,7 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
                                             + declination.getBearingCorrectedTo(message.getTimePoint()).getDegrees()));
                         } else {
                             logger.warning("Unable to obtain declination for wind bearing correction for time point "
-                                    + message.getTimePoint() + " and position " + lastKnownPosition);
+                                    + message.getTimePoint() + " and position " + lastKnownPositionPerBoatID.get(message.getBoatID()));
                             windSpeed = null;
                         }
                     } catch (Exception e) {
@@ -110,8 +113,8 @@ public class ExpeditionWindTracker implements ExpeditionListener, WindTracker {
                             "Unable to use wind direction because declination correction requested and position not known");
                 }
             }
-            if (windSpeed != null && lastKnownPosition != null) {
-                Wind wind = new WindImpl(lastKnownPosition, message.getTimePoint(), windSpeed);
+            if (windSpeed != null && lastKnownPositionPerBoatID.get(message.getBoatID()) != null) {
+                Wind wind = new WindImpl(lastKnownPositionPerBoatID.get(message.getBoatID()), message.getTimePoint(), windSpeed);
                 String windSourceID = Integer.valueOf(message.getBoatID()).toString();
                 race.recordWind(wind, new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, windSourceID));
             }

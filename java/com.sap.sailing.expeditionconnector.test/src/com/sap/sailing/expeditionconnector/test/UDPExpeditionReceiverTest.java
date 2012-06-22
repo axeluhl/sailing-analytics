@@ -31,6 +31,7 @@ import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.test.mock.MockedTrackedRace;
@@ -143,6 +144,31 @@ public class UDPExpeditionReceiverTest {
         assertTrue(m.hasValue(146));
         assertEquals(40348.390035, m.getValue(146), 0.00000001);
     }
+    
+    @Test
+    public void testTwoBoatsAtDifferentPositionsWithSporadicMissingPosition() throws IOException, InterruptedException {
+        final List<Wind> windFixes = new ArrayList<Wind>();
+        ExpeditionWindTracker windTracker = new ExpeditionWindTracker(new MockedTrackedRace() {
+            private static final long serialVersionUID = 4444197492014940699L;
+            @Override
+            public void recordWind(Wind wind, WindSource windSource) {
+                windFixes.add(wind);
+            }
+        }, null, receiver, new ExpeditionWindTrackerFactory());
+        receiver.addListener(windTracker, /* validMessagesOnly */ true);
+        receiver.addListener(listener, /* validMessagesOnly */ true);
+        sendAndWaitABit(new String[] { "#0,1,7.900,2,-42.0,3,25.90,9,323.0,13,326.0,48,50.000000,49,10.000000,50,340.3,146,40348.578310*25" });
+        sendAndWaitABit(new String[] { "#1,1,7.800,2,-42.0,3,24.80,9,323.0,13,326.0,48,54.000000,49,12.000000,50,340.3,146,40348.578311*25" });
+        sendAndWaitABit(new String[] { "#0,1,7.700,2,-42.0,3,23.70,9,320.0,13,322.0,50,343.3,146,40348.578312*25" });
+        assertEquals(3, messages.size());
+        assertEquals(3, windFixes.size());
+        assertEquals(messages.get(0).getBoatID(), messages.get(2).getBoatID());
+        assertTrue(messages.get(2).hasValue(ExpeditionMessage.ID_GPS_TIME));
+        assertFalse(messages.get(2).hasValue(ExpeditionMessage.ID_GPS_LAT));
+        assertFalse(messages.get(2).hasValue(ExpeditionMessage.ID_GPS_LNG));
+        assertEquals(windFixes.get(0).getPosition(), windFixes.get(2).getPosition());
+    }
+
 
     @Test
     public void testTimeStampConversion() throws IOException, InterruptedException {
