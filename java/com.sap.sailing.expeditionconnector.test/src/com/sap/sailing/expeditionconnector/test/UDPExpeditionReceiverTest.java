@@ -154,7 +154,7 @@ public class UDPExpeditionReceiverTest {
             public void recordWind(Wind wind, WindSource windSource) {
                 windFixes.add(wind);
             }
-        }, null, receiver, new ExpeditionWindTrackerFactory());
+        }, null, receiver, /* ExpeditionWindTrackerFactory */ null);
         receiver.addListener(windTracker, /* validMessagesOnly */ false);
         receiver.addListener(listener, /* validMessagesOnly */ false);
         sendAndWaitABit(new String[] { "#0,1,7.900,2,-42.0,3,25.90,9,323.0,13,326.0,48,50.000000,49,10.000000,50,340.3,146,40348.578310*25" });
