@@ -105,6 +105,7 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -239,8 +240,17 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private final WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
 
+    private final Map<Pair<TrackedRace, Competitor>, RunnableFuture<List<LegEntryDTO>>> legDetailsAtEndOfTrackingCache;
+
+    /**
+     * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
+     */
+    private final Set<CacheInvalidationListener> cacheInvalidationListeners;
+
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
+        legDetailsAtEndOfTrackingCache = new HashMap<Pair<TrackedRace, Competitor>, RunnableFuture<List<LegEntryDTO>>>();
+        cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
         racingEventServiceTracker = createAndOpenRacingEventServiceTracker(context);
         replicationServiceTracker = createAndOpenReplicationServiceTracker(context);
@@ -253,6 +263,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    }
+    
+    public void destroy() {
+        super.destroy();
+        for (CacheInvalidationListener cacheInvalidationListener : cacheInvalidationListeners) {
+            cacheInvalidationListener.removeFromTrackedRace();
+        }
     }
 
     protected ServiceTracker<RacingEventService, RacingEventService> createAndOpenRacingEventServiceTracker(
@@ -412,19 +429,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
         if (addLegDetails && trackedRace != null) {
-            entryDTO.legDetails = new ArrayList<LegEntryDTO>();
-            for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
-                // We loop over a copy of the course's legs; during a course change, legs may become "stale," even with
-                // regard to the leg/trackedLeg structures inside the tracked race which is updated by the course change
-                // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
-                TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
-                LegEntryDTO legEntry;
-                if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
-                    legEntry = createLegEntry(trackedLeg, timePoint);
-                } else {
-                    legEntry = null;
-                }
-                entryDTO.legDetails.add(legEntry);
+            try {
+                entryDTO.legDetails = getLegDetails(trackedRace, competitor, timePoint);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e); // the future used to calculate the leg details was interrupted; escalate as runtime exception
             }
             final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace.getWindwardDistanceToOverallLeader(competitor, timePoint);
             entryDTO.windwardDistanceToOverallLeaderInMeters = windwardDistanceToOverallLeader == null ? null : windwardDistanceToOverallLeader.getMeters();
@@ -434,6 +444,147 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         final Fleet fleet = entry.getFleet();
         entryDTO.fleet = fleet == null ? null : createFleetDTO(fleet);
         return entryDTO;
+    }
+
+    /**
+     * If <code>timePoint</code> is after the end of the race's tracking the query will be adjusted to obtain the values
+     * at the end of the {@link TrackedRace#getEndOfTracking() race's tracking time}. If the time point adjusted this
+     * way equals the end of the tracking time, the query results will be looked up in a cache first and if not found,
+     * they will be stored to the cache after calculating them. A cache invalidation {@link RaceChangeListener listener}
+     * will be registered with the race which will be triggered for any event received by the race.
+     */
+    private List<LegEntryDTO> getLegDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint)
+            throws NoWindException, InterruptedException, ExecutionException {
+        List<LegEntryDTO> legDetails = null;
+        if (trackedRace.getEndOfTracking() != null && trackedRace.getEndOfTracking().compareTo(timePoint) < 0) {
+            legDetails = getLegDetailsFOrEndOfTrackingFromCacheOrCalculateAndCache(trackedRace, competitor);
+        } else {
+            legDetails = calculateLegDetails(trackedRace, competitor, timePoint);
+        }
+        return legDetails;
+    }
+
+    private List<LegEntryDTO> getLegDetailsFOrEndOfTrackingFromCacheOrCalculateAndCache(final TrackedRace trackedRace,
+            final Competitor competitor) throws NoWindException, InterruptedException, ExecutionException {
+        final Pair<TrackedRace, Competitor> key = new Pair<TrackedRace, Competitor>(trackedRace, competitor);
+        RunnableFuture<List<LegEntryDTO>> legDetails;
+        synchronized (legDetailsAtEndOfTrackingCache) {
+            legDetails = legDetailsAtEndOfTrackingCache.get(key);
+            if (legDetails == null) {
+                legDetails = new FutureTask<List<LegEntryDTO>>(new Callable<List<LegEntryDTO>>() {
+                    @Override
+                    public List<LegEntryDTO> call() throws Exception {
+                        return calculateLegDetails(trackedRace, competitor, trackedRace.getEndOfTracking());
+                    }
+                });
+                executor.execute(legDetails);
+                legDetailsAtEndOfTrackingCache.put(key, legDetails);
+                final CacheInvalidationListener cacheInvalidationListener = new CacheInvalidationListener(trackedRace,
+                        competitor);
+                trackedRace.addListener(cacheInvalidationListener);
+                cacheInvalidationListeners.add(cacheInvalidationListener);
+            }
+        }
+        return legDetails.get();
+    }
+    
+    /**
+     * Handles the invalidation of the {@link SailingServiceImpl#legDetailsAtEndOfTrackingCache} entries if the tracked race
+     * changes in any way.
+     * 
+     * @author Axel Uhl (D043530)
+     *
+     */
+    private class CacheInvalidationListener implements RaceChangeListener {
+        private final TrackedRace trackedRace;
+        private final Competitor competitor;
+        
+        public CacheInvalidationListener(TrackedRace trackedRace, Competitor competitor) {
+            this.trackedRace = trackedRace;
+            this.competitor = competitor;
+        }
+
+        public void removeFromTrackedRace() {
+            trackedRace.removeListener(this);
+        }
+
+        private void invalidateCacheAndRemoveThisListenerFromTrackedRace() {
+            synchronized (legDetailsAtEndOfTrackingCache) {
+                legDetailsAtEndOfTrackingCache.remove(new Pair<TrackedRace, Competitor>(trackedRace, competitor));
+                removeFromTrackedRace();
+            }
+        }
+
+        @Override
+        public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
+                Iterable<MarkPassing> markPassings) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void windDataReceived(Wind wind, WindSource windSource) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void windDataRemoved(Wind wind, WindSource windSource) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void delayToLiveChanged(long delayToLiveInMillis) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+
+        @Override
+        public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+            invalidateCacheAndRemoveThisListenerFromTrackedRace();
+        }
+    }
+
+    private List<LegEntryDTO> calculateLegDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint)
+            throws NoWindException {
+        List<LegEntryDTO> legDetails;
+        legDetails = new ArrayList<LegEntryDTO>();
+        for (Leg leg : trackedRace.getRace().getCourse().getLegs()) {
+            LegEntryDTO legEntry;
+            // We loop over a copy of the course's legs; during a course change, legs may become "stale," even with
+            // regard to the leg/trackedLeg structures inside the tracked race which is updated by the course change
+            // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
+            TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
+            if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
+                legEntry = createLegEntry(trackedLeg, timePoint);
+            } else {
+                legEntry = null;
+            }
+            legDetails.add(legEntry);
+        }
+        return legDetails;
     }
 
     private LegEntryDTO createLegEntry(TrackedLegOfCompetitor trackedLeg, TimePoint timePoint) throws NoWindException {
