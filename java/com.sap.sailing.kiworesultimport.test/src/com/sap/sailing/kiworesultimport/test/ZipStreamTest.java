@@ -26,6 +26,7 @@ import com.sap.sailing.kiworesultimport.ZipFile;
 public class ZipStreamTest {
     private final static String ZIP_EXAMPLE_FILE = "resources/Kieler_Woche_2011_Export.zip";
     private final static String ZIP_EXAMPLE_FILE_YES = "resources/2012 Young Europeans Sailing-Export.zip";
+    private final static String ZIP_EXAMPLE_FILE_KIWO_2012 = "resources/2012 Kieler Woche-Export.zip";
     
     @Test
     public void testOpenZip() throws IOException {
@@ -59,5 +60,15 @@ public class ZipStreamTest {
         Boat ger1899 = twentyNiner.getRace(1).getBoat("GER 1899");
         BoatResultInRace ger1899results = ger1899.getResultsInRace(1);
         assertEquals(MaxPointsReason.ZFP, ger1899results.getMaxPointsReason());
+    }
+
+    @Test
+    public void asteriskNoParenthesesTest() throws FileNotFoundException, IOException, SAXException, ParserConfigurationException {
+        // test GER1899 in YES 29er regatta, race number 1
+        ZipFile zipFile = ParserFactory.INSTANCE.createZipFileParser().parse(new FileInputStream(ZIP_EXAMPLE_FILE_KIWO_2012));
+        RegattaSummary laser = zipFile.getRegattaSummary("Laser");
+        Boat stelmaszyk = laser.getRace(1).getBoat("POL 202671");
+        BoatResultInRace stelmaszykResults = stelmaszyk.getResultsInRace(8);
+        assertEquals(20.02, stelmaszykResults.getPoints(), 0.0000000001);
     }
 }
