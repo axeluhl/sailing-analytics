@@ -157,9 +157,9 @@ public class UDPExpeditionReceiverTest {
         }, null, receiver, /* ExpeditionWindTrackerFactory */ null);
         receiver.addListener(windTracker, /* validMessagesOnly */ false);
         receiver.addListener(listener, /* validMessagesOnly */ false);
-        sendAndWaitABit(new String[] { "#0,1,7.900,2,-42.0,3,25.90,9,323.0,13,326.0,48,50.000000,49,10.000000,50,340.3,146,40348.578310*25",
-                "#1,1,7.800,2,-42.0,3,24.80,9,323.0,13,326.0,48,54.000000,49,12.000000,50,340.3,146,40348.578311*25",
-                "#0,1,7.700,2,-42.0,3,23.70,9,320.0,13,322.0,50,343.3,146,40348.578312*25" });
+        sendAndWaitABit(new String[] { "#0,1,7.900,2,-42.0,3,25.90,5,19.41,6,271.5,9,323.0,13,326.0,48,50.000000,49,10.000000,50,340.3,146,40348.578310*25",
+                "#1,1,7.800,2,-42.0,3,24.80,5,19.41,6,271.5,9,323.0,13,326.0,48,54.000000,49,12.000000,50,340.3,146,40348.578311*25",
+                "#0,1,7.700,2,-42.0,3,23.70,5,19.41,6,271.5,9,320.0,13,322.0,50,343.3,146,40348.578312*25" });
         assertEquals(3, messages.size());
         assertEquals(3, windFixes.size());
         assertEquals(messages.get(0).getBoatID(), messages.get(2).getBoatID());
