@@ -432,8 +432,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             try {
                 RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint);
                 entryDTO.legDetails = raceDetails.getLegDetails();
-                entryDTO.windwardDistanceToOverallLeaderInMeters = raceDetails.getWindwardDistanceToOverallLeader().getMeters();
-                entryDTO.averageCrossTrackErrorInMeters = raceDetails.getAverageCrossTrackError().getMeters();
+                entryDTO.windwardDistanceToOverallLeaderInMeters = raceDetails.getWindwardDistanceToOverallLeader() == null ? null
+                        : raceDetails.getWindwardDistanceToOverallLeader().getMeters();
+                entryDTO.averageCrossTrackErrorInMeters = raceDetails.getAverageCrossTrackError() == null ? null
+                        : raceDetails.getAverageCrossTrackError().getMeters();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } catch (ExecutionException e) {
