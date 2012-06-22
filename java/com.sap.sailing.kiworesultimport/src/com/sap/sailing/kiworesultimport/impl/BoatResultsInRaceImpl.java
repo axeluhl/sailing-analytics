@@ -28,7 +28,7 @@ public class BoatResultsInRaceImpl extends AbstractNodeWrapper implements BoatRe
     public Double getPoints() {
         Matcher m = pointsPattern.matcher(getNode().getAttributes().getNamedItem("points").getNodeValue());
         Double result = null;
-        if (m.matches()) {
+        if (m.find()) {
             final String pointsAsString = m.group().replace(',', '.').trim();
             if (!pointsAsString.trim().equals("-")) {
                 try {
