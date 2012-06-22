@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,6 +67,16 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     private class ResultManager implements AsyncCallback<SimulatorResultsDTO> {
+    	
+    	private class SortByTimeAsc implements Comparator<PathDTO> {
+
+			@Override
+			public int compare(PathDTO o1, PathDTO o2) {
+				return (int) (o1.getPathTime() - o2.getPathTime());
+			}
+    		
+    	}
+    	
         private boolean summaryView;
 
         public ResultManager(boolean summaryView) {
@@ -80,6 +92,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         public void onSuccess(SimulatorResultsDTO result) {
             PathDTO[] paths = result.paths;
             logger.info("Number of Paths : " + paths.length);
+            SortByTimeAsc sorter = new SortByTimeAsc();
+            Arrays.sort(paths, sorter);
             
             removeOverlays();
             pathCanvasOverlays.clear();

@@ -67,17 +67,21 @@ public class PathImpl implements Path {
 	@Override
 	public List<TimedPositionWithSpeed> getEvenTimedPoints(long milliseconds) {
 		
+	        if (milliseconds == 0) return null;
+	    
 		List<TimedPositionWithSpeed> lst = new ArrayList<TimedPositionWithSpeed>();
 		TimePoint t = pathPoints.get(0).getTimePoint();
 		TimePoint lastPoint = pathPoints.get(pathPoints.size()-1).getTimePoint();
 
-		while((t.compareTo(lastPoint) <= 0)&&(lst.size()<50)) {  // restrict path length to max. 50 timesteps (timestep 30sec => 25min)
+		while((t.compareTo(lastPoint) <= 0)) {//&&(lst.size() < 50)) { // paths with more than 50 points lead to performance issues
 			lst.add(getPositionAtTime(t));
 			t = new MillisecondsTimePoint(t.asMillis() + milliseconds);
 		}
-		if (t.compareTo(lastPoint)> 0) {
+		/*if (t.compareTo(lastPoint)> 0) { // without this, the path may not reach end
                     lst.add(getPositionAtTime(t));
-		}
+		}*/
+		if (!lst.contains(pathPoints.get(pathPoints.size()-1)))
+			lst.add(pathPoints.get(pathPoints.size()-1));
 		
 		return lst;
 	}

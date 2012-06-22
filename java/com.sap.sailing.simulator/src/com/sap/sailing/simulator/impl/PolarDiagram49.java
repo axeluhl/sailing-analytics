@@ -387,10 +387,17 @@ public class PolarDiagram49 implements PolarDiagram {
 		return 4000;
 	}
 
+	//TO BE REVIEWED
+	//not sure I use the right terms and conventions
 	@Override
-	public WindSide getWindSide() {
-		// TODO Auto-generated method stub
-		return null;
+	public WindSide getWindSide(Bearing bearing) {
+		WindSide windSide = null;
+		if(bearingComparator.compare(bearing, wind.getBearing().reverse()) > 0) windSide = WindSide.LEFT;
+		if(bearingComparator.compare(bearing, wind.getBearing().reverse()) < 0) windSide = WindSide.RIGHT;
+		if(bearing.equals(wind.getBearing())) windSide = WindSide.OPPOSING;
+		if(bearing.equals(wind.getBearing().reverse())) windSide = WindSide.FACING;
+		
+		return windSide;
 	}
 
 }

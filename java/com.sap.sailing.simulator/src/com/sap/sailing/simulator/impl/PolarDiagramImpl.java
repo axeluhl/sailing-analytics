@@ -58,7 +58,7 @@ public class PolarDiagramImpl implements PolarDiagram {
 	}
 
 	@Override
-	public WindSide getWindSide() {
+	public WindSide getWindSide(Bearing bearing) {
 		// TODO Auto-generated method stub
 		return null;
 	}
