@@ -491,14 +491,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     @Override
     public boolean isRaceBeingTracked(RaceDefinition r) {
-        for (Set<RaceTracker> trackers : raceTrackersByRegatta.values()) {
-            for (RaceTracker tracker : trackers) {
-                if (tracker.getRaces() != null && tracker.getRaces().contains(r)) {
-                    return true;
+        synchronized (raceTrackersByRegatta) {
+            for (Set<RaceTracker> trackers : raceTrackersByRegatta.values()) {
+                for (RaceTracker tracker : trackers) {
+                    if (tracker.getRaces() != null && tracker.getRaces().contains(r)) {
+                        return true;
+                    }
                 }
             }
+            return false;
         }
-        return false;
     }
 
     @Override
@@ -624,12 +626,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 assert tracker.getRegatta() == regatta;
             }
             raceTrackersByID.put(params.getTrackerID(), tracker);
-            Set<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
-            if (trackers == null) {
-                trackers = new HashSet<RaceTracker>();
-                raceTrackersByRegatta.put(tracker.getRegatta(), trackers);
+            synchronized (raceTrackersByRegatta) {
+                Set<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
+                if (trackers == null) {
+                    trackers = new HashSet<RaceTracker>();
+                    raceTrackersByRegatta.put(tracker.getRegatta(), trackers);
+                }
+                trackers.add(tracker);
             }
-            trackers.add(tracker);
             // TODO we assume here that the event name is unique which necessitates adding the boat class name to it in EventImpl constructor
             String regattaName = tracker.getRegatta().getName();
             Regatta regattaWithName = regattasByName.get(regattaName);
@@ -878,14 +882,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public synchronized void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
         if (raceTrackersByRegatta.containsKey(regatta)) {
-            for (RaceTracker raceTracker : raceTrackersByRegatta.get(regatta)) {
-                for (RaceDefinition race : raceTracker.getRaces()) {
-                    stopTrackingWind(regatta, race);
+            synchronized (raceTrackersByRegatta) {
+                for (RaceTracker raceTracker : raceTrackersByRegatta.get(regatta)) {
+                    for (RaceDefinition race : raceTracker.getRaces()) {
+                        stopTrackingWind(regatta, race);
+                    }
+                    raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
+                    raceTrackersByID.remove(raceTracker.getID());
                 }
-                raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
-                raceTrackersByID.remove(raceTracker.getID());
+                raceTrackersByRegatta.remove(regatta);
             }
-            raceTrackersByRegatta.remove(regatta);
         }
     }
     
@@ -926,9 +932,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                         Regatta regatta = tracker.getRegatta();
                         logger.log(Level.SEVERE, "RaceDefinition for a race in regatta "+regatta.getName()+" not obtained within "+
                                 timeoutInMilliseconds+"ms. Aborting tracker for this race.");
-                        Set<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
-                        if (trackersForRegatta != null) {
-                            trackersForRegatta.remove(tracker);
+                        Set<RaceTracker> trackersForRegatta;
+                        synchronized (raceTrackersByRegatta) {
+                            trackersForRegatta = raceTrackersByRegatta.get(regatta);
+                            if (trackersForRegatta != null) {
+                                trackersForRegatta.remove(tracker);
+                            }
                         }
                         tracker.stop();
                         raceTrackersByID.remove(tracker.getID());
@@ -949,15 +958,18 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public synchronized void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException {
         logger.info("Stopping tracking for "+race+"...");
         if (raceTrackersByRegatta.containsKey(regatta)) {
-            Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
-            while (trackerIter.hasNext()) {
-                RaceTracker raceTracker = trackerIter.next();
-                if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
-                    logger.info("Found tracker to stop for races "+raceTracker.getRaces());
-                    raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
-                    // do not remove the tracker from raceTrackersByRegatta, because it should still exist there, but with the state "non-tracked"
-                    trackerIter.remove();
-                    raceTrackersByID.remove(raceTracker.getID());
+            synchronized (raceTrackersByRegatta) {
+                Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
+                while (trackerIter.hasNext()) {
+                    RaceTracker raceTracker = trackerIter.next();
+                    if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
+                        logger.info("Found tracker to stop for races " + raceTracker.getRaces());
+                        raceTracker.stop(); // this also removes the TrackedRace from trackedRegatta
+                        // do not remove the tracker from raceTrackersByRegatta, because it should still exist there,
+                        // but with the state "non-tracked"
+                        trackerIter.remove();
+                        raceTrackersByID.remove(raceTracker.getID());
+                    }
                 }
             }
         } else {
@@ -1043,27 +1055,29 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      */
     private void stopAllTrackersForWhichRaceIsLastReachable(Regatta regatta, RaceDefinition race)
             throws MalformedURLException, IOException, InterruptedException {
-        if (raceTrackersByRegatta.containsKey(regatta)) {
-            Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
-            while (trackerIter.hasNext()) {
-                RaceTracker raceTracker = trackerIter.next();
-                if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
-                    boolean foundReachableRace = false;
-                    for (RaceDefinition raceTrackedByTracker : raceTracker.getRaces()) {
-                        if (raceTrackedByTracker != race && isReachable(regatta, raceTrackedByTracker)) {
-                            foundReachableRace = true;
-                            break;
+        synchronized (raceTrackersByRegatta) {
+            if (raceTrackersByRegatta.containsKey(regatta)) {
+                Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
+                while (trackerIter.hasNext()) {
+                    RaceTracker raceTracker = trackerIter.next();
+                    if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
+                        boolean foundReachableRace = false;
+                        for (RaceDefinition raceTrackedByTracker : raceTracker.getRaces()) {
+                            if (raceTrackedByTracker != race && isReachable(regatta, raceTrackedByTracker)) {
+                                foundReachableRace = true;
+                                break;
+                            }
                         }
-                    }
-                    if (!foundReachableRace) {
-                        // firstly stop the tracker
-                        raceTracker.stop();
-                        // remove it from the raceTrackers by Regatta
-                        trackerIter.remove();
-                        raceTrackersByID.remove(raceTracker.getID());
-                        // if the last tracked race was removed, remove the entire regatta
-                        if (raceTrackersByRegatta.get(regatta).isEmpty()) {
-                            stopTracking(regatta);
+                        if (!foundReachableRace) {
+                            // firstly stop the tracker
+                            raceTracker.stop();
+                            // remove it from the raceTrackers by Regatta
+                            trackerIter.remove();
+                            raceTrackersByID.remove(raceTracker.getID());
+                            // if the last tracked race was removed, remove the entire regatta
+                            if (raceTrackersByRegatta.get(regatta).isEmpty()) {
+                                stopTracking(regatta);
+                            }
                         }
                     }
                 }

@@ -319,7 +319,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         raceStartTrackingColumn.setSortable(true);
         boatClassNamesColumn.setSortable(true);
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<TracTracRaceRecordDTO>(/* pageSize */ 200, tableRes);
+        raceTable = new CellTable<TracTracRaceRecordDTO>(/* pageSize */ 10000, tableRes);
         raceTable.addColumn(regattaNameColumn, stringMessages.event());
         raceTable.addColumn(raceNameColumn, stringMessages.race());
         raceTable.addColumn(boatClassNamesColumn, stringMessages.boatClass());

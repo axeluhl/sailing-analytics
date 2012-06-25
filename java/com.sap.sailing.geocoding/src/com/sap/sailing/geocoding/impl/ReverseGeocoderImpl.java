@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -236,7 +237,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
         url.append("&lat=" + Double.toString(position.getLatDeg()));
         url.append("&lng=" + Double.toString(position.getLngDeg()));
-        url.append("&username=" + GEONAMES_USER);
+        url.append("&username=" + getGeonamesUser());
 
         URL request = new URL(url.toString());
         URLConnection connection = request.openConnection();
@@ -254,7 +255,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         url.append("&lng=" + Double.toString(position.getLngDeg()));
         url.append("&radius=" + Double.toString(radius));
         url.append("&maxRows=" + Integer.toString(maxRows));
-        url.append("&username=" + GEONAMES_USER);
+        url.append("&username=" + getGeonamesUser());
 
         URL request = new URL(url.toString());
         URLConnection connection = request.openConnection();
@@ -263,6 +264,11 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         JSONObject obj = (JSONObject) parser.parse(in);
         JSONArray geonames = (JSONArray) obj.get("geonames");
         return geonames;
+    }
+
+    final String GEONAMES_USER = "sailtracking";
+    private String getGeonamesUser() {
+        return GEONAMES_USER+new Random().nextInt(10);
     }
 
 }

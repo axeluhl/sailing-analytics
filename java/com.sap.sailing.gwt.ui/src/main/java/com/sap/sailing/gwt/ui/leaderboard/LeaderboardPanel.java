@@ -979,7 +979,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         LEG_DETAIL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDTO>(
-        /* pageSize */100, tableResources);
+        /* pageSize */10000, tableResources);
         getLeaderboardTable().setWidth("100%");
         if (userAgentType == UserAgentTypes.MOBILE) {
             leaderboardSelectionModel = new ToggleSelectionModel<LeaderboardRowDTO>();
