@@ -259,7 +259,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         };
         groupsStartDateColumn.setSortable(true);
         
-        groupsTable = new CellTable<LeaderboardGroupDTO>(200, tableResources);
+        groupsTable = new CellTable<LeaderboardGroupDTO>(10000, tableResources);
         groupsTable.setWidth("100%");
         groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
         groupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -385,7 +385,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
         };
         
-        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
+        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableResources);
         leaderboardsTable.setWidth("100%");
         leaderboardsSelectionModel = new SingleSelectionModel<StrippedLeaderboardDTO>();
         leaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

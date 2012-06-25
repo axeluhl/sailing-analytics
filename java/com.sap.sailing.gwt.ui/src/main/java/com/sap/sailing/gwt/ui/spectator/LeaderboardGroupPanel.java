@@ -187,7 +187,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         };
         
         LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
-        CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
+        CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableResources);
         leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
         leaderboardsTable.addColumn(leaderboardNameColumn, stringConstants.name());
         leaderboardsTable.addColumn(overviewColumn, stringConstants.leaderboard());

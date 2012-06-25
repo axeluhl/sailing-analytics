@@ -214,7 +214,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
             }
         };
 
-        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableRes);
+        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableRes);
         leaderboardsTable.setWidth("100%");
         leaderboardsTable.addColumnSortHandler(leaderboardsListHandler);
         leaderboardsTable.addColumn(leaderboardsNameColumn, stringConstants.leaderboardName());
@@ -319,7 +319,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
             }
         };
 
-        groupDetailsTable = new CellTable<StrippedLeaderboardDTO>(200, tableRes);
+        groupDetailsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableRes);
         groupDetailsTable.setWidth("100%");
         groupDetailsTable.addColumn(groupDetailsNameColumn, stringConstants.leaderboardName());
         groupDetailsTable.addColumn(groupDetailsRacesColumn, stringConstants.races());
@@ -456,7 +456,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
             }
         });
 
-        groupsTable = new CellTable<LeaderboardGroupDTO>(200, tableRes);
+        groupsTable = new CellTable<LeaderboardGroupDTO>(10000, tableRes);
         groupsTable.setWidth("100%");
         groupsTable.addColumn(groupNameColumn, stringConstants.name());
         groupsTable.addColumn(groupDescriptionColumn, stringConstants.description());

@@ -261,7 +261,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             }
         });
         
-        regattaTable = new CellTable<RegattaDTO>(200, tableRes);
+        regattaTable = new CellTable<RegattaDTO>(10000, tableRes);
         regattaTable.setWidth("100%");
         regattaTable.addColumn(regattaNameColumn, stringMessages.regattaName());
         regattaTable.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
