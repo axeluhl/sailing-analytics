@@ -430,7 +430,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 availableLeaderboardList.clear();
                 leaderboardList.getList().addAll(leaderboards);
                 availableLeaderboardList.addAll(leaderboards);
-                
+                fillRaceListFromAvailableLeaderboardsApplyingFilter();
                 leaderboardSelectionChanged();
                 leaderboardRaceColumnSelectionChanged();
             }

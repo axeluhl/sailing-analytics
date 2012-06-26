@@ -237,6 +237,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private final com.sap.sailing.domain.common.CountryCodeFactory countryCodeFactory;
     
     private final Executor executor;
+    
+    /**
+     * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
+     * can depend on the results of the tasks run by {@link #raceDetailsExecutor}, and an {@link Executor} doesn't
+     * move a task that is blocked by waiting for another {@link FutureTask} to the side but blocks permanently,
+     * ending in a deadlock (one that cannot easily be detected by the Eclipse debugger either).
+     */
+    private final Executor raceDetailsExecutor;
 
     private final WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
 
@@ -263,6 +271,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
     
     public void destroy() {
@@ -500,7 +509,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         return calculateRaceDetails(trackedRace, competitor, trackedRace.getEndOfTracking());
                     }
                 });
-                executor.execute(raceDetails);
+                raceDetailsExecutor.execute(raceDetails);
                 raceDetailsAtEndOfTrackingCache.put(key, raceDetails);
                 final CacheInvalidationListener cacheInvalidationListener = new CacheInvalidationListener(trackedRace,
                         competitor);
