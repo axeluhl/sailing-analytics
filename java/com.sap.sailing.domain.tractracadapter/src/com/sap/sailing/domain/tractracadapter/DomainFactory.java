@@ -37,6 +37,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
+import com.sap.sailing.domain.tractracadapter.impl.Simulator;
 import com.tractrac.clientmodule.Competitor;
 import com.tractrac.clientmodule.CompetitorClass;
 import com.tractrac.clientmodule.ControlPoint;
@@ -156,14 +157,13 @@ public interface DomainFactory {
      *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to
      *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
      *            particularly the mark position loading will be constrained to this end time.
-     * @param simulateWithStartTimeNow TODO
-     * @param trackedRegattaRegistry TODO
+     * @param simulator TODO
      * @param tokenToRetrieveAssociatedRace
      *            used to update the set of{@link RaceDefinition}s received by the
      *            {@link RaceCourseReceiver} created by this call
      */
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, TimePoint startOfTracking,
-            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry);
+            TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry);
 
     /**
      * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
@@ -198,7 +198,7 @@ public interface DomainFactory {
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint passed, com.sap.sailing.domain.base.Competitor competitor);
 
     Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta, Event tractracEvent, WindStore windStore,
-            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, ReceiverType... types);
+            TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator, DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, ReceiverType... types);
 
     JSONService parseJSONURL(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException;
 
