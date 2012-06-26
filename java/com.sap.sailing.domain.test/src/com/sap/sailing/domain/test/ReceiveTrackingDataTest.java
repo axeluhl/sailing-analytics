@@ -78,7 +78,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             }
         });
         for (Receiver receiver : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(), /* start of tracking */ null,
-        /* end of tracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */false,
+        /* end of tracking */null, /* delayToLiveInMillis */0l, /* simulator */ null,
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
@@ -90,7 +90,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
         }
         addListenersForStoredDataAndStartController(domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
                 /* start of tracking */null, /* end of tracking */null, /* delayToLiveInMillis */0l, /* simulateWithStartTimeNow */
-                false, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
+                /* simulator */ null, EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }

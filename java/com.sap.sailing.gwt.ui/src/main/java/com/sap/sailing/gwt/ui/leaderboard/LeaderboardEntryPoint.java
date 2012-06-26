@@ -27,13 +27,15 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         super.onModuleLoad();
         final boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null
                 && Window.Location.getParameter("showRaceDetails").equalsIgnoreCase("true");
+        final boolean embedded = Window.Location.getParameter("embedded") != null
+                && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
                 leaderboardName = Window.Location.getParameter("name");
                 leaderboardGroupName = Window.Location.getParameter("leaderboardGroupName");
                 if (leaderboardNames.contains(leaderboardName)) {
-                    createUI(showRaceDetails);
+                    createUI(showRaceDetails, embedded);
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
@@ -46,14 +48,16 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         });
     }
     
-    private void createUI(boolean showRaceDetails) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, stringMessages.leaderboard() + " " +leaderboardName, stringMessages);
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
+    private void createUI(boolean showRaceDetails, boolean embedded) {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
-        mainPanel.addNorth(logoAndTitlePanel, 68);
-        
+        LogoAndTitlePanel logoAndTitlePanel = null;
+        if (!embedded) {
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName,
+                    stringMessages.leaderboard() + " " + leaderboardName, stringMessages);
+            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+            mainPanel.addNorth(logoAndTitlePanel, 68);
+        }
         ScrollPanel contentScrollPanel = new ScrollPanel();
         
         String tvModeParam = Window.Location.getParameter("tvMode");
