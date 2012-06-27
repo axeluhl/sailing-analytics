@@ -49,6 +49,7 @@
 		        <module>com.sap.sailing.gwt.ui.AdminConsole</module>
 		        <module>com.sap.sailing.gwt.ui.Leaderboard</module>
 		        <module>com.sap.sailing.gwt.ui.UserManagement</module>
+		        <module>com.sap.sailing.gwt.ui.Simulator</module>
 		      </modules>
 		      <gen>${basedir}/.generated</gen>
 		      <localWorkers>3</localWorkers>

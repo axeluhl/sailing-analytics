@@ -18,7 +18,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  org.moxieapps.gwt.highcharts;bundle-version="1.1.4",
  com.sap.sailing.geocoding,
- com.sap.sailing.server.replication
+ com.sap.sailing.server.replication,
+ com.sap.sailing.simulator
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui.test",
@@ -27,9 +28,7 @@ Export-Package: com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui
  com.sap.sailing.gwt.ui.leaderboardedit;x-friends:="com.sap.sailing.gwt.ui.test",
  com.sap.sailing.gwt.ui.server;x-friends:="com.sap.sailing.gwt.ui.test",
  com.sap.sailing.gwt.ui.shared;x-friends:="com.sap.sailing.gwt.ui.test"
-Import-Package: com.sap.sailing.simulator,
- com.sap.sailing.simulator.impl,
- javax.jms;version="1.1.0",
+Import-Package: javax.jms;version="1.1.0",
  javax.servlet;version="2.5.0",
  javax.servlet.http;version="2.5.0",
  org.json.simple,
