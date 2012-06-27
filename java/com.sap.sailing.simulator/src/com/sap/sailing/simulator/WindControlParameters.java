@@ -89,7 +89,7 @@ public class WindControlParameters {
         baseWindSpeed = 12.0;
         
         baseWindBearing = 0.0;
-        frequency = 30.0;
+        frequency = 0.0; //30.0;
         amplitude = 15.0;
         leftWindSpeed = 100.0;
         middleWindSpeed = 100.0;
