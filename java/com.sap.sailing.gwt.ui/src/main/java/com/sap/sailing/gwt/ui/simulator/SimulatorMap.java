@@ -92,8 +92,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         public void onSuccess(SimulatorResultsDTO result) {
             PathDTO[] paths = result.paths;
             logger.info("Number of Paths : " + paths.length);
-            SortByTimeAsc sorter = new SortByTimeAsc();
-            Arrays.sort(paths, sorter);
+            //SortByTimeAsc sorter = new SortByTimeAsc();
+            //Arrays.sort(paths, sorter);
             
             removeOverlays();
             pathCanvasOverlays.clear();
