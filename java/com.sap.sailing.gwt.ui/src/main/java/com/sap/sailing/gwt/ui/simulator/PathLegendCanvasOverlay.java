@@ -55,7 +55,7 @@ public class PathLegendCanvasOverlay extends CanvasOverlay {
         setCanvasSettings();
         int index = 0;
         for (PathCanvasOverlay path : pathOverlays) {
-            drawRectangleWithText(xOffset, yOffset + index * rectHeight, path.pathColor, 
+            drawRectangleWithText(xOffset, yOffset + (pathOverlays.size()-1-index) * rectHeight, path.pathColor, 
                     path.name + " " + getFormattedTime(path.getPathTime()));
             index++;
         }
