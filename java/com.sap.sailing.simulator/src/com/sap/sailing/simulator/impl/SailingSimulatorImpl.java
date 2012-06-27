@@ -263,7 +263,12 @@ public class SailingSimulatorImpl implements SailingSimulator {
         // System.out.println("p1 to p2: angle: "+bearingToP.getDegrees()+"° dist: "+distanceToP.getMeters()+"m speed: "+speedToP.getMetersPerSecond()+"m/s");
 
         // add time delta for sailing from p1 to p2 to current time
-        double deltat = (distanceToP.getMeters() / speedToP.getMetersPerSecond());
+        double deltat;
+        if (speedToP.getMetersPerSecond() <= 0.1) {
+            deltat = 86400; // set a high value for small times
+        } else {
+            deltat = (distanceToP.getMeters() / speedToP.getMetersPerSecond());
+        }
         long timeToP = curtime.asMillis() + (long) (deltat) * 1000;
         // System.out.println("time: "+deltat/60.+"min");
 
@@ -275,7 +280,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         } else {
             side2 = (int) Math.signum(relativeBearing.getDegrees());
         }
-        if ((side2 > 0) && (side1 == -side2)) {
+        if ((side1 != 0)&&(side2 != 0)&&(side1 == -side2)) {
             timeToP = timeToP + turnloss;
         }
 
