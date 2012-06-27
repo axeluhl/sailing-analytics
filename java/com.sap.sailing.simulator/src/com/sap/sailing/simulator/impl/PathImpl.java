@@ -41,7 +41,7 @@ public class PathImpl implements Path {
 	public TimedPositionWithSpeed getPositionAtTime(TimePoint t) {
 		
 		if (t.compareTo(pathPoints.get(0).getTimePoint()) == 0) return pathPoints.get(0); 
-                if (t.compareTo(pathPoints.get(pathPoints.size()-1).getTimePoint()) >= 0) return pathPoints.get(pathPoints.size()-1); 
+                if (t.compareTo(pathPoints.get(pathPoints.size()-1).getTimePoint()) >= 0) return pathPoints.get(pathPoints.size()-1);
 		
 		TimedPositionWithSpeed p1 = null;
 		TimedPositionWithSpeed p2 = null;
@@ -73,15 +73,15 @@ public class PathImpl implements Path {
 		TimePoint t = pathPoints.get(0).getTimePoint();
 		TimePoint lastPoint = pathPoints.get(pathPoints.size()-1).getTimePoint();
 
-		while((t.compareTo(lastPoint) <= 0)) {//&&(lst.size() < 50)) { // paths with more than 50 points lead to performance issues
+		while((t.compareTo(lastPoint) <= 0)&&(lst.size() < 50)) { // paths with more than 50 points lead to performance issues
 			lst.add(getPositionAtTime(t));
 			t = new MillisecondsTimePoint(t.asMillis() + milliseconds);
 		}
-		/*if (t.compareTo(lastPoint)> 0) { // without this, the path may not reach end
+		if (t.compareTo(lastPoint)> 0) { // without this, the path may not reach end
                     lst.add(getPositionAtTime(t));
-		}*/
-		if (!lst.contains(pathPoints.get(pathPoints.size()-1)))
-			lst.add(pathPoints.get(pathPoints.size()-1));
+		}
+		//if (!lst.contains(pathPoints.get(pathPoints.size()-1)))
+		//	lst.add(pathPoints.get(pathPoints.size()-1));
 		
 		return lst;
 	}
