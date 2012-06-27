@@ -1,12 +1,11 @@
 package com.sap.sailing.simulator.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.simulator.Boundary;
