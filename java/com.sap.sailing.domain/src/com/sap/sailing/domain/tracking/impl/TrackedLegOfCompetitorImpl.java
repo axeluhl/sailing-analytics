@@ -385,7 +385,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         if (legStartMarkPassing != null) {
             TimePoint legStart = legStartMarkPassing.getTimePoint();
             final MarkPassing legEndMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getTo());
-            synchronized (track) {
+            track.lockForRead();
+            try {
                 Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
                 while (fixIter.hasNext()
                         && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
@@ -397,6 +398,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         count++;
                     }
                 }
+            } finally {
+                track.unlockAfterRead();
             }
         }
         return count == 0 ? null : new MeterDistance(distanceInMeters / count);

@@ -655,7 +655,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public synchronized Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
+    public Competitor getOverallLeader(TimePoint timePoint) throws NoWindException {
         try {
             Competitor result = null;
             List<Competitor> ranks = getCompetitorsFromBestToWorst(timePoint);
@@ -735,7 +735,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 if (trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
                     TimePoint legStart = legStartMarkPassing.getTimePoint();
                     final MarkPassing legEndMarkPassing = getMarkPassing(competitor, leg.getTo());
-                    synchronized (track) {
+                    track.lockForRead();
+                    try {
                         Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
                         while (fixIter.hasNext()
                                 && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
@@ -748,6 +749,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                                 count++;
                             }
                         }
+                    } finally {
+                        track.unlockAfterRead();
                     }
                 }
             }

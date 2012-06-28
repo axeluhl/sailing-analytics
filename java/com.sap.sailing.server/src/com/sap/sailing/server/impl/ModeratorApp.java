@@ -100,7 +100,8 @@ public class ModeratorApp extends Servlet {
                     jsonCompetitor.put("name", competitor.getName());
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     JSONArray jsonFixes = new JSONArray();
-                    synchronized (track) {
+                    track.lockForRead();
+                    try {
                         Iterator<GPSFixMoving> fixIter;
                         if (sinceTimePoint == null) {
                             fixIter = track.getFixes().iterator();
@@ -122,6 +123,8 @@ public class ModeratorApp extends Servlet {
                             jsonFix.put("tack", trackedRace.getTack(competitor, fix.getTimePoint()).name());
                             jsonFixes.add(jsonFix);
                         }
+                    } finally {
+                        track.unlockAfterRead();
                     }
                     jsonCompetitor.put("track", jsonFixes);
                     jsonCompetitors.add(jsonCompetitor);

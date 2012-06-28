@@ -1196,7 +1196,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     // copy the fixes into a list while holding the monitor; then release the monitor to avoid deadlocks
                     // during wind estimations required for tack determination
                     List<GPSFixMoving> fixes = new ArrayList<GPSFixMoving>();
-                    synchronized (track) {
+                    track.lockForRead();
+                    try {
                         Iterator<GPSFixMoving> fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */true);
                         while (fixIter.hasNext()) {
                             GPSFixMoving fix = fixIter.next();
@@ -1206,6 +1207,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                 break;
                             }
                         }
+                    } finally {
+                        track.unlockAfterRead();
                     }
                     Iterator<GPSFixMoving> fixIter = fixes.iterator();
                     if (fixIter.hasNext()) {
