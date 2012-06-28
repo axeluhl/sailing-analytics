@@ -70,11 +70,17 @@ public class Simulator {
             new Thread("Wind simulator for wind source "+windSourceAndTrack.getKey()+" for tracked race "+trackedRace.getRace().getName()) {
                 @Override
                 public void run() {
-                    for (Wind wind : windSourceAndTrack.getValue().getRawFixes()) {
-                        if (stopped) {
-                            break;
+                    final WindTrack windTrack = windSourceAndTrack.getValue();
+                    windTrack.lockForRead();
+                    try {
+                        for (Wind wind : windTrack.getRawFixes()) {
+                            if (stopped) {
+                                break;
+                            }
+                            trackedRace.recordWind(delayWind(wind), windSourceAndTrack.getKey());
                         }
-                        trackedRace.recordWind(delayWind(wind), windSourceAndTrack.getKey());
+                    } finally {
+                        windTrack.unlockAfterRead();
                     }
                 }
             }.start();

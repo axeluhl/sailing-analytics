@@ -251,11 +251,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                             for (RaceDefinition raceDefinition : raceDefinitions) {
                                 DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(
                                         raceDefinition);
-                                DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
-                                if (buoyTrack.getFirstRawFix() == null) {
-                                    buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(first ? controlPoint
-                                            .getLat1() : controlPoint.getLat2(), first ? controlPoint.getLon1()
-                                            : controlPoint.getLon2()), MillisecondsTimePoint.now()));
+                                if (trackedRace != null) {
+                                    DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
+                                    if (buoyTrack.getFirstRawFix() == null) {
+                                        buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(first ? controlPoint
+                                                .getLat1() : controlPoint.getLat2(), first ? controlPoint.getLon1()
+                                                : controlPoint.getLon2()), MillisecondsTimePoint.now()));
+                                    }
                                 }
                             }
                             first = false;

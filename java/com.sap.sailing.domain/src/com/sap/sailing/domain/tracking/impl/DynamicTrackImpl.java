@@ -19,9 +19,12 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
 
     @Override
     public void addGPSFix(FixType gpsFix) {
-        synchronized (this) {
+        lockForWrite();
+        try {
             getInternalRawFixes().add(gpsFix);
             invalidateValidityCaches(gpsFix);
+        } finally {
+            unlockAfterWrite();
         }
         Iterable<GPSTrackListener<ItemType, FixType>> listeners = getListeners();
         synchronized (listeners) {

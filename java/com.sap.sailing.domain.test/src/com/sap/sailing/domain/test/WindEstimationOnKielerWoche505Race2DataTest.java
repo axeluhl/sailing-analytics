@@ -12,6 +12,7 @@ import java.util.GregorianCalendar;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
@@ -20,6 +21,8 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -69,7 +72,13 @@ public class WindEstimationOnKielerWoche505Race2DataTest extends OnlineTracTracB
     @Test
     public void testSetUp() {
         assertNotNull(getTrackedRace());
-        assertTrue(Util.size(getTrackedRace().getTrack(getCompetitorByName("Dr.Plattner")).getFixes()) > 1000);
+        final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(getCompetitorByName("Dr.Plattner"));
+        track.lockForRead();
+        try {
+            assertTrue(Util.size(track.getFixes()) > 1000);
+        } finally {
+            track.unlockAfterRead();
+        }
     }
 
     @Test
