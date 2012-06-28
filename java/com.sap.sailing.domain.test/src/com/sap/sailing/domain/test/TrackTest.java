@@ -150,12 +150,17 @@ public class TrackTest {
 
     @Test
     public void testIterate() {
-        Iterator<GPSFixMoving> i = track.getRawFixes().iterator();
-        int count;
-        for (count=0; i.hasNext(); count++) {
-            i.next();
+        track.lockForRead();
+        try {
+            Iterator<GPSFixMoving> i = track.getRawFixes().iterator();
+            int count;
+            for (count = 0; i.hasNext(); count++) {
+                i.next();
+            }
+            assertEquals(5, count);
+        } finally {
+            track.unlockAfterRead();
         }
-        assertEquals(5, count);
     }
     
     @Test
@@ -163,35 +168,45 @@ public class TrackTest {
         long lastMillis = 0;
         GPSFix lastFix = null;
         boolean first = true;
-        for (Iterator<GPSFixMoving> i = track.getRawFixes().iterator(); i.hasNext(); first = false) {
-            GPSFixMoving fix = i.next();
-            long millis = fix.getTimePoint().asMillis();
-            if (!first) {
-                assertTrue(millis > lastMillis);
-                TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis+lastMillis)/2);
-                assertEquals(lastFix, track.getLastRawFixBefore(inBetweenTimePoint));
-                assertEquals(lastFix, track.getLastRawFixAtOrBefore(inBetweenTimePoint));
-                assertEquals(fix, track.getFirstRawFixAfter(inBetweenTimePoint));
-                assertEquals(fix, track.getFirstRawFixAtOrAfter(inBetweenTimePoint));
+        track.lockForRead();
+        try {
+            for (Iterator<GPSFixMoving> i = track.getRawFixes().iterator(); i.hasNext(); first = false) {
+                GPSFixMoving fix = i.next();
+                long millis = fix.getTimePoint().asMillis();
+                if (!first) {
+                    assertTrue(millis > lastMillis);
+                    TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis + lastMillis) / 2);
+                    assertEquals(lastFix, track.getLastRawFixBefore(inBetweenTimePoint));
+                    assertEquals(lastFix, track.getLastRawFixAtOrBefore(inBetweenTimePoint));
+                    assertEquals(fix, track.getFirstRawFixAfter(inBetweenTimePoint));
+                    assertEquals(fix, track.getFirstRawFixAtOrAfter(inBetweenTimePoint));
 
-                assertEquals(lastFix, track.getLastRawFixAtOrBefore(lastFix.getTimePoint()));
-                assertEquals(fix, track.getFirstRawFixAtOrAfter(fix.getTimePoint()));
+                    assertEquals(lastFix, track.getLastRawFixAtOrBefore(lastFix.getTimePoint()));
+                    assertEquals(fix, track.getFirstRawFixAtOrAfter(fix.getTimePoint()));
 
-                assertEquals(lastFix, track.getLastRawFixBefore(fix.getTimePoint()));
-                assertEquals(fix, track.getLastRawFixAtOrBefore(fix.getTimePoint()));
-                assertEquals(fix, track.getFirstRawFixAfter(lastFix.getTimePoint()));
-                assertEquals(lastFix, track.getFirstRawFixAtOrAfter(lastFix.getTimePoint()));
+                    assertEquals(lastFix, track.getLastRawFixBefore(fix.getTimePoint()));
+                    assertEquals(fix, track.getLastRawFixAtOrBefore(fix.getTimePoint()));
+                    assertEquals(fix, track.getFirstRawFixAfter(lastFix.getTimePoint()));
+                    assertEquals(lastFix, track.getFirstRawFixAtOrAfter(lastFix.getTimePoint()));
+                }
+                lastMillis = millis;
+                lastFix = fix;
             }
-            lastMillis = millis;
-            lastFix = fix;
+        } finally {
+            track.unlockAfterRead();
         }
     }
     
     @Test
     public void assertEstimatedPositionBeforeStartIsStart() {
-        GPSFixMoving start = track.getRawFixes().iterator().next();
-        TimePoint oneNanoBeforeStart = new MillisecondsTimePoint(start.getTimePoint().asMillis()-1);
-        assertEquals(start.getPosition(), track.getEstimatedPosition(oneNanoBeforeStart, false));
+        track.lockForRead();
+        try {
+            GPSFixMoving start = track.getRawFixes().iterator().next();
+            TimePoint oneNanoBeforeStart = new MillisecondsTimePoint(start.getTimePoint().asMillis() - 1);
+            assertEquals(start.getPosition(), track.getEstimatedPosition(oneNanoBeforeStart, false));
+        } finally {
+            track.unlockAfterRead();
+        }
     }
     
     @Test
@@ -247,70 +262,83 @@ public class TrackTest {
         List<GPSFixMoving> fixes = new ArrayList<GPSFixMoving>();
         boolean first = true;
         GPSFixMoving oldFix = null;
-        for (GPSFixMoving fix : track.getRawFixes()) {
-            fixes.add(fix);
-            if (first) {
-                first = false;
-            } else {
-                Distance d = oldFix.getPosition().getDistance(fix.getPosition());
-                distances.add(d);
-            }
-            oldFix = fix;
-        }
-        for (int i=0; i<fixes.size(); i++) {
-            for (int j=i; j<fixes.size(); j++) {
-                double distanceSumInNauticalMiles = 0;
-                for (int k=i; k<j; k++) {
-                    distanceSumInNauticalMiles += distances.get(k).getNauticalMiles();
+        track.lockForRead();
+        try {
+            for (GPSFixMoving fix : track.getRawFixes()) {
+                fixes.add(fix);
+                if (first) {
+                    first = false;
+                } else {
+                    Distance d = oldFix.getPosition().getDistance(fix.getPosition());
+                    distances.add(d);
                 }
-                // travel fully from fix #i to fix #j and require the segment distances to sum up equal
-                double nauticalMilesFromIToJ = track.getRawDistanceTraveled(fixes.get(i).getTimePoint(), fixes.get(j).getTimePoint())
-                        .getNauticalMiles();
-                assertEquals(distanceSumInNauticalMiles, nauticalMilesFromIToJ, 0.0000001);
-                if (j > i) {
-                    // now skip half a segment at the beginning:
-                    double nauticalMilesFromHalfAfterIToJ = track.getRawDistanceTraveled(
-                            new MillisecondsTimePoint((fixes.get(i).getTimePoint().asMillis() + fixes.get(i + 1)
-                                    .getTimePoint().asMillis()) / 2), fixes.get(j).getTimePoint()).getNauticalMiles();
-                    assertTrue("for i=" + i + ", j=" + j + ": " + nauticalMilesFromHalfAfterIToJ + "<"
-                            + distanceSumInNauticalMiles, nauticalMilesFromHalfAfterIToJ < distanceSumInNauticalMiles);
-                    if (i > 0) {
-                        // now skip half a segment before the beginning:
-                        double nauticalMilesFromHalfBeforeIToJ = track.getRawDistanceTraveled(
-                                new MillisecondsTimePoint((fixes.get(i).getTimePoint().asMillis() + fixes.get(i - 1)
+                oldFix = fix;
+            }
+            for (int i = 0; i < fixes.size(); i++) {
+                for (int j = i; j < fixes.size(); j++) {
+                    double distanceSumInNauticalMiles = 0;
+                    for (int k = i; k < j; k++) {
+                        distanceSumInNauticalMiles += distances.get(k).getNauticalMiles();
+                    }
+                    // travel fully from fix #i to fix #j and require the segment distances to sum up equal
+                    double nauticalMilesFromIToJ = track.getRawDistanceTraveled(fixes.get(i).getTimePoint(),
+                            fixes.get(j).getTimePoint()).getNauticalMiles();
+                    assertEquals(distanceSumInNauticalMiles, nauticalMilesFromIToJ, 0.0000001);
+                    if (j > i) {
+                        // now skip half a segment at the beginning:
+                        double nauticalMilesFromHalfAfterIToJ = track.getRawDistanceTraveled(
+                                new MillisecondsTimePoint((fixes.get(i).getTimePoint().asMillis() + fixes.get(i + 1)
                                         .getTimePoint().asMillis()) / 2), fixes.get(j).getTimePoint())
                                 .getNauticalMiles();
-                        assertTrue(nauticalMilesFromHalfBeforeIToJ > distanceSumInNauticalMiles);
-                    }
-                    // now skip half a segment at the end:
-                    double nauticalMilesFromIToHalfBeforeJ = track.getRawDistanceTraveled(
-                            fixes.get(i).getTimePoint(),
-                            new MillisecondsTimePoint((fixes.get(j).getTimePoint().asMillis() + fixes.get(j - 1)
-                                    .getTimePoint().asMillis()) / 2)).getNauticalMiles();
-                    assertTrue(nauticalMilesFromIToHalfBeforeJ < distanceSumInNauticalMiles);
-                    if (j < fixes.size() - 1) {
-                        // now skip half a segment before the beginning:
-                        double nauticalMilesFromIToHalfAfterJ = track.getRawDistanceTraveled(
+                        assertTrue("for i=" + i + ", j=" + j + ": " + nauticalMilesFromHalfAfterIToJ + "<"
+                                + distanceSumInNauticalMiles,
+                                nauticalMilesFromHalfAfterIToJ < distanceSumInNauticalMiles);
+                        if (i > 0) {
+                            // now skip half a segment before the beginning:
+                            double nauticalMilesFromHalfBeforeIToJ = track.getRawDistanceTraveled(
+                                    new MillisecondsTimePoint((fixes.get(i).getTimePoint().asMillis() + fixes
+                                            .get(i - 1).getTimePoint().asMillis()) / 2), fixes.get(j).getTimePoint())
+                                    .getNauticalMiles();
+                            assertTrue(nauticalMilesFromHalfBeforeIToJ > distanceSumInNauticalMiles);
+                        }
+                        // now skip half a segment at the end:
+                        double nauticalMilesFromIToHalfBeforeJ = track.getRawDistanceTraveled(
                                 fixes.get(i).getTimePoint(),
-                                new MillisecondsTimePoint((fixes.get(j).getTimePoint().asMillis() + fixes.get(j + 1)
+                                new MillisecondsTimePoint((fixes.get(j).getTimePoint().asMillis() + fixes.get(j - 1)
                                         .getTimePoint().asMillis()) / 2)).getNauticalMiles();
-                        assertTrue("for i=" + i + ", j=" + j + ": " + nauticalMilesFromIToHalfAfterJ + ">"
-                                + distanceSumInNauticalMiles, nauticalMilesFromIToHalfAfterJ > distanceSumInNauticalMiles);
+                        assertTrue(nauticalMilesFromIToHalfBeforeJ < distanceSumInNauticalMiles);
+                        if (j < fixes.size() - 1) {
+                            // now skip half a segment before the beginning:
+                            double nauticalMilesFromIToHalfAfterJ = track.getRawDistanceTraveled(
+                                    fixes.get(i).getTimePoint(),
+                                    new MillisecondsTimePoint((fixes.get(j).getTimePoint().asMillis() + fixes
+                                            .get(j + 1).getTimePoint().asMillis()) / 2)).getNauticalMiles();
+                            assertTrue("for i=" + i + ", j=" + j + ": " + nauticalMilesFromIToHalfAfterJ + ">"
+                                    + distanceSumInNauticalMiles,
+                                    nauticalMilesFromIToHalfAfterJ > distanceSumInNauticalMiles);
+                        }
                     }
                 }
             }
+        } finally {
+            track.unlockAfterRead();
         }
     }
     
     @Test
     public void testDistanceTraveledOnInBetweenSectionFromFixToFix() {
-        // take second and third fix and compute distance between them
-        Iterator<GPSFixMoving> iter = track.getRawFixes().iterator();
-        iter.next(); // skip first;
-        GPSFix second = iter.next();
-        GPSFix third = iter.next();
-        assertEquals(second.getPosition().getDistance(third.getPosition()),
-                track.getRawDistanceTraveled(second.getTimePoint(), third.getTimePoint()));
+        track.lockForRead();
+        try {
+            // take second and third fix and compute distance between them
+            Iterator<GPSFixMoving> iter = track.getRawFixes().iterator();
+            iter.next(); // skip first;
+            GPSFix second = iter.next();
+            GPSFix third = iter.next();
+            assertEquals(second.getPosition().getDistance(third.getPosition()),
+                    track.getRawDistanceTraveled(second.getTimePoint(), third.getTimePoint()));
+        } finally {
+            track.unlockAfterRead();
+        }
     }
     
     @Test
