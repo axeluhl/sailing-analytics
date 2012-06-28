@@ -214,22 +214,25 @@ public class TrackTest {
         long lastMillis = 0;
         GPSFix lastFix = null;
         boolean first = true;
-        for (Iterator<GPSFixMoving> i = track.getRawFixes().iterator(); i.hasNext(); first = false) {
-            GPSFixMoving fix = i.next();
-            long millis = fix.getTimePoint().asMillis();
-            if (!first) {
-                TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis+lastMillis)/2);
-                Position interpolatedPosition = track.getEstimatedRawPosition(inBetweenTimePoint, false);
-                Distance d1 = lastFix.getPosition().getDistance(interpolatedPosition);
-                Distance d2 = interpolatedPosition.getDistance(fix.getPosition());
-                // the interpolated point should be on the great circle, not open a "triangle"
-                assertEquals(
-                        lastFix.getPosition().getDistance(fix.getPosition())
-                                .getMeters(), d1.getMeters() + d2.getMeters(),
-                        0.00001);
+        track.lockForRead();
+        try {
+            for (Iterator<GPSFixMoving> i = track.getRawFixes().iterator(); i.hasNext(); first = false) {
+                GPSFixMoving fix = i.next();
+                long millis = fix.getTimePoint().asMillis();
+                if (!first) {
+                    TimePoint inBetweenTimePoint = new MillisecondsTimePoint((millis + lastMillis) / 2);
+                    Position interpolatedPosition = track.getEstimatedRawPosition(inBetweenTimePoint, false);
+                    Distance d1 = lastFix.getPosition().getDistance(interpolatedPosition);
+                    Distance d2 = interpolatedPosition.getDistance(fix.getPosition());
+                    // the interpolated point should be on the great circle, not open a "triangle"
+                    assertEquals(lastFix.getPosition().getDistance(fix.getPosition()).getMeters(),
+                            d1.getMeters() + d2.getMeters(), 0.00001);
+                }
+                lastMillis = millis;
+                lastFix = fix;
             }
-            lastMillis = millis;
-            lastFix = fix;
+        } finally {
+            track.unlockAfterRead();
         }
     }
     
@@ -343,12 +346,17 @@ public class TrackTest {
     
     @Test
     public void testFarFutureFixNotUsedDuringEstimation() {
-        Iterator<GPSFixMoving> iter = track.getRawFixes().iterator();
         TimePoint normalFixesTime = null;
-        for (int i=0; i<2; i++) {
-            normalFixesTime = iter.next().getTimePoint();
+        track.lockForRead();
+        try {
+            Iterator<GPSFixMoving> iter = track.getRawFixes().iterator();
+            for (int i = 0; i < 2; i++) {
+                normalFixesTime = iter.next().getTimePoint();
+            }
+            assertNotNull(normalFixesTime);
+        } finally {
+            track.unlockAfterRead();
         }
-        assertNotNull(normalFixesTime);
         SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(normalFixesTime);
         GPSFixMovingImpl gpsFixFarInTheFuture = new GPSFixMovingImpl(
                 new DegreePosition(89, 180), new MillisecondsTimePoint(
