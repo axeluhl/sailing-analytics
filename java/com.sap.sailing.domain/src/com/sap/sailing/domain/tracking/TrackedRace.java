@@ -338,7 +338,10 @@ public interface TrackedRace extends Serializable {
     List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
     /**
-     * @param waitForLatest TODO
+     * @param waitForLatest
+     *            if <code>true</code>, any currently ongoing maneuver recalculation for <code>competitor</code> is
+     *            waited for before returning the result; otherwise, whatever is in the {@link #maneuverCache} for
+     *            <code>competitor</code>, reduced to the interval requested, will be returned.
      * @return a non-<code>null</code> but perhaps empty list of the maneuvers that <code>competitor</code> performed in
      *         this race between <code>from</code> and <code>to</code>.
      */
