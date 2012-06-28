@@ -303,7 +303,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             // timePoint is after leg finish; take leg end and end time point
             end = legEnd.getTimePoint();
         }
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(), getMarkPassingForLegStart().getTimePoint(), end);
+        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(), getMarkPassingForLegStart().getTimePoint(), end, true);
         return maneuvers;
     }
 

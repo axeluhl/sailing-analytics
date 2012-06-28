@@ -115,6 +115,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             }
         }
         updated(/* time point */null);
+        triggerManeuverCacheRecalculationForAllCompetitors();
     }
 
     @Override
@@ -125,6 +126,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             getOrCreateWindTrack(windSource).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
         }
         updated(/* time point */null);
+        triggerManeuverCacheRecalculationForAllCompetitors();
         notifyListenersWindAveragingChanged(oldMillisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageWind);
     }
 
@@ -397,6 +399,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 }
             }
             updated(timePointOfLatestEvent);
+            triggerManeuverCacheRecalculation(competitor);
         }
         // update the race times like start, end and the leg times
         if (requiresStartTimeUpdate) {
@@ -482,6 +485,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public synchronized void recordWind(Wind wind, WindSource windSource) {
         getOrCreateWindTrack(windSource).add(wind);
         updated(/* time point */null); // wind events shouldn't advance race time
+        triggerManeuverCacheRecalculationForAllCompetitors();
         notifyListeners(wind, windSource);
     }
     
@@ -489,12 +493,14 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public synchronized void removeWind(Wind wind, WindSource windSource) {
         getOrCreateWindTrack(windSource).remove(wind);
         updated(/* time point */null); // wind events shouldn't advance race time
+        triggerManeuverCacheRecalculationForAllCompetitors();
         notifyListenersWindRemoved(wind, windSource);
     }
 
     @Override
     public void gpsFixReceived(GPSFixMoving fix, Competitor competitor) {
         updated(fix.getTimePoint());
+        triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor);
     }
 
