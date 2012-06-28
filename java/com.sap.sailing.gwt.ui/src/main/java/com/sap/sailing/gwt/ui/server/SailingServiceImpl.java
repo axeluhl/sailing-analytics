@@ -1390,7 +1390,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         for (Buoy startBuoy : waypoint.getBuoys()) {
             final Position estimatedBuoyPosition = trackedRace.getOrCreateTrack(startBuoy)
                     .getEstimatedPosition(timePoint, /* extrapolate */false);
-            startBuoyPositions.add(new PositionDTO(estimatedBuoyPosition.getLatDeg(), estimatedBuoyPosition.getLngDeg()));
+            if (estimatedBuoyPosition != null) {
+                startBuoyPositions.add(new PositionDTO(estimatedBuoyPosition.getLatDeg(), estimatedBuoyPosition.getLngDeg()));
+            }
         }
         return startBuoyPositions;
     }

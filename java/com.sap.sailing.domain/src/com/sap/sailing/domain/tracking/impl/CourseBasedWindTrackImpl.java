@@ -40,6 +40,7 @@ public class CourseBasedWindTrackImpl extends WindTrackImpl {
 
     @Override
     protected NavigableSet<Wind> getInternalRawFixes() {
+        assertReadLock();
         NavigableSet<Wind> result;
         if (trackedRace.raceIsKnownToStartUpwind()) {
             TimePoint startTime = trackedRace.getStartOfRace();

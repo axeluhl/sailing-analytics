@@ -466,8 +466,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
         if (windSource.getType().canBeStored()) {
             // replicate all wind fixed that may have been loaded by the wind store
-            for (Wind wind : result.getRawFixes()) {
-                notifyListeners(wind, windSource);
+            result.lockForRead();
+            try {
+                for (Wind wind : result.getRawFixes()) {
+                    notifyListeners(wind, windSource);
+                }
+            } finally {
+                result.unlockAfterRead();
             }
         }
         return result;

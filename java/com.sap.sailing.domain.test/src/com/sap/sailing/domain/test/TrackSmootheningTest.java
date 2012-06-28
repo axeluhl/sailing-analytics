@@ -64,8 +64,13 @@ public class TrackSmootheningTest extends StoredTrackBasedTest {
     }
 
     protected void assertOutlierInTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {
-        GPSFixMoving outlier = getAnyOutlier(track.getRawFixes());
-        assertNotNull(outlier); // assert that we found an outlier
+        track.lockForRead();
+        try {
+            GPSFixMoving outlier = getAnyOutlier(track.getRawFixes());
+            assertNotNull(outlier); // assert that we found an outlier
+        } finally {
+            track.unlockAfterRead();
+        }
     }
 
     protected void assertNoOutlierInSmoothenedTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track) {

@@ -18,6 +18,9 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -144,7 +147,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private long updateCount;
 
-    private final Map<TimePoint, List<Competitor>> competitorRankings;
+    private transient Map<TimePoint, List<Competitor>> competitorRankings;
+    
+    /**
+     * The locks managed here correspond with the {@link #competitorRankings} structure. When
+     * {@link #getCompetitorsFromBestToWorst(TimePoint)} starts to compute rankings, it locks the write lock for the
+     * time point. Readers use the read lock. Checking / entering a lock into this map uses <code>synchronized</code> on
+     * the map itself.
+     */
+    private transient Map<TimePoint, ReadWriteLock> competitorRankingsLocks;
 
     /**
      * legs appear in the order in which they appear in the race's course
@@ -256,6 +267,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         windTracks.put(trackBasedWindSource, getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
         this.trackedRegatta = trackedRegatta;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
+        competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
     }
     
     /**
@@ -265,6 +277,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         windStore = EmptyWindStore.INSTANCE;
+        competitorRankings = new HashMap<TimePoint, List<Competitor>>();
+        competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
     }
 
     /**
@@ -671,8 +685,26 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+        ReadWriteLock readWriteLock;
+        synchronized (competitorRankingsLocks) {
+            readWriteLock = competitorRankingsLocks.get(timePoint);
+            if (readWriteLock == null) {
+                readWriteLock = new ReentrantReadWriteLock();
+                competitorRankingsLocks.put(timePoint, readWriteLock);
+            }
+        }
+        List<Competitor> rankedCompetitors;
+        final Lock lock;
         synchronized (competitorRankings) {
-            List<Competitor> rankedCompetitors = competitorRankings.get(timePoint);
+            rankedCompetitors = competitorRankings.get(timePoint);
+            if (rankedCompetitors == null) {
+                lock = readWriteLock.writeLock();
+            } else {
+                lock = readWriteLock.readLock();
+            }
+        }
+        lock.lock();
+        try {
             if (rankedCompetitors == null) {
                 RaceRankComparator comparator = new RaceRankComparator(this, timePoint);
                 rankedCompetitors = new ArrayList<Competitor>();
@@ -680,11 +712,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     rankedCompetitors.add(c);
                 }
                 Collections.sort(rankedCompetitors, comparator);
-                competitorRankings.put(timePoint, rankedCompetitors);
+                synchronized (competitorRankings) {
+                    competitorRankings.put(timePoint, rankedCompetitors);
+                }
             }
             return rankedCompetitors;
+        } finally {
+            lock.unlock();
         }
-
     }
 
     @Override
@@ -1012,6 +1047,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         cacheInvalidationTimer = null;
                         synchronized (competitorRankings) {
                             competitorRankings.clear();
+                        }
+                        synchronized (competitorRankingsLocks) {
+                            competitorRankingsLocks.clear();
                         }
                         synchronized (maneuverCache) {
                             maneuverCache.clear();
