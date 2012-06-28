@@ -59,6 +59,7 @@ public class SerializationTestWithOnlineRace extends OnlineTracTracBasedTest {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> cloneOfFindelsTrack = AbstractSerializationTest
                 .cloneBySerialization(findelsTrack, DomainFactory.INSTANCE);
         findelsTrack.lockForRead();
+        cloneOfFindelsTrack.lockForRead();
         try {
             assertEquals(Util.size(findelsTrack.getFixes()), Util.size(cloneOfFindelsTrack.getFixes()));
             Pair<Integer, Long> sizeAndTime = getSerializationSizeAndTime(findelsTrack);
@@ -66,6 +67,7 @@ public class SerializationTestWithOnlineRace extends OnlineTracTracBasedTest {
             assertTrue(sizeAndTime.getA() > 100000);
         } finally {
             findelsTrack.unlockAfterRead();
+            cloneOfFindelsTrack.unlockAfterRead();
         }
     }
 }
