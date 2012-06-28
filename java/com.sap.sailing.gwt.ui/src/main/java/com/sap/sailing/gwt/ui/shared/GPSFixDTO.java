@@ -19,7 +19,8 @@ public class GPSFixDTO implements IsSerializable {
     public boolean extrapolated;
     
     /**
-     * Contains one of the literals of the {@link Tack} enumeration ("STARBOARD" or "PORT")
+     * Contains one of the literals of the {@link Tack} enumeration ("STARBOARD" or "PORT") or <code>null</code> if the tack
+     * is not known
      */
     public Tack tack;
     

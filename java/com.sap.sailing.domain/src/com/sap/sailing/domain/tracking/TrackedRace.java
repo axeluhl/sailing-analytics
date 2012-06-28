@@ -313,7 +313,7 @@ public interface TrackedRace extends Serializable {
      * and, if the {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the
      * competitors' GPS tracks.
      */
-    Tack getTack(Competitor competitor, TimePoint timePoint);
+    Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     TrackedRegatta getTrackedRegatta();
 

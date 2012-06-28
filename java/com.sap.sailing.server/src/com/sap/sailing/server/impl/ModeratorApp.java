@@ -14,10 +14,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.CountryCode;
@@ -120,7 +120,13 @@ public class ModeratorApp extends Servlet {
                             jsonFix.put("lngdeg", fix.getPosition().getLngDeg());
                             jsonFix.put("truebearingdeg", fix.getSpeed().getBearing().getDegrees());
                             jsonFix.put("knotspeed", fix.getSpeed().getKnots());
-                            jsonFix.put("tack", trackedRace.getTack(competitor, fix.getTimePoint()).name());
+                            String tackName;
+                            try {
+                                tackName = trackedRace.getTack(competitor, fix.getTimePoint()).name();
+                                jsonFix.put("tack", tackName);
+                            } catch (NoWindException e) {
+                                // don't output tack
+                            }
                             jsonFixes.add(jsonFix);
                         }
                     } finally {

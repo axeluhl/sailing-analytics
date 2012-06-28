@@ -1064,6 +1064,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         try {
                             return computeManeuversAndUpdateInCache(competitor);
                         } catch (NoWindException e) {
+                            // cache won't be updated, but that's ok because maneuver detection without wind direction makes no sense
                             logger.throwing(TrackedRaceImpl.class.getName(), "triggerManeuverCacheRecalculation", e);
                             throw new NoWindError(e);
                         }
@@ -1102,8 +1103,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(),
                                 extendedFrom, extendedTo));
                 synchronized (maneuverCache) {
-                    result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom,
-                            extendedTo, extendedResultForCache);
+                    result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo, extendedResultForCache);
                     maneuverCache.put(competitor, result);
                 }
             } else {
@@ -1457,9 +1457,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * <p>
      * 
      * For the unlikely case of 0 degrees difference, {@link Tack#STARBOARD} will result.
+     * @throws NoWindException 
      */
     @Override
-    public Tack getTack(Competitor competitor, TimePoint timePoint) {
+    public Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException {
         return getTack(getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */false), timePoint,
                 getTrack(competitor).getEstimatedSpeed(timePoint).getBearing());
     }
@@ -1467,11 +1468,22 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     /**
      * Based on the wind direction at <code>timePoint</code> and at position <code>where</code>, compares the
      * <code>boatBearing</code> to the wind's bearing at that time and place and determined the tack.
+     * 
+     * @throws NoWindException
+     *             in case the wind cannot be determined because without a wind direction, the tack cannot be determined
+     *             either
      */
-    private Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) {
-        Bearing wind = getWind(where, timePoint).getBearing();
-        Bearing difference = wind.getDifferenceTo(boatBearing);
-        return difference.getDegrees() <= 0 ? Tack.STARBOARD : Tack.PORT;
+    private Tack getTack(Position where, TimePoint timePoint, Bearing boatBearing) throws NoWindException {
+        final Wind wind = getWind(where, timePoint);
+        Tack result;
+        if (wind == null) {
+            throw new NoWindException("Can't determine wind direction in position "+where+" at "+timePoint+
+                    ", therefore cannot determine tack");
+        }
+        Bearing windBearing = wind.getBearing();
+        Bearing difference = windBearing.getDifferenceTo(boatBearing);
+        result = difference.getDegrees() <= 0 ? Tack.STARBOARD : Tack.PORT;
+        return result;
     }
 
     @Override
@@ -1504,7 +1516,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         if (waitForLatest) {
             Future<Triple<TimePoint, TimePoint, List<Maneuver>>> future;
             synchronized (ongoingManeuverCacheRecalculations) {
-                future = ongoingManeuverCacheRecalculations.get(competitor);
+                future = ongoingManeuverCacheRecalculations.get(competitor); // TODO what about cancellation?
             }
             if (future != null) {
                 try {
@@ -1687,10 +1699,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 speedWithBearingOnApproximationAtBeginning.getBearing());
         Tack tackAfterManeuver = getTack(maneuverPosition, timePointAfterManeuver,
                 speedWithBearingOnApproximationAtEnd.getBearing());
+        ManeuverType maneuverType;
         // the TrackedLegOfCompetitor variables may be null, e.g., in case the time points are before or after the race
         TrackedLegOfCompetitor legBeforeManeuver = getTrackedLeg(competitor, timePointBeforeManeuver);
         TrackedLegOfCompetitor legAfterManeuver = getTrackedLeg(competitor, timePointAfterManeuver);
-        ManeuverType maneuverType;
         if (Math.abs(totalCourseChangeInDegrees) > PENALTY_CIRCLE_DEGREES_THRESHOLD) {
             maneuverType = ManeuverType.PENALTY_CIRCLE;
         } else if (legBeforeManeuver != legAfterManeuver
@@ -1716,10 +1728,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     default:
                         maneuverType = ManeuverType.UNKNOWN;
                         if (logger.isLoggable(Level.FINE)) {
-                            logger.fine("Unknown maneuver for "
-                                    + competitor
-                                    + " at "
-                                    + maneuverTimePoint
+                            logger.fine("Unknown maneuver for " + competitor + " at " + maneuverTimePoint
                                     + (legBeforeManeuver != null ? " on reaching leg " + legBeforeManeuver.getLeg()
                                             : " before start"));
                         }
