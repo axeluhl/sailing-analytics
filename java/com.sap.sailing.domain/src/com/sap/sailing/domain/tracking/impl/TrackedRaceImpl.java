@@ -193,7 +193,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private final Map<WindSource, WindTrack> windTracks;
 
-    private final Map<TimePoint, Wind> directionFromStartToNextMarkCache;
+    private final Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
 
@@ -226,7 +226,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.race = race;
         this.windStore = windStore;
         this.windSourcesToExclude = new HashSet<WindSource>();
-        this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Wind>();
+        this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis; 
@@ -975,25 +975,40 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Wind getDirectionFromStartToNextMark(TimePoint at) {
-        Wind result;
+    public Wind getDirectionFromStartToNextMark(final TimePoint at) {
+        Future<Wind> future;
+        FutureTask<Wind> newFuture = null;
         synchronized (directionFromStartToNextMarkCache) {
-            result = directionFromStartToNextMarkCache.get(at);
-            if (result == null) {
-                Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
-                Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
-                Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
-                if (firstLegStart != null && firstLegEnd != null) {
-                    result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0,
-                            firstLegEnd.getBearingGreatCircle(firstLegStart)));
-                    final Wind finalResult = result;
-                    directionFromStartToNextMarkCache.put(at, finalResult);
-                } else {
-                    result = null;
-                }
+            future = directionFromStartToNextMarkCache.get(at);
+            if (future == null) {
+                newFuture = new FutureTask<Wind>(new Callable<Wind>() {
+                    @Override
+                    public Wind call() {
+                        Wind result;
+                        Leg firstLeg = getRace().getCourse().getLegs().iterator().next();
+                        Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
+                        Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
+                        if (firstLegStart != null && firstLegEnd != null) {
+                            result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(1.0,
+                                    firstLegEnd.getBearingGreatCircle(firstLegStart)));
+                        } else {
+                            result = null;
+                        }
+                        return result;
+                    }
+                });
+                directionFromStartToNextMarkCache.put(at, newFuture);
             }
         }
-        return result;
+        if (newFuture != null) {
+            newFuture.run();
+            future = newFuture;
+        }
+        try {
+            return future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -1257,8 +1272,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         NavigableSet<MarkPassing> markPassingsRemoved = markPassingsForWaypoint.remove(waypointThatGotRemoved);
         for (NavigableSet<MarkPassing> markPassingsForOneCompetitor : markPassingsForCompetitor.values()) {
             if (!markPassingsForOneCompetitor.isEmpty()) {
+                final Competitor competitor = markPassingsForOneCompetitor.iterator().next().getCompetitor();
                 markPassingsForOneCompetitor.removeAll(markPassingsRemoved);
-                triggerManeuverCacheRecalculation(markPassingsForOneCompetitor.iterator().next().getCompetitor());
+                triggerManeuverCacheRecalculation(competitor);
             }
         }
     }
