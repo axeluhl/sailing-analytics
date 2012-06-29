@@ -78,8 +78,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * time point is after the competitor has finished this leg, all of the competitor's maneuvers during this leg will
      * be reported in chronological order. The list may be empty if no maneuvers happened between the point in time when
      * the competitor started the leg and <code>timePoint</code>.
+     * @param waitForLatest TODO
      */
-    List<Maneuver> getManeuvers(TimePoint timePoint) throws NoWindException;
+    List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet
