@@ -244,8 +244,13 @@ public class EndToEndListeningStoreAndFowardTest {
                 }
             }
             for (Buoy buoy : buoys) {
-                assertTrue("Track of buoy " + buoy + " empty",
-                        !Util.isEmpty(trackedRace.getOrCreateTrack(buoy).getRawFixes()));
+                final GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
+                track.lockForRead();
+                try {
+                    assertTrue("Track of buoy " + buoy + " empty", !Util.isEmpty(track.getRawFixes()));
+                } finally {
+                    track.unlockAfterRead();
+                }
             }
         }
         Set<String> expectedRaceIDs = new HashSet<String>();
