@@ -119,7 +119,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
         List<GPSFixMoving> relevantFixes = new LinkedList<GPSFixMoving>();
         boolean beforeSetEmpty;
         GPSFixMoving beforeSetLast = null;
-        synchronized (this) {
+        lockForRead();
+        try {
             NavigableSet<GPSFixMoving> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
             beforeSetEmpty = beforeSet.isEmpty(); // ask this while holding the lock
             if (!beforeSetEmpty) {
@@ -131,10 +132,13 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 }
                 relevantFixes.add(0, beforeFix);
             }
+        } finally {
+            unlockAfterRead();
         }
         boolean afterSetEmpty;
         GPSFixMoving afterSetFirst = null;
-        synchronized (this) {
+        lockForRead();
+        try {
             NavigableSet<GPSFixMoving> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
             afterSetEmpty = afterSet.isEmpty(); // ask this while holding the lock
             if (!afterSetEmpty) {
@@ -146,6 +150,8 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                 }
                 relevantFixes.add(afterFix);
             }
+        } finally {
+            unlockAfterRead();
         }
         if (relevantFixes.isEmpty()) {
             // find the fix closest to "at":
