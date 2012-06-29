@@ -118,9 +118,14 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         Buoy replicaBuoy = replicaTrackedRace.getRace().getCourse().getFirstWaypoint().getBuoys().iterator().next();
 //        assertNotSame(replicaBuoy, masterBuoy); // TODO this would require solving bug 592
         GPSFixTrack<Buoy, GPSFix> replicaBuoyTrack = replicaTrackedRace.getOrCreateTrack(replicaBuoy);
-        assertEquals(1, Util.size(replicaBuoyTrack.getRawFixes()));
-        assertEquals(replicaBuoyTrack.getRawFixes().iterator().next(), fix);
-        assertNotSame(fix, replicaBuoyTrack.getRawFixes().iterator().next());
+        replicaBuoyTrack.lockForRead();
+        try {
+            assertEquals(1, Util.size(replicaBuoyTrack.getRawFixes()));
+            assertEquals(replicaBuoyTrack.getRawFixes().iterator().next(), fix);
+            assertNotSame(fix, replicaBuoyTrack.getRawFixes().iterator().next());
+        } finally {
+            replicaBuoyTrack.unlockAfterRead();
+        }
     }
 
     @Test
