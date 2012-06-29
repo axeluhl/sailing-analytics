@@ -1381,62 +1381,68 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));
         }
-        for (Competitor competitor : getRace().getCompetitors()) {
-            TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
-            if (leg != null) {
-                TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
-                LegType legType;
-                try {
-                    legType = trackedLeg.getLegType(timePoint);
-                    if (legType != LegType.REACHING) {
-                        GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-                        if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
-                            SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track
-                                    .getEstimatedSpeed(timePoint, weigher);
-                            if (estimatedSpeedWithConfidence != null
-                                    && estimatedSpeedWithConfidence.getObject() != null &&
-                                    // Mark passings may be missing or far off. This can lead to boats apparently going
-                                    // "backwards" regarding the leg's direction; ignore those
-                                    isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(),
-                                            trackedLeg, timePoint)) {
-                                // additionally to generally excluding maneuvers, reduce confidence around mark
-                                // passings:
-                                NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-                                double markPassingProximityConfidenceReduction = 1.0;
-                                synchronized (markPassings) {
-                                    NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(
-                                            dummyMarkPassingForNow, /* inclusive */true);
-                                    NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(
-                                            dummyMarkPassingForNow, /* inclusive */true);
-                                    if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
-                                        markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                                1.0 - weigherForMarkPassingProximity.getConfidence(prevMarkPassing
-                                                        .last().getTimePoint(), timePoint));
+        getRace().getCourse().lockForRead(); // ensure the course doesn't change, particularly lose the leg we're interested in, while we're running
+        try {
+            for (Competitor competitor : getRace().getCompetitors()) {
+                TrackedLegOfCompetitor leg = getTrackedLeg(competitor, timePoint);
+                if (leg != null) {
+                    TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
+                    LegType legType;
+                    try {
+                        legType = trackedLeg.getLegType(timePoint);
+                        if (legType != LegType.REACHING) {
+                            GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
+                            if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
+                                SpeedWithBearingWithConfidence<TimePoint> estimatedSpeedWithConfidence = track
+                                        .getEstimatedSpeed(timePoint, weigher);
+                                if (estimatedSpeedWithConfidence != null
+                                        && estimatedSpeedWithConfidence.getObject() != null &&
+                                        // Mark passings may be missing or far off. This can lead to boats apparently
+                                        // going
+                                        // "backwards" regarding the leg's direction; ignore those
+                                        isNavigatingForward(estimatedSpeedWithConfidence.getObject().getBearing(),
+                                                trackedLeg, timePoint)) {
+                                    // additionally to generally excluding maneuvers, reduce confidence around mark
+                                    // passings:
+                                    NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+                                    double markPassingProximityConfidenceReduction = 1.0;
+                                    synchronized (markPassings) {
+                                        NavigableSet<MarkPassing> prevMarkPassing = markPassings.headSet(
+                                                dummyMarkPassingForNow, /* inclusive */true);
+                                        NavigableSet<MarkPassing> nextMarkPassing = markPassings.tailSet(
+                                                dummyMarkPassingForNow, /* inclusive */true);
+                                        if (prevMarkPassing != null && !prevMarkPassing.isEmpty()) {
+                                            markPassingProximityConfidenceReduction *= Math.max(0.0,
+                                                    1.0 - weigherForMarkPassingProximity.getConfidence(prevMarkPassing
+                                                            .last().getTimePoint(), timePoint));
+                                        }
+                                        if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
+                                            markPassingProximityConfidenceReduction *= Math.max(0.0,
+                                                    1.0 - weigherForMarkPassingProximity.getConfidence(nextMarkPassing
+                                                            .first().getTimePoint(), timePoint));
+                                        }
                                     }
-                                    if (nextMarkPassing != null && !nextMarkPassing.isEmpty()) {
-                                        markPassingProximityConfidenceReduction *= Math.max(0.0,
-                                                1.0 - weigherForMarkPassingProximity.getConfidence(nextMarkPassing
-                                                        .first().getTimePoint(), timePoint));
-                                    }
+                                    BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
+                                            estimatedSpeedWithConfidence.getObject() == null ? null
+                                                    : estimatedSpeedWithConfidence.getObject().getBearing(),
+                                            markPassingProximityConfidenceReduction
+                                                    * estimatedSpeedWithConfidence.getConfidence(),
+                                            estimatedSpeedWithConfidence.getRelativeTo());
+                                    BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings
+                                            .get(legType);
+                                    bearingClusterForLegType.add(bearing);
                                 }
-                                BearingWithConfidence<TimePoint> bearing = new BearingWithConfidenceImpl<TimePoint>(
-                                        estimatedSpeedWithConfidence.getObject() == null ? null
-                                                : estimatedSpeedWithConfidence.getObject().getBearing(),
-                                        markPassingProximityConfidenceReduction
-                                                * estimatedSpeedWithConfidence.getConfidence(),
-                                        estimatedSpeedWithConfidence.getRelativeTo());
-                                BearingWithConfidenceCluster<TimePoint> bearingClusterForLegType = bearings
-                                        .get(legType);
-                                bearingClusterForLegType.add(bearing);
                             }
                         }
+                    } catch (NoWindException e) {
+                        logger.warning("Unable to determine leg type for race " + getRace().getName()
+                                + " while trying to estimate wind");
+                        bearings = null;
                     }
-                } catch (NoWindException e) {
-                    logger.warning("Unable to determine leg type for race " + getRace().getName()
-                            + " while trying to estimate wind");
-                    bearings = null;
                 }
             }
+        } finally {
+            getRace().getCourse().unlockAfterRead();
         }
         return bearings;
     }
@@ -1521,6 +1527,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * {@link #triggerManeuverCacheRecalculationForAllCompetitors()}). Callers can choose whether to wait for any
      * ongoing updates by using the <code>waitForLatest</code> parameter. From the cache the interval requested is then
      * {@link #extractInterval(TimePoint, TimePoint, List) extracted}.
+     * 
      * @param waitForLatest
      *            if <code>true</code>, any currently ongoing maneuver recalculation for <code>competitor</code> is
      *            waited for before returning the result; otherwise, whatever is in the {@link #maneuverCache} for
