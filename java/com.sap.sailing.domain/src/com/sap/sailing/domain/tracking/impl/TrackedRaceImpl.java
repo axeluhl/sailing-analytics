@@ -184,8 +184,48 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private final Map<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>> maneuverCache;
     
-    private transient Map<Competitor, FutureTask<Triple<TimePoint, TimePoint, List<Maneuver>>>> ongoingManeuverCacheRecalculations;
+    /**
+     * Holds the tasks that have been added to an {@link Executor} already for execution and that, as long as a client
+     * holds the object monitor / lock on this map, aren't cancelled. Note, however, that once the lock is released,
+     * the Futures may be cancelled in case a cache replacement has taken place. Clients can prevent this by calling
+     * {@link FutureTaskWithCancelBlocking#dontCancel()} on the future while holding the lock on
+     * {@link #ongoingManeuverCacheRecalculations}. This will let {@link Future#cancel(boolean)} return <code>false</code>
+     * should it be called on that Future.
+     */
+    private transient Map<Competitor, FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>> ongoingManeuverCacheRecalculations;
+    
+    /**
+     * Once a client has fetched such a Future from {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations} while
+     * holding the object monitor of {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client knows that
+     * the Future hasn't been cancelled yet. To avoid that the Future is cancelled after the client has fetched it from
+     * {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client can call {@link #dontCancel()} on this
+     * future. After that, calls to {@link #cancel(boolean)} will return <code>false</code> immediately and the Future
+     * will be executed as originally scheduled.
+     * 
+     * @author Axel Uhl (D043530)
+     * 
+     */
+    private static class FutureTaskWithCancelBlocking<V> extends FutureTask<V> {
+        private boolean dontCancel;
+        
+        public FutureTaskWithCancelBlocking(Callable<V> callable) {
+            super(callable);
+        }
 
+        public synchronized void dontCancel() {
+            dontCancel = true;
+        }
+        
+        @Override
+        public synchronized boolean cancel(boolean mayInterruptIfRunning) {
+            if (!dontCancel) {
+                return super.cancel(mayInterruptIfRunning);
+            } else {
+                return false;
+            }
+        }
+    }
+    
     /**
      * A tracked race can maintain a number of sources for wind information from which a client can select. As all
      * intra-leg computations are done dynamically based on wind information, selecting a different wind information
@@ -221,7 +261,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             long delayForWindEstimationCacheInvalidation) {
         super();
         this.maneuverRecalculator = Executors.newSingleThreadExecutor();
-        this.ongoingManeuverCacheRecalculations = new HashMap<Competitor, FutureTask<Triple<TimePoint, TimePoint, List<Maneuver>>>>();
+        this.ongoingManeuverCacheRecalculations = new HashMap<Competitor, FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>>();
         this.updateCount = 0;
         this.race = race;
         this.windStore = windStore;
@@ -292,7 +332,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
         maneuverRecalculator = Executors.newSingleThreadExecutor();
-        ongoingManeuverCacheRecalculations = new HashMap<Competitor, FutureTask<Triple<TimePoint, TimePoint, List<Maneuver>>>>();
+        ongoingManeuverCacheRecalculations = new HashMap<Competitor, FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>>();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
     }
 
@@ -1073,7 +1113,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        final FutureTask<Triple<TimePoint, TimePoint, List<Maneuver>>> future = new FutureTask<Triple<TimePoint, TimePoint, List<Maneuver>>>(
+        final FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>> future =
+                new FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>(
                 new Callable<Triple<TimePoint, TimePoint, List<Maneuver>>>() {
                     @Override
                     public Triple<TimePoint, TimePoint, List<Maneuver>> call() {
@@ -1086,8 +1127,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                         }
                     }
                 });
+        // establish and maintain the following invariant: after lock on ongoingManeuverCacheRecalculations is released,
+        // no Future contained in it is in cancelled state
         synchronized (ongoingManeuverCacheRecalculations) {
-            FutureTask<Triple<TimePoint, TimePoint, List<Maneuver>>> oldFuture = ongoingManeuverCacheRecalculations.put(competitor, future);
+            FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>> oldFuture = ongoingManeuverCacheRecalculations.put(competitor, future);
             if (oldFuture != null) {
                 oldFuture.cancel(/* mayInterruptIfRunning */ false);
             }
@@ -1538,9 +1581,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             throws NoWindException {
         List<Maneuver> allManeuvers;
         if (waitForLatest) {
-            Future<Triple<TimePoint, TimePoint, List<Maneuver>>> future;
+            FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>> future;
             synchronized (ongoingManeuverCacheRecalculations) {
-                future = ongoingManeuverCacheRecalculations.get(competitor); // TODO what about cancellation?
+                // as long as we hold the lock on ongoingManeuverCacheRecalculations, the Futures contained in it are not cancelled
+                future = ongoingManeuverCacheRecalculations.get(competitor);
+                if (future != null) {
+                    future.dontCancel();
+                }
             }
             if (future != null) {
                 try {
