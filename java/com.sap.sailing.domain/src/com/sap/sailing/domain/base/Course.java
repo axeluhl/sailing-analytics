@@ -17,7 +17,8 @@ import difflib.PatchFailedException;
  * {@link #addWaypoint(int, Waypoint)} which each obtain the write lock. However, if callers expect the waypoint or leg
  * obtained from a reading call to remain valid, holding the read lock is required. Otherwise, particularly a
  * {@link #removeWaypoint(int)} call may turn a leg and of course the waypoint invalid and therefore violate the
- * reader's assumptions. It is of course necessary to always use {@link #lockForRead()} and {@link #unlockAfterRead()}
+ * reader's assumptions. The write lock is still held while propagating the updates to all {@link CourseListener}s
+ * registered. It is of course necessary to always use {@link #lockForRead()} and {@link #unlockAfterRead()}
  * symmetrically, where the {@link #unlockAfterRead()} call should happen in a <code>finally</code> clause to guarantee
  * execution.
  * 

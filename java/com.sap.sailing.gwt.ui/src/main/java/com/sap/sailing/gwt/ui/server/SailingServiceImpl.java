@@ -610,7 +610,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
             TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
             if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
-                legEntry = createLegEntry(trackedLeg, timePoint);
+                legEntry = createLegEntry(trackedLeg, timePoint, /* waitForLatestManeuverAnalysis */ true);
             } else {
                 legEntry = null;
             }
@@ -621,7 +621,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return new RaceDetails(legDetails, windwardDistanceToOverallLeader, averageCrossTrackError);
     }
 
-    private LegEntryDTO createLegEntry(TrackedLegOfCompetitor trackedLeg, TimePoint timePoint) throws NoWindException {
+    private LegEntryDTO createLegEntry(TrackedLegOfCompetitor trackedLeg, TimePoint timePoint,
+            boolean waitForLatestManeuverAnalysis) throws NoWindException {
         LegEntryDTO result;
         if (trackedLeg == null) {
             result = null;
@@ -657,7 +658,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint);
             result.windwardDistanceToGoInMeters = windwardDistanceToGo == null ? null : windwardDistanceToGo
                     .getMeters();
-            List<Maneuver> maneuvers = trackedLeg.getManeuvers(timePoint, /* waitForLatest */ true);
+            List<Maneuver> maneuvers = trackedLeg.getManeuvers(timePoint, waitForLatestManeuverAnalysis);
             if (maneuvers != null) {
                 result.numberOfTacks = 0;
                 result.numberOfJibes = 0;
