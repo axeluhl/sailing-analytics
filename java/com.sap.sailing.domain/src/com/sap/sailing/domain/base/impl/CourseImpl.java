@@ -85,19 +85,24 @@ public class CourseImpl extends NamedImpl implements Course {
     /**
      * Synchronize on this object to avoid concurrent modifications of the underlying waypoints list
      */
-    private synchronized void writeObject(ObjectOutputStream s) throws IOException {
-        s.defaultWriteObject();
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        lockForRead();
+        try {
+            s.defaultWriteObject();
+        } finally {
+            unlockAfterRead();
+        }
     }
     
     /**
      * For access by {@link LegImpl}
      */
     Waypoint getWaypoint(int i) {
-        lock.readLock().lock();
+        lockForRead();
         try {
             return waypoints.get(i);
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
     
@@ -186,27 +191,27 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public List<Leg> getLegs() {
-        lock.readLock().lock();
+        lockForRead();
         try {
             return new ArrayList<Leg>(legs);
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
 
     @Override
     public Iterable<Waypoint> getWaypoints() {
-        lock.readLock().lock();
+        lockForRead();
         try {
             return new ArrayList<Waypoint>(waypoints);
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
 
     @Override
     public String toString() {
-        lock.readLock().lock();
+        lockForRead();
         try {
             StringBuilder result = new StringBuilder(getName());
             result.append(": ");
@@ -221,13 +226,13 @@ public class CourseImpl extends NamedImpl implements Course {
             }
             return result.toString();
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
 
     @Override
     public int getIndexOfWaypoint(Waypoint waypoint) {
-        lock.readLock().lock();
+        lockForRead();
         try {
             int result = -1;
             Integer indexEntry = waypointIndexes.get(waypoint);
@@ -236,12 +241,12 @@ public class CourseImpl extends NamedImpl implements Course {
             }
             return result;
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
     
     private Set<ControlPoint> getControlPoints() {
-        lock.readLock().lock();
+        lockForRead();
         try {
             Set<ControlPoint> result = new HashSet<ControlPoint>();
             for (Waypoint waypoint : getWaypoints()) {
@@ -249,12 +254,12 @@ public class CourseImpl extends NamedImpl implements Course {
             }
             return result;
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
     
     private ControlPoint getControlPointForBuoy(Buoy buoy) {
-        lock.readLock().lock();
+        lockForRead();
         try {
             for (ControlPoint controlPoint : getControlPoints()) {
                 for (Buoy controlPointBuoy : controlPoint.getBuoys()) {
@@ -265,13 +270,13 @@ public class CourseImpl extends NamedImpl implements Course {
             }
             return null;
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
     
     @Override
     public Iterable<Leg> getLegsAdjacentTo(Buoy buoy) {
-        lock.readLock().lock();
+        lockForRead();
         try {
             Set<Leg> result = new HashSet<Leg>();
             ControlPoint controlPointForBuoy = getControlPointForBuoy(buoy);
@@ -291,13 +296,13 @@ public class CourseImpl extends NamedImpl implements Course {
             }
             return result;
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
 
     @Override
     public synchronized Waypoint getWaypointForControlPoint(ControlPoint controlPoint, int start) {
-        lock.readLock().lock();
+        lockForRead();
         try {
             if (start > legs.size()) {
                 throw new IllegalArgumentException("Starting to search beyond end of course: " + start + " vs. "
@@ -312,27 +317,27 @@ public class CourseImpl extends NamedImpl implements Course {
             }
             return null;
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
 
     @Override
     public Waypoint getFirstWaypoint() {
-        lock.readLock().lock();
+        lockForRead();
         try {
             return waypoints.get(0);
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
 
     @Override
     public Waypoint getLastWaypoint() {
-        lock.readLock().lock();
+        lockForRead();
         try {
             return waypoints.get(waypoints.size() - 1);
         } finally {
-            lock.readLock().unlock();
+            unlockAfterRead();
         }
     }
 

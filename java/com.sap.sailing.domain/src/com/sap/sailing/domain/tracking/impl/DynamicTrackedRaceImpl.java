@@ -65,9 +65,15 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     /**
      * Synchronized object serialization on this object so that incoming new data doesn't disrupt the serialization process.
+     * Also obtain a read lock for the course so that in cannot change while serializing this object. 
      */
     private synchronized void writeObject(ObjectOutputStream s) throws IOException {
-        s.defaultWriteObject();
+        getRace().getCourse().lockForRead();
+        try {
+            s.defaultWriteObject();
+        } finally {
+            getRace().getCourse().unlockAfterRead();
+        }
     }
     
     /**

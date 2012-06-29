@@ -1527,6 +1527,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * {@link #triggerManeuverCacheRecalculationForAllCompetitors()}). Callers can choose whether to wait for any
      * ongoing updates by using the <code>waitForLatest</code> parameter. From the cache the interval requested is then
      * {@link #extractInterval(TimePoint, TimePoint, List) extracted}.
+     * 
      * @param waitForLatest
      *            if <code>true</code>, any currently ongoing maneuver recalculation for <code>competitor</code> is
      *            waited for before returning the result; otherwise, whatever is in the {@link #maneuverCache} for
