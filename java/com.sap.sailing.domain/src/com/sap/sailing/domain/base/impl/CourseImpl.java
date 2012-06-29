@@ -66,6 +66,16 @@ public class CourseImpl extends NamedImpl implements Course {
         }
     }
     
+    @Override
+    public void lockForRead() {
+        lock.readLock().lock();
+    }
+
+    @Override
+    public void unlockAfterRead() {
+        lock.readLock().unlock();
+    }
+
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<>();
