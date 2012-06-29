@@ -297,7 +297,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 if (fromPos == null) {
                     return Distance.NULL;
                 }
-                synchronized (this) {
+                lockForRead();
+                try {
                     NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
                     /* fromInclusive */false, new DummyGPSFix(to),
                     /* toInclusive */false);
@@ -306,6 +307,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                         distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
                         fromPos = fix.getPosition();
                     }
+                } finally {
+                    unlockAfterRead();
                 }
                 Position toPos = getEstimatedPosition(to, false);
                 distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
@@ -463,21 +466,19 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         try {
             DummyGPSFix atTimed = new DummyGPSFix(at);
             List<GPSFix> relevantFixes = new LinkedList<GPSFix>();
-            synchronized (this) {
-                NavigableSet<GPSFix> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
-                NavigableSet<GPSFix> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
-                for (GPSFix beforeFix : beforeSet.descendingSet()) {
-                    if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                        break;
-                    }
-                    relevantFixes.add(0, beforeFix);
+            NavigableSet<GPSFix> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */false);
+            NavigableSet<GPSFix> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */true);
+            for (GPSFix beforeFix : beforeSet.descendingSet()) {
+                if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                    break;
                 }
-                for (GPSFix afterFix : afterSet) {
-                    if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                        break;
-                    }
-                    relevantFixes.add(afterFix);
+                relevantFixes.add(0, beforeFix);
+            }
+            for (GPSFix afterFix : afterSet) {
+                if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                    break;
                 }
+                relevantFixes.add(afterFix);
             }
             return relevantFixes;
         } finally {

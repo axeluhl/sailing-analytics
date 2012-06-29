@@ -162,7 +162,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private void getLeaderboard(){
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
-        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al,
+        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* waitForLatestManeuverAnalysis */ true,
                 new AsyncCallback<LeaderboardDTO>() {
 
                     @Override

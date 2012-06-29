@@ -12,6 +12,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
@@ -78,7 +79,12 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
 
     private final NavigableSet<TimePoint> timePointsWithCachedNullResult;
     
+    /**
+     * Access to this cache is guarded by {@link #cacheLock}.
+     */
     private final NavigableSet<WindWithConfidence<TimePoint>> cache;
+    
+    private final ReentrantReadWriteLock cacheLock;
     
     private final Weigher<TimePoint> weigher;
     
@@ -162,6 +168,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                         return o1.getObject().getTimePoint().compareTo(o2.getObject().getTimePoint());
                     }
                 });
+        cacheLock = new ReentrantReadWriteLock();
         virtualInternalRawFixes = new EstimatedWindFixesAsNavigableSet(trackedRace);
         weigher = ConfidenceFactory.INSTANCE
                 .createHyperbolicTimeDifferenceWeigher(getMillisecondsOverWhichToAverageWind());
@@ -175,11 +182,13 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * Synchronizes serialization on this object to avoid the cache being updated while being written.
      */
     private synchronized void writeObject(ObjectOutputStream s) throws IOException {
+        cacheLock.readLock().lock();
         lockForRead();
         try {
             s.defaultWriteObject();
         } finally {
             unlockAfterRead();
+            cacheLock.readLock().unlock();
         }
     }
     
@@ -218,7 +227,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         // can't use lockForWrite() here because caching can happen while holding the read lock, and the lock can't be
         // upgraded. But lockForRead() and synchronization will do the job because all invalidations lock the write lock,
         // and all contains() checks and get() calls use synchronization too.
-        lockForRead();
+        cacheLock.writeLock().lock();
         try {
             // synchronization necessary to protect writeObject from ConcurrentModificationException
             synchronized (this) {
@@ -230,13 +239,16 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                         timePointsWithCachedNullResultFastContains.add(timePoint);
                     }
                 } else {
-                    synchronized (cache) {
+                    cacheLock.writeLock().lock();
+                    try {
                         cache.add(fix);
+                    } finally {
+                        cacheLock.writeLock().unlock();
                     }
                 }
             }
         } finally {
-            unlockAfterRead();
+            cacheLock.writeLock().unlock();
         }
     }
     
@@ -269,7 +281,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * running.
      */
     private void invalidateCache() {
-        lockForWrite();
+        cacheLock.writeLock().lock();
         try {
             Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
                     : getCachedFixes().tailSet(scheduledRefreshInterval.getStart(), /* inclusive */true)).iterator();
@@ -295,7 +307,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             }
             scheduledRefreshInterval.clear();
         } finally {
-            unlockAfterWrite();
+            cacheLock.writeLock().unlock();
         }
     }
 
@@ -305,7 +317,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     private void refreshCacheIncrementally() {
         Set<WindWithConfidence<TimePoint>> windFixesToRecalculate = new HashSet<WindWithConfidence<TimePoint>>();
         Set<TimePoint> cachedNullResultsToRecalculate = new HashSet<TimePoint>();
-        lockForWrite();
+        cacheLock.readLock().lock();
         try {
             Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
                     : getCachedFixes().tailSet(scheduledRefreshInterval.getStart(), /* inclusive */true)).iterator();
@@ -325,7 +337,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                 cachedNullResultsToRecalculate.add(nextNullResultToRecalculate);
             }
         } finally {
-            unlockAfterWrite();
+            cacheLock.readLock().unlock();
         }
         Set<TimePoint> nullRemovals = new HashSet<TimePoint>();
         Set<TimePoint> nullInsertions = new HashSet<TimePoint>();
@@ -350,7 +362,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             }
         }
         // apply the computed cache deltas
-        lockForWrite();
+        cacheLock.writeLock().lock();
         try {
             for (TimePoint nullRemoval : nullRemovals) {
                 timePointsWithCachedNullResult.remove(nullRemoval);
@@ -367,7 +379,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             }
             scheduledRefreshInterval.clear();
         } finally {
-            unlockAfterWrite();
+            cacheLock.writeLock().unlock();
         }
     }
 
@@ -396,16 +408,13 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     private void clearCache() {
-        lockForWrite();
+        cacheLock.writeLock().lock();
         try {
-            // synchronize to protect writeObject from ConcurrentModificationException
-            synchronized (this) {
-                cache.clear();
-                timePointsWithCachedNullResult.clear();
-                timePointsWithCachedNullResultFastContains.clear();
-            }
+            cache.clear();
+            timePointsWithCachedNullResult.clear();
+            timePointsWithCachedNullResultFastContains.clear();
         } finally {
-            unlockAfterWrite();
+            cacheLock.writeLock().unlock();
         }
     }
 
@@ -419,18 +428,16 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         WindWithConfidence<TimePoint> cachedFix = null;
         WindWithConfidence<TimePoint> result = null;
         final boolean nullResultCacheContains;
-        lockForRead();
+        cacheLock.readLock().lock();
         try {
             nullResultCacheContains = nullResultCacheContains(timePoint);
             if (nullResultCacheContains) {
                 result = null;
             } else {
-                synchronized (cache) {
-                    cachedFix = cache.floor(getDummyFixWithConfidence(timePoint));
-                }
+                cachedFix = cache.floor(getDummyFixWithConfidence(timePoint));
             }
         } finally {
-            unlockAfterRead();
+            cacheLock.readLock().unlock();
         }
         if (!nullResultCacheContains) {
             if (cachedFix == null || !cachedFix.getObject().getTimePoint().equals(timePoint)) {

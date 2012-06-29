@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -235,7 +236,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
-    private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
+    private final ConcurrentHashMap<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
 
     protected long millisecondsOverWhichToAverageSpeed;
 
@@ -272,7 +273,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.delayToLiveInMillis = delayToLiveInMillis; 
         this.startToNextMarkCacheInvalidationListeners = new HashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = new HashMap<Competitor, Util.Triple<TimePoint, TimePoint, List<Maneuver>>>();
-        this.buoyTracks = new HashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
+        this.buoyTracks = new ConcurrentHashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
         int i = 0;
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             for (Buoy buoy : waypoint.getBuoys()) {
@@ -546,8 +547,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public synchronized Iterable<TrackedLeg> getTrackedLegs() {
-        return new ArrayList<TrackedLeg>(trackedLegs.values());
+    public Iterable<TrackedLeg> getTrackedLegs() {
+        // ensure that no course modification is carried out while copying the tracked legs
+        getRace().getCourse().lockForRead();
+        try {
+            return new ArrayList<TrackedLeg>(trackedLegs.values());
+        } finally {
+            getRace().getCourse().unlockAfterRead();
+        }
     }
 
     @Override
@@ -783,35 +790,40 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         int count = 0;
         GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
         GPSFixMoving fix = null;
-        for (Leg leg : getRace().getCourse().getLegs()) {
-            final TrackedLeg trackedLeg = getTrackedLeg(leg);
-            final MarkPassing legStartMarkPassing = getMarkPassing(competitor, leg.getFrom());
-            if (legStartMarkPassing != null) {
-                if (trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
-                    TimePoint legStart = legStartMarkPassing.getTimePoint();
-                    final MarkPassing legEndMarkPassing = getMarkPassing(competitor, leg.getTo());
-                    track.lockForRead();
-                    try {
-                        Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
-                        while (fixIter.hasNext()
-                                && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
-                                        legEndMarkPassing.getTimePoint()) < 0) && fix.getTimePoint().compareTo(
-                                        timePoint) < 0))) {
-                            fix = fixIter.next();
-                            if (fix.getTimePoint().compareTo(timePoint) < 0) {
-                                Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
-                                distanceInMeters += xte.getMeters();
-                                count++;
+        getRace().getCourse().lockForRead();
+        try {
+            for (Leg leg : getRace().getCourse().getLegs()) {
+                final TrackedLeg trackedLeg = getTrackedLeg(leg);
+                final MarkPassing legStartMarkPassing = getMarkPassing(competitor, leg.getFrom());
+                if (legStartMarkPassing != null) {
+                    if (trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
+                        TimePoint legStart = legStartMarkPassing.getTimePoint();
+                        final MarkPassing legEndMarkPassing = getMarkPassing(competitor, leg.getTo());
+                        track.lockForRead();
+                        try {
+                            Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
+                            while (fixIter.hasNext()
+                                    && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
+                                            legEndMarkPassing.getTimePoint()) < 0) && fix.getTimePoint().compareTo(
+                                            timePoint) < 0))) {
+                                fix = fixIter.next();
+                                if (fix.getTimePoint().compareTo(timePoint) < 0) {
+                                    Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
+                                    distanceInMeters += xte.getMeters();
+                                    count++;
+                                }
                             }
+                        } finally {
+                            track.unlockAfterRead();
                         }
-                    } finally {
-                        track.unlockAfterRead();
                     }
                 }
+                if (fix != null && fix.getTimePoint().compareTo(timePoint) >= 0) {
+                    break;
+                }
             }
-            if (fix != null && fix.getTimePoint().compareTo(timePoint) >= 0) {
-                break;
-            }
+        } finally {
+            getRace().getCourse().unlockAfterRead();
         }
         return count == 0 ? null : new MeterDistance(distanceInMeters / count);
     }
@@ -877,16 +889,28 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return null;
     }
 
+    /**
+     * This method was a synchronization bottleneck when it was using a regular HashMap for {@link #buoyTracks}.
+     * It is frequently used, and the most frequent case is that the <code>get</code> call on {@link #buoyTracks}
+     * succeeds with a non-<code>null</code> result. To improve performance for this case, {@link #buoyTracks} now is
+     * a {@link ConcurrentHashMap} that can be read while writes are going on without locking or synchronization.
+     * Only if the <code>get</code> call does not provide a result, the entire procedure is repeated, this time with
+     * synchronization to avoid duplicate track creation for the same buoy.
+     */
     @Override
     public GPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy) {
-        synchronized (buoyTracks) {
-            GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
-            if (result == null) {
-                result = createBuoyTrack(buoy);
-                buoyTracks.put(buoy, result);
+        GPSFixTrack<Buoy, GPSFix> result = buoyTracks.get(buoy);
+        if (result == null) {
+            // try again, this time with more expensive synchronization
+            synchronized (buoyTracks) {
+                result = buoyTracks.get(buoy);
+                if (result == null) {
+                    result = createBuoyTrack(buoy);
+                    buoyTracks.put(buoy, result);
+                }
             }
-            return result;
         }
+        return result;
     }
 
     protected DynamicGPSFixTrackImpl<Buoy> createBuoyTrack(Buoy buoy) {
@@ -1071,7 +1095,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * @param timeOfEvent
      *            may be <code>null</code> meaning to only unblock waiters but not update any time points
      */
-    protected synchronized void updated(TimePoint timeOfEvent) {
+    protected void updated(TimePoint timeOfEvent) {
         updateCount++;
         clearAllCachesExceptManeuvers();
         if (timeOfEvent != null) {
@@ -1083,7 +1107,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             timePointOfLastEvent = timeOfEvent;
         }
-        notifyAll();
+        synchronized (this) {
+            notifyAll();
+        }
     }
 
     protected void setStartTimeReceived(TimePoint start) {
@@ -1213,6 +1239,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public synchronized void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        // assuming that getRace().getCourse()'s write lock is held by the current thread
         updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
         getOrCreateMarkPassingsInOrderAsNavigableSet(waypointThatGotAdded);
         for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
@@ -1292,6 +1319,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public synchronized void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        // assuming that getRace().getCourse()'s write lock is held by the current thread
         updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
         Leg toRemove = null;
         Leg last = null;

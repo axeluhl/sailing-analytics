@@ -574,7 +574,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 callWhenExpansionDataIsLoaded.run();
             } else {
                 getSailingService().getLeaderboardByName(getLeaderboardName(), getLeaderboardDisplayDate(),
-                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
+                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), /* waitForLatestManeuverAnalysis */ true,
                         new AsyncCallback<LeaderboardDTO>() {
                             @Override
                             public void onSuccess(LeaderboardDTO result) {
@@ -1221,7 +1221,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private void loadCompleteLeaderboard(Date date) {
         if (needsDataLoading()) {
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService, getLeaderboardName(), date,
-                    /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), new AsyncCallback<LeaderboardDTO>() {
+                    /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
+                    /* waitForLatestManeuverAnalysis */ /* TODO uncomment after profiling run: timer.getPlayMode() != PlayModes.Live */ true,
+                    new AsyncCallback<LeaderboardDTO>() {
                 @Override
                 public void onSuccess(LeaderboardDTO result) {
                     updateLeaderboard(result);
