@@ -93,7 +93,7 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         Date fromDate = new Date(toDate.getTime()-450000l);
         Date maneuverTime = new Date(1317649967712l);
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
-                new MillisecondsTimePoint(toDate), true);
+                new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
         maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
         assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE,
                 new MillisecondsTimePoint(maneuverTime), PENALTYCIRCLE_TOLERANCE);

@@ -193,7 +193,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private final Map<WindSource, WindTrack> windTracks;
 
-    private final Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
+    private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     private final Map<Buoy, GPSFixTrack<Buoy, GPSFix>> buoyTracks;
 
@@ -293,6 +293,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
         maneuverRecalculator = Executors.newSingleThreadExecutor();
         ongoingManeuverCacheRecalculations = new HashMap<Competitor, FutureTask<Triple<TimePoint, TimePoint, List<Maneuver>>>>();
+        directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
     }
 
     /**
@@ -1520,10 +1521,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * {@link #triggerManeuverCacheRecalculationForAllCompetitors()}). Callers can choose whether to wait for any
      * ongoing updates by using the <code>waitForLatest</code> parameter. From the cache the interval requested is then
      * {@link #extractInterval(TimePoint, TimePoint, List) extracted}.
-     * 
-     * @param waitForLatest if <code>true</code>, any currently ongoing maneuver recalculation for <code>competitor</code> is
-     * waited for before returning the result; otherwise, whatever is in the {@link #maneuverCache} for <code>competitor</code>,
-     * reduced to the interval requested, will be returned.
+     * @param waitForLatest
+     *            if <code>true</code>, any currently ongoing maneuver recalculation for <code>competitor</code> is
+     *            waited for before returning the result; otherwise, whatever is in the {@link #maneuverCache} for
+     *            <code>competitor</code>, reduced to the interval requested, will be returned.
      */
     @Override
     public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest)

@@ -2028,7 +2028,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                     List<Maneuver> maneuversForCompetitor;
                                     try {
                                         maneuversForCompetitor = trackedRace.getManeuvers(competitor, timePointFrom,
-                                                timePointTo, true);
+                                                timePointTo, /* waitForLatest */ true);
                                     } catch (NoWindException e) {
                                         throw new NoWindError(e);
                                     }
