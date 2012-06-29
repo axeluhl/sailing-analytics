@@ -37,6 +37,7 @@ import com.sap.sailing.domain.swisstimingadapter.persistence.SwissTimingAdapterP
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.swisstimingadapter.persistence.impl.FieldNames;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.RacesHandle;
@@ -175,8 +176,14 @@ public class EndToEndListeningStoreAndFowardTest {
                 }
             }
             for (Buoy buoy : buoys) {
-                assertTrue("Track of buoy " + buoy + " empty",
-                        !Util.isEmpty(trackedRace.getOrCreateTrack(buoy).getRawFixes()));
+                final GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
+                track.lockForRead();
+                try {
+                    assertTrue("Track of buoy " + buoy + " empty",
+                            !Util.isEmpty(track.getRawFixes()));
+                } finally {
+                    track.unlockAfterRead();
+                }
             }
         }
         Set<String> expectedRaceIDs = new HashSet<String>();
@@ -215,10 +222,15 @@ public class EndToEndListeningStoreAndFowardTest {
             assertEquals(3, Util.size(race.getCourse().getWaypoints()));
             assertEquals(2, Util.size(race.getCourse().getLegs()));
             for (Competitor competitor : race.getCompetitors()) {
-                if (!competitor.getName().equals("Competitor 35") && !competitor.getName().equals("Competitor 20")) {
+                if (!competitor.getName().equals("NED 24") && !competitor.getName().equals("Competitor 35")
+                        && !competitor.getName().equals("Competitor 20")) {
                     final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                    assertTrue("Track of competitor " + competitor + " empty",
-                            !Util.isEmpty(track.getRawFixes()));
+                    track.lockForRead();
+                    try {
+                        assertTrue("Track of competitor " + competitor + " empty", !Util.isEmpty(track.getRawFixes()));
+                    } finally {
+                        track.unlockAfterRead();
+                    }
                 }
             }
             Set<Buoy> buoys = new HashSet<Buoy>();
