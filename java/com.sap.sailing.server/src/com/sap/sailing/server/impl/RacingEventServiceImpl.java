@@ -184,13 +184,24 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this(MongoFactory.INSTANCE.getDefaultDomainObjectFactory(), MongoFactory.INSTANCE.getDefaultMongoObjectFactory());
     }
     
+    /**
+     * Uses the default factories for the tracking adapters
+     */
     private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory) {
-        logger.info("Created "+this);
-        tractracDomainFactory = DomainFactory.INSTANCE;
+        this(domainObjectFactory, mongoObjectFactory, SwissTimingFactory.INSTANCE,
+                com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE, DomainFactory.INSTANCE);
+    }
+    
+    private RacingEventServiceImpl(DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
+            SwissTimingFactory swissTimingFactory,
+            com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory,
+            DomainFactory tractracDomainFactory) {
+        logger.info("Created " + this);
+        this.tractracDomainFactory = tractracDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
         this.mongoObjectFactory = mongoObjectFactory;
-        swissTimingFactory = SwissTimingFactory.INSTANCE;
-        swissTimingDomainFactory = com.sap.sailing.domain.swisstimingadapter.DomainFactory.INSTANCE;
+        this.swissTimingFactory = swissTimingFactory;
+        this.swissTimingDomainFactory = swissTimingDomainFactory;
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
         regattasByName = new HashMap<String, Regatta>();
@@ -215,6 +226,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     public RacingEventServiceImpl(MongoDBService mongoDBService) {
         this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE.getMongoObjectFactory(mongoDBService));
+    }
+    
+    public RacingEventServiceImpl(MongoDBService mongoDBService, SwissTimingFactory swissTimingFactory,
+            com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory,
+            DomainFactory tractracDomainFactory) {
+        this(MongoFactory.INSTANCE.getDomainObjectFactory(mongoDBService), MongoFactory.INSTANCE.getMongoObjectFactory(mongoDBService),
+                swissTimingFactory, swissTimingDomainFactory, tractracDomainFactory);
     }
 
     private void loadRaceIDToRegattaAssociations() {

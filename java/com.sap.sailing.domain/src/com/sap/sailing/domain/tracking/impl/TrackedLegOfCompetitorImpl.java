@@ -284,7 +284,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Integer getNumberOfTacks(TimePoint timePoint) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint);
+            List<Maneuver> maneuvers = getManeuvers(timePoint, /* waitForLatest */ true);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.TACK) {
@@ -296,7 +296,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public List<Maneuver> getManeuvers(TimePoint timePoint) throws NoWindException {
+    public List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         MarkPassing legEnd = getMarkPassingForLegEnd();
         TimePoint end = timePoint;
         if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
@@ -304,7 +304,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             end = legEnd.getTimePoint();
         }
         List<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(),
-                getMarkPassingForLegStart().getTimePoint(), end, /* waitForLatest */true);
+                getMarkPassingForLegStart().getTimePoint(), end, waitForLatest);
         return maneuvers;
     }
 
@@ -312,7 +312,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Integer getNumberOfJibes(TimePoint timePoint) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint);
+            List<Maneuver> maneuvers = getManeuvers(timePoint, /* waitForLatest */ true);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.JIBE) {
@@ -327,7 +327,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Integer getNumberOfPenaltyCircles(TimePoint timePoint) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint);
+            List<Maneuver> maneuvers = getManeuvers(timePoint, /* waitForLatest */ true);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {
