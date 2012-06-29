@@ -128,10 +128,10 @@ public class CourseImpl extends NamedImpl implements Course {
             if (waypoints.size() > 1) {
                 legs.add(new LegImpl(this, legStartWaypointIndex));
             }
+            notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
         } finally {
             lock.writeLock().unlock();
         }
-        notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
     }
 
     @Override
@@ -158,10 +158,10 @@ public class CourseImpl extends NamedImpl implements Course {
                 } else {
                     legs.remove(zeroBasedPosition);
                 }
+                notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
             } finally {
                 lock.writeLock().unlock();
             }
-            notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
         }
     }
 
