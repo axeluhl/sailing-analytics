@@ -296,6 +296,11 @@ public class UDPExpeditionReceiverTest {
                 }
             }
         }
-        assertEquals(Util.size(race.getWindTrack().getFixes()), matched.size());
+        race.getWindTrack().lockForRead();
+        try {
+            assertEquals(Util.size(race.getWindTrack().getFixes()), matched.size());
+        } finally {
+            race.getWindTrack().unlockAfterRead();
+        }
     }
 }
