@@ -539,14 +539,13 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
 
     @Override
     public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
+        assert fix != null && fix.getTimePoint() != null;
         // A buoy position change can mean a leg type change. The interval over which the wind estimation is affected
         // depends on how the GPS track computes the estimated buoy position. Ask it:
         Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(buoy).getEstimatedPositionTimePeriodAffectedBy(fix);
-        WindWithConfidence<TimePoint> startOfInvalidation = interval.getA() == null ? null : getDummyFixWithConfidence(interval.getA());
+        WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.getA());
         TimePoint endOfInvalidation = interval.getB();
-        if (startOfInvalidation != null && endOfInvalidation != null) {
-            scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
-        }
+        scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
     }
 
     /**

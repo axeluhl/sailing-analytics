@@ -163,8 +163,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         lockForRead();
         try {
             Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ false);
-            return new Pair<TimePoint, TimePoint>(fixesForPositionEstimation.getA() == null ? null : fixesForPositionEstimation.getA().getTimePoint(),
-                    fixesForPositionEstimation.getB() == null ? null : fixesForPositionEstimation.getB().getTimePoint());
+            return new Pair<TimePoint, TimePoint>(fixesForPositionEstimation.getA() == null ? fix.getTimePoint()
+                    : fixesForPositionEstimation.getA().getTimePoint(),
+                    fixesForPositionEstimation.getB() == null ? fix.getTimePoint() : fixesForPositionEstimation.getB().getTimePoint());
         } finally {
             unlockAfterRead();
         }
