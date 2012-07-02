@@ -1535,12 +1535,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds) {
-        return createStrippedLeaderboardDTO(getService().apply(new CreateFlexibleLeaderboard(leaderboardName, discardThresholds)), false);
+        return createStrippedLeaderboardDTO(getService().apply(new CreateFlexibleLeaderboard(leaderboardName, discardThresholds)), false, false);
     }
 
     @Override
     public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds) {
-        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, discardThresholds)), false);
+        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, discardThresholds)), false, false);
     }
 
     @Override
@@ -1548,7 +1548,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         for(Leaderboard leaderboard: leaderboards.values()) {
-            StrippedLeaderboardDTO dao = createStrippedLeaderboardDTO(leaderboard, false);
+            StrippedLeaderboardDTO dao = createStrippedLeaderboardDTO(leaderboard, false, false);
             results.add(dao);
         }
         return results;
@@ -1582,7 +1582,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     if (trackedRace != null) {
                         RaceDefinition trackedRaceDef = trackedRace.getRace();
                         if (trackedRaceDef.getName().equals(race.name)) {
-                            results.add(createStrippedLeaderboardDTO(leaderboard, false));
+                            results.add(createStrippedLeaderboardDTO(leaderboard, false, false));
                             break;
                         }
                     }
@@ -1598,9 +1598,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
      * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
      * is used for {@link LeaderboardDTO#competitorDisplayNames}.<br />
-     * If <code>withAdditionalData</code> is <code>true</code>, additional data (like location and race dates) will be loaded.
+     * If <code>withGeoLocationData</code> is <code>true</code> the geographical location will be determined.
+     * If <code>withRaceData</code> is <code>true</code> the race times will be loaded.
      */
-    private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withAdditionalData) {
+    private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withGeoLocationData, boolean withRaceData) {
         StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO();
         leaderboardDTO.name = leaderboard.getName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
@@ -1611,7 +1612,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 if (raceColumn.getTrackedRace(fleet) != null) {
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
-                    if (withAdditionalData) {
+                    if (withGeoLocationData) {
                         // Getting the places of the race
                         PlacemarkOrderDTO racePlaces = getRacePlaces(trackedRace);
                         // Creating raceDTO and getting the dates
@@ -2140,31 +2141,32 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<LeaderboardGroupDTO> getLeaderboardGroups() {
+    public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData, boolean withRaceData) {
         ArrayList<LeaderboardGroupDTO> leaderboardGroupDTOs = new ArrayList<LeaderboardGroupDTO>();
         Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
         
         for (LeaderboardGroup leaderboardGroup : leaderboardGroups.values()) {
-            leaderboardGroupDTOs.add(convertToLeaderboardGroupDTO(leaderboardGroup));
+            leaderboardGroupDTOs.add(convertToLeaderboardGroupDTO(leaderboardGroup, withGeoLocationData, withRaceData));
         }
         
         return leaderboardGroupDTOs;
     }
 
     @Override
-    public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName) {
-        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName));
+    public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName, boolean withGeoLocationData, boolean withRaceData) {
+        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName), withGeoLocationData, withRaceData);
     }
     
-    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup) {
+    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup, boolean withGeoLocationData, boolean withRaceData) {
         LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO();
         groupDTO.name = leaderboardGroup.getName();
         groupDTO.description = leaderboardGroup.getDescription();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-            groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, true));
+            groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withRaceData));
         }
         return groupDTO;
     }
+    
     
     private PlacemarkDTO convertToPlacemarkDTO(Placemark placemark) {
         Position position = placemark.getPosition();
@@ -2184,7 +2186,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description) {
-        return convertToLeaderboardGroupDTO(getService().apply(new CreateLeaderboardGroup(groupName, description, new ArrayList<String>())));
+        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(groupName, description, new ArrayList<String>());
+        return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false, false);
     }
 
     @Override
