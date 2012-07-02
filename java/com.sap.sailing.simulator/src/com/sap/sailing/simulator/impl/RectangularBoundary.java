@@ -36,9 +36,6 @@ public class RectangularBoundary implements Boundary {
     private Bearing east;
     private Bearing west;
 
-    private Distance width;
-    private Distance height;
-
     private Distance appWidth;
     private Distance appHeight;
 
@@ -92,9 +89,6 @@ public class RectangularBoundary implements Boundary {
         northEast = appNorthEast.translateGreatCircle(diag2, diag.scale(tolerance));
         diag2 = diag2.reverse();
         southWest = appSouthWest.translateGreatCircle(diag2, diag.scale(tolerance));
-
-        height = northWest.getDistance(southWest);
-        width = southWest.getDistance(southEast);
     }
 
     public RectangularBoundary(Position p1, Position p2) {

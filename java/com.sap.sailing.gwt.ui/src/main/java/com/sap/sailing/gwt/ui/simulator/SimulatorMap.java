@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
@@ -57,7 +56,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     
     private ColorPalette colorPalette;
 
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    private static Logger logger = Logger.getLogger(SimulatorMap.class.getName());
 
     private final int xRes;
     private final int yRes;

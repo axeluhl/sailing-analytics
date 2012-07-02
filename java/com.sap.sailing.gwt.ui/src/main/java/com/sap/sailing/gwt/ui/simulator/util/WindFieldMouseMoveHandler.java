@@ -4,7 +4,6 @@
 package com.sap.sailing.gwt.ui.simulator.util;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -27,8 +26,6 @@ public class WindFieldMouseMoveHandler implements MouseMoveHandler {
     private ImageData lastImageData = null;
     private double lastToolx;
     private double lastTooly;
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
-
 
     public WindFieldMouseMoveHandler(Canvas canvas) {
         super();

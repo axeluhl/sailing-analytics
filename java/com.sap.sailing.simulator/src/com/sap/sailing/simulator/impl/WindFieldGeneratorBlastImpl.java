@@ -1,5 +1,7 @@
 package com.sap.sailing.simulator.impl;
 
+import java.util.logging.Logger;
+
 import umontreal.iro.lecuyer.randvar.GeometricGen;
 import umontreal.iro.lecuyer.randvar.NormalGen;
 import umontreal.iro.lecuyer.randvar.UniformGen;
@@ -36,6 +38,8 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
      */
     public final int defaultTimeUnits = 20;
     private int timeUnits;
+
+    private static Logger logger = Logger.getLogger(WindFieldGeneratorBlastImpl.class.getName());
 
     public WindFieldGeneratorBlastImpl(Boundary boundary, WindControlParameters windParameters) {
         super(boundary, windParameters);

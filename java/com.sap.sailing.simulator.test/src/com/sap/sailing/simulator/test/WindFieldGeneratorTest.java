@@ -3,7 +3,8 @@
  */
 package com.sap.sailing.simulator.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -22,9 +23,9 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.simulator.WindControlParameters;
+import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.TimedPositionWithSpeedImpl;
 import com.sap.sailing.simulator.impl.WindFieldGeneratorBlastImpl;
-import com.sap.sailing.simulator.impl.RectangularBoundary;
 import com.sap.sailing.simulator.impl.WindFieldGeneratorCombined;
 import com.sap.sailing.simulator.impl.WindFieldGeneratorImpl;
 import com.sap.sailing.simulator.impl.WindFieldGeneratorOscillationImpl;
@@ -37,7 +38,7 @@ import com.sap.sailing.simulator.impl.WindFieldGeneratorOscillationImpl;
  */
 public class WindFieldGeneratorTest {
 
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    private static Logger logger = Logger.getLogger(WindFieldGeneratorTest.class.getName());
 
     @Test
     public void testWindFieldGeneratorBasic() {

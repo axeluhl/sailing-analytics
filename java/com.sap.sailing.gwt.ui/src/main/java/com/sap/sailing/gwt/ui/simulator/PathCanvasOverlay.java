@@ -33,7 +33,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
      */
     private static final long serialVersionUID = -6284996043723173190L;
 
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    private static Logger logger = Logger.getLogger(PathCanvasOverlay.class.getName());
     
     protected String name;
     

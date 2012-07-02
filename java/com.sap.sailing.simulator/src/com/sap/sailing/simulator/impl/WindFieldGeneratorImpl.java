@@ -1,12 +1,8 @@
 package com.sap.sailing.simulator.impl;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;
@@ -39,9 +35,6 @@ public abstract class WindFieldGeneratorImpl implements WindFieldGenerator {
      */
     protected TimePoint timeStep;
     
-    @SuppressWarnings("unused")
-    protected static Logger logger = Logger.getLogger("com.sap.sailing");
-
     private class LatLngComparator implements Comparator<Position> {
 
         @Override

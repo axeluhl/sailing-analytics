@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 
 public class ReplayPathCanvasOverlay extends PathCanvasOverlay  {
 
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    private static Logger logger = Logger.getLogger(ReplayPathCanvasOverlay.class.getName());
     private  List<WindDTO> windDTOToDraw;
     
     public ReplayPathCanvasOverlay(String name, Timer timer) {
