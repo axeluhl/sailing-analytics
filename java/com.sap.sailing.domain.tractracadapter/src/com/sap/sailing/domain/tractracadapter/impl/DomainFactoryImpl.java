@@ -158,6 +158,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public Competitor getOrCreateCompetitor(com.tractrac.clientmodule.Competitor competitor) {
+        // TODO see bug 596; consider allowing for a new competitor (check for use of == throughout the code) or update existing one
         Competitor result = baseDomainFactory.getExistingCompetitorById(competitor.getId());
         if (result == null) {
             BoatClass boatClass = getOrCreateBoatClass(competitor.getCompetitorClass());
@@ -286,15 +287,9 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore, TimePoint startOfTracking,
-            TimePoint endOfTracking, long delayToLiveInMillis, boolean simulateWithStartTimeNow,
+            TimePoint endOfTracking, long delayToLiveInMillis, Simulator simulator,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry,
             ReceiverType... types) {
-        Simulator simulator;
-        if (simulateWithStartTimeNow) {
-            simulator = new Simulator();
-        } else {
-            simulator = null;
-        }
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
             switch (type) {
@@ -328,10 +323,10 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Iterable<Receiver> getUpdateReceivers(DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, TimePoint startOfTracking, TimePoint endOfTracking,
-            long delayToLiveInMillis, boolean simulateWithStartTimeNow, WindStore windStore,
+            long delayToLiveInMillis, Simulator simulator, WindStore windStore,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry) {
         return getUpdateReceivers(trackedRegatta, tractracEvent, windStore, startOfTracking, endOfTracking,
-                delayToLiveInMillis, simulateWithStartTimeNow, raceDefinitionSetToUpdate, trackedRegattaRegistry,
+                delayToLiveInMillis, simulator, raceDefinitionSetToUpdate, trackedRegattaRegistry,
                 ReceiverType.RACECOURSE, ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,
                 ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS);
     }

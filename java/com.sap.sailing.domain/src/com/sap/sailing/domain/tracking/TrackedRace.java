@@ -313,7 +313,7 @@ public interface TrackedRace extends Serializable {
      * and, if the {@link WindSource#TRACK_BASED_ESTIMATION} source is used, also the monitors of the
      * competitors' GPS tracks.
      */
-    Tack getTack(Competitor competitor, TimePoint timePoint);
+    Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     TrackedRegatta getTrackedRegatta();
 
@@ -338,10 +338,11 @@ public interface TrackedRace extends Serializable {
     List<GPSFixMoving> approximate(Competitor competitor, Distance maxDistance, TimePoint from, TimePoint to);
 
     /**
+     * @param waitForLatest TODO
      * @return a non-<code>null</code> but perhaps empty list of the maneuvers that <code>competitor</code> performed in
      *         this race between <code>from</code> and <code>to</code>.
      */
-    List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) throws NoWindException;
+    List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) throws NoWindException;
 
     /**
      * @return <code>true</code> if this race is known to start with an {@link LegType#UPWIND upwind} leg.

@@ -99,8 +99,11 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     @Override
     public void add(Wind wind) {
         CompactWindImpl compactWind = new CompactWindImpl(wind);
-        synchronized (this) {
+        lockForWrite();
+        try {
             getInternalRawFixes().add(compactWind);
+        } finally {
+            unlockAfterWrite();
         }
         notifyListenersAboutReceive(compactWind);
     }
@@ -175,14 +178,15 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
      *            <code>p</code> is used as the result's position and may be used for confidence determination.
      */
     protected WindWithConfidence<Pair<Position, TimePoint>> getAveragedWindUnsynchronized(Position p, TimePoint at) {
-        List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAverage = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
-        // don't measure speed with separate confidence; return confidence obtained from averaging bearings
-        ConfidenceBasedWindAverager<Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE
-                .createWindAverager(new PositionAndTimePointWeigher(
-                /* halfConfidenceAfterMilliseconds */getMillisecondsOverWhichToAverageWind() / 10));
-        DummyWind atTimed = new DummyWind(at);
-        Pair<Position, TimePoint> relativeTo = new Pair<Position, TimePoint>(p, at);
-        synchronized (this) {
+        lockForRead();
+        try {
+            List<WindWithConfidence<Pair<Position, TimePoint>>> windFixesToAverage = new ArrayList<WindWithConfidence<Pair<Position, TimePoint>>>();
+            // don't measure speed with separate confidence; return confidence obtained from averaging bearings
+            ConfidenceBasedWindAverager<Pair<Position, TimePoint>> windAverager = ConfidenceFactory.INSTANCE
+                    .createWindAverager(new PositionAndTimePointWeigher(
+                    /* halfConfidenceAfterMilliseconds */getMillisecondsOverWhichToAverageWind() / 10));
+            DummyWind atTimed = new DummyWind(at);
+            Pair<Position, TimePoint> relativeTo = new Pair<Position, TimePoint>(p, at);
             NavigableSet<Wind> beforeSet = getInternalFixes().headSet(atTimed, /* inclusive */false);
             NavigableSet<Wind> afterSet = getInternalFixes().tailSet(atTimed, /* inclusive */true);
             Iterator<Wind> beforeIter = beforeSet.descendingIterator();
@@ -235,12 +239,15 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
                 }
             } while (beforeIntervalLength + afterIntervalLength < getMillisecondsOverWhichToAverageWind()
                     && (beforeWind != null || afterWind != null));
-        }
-        if (windFixesToAverage.isEmpty()) {
-            return null;
-        } else {
-            WindWithConfidence<Pair<Position, TimePoint>> average = windAverager.getAverage(windFixesToAverage, relativeTo);
-            return average;
+            if (windFixesToAverage.isEmpty()) {
+                return null;
+            } else {
+                WindWithConfidence<Pair<Position, TimePoint>> average = windAverager.getAverage(windFixesToAverage,
+                        relativeTo);
+                return average;
+            }
+        } finally {
+            unlockAfterRead();
         }
     }
 
@@ -254,35 +261,45 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        synchronized (this) {
-            for (Wind wind : getRawFixes()) {
-                result.append(wind);
-                result.append(" avg(");
-                result.append(getMillisecondsOverWhichToAverageWind());
-                if (wind == null) {
-                    result.append("ms)");
-                } else {
-                    result.append("ms): ");
-                    result.append(getAveragedWind(wind.getPosition(), wind.getTimePoint()));
+        lockForRead();
+        try {
+            StringBuilder result = new StringBuilder();
+            synchronized (this) {
+                for (Wind wind : getRawFixes()) {
+                    result.append(wind);
+                    result.append(" avg(");
+                    result.append(getMillisecondsOverWhichToAverageWind());
+                    if (wind == null) {
+                        result.append("ms)");
+                    } else {
+                        result.append("ms): ");
+                        result.append(getAveragedWind(wind.getPosition(), wind.getTimePoint()));
+                    }
+                    result.append("\n");
                 }
-                result.append("\n");
             }
+            return result.toString();
+        } finally {
+            unlockAfterRead();
         }
-        return result.toString();
     }
     
     public String toCSV() {
-        StringBuilder result = new StringBuilder();
-        synchronized (this) {
-            for (Wind wind : getRawFixes()) {
-                append(result, wind);
-                Wind estimate = getAveragedWind(wind.getPosition(), wind.getTimePoint());
-                append(result, estimate);
-                result.append("\n");
+        lockForRead();
+        try {
+            StringBuilder result = new StringBuilder();
+            synchronized (this) {
+                for (Wind wind : getRawFixes()) {
+                    append(result, wind);
+                    Wind estimate = getAveragedWind(wind.getPosition(), wind.getTimePoint());
+                    append(result, estimate);
+                    result.append("\n");
+                }
             }
+            return result.toString();
+        } finally {
+            unlockAfterRead();
         }
-        return result.toString();
     }
 
     private void append(StringBuilder result, Wind wind) {
@@ -358,7 +375,12 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
 
     @Override
     public void remove(Wind wind) {
-        getInternalRawFixes().remove(wind);
+        lockForWrite();
+        try {
+            getInternalRawFixes().remove(wind);
+        } finally {
+            unlockAfterWrite();
+        }
         notifyListenersAboutRemoval(wind);
     }
 

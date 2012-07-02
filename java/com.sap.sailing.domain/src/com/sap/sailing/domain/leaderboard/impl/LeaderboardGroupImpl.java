@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     public LeaderboardGroupImpl(String name, String description, List<Leaderboard> leaderboards) {
         this.name = name;
         this.description = description;
-        this.leaderboards = leaderboards;
+        this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
     }
 
     @Override
@@ -40,8 +41,8 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     }
 
     @Override
-    public Iterable<Leaderboard> getLeaderboards() {
-        return leaderboards;
+    public synchronized Iterable<Leaderboard> getLeaderboards() {
+        return new ArrayList<Leaderboard>(leaderboards);
     }
 
     @Override
@@ -50,32 +51,32 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     }
 
     @Override
-    public void addLeaderboard(Leaderboard leaderboard) {
+    public synchronized void addLeaderboard(Leaderboard leaderboard) {
         leaderboards.add(leaderboard);
     }
     
     @Override
-    public void addLeaderboardAt(Leaderboard leaderboard, int index) {
+    public synchronized void addLeaderboardAt(Leaderboard leaderboard, int index) {
         leaderboards.add(index, leaderboard);
     }
 
     @Override
-    public void addAllLeaderboards(Collection<Leaderboard> leaderboards) {
+    public synchronized void addAllLeaderboards(Collection<Leaderboard> leaderboards) {
         this.leaderboards.addAll(leaderboards);
     }
 
     @Override
-    public void removeLeaderboard(Leaderboard leaderboard) {
+    public synchronized void removeLeaderboard(Leaderboard leaderboard) {
         leaderboards.remove(leaderboard);
     }
 
     @Override
-    public void removeAllLeaderboards(Collection<Leaderboard> leaderboards) {
+    public synchronized void removeAllLeaderboards(Collection<Leaderboard> leaderboards) {
         this.leaderboards.removeAll(leaderboards);
     }
 
     @Override
-    public void clearLeaderboards() {
+    public synchronized void clearLeaderboards() {
         leaderboards.clear();
     }
 

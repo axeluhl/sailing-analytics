@@ -281,15 +281,26 @@ public class UDPExpeditionReceiverTest {
             if (m.getTrueWind() != null) {
                 Declination declination = declinationService.getDeclination(m.getTimePoint(), lastKnownPosition,
                         /* timeoutForOnlineFetchInMilliseconds */5000);
-                for (Wind recordedWind : race.getWindTrack().getRawFixes()) {
-                    if (Math.abs(m.getTrueWindBearing().getDegrees() + declination.getBearingCorrectedTo(m.getTimePoint()).getDegrees() -
-                        recordedWind.getBearing().getDegrees()) <= 0.0000001) {
-                        matched.add(recordedWind);
-                        break;
+                race.getWindTrack().lockForRead();
+                try {
+                    for (Wind recordedWind : race.getWindTrack().getRawFixes()) {
+                        if (Math.abs(m.getTrueWindBearing().getDegrees()
+                                + declination.getBearingCorrectedTo(m.getTimePoint()).getDegrees()
+                                - recordedWind.getBearing().getDegrees()) <= 0.0000001) {
+                            matched.add(recordedWind);
+                            break;
+                        }
                     }
+                } finally {
+                    race.getWindTrack().unlockAfterRead();
                 }
             }
         }
-        assertEquals(Util.size(race.getWindTrack().getFixes()), matched.size());
+        race.getWindTrack().lockForRead();
+        try {
+            assertEquals(Util.size(race.getWindTrack().getFixes()), matched.size());
+        } finally {
+            race.getWindTrack().unlockAfterRead();
+        }
     }
 }

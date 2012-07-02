@@ -204,7 +204,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceStartTrackingColumn.setSortable(true);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 200, tableRes);
+        raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTimeColumn());
         raceTable.setWidth("300px");

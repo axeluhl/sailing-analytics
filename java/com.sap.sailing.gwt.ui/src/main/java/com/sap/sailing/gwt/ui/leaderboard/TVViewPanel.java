@@ -56,6 +56,9 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private RegattaAndRaceIdentifier currentRace;
     private boolean raceBoardIsWidget;
     
+    /**
+     * @param logoAndTitlePanel allowed to be <code>null</code>
+     */
     public TVViewPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             String leaderboardName, UserAgentTypes userAgentType, UserDTO userDTO, Timer timer,
             LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel, boolean showRaceDetails) {
@@ -139,8 +142,10 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
             
             setWidget(leaderboardPanel);
             if (raceBoardPanel != null) {
-                logoAndTitlePanel.remove(raceBoardPanel.getNavigationWidget());
-                logoAndTitlePanel.remove(raceBoardHeader);
+                if (logoAndTitlePanel != null) {
+                    logoAndTitlePanel.remove(raceBoardPanel.getNavigationWidget());
+                    logoAndTitlePanel.remove(raceBoardHeader);
+                }
                 dockPanel.remove(timePanel);
                 raceBoardPanel = null;
             }
@@ -153,10 +158,14 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     
     private void showRaceBoard() {
         if (!raceBoardIsWidget) {
-            logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
+            if (logoAndTitlePanel != null) {
+                logoAndTitlePanel.add(raceBoardPanel.getNavigationWidget());
+            }
             raceBoardHeader = new Label(currentRace.getRaceName());
             raceBoardHeader.addStyleName("RaceBoardHeader");
-            logoAndTitlePanel.add(raceBoardHeader);
+            if (logoAndTitlePanel != null) {
+                logoAndTitlePanel.add(raceBoardHeader);
+            }
             
             timePanel = createTimePanel();
             dockPanel.insertSouth(timePanel, 122, dockPanel.getWidget(0));

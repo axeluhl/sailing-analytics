@@ -5,6 +5,7 @@ import java.io.ObjectOutputStream;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.TimePoint;
@@ -18,7 +19,9 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
      * The fixes, ordered by their time points
      */
     private final NavigableSet<Timed> fixes;
-    
+
+    private final ReentrantReadWriteLock readWriteLock;
+
     protected static class DummyTimed implements Timed {
         private static final long serialVersionUID = 6047311973718918856L;
         private final TimePoint timePoint;
@@ -41,14 +44,38 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     }
     
     protected TrackImpl(NavigableSet<Timed> fixes) {
+        this.readWriteLock = new ReentrantReadWriteLock();
         this.fixes = fixes;
     }
     
     /**
      * Synchronize the serialization such that no fixes are added while serializing
      */
-    private synchronized void writeObject(ObjectOutputStream s) throws IOException {
-        s.defaultWriteObject();
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        lockForRead();
+        try {
+            s.defaultWriteObject();
+        } finally {
+            unlockAfterRead();
+        }
+    }
+
+    @Override
+    public void lockForRead() {
+        readWriteLock.readLock().lock();
+    }
+
+    @Override
+    public void unlockAfterRead() {
+        readWriteLock.readLock().unlock();
+    }
+    
+    protected void lockForWrite() {
+        readWriteLock.writeLock().lock();
+    }
+    
+    protected void unlockAfterWrite() {
+        readWriteLock.writeLock().unlock();
     }
 
     /**
@@ -60,7 +87,19 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
         NavigableSet<FixType> result = (NavigableSet<FixType>) fixes;
         return result;
     }
+
+    protected void assertReadLock() {
+        if (readWriteLock.getReadHoldCount() < 1) {
+            throw new IllegalStateException("Caller must obtain read lock using lockForRead() before calling this method");
+        }
+    }
     
+    protected void assertWriteLock() {
+        if (readWriteLock.getWriteHoldCount() < 1) {
+            throw new IllegalStateException("Caller must obtain write lock using lockForWrite() before calling this method");
+        }
+    }
+
     /**
      * Callers that want to iterate over the collection returned need to synchronize on <code>this</code> object to
      * avoid {@link ConcurrentModificationException}s.
@@ -80,6 +119,7 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
      */
     @Override
     public NavigableSet<FixType> getFixes() {
+        assertReadLock();
         return new UnmodifiableNavigableSet<FixType>(getInternalFixes());
     }
 
@@ -88,69 +128,121 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
      */
     @Override
     public NavigableSet<FixType> getRawFixes() {
+        assertReadLock();
         return new UnmodifiableNavigableSet<FixType>(getInternalRawFixes());
     }
 
     @Override
     public FixType getLastFixAtOrBefore(TimePoint timePoint) {
-        return (FixType) getInternalFixes().floor(getDummyFix(timePoint));
+        lockForRead();
+        try {
+            return (FixType) getInternalFixes().floor(getDummyFix(timePoint));
+        } finally {
+            unlockAfterRead();
+        }
     }
     
     @Override
     public FixType getLastFixBefore(TimePoint timePoint) {
-        return (FixType) getInternalFixes().lower(getDummyFix(timePoint));
+        lockForRead();
+        try {
+            return (FixType) getInternalFixes().lower(getDummyFix(timePoint));
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public FixType getLastRawFixAtOrBefore(TimePoint timePoint) {
-        return (FixType) getInternalRawFixes().floor(getDummyFix(timePoint));
+        lockForRead();
+        try {
+            return (FixType) getInternalRawFixes().floor(getDummyFix(timePoint));
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public FixType getFirstRawFixAtOrAfter(TimePoint timePoint) {
-        return (FixType) getInternalRawFixes().ceiling(getDummyFix(timePoint));
+        lockForRead();
+        try {
+            return (FixType) getInternalRawFixes().ceiling(getDummyFix(timePoint));
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public FixType getFirstFixAtOrAfter(TimePoint timePoint) {
-        return (FixType) getInternalFixes().ceiling(getDummyFix(timePoint));
+        lockForRead();
+        try {
+            return (FixType) getInternalFixes().ceiling(getDummyFix(timePoint));
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public FixType getLastRawFixBefore(TimePoint timePoint) {
-        return (FixType) getInternalRawFixes().lower(getDummyFix(timePoint));
+        lockForRead();
+        try {
+            return (FixType) getInternalRawFixes().lower(getDummyFix(timePoint));
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public FixType getFirstFixAfter(TimePoint timePoint) {
-        return (FixType) getInternalFixes().higher(getDummyFix(timePoint));
+        lockForRead();
+        try {
+            return (FixType) getInternalFixes().higher(getDummyFix(timePoint));
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public FixType getFirstRawFixAfter(TimePoint timePoint) {
-        return (FixType) getInternalRawFixes().higher(getDummyFix(timePoint));
+        lockForRead();
+        try {
+            return (FixType) getInternalRawFixes().higher(getDummyFix(timePoint));
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public FixType getFirstRawFix() {
-        if (getInternalFixes().isEmpty()) {
-            return null;
-        } else {
-            return (FixType) getInternalFixes().first();
+        lockForRead();
+        try {
+            if (getInternalFixes().isEmpty()) {
+                return null;
+            } else {
+                return (FixType) getInternalFixes().first();
+            }
+        } finally {
+            unlockAfterRead();
         }
     }
     
     @Override
     public FixType getLastRawFix() {
-        if (getInternalRawFixes().isEmpty()) {
-            return null;
-        } else {
-            return (FixType) getInternalRawFixes().last();
+        lockForRead();
+        try {
+            if (getInternalRawFixes().isEmpty()) {
+                return null;
+            } else {
+                return (FixType) getInternalRawFixes().last();
+            }
+        } finally {
+            unlockAfterRead();
         }
     }
     
     @Override
     public Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive) {
+        assertReadLock();
         Iterator<FixType> result = (Iterator<FixType>) getInternalFixes().tailSet(
                 getDummyFix(startingAt), inclusive).iterator();
         return result;
@@ -171,6 +263,7 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
 
     @Override
     public Iterator<FixType> getRawFixesIterator(TimePoint startingAt, boolean inclusive) {
+        assertReadLock();
         Iterator<FixType> result = (Iterator<FixType>) getInternalRawFixes().tailSet(
                 getDummyFix(startingAt), inclusive).iterator();
         return result;

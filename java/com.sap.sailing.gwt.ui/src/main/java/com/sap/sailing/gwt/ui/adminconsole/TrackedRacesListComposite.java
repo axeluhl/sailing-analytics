@@ -160,7 +160,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         panel.add(noTrackedRacesLabel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<RaceDTO>(/* pageSize */200, tableRes);
+        raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
         ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(
                 raceList.getList());
         TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {

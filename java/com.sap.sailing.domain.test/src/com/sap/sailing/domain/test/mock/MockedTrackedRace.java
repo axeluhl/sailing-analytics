@@ -467,7 +467,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to) {
+    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         // TODO Auto-generated method stub
         return null;
     }

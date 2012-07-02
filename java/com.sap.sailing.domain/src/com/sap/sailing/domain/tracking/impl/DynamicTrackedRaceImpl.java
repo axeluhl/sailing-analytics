@@ -65,9 +65,15 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     
     /**
      * Synchronized object serialization on this object so that incoming new data doesn't disrupt the serialization process.
+     * Also obtain a read lock for the course so that in cannot change while serializing this object. 
      */
     private synchronized void writeObject(ObjectOutputStream s) throws IOException {
-        s.defaultWriteObject();
+        getRace().getCourse().lockForRead();
+        try {
+            s.defaultWriteObject();
+        } finally {
+            getRace().getCourse().unlockAfterRead();
+        }
     }
     
     /**
@@ -115,6 +121,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             }
         }
         updated(/* time point */null);
+        triggerManeuverCacheRecalculationForAllCompetitors();
     }
 
     @Override
@@ -125,6 +132,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             getOrCreateWindTrack(windSource).setMillisecondsOverWhichToAverage(millisecondsOverWhichToAverageWind);
         }
         updated(/* time point */null);
+        triggerManeuverCacheRecalculationForAllCompetitors();
         notifyListenersWindAveragingChanged(oldMillisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageWind);
     }
 
@@ -397,6 +405,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 }
             }
             updated(timePointOfLatestEvent);
+            triggerManeuverCacheRecalculation(competitor);
         }
         // update the race times like start, end and the leg times
         if (requiresStartTimeUpdate) {
@@ -466,8 +475,13 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         WindTrack result = super.createWindTrack(windSource, delayForWindEstimationCacheInvalidation);
         if (windSource.getType().canBeStored()) {
             // replicate all wind fixed that may have been loaded by the wind store
-            for (Wind wind : result.getRawFixes()) {
-                notifyListeners(wind, windSource);
+            result.lockForRead();
+            try {
+                for (Wind wind : result.getRawFixes()) {
+                    notifyListeners(wind, windSource);
+                }
+            } finally {
+                result.unlockAfterRead();
             }
         }
         return result;
@@ -477,6 +491,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public synchronized void recordWind(Wind wind, WindSource windSource) {
         getOrCreateWindTrack(windSource).add(wind);
         updated(/* time point */null); // wind events shouldn't advance race time
+        triggerManeuverCacheRecalculationForAllCompetitors();
         notifyListeners(wind, windSource);
     }
     
@@ -484,12 +499,14 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     public synchronized void removeWind(Wind wind, WindSource windSource) {
         getOrCreateWindTrack(windSource).remove(wind);
         updated(/* time point */null); // wind events shouldn't advance race time
+        triggerManeuverCacheRecalculationForAllCompetitors();
         notifyListenersWindRemoved(wind, windSource);
     }
 
     @Override
     public void gpsFixReceived(GPSFixMoving fix, Competitor competitor) {
         updated(fix.getTimePoint());
+        triggerManeuverCacheRecalculation(competitor);
         notifyListeners(fix, competitor);
     }
 

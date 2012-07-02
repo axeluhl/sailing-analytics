@@ -156,7 +156,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         leaderboardsPanel.add(filterPanel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */200, tableRes);
+        leaderboardTable = new CellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 leaderboardList.getList());
 
@@ -430,7 +430,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 availableLeaderboardList.clear();
                 leaderboardList.getList().addAll(leaderboards);
                 availableLeaderboardList.addAll(leaderboards);
-                
+                fillRaceListFromAvailableLeaderboardsApplyingFilter();
                 leaderboardSelectionChanged();
                 leaderboardRaceColumnSelectionChanged();
             }

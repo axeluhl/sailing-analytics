@@ -108,8 +108,8 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
      *            assumed to already have been inserted into this track, but it's OK to pass a fix that's not in the
      *            track yet
      * 
-     * @return if no fix before <code>fix</code> is found, the first component is <code>null</code>. If no fix after
-     *         <code>fix</code> is found, the second component is <code>null</code>.
+     * @return if no fix before <code>fix</code> is found, the first component is <code>fix.getTimePoint()</code>. If no fix after
+     *         <code>fix</code> is found, the second component is <code>fix.getTimePoint()</code>.
      */
     Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix);
 

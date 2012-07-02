@@ -32,6 +32,7 @@ public class Simulator {
     private WindStore windStore;
     private long advanceInMillis = -1;
     private Timer timer = new Timer("Timer for TracTrac Simulator");
+    private boolean stopped;
     
     /**
      * Creates a wind store which replays the wind store events against a tracked race, correcting the wind fixes with
@@ -69,12 +70,25 @@ public class Simulator {
             new Thread("Wind simulator for wind source "+windSourceAndTrack.getKey()+" for tracked race "+trackedRace.getRace().getName()) {
                 @Override
                 public void run() {
-                    for (Wind wind : windSourceAndTrack.getValue().getRawFixes()) {
-                        trackedRace.recordWind(delayWind(wind), windSourceAndTrack.getKey());
+                    final WindTrack windTrack = windSourceAndTrack.getValue();
+                    windTrack.lockForRead();
+                    try {
+                        for (Wind wind : windTrack.getRawFixes()) {
+                            if (stopped) {
+                                break;
+                            }
+                            trackedRace.recordWind(delayWind(wind), windSourceAndTrack.getKey());
+                        }
+                    } finally {
+                        windTrack.unlockAfterRead();
                     }
                 }
             }.start();
         }
+    }
+    
+    public void stop() {
+        stopped = true;
     }
     
     private Wind delayWind(Wind wind) {

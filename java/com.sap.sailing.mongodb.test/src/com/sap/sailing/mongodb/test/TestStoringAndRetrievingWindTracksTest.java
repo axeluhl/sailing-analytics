@@ -74,7 +74,7 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         DynamicTrackedRegatta trackedRegatta = new RacingEventServiceImpl().getOrCreateTrackedRegatta(domainEvent);
         Iterable<Receiver> typeControllers = domainFactory.getUpdateReceivers(trackedRegatta, getTracTracEvent(),
                 EmptyWindStore.INSTANCE, /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */
-                0l, /* simulateWithStartTimeNow */false, new DynamicRaceDefinitionSet() {
+                0l, /* simulator */ null, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {
                     }
@@ -105,11 +105,16 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
         WindTrack result = new DomainObjectFactoryImpl(secondDatabase).loadWindTrack(domainEvent, race, windSource, /* millisecondsOverWhichToAverage */
                 30000);
         double myBearingDeg = 123.4;
-        for (Wind wind : result.getRawFixes()) {
-            assertEquals(pos, wind.getPosition());
-            assertEquals(10., wind.getKnots(), 0.000000000001);
-            assertEquals(myBearingDeg, wind.getBearing().getDegrees(), 0.000000001);
-            myBearingDeg += 1.1;
+        result.lockForRead();
+        try {
+            for (Wind wind : result.getRawFixes()) {
+                assertEquals(pos, wind.getPosition());
+                assertEquals(10., wind.getKnots(), 0.000000000001);
+                assertEquals(myBearingDeg, wind.getBearing().getDegrees(), 0.000000001);
+                myBearingDeg += 1.1;
+            }
+        } finally {
+            result.unlockAfterRead();
         }
         assertTrue("Expected myBeaaringDeg to be >= 139.999999999 but was "+myBearingDeg, myBearingDeg >= 139.999999999);
     }

@@ -167,8 +167,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         this.races = new HashSet<RaceDefinition>();
         this.windStore = windStore;
         this.domainFactory = domainFactory;
+        final Simulator simulator;
+        if (simulateWithStartTimeNow) {
+            simulator = new Simulator();
+        } else {
+            simulator = null;
+        }
         // Read event data from configuration file
-        controlPointPositionPoller = scheduleControlPointPositionPoller(paramURL);
+        controlPointPositionPoller = scheduleControlPointPositionPoller(paramURL, simulator);
         // can happen that TracTrac event is null (occurs when there is no Internet connection)
         // so lets raise some meaningful exception
         if (tractracEvent == null) {
@@ -198,7 +204,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         receivers = new HashSet<Receiver>();
         Set<TypeController> typeControllers = new HashSet<TypeController>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), tractracEvent, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore, this, trackedRegattaRegistry)) {
+                endOfTracking, delayToLiveInMillis, simulator, windStore, this, trackedRegattaRegistry)) {
             receivers.add(receiver);
             for (TypeController typeController : receiver.getTypeControllersAndStart()) {
                 typeControllers.add(typeController);
@@ -217,24 +223,27 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
     }
     
     /**
-     * Control points may get added late in the race. If they don't have a tracker installed, their position
-     * will be static. This position can be retrieved from {@link ControlPoint#getLat1()} etc. This method registers
-     * a task with {@link #scheduler} that regularly polls the <code>paramURL</code> to see if any new control points
-     * have arrived or positions for existing control points have been received. Any new information in this
-     * direction will be entered into the {@link TrackedRace} for the {@link #getRaces() race} tracked by this
-     * tracker.
+     * Control points may get added late in the race. If they don't have a tracker installed, their position will be
+     * static. This position can be retrieved from {@link ControlPoint#getLat1()} etc. This method registers a task with
+     * {@link #scheduler} that regularly polls the <code>paramURL</code> to see if any new control points have arrived
+     * or positions for existing control points have been received. Any new information in this direction will be
+     * entered into the {@link TrackedRace} for the {@link #getRaces() race} tracked by this tracker.
      * 
-     * @param paramURL points to the document describing the race's metadata which will periodically be downloaded
+     * @param paramURL
+     *            points to the document describing the race's metadata which will periodically be downloaded
+     * @param simulator
+     *            if not <code>null</code>, use this simulator to translate start/stop tracking times received through
+     *            clientparams document
      * @return the task to cancel in case the tracker wants to terminate the poller
      */
-    private ScheduledFuture<?> scheduleControlPointPositionPoller(final URL paramURL) {
+    private ScheduledFuture<?> scheduleControlPointPositionPoller(final URL paramURL, final Simulator simulator) {
         ScheduledFuture<?> task = scheduler.scheduleWithFixedDelay(new Runnable() {
             @Override public void run() {
                 Set<RaceDefinition> raceDefinitions = getRaces();
                 if (raceDefinitions != null && !raceDefinitions.isEmpty()) {
                     logger.info("fetching paramURL to check for new ControlPoint positions...");
                     Event event = KeyValue.setup(paramURL);
-                    updateStartStopTimesAndLiveDelay(paramURL);
+                    updateStartStopTimesAndLiveDelay(paramURL, simulator);
                     for (ControlPoint controlPoint : event.getControlPointList()) {
                         com.sap.sailing.domain.base.ControlPoint domainControlPoint = domainFactory.getOrCreateControlPoint(controlPoint);
                         boolean first = true;
@@ -242,11 +251,13 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                             for (RaceDefinition raceDefinition : raceDefinitions) {
                                 DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(
                                         raceDefinition);
-                                DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
-                                if (buoyTrack.getFirstRawFix() == null) {
-                                    buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(first ? controlPoint
-                                            .getLat1() : controlPoint.getLat2(), first ? controlPoint.getLon1()
-                                            : controlPoint.getLon2()), MillisecondsTimePoint.now()));
+                                if (trackedRace != null) {
+                                    DynamicGPSFixTrack<Buoy, GPSFix> buoyTrack = trackedRace.getOrCreateTrack(buoy);
+                                    if (buoyTrack.getFirstRawFix() == null) {
+                                        buoyTrack.addGPSFix(new GPSFixImpl(new DegreePosition(first ? controlPoint
+                                                .getLat1() : controlPoint.getLat2(), first ? controlPoint.getLon1()
+                                                : controlPoint.getLon2()), MillisecondsTimePoint.now()));
+                                    }
                                 }
                             }
                             first = false;
@@ -258,7 +269,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         return task;
     }
 
-    private void updateStartStopTimesAndLiveDelay(URL paramURL) {
+    private void updateStartStopTimesAndLiveDelay(URL paramURL, Simulator simulator) {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) paramURL.getContent()));
             RaceDefinition currentRace = null;
@@ -292,12 +303,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
                             if (propertyName.equals("RaceTrackingStartTime")) {
                                 TimePoint startOfTracking = parseTimePoint(propertyValue);
                                 if (startOfTracking != null) {
-                                    trackedRace.setStartOfTrackingReceived(startOfTracking);
+                                    trackedRace.setStartOfTrackingReceived(simulator==null?startOfTracking:simulator.advance(startOfTracking));
                                 }
                             } else if (propertyName.equals("RaceTrackingEndTime")) {
                                 TimePoint endOfTracking = parseTimePoint(propertyValue);
                                 if (endOfTracking != null) {
-                                    trackedRace.setEndOfTrackingReceived(endOfTracking);
+                                    trackedRace.setEndOfTrackingReceived(simulator==null?endOfTracking:simulator.advance(endOfTracking));
                                 }
                             }
                         }

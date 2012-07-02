@@ -173,6 +173,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + leaderboard.name
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
+                        + (embedded ? "&embedded=true" : "")
                         + "&leaderboardGroupName=" + group.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 if (embedded) {
@@ -187,7 +188,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         };
         
         LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
-        CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(200, tableResources);
+        CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableResources);
         leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
         leaderboardsTable.addColumn(leaderboardNameColumn, stringConstants.name());
         leaderboardsTable.addColumn(overviewColumn, stringConstants.leaderboard());
