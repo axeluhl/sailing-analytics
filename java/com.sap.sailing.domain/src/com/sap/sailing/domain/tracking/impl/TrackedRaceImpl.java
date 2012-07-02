@@ -21,8 +21,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.locks.Lock;
@@ -84,6 +82,9 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.util.impl.SmartFutureCache;
+import com.sap.sailing.util.impl.SmartFutureCache.CacheUpdateComputer;
+import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
@@ -182,49 +183,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * computed. Clients wanting to know maneuvers for the competitor outside of this time interval need to (re-)compute
      * them.
      */
-    private final Map<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>> maneuverCache;
-    
-    /**
-     * Holds the tasks that have been added to an {@link Executor} already for execution and that, as long as a client
-     * holds the object monitor / lock on this map, aren't cancelled. Note, however, that once the lock is released,
-     * the Futures may be cancelled in case a cache replacement has taken place. Clients can prevent this by calling
-     * {@link FutureTaskWithCancelBlocking#dontCancel()} on the future while holding the lock on
-     * {@link #ongoingManeuverCacheRecalculations}. This will let {@link Future#cancel(boolean)} return <code>false</code>
-     * should it be called on that Future.
-     */
-    private transient Map<Competitor, FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>> ongoingManeuverCacheRecalculations;
-    
-    /**
-     * Once a client has fetched such a Future from {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations} while
-     * holding the object monitor of {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client knows that
-     * the Future hasn't been cancelled yet. To avoid that the Future is cancelled after the client has fetched it from
-     * {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client can call {@link #dontCancel()} on this
-     * future. After that, calls to {@link #cancel(boolean)} will return <code>false</code> immediately and the Future
-     * will be executed as originally scheduled.
-     * 
-     * @author Axel Uhl (D043530)
-     * 
-     */
-    private static class FutureTaskWithCancelBlocking<V> extends FutureTask<V> {
-        private boolean dontCancel;
-        
-        public FutureTaskWithCancelBlocking(Callable<V> callable) {
-            super(callable);
-        }
-
-        public synchronized void dontCancel() {
-            dontCancel = true;
-        }
-        
-        @Override
-        public synchronized boolean cancel(boolean mayInterruptIfRunning) {
-            if (!dontCancel) {
-                return super.cancel(mayInterruptIfRunning);
-            } else {
-                return false;
-            }
-        }
-    }
+    private transient SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, UpdateInterval> maneuverCache;
     
     /**
      * A tracked race can maintain a number of sources for wind information from which a client can select. As all
@@ -254,16 +213,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private long delayToLiveInMillis;
     
-    private transient Executor maneuverRecalculator;
-    
     private transient CrossTrackErrorCache crossTrackErrorCache;
 
     public TrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
-        this.maneuverRecalculator = Executors.newSingleThreadExecutor();
-        this.ongoingManeuverCacheRecalculations = new HashMap<Competitor, FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>>();
         this.updateCount = 0;
         this.race = race;
         this.windStore = windStore;
@@ -273,7 +228,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis; 
         this.startToNextMarkCacheInvalidationListeners = new HashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
-        this.maneuverCache = new HashMap<Competitor, Util.Triple<TimePoint, TimePoint, List<Maneuver>>>();
+        this.maneuverCache = createManeuverCache();
         this.buoyTracks = new ConcurrentHashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
         this.crossTrackErrorCache = new CrossTrackErrorCache(this);
         int i = 0;
@@ -324,6 +279,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
     }
+
+    private SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, UpdateInterval> createManeuverCache() {
+        return new SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, UpdateInterval>(
+                new CacheUpdateComputer<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, UpdateInterval>() {
+                    @Override
+                    public Triple<TimePoint, TimePoint, List<Maneuver>> computeCacheValue(Competitor competitor,
+                            UpdateInterval updateInterval) throws NoWindException {
+                        return computeManeuvers(competitor);
+                    }
+                });
+    }
     
     /**
      * When de-serializing, a possibly remote {@link #windStore} is ignored because it is transient. Instead,
@@ -334,10 +300,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         windStore = EmptyWindStore.INSTANCE;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
-        maneuverRecalculator = Executors.newSingleThreadExecutor();
-        ongoingManeuverCacheRecalculations = new HashMap<Competitor, FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>>();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
+        maneuverCache = createManeuverCache();
     }
 
     /**
@@ -1502,40 +1467,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        final FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>> future =
-                new FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>(
-                new Callable<Triple<TimePoint, TimePoint, List<Maneuver>>>() {
-                    @Override
-                    public Triple<TimePoint, TimePoint, List<Maneuver>> call() {
-                        try {
-                            Triple<TimePoint, TimePoint, List<Maneuver>> result = computeManeuversAndUpdateInCache(competitor);
-                            synchronized (maneuverCache) {
-                                if (result == null) {
-                                    maneuverCache.remove(competitor);
-                                } else {
-                                    maneuverCache.put(competitor, result);
-                                }
-                            }
-                            return result;
-                        } catch (NoWindException e) {
-                            // cache won't be updated, but that's ok because maneuver detection without wind direction makes no sense
-                            logger.throwing(TrackedRaceImpl.class.getName(), "triggerManeuverCacheRecalculation", e);
-                            throw new NoWindError(e);
-                        }
-                    }
-                });
-        // establish and maintain the following invariant: after lock on ongoingManeuverCacheRecalculations is released,
-        // no Future contained in it is in cancelled state
-        synchronized (ongoingManeuverCacheRecalculations) {
-            FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>> oldFuture = ongoingManeuverCacheRecalculations.put(competitor, future);
-            if (oldFuture != null) {
-                oldFuture.cancel(/* mayInterruptIfRunning */ false);
-            }
-        }
-        maneuverRecalculator.execute(future);
+        maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
     }
 
-    private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuversAndUpdateInCache(Competitor competitor) throws NoWindException {
+    private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
         // compute the maneuvers for competitor
         Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
@@ -1644,32 +1579,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest)
             throws NoWindException {
-        List<Maneuver> allManeuvers;
-        if (waitForLatest) {
-            FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>> future;
-            synchronized (ongoingManeuverCacheRecalculations) {
-                // as long as we hold the lock on ongoingManeuverCacheRecalculations, the Futures contained in it are not cancelled
-                future = ongoingManeuverCacheRecalculations.get(competitor);
-                if (future != null) {
-                    future.dontCancel();
-                }
-            }
-            if (future != null) {
-                try {
-                    allManeuvers = future.get().getC();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                // no calculation currently going on; we probably don't know anything about this competitor
-                allManeuvers = Collections.emptyList();
-            }
+        Triple<TimePoint, TimePoint, List<Maneuver>> allManeuvers = maneuverCache.get(competitor, waitForLatest);
+        List<Maneuver> result;
+        if (allManeuvers == null) {
+            result = Collections.emptyList();
         } else {
-            synchronized (maneuverCache) {
-                allManeuvers = maneuverCache.get(competitor).getC();
-            }
+            result = extractInterval(from, to, allManeuvers.getC());
         }
-        return extractInterval(from, to, allManeuvers);
+        return result;
     }
     
     private <T extends Timed> List<T> extractInterval(TimePoint from, TimePoint to, List<T> listOfTimed) {

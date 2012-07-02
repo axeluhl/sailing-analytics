@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Logger;
 
@@ -25,6 +26,14 @@ import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
 public class SmartFutureCache<K, V, U extends UpdateInterval> {
     private static final Logger logger = Logger.getLogger(SmartFutureCache.class.getName());
     
+    /**
+     * Holds the tasks that have been added to an {@link Executor} already for execution and that, as long as a client
+     * holds the object monitor / lock on this map, aren't cancelled. Note, however, that once the lock is released,
+     * the Futures may be cancelled in case a cache replacement has taken place. Clients can prevent this by calling
+     * {@link FutureTaskWithCancelBlocking#dontCancel()} on the future while holding the lock on
+     * {@link #ongoingManeuverCacheRecalculations}. This will let {@link Future#cancel(boolean)} return <code>false</code>
+     * should it be called on that Future.
+     */
     private final Map<K, FutureTaskWithCancelBlocking<V, U>> ongoingRecalculations;
     
     private final Map<K, V> cache;
@@ -56,7 +65,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval> {
      * @param <U> the update interval type
      */
     public static interface CacheUpdateComputer<K, V, U extends UpdateInterval> {
-        V computeCacheValue(K key, U updateInterval);
+        V computeCacheValue(K key, U updateInterval) throws Exception;
     }
     
     /**
@@ -139,7 +148,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval> {
                             } catch (Throwable e) {
                                 // cache won't be updated
                                 logger.throwing(SmartFutureCache.class.getName(), "triggerUpdate", e);
-                                throw e;
+                                throw new RuntimeException(e);
                             }
                         }
                     }, joinedUpdateInterval);
