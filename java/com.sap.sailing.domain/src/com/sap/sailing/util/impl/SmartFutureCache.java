@@ -203,6 +203,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                                     return result;
                                 } finally {
                                     getOrCreateLockForKey(key).writeLock().unlock();
+                                    ongoingRecalculations.remove(key);
                                 }
                             } catch (Throwable e) {
                                 // cache won't be updated
@@ -217,7 +218,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     }
     
     public V get(K key, boolean waitForLatest) {
-        V value;
+        V value = null;
         if (waitForLatest) {
             FutureTaskWithCancelBlocking<V, U> future;
             synchronized (ongoingRecalculations) {
@@ -225,6 +226,8 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 future = ongoingRecalculations.get(key);
                 if (future != null) {
                     future.dontCancel();
+                } else {
+                    value = cache.get(key);
                 }
             }
             if (future != null) {
@@ -233,10 +236,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException(e);
                 }
-            } else {
-                // no calculation currently going on; we probably don't know anything about this key
-                value = null;
-            }
+            } // else no calculation currently going on; value has been fetched from latest cache entry
         } else {
             getOrCreateLockForKey(key).readLock().lock();
             try {
