@@ -10,6 +10,11 @@ Move wind data from test to prod
   /opt/mongodb/bin/mongoexport --port 10201 -d winddb -c WIND_TRACKS -q "{ EVENT_NAME: 'Kieler Woche 2012 (Kite)'}" > /tmp/windtracks-kite.json
   /opt/mongodb/bin/mongoexport --port 10201 -d winddb -c WIND_TRACKS -q "{ EVENT_NAME: 'Kieler Woche 2012 (Finn)'}" > /tmp/windtracks-finn.json
 
+	/opt/mongodb/bin/mongoexport --port 10201 -d winddb -c WIND_TRACKS -q "{ EVENT_NAME: 'Kieler Woche 2012 (29er)'}" > /tmp/windtracks-29er.json
+	/opt/mongodb/bin/mongoexport --port 10201 -d winddb -c WIND_TRACKS -q "{ EVENT_NAME: 'Kieler Woche IC 2012 (STAR)'}" > /tmp/windtracks-star.json
+	/opt/mongodb/bin/mongoexport --port 10201 -d winddb -c WIND_TRACKS -q "{ EVENT_NAME: 'Kieler Woche IC 2012 (5o5)'}" > /tmp/windtracks-5o5.json
+	
+
   /opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-laser.json
   /opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-470m.json
   /opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-470w.json
@@ -18,3 +23,7 @@ Move wind data from test to prod
   /opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-laserradial.json
   /opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-kite.json
   /opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-finn.json
+
+	/opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-29er.json
+	/opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-star.json
+	/opt/mongodb/bin/mongoimport --port 10202 -d winddb -c WIND_TRACKS /tmp/windtracks-5o5.json
