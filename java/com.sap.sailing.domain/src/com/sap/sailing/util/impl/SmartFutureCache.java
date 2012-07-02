@@ -1,13 +1,15 @@
 package com.sap.sailing.util.impl;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
 import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
@@ -23,7 +25,7 @@ import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
  * @author Axel Uhl (D043530)
  * 
  */
-public class SmartFutureCache<K, V, U extends UpdateInterval> {
+public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
     private static final Logger logger = Logger.getLogger(SmartFutureCache.class.getName());
     
     /**
@@ -40,7 +42,9 @@ public class SmartFutureCache<K, V, U extends UpdateInterval> {
     
     private final Executor recalculator;
 
-    private final CacheUpdateComputer<K, V, U> cacheUpdateComputer;
+    private final CacheUpdater<K, V, U> cacheUpdateComputer;
+    
+    private final Map<K, ReentrantReadWriteLock> locksForKeys;
     
     /**
      * An immutable "interval" description for a cache update
@@ -48,12 +52,19 @@ public class SmartFutureCache<K, V, U extends UpdateInterval> {
      * @author Axel Uhl (D043530)
      *
      */
-    public static interface UpdateInterval {
+    public static interface UpdateInterval<U extends UpdateInterval<U>> {
         /**
          * Produces a new immutable update interval that "contains" both, this and <code>otherUpdateInterval</code> according
          * to the semantics of the specific implementation.
          */
-        <U extends UpdateInterval> U join(U otherUpdateInterval);
+        U join(U otherUpdateInterval);
+    }
+    
+    public static class EmptyUpdateInterval implements UpdateInterval<EmptyUpdateInterval> {
+        @Override
+        public EmptyUpdateInterval join(EmptyUpdateInterval otherUpdateInterval) {
+            return null;
+        }
     }
     
     /**
@@ -64,8 +75,40 @@ public class SmartFutureCache<K, V, U extends UpdateInterval> {
      * @param <V> the cache's value type
      * @param <U> the update interval type
      */
-    public static interface CacheUpdateComputer<K, V, U extends UpdateInterval> {
-        V computeCacheValue(K key, U updateInterval) throws Exception;
+    public static interface CacheUpdater<K, V, U extends UpdateInterval<U>> {
+        /**
+         * Called by a background task to perform the potentially expensive update computations. The cache is
+         * not updated with the results immediately. Instead, the result of this operation is later passed to
+         * {@link #provideNewCacheValue(Object, Object)} with the cache entry for <code>key</code> locked for writing.
+         */
+        V computeCacheUpdate(K key, U updateInterval) throws Exception;
+        
+        /**
+         * Expected to deliver an updated cache value quick (compared to the potentially much more expensive
+         * {@link #computeCacheUpdate(Object, UpdateInterval)} method which is run in a background task and doesn't lock
+         * the cache for readers).
+         * 
+         * @param key
+         *            the key for which to deliver the cache update
+         * @param oldCacheValue
+         *            the value associated with <code>key</code> up to now; may be <code>null</code>
+         * @param computedCacheUpdate
+         *            the result of {@link #computeCacheUpdate(Object, UpdateInterval)} called for <code>key</code>. A
+         *            trivial implementation may simply return <code>computeCacheUpdate</code> if no further changes are
+         *            required. However, an implementation may take the opportunity to update the result of
+         *            {@link SmartFutureCache#get(Object, boolean)} called with <code>key</code> and <code>false</code>
+         *            to obtain the current cache value for <code>key</code> and incrementally update it with
+         *            <code>computedCacheUpdate</code> instead of constructing a new cache value which again may be
+         *            fairly expensive.
+         */
+        V provideNewCacheValue(K key, V oldCacheValue, V computedCacheUpdate, U updateInterval);
+    }
+
+    public static abstract class AbstractCacheUpdater<K, V, U extends UpdateInterval<U>> implements CacheUpdater<K, V, U> {
+        @Override
+        public V provideNewCacheValue(K key, V oldCacheValue, V computedCacheUpdate, U updateInterval) {
+            return computedCacheUpdate;
+        }
     }
     
     /**
@@ -79,7 +122,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval> {
      * @author Axel Uhl (D043530)
      * 
      */
-    private static class FutureTaskWithCancelBlocking<V, U extends UpdateInterval> extends FutureTask<V> {
+    private static class FutureTaskWithCancelBlocking<V, U extends UpdateInterval<U>> extends FutureTask<V> {
         private boolean dontCancel;
         
         private final U updateInterval;
@@ -107,11 +150,23 @@ public class SmartFutureCache<K, V, U extends UpdateInterval> {
         }
     }
     
-    public SmartFutureCache(CacheUpdateComputer<K, V, U> cacheUpdateComputer) {
-        this.ongoingRecalculations = new HashMap<K, FutureTaskWithCancelBlocking<V, U>>();
-        this.cache = new HashMap<K, V>();
+    public SmartFutureCache(CacheUpdater<K, V, U> cacheUpdateComputer) {
+        this.ongoingRecalculations = new ConcurrentHashMap<K, FutureTaskWithCancelBlocking<V, U>>();
+        this.cache = new ConcurrentHashMap<K, V>();
         this.recalculator = Executors.newSingleThreadExecutor();
         this.cacheUpdateComputer = cacheUpdateComputer;
+        this.locksForKeys = new ConcurrentHashMap<K, ReentrantReadWriteLock>();
+    }
+    
+    private ReentrantReadWriteLock getOrCreateLockForKey(K key) {
+        synchronized (locksForKeys) {
+            ReentrantReadWriteLock result = locksForKeys.get(key);
+            if (result == null) {
+                result = new ReentrantReadWriteLock();
+                locksForKeys.put(key, result);
+            }
+            return result;
+        }
     }
     
     public void triggerUpdate(final K key, U updateInterval) {
@@ -136,15 +191,19 @@ public class SmartFutureCache<K, V, U extends UpdateInterval> {
                         @Override
                         public V call() {
                             try {
-                                V result = cacheUpdateComputer.computeCacheValue(key, joinedUpdateInterval);
-                                synchronized (cache) {
+                                V preResult = cacheUpdateComputer.computeCacheUpdate(key, joinedUpdateInterval);
+                                getOrCreateLockForKey(key).writeLock().lock();
+                                try {
+                                    V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult, joinedUpdateInterval);
                                     if (result == null) {
                                         cache.remove(key);
                                     } else {
                                         cache.put(key, result);
                                     }
+                                    return result;
+                                } finally {
+                                    getOrCreateLockForKey(key).writeLock().unlock();
                                 }
-                                return result;
                             } catch (Throwable e) {
                                 // cache won't be updated
                                 logger.throwing(SmartFutureCache.class.getName(), "triggerUpdate", e);
@@ -179,10 +238,17 @@ public class SmartFutureCache<K, V, U extends UpdateInterval> {
                 value = null;
             }
         } else {
-            synchronized (cache) {
+            getOrCreateLockForKey(key).readLock().lock();
+            try {
                 value = cache.get(key);
+            } finally {
+                getOrCreateLockForKey(key).readLock().unlock();
             }
         }
         return value;
+    }
+
+    public Set<K> keySet() {
+        return cache.keySet();
     }
 }

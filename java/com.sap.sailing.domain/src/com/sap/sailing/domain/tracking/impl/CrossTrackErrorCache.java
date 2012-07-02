@@ -1,13 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Buoy;
@@ -28,6 +24,9 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.util.impl.SmartFutureCache;
+import com.sap.sailing.util.impl.SmartFutureCache.CacheUpdater;
+import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
 
 /**
  * (Re-)computing the cross track error for a competitor causes significant amounts of CPU cycles. The cross track error
@@ -96,6 +95,27 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         }
     }
     
+    private static class FromTimePointToEndUpdateInterval implements UpdateInterval<FromTimePointToEndUpdateInterval> {
+        private final TimePoint from;
+        
+        public FromTimePointToEndUpdateInterval(TimePoint from) {
+            super();
+            this.from = from;
+        }
+
+        @Override
+        public FromTimePointToEndUpdateInterval join(FromTimePointToEndUpdateInterval otherUpdateInterval) {
+            return new FromTimePointToEndUpdateInterval(getFrom()==null?
+                    otherUpdateInterval.getFrom():otherUpdateInterval.getFrom()==null?
+                            getFrom():(getFrom().compareTo(otherUpdateInterval.getFrom())<0)?
+                                    getFrom():otherUpdateInterval.getFrom());
+        }
+
+        public TimePoint getFrom() {
+            return from;
+        }
+    }
+    
     /**
      * For each competitor for which the {@link #owner owning tracked race} has received GPS fixes, holds the aggregated
      * cross track errors at each (smoothened) fix's time point, as the sum of the cross track distance and the number
@@ -111,102 +131,115 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
      * increment can be computed quickly and at constant time for any time point. This will be important in case the fix
      * frequency increases
      */
-    private final Map<Competitor, CrossTrackErrorSumAndNumberOfFixesTrack> cachePerCompetitor;
-    
-    private final Map<Competitor, ReentrantReadWriteLock> locksForCompetitors;
+    private final SmartFutureCache<Competitor, CrossTrackErrorSumAndNumberOfFixesTrack, FromTimePointToEndUpdateInterval> cachePerCompetitor;
     
     private final TrackedRace owner;
     
     public CrossTrackErrorCache(TrackedRace owner) {
-        cachePerCompetitor = new HashMap<Competitor, CrossTrackErrorSumAndNumberOfFixesTrack>();
+        cachePerCompetitor = new SmartFutureCache<Competitor, CrossTrackErrorSumAndNumberOfFixesTrack, FromTimePointToEndUpdateInterval>(
+                new CacheUpdater<Competitor, CrossTrackErrorSumAndNumberOfFixesTrack, FromTimePointToEndUpdateInterval>() {
+                    @Override
+                    public CrossTrackErrorSumAndNumberOfFixesTrack computeCacheUpdate(Competitor competitor,
+                            FromTimePointToEndUpdateInterval updateInterval) throws Exception {
+                        return computeFixesForCacheUpdate(competitor, updateInterval.getFrom());
+                    }
+
+                    @Override
+                    public CrossTrackErrorSumAndNumberOfFixesTrack provideNewCacheValue(Competitor key,
+                            CrossTrackErrorSumAndNumberOfFixesTrack oldValue, CrossTrackErrorSumAndNumberOfFixesTrack computedCacheUpdate,
+                            FromTimePointToEndUpdateInterval updateInterval) {
+                        CrossTrackErrorSumAndNumberOfFixesTrack result;
+                        if (oldValue != null) {
+                            oldValue.deleteAllLaterThan(updateInterval.getFrom());
+                            computedCacheUpdate.lockForRead();
+                            try {
+                                for (CrossTrackErrorSumAndNumberOfFixes entry : computedCacheUpdate.getRawFixes()) {
+                                    oldValue.add(entry);
+                                }
+                            } finally {
+                                computedCacheUpdate.unlockAfterRead();
+                            }
+                            result = oldValue;
+                        } else {
+                            result = computedCacheUpdate;
+                        }
+                        return result;
+                    }
+                });
         this.owner = owner;
-        this.locksForCompetitors = new HashMap<Competitor, ReentrantReadWriteLock>();
         owner.addListener(this);
     }
     
     /**
      * Answers the query from the cache contents.
      * 
-     * @param upwindOnly if <code>true</code>, only fixes in upwind legs are considered during aggregation
+     * @param upwindOnly
+     *            if <code>true</code>, only fixes in upwind legs are considered during aggregation
+     * @param waitForLatest
+     *            whether to wait for any currently ongoing cache update calculation; if <code>false</code>, the current
+     *            cache entry will be used
      */
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly) throws NoWindException {
-        Track<CrossTrackErrorSumAndNumberOfFixes> cacheForCompetitor = getOrCreateCacheEntryForCompetitor(competitor);
+    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
+            boolean waitForLatest) throws NoWindException {
+        Track<CrossTrackErrorSumAndNumberOfFixes> cacheForCompetitor = cachePerCompetitor.get(competitor, waitForLatest);
         double distanceInMeters = 0;
         int count = 0;
-        owner.getRace().getCourse().lockForRead(); // make sure that course updates don't happen while we're computing
-        synchronized (cacheForCompetitor) {
-            getOrCreateLockForCompetitor(competitor).readLock().lock();
-        }
-        try {
-            CrossTrackErrorSumAndNumberOfFixes startAggregate = null;
-            // iterate leg by leg to support excluding non-upwind legs based on the upwindOnly parameter
-            for (Leg leg : owner.getRace().getCourse().getLegs()) {
-                final TrackedLeg trackedLeg = owner.getTrackedLeg(leg);
-                final MarkPassing legStartMarkPassing = owner.getMarkPassing(competitor, leg.getFrom());
-                if (legStartMarkPassing != null) {
-                    if (!upwindOnly || trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
-                        TimePoint start;
-                        final TimePoint legStart = legStartMarkPassing.getTimePoint();
-                        if (legStart.compareTo(from) < 0) {
-                            // the interval requested starts after this leg's start:
-                            start = from;
-                        } else {
-                            start = legStart;
-                        }
-                        final MarkPassing legEndMarkPassing = owner.getMarkPassing(competitor, leg.getTo());
-                        if (startAggregate == null) {
-                            startAggregate = cacheForCompetitor.getLastFixAtOrBefore(start);
-                        }
-                        CrossTrackErrorSumAndNumberOfFixes endAggregate;
-                        TimePoint end;
-                        if (legEndMarkPassing == null || legEndMarkPassing.getTimePoint().compareTo(to) >= 0) {
-                            // no next mark passing, or next mark passing is beyond the "to" time point; aggregate up to "to"
-                            end = to;
-                        } else {
-                            end = legEndMarkPassing.getTimePoint();
-                        }
-                        if (from.compareTo(end) < 0) {
-                            endAggregate = cacheForCompetitor.getLastFixAtOrBefore(end);
-                            distanceInMeters += endAggregate.getDistanceInMetersSumFromStart()
-                                    - startAggregate.getDistanceInMetersSumFromStart();
-                            count += endAggregate.getFixCountFromStart() - startAggregate.getFixCountFromStart();
-                            startAggregate = endAggregate;
+        if (cacheForCompetitor != null) {
+            owner.getRace().getCourse().lockForRead(); // make sure that course updates don't happen while we're computing
+            try {
+                CrossTrackErrorSumAndNumberOfFixes startAggregate = null;
+                // iterate leg by leg to support excluding non-upwind legs based on the upwindOnly parameter
+                for (Leg leg : owner.getRace().getCourse().getLegs()) {
+                    final TrackedLeg trackedLeg = owner.getTrackedLeg(leg);
+                    final MarkPassing legStartMarkPassing = owner.getMarkPassing(competitor, leg.getFrom());
+                    if (legStartMarkPassing != null) {
+                        if (!upwindOnly || trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
+                            TimePoint start;
+                            final TimePoint legStart = legStartMarkPassing.getTimePoint();
+                            if (legStart.compareTo(from) < 0) {
+                                // the interval requested starts after this leg's start:
+                                start = from;
+                            } else {
+                                start = legStart;
+                            }
+                            final MarkPassing legEndMarkPassing = owner.getMarkPassing(competitor, leg.getTo());
+                            if (startAggregate == null) {
+                                startAggregate = cacheForCompetitor.getLastFixAtOrBefore(start);
+                            }
+                            CrossTrackErrorSumAndNumberOfFixes endAggregate;
+                            TimePoint end;
+                            if (legEndMarkPassing == null || legEndMarkPassing.getTimePoint().compareTo(to) >= 0) {
+                                // no next mark passing, or next mark passing is beyond the "to" time point; aggregate up to "to"
+                                end = to;
+                            } else {
+                                end = legEndMarkPassing.getTimePoint();
+                            }
+                            if (from.compareTo(end) < 0) {
+                                endAggregate = cacheForCompetitor.getLastFixAtOrBefore(end);
+                                distanceInMeters += endAggregate.getDistanceInMetersSumFromStart()
+                                        - startAggregate.getDistanceInMetersSumFromStart();
+                                count += endAggregate.getFixCountFromStart() - startAggregate.getFixCountFromStart();
+                                startAggregate = endAggregate;
+                            }
                         }
                     }
                 }
+            } finally {
+                owner.getRace().getCourse().unlockAfterRead();
             }
-        } finally {
-            getOrCreateLockForCompetitor(competitor).readLock().unlock();
-            owner.getRace().getCourse().unlockAfterRead();
         }
         return count == 0 ? null : new MeterDistance(distanceInMeters / count);
     }
     
-    private synchronized ReentrantReadWriteLock getOrCreateLockForCompetitor(Competitor competitor) {
-        ReentrantReadWriteLock result = locksForCompetitors.get(competitor);
-        if (result == null) {
-            result = new ReentrantReadWriteLock();
-            locksForCompetitors.put(competitor, result);
-        }
-        return result;
-    }
-
     /**
      * Updates {@link #cachePerCompetitor} for <code>competitor</code>, starting at <code>from</code>, up to and including
      * the competitor's finish line passing, or the last GPS fix if there is no finish line passing.
      */
-    private List<CrossTrackErrorSumAndNumberOfFixes> computeFixesForCacheUpdate(Competitor competitor, TimePoint from) throws NoWindException {
-        List<CrossTrackErrorSumAndNumberOfFixes> result = new ArrayList<CrossTrackErrorSumAndNumberOfFixes>();
-        final CrossTrackErrorSumAndNumberOfFixesTrack competitorCacheEntry = getOrCreateCacheEntryForCompetitor(competitor);
-        synchronized (competitorCacheEntry) {
-            getOrCreateLockForCompetitor(competitor).readLock().lock();
-        }
+    private CrossTrackErrorSumAndNumberOfFixesTrack computeFixesForCacheUpdate(Competitor competitor, TimePoint from) throws NoWindException {
+        CrossTrackErrorSumAndNumberOfFixesTrack result = new CrossTrackErrorSumAndNumberOfFixesTrack();
+        final CrossTrackErrorSumAndNumberOfFixesTrack competitorCacheEntry = cachePerCompetitor.get(competitor, /* waitForLatest */ false);
         final CrossTrackErrorSumAndNumberOfFixes lastCacheEntryBeforeFrom;
-        try {
-            lastCacheEntryBeforeFrom = competitorCacheEntry.getLastFixBefore(from);
-        } finally {
-            getOrCreateLockForCompetitor(competitor).readLock().unlock();
-        }
+        lastCacheEntryBeforeFrom = competitorCacheEntry == null ? null : competitorCacheEntry.getLastFixBefore(from);
         double distanceInMeters;
         int count;
         if (lastCacheEntryBeforeFrom != null) {
@@ -260,15 +293,6 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         return result;
     }
 
-    private synchronized CrossTrackErrorSumAndNumberOfFixesTrack getOrCreateCacheEntryForCompetitor(Competitor competitor) {
-        CrossTrackErrorSumAndNumberOfFixesTrack cacheForCompetitor = cachePerCompetitor.get(competitor);
-        if (cacheForCompetitor == null) {
-            cacheForCompetitor = new CrossTrackErrorSumAndNumberOfFixesTrack();
-            cachePerCompetitor.put(competitor, cacheForCompetitor);
-        }
-        return cacheForCompetitor;
-    }
-    
     /**
      * First locks the competitor's cache entry for read access in
      * {@link #computeFixesForCacheUpdate(Competitor, TimePoint)}, then releases the read lock and obtains the write
@@ -278,39 +302,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
      * synchronizes on the competitor's cache entry to make sure they don't cut in between this phase of uncertainty.
      */
     private void invalidate(Competitor competitor, TimePoint from) {
-        try {
-            CrossTrackErrorSumAndNumberOfFixesTrack competitorCacheEntry = getOrCreateCacheEntryForCompetitor(competitor);
-            synchronized (competitorCacheEntry) {
-                getOrCreateLockForCompetitor(competitor).readLock().lock();
-            }
-            List<CrossTrackErrorSumAndNumberOfFixes> update;
-            try {
-                update = computeFixesForCacheUpdate(competitor, from);
-            } catch (Throwable t) {
-                getOrCreateLockForCompetitor(competitor).readLock().unlock();
-                throw t;
-            }
-            // synchronized (competitorCacheEntry) {
-                // FIXME Using the commented synchronization can cause a deadlock with itself. If one thread holds the read lock, obtains the
-                // competitorCacheEntry monitor
-                // and then releases the read lock and tries to obtain the write lock, while another thread
-                // also holds the read lock, the other thread cannot enter the code to unlock the read lock because
-                // it cannot obtain the competitorCacheEntry monitor
-                getOrCreateLockForCompetitor(competitor).readLock().unlock();
-                getOrCreateLockForCompetitor(competitor).writeLock().lock();
-            // }
-            try {
-                competitorCacheEntry.deleteAllLaterThan(from);
-                for (CrossTrackErrorSumAndNumberOfFixes updateFix : update) {
-                    competitorCacheEntry.add(updateFix);
-                }
-            } finally {
-                getOrCreateLockForCompetitor(competitor).writeLock().unlock();
-            }
-        } catch (NoWindException e) {
-            logger.severe("Error trying to update cross track error cache: "+e.getMessage());
-            logger.throwing(CrossTrackErrorCache.class.getName(), "invalidate", e);
-        }
+        cachePerCompetitor.triggerUpdate(competitor, new FromTimePointToEndUpdateInterval(from));
     }
 
     @Override

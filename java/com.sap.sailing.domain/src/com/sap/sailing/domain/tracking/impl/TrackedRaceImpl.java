@@ -83,8 +83,8 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.util.impl.SmartFutureCache;
-import com.sap.sailing.util.impl.SmartFutureCache.CacheUpdateComputer;
-import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
+import com.sap.sailing.util.impl.SmartFutureCache.AbstractCacheUpdater;
+import com.sap.sailing.util.impl.SmartFutureCache.EmptyUpdateInterval;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
@@ -183,7 +183,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * computed. Clients wanting to know maneuvers for the competitor outside of this time interval need to (re-)compute
      * them.
      */
-    private transient SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, UpdateInterval> maneuverCache;
+    private transient SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
     
     /**
      * A tracked race can maintain a number of sources for wind information from which a client can select. As all
@@ -280,12 +280,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
     }
 
-    private SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, UpdateInterval> createManeuverCache() {
-        return new SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, UpdateInterval>(
-                new CacheUpdateComputer<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, UpdateInterval>() {
+    private SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> createManeuverCache() {
+        return new SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>(
+                new AbstractCacheUpdater<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>() {
                     @Override
-                    public Triple<TimePoint, TimePoint, List<Maneuver>> computeCacheValue(Competitor competitor,
-                            UpdateInterval updateInterval) throws NoWindException {
+                    public Triple<TimePoint, TimePoint, List<Maneuver>> computeCacheUpdate(Competitor competitor,
+                            EmptyUpdateInterval updateInterval) throws NoWindException {
                         return computeManeuvers(competitor);
                     }
                 });
@@ -763,7 +763,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         Distance result;
         if (from != null) {
-            result = crossTrackErrorCache.getAverageCrossTrackError(competitor, from, timePoint, /* upwindOnly */ true);
+            result = crossTrackErrorCache.getAverageCrossTrackError(competitor, from, timePoint, /* upwindOnly */ true, /* waitForLatest */ true);
         } else {
             result = null;
         }
