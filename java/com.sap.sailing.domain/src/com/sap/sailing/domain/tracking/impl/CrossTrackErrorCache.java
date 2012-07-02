@@ -290,15 +290,19 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                 getOrCreateLockForCompetitor(competitor).readLock().unlock();
                 throw t;
             }
-            synchronized (competitorCacheEntry) {
+            // synchronized (competitorCacheEntry) {
+                // FIXME Using the commented synchronization can cause a deadlock with itself. If one thread holds the read lock, obtains the
+                // competitorCacheEntry monitor
+                // and then releases the read lock and tries to obtain the write lock, while another thread
+                // also holds the read lock, the other thread cannot enter the code to unlock the read lock because
+                // it cannot obtain the competitorCacheEntry monitor
                 getOrCreateLockForCompetitor(competitor).readLock().unlock();
                 getOrCreateLockForCompetitor(competitor).writeLock().lock();
-            }
+            // }
             try {
-                final CrossTrackErrorSumAndNumberOfFixesTrack cacheEntryForCompetitor = competitorCacheEntry;
-                cacheEntryForCompetitor.deleteAllLaterThan(from);
+                competitorCacheEntry.deleteAllLaterThan(from);
                 for (CrossTrackErrorSumAndNumberOfFixes updateFix : update) {
-                    cacheEntryForCompetitor.add(updateFix);
+                    competitorCacheEntry.add(updateFix);
                 }
             } finally {
                 getOrCreateLockForCompetitor(competitor).writeLock().unlock();
