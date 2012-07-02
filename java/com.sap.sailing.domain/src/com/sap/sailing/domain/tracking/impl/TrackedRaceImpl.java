@@ -763,10 +763,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         Distance result;
         if (from != null) {
-            result = crossTrackErrorCache.getAverageCrossTrackError(competitor, from, timePoint, /* upwindOnly */ true, /* waitForLatest */ true);
+            result = getAverageCrossTrackError(competitor, from, timePoint);
         } else {
             result = null;
         }
+        return result;
+    }
+
+    @Override
+    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to)
+            throws NoWindException {
+        Distance result;
+        result = crossTrackErrorCache.getAverageCrossTrackError(competitor, from, to, /* upwindOnly */ true, /* waitForLatest */ true);
         return result;
     }
 

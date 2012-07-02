@@ -409,4 +409,6 @@ public interface TrackedRace extends Serializable {
      * be sorted "worst".
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+
+    Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to) throws NoWindException;
 }
