@@ -1612,9 +1612,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 if (raceColumn.getTrackedRace(fleet) != null) {
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
-                    if (withGeoLocationData) {
+                    if (withRaceData) {
                         // Getting the places of the race
-                        PlacemarkOrderDTO racePlaces = getRacePlaces(trackedRace);
+                        PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
                         // Creating raceDTO and getting the dates
                         race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
                         race.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
