@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
@@ -51,9 +51,9 @@ public class WindSettingPanel extends FormPanel {
                 if (latDegBox.getValue() != null && lngDegBox.getValue() != null) {
                     wind.position = new PositionDTO(latDegBox.getValue(), lngDegBox.getValue());
                 }
-                List<EventAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
+                List<RegattaAndRaceIdentifier> selectedRaces = raceSelectionProvider.getSelectedRaces();
                 // Here we assume that single selection is enabled because the WindPanel creates a TrackedComposite with disabled multi selection.
-                final EventAndRaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size()-1);
+                final RegattaAndRaceIdentifier raceIdentifier = selectedRaces.get(selectedRaces.size()-1);
                 sailingService.setWind(raceIdentifier, wind, new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {

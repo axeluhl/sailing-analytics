@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 public interface WindShower {
-    void showWind(EventAndRaceIdentifier race);
+    void showWind(RegattaAndRaceIdentifier race);
 }

@@ -13,4 +13,7 @@ interface ComponentResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/settings.png")
     ImageResource settingsIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/leaderboardsettings.png")
+    ImageResource darkSettingsIcon();
 }

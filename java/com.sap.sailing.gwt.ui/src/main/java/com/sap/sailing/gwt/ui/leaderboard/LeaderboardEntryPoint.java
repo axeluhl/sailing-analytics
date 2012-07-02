@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -11,14 +10,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.client.AbstractEntryPoint;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.shared.panels.BreadcrumbPanel;
 
 
 public class LeaderboardEntryPoint extends AbstractEntryPoint {
@@ -28,13 +25,17 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     @Override
     public void onModuleLoad() {     
         super.onModuleLoad();
+        final boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null
+                && Window.Location.getParameter("showRaceDetails").equalsIgnoreCase("true");
+        final boolean embedded = Window.Location.getParameter("embedded") != null
+                && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
                 leaderboardName = Window.Location.getParameter("name");
                 leaderboardGroupName = Window.Location.getParameter("leaderboardGroupName");
                 if (leaderboardNames.contains(leaderboardName)) {
-                    createUI();
+                    createUI(showRaceDetails, embedded);
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
@@ -47,54 +48,37 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         });
     }
     
-    private void createUI() {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(leaderboardName, stringMessages);
-        logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
+    private void createUI(boolean showRaceDetails, boolean embedded) {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
-        mainPanel.addNorth(logoAndTitlePanel, 68);
-        
+        LogoAndTitlePanel logoAndTitlePanel = null;
+        if (!embedded) {
+            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName,
+                    stringMessages.leaderboard() + " " + leaderboardName, stringMessages);
+            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
+            mainPanel.addNorth(logoAndTitlePanel, 68);
+        }
         ScrollPanel contentScrollPanel = new ScrollPanel();
-        BreadcrumbPanel breadcrumbPanel = null;
         
         String tvModeParam = Window.Location.getParameter("tvMode");
         if (tvModeParam != null) {
             Timer timer = new Timer(PlayModes.Replay, 1000l);
+            timer.setLivePlayDelayInMillis(5000l);
             TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
-                    userAgentType, null, timer, logoAndTitlePanel, mainPanel);
+                    userAgentType, null, timer, logoAndTitlePanel, mainPanel, showRaceDetails);
             contentScrollPanel.setWidget(tvViewPanel);
         } else {
+            Timer timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
+            timer.setLivePlayDelayInMillis(5000l);
             LeaderboardPanel leaderboardPanel =  new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
                     LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false),
-                    /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true),
-                    new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
+                    /* preSelectedRace */ null, new CompetitorSelectionModel(/* hasMultiSelection */ true), timer,
                     leaderboardName, leaderboardGroupName,
-                    LeaderboardEntryPoint.this, stringMessages, userAgentType);
+                    LeaderboardEntryPoint.this, stringMessages, userAgentType, showRaceDetails);
             contentScrollPanel.setWidget(leaderboardPanel);
-            
-            breadcrumbPanel = createBreadcrumbPanel();
         }
-        
-        if (breadcrumbPanel != null) {
-            mainPanel.addNorth(breadcrumbPanel, 30);
-        }
+
         mainPanel.add(contentScrollPanel);
     }
     
-    private BreadcrumbPanel createBreadcrumbPanel() {
-        ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
-        String debugParam = Window.Location.getParameter("gwt.codesvr");
-        if(leaderboardGroupName != null) {
-            if (Window.Location.getParameter("root").equals("overview")) {
-                String link = "/gwt/Spectator.html"
-                        + (debugParam != null && !debugParam.isEmpty() ? "?gwt.codesvr=" + debugParam : "");
-                breadcrumbLinksData.add(new Pair<String, String>(link, stringMessages.home()));
-            }
-            String link = "/gwt/Spectator.html?leaderboardGroupName=" + leaderboardGroupName
-                    + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : "");
-            breadcrumbLinksData.add(new Pair<String, String>(link, leaderboardGroupName));
-        }
-        return new BreadcrumbPanel(breadcrumbLinksData, leaderboardName.toUpperCase());
-    }
 }

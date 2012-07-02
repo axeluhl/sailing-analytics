@@ -20,6 +20,11 @@ import com.google.gwt.core.client.Scheduler.RepeatingCommand;
  */
 public class Timer {
     /**
+     * Used by {@link #quantizeTimeStamp(long)}; currently set to 1s (1000ms)
+     */
+    private static final long LIVE_CLOCK_QUANTUM = 1000;
+    
+    /**
      * The time point represented by this timer
      */
     private Date time;
@@ -68,6 +73,11 @@ public class Timer {
      * Applies only if the timer is in replay mode.
      */
     private double playSpeedFactor;
+
+    /**
+     * Set to <code>true</code> to enable the timer to advance the max time automatically if the current time gets greater than the max time 
+     */
+    private boolean autoAdvance;
     
     /**
      * The timer can run in two different modes: Live and Replay
@@ -91,7 +101,7 @@ public class Timer {
      * The timer is created in stopped state, using "now" as its current time, 1.0 as its {@link #playSpeedFactor
      * acceleration factor} and <code>delayBetweenAutoAdvancesInMilliseconds</code> as the
      * {@link #refreshInterval delay between automatic updates} should the timer be
-     * {@link #resume() started}. The {@link #livePlayDelayInMillis} is set to five seconds (5000ms).
+     * {@link #resume() started}. The {@link #livePlayDelayInMillis} is set to zero seconds.
      */
     public Timer(PlayModes playMode, long refreshInterval) {
         this.refreshInterval = refreshInterval;
@@ -101,7 +111,8 @@ public class Timer {
         playStateListeners = new HashSet<PlayStateListener>();
         playState = PlayStates.Stopped;
         playSpeedFactor = 1.0;
-        livePlayDelayInMillis = 5000l;
+        livePlayDelayInMillis = 0l;
+        autoAdvance = true;
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -198,7 +209,9 @@ public class Timer {
             if (playMode == PlayModes.Live) {
                 setTime(System.currentTimeMillis()-livePlayDelayInMillis);
             }
-            startAutoAdvance();
+            if(autoAdvance) {
+                startAutoAdvance();
+            }
             for (PlayStateListener playStateListener : playStateListeners) {
                 playStateListener.playStateChanged(playState, playMode);
             }
@@ -214,7 +227,8 @@ public class Timer {
                     if (playMode == PlayModes.Replay) {
                         newTime += (long) playSpeedFactor * refreshInterval;
                     } else {
-                        newTime = System.currentTimeMillis() - getLivePlayDelayInMillis(); 
+                        // play mode is Live; quantize to make cache hits more likely
+                        newTime = quantizeTimeStamp(System.currentTimeMillis() - getLivePlayDelayInMillis()); 
                     }
                     setTime(newTime);
                 }
@@ -226,15 +240,24 @@ public class Timer {
                     return playState == PlayStates.Playing ? true: false;
                 }
             }
+
         };
         scheduleAdvancerCommand(command);
+    }
+
+    /**
+     * In {@link PlayModes#Live live mode}, time stamps are quantized to make it more likely for the back-end to achieve
+     * a cache hit. Quantization is controlled by the {@link #LIVE_CLOCK_QUANTUM} constant.
+     */
+    private long quantizeTimeStamp(long millis) {
+        return millis - (millis % LIVE_CLOCK_QUANTUM);
     }
 
     private void scheduleAdvancerCommand(RepeatingCommand command) {
         Scheduler.get().scheduleFixedPeriod(command, (int) refreshInterval);
     }
     
-    public void setDelay(long delayInMilliseconds) {
+    public void setLivePlayDelayInMillis(long delayInMilliseconds) {
         this.livePlayDelayInMillis = delayInMilliseconds;
         if (getPlayState() == PlayStates.Playing) {
             setTime(new Date().getTime() - delayInMilliseconds);
@@ -261,5 +284,12 @@ public class Timer {
     public PlayModes getPlayMode() {
         return playMode;
     }
-    
+
+    public boolean isAutoAdvance() {
+        return autoAdvance;
+    }
+
+    public void setAutoAdvance(boolean autoAdvance) {
+        this.autoAdvance = autoAdvance;
+    }
 }

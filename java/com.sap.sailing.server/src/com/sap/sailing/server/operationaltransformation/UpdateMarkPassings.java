@@ -1,7 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.server.RacingEventService;
@@ -12,7 +12,7 @@ public class UpdateMarkPassings extends AbstractRaceOperation<Void> {
     private final Competitor competitor;
     private final Iterable<MarkPassing> markPassings;
     
-    public UpdateMarkPassings(EventAndRaceIdentifier raceIdentifier, Competitor competitor,
+    public UpdateMarkPassings(RegattaAndRaceIdentifier raceIdentifier, Competitor competitor,
             Iterable<MarkPassing> markPassings) {
         super(raceIdentifier);
         this.competitor = competitor;

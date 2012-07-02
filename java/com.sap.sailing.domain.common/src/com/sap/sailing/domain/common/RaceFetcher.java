@@ -4,12 +4,12 @@ public interface RaceFetcher {
     /**
      * Not for execution on the client; on the server, returns a <code>RaceDefinition</code> object.
      */
-    Object getRace(EventAndRaceIdentifier eventNameAndRaceName);
+    Object getRace(RegattaAndRaceIdentifier regattaNameAndRaceName);
 
     /**
      * Not for execution on the client; on the server, returns a <code>TrackedRace</code> object.
      */
-    Object getTrackedRace(EventAndRaceIdentifier eventNameAndRaceName);
+    Object getTrackedRace(RegattaAndRaceIdentifier regattaNameAndRaceName);
 
-    Object getExistingTrackedRace(RaceIdentifier eventNameAndRaceName);
+    Object getExistingTrackedRace(RaceIdentifier regattaNameAndRaceName);
 }

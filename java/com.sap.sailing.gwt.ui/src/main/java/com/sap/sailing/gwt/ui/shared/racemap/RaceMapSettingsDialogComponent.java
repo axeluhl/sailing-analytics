@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -95,7 +97,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         //Run zoomSettingsChanged to set the checkboxes to their correct state
         zoomSettingsChanged();
         
-        Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypes());
+        Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypesToShowWhenCompetitorIsClicked());
         vp.add(maneuversLabel);
         for (ManeuverType maneuverType : ManeuverType.values()) {
             CheckBox checkbox = dialog.createCheckbox(ManeuverTypeFormatter.format(maneuverType, stringMessages));
@@ -169,7 +171,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     }
 
     private RaceMapHelpLinesSettings getHelpLinesSettings() {
-        ArrayList<HelpLineTypes> helpLineTypes = new ArrayList<HelpLineTypes>();
+        Set<HelpLineTypes> helpLineTypes = new HashSet<HelpLineTypes>();
         for (Pair<CheckBox, HelpLineTypes> pair : checkboxAndHelpLineType) {
             if (pair.getA().getValue()) {
                 helpLineTypes.add(pair.getB());

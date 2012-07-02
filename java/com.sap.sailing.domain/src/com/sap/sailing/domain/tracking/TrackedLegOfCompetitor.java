@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 
@@ -77,8 +78,9 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * time point is after the competitor has finished this leg, all of the competitor's maneuvers during this leg will
      * be reported in chronological order. The list may be empty if no maneuvers happened between the point in time when
      * the competitor started the leg and <code>timePoint</code>.
+     * @param waitForLatest TODO
      */
-    List<Maneuver> getManeuvers(TimePoint timePoint) throws NoWindException;
+    List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet
@@ -153,5 +155,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
 
     Distance getAverageCrossTrackError(TimePoint timePoint) throws NoWindException;
+
+    Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
 
 }

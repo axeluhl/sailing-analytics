@@ -2,7 +2,7 @@ package com.sap.sailing.domain.tracking;
 
 import java.util.Set;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 
 /**
@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
  */
 public interface RacesHandle {
 
-    Event getEvent();
+    Regatta getRegatta();
     
     /**
      * Fetch the race definitions. If the race definitions represented by this handle haven't been created yet, the call
@@ -33,7 +33,7 @@ public interface RacesHandle {
      */
     Set<RaceDefinition> getRaces(long timeoutInMilliseconds);
 
-    DynamicTrackedEvent getTrackedEvent();
+    DynamicTrackedRegatta getTrackedRegatta();
 
     /**
      * The tracker managing the tracking of the race to which this is a handle.

@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
@@ -20,7 +20,7 @@ public abstract class Servlet extends HttpServlet {
 
     protected static final String PARAM_ACTION = "action";
     
-    protected static final String PARAM_NAME_EVENTNAME = "eventname";
+    protected static final String PARAM_NAME_REGATTANAME = "regattaname";
 
     protected static final String PARAM_NAME_RACENAME = "racename";
 
@@ -40,16 +40,16 @@ public abstract class Servlet extends HttpServlet {
         return racingEventServiceTracker.getService();
     }
 
-    protected Event getEvent(HttpServletRequest req) {
-        Event event = getService().getEventByName(req.getParameter(PARAM_NAME_EVENTNAME));
-        return event;
+    protected Regatta getRegatta(HttpServletRequest req) {
+        Regatta regatta = getService().getRegattaByName(req.getParameter(PARAM_NAME_REGATTANAME));
+        return regatta;
     }
 
     protected RaceDefinition getRaceDefinition(HttpServletRequest req) {
-        Event event = getEvent(req);
-        if (event != null) {
+        Regatta regatta = getRegatta(req);
+        if (regatta != null) {
             String racename = req.getParameter(PARAM_NAME_RACENAME);
-            for (RaceDefinition race : event.getAllRaces()) {
+            for (RaceDefinition race : regatta.getAllRaces()) {
                 if (race.getName().equals(racename)) {
                     return race;
                 }
@@ -58,9 +58,9 @@ public abstract class Servlet extends HttpServlet {
         return null;
     }
 
-    protected RaceDefinition getRaceDefinition(Event event, HttpServletRequest req) {
+    protected RaceDefinition getRaceDefinition(Regatta regatta, HttpServletRequest req) {
         String racename = req.getParameter(PARAM_NAME_RACENAME);
-        for (RaceDefinition race : event.getAllRaces()) {
+        for (RaceDefinition race : regatta.getAllRaces()) {
             if (race.getName().equals(racename)) {
                 return race;
             }
@@ -86,11 +86,11 @@ public abstract class Servlet extends HttpServlet {
     }
 
 	protected TrackedRace getTrackedRace(HttpServletRequest req) {
-	    Event event = getEvent(req);
+	    Regatta regatta = getRegatta(req);
 	    RaceDefinition race = getRaceDefinition(req);
 	    TrackedRace trackedRace = null;
-	    if (event != null && race != null) {
-	        trackedRace = getService().getOrCreateTrackedEvent(event).getTrackedRace(race);
+	    if (regatta != null && race != null) {
+	        trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
 	    }
 	    return trackedRace;
 	}

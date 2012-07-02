@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.sap.sailing.gwt.ui.shared.panels.ClosableWelcomeWidget;
 import com.sap.sailing.gwt.ui.shared.panels.SimpleWelcomeWidget;
 import com.sap.sailing.gwt.ui.shared.panels.WelcomeWidget;
 
@@ -14,7 +13,7 @@ public interface HasWelcomeWidget {
     /**
      * Sets the welcome widget of the component.
      * @param welcome The new welcome widget
-     * @see {@link WelcomeWidget}, {@link SimpleWelcomeWidget}, {@link ClosableWelcomeWidget}, ...
+     * @see {@link WelcomeWidget}, {@link SimpleWelcomeWidget}
      */
     void setWelcomeWidget(WelcomeWidget welcome);
     void setWelcomeWidgetVisible(boolean isVisible);

@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -70,7 +70,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
         if (date != null) {
             Date from = new Date(date.getTime() - windIndicators.length * millisecondStepsPerLabel);
             if (race != null) {
-                sailingService.getWindInfo(race, from, millisecondStepsPerLabel,
+                sailingService.getAveragedWindInfo(race, from, millisecondStepsPerLabel,
                         windIndicators.length, position.latDeg, position.lngDeg, /* all sources */ null,
                         new AsyncCallback<WindInfoForRaceDTO>() {
                             @Override
@@ -148,7 +148,7 @@ public class SmallWindHistoryPanel extends FormPanel implements TimeListener, Ra
     }
 
     @Override
-    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         if (!selectedRaces.isEmpty()) {
             race = selectedRaces.get(selectedRaces.size() - 1);
             updateWindDisplay();

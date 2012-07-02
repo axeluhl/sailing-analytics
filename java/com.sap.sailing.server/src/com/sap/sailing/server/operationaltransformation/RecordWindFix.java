@@ -1,6 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -10,7 +10,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 public class RecordWindFix extends AbstractWindOperation {
     private static final long serialVersionUID = 6004214406759400039L;
     
-    public RecordWindFix(EventAndRaceIdentifier raceIdentifier, WindSource windSource, Wind wind) {
+    public RecordWindFix(RegattaAndRaceIdentifier raceIdentifier, WindSource windSource, Wind wind) {
         super(raceIdentifier, windSource, wind);
     }
 

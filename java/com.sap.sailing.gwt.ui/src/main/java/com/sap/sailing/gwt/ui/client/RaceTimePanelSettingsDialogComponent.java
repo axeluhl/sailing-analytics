@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -14,12 +14,12 @@ public class RaceTimePanelSettingsDialogComponent extends TimePanelSettingsDialo
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         Widget widget = super.getAdditionalWidget(dialog);
-        HorizontalPanel labelAndTDelayForLiveBoxPanel = new HorizontalPanel();
-        labelAndTDelayForLiveBoxPanel.setSpacing(5);
-        labelAndTDelayForLiveBoxPanel.add(new Label(getStringMessages().delayForLiveMode()));
+        FlowPanel labelAndTDelayForLiveBoxPanel = new FlowPanel();
+        Label delayForLiveMode = new Label(getStringMessages().delayForLiveMode());
+        labelAndTDelayForLiveBoxPanel.add(delayForLiveMode);
         RaceTimesInfoDTO raceTimesInfo = initialSettings.getRaceTimesInfo();
-        if (raceTimesInfo != null && raceTimesInfo.startOfTracking != null) {
-            long delayforLiveModeInMs = System.currentTimeMillis() - raceTimesInfo.getStartOfTracking().getTime();
+        if (raceTimesInfo != null && raceTimesInfo.startOfRace != null) {
+            long delayforLiveModeInMs = System.currentTimeMillis() - raceTimesInfo.getStartOfRace().getTime();
             labelAndTDelayForLiveBoxPanel.add(new Label(delayforLiveModeInMs / 1000 + " s"));
         }
         mainContentPanel.add(labelAndTDelayForLiveBoxPanel);

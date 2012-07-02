@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
 /**
- * Configuration parameters that can be used to connect to a TracTrac event / race.
+ * Configuration parameters that can be used to connect to a SwissTiming event / race.
  * 
  * @author Axel Uhl (D043530)
  *

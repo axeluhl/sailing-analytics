@@ -1,15 +1,16 @@
 #!/bin/sh
 exec_dir=$PWD
-cd /home/trac/git
+GIT_DIR=/home/trac/git
+cd $GIT_DIR
 active_branch=$(git symbolic-ref -q HEAD)
 active_branch=`basename $active_branch`
 echo Active branch is: $active_branch
 cd $exec_dir
-server_instance=`basename \`pwd\``
+server_instance=`basename \`pwd\` | sed -e 's/[12]$//'`
 echo Active server is: $server_instance
-if [ $active_branch == $server_instance ]
-then
-p2PluginRepository=~/git/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/x86_64
+#if [ $active_branch == $server_instance ]
+#then
+p2PluginRepository=$GIT_DIR/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/x86_64
 echo p2 repository for branch $active_branch: $p2PluginRepository
 echo Remove old installation
 rm -rf plugins/*.*
@@ -17,13 +18,13 @@ rm -rf org.eclipse.*
 rm -rf configuration/org.eclipse.*
 echo Install p2 content
 cp -v $p2PluginRepository/configuration/config.ini configuration
-cp -v ~/git/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-cp -v ~/git/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
+cp -v $GIT_DIR/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
+cp -v $GIT_DIR/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
 cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration
 cp -v $p2PluginRepository/plugins/*.jar plugins
 echo Done.
-else
-   echo "********** CANCEL INSTALLATION **************************"
-   echo "ACTIVE BRANCH DOES NOT FIT THE CURRENT SERVER INSTANCE!!!"
-fi
+#else
+#   echo "********** CANCEL INSTALLATION **************************"
+#   echo "ACTIVE BRANCH DOES NOT FIT THE CURRENT SERVER INSTANCE!!!"
+#fi
 

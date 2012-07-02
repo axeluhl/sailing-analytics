@@ -2,14 +2,14 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class AddWaypoint extends WaypointOperation {
     private static final long serialVersionUID = -1965390080325959255L;
 
-    public AddWaypoint(EventAndRaceIdentifier raceIdentifier, int zeroBasedIndex, Waypoint waypoint) {
+    public AddWaypoint(RegattaAndRaceIdentifier raceIdentifier, int zeroBasedIndex, Waypoint waypoint) {
         super(raceIdentifier, zeroBasedIndex, waypoint);
     }
 

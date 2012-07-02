@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 
 public interface TrackedRaceChangedListener {
-    void changeTrackingRace(EventNameAndRaceName eventNameAndRaceName, boolean isTracked);
+    void changeTrackingRace(RegattaNameAndRaceName regattaNameAndRaceName, boolean isTracked);
 }

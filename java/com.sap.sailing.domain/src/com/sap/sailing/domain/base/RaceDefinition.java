@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.Named;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface RaceDefinition extends Named {
+public interface RaceDefinition extends Named, WithID {
     BoatClass getBoatClass();
     
     Course getCourse();

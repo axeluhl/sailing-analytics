@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -14,29 +15,32 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 
-public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDTO> {
+public abstract class LeaderboardDialog extends DataEntryDialog<StrippedLeaderboardDTO> {
     protected final StringMessages stringConstants;
     protected TextBox entryField;
-    protected LeaderboardDTO leaderboard;
+    protected StrippedLeaderboardDTO leaderboard;
+    protected ListBox regattaListBox;
+    protected Collection<RegattaDTO> existingRegattas;
     
     protected LongBox[] discardThresholdBoxes;
     protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
-    protected static class LeaderboardParameterValidator implements Validator<LeaderboardDTO> {
+    protected static class LeaderboardParameterValidator implements Validator<StrippedLeaderboardDTO> {
         protected final StringMessages stringConstants;
-        protected final Collection<LeaderboardDTO> existingLeaderboards;
+        protected final Collection<StrippedLeaderboardDTO> existingLeaderboards;
         
-        public LeaderboardParameterValidator(StringMessages stringConstants, Collection<LeaderboardDTO> existingLeaderboards){
+        public LeaderboardParameterValidator(StringMessages stringConstants, Collection<StrippedLeaderboardDTO> existingLeaderboards){
             super();
             this.stringConstants = stringConstants;
             this.existingLeaderboards = existingLeaderboards;
         }
 
         @Override
-        public String getErrorMessage(LeaderboardDTO leaderboardToValidate) {
+        public String getErrorMessage(StrippedLeaderboardDTO leaderboardToValidate) {
             String errorMessage;
             boolean nonEmpty = leaderboardToValidate.name != null && leaderboardToValidate.name.length() > 0;
 
@@ -45,12 +49,14 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDTO> 
                 // TODO what are correct values for discarding Thresholds?
                 if (0 < leaderboardToValidate.discardThresholds.length){ 
                     discardThresholdsAscending = discardThresholdsAscending
-                            && leaderboardToValidate.discardThresholds[i - 1] < leaderboardToValidate.discardThresholds[i];
+                            && leaderboardToValidate.discardThresholds[i - 1] < leaderboardToValidate.discardThresholds[i]
+                    // and if one box is empty, all subsequent boxes need to be empty too
+                    && (leaderboardToValidate.discardThresholds[i] == 0 || leaderboardToValidate.discardThresholds[i-1] > 0);
                 }
             }
             
             boolean unique = true;
-            for (LeaderboardDTO dao : existingLeaderboards) {
+            for (StrippedLeaderboardDTO dao : existingLeaderboards) {
                 if(dao.name.equals(leaderboardToValidate.name)){
                     unique = false;
                 }
@@ -69,21 +75,27 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDTO> 
         }
     }
     
-    public LeaderboardDialog(LeaderboardDTO leaderboardDTO,  StringMessages stringConstants,
-            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDTO> callback) {
+    public LeaderboardDialog(StrippedLeaderboardDTO leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
+            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<StrippedLeaderboardDTO> callback) {
         super(stringConstants.leaderboardName(), null, stringConstants.ok(),
                 stringConstants.cancel(), validator, callback);
+        this.existingRegattas = existingRegattas;
         this.stringConstants = stringConstants;
         this.leaderboard = leaderboardDTO;
     }
     
     @Override
-    protected LeaderboardDTO getResult() {
+    protected StrippedLeaderboardDTO getResult() {
         List<Integer> discardThresholds = new ArrayList<Integer>();
-        for (int i = 0; i < discardThresholdBoxes.length; i++) {
-            if (discardThresholdBoxes[i].getValue() != null
-                    && discardThresholdBoxes[i].getValue().toString().length() > 0) {
-                discardThresholds.add(discardThresholdBoxes[i].getValue().intValue());
+        // go backwards; starting from first non-zero element, add them; take over leading zeroes which validator shall discard
+        for (int i = discardThresholdBoxes.length-1; i>=0; i--) {
+            if ((discardThresholdBoxes[i].getValue() != null
+                    && discardThresholdBoxes[i].getValue().toString().length() > 0) || !discardThresholds.isEmpty()) {
+                if (discardThresholdBoxes[i].getValue() == null) {
+                    discardThresholds.add(0, 0);
+                } else {
+                    discardThresholds.add(0, discardThresholdBoxes[i].getValue().intValue());
+                }
             }
         }
         int[] discardThresholdsBoxContents = new int[discardThresholds.size()];
@@ -92,6 +104,7 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDTO> 
         }
         leaderboard.name = entryField.getValue();
         leaderboard.discardThresholds = discardThresholdsBoxContents;
+        leaderboard.regatta = getSelectedRegatta();
         return leaderboard;
     }
 
@@ -103,8 +116,20 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDTO> 
             panel.add(additionalWidget);
         }
         panel.add(entryField);
+        
+        HorizontalPanel regattaPanel = new HorizontalPanel();
+        regattaPanel.setSpacing(3);
+        regattaPanel.add(new Label(stringConstants.regatta() + ":"));
+        regattaListBox.addItem(stringConstants.noRegatta());
+        for (RegattaDTO regatta : existingRegattas) {
+            regattaListBox.addItem(regatta.name);
+        }
+        regattaPanel.add(regattaListBox);
+        panel.add(regattaPanel);
+        
         panel.add(new Label(stringConstants.discardRacesFromHowManyStartedRacesOn()));
         HorizontalPanel hp = new HorizontalPanel();
+        hp.setSpacing(3);
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
             hp.add(new Label("" + (i + 1) + "."));
             hp.add(discardThresholdBoxes[i]);
@@ -113,6 +138,21 @@ public abstract class LeaderboardDialog extends DataEntryDialog<LeaderboardDTO> 
         return panel;
     }
 
+    public RegattaDTO getSelectedRegatta() {
+        RegattaDTO result = null;
+        int selIndex = regattaListBox.getSelectedIndex();
+        if(selIndex > 0) { // the zero index represents the 'no selection' text
+            String itemText = regattaListBox.getItemText(selIndex);
+            for(RegattaDTO regattaDTO: existingRegattas) {
+                if(regattaDTO.name.equals(itemText)) {
+                    result = regattaDTO;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
     @Override
     public void show() {
         super.show();

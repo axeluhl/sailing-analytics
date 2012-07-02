@@ -52,10 +52,10 @@ public class GetWindInfoAction extends DefaultAsyncAction<WindInfoForRaceDTO> {
     public void execute(AsyncActionsExecutor asyncActionsExecutor) {
         switch (callVariant) {
         case Variant1:
-            sailingService.getWindInfo(raceIdentifier, from, millisecondsStepWidth, numberOfFixes, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) getWrapperCallback(asyncActionsExecutor));
+            sailingService.getAveragedWindInfo(raceIdentifier, from, millisecondsStepWidth, numberOfFixes, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) getWrapperCallback(asyncActionsExecutor));
             break;
         case Variant2:
-            sailingService.getWindInfo(raceIdentifier, fromDate, toDate, resolutionInMilliseconds, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) getWrapperCallback(asyncActionsExecutor));
+            sailingService.getAveragedWindInfo(raceIdentifier, fromDate, toDate, resolutionInMilliseconds, windSourceTypeNames, (AsyncCallback<WindInfoForRaceDTO>) getWrapperCallback(asyncActionsExecutor));
             break;
         }
     }

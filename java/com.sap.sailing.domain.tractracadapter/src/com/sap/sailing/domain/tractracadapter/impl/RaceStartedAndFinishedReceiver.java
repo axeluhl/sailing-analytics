@@ -7,12 +7,13 @@ import java.util.logging.Logger;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.data.ICallbackData;
@@ -21,9 +22,9 @@ import com.tractrac.clientmodule.data.StartStopTimesData;
 /**
  * The ordering of the {@link ControlPoint}s of a {@link Course} are received
  * dynamically through a callback interface. Therefore, when connected to an
- * {@link Event}, these orders are not yet defined. An instance of this class
+ * {@link Regatta}, these orders are not yet defined. An instance of this class
  * can be used to create the listeners needed to receive this information and
- * set it on an {@link Event}.
+ * set it on an {@link Regatta}.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -31,8 +32,9 @@ import com.tractrac.clientmodule.data.StartStopTimesData;
 public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Race, StartStopTimesData, Boolean> {
     private static final Logger logger = Logger.getLogger(RaceStartedAndFinishedReceiver.class.getName());
 
-    public RaceStartedAndFinishedReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedEvent);
+    public RaceStartedAndFinishedReceiver(DynamicTrackedRegatta trackedRegatta,
+            com.tractrac.clientmodule.Event tractracEvent, Simulator simulator, DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator);
     }
 
     /**
@@ -62,13 +64,19 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<Ra
         DynamicTrackedRace trackedRace = getTrackedRace(event.getA());
         if (trackedRace != null) {
             StartStopTimesData startStopTimesData = event.getB();
-            if(startStopTimesData != null) {
-                if(startStopTimesData.getStartTime() > 0) {
-                    MillisecondsTimePoint startOfTracking = new MillisecondsTimePoint(startStopTimesData.getStartTime());
+            if (startStopTimesData != null) {
+                final long startTime = startStopTimesData.getStartTime();
+                TimePoint startOfTracking = getSimulator() == null ?
+                        new MillisecondsTimePoint(startTime) :
+                            getSimulator().advance(new MillisecondsTimePoint(startTime));
+                if (startTime > 0) {
                     trackedRace.setStartOfTrackingReceived(startOfTracking);
                 }
-                if(startStopTimesData.getStopTime() > 0) {
-                    MillisecondsTimePoint endOfTracking = new MillisecondsTimePoint(startStopTimesData.getStopTime());
+                final long stopTime = startStopTimesData.getStopTime();
+                TimePoint endOfTracking = getSimulator() == null ?
+                        new MillisecondsTimePoint(stopTime) :
+                            getSimulator().advance(new MillisecondsTimePoint(stopTime));
+                if (stopTime > 0) {
                     trackedRace.setEndOfTrackingReceived(endOfTracking);
                 }
             }

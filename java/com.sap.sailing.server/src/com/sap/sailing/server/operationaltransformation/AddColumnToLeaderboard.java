@@ -1,5 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
@@ -10,7 +11,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
  * @author Axel Uhl (d043530)
  *
  */
-public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation<Void> {
+public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation<RaceColumn> {
     private static final long serialVersionUID = -7670764349119941051L;
     private final boolean medalRace;
     
@@ -20,9 +21,8 @@ public class AddColumnToLeaderboard extends AbstractLeaderboardColumnOperation<V
     }
 
     @Override
-    public Void internalApplyTo(RacingEventService toState) {
-        toState.addColumnToLeaderboard(getColumnName(), getLeaderboardName(), medalRace);
-        return null;
+    public RaceColumn internalApplyTo(RacingEventService toState) {
+        return toState.addColumnToLeaderboard(getColumnName(), getLeaderboardName(), medalRace);
     }
 
     @Override

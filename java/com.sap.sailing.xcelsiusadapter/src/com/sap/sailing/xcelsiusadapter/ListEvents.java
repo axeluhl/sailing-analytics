@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom.Document;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -34,26 +34,26 @@ public class ListEvents extends Action {
     public void perform() throws Exception {
         final Document table = getTable("data");
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm zzz");
-        final HashMap<String, Event> events = getEvents();
-        for (final String eventName : events.keySet()) {
-            final Event event = events.get(eventName);
-            final HashMap<String, RaceDefinition> races = getRaces(event);
+        final HashMap<String, Regatta> regattas = getRegattas();
+        for (final String regattaName : regattas.keySet()) {
+            final Regatta regatta = regattas.get(regattaName);
+            final HashMap<String, RaceDefinition> races = getRaces(regatta);
             for (final String raceName : races.keySet()) {
                 RaceDefinition race = races.get(raceName);
-                final TrackedRace trackedRace = getTrackedRace(event, race);
+                final TrackedRace trackedRace = getTrackedRace(regatta, race);
                 if (trackedRace != null) {
                     addRow();
                     addColumn(race.getBoatClass().getName());
-                    addColumn(eventName);
+                    addColumn(regattaName);
                     addColumn(raceName);
-                    addColumn(trackedRace.getStart() == null ? " " : dateFormat.format(trackedRace.getStart().asDate()));
+                    addColumn(trackedRace.getStartOfRace() == null ? " " : dateFormat.format(trackedRace.getStartOfRace().asDate()));
                     addColumn("" + Util.size(race.getCompetitors()));
                     Iterator<Waypoint> waypointsIter = race.getCourse().getWaypoints().iterator();
                     Position startPos = trackedRace
-                            .getApproximatePosition(waypointsIter.next(), trackedRace.getStart());
+                            .getApproximatePosition(waypointsIter.next(), trackedRace.getStartOfRace());
                     Position secondMarkPos = trackedRace.getApproximatePosition(waypointsIter.next(),
-                            trackedRace.getStart());
-                    Wind wind = trackedRace.getWind(startPos, trackedRace.getStart());
+                            trackedRace.getStartOfRace());
+                    Wind wind = trackedRace.getWind(startPos, trackedRace.getStartOfRace());
                     addColumn("" + wind.getBeaufort());
                     addColumn("" + wind.getFrom().getDegrees());
                     addColumn("0"); // gusts
@@ -79,7 +79,7 @@ public class ListEvents extends Action {
                     addColumn("" + startPos.getBearingGreatCircle(secondMarkPos).getDegrees());
                     addColumn("" + startPos.getLatDeg());
                     addColumn("" + startPos.getLngDeg());
-                    addColumn(URLEncoder.encode(eventName, "UTF-8"));
+                    addColumn(URLEncoder.encode(regattaName, "UTF-8"));
                     addColumn(URLEncoder.encode(raceName, "UTF-8"));
                 }
             }

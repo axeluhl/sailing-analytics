@@ -1,108 +1,53 @@
 package com.sap.sailing.domain.base.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.domain.base.EventListener;
-import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 
 public class EventImpl extends NamedImpl implements Event {
-    private static final long serialVersionUID = 6509564189552478869L;
-    private final Set<RaceDefinition> races;
-    private final BoatClass boatClass;
-    private transient Set<EventListener> eventListeners;
+    private static final long serialVersionUID = 855135446595485715L;
     
-    public EventImpl(String name, BoatClass boatClass) {
-        super(name+(boatClass==null?"":" ("+boatClass.getName()+")"));
-        races = new HashSet<RaceDefinition>();
-        eventListeners = new HashSet<EventListener>();
-        this.boatClass = boatClass;
+    private final Set<Regatta> regattas;
+    
+    private final Venue venue;
+
+    public EventImpl(String name, String venueName) {
+        this(name, new VenueImpl(venueName));
     }
     
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        eventListeners = new HashSet<>();
+    /**
+     * @param venue must not be <code>null</code>
+     */
+    public EventImpl(String name, Venue venue) {
+        super(name);
+        assert venue != null;
+        this.venue = venue;
+        this.regattas = new HashSet<Regatta>();
     }
 
     @Override
-    public Iterable<RaceDefinition> getAllRaces() {
-        return races;
+    public Iterable<Regatta> getRegattas() {
+        return Collections.unmodifiableSet(regattas);
+    }
+
+    @Override
+    public void addRegatta(Regatta regatta) {
+        regattas.add(regatta);
+    }
+
+    @Override
+    public void removeRegatta(Regatta regatta) {
+        regattas.remove(regatta);
+    }
+
+    @Override
+    public Venue getVenue() {
+        return venue;
     }
     
-    @Override
-    public RaceDefinition getRaceByName(String raceName) {
-        Iterable<RaceDefinition> allRaces = getAllRaces();
-        synchronized (allRaces) {
-            for (RaceDefinition r : getAllRaces()) {
-                if (r.getName().equals(raceName)) {
-                    return r;
-                }
-            }
-            return null;
-        }
-    }
-    
-    @Override
-    public void addRace(RaceDefinition race) {
-        if (getBoatClass() != null && race.getBoatClass() != getBoatClass()) {
-            throw new IllegalArgumentException("Boat class "+race.getBoatClass()+" doesn't match event's boat class "+getBoatClass());
-        }
-        synchronized (races) {
-            races.add(race);
-        }
-        synchronized (eventListeners) {
-            for (EventListener l : eventListeners) {
-                l.raceAdded(this, race);
-            }
-        }
-    }
-    
-    @Override
-    public void removeRace(RaceDefinition race) {
-        synchronized (races) {
-            races.remove(race);
-        }
-        synchronized (eventListeners) {
-            for (EventListener l : eventListeners) {
-                l.raceRemoved(this, race);
-            }
-        }
-    }
-
-    @Override
-    public BoatClass getBoatClass() {
-        return boatClass;
-    }
-
-    @Override
-    public Iterable<Competitor> getCompetitors() {
-        Set<Competitor> result = new HashSet<Competitor>();
-        for (RaceDefinition race : getAllRaces()) {
-            for (Competitor c : race.getCompetitors()) {
-                result.add(c);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public void addEventListener(EventListener listener) {
-        synchronized (eventListeners) {
-            eventListeners.add(listener);
-        }
-    }
-
-    @Override
-    public void removeEventListener(EventListener listener) {
-        synchronized (eventListeners) {
-            eventListeners.remove(listener);
-        }
-    }
-
 }

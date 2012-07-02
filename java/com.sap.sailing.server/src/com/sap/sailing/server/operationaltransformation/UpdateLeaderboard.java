@@ -39,7 +39,7 @@ public class UpdateLeaderboard extends AbstractLeaderboardOperation<Void> {
         if (!Arrays.equals(leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), newDiscardingThresholds)) {
             leaderboard.setResultDiscardingRule(new ResultDiscardingRuleImpl(newDiscardingThresholds));
         }
-        toState.updateStoredLeaderboard(leaderboard);
+        updateStoredLeaderboard(toState, leaderboard);
         return null;
     }
 

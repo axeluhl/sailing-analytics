@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -36,13 +36,13 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RacesHandle;
-import com.sap.sailing.domain.tracking.TrackedEventRegistry;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -57,21 +57,32 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     private final RaceSpecificMessageLoader messageLoader;
     private final DomainFactory domainFactory;
     private final Triple<String, String, Integer> id;
-    private final Event event;
+    private final Regatta regatta;
     private final WindStore windStore;
 
     private RaceDefinition race;
     private Course course;
     private StartList startList;
     private DynamicTrackedRace trackedRace;
+    private final DynamicTrackedRegatta trackedRegatta;
 
     private boolean loggedIgnore;
+    private final long delayToLiveInMillis;
     
     protected SwissTimingRaceTrackerImpl(String raceID, String hostname, int port, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
-            TrackedEventRegistry trackedEventRegistry, boolean canSendRequests) throws InterruptedException,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
+            UnknownHostException, IOException, ParseException {
+        this(domainFactory.getOrCreateRegatta(raceID, trackedRegattaRegistry), raceID, hostname, port, windStore, domainFactory, factory,
+                messageLoader, trackedRegattaRegistry, canSendRequests, delayToLiveInMillis);
+    }
+    
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String hostname, int port, WindStore windStore,
+            DomainFactory domainFactory, SwissTimingFactory factory, RaceSpecificMessageLoader messageLoader,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean canSendRequests, long delayToLiveInMillis) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         super();
+        this.regatta = regatta;
         this.connector = factory.getOrCreateSailMasterConnector(hostname, port, messageLoader, canSendRequests);
         this.domainFactory = domainFactory;
         this.raceID = raceID;
@@ -79,9 +90,14 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.windStore = windStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(raceID, this);
-        event = domainFactory.getOrCreateEvent(raceID);
-        setTrackedEvent(trackedEventRegistry.getOrCreateTrackedEvent(event));
+        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
+        this.delayToLiveInMillis = delayToLiveInMillis;
         connector.trackRace(raceID);
+    }
+
+    @Override
+    public DynamicTrackedRegatta getTrackedRegatta() {
+        return trackedRegatta;
     }
 
     static Triple<String, String, Integer> createID(String raceID, String hostname, int port) {
@@ -103,8 +119,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     public RacesHandle getRacesHandle() {
         return new RacesHandle() {
             @Override
-            public Event getEvent() {
-                return SwissTimingRaceTrackerImpl.this.getEvent();
+            public Regatta getRegatta() {
+                return SwissTimingRaceTrackerImpl.this.getRegatta();
             }
 
             @Override
@@ -118,8 +134,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             }
 
             @Override
-            public DynamicTrackedEvent getTrackedEvent() {
-                return SwissTimingRaceTrackerImpl.this.getTrackedEvent();
+            public DynamicTrackedRegatta getTrackedRegatta() {
+                return SwissTimingRaceTrackerImpl.this.getTrackedRegatta();
             }
 
             @Override
@@ -135,8 +151,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     }
 
     @Override
-    public Event getEvent() {
-        return event;
+    public Regatta getRegatta() {
+        return regatta;
     }
 
     @Override
@@ -209,8 +225,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             for (Triple<Integer, Integer, Long> markIndexRankAndTimeSinceStartInMilliseconds : markIndicesRanksAndTimesSinceStartInMilliseconds) {
                 Waypoint waypoint = Util.get(trackedRace.getRace().getCourse().getWaypoints(),
                         markIndexRankAndTimeSinceStartInMilliseconds.getA());
-                MillisecondsTimePoint timePoint = trackedRace.getStart() == null ? null : new MillisecondsTimePoint(
-                        trackedRace.getStart().asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
+                MillisecondsTimePoint timePoint = trackedRace.getStartOfRace() == null ? null : new MillisecondsTimePoint(
+                        trackedRace.getStartOfRace().asMillis() + markIndexRankAndTimeSinceStartInMilliseconds.getC());
                 MarkPassing markPassing = domainFactory.createMarkPassing(timePoint, waypoint,
                         domainFactory.getCompetitorByBoatID(boatID));
                 markPassingsByMarkIndex.put(markIndexRankAndTimeSinceStartInMilliseconds.getA(), markPassing);
@@ -248,8 +264,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         assert course != null;
         // now we can create the RaceDefinition and most other things
         Race swissTimingRace = messageLoader.getRace(raceID);
-        race = domainFactory.createRaceDefinition(event, swissTimingRace, startList, course);
-        trackedRace = getTrackedEvent().createTrackedRace(race, windStore,
+        race = domainFactory.createRaceDefinition(regatta, swissTimingRace, startList, course);
+        trackedRace = getTrackedRegatta().createTrackedRace(race, windStore, delayToLiveInMillis,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 new DynamicRaceDefinitionSet() {
@@ -263,14 +279,14 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     }
     
     /**
-     * Checks if {@link #getEvent()} still contains the {@link RaceDefinition} obtained when calling
-     * {@link TrackedRace#getRace()} on {@link #trackedRace} and if the {@link #getTrackedEvent() tracked event} for
-     * {@link #getEvent()} still contains {@link #trackedRace}. This is the precondition for updating the
+     * Checks if {@link #getRegatta()} still contains the {@link RaceDefinition} obtained when calling
+     * {@link TrackedRace#getRace()} on {@link #trackedRace} and if the {@link #getTrackedRegatta() tracked regatta} for
+     * {@link #getRegatta()} still contains {@link #trackedRace}. This is the precondition for updating the
      * {@link #trackedRace} with data received from the trackers.
      */
     private boolean isTrackedRaceStillReachable() {
-        return trackedRace != null && Util.contains(getEvent().getAllRaces(), trackedRace.getRace()) &&
-                getTrackedEvent().getExistingTrackedRace(trackedRace.getRace()) == trackedRace;
+        return trackedRace != null && Util.contains(getRegatta().getAllRaces(), trackedRace.getRace()) &&
+                getTrackedRegatta().getExistingTrackedRace(trackedRace.getRace()) == trackedRace;
     }
 
     @Override

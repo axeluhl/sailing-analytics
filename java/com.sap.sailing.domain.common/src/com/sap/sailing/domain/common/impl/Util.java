@@ -30,6 +30,45 @@ public class Util {
         }
     }
     
+    public static <T> int indexOf(Iterable<? extends T> i, T t) {
+        int result;
+        if (i instanceof List<?>) {
+            List<?> list = (List<?>) i;
+            result = list.indexOf(t);
+        } else {
+            boolean found = false;
+            int counter = 0;
+            for (T it : i) {
+                if (it == null && t == null
+                        || it != null && it.equals(t)) {
+                    result = counter;
+                    found = true;
+                    break;
+                }
+                counter++;
+            }
+            if (found) {
+                result = counter;
+            } else {
+                result = -1;
+            }
+        }
+        return result;
+    }
+    
+    public static <T> boolean equals(Iterable<? extends T> a, Iterable<? extends T> b) {
+        Iterator<? extends T> aIter = a.iterator();
+        Iterator<? extends T> bIter = b.iterator();
+        while (aIter.hasNext() && bIter.hasNext()) {
+            T ao = aIter.next();
+            T bo = bIter.next();
+            if (!ao.equals(bo)) {
+                return false;
+            }
+        }
+        return !aIter.hasNext() && !bIter.hasNext();
+    }
+    
     public static <T> T get(Iterable<T> iterable, int i) {
         if (iterable instanceof List<?>) {
             List<T> l = (List<T>) iterable;
@@ -72,43 +111,27 @@ public class Util {
 
         private B b;
 
-        private int hashCode;
+        private transient int hashCode;
 
         @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
         private Pair() {}
         
         public Pair( A a, B b ) {
-
             this.a = a;
             this.b = b;
-            hashCode = 0;
-        }
-
-        public void setA( A a ) {
-
-            this.a = a;
             hashCode = 0;
         }
 
         public A getA( ) {
-
             return a;
         }
 
-        public void setB( B b ) {
-
-            this.b = b;
-            hashCode = 0;
-        }
-
         public B getB( ) {
-
             return b;
         }
 
         @Override
         public int hashCode( ) {
-
             if ( hashCode == 0 ) {
                 hashCode = 17;
                 hashCode = 37 * hashCode + ( a != null ? a.hashCode( ) : 0 );
@@ -119,7 +142,6 @@ public class Util {
 
         @Override
         public boolean equals( Object obj ) {
-
             boolean result;
             if ( this == obj ) {
                 result = true;
@@ -134,7 +156,6 @@ public class Util {
 
         @Override
         public String toString( ) {
-
             return "[" + (a==null?"null":a.toString( )) + ", " +
                 (b==null?"null":b.toString( )) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
@@ -149,55 +170,32 @@ public class Util {
 
         private C c;
 
-        private int hashCode;
+        private transient int hashCode;
 
         @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
         private Triple() {}
 
         public Triple( A a, B b, C c ) {
-
             this.a = a;
             this.b = b;
             this.c = c;
-            hashCode = 0;
-        }
-
-        public void setA( A a ) {
-
-            this.a = a;
             hashCode = 0;
         }
 
         public A getA( ) {
-
             return a;
         }
 
-        public void setB( B b ) {
-
-            this.b = b;
-            hashCode = 0;
-        }
-
         public B getB( ) {
-
             return b;
         }
 
-        public void setC( C c ) {
-
-            this.c = c;
-            hashCode = 0;
-        }
-
         public C getC( ) {
-
             return c;
         }
 
         @Override
         public int hashCode( ) {
-
             if ( hashCode == 0 ) {
                 hashCode = 17;
                 hashCode = 37 * hashCode + ( a != null ? a.hashCode( ) : 0 );

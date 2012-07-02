@@ -1,7 +1,0 @@
-
-<div class="field">
-    <span>If you do not select one of the races shown the whole event will be configured</span><br/>
-    <tal:for repeat="race races">
-    <input type="checkbox" name="race-conf" value="${race['paramURL']}"/>&nbsp;${race['name']} (${race['ID']})<br/>
-    </tal:for>
-</div>

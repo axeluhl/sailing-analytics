@@ -10,14 +10,18 @@ import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.sap.sailing.mongodb.MongoDBConfiguration;
+import com.sap.sailing.mongodb.MongoDBService;
 
 public abstract class AbstractMongoDBTest {
     protected Mongo mongo;
     protected DB db;
     private final MongoDBConfiguration dbConfiguration;
+    private MongoDBService service;
     
     public AbstractMongoDBTest() {
         dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
+        service = MongoDBService.INSTANCE;
+        service.setConfiguration(getDBConfiguration());
     }
     
     protected MongoDBConfiguration getDBConfiguration() {
@@ -29,11 +33,19 @@ public abstract class AbstractMongoDBTest {
     }
     
     @Before
-    public void dropTestDB() throws UnknownHostException, MongoException {
+    public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {
         mongo = newMongo();
         assertNotNull(mongo);
-        mongo.dropDatabase(getDBConfiguration().getDatabaseName());
         db = mongo.getDB(getDBConfiguration().getDatabaseName());
+        dropAllCollections(db);
         assertNotNull(db);
+    }
+
+    private void dropAllCollections(DB theDB) throws InterruptedException {
+        db.dropDatabase();
+    }
+
+    protected MongoDBService getMongoService() {
+        return service;
     }
 }

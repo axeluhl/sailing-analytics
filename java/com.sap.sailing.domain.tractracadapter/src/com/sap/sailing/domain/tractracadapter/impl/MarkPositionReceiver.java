@@ -7,15 +7,17 @@ import java.util.logging.Logger;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.ControlPoint;
 import com.tractrac.clientmodule.Race;
@@ -24,9 +26,9 @@ import com.tractrac.clientmodule.data.ICallbackData;
 
 /**
  * The positions of the {@link ControlPoint}s of a {@link Course} are received dynamically through a callback interface.
- * Therefore, when connected to an {@link Event}, and even after receiving the order of the marks for a race course,
+ * Therefore, when connected to an {@link Regatta}, and even after receiving the order of the marks for a race course,
  * these orders are not yet defined. An instance of this class can be used to create the listeners needed to receive
- * this information and set it on an {@link Event}'s {@link ControlPoint}s.
+ * this information and set it on an {@link Regatta}'s {@link ControlPoint}s.
  * <p>
  * 
  * As a {@link MarkPositionReceiver} requires a tracked race in order to update the mark positions received, and since a
@@ -66,9 +68,9 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
      *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
      *            particularly the mark position loading will be constrained to this end time.
      */
-    public MarkPositionReceiver(final DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
-            TimePoint startOfTracking, TimePoint endOfTracking, final DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedEvent);
+    public MarkPositionReceiver(final DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
+            TimePoint startOfTracking, TimePoint endOfTracking, Simulator simulator, final DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator);
         this.startOfTracking = startOfTracking;
         this.endOfTracking = endOfTracking;
         // assumption: there is currently only one race per TracTrac Event object
@@ -80,19 +82,20 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
     /**
      * The listeners returned will, when added to a controller, receive events about the
      * position changes of marks during a race. Receiving such an event updates the Buoy's
-     * {@link GPSFixTrack} in the {@link TrackedEvent}. Starts a thread for this receiver,
+     * {@link GPSFixTrack} in the {@link TrackedRegatta}. Starts a thread for this receiver,
      * blocking for events received.
      */
     @Override
     public Iterable<TypeController> getTypeControllersAndStart() {
         List<TypeController> result = new ArrayList<TypeController>();
+        TimePoint now = MillisecondsTimePoint.now();
         TypeController controlPointListener = ControlPointPositionData.subscribe(getTracTracEvent(),
                 new ICallbackData<ControlPoint, ControlPointPositionData>() {
                     @Override
                     public void gotData(ControlPoint controlPoint, ControlPointPositionData record, boolean isLiveData) {
                         enqueue(new Triple<ControlPoint, ControlPointPositionData, Boolean>(controlPoint, record, isLiveData));
                     }
-                }, /* fromTime */ startOfTracking == null ? 0l : startOfTracking.asMillis(),
+                }, /* fromTime */ startOfTracking == null ? 0l : startOfTracking.compareTo(now) > 0 ? now.asMillis() : startOfTracking.asMillis(),
                    /* toTime */ endOfTracking == null ? Long.MAX_VALUE : endOfTracking.asMillis());
         result.add(controlPointListener);
         setAndStartThread(new Thread(this, getClass().getName()));
@@ -111,7 +114,12 @@ public class MarkPositionReceiver extends AbstractReceiverWithQueue<ControlPoint
         for (Race tractracRace : getTracTracEvent().getRaceList()) {
             DynamicTrackedRace trackedRace = getTrackedRace(tractracRace);
             if (trackedRace != null) {
-                trackedRace.recordFix(buoy, getDomainFactory().createGPSFixMoving(event.getB()));
+                GPSFixMoving markPosition = getDomainFactory().createGPSFixMoving(event.getB());
+                if (getSimulator() != null) {
+                    getSimulator().scheduleMarkPosition(buoy, markPosition);
+                } else {
+                    trackedRace.recordFix(buoy, markPosition);
+                }
             } else {
                 logger.warning("Couldn't find tracked race for race " + tractracRace.getName()
                         + ". Dropping mark position event " + event);

@@ -1,29 +1,72 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class RegattaDTO implements IsSerializable {
+public class RegattaDTO extends NamedDTO implements IsSerializable {
+    /**
+     * May be <code>null</code> in case the boat class is not known
+     */
     public BoatClassDTO boatClass;
     public List<RaceDTO> races;
+    public List<CompetitorDTO> competitors;
+    public List<SeriesDTO> series;
 
-    private EventDTO event;
+    public RegattaDTO() {
+    }
+
+    public RegattaDTO(String name, List<CompetitorDTO> competitors) {
+        super(name);
+        this.name = name;
+        this.competitors = competitors;
+    }
+
+    /**
+     * @return The start date of the first {@link #races Race}, or <code>null</code> if the start date isn't set
+     */
+    public Date getStartDate() {
+        return races.get(0).startOfRace;
+    }
     
-    public RegattaDTO() {}
-
-    public RegattaDTO(BoatClassDTO boatClass, List<RaceDTO> races) {
-        super();
-        this.boatClass = boatClass;
-        this.races = races;
+    /**
+     * @return <code>true</code> if at least one race of the regatta is currently tracked, else it returns <code>false</code>
+     */
+    public boolean currentlyTracked() {
+        boolean tracked = false;
+        for (RaceDTO race : races) {
+            tracked = race.currentlyTracked;
+            if (tracked) {
+                break;
+            }
+        }
+        return tracked;
     }
 
-    public EventDTO getEvent() {
-        return event;
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((competitors == null) ? 0 : competitors.hashCode());
+        return result;
     }
 
-    public void setEvent(EventDTO event) {
-        this.event = event;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RegattaDTO other = (RegattaDTO) obj;
+        if (competitors == null) {
+            if (other.competitors != null)
+                return false;
+        } else if (!competitors.equals(other.competitors))
+            return false;
+        return true;
     }
     
 }

@@ -7,9 +7,10 @@ import java.util.logging.Logger;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Race;
 import com.tractrac.clientmodule.RaceCompetitor;
@@ -21,8 +22,9 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
 
     private int received;
 
-    public RawPositionReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent, DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedEvent);
+    public RawPositionReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
+            DomainFactory domainFactory, Simulator simulator) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator);
     }
     
     /**
@@ -58,6 +60,10 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<RaceCompetito
         DynamicTrackedRace trackedRace = getTrackedRace(race);
         if (trackedRace != null) {
             GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
+            if (getSimulator() != null) {
+                fix = new GPSFixMovingImpl(fix.getPosition(), getSimulator().delay(
+                        fix.getTimePoint()), fix.getSpeed());
+            }
             Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
             trackedRace.recordFix(competitor, fix);
         } else {

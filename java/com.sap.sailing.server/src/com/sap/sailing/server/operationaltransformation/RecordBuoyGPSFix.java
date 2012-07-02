@@ -1,7 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.base.Buoy;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.RacingEventService;
@@ -12,7 +12,7 @@ public class RecordBuoyGPSFix extends AbstractRaceOperation<Void> {
     private final Buoy buoy;
     private final GPSFix fix;
     
-    public RecordBuoyGPSFix(EventAndRaceIdentifier raceIdentifier, Buoy buoy, GPSFix fix) {
+    public RecordBuoyGPSFix(RegattaAndRaceIdentifier raceIdentifier, Buoy buoy, GPSFix fix) {
         super(raceIdentifier);
         this.buoy = buoy;
         this.fix = fix;

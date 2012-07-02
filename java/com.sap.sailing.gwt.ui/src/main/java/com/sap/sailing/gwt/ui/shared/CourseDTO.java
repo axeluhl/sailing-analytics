@@ -1,14 +1,13 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.impl.Util.Pair;
 
 public class CourseDTO implements IsSerializable {
-    public Pair<MarkDTO, MarkDTO> startGate;
-
-    public Pair<MarkDTO, MarkDTO> finishGate;
-    
-    public List<MarkDTO> buoys;
+    public List<PositionDTO> waypointPositions;
+    public List<PositionDTO> startBuoyPositions;
+    public List<PositionDTO> finishBuoyPositions;
+    public Set<MarkDTO> buoys;
 }

@@ -25,3 +25,8 @@ Stored-URI: tcp://germanmaster.traclive.dk:1521
 http://germanmaster.traclive.dk/events/event_20100725_OWorlds/jsonservice.php
 Live-URI: tcp://germanmaster.traclive.dk:1520
 Stored-URI: tcp://germanmaster.traclive.dk:1521
+
+Kieler Woche 2012:
+http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/jsonservice.php
+http://germanmaster.traclive.dk/events/event_20120621_KielerWoch/jsonservice.php
+http://germanmaster.traclive.dk/events/event_20120615_KielerWoch1/jsonservice.php

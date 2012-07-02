@@ -12,7 +12,6 @@ import com.sap.sailing.geocoding.impl.ReverseGeocoderImpl;
 
 public interface ReverseGeocoder {
     final ReverseGeocoder INSTANCE = new ReverseGeocoderImpl();
-    final String GEONAMES_USER = "sailtracking";
     final double POSITION_CACHE_DISTANCE_LIMIT_IN_KM = 5.0;
 
     /**

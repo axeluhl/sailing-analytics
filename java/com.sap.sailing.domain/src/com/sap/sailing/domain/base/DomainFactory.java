@@ -31,12 +31,20 @@ public interface DomainFactory {
 
     /**
      * Caches an existing waypoint. This is useful, e.g., after de-serialization of a waypoint that has a yet unknown ID.
+     * 
+     * @param waypoint a waypoint that hasn't been cached in this domain factory before
      */
-    void cacheWaypoint(Waypoint  waypoint);
+    void cacheWaypoint(Waypoint waypoint);
 
     MarkPassing createMarkPassing(TimePoint timePoint, Waypoint waypoint, Competitor competitor);
     
     BoatClass getOrCreateBoatClass(String name, boolean typicallyStartsUpwind);
+    
+    /**
+     * Like {@link #getOrCreateBoatClass(String, boolean)}, only that a default for <code>typicallyStartsUpwind</code> based
+     * on the boat class name is calculated.
+     */
+    BoatClass getOrCreateBoatClass(String name);
     
     Competitor getExistingCompetitorById(Serializable competitorId);
     

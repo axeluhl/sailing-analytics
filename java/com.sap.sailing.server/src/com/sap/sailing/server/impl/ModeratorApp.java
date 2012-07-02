@@ -14,10 +14,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.CountryCode;
@@ -100,7 +100,8 @@ public class ModeratorApp extends Servlet {
                     jsonCompetitor.put("name", competitor.getName());
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     JSONArray jsonFixes = new JSONArray();
-                    synchronized (track) {
+                    track.lockForRead();
+                    try {
                         Iterator<GPSFixMoving> fixIter;
                         if (sinceTimePoint == null) {
                             fixIter = track.getFixes().iterator();
@@ -119,9 +120,17 @@ public class ModeratorApp extends Servlet {
                             jsonFix.put("lngdeg", fix.getPosition().getLngDeg());
                             jsonFix.put("truebearingdeg", fix.getSpeed().getBearing().getDegrees());
                             jsonFix.put("knotspeed", fix.getSpeed().getKnots());
-                            jsonFix.put("tack", trackedRace.getTack(competitor, fix.getTimePoint()).name());
+                            String tackName;
+                            try {
+                                tackName = trackedRace.getTack(competitor, fix.getTimePoint()).name();
+                                jsonFix.put("tack", tackName);
+                            } catch (NoWindException e) {
+                                // don't output tack
+                            }
                             jsonFixes.add(jsonFix);
                         }
+                    } finally {
+                        track.unlockAfterRead();
                     }
                     jsonCompetitor.put("track", jsonFixes);
                     jsonCompetitors.add(jsonCompetitor);
@@ -141,7 +150,7 @@ public class ModeratorApp extends Servlet {
         } else {
             try {
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-                        trackedRace.getStart() != null ? trackedRace.getStart()
+                        trackedRace.getStartOfRace() != null ? trackedRace.getStartOfRace()
                                 : trackedRace.getStartOfTracking() != null ? trackedRace.getStartOfTracking()
                                         : trackedRace.getTimePointOfNewestEvent() == null ? MillisecondsTimePoint.now()
                                                 : trackedRace.getTimePointOfNewestEvent());
@@ -197,7 +206,7 @@ public class ModeratorApp extends Servlet {
                 jsonRace.put("name", trackedRace.getRace().getName());
                 jsonRace.put("startoftracking", trackedRace.getStartOfTracking() == null ? 0l : trackedRace
                         .getStartOfTracking().asMillis());
-                jsonRace.put("start", trackedRace.getStart() == null ? 0l : trackedRace.getStart().asMillis());
+                jsonRace.put("start", trackedRace.getStartOfRace() == null ? 0l : trackedRace.getStartOfRace().asMillis());
                 jsonRace.put("timeofnewestevent", trackedRace.getTimePointOfNewestEvent() == null ? 0l : trackedRace
                         .getTimePointOfNewestEvent().asMillis());
                 jsonRace.put("timeoflastevent", trackedRace.getTimePointOfLastEvent() == null ? 0l : trackedRace
@@ -349,17 +358,19 @@ public class ModeratorApp extends Servlet {
     }
 
     private void listEvents(HttpServletResponse resp) throws IOException {
-        JSONArray eventList = new JSONArray();
-        for (Event event : getService().getAllEvents()) {
+        // TODO one a new top-level event will have been introduced, produce it here
+        JSONArray regattaList = new JSONArray();
+        for (Regatta regatta : getService().getAllRegattas()) {
             JSONObject jsonEvent = new JSONObject();
-            jsonEvent.put("name", event.getName());
-            if (event.getBoatClass() != null) {
-                jsonEvent.put("boatclass", event.getBoatClass().getName());
+            jsonEvent.put("name", regatta.getName());
+            if (regatta.getBoatClass() != null) {
+                jsonEvent.put("boatclass", regatta.getBoatClass().getName());
             }
             JSONArray jsonCompetitors = new JSONArray();
-            for (Competitor competitor : event.getCompetitors()) {
+            for (Competitor competitor : regatta.getCompetitors()) {
                 JSONObject jsonCompetitor = new JSONObject();
                 jsonCompetitor.put("name", competitor.getName());
+                jsonCompetitor.put("sailID", competitor.getBoat()==null?"":competitor.getBoat().getSailID());
                 jsonCompetitor.put("nationality", competitor.getTeam().getNationality().getThreeLetterIOCAcronym());
                 CountryCode countryCode = competitor.getTeam().getNationality().getCountryCode();
                 jsonCompetitor.put("nationalityISO2", countryCode == null ? "" : countryCode.getTwoLetterISOCode());
@@ -376,14 +387,14 @@ public class ModeratorApp extends Servlet {
             }
             jsonEvent.put("competitors", jsonCompetitors);
             JSONArray jsonRaces = new JSONArray();
-            for (RaceDefinition race : event.getAllRaces()) {
+            for (RaceDefinition race : regatta.getAllRaces()) {
                 // don't wait for the arrival of a tracked race; just ignore it if it's not currently being tracked
-                TrackedRace trackedRace = getService().getOrCreateTrackedEvent(event).getExistingTrackedRace(race);
+                TrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getExistingTrackedRace(race);
                 if (trackedRace != null) {
                     JSONObject jsonRace = new JSONObject();
                     jsonRace.put("name", race.getName());
                     jsonRace.put("boatclass", race.getBoatClass() == null ? "" : race.getBoatClass().getName());
-                    TimePoint start = trackedRace.getStart();
+                    TimePoint start = trackedRace.getStartOfRace();
                     jsonRace.put("start", start == null ? Long.MAX_VALUE : start.asMillis());
                     JSONArray jsonLegs = new JSONArray();
                     for (Leg leg : race.getCourse().getLegs()) {
@@ -397,8 +408,8 @@ public class ModeratorApp extends Servlet {
                 }
             }
             jsonEvent.put("races", jsonRaces);
-            eventList.add(jsonEvent);
+            regattaList.add(jsonEvent);
         }
-        eventList.writeJSONString(resp.getWriter());
+        regattaList.writeJSONString(resp.getWriter());
     }
 }

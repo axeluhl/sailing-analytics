@@ -137,81 +137,116 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     private Pair<FixType, FixType> getFixesForPositionEstimation(TimePoint timePoint, boolean inclusive) {
-        FixType lastFixBefore = inclusive ? getLastFixAtOrBefore(timePoint) : getLastFixBefore(timePoint);
-        FixType firstFixAfter = inclusive ? getFirstFixAtOrAfter(timePoint) : getFirstFixAfter(timePoint);
-        return new Pair<FixType, FixType>(lastFixBefore, firstFixAfter);
+        lockForRead();
+        try {
+            FixType lastFixBefore = inclusive ? getLastFixAtOrBefore(timePoint) : getLastFixBefore(timePoint);
+            FixType firstFixAfter = inclusive ? getFirstFixAtOrAfter(timePoint) : getFirstFixAfter(timePoint);
+            return new Pair<FixType, FixType>(lastFixBefore, firstFixAfter);
+        } finally {
+            unlockAfterRead();
+        }
     }
     
     @Override
     public Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate) {
-        Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(timePoint, /* inclusive */ true);
-        return getEstimatedPosition(timePoint, extrapolate, fixesForPositionEstimation.getA(), fixesForPositionEstimation.getB());
+        lockForRead();
+        try {
+            Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(timePoint, /* inclusive */ true);
+            return getEstimatedPosition(timePoint, extrapolate, fixesForPositionEstimation.getA(), fixesForPositionEstimation.getB());
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
-        Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ false);
-        return new Pair<TimePoint, TimePoint>(fixesForPositionEstimation.getA() == null ? null : fixesForPositionEstimation.getA().getTimePoint(),
-                fixesForPositionEstimation.getB() == null ? null : fixesForPositionEstimation.getB().getTimePoint());
+        lockForRead();
+        try {
+            Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ false);
+            return new Pair<TimePoint, TimePoint>(fixesForPositionEstimation.getA() == null ? null : fixesForPositionEstimation.getA().getTimePoint(),
+                    fixesForPositionEstimation.getB() == null ? null : fixesForPositionEstimation.getB().getTimePoint());
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public Position getEstimatedRawPosition(TimePoint timePoint, boolean extrapolate) {
-        FixType lastFixAtOrBefore = getLastRawFixAtOrBefore(timePoint);
-        FixType firstFixAtOrAfter = getFirstRawFixAtOrAfter(timePoint);
-        return getEstimatedPosition(timePoint, extrapolate, lastFixAtOrBefore, firstFixAtOrAfter);
+        lockForRead();
+        try {
+            FixType lastFixAtOrBefore = getLastRawFixAtOrBefore(timePoint);
+            FixType firstFixAtOrAfter = getFirstRawFixAtOrAfter(timePoint);
+            return getEstimatedPosition(timePoint, extrapolate, lastFixAtOrBefore, firstFixAtOrAfter);
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     private Position getEstimatedPosition(TimePoint timePoint, boolean extrapolate, FixType lastFixAtOrBefore,
             FixType firstFixAtOrAfter) {
-        // TODO bug #346: compute a confidence value for the position returned based on time difference between fix(es) and timePoint; consider using Taylor approximation of more fixes around timePoint to predict and weigh position
-        if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
-            return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
-        } else {
-            if (lastFixAtOrBefore == null && firstFixAtOrAfter != null) {
-                return firstFixAtOrAfter.getPosition(); // asking for time point before first fix: return first fix's position
-            }
-            if (firstFixAtOrAfter == null && !extrapolate) {
-                return lastFixAtOrBefore == null ? null : lastFixAtOrBefore.getPosition();
+        lockForRead();
+        try {
+            // TODO bug #346: compute a confidence value for the position returned based on time difference between fix(es) and timePoint; consider using Taylor approximation of more fixes around timePoint to predict and weigh position
+            if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
+                return lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
             } else {
-                SpeedWithBearing estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
-                if (estimatedSpeed == null) {
-                    return null;
+                if (lastFixAtOrBefore == null && firstFixAtOrAfter != null) {
+                    return firstFixAtOrAfter.getPosition(); // asking for time point before first fix: return first fix's position
+                }
+                if (firstFixAtOrAfter == null && !extrapolate) {
+                    return lastFixAtOrBefore == null ? null : lastFixAtOrBefore.getPosition();
                 } else {
-                    if (lastFixAtOrBefore != null) {
-                        Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
-                        Position result = lastFixAtOrBefore.getPosition().translateGreatCircle(
-                                estimatedSpeed.getBearing(), distance);
-                        return result;
+                    SpeedWithBearing estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
+                    if (estimatedSpeed == null) {
+                        return null;
                     } else {
-                        // firstFixAtOrAfter can't be null because otherwise no speed could have been estimated
-                        return firstFixAtOrAfter.getPosition();
+                        if (lastFixAtOrBefore != null) {
+                            Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
+                            Position result = lastFixAtOrBefore.getPosition().translateGreatCircle(
+                                    estimatedSpeed.getBearing(), distance);
+                            return result;
+                        } else {
+                            // firstFixAtOrAfter can't be null because otherwise no speed could have been estimated
+                            return firstFixAtOrAfter.getPosition();
+                        }
                     }
                 }
             }
+        } finally {
+            unlockAfterRead();
         }
     }
 
     @Override
-    public synchronized Speed getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
-        // fetch all fixes on this leg so far and determine their maximum speed
-        Iterator<FixType> iter = getFixesIterator(from, /* inclusive */ true);
-        Speed max = Speed.NULL;
-        if (iter.hasNext()) {
-            Position lastPos = getEstimatedPosition(from, false);
-            while (iter.hasNext()) {
-                FixType fix = iter.next();
-                Speed fixSpeed = getSpeed(fix, lastPos, from);
-                if (fixSpeed.compareTo(max) > 0) {
-                    max = fixSpeed;
+    public Speed getMaximumSpeedOverGround(TimePoint from, TimePoint to) {
+        lockForRead();
+        try {
+            // fetch all fixes on this leg so far and determine their maximum speed
+            Iterator<FixType> iter = getFixesIterator(from, /* inclusive */ true);
+            Speed max = Speed.NULL;
+            if (iter.hasNext()) {
+                Position lastPos = getEstimatedPosition(from, false);
+                while (iter.hasNext()) {
+                    FixType fix = iter.next();
+                    Speed fixSpeed = getSpeed(fix, lastPos, from);
+                    if (fixSpeed.compareTo(max) > 0) {
+                        max = fixSpeed;
+                    }
                 }
             }
+            return max;
+        } finally {
+            unlockAfterRead();
         }
-        return max;
     }
 
     protected Speed getSpeed(FixType fix, Position lastPos, TimePoint timePointOfLastPos) {
-        return lastPos.getDistance(fix.getPosition()).inTime(fix.getTimePoint().asMillis()-timePointOfLastPos.asMillis());
+        lockForRead();
+        try {
+            return lastPos.getDistance(fix.getPosition()).inTime(fix.getTimePoint().asMillis()-timePointOfLastPos.asMillis());
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     private SpeedWithBearing estimateSpeed(FixType fix1, FixType fix2) {
@@ -254,51 +289,61 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     @Override
     public Distance getDistanceTraveled(TimePoint from, TimePoint to) {
-        double distanceInNauticalMiles = 0;
-        if (from.compareTo(to) < 0) {
-            Position fromPos = getEstimatedPosition(from, false);
-            if (fromPos == null) {
+        lockForRead();
+        try {
+            double distanceInNauticalMiles = 0;
+            if (from.compareTo(to) < 0) {
+                Position fromPos = getEstimatedPosition(from, false);
+                if (fromPos == null) {
+                    return Distance.NULL;
+                }
+                synchronized (this) {
+                    NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
+                    /* fromInclusive */false, new DummyGPSFix(to),
+                    /* toInclusive */false);
+                    for (GPSFix fix : subset) {
+                        double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(fix.getPosition()).getNauticalMiles();
+                        distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
+                        fromPos = fix.getPosition();
+                    }
+                }
+                Position toPos = getEstimatedPosition(to, false);
+                distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
+                return new NauticalMileDistance(distanceInNauticalMiles);
+            } else {
                 return Distance.NULL;
             }
-            synchronized (this) {
-                NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
-                /* fromInclusive */false, new DummyGPSFix(to),
-                /* toInclusive */false);
-                for (GPSFix fix : subset) {
-                    double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(fix.getPosition()).getNauticalMiles();
-                    distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
-                    fromPos = fix.getPosition();
-                }
-            }
-            Position toPos = getEstimatedPosition(to, false);
-            distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
-            return new NauticalMileDistance(distanceInNauticalMiles);
-        } else {
-            return Distance.NULL;
+        } finally {
+            unlockAfterRead();
         }
     }
 
     @Override
     public Distance getRawDistanceTraveled(TimePoint from, TimePoint to) {
-        double distanceInNauticalMiles = 0;
-        if (from.compareTo(to) < 0) {
-            Position fromPos = getEstimatedRawPosition(from, false);
-            if (fromPos == null) {
+        lockForRead();
+        try {
+            double distanceInNauticalMiles = 0;
+            if (from.compareTo(to) < 0) {
+                Position fromPos = getEstimatedRawPosition(from, false);
+                if (fromPos == null) {
+                    return Distance.NULL;
+                }
+                @SuppressWarnings("unchecked")
+                NavigableSet<GPSFix> subset = (NavigableSet<GPSFix>) getInternalRawFixes().subSet((FixType) new DummyGPSFix(from),
+                /* fromInclusive */false, (FixType) new DummyGPSFix(to),
+                /* toInclusive */false);
+                for (GPSFix fix : subset) {
+                    distanceInNauticalMiles += fromPos.getDistance(fix.getPosition()).getNauticalMiles();
+                    fromPos = fix.getPosition();
+                }
+                Position toPos = getEstimatedRawPosition(to, false);
+                distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
+                return new NauticalMileDistance(distanceInNauticalMiles);
+            } else {
                 return Distance.NULL;
             }
-            @SuppressWarnings("unchecked")
-            NavigableSet<GPSFix> subset = (NavigableSet<GPSFix>) getInternalRawFixes().subSet((FixType) new DummyGPSFix(from),
-            /* fromInclusive */false, (FixType) new DummyGPSFix(to),
-            /* toInclusive */false);
-            for (GPSFix fix : subset) {
-                distanceInNauticalMiles += fromPos.getDistance(fix.getPosition()).getNauticalMiles();
-                fromPos = fix.getPosition();
-            }
-            Position toPos = getEstimatedRawPosition(to, false);
-            distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
-            return new NauticalMileDistance(distanceInNauticalMiles);
-        } else {
-            return Distance.NULL;
+        } finally {
+            unlockAfterRead();
         }
     }
 
@@ -311,29 +356,50 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * the speeds/bearings determined by distance/time difference of the fixes themselves.
      */
     @Override
-    public synchronized SpeedWithBearing getEstimatedSpeed(TimePoint at) {
-        SpeedWithBearingWithConfidence<TimePoint> estimatedSpeed = getEstimatedSpeed(at, getInternalFixes(),
-                ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
-                // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-                        getMillisecondsOverWhichToAverageSpeed()));
-        return estimatedSpeed == null ? null : estimatedSpeed.getObject();
+    public SpeedWithBearing getEstimatedSpeed(TimePoint at) {
+        lockForRead();
+        try {
+            SpeedWithBearingWithConfidence<TimePoint> estimatedSpeed = getEstimatedSpeed(at, getInternalFixes(),
+                    ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+                    // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+                            getMillisecondsOverWhichToAverageSpeed()));
+            return estimatedSpeed == null ? null : estimatedSpeed.getObject();
+        } finally {
+            unlockAfterRead();
+        }
     }
-    
+
     @Override
-    public synchronized SpeedWithBearing getRawEstimatedSpeed(TimePoint at) {
-        return getEstimatedSpeed(at, getRawFixes(), ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
-                // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
-                getMillisecondsOverWhichToAverageSpeed())).getObject();
+    public SpeedWithBearing getRawEstimatedSpeed(TimePoint at) {
+        lockForRead();
+        try {
+            return getEstimatedSpeed(at, getRawFixes(),
+                    ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
+                    // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
+                            getMillisecondsOverWhichToAverageSpeed())).getObject();
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public SpeedWithBearingWithConfidence<TimePoint> getEstimatedSpeed(TimePoint at, Weigher<TimePoint> weigher) {
-        return getEstimatedSpeed(at, getInternalFixes(), weigher);
+        lockForRead();
+        try {
+            return getEstimatedSpeed(at, getInternalFixes(), weigher);
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     @Override
     public SpeedWithBearingWithConfidence<TimePoint> getRawEstimatedSpeed(TimePoint at, Weigher<TimePoint> weigher) {
-        return getEstimatedSpeed(at, getRawFixes(), weigher);
+        lockForRead();
+        try {
+            return getEstimatedSpeed(at, getRawFixes(), weigher);
+        } finally {
+            unlockAfterRead();
+        }
     }
 
     /**
@@ -351,62 +417,72 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      */
     protected SpeedWithBearingWithConfidence<TimePoint> getEstimatedSpeed(TimePoint at,
             NavigableSet<FixType> fixesToUseForSpeedEstimation, Weigher<TimePoint> weigher) {
-        @SuppressWarnings("unchecked")
-        NavigableSet<GPSFix> gpsFixesToUseForSpeedEstimation = (NavigableSet<GPSFix>) fixesToUseForSpeedEstimation;
-        List<GPSFix> relevantFixes = getFixesRelevantForSpeedEstimation(at, gpsFixesToUseForSpeedEstimation);
-        List<SpeedWithConfidence<TimePoint>> speeds = new ArrayList<SpeedWithConfidence<TimePoint>>();
-        BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
-        if (!relevantFixes.isEmpty()) {
-            Iterator<GPSFix> fixIter = relevantFixes.iterator();
-            GPSFix last = fixIter.next();
-            while (fixIter.hasNext()) {
-                // TODO bug #346: consider time difference between next.getTimepoint() and at to compute a confidence
-                GPSFix next = fixIter.next();
-                // TODO bug #345: use SpeedWithConfidence to aggregate confidence-tagged speed values
-                MillisecondsTimePoint relativeTo = new MillisecondsTimePoint((last.getTimePoint().asMillis() + next.getTimePoint().asMillis())/2);
-                Speed speed = last.getPosition().getDistance(next.getPosition())
-                        .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis());
-                SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(speed, /* original confidence */
-                        0.9, relativeTo);
-                speeds.add(speedWithConfidence);
-                bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
-                        /* confidence */ 0.9, // TODO use number of tracked satellites to determine confidence of single fix
-                        relativeTo));
-                last = next;
+        lockForRead();
+        try {
+            @SuppressWarnings("unchecked")
+            NavigableSet<GPSFix> gpsFixesToUseForSpeedEstimation = (NavigableSet<GPSFix>) fixesToUseForSpeedEstimation;
+            List<GPSFix> relevantFixes = getFixesRelevantForSpeedEstimation(at, gpsFixesToUseForSpeedEstimation);
+            List<SpeedWithConfidence<TimePoint>> speeds = new ArrayList<SpeedWithConfidence<TimePoint>>();
+            BearingWithConfidenceCluster<TimePoint> bearingCluster = new BearingWithConfidenceCluster<TimePoint>(weigher);
+            if (!relevantFixes.isEmpty()) {
+                Iterator<GPSFix> fixIter = relevantFixes.iterator();
+                GPSFix last = fixIter.next();
+                while (fixIter.hasNext()) {
+                    // TODO bug #346: consider time difference between next.getTimepoint() and at to compute a confidence
+                    GPSFix next = fixIter.next();
+                    // TODO bug #345: use SpeedWithConfidence to aggregate confidence-tagged speed values
+                    MillisecondsTimePoint relativeTo = new MillisecondsTimePoint((last.getTimePoint().asMillis() + next.getTimePoint().asMillis())/2);
+                    Speed speed = last.getPosition().getDistance(next.getPosition())
+                            .inTime(next.getTimePoint().asMillis() - last.getTimePoint().asMillis());
+                    SpeedWithConfidenceImpl<TimePoint> speedWithConfidence = new SpeedWithConfidenceImpl<TimePoint>(speed, /* original confidence */
+                            0.9, relativeTo);
+                    speeds.add(speedWithConfidence);
+                    bearingCluster.add(new BearingWithConfidenceImpl<TimePoint>(last.getPosition().getBearingGreatCircle(next.getPosition()),
+                            /* confidence */ 0.9, // TODO use number of tracked satellites to determine confidence of single fix
+                            relativeTo));
+                    last = next;
+                }
             }
+            ConfidenceBasedAverager<Double, Speed, TimePoint> speedAverager = ConfidenceFactory.INSTANCE.createAverager(weigher);
+            HasConfidence<Double, Speed, TimePoint> speedWithConfidence = speedAverager.getAverage(speeds, at);
+            BearingWithConfidence<TimePoint> bearingAverage = bearingCluster.getAverage(at);
+            Bearing bearing = bearingAverage == null ? null : bearingAverage.getObject();
+            SpeedWithBearing avgSpeed = (speedWithConfidence == null || bearing == null) ? null :
+                new KnotSpeedWithBearingImpl(speedWithConfidence.getObject().getKnots(), bearing);
+            SpeedWithBearingWithConfidence<TimePoint> result = avgSpeed == null ? null :
+                new SpeedWithBearingWithConfidenceImpl<TimePoint>(avgSpeed, (bearingAverage.getConfidence() + speedWithConfidence.getConfidence())/2., at);
+            return result;
+        } finally {
+            unlockAfterRead();
         }
-        ConfidenceBasedAverager<Double, Speed, TimePoint> speedAverager = ConfidenceFactory.INSTANCE.createAverager(weigher);
-        HasConfidence<Double, Speed, TimePoint> speedWithConfidence = speedAverager.getAverage(speeds, at);
-        BearingWithConfidence<TimePoint> bearingAverage = bearingCluster.getAverage(at);
-        Bearing bearing = bearingAverage == null ? null : bearingAverage.getObject();
-        SpeedWithBearing avgSpeed = (speedWithConfidence == null || bearing == null) ? null :
-            new KnotSpeedWithBearingImpl(speedWithConfidence.getObject().getKnots(), bearing);
-        SpeedWithBearingWithConfidence<TimePoint> result = avgSpeed == null ? null :
-            new SpeedWithBearingWithConfidenceImpl<TimePoint>(avgSpeed, (bearingAverage.getConfidence() + speedWithConfidence.getConfidence())/2., at);
-        return result;
     }
 
     private List<GPSFix> getFixesRelevantForSpeedEstimation(TimePoint at,
             NavigableSet<GPSFix> fixesToUseForSpeedEstimation) {
-        DummyGPSFix atTimed = new DummyGPSFix(at);
-        List<GPSFix> relevantFixes = new LinkedList<GPSFix>();
-        synchronized (this) {
-            NavigableSet<GPSFix> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
-            NavigableSet<GPSFix> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
-            for (GPSFix beforeFix : beforeSet.descendingSet()) {
-                if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                    break;
+        lockForRead();
+        try {
+            DummyGPSFix atTimed = new DummyGPSFix(at);
+            List<GPSFix> relevantFixes = new LinkedList<GPSFix>();
+            synchronized (this) {
+                NavigableSet<GPSFix> beforeSet = fixesToUseForSpeedEstimation.headSet(atTimed, /* inclusive */ false);
+                NavigableSet<GPSFix> afterSet = fixesToUseForSpeedEstimation.tailSet(atTimed, /* inclusive */ true);
+                for (GPSFix beforeFix : beforeSet.descendingSet()) {
+                    if (at.asMillis() - beforeFix.getTimePoint().asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                        break;
+                    }
+                    relevantFixes.add(0, beforeFix);
                 }
-                relevantFixes.add(0, beforeFix);
-            }
-            for (GPSFix afterFix : afterSet) {
-                if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
-                    break;
+                for (GPSFix afterFix : afterSet) {
+                    if (afterFix.getTimePoint().asMillis() - at.asMillis() > getMillisecondsOverWhichToAverage() / 2) {
+                        break;
+                    }
+                    relevantFixes.add(afterFix);
                 }
-                relevantFixes.add(afterFix);
             }
+            return relevantFixes;
+        } finally {
+            unlockAfterRead();
         }
-        return relevantFixes;
     }
 
     protected long getMillisecondsOverWhichToAverage() {
@@ -418,6 +494,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      */
     @Override
     protected NavigableSet<FixType> getInternalFixes() {
+        assertReadLock();
         return new PartialNavigableSetView<FixType>(super.getInternalFixes()) {
             @Override
             protected boolean isValid(FixType e) {
@@ -432,6 +509,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * adding a fix, only immediately adjacent fix's validity caches need to be invalidated.
      */
     protected boolean isValid(PartialNavigableSetView<FixType> filteredView, FixType e) {
+        assertReadLock();
         boolean result;
         if (maxSpeedForSmoothening == null) {
             result = true;
@@ -464,7 +542,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * of the fixes whose validity may be affected. If subclasses redefine {@link #isValid(PartialNavigableSetView, GPSFix)},
      * they must make sure that this method is redefined accordingly.
      */
-    protected synchronized void invalidateValidityCaches(FixType gpsFix) {
+    protected void invalidateValidityCaches(FixType gpsFix) {
+        assertWriteLock();
         gpsFix.invalidateCache();
         FixType lower = getInternalRawFixes().lower(gpsFix);
         if (lower != null) {
@@ -478,23 +557,30 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     @Override
     public boolean hasDirectionChange(TimePoint at, double minimumDegreeDifference) {
-        boolean result = false;
-        TimePoint start = new MillisecondsTimePoint(at.asMillis()-getMillisecondsOverWhichToAverageSpeed());
-        TimePoint end = new MillisecondsTimePoint(at.asMillis()+getMillisecondsOverWhichToAverageSpeed());
-        SpeedWithBearing estimatedSpeedAtStart = getEstimatedSpeed(start);
-        if (estimatedSpeedAtStart != null) {
-            Bearing bearingAtStart = estimatedSpeedAtStart.getBearing();
-            TimePoint next = new MillisecondsTimePoint(start.asMillis()+Math.max(1000l, getMillisecondsOverWhichToAverageSpeed()/2));
-            while (!result && next.compareTo(end) <= 0) {
-                SpeedWithBearing estimatedSpeedAtNext = getEstimatedSpeed(next);
-                if (estimatedSpeedAtNext != null) {
-                    Bearing bearingAtEnd = estimatedSpeedAtNext.getBearing();
-                    result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
+        lockForRead();
+        try {
+            boolean result = false;
+            TimePoint start = new MillisecondsTimePoint(at.asMillis() - getMillisecondsOverWhichToAverageSpeed());
+            TimePoint end = new MillisecondsTimePoint(at.asMillis() + getMillisecondsOverWhichToAverageSpeed());
+            SpeedWithBearing estimatedSpeedAtStart = getEstimatedSpeed(start);
+            if (estimatedSpeedAtStart != null) {
+                Bearing bearingAtStart = estimatedSpeedAtStart.getBearing();
+                TimePoint next = new MillisecondsTimePoint(start.asMillis()
+                        + Math.max(1000l, getMillisecondsOverWhichToAverageSpeed() / 2));
+                while (!result && next.compareTo(end) <= 0) {
+                    SpeedWithBearing estimatedSpeedAtNext = getEstimatedSpeed(next);
+                    if (estimatedSpeedAtNext != null) {
+                        Bearing bearingAtEnd = estimatedSpeedAtNext.getBearing();
+                        result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
+                    }
+                    next = new MillisecondsTimePoint(next.asMillis()
+                            + Math.max(1000l, getMillisecondsOverWhichToAverageSpeed() / 2));
                 }
-                next = new MillisecondsTimePoint(next.asMillis()+Math.max(1000l, getMillisecondsOverWhichToAverageSpeed()/2));
             }
+            return result;
+        } finally {
+            unlockAfterRead();
         }
-        return result;
     }
 
 }

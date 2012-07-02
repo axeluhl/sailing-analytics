@@ -26,7 +26,7 @@ public class ComponentToolbar<SettingsType> extends HorizontalPanel {
 
     public void addSettingsButton() {
         if(component.hasSettings()) {
-            ImageResource settingsImage = resources.settingsIcon();
+            ImageResource settingsImage = resources.darkSettingsIcon();
             Anchor showConfigAnchor = new Anchor(AbstractImagePrototype.create(settingsImage).getSafeHtml());
             showConfigAnchor.setTitle(stringMessages.configuration());
             showConfigAnchor.addClickHandler(new ClickHandler() {

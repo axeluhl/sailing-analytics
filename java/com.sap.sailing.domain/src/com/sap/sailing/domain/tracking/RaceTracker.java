@@ -5,12 +5,13 @@ import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 /**
  * Centerpiece of a tracking adapter. A tracker is responsible for receiving tracking data for one or more
- * {@link RaceDefinition races} that are {@link Event#getAllRaces() part of} a common {@link #getEvent() Event}. Some
+ * {@link RaceDefinition races} that are {@link Regatta#getAllRaces() part of} a common {@link #getRegatta() Event}. Some
  * tracker architectures may not be able to deliver all data for the {@link RaceDefinition} when created or started.
  * Therefore, {@link #getRaces()} may return <code>null</code> if the race information hasn't been received by the
  * tracker yet. Through the {@link RacesHandle} returned by {@link #getRacesHandle()} it is also possible to perform a
@@ -19,12 +20,12 @@ import com.sap.sailing.domain.base.RaceDefinition;
  * 
  * The data received by the tracker is usually fed into {@link TrackedRace} objects that {@link TrackedRace#getRace()
  * correspond} to the {@link RaceDefinition} objects for whose tracking this tracker is responsible. When the
- * {@link TrackedRace} isn't connected to its {@link TrackedEvent#getTrackedRaces() owning} {@link TrackedEvent}, a
+ * {@link TrackedRace} isn't connected to its {@link TrackedRegatta#getTrackedRaces() owning} {@link TrackedRegatta}, a
  * tracker is assumed to no longer update the {@link TrackedRace} object, even if it hasn't been {@link #stop() stopped}.
  * <p>
  * 
  * A tracker may be {@link #stop() stopped}. In this case, it will no longer receive any data at all. Stopping a tracker
- * will not modify the {@link Event} and the {@link TrackedEvent} with regards to their ownership of their
+ * will not modify the {@link Regatta} and the {@link TrackedRegatta} with regards to their ownership of their
  * {@link RaceDefiniion} and {@link TrackedRace}, respectively.
  * 
  * @author Axel Uhl (d043530)
@@ -32,11 +33,18 @@ import com.sap.sailing.domain.base.RaceDefinition;
  */
 public interface RaceTracker {
     /**
+     * By default, wait half a minute for race data; sometimes, a tracking provider's server may be under heavy load and
+     * may serve races one after another. If many races are requested concurrently, this can lead to a queue
+     * of several minutes length.
+     */
+    static long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 30000;
+
+    /**
      * Stops tracking the races.
      */
     void stop() throws MalformedURLException, IOException, InterruptedException;
 
-    com.sap.sailing.domain.base.Event getEvent();
+    com.sap.sailing.domain.base.Regatta getRegatta();
 
     /**
      * Returns the races being tracked by this tracker. Non-blocking call that returns <code>null</code> if
@@ -46,10 +54,12 @@ public interface RaceTracker {
      * longer update their {@link TrackedRace} with new data.
      */
     Set<RaceDefinition> getRaces();
+    
+    Set<RegattaAndRaceIdentifier> getRaceIdentifiers();
 
     RacesHandle getRacesHandle();
 
-    DynamicTrackedEvent getTrackedEvent();
+    DynamicTrackedRegatta getTrackedRegatta();
     
     WindStore getWindStore();
 

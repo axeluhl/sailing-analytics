@@ -1,10 +1,10 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
-import com.sap.sailing.domain.tracking.TrackedEvent;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -13,7 +13,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 
 /**
  * Creates a tracked race for a race identifier by a {@link RaceIdentifier}. The operation assumes that the
- * {@link RaceDefinition}, therefore the {@link Event} as well as the {@link TrackedEvent} into which the
+ * {@link RaceDefinition}, therefore the {@link Regatta} as well as the {@link TrackedRegatta} into which the
  * new {@link TrackedRace} will be composed already exist and that the {@link TrackedRace} does not yet
  * exist.
  * 
@@ -24,6 +24,7 @@ public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
     private static final long serialVersionUID = 5084401060896514911L;
     private final long millisecondsOverWhichToAverageWind;
     private final long millisecondsOverWhichToAverageSpeed;
+    private final long delayToLiveInMillis;
     
     /**
      * If a {@link WindStore} is provided to this command, it will be used for the construction of the tracked race.
@@ -37,10 +38,11 @@ public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
      *            if <code>null</code>, an {@link EmptyWindStore} will be used. Note that the {@link #windStore} field
      *            won't be serialized. A receiver of this operation will therefore always use an {@link EmptyWindStore}.
      */
-    public CreateTrackedRace(EventAndRaceIdentifier raceIdentifier, WindStore windStore,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
+    public CreateTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         super(raceIdentifier);
         this.windStore = windStore;
+        this.delayToLiveInMillis = delayToLiveInMillis;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
     }
@@ -60,7 +62,7 @@ public class CreateTrackedRace extends AbstractRaceOperation<TrackedRace> {
     @Override
     public TrackedRace internalApplyTo(RacingEventService toState) {
         return toState.createTrackedRace(getRaceIdentifier(), windStore == null ? EmptyWindStore.INSTANCE : windStore,
-                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
+                delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed);
     }
 
 }

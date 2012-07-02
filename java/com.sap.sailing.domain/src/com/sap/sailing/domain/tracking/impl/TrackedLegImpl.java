@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -34,7 +35,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
 
     private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
     
-    private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 60; // TracTrac does 22.5, Marcus Baur suggest 40; Nils Schröder suggests 60
+    private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 45; // TracTrac does 22.5, Marcus Baur suggest 40; Nils Schröder suggests 60
 
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
@@ -103,6 +104,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
             }
             // ensure that race isn't updated by events as we're tying to sort the competitors
             synchronized (getTrackedRace()) {
+                // TODO See bug 469; competitors already disqualified may need to be ranked worst 
                 Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint));
                 rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
                 synchronized (competitorTracksOrderedByRank) {
@@ -194,6 +196,11 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
+    public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
+        clearCaches();
+    }
+
+    @Override
     public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
         clearCaches();
     }
@@ -204,7 +211,7 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
     }
 
     @Override
-    public void markPassingReceived(MarkPassing oldMarkPassing, MarkPassing markPassing) {
+    public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassing, Iterable<MarkPassing> markPassing) {
         clearCaches();
     }
 
@@ -223,6 +230,14 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
         clearCaches();
     }
     
+    @Override
+    public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
+    }
+
+    @Override
+    public void delayToLiveChanged(long delayToLiveInMillis) {
+    }
+
     private void clearCaches() {
         synchronized (competitorTracksOrderedByRank) {
             competitorTracksOrderedByRank.clear();

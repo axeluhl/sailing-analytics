@@ -1,17 +1,25 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.IntegerBox;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
+import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
+import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 
 /**
  * Allows administrators to manage all aspects of server instance replication such as showing whether the instance
@@ -21,7 +29,7 @@ import com.sap.sailing.gwt.ui.client.TextfieldEntryDialog;
  *
  */
 public class ReplicationPanel extends FlowPanel {
-    private final ListBox registeredReplicas;
+    private final Grid registeredReplicas;
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
@@ -30,7 +38,8 @@ public class ReplicationPanel extends FlowPanel {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        registeredReplicas = new ListBox();
+        registeredReplicas = new Grid();
+        registeredReplicas.resizeColumns(3);
         add(registeredReplicas);
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
@@ -51,15 +60,17 @@ public class ReplicationPanel extends FlowPanel {
     }
     
     private void addReplication() {
-        TextfieldEntryDialog dialog = new TextfieldEntryDialog(stringMessages.add(), stringMessages.enterMaster(),
-                stringMessages.ok(), stringMessages.cancel(), "", null, new AsyncCallback<String>() {
+        AddReplicationDialog dialog = new AddReplicationDialog(null,
+                new AsyncCallback<Triple<String, Integer, Integer>>() {
                     @Override
-                    public void onSuccess(final String masterName) {
-                        sailingService.startReplicatingFromMaster(masterName, /* TODO servlet port */ 8888,
-                                /* TODO JMS port */ 61616, new AsyncCallback<Void>() {
+                    public void onSuccess(final Triple<String, Integer, Integer> masterNameAndJMSPortNumberAndServletPortNumber) {
+                        sailingService.startReplicatingFromMaster(masterNameAndJMSPortNumberAndServletPortNumber.getA(),
+                                /* TODO servlet port */ masterNameAndJMSPortNumberAndServletPortNumber.getC(),
+                                /* TODO JMS port */ masterNameAndJMSPortNumberAndServletPortNumber.getB(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable e) {
-                                errorReporter.reportError(stringMessages.errorStartingReplication(masterName, e.getMessage()));
+                                errorReporter.reportError(stringMessages.errorStartingReplication(
+                                        masterNameAndJMSPortNumberAndServletPortNumber.getA(), e.getMessage()));
                             }
 
                             @Override
@@ -78,12 +89,31 @@ public class ReplicationPanel extends FlowPanel {
     }
 
     private void updateReplicaList() {
-        sailingService.getHostnamesOfReplica(new AsyncCallback<List<String>>() {
+        sailingService.getReplicaInfo(new AsyncCallback<ReplicationStateDTO>() {
             @Override
-            public void onSuccess(List<String> hostnames) {
-                registeredReplicas.clear();
-                for (String hostname : hostnames) {
-                    registeredReplicas.addItem(hostname);
+            public void onSuccess(ReplicationStateDTO replicas) {
+                while (registeredReplicas.getRowCount() > 0) {
+                    registeredReplicas.removeRow(0);
+                }
+                int i=0;
+                final ReplicationMasterDTO replicatingFromMaster = replicas.getReplicatingFromMaster();
+                if (replicatingFromMaster != null) {
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
+                            replicatingFromMaster.getJmsPort(), replicatingFromMaster.getServletPort())));
+                    i++;
+                }
+                for (ReplicaDTO replica : replicas.getReplicas()) {
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 0, new Label(replica.getHostname()));
+                    registeredReplicas.setWidget(i, 1, new Label(stringMessages.registeredAt(replica.getRegistrationTime().toString())));
+                    i++;
+                    for (Map.Entry<String, Integer> e : replica.getOperationCountByOperationClassName().entrySet()) {
+                        registeredReplicas.insertRow(i);
+                        registeredReplicas.setWidget(i, 1, new Label(e.getKey()));
+                        registeredReplicas.setWidget(i, 2, new Label(e.getValue().toString()));
+                        i++;
+                    }
                 }
             }
             
@@ -93,4 +123,54 @@ public class ReplicationPanel extends FlowPanel {
             }
         });
     }
+    
+    /**
+     * A text entry dialog with ok/cancel button and configurable validation rule. Subclasses may provide a redefinition for
+     * {@link #getAdditionalWidget()} to add a widget below the text field, e.g., for capturing additional data.
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
+    private class AddReplicationDialog extends DataEntryDialog<Triple<String, Integer, Integer>> {
+        private final TextBox entryField;
+        private final IntegerBox jmsPortField;
+        private final IntegerBox servletPortField;
+        
+        public AddReplicationDialog(final Validator<Triple<String, Integer, Integer>> validator,
+                final AsyncCallback<Triple<String, Integer, Integer>> callback) {
+            super(stringMessages.add(), stringMessages.enterMaster(),
+                    stringMessages.ok(), stringMessages.cancel(), validator, callback);
+            entryField = createTextBox("");
+            jmsPortField = createIntegerBox(61616, /* visible length */ 5);
+            servletPortField = createIntegerBox(8888, /* visibleLength */ 5);
+        }
+        
+        /**
+         * Can contribute an additional widget to be displayed underneath the text entry field. If <code>null</code> is
+         * returned, no additional widget will be displayed. This is the default behavior of this default implementation.
+         */
+        @Override
+        protected Widget getAdditionalWidget() {
+            Grid grid = new Grid(3, 2);
+            grid.setWidget(0, 0, new Label(stringMessages.hostname()));
+            grid.setWidget(0, 1, entryField);
+            grid.setWidget(1, 0, new Label(stringMessages.jmsPortNumber()));
+            grid.setWidget(1, 1, jmsPortField);
+            grid.setWidget(2, 0, new Label(stringMessages.servletPortNumber()));
+            grid.setWidget(2, 1, servletPortField);
+            return grid;
+        }
+        
+        @Override
+        public void show() {
+            super.show();
+            entryField.setFocus(true);
+        }
+
+        @Override
+        protected Triple<String, Integer, Integer> getResult() {
+            return new Triple<String, Integer, Integer>(entryField.getText(), jmsPortField.getValue(), servletPortField.getValue());
+        }
+    }
+
 }

@@ -35,11 +35,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 
@@ -68,8 +68,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     private final List<SwissTimingRaceRecordDTO> availableSwissTimingRaces = new ArrayList<SwissTimingRaceRecordDTO>();
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            EventRefresher eventRefresher, StringMessages stringConstants) {
-        super(sailingService, eventRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
+            RegattaRefresher regattaRefresher, StringMessages stringConstants) {
+        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringConstants);
         this.errorReporter = errorReporter;
 
         VerticalPanel mainPanel = new VerticalPanel();
@@ -204,7 +204,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceStartTrackingColumn.setSortable(true);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 200, tableRes);
+        raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringConstants.name());
         raceTable.addColumn(raceStartTrackingColumn, stringConstants.raceStartTimeColumn());
         raceTable.setWidth("300px");
@@ -342,7 +342,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         int port = portIntegerbox.getValue();
         for (final SwissTimingRaceRecordDTO rr : raceList.getList()) {
             if (raceTable.getSelectionModel().isSelected(rr)) {
-                sailingService.trackWithSwissTiming(rr, hostname, port, /* canSendRequests */false, 
+                sailingService.trackWithSwissTiming(/* regattaToAddTo */ null, // TODO allow user to select a pre-defined regatta
+                        rr, hostname, port, /* canSendRequests */false, 
                         trackWind, correctWindByDeclination, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -352,7 +353,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
                     @Override 
                     public void onSuccess(Void result) {
-                        eventRefresher.fillEvents();
+                        regattaRefresher.fillRegattas();
                     }
                 });
             }
@@ -372,8 +373,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
     }
 
     @Override
-    public void fillEvents(List<EventDTO> result) {
-        trackedRacesListComposite.fillEvents(result);
+    public void fillRegattas(List<RegattaDTO> result) {
+        trackedRacesListComposite.fillRegattas(result);
     }
     
     private void fillRaceListFromAvailableRacesApplyingFilter(String text) {

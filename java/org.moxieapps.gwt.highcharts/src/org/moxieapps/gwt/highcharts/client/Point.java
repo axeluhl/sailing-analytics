@@ -365,7 +365,10 @@ public class Point extends Configurable<Point> {
      * animation options. <p/>
      * Note that this method is only relevant on Point instance that are obtained from the chart
      * after it has been rendered, such as via an event or dynamically retrieving the points of
-     * a series.
+     * a series.<p/>
+     * Also note that when using persistent chart's, you'll normally want to use the
+     * {@link Series#removePoint(Point)} method instead of this one.
+     *
      *
      * @return A reference to this {@link Point} instance for convenient method chaining.
      * @since 1.1.0
@@ -379,7 +382,9 @@ public class Point extends Configurable<Point> {
      * and/or animated or not. <p/>
      * Note that this method is only relevant on Point instance that are obtained from the chart
      * after it has been rendered, such as via an event or dynamically retrieving the points of
-     * a series.
+     * a series.<p/>
+     * Also note that when using persistent chart's, you'll normally want to use the
+     * {@link Series#removePoint(Point, boolean, boolean)} method instead of this one.
      *
      * @param redraw    Whether to redraw the chart after the point is removed. When removing more than one
      *                  point, it is highly recommended that the redraw option be set to false, and instead
@@ -399,7 +404,9 @@ public class Point extends Configurable<Point> {
      * and the details of the animation options. <p/>
      * Note that this method is only relevant on Point instance that are obtained from the chart
      * after it has been rendered, such as via an event or dynamically retrieving the points of
-     * a series.
+     * a series.<p/>
+     * Also note that when using persistent chart's, you'll normally want to use the
+     * {@link Series#removePoint(Point, boolean, Animation)}  method instead of this one.
      *
      * @param redraw    Whether to redraw the chart after the point is removed. When removing more than one
      *                  point, it is highly recommended that the redraw option be set to false, and instead
@@ -677,7 +684,7 @@ public class Point extends Configurable<Point> {
                         nativeUpdate(this.nativePoint, pointOptions.getY().doubleValue(), redraw, animation != null);
                     }
                 } else {
-                    nativeUpdate(this.nativePoint, Series.convertPointToJavaScriptObject(pointOptions), redraw, animation != null);
+                    nativeUpdate(this.nativePoint, convertPointToJavaScriptObject(pointOptions), redraw, animation != null);
                 }
             } else {
                 if (pointOptions.isSingleValue()) {
@@ -687,7 +694,7 @@ public class Point extends Configurable<Point> {
                         nativeUpdate(this.nativePoint, pointOptions.getY().doubleValue(), redraw, animation.getOptions().getJavaScriptObject());
                     }
                 } else {
-                    nativeUpdate(this.nativePoint, Series.convertPointToJavaScriptObject(pointOptions), redraw, animation.getOptions().getJavaScriptObject());
+                    nativeUpdate(this.nativePoint, convertPointToJavaScriptObject(pointOptions), redraw, animation.getOptions().getJavaScriptObject());
                 }
             }
         } else {
@@ -726,6 +733,32 @@ public class Point extends Configurable<Point> {
             options.put("userData", point.getUserData());
         }
         return options;
+    }
+
+    // Only needed and used when handling removing of points from charts that have been set in "persistent" mode
+    private String id;
+
+    // Internal method purposefully package scope
+    void setId(String id) {
+        this.id = id;
+    }
+
+    // Internal method purposefully package scope
+    String getId() {
+        if(this.nativePoint != null) {
+            return nativeGetString(this.nativePoint, "id");
+        } else {
+            return this.id;
+        }
+    }
+
+    private static JavaScriptObject convertPointToJavaScriptObject(Point point) {
+        final JSONObject options = point.getOptions() != null ? point.getOptions() : new JSONObject();
+        Chart.addPointScalarValues(point, options);
+        if(point.hasNativeProperties()) {
+            Point.addPointNativeProperties(point, options);
+        }
+        return options.getJavaScriptObject();
     }
 
     private static native boolean nativeContainsKey(JavaScriptObject point, String key) /*-{

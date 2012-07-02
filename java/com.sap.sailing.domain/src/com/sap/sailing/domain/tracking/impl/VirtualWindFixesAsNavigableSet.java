@@ -139,13 +139,13 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
     /**
      * The time point starting from and including which the GPS fixes are considered in the race's tracks. Returns the
      * value of {@link #from} unless it is <code>null</code>. In this case, the time point of the
-     * {@link TrackedRace#getStart() race start}, {@link #floorToResolution(Wind) floored to the resolution of this set}
+     * {@link TrackedRace#getStartOfRace() race start}, {@link #floorToResolution(Wind) floored to the resolution of this set}
      * will be returned instead. If no valid start time can be obtained from the race, <code>Long.MAX_VALUE</code> is
      * returned instead.
      */
     protected TimePoint getFrom() {
-        return from == null ? getTrackedRace().getStart() == null ? new MillisecondsTimePoint(Long.MAX_VALUE)
-                : floorToResolution(getTrackedRace().getStart()) : from;
+        return from == null ? getTrackedRace().getStartOfRace() == null ? new MillisecondsTimePoint(Long.MAX_VALUE)
+                : floorToResolution(getTrackedRace().getStartOfRace()) : from;
     }
 
     /**

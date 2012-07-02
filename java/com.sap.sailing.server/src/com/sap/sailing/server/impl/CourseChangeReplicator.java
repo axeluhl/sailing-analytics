@@ -1,20 +1,20 @@
 package com.sap.sailing.server.impl;
 
 import com.sap.sailing.domain.base.CourseListener;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.server.operationaltransformation.AddWaypoint;
 import com.sap.sailing.server.operationaltransformation.RemoveWaypoint;
 
 public class CourseChangeReplicator implements CourseListener {
-    private final EventAndRaceIdentifier raceIdentifier;
+    private final RegattaAndRaceIdentifier raceIdentifier;
     private final RacingEventServiceImpl replicator;
     
-    public CourseChangeReplicator(RacingEventServiceImpl replicator, Event event, RaceDefinition raceDefinition) {
-        raceIdentifier = new EventNameAndRaceName(event.getName(), raceDefinition.getName());
+    public CourseChangeReplicator(RacingEventServiceImpl replicator, Regatta regatta, RaceDefinition raceDefinition) {
+        raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceDefinition.getName());
         this.replicator = replicator;
     }
 

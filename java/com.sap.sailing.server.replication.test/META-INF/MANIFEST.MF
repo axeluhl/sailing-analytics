@@ -16,4 +16,9 @@ Require-Bundle: com.sap.sailing.server,
  org.apache.activemq.activemq-core;bundle-version="5.4.3",
  com.sap.sailing.mongodb,
  com.mongodb.driver;bundle-version="2.6.2",
- com.sap.sailing.domain.persistence
+ com.sap.sailing.domain.persistence,
+ com.sap.sailing.domain.tractracadapter,
+ com.tractrac.clientmodule,
+ com.sap.sailing.expeditionconnector,
+ com.sap.sailing.domain.swisstimingadapter,
+ org.json.simple;bundle-version="1.1.0"

@@ -17,29 +17,29 @@ import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog.Validator;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
-    private final List<RaceInLeaderboardDTO> raceColumnSelection;
-    private final List<RaceInLeaderboardDTO> raceAllRaceColumns;
+    private final List<RaceColumnDTO> raceColumnSelection;
+    private final List<RaceColumnDTO> raceAllRaceColumns;
     private final List<DetailType> maneuverDetailSelection;
     private final List<DetailType> legDetailSelection;
     private final List<DetailType> raceDetailSelection;
-    private final Map<RaceInLeaderboardDTO, CheckBox> raceColumnCheckboxes;
+    private final Map<RaceColumnDTO, CheckBox> raceColumnCheckboxes;
     private final Map<DetailType, CheckBox> maneuverDetailCheckboxes;
     private final Map<DetailType, CheckBox> legDetailCheckboxes;
     private final Map<DetailType, CheckBox> raceDetailCheckboxes;
     private final StringMessages stringConstants;
     private LongBox delayBetweenAutoAdvancesInSecondsBox;
     private LongBox delayInSecondsBox;
-    private final boolean autoExpandFirstRace;
+    private final boolean autoExpandPreSelectedRace;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final long delayInMilliseconds;
 
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
-            List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<RaceInLeaderboardDTO> raceAllRaceColumns,
-            List<RaceInLeaderboardDTO> raceColumnSelection, boolean autoExpandFirstRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
+            List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
+            List<RaceColumnDTO> raceColumnSelection, boolean autoExpandPreSelectedRace, long delayBetweenAutoAdvancesInMilliseconds, long delayInMilliseconds,
             StringMessages stringConstants) {
         this.maneuverDetailSelection = maneuverDetailSelection;
         this.raceColumnSelection = raceColumnSelection;
@@ -47,11 +47,11 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.legDetailSelection = legDetailSelection;
         this.raceDetailSelection = raceDetailSelection;
         this.stringConstants = stringConstants;
-        raceColumnCheckboxes = new LinkedHashMap<RaceInLeaderboardDTO, CheckBox>();
+        raceColumnCheckboxes = new LinkedHashMap<RaceColumnDTO, CheckBox>();
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
-        this.autoExpandFirstRace = autoExpandFirstRace;
+        this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
     }
@@ -102,8 +102,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         hp.add(vpLeft);
         
         vpRight.add(new Label(stringConstants.selectedRaces()));
-        List<RaceInLeaderboardDTO> allColumns = raceAllRaceColumns;
-        for (RaceInLeaderboardDTO expandableSortableColumn : allColumns) {
+        List<RaceColumnDTO> allColumns = raceAllRaceColumns;
+        for (RaceColumnDTO expandableSortableColumn : allColumns) {
             CheckBox checkbox = dialog.createCheckbox(expandableSortableColumn.getRaceColumnName());
             checkbox.setValue(raceColumnSelection.contains(expandableSortableColumn));
             raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
@@ -134,7 +134,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             }
         }
         List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
-        for (Map.Entry<RaceInLeaderboardDTO, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
+        for (Map.Entry<RaceColumnDTO, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
             if(entry.getValue().getValue()){
                 namesOfRaceColumnsToShow.add(entry.getKey().getRaceColumnName());
             }
@@ -142,7 +142,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         Long delayBetweenAutoAdvancesValue = delayBetweenAutoAdvancesInSecondsBox.getValue();
         Long delayInSecondsValue = delayInSecondsBox.getValue();
         return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow,
-                namesOfRaceColumnsToShow, /* nameOfRacesToShow */null, autoExpandFirstRace,
+                namesOfRaceColumnsToShow, /* nameOfRacesToShow */null, autoExpandPreSelectedRace,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
                 1000 * (delayInSecondsValue == null ? 0 : delayInSecondsValue.longValue()), null, true);
     }

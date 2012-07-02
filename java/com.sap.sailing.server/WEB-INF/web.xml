@@ -31,4 +31,22 @@
 		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
 		<url-pattern>/expedition</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>ListLeaderboards</servlet-name>
+		<servlet-class>com.sap.sailing.server.impl.ListLeaderboards</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ListLeaderboards</servlet-name>
+		<url-pattern>/listleaderboards</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>LeaderboardJsonExport</servlet-name>
+		<servlet-class>com.sap.sailing.server.impl.LeaderboardJsonExport</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>LeaderboardJsonExport</servlet-name>
+		<url-pattern>/leaderboard</url-pattern>
+	</servlet-mapping>
 </web-app>

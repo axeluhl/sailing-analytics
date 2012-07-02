@@ -1,11 +1,12 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.RaceSpecificMessageLoader;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.TrackedEventRegistry;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public class SwissTimingTrackingConnectivityParameters implements RaceTrackingConnectivityParameters {
@@ -17,8 +18,9 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     private final DomainFactory domainFactory;
     private final WindStore windStore;
     private final RaceSpecificMessageLoader messageLoader; 
+    private final long delayToLiveInMillis;
     
-    public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, boolean canSendRequests,
+    public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, boolean canSendRequests, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore,
             RaceSpecificMessageLoader messageLoader) {
         super();
@@ -26,6 +28,7 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
         this.port = port;
         this.raceID = raceID;
         this.canSendRequests = canSendRequests;
+        this.delayToLiveInMillis = delayToLiveInMillis;
         this.swissTimingFactory = swissTimingFactory;
         this.domainFactory = domainFactory;
         this.windStore = windStore;
@@ -33,9 +36,16 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     }
 
     @Override
-    public RaceTracker createRaceTracker(TrackedEventRegistry trackedEventRegistry) throws Exception {
-        return swissTimingFactory.createRaceTracker(raceID, hostname, port, canSendRequests, windStore, messageLoader,
-                domainFactory, trackedEventRegistry);
+    public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry) throws Exception {
+        return swissTimingFactory.createRaceTracker(raceID, hostname, port, canSendRequests, delayToLiveInMillis, windStore, messageLoader,
+                domainFactory, trackedRegattaRegistry);
+    }
+
+    @Override
+    public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry)
+            throws Exception {
+        return swissTimingFactory.createRaceTracker(regatta, raceID, hostname, port, canSendRequests, delayToLiveInMillis, windStore, messageLoader,
+                domainFactory, trackedRegattaRegistry);
     }
 
     @Override
@@ -43,4 +53,8 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
         return SwissTimingRaceTrackerImpl.createID(raceID, hostname, port);
     }
 
+    @Override
+    public long getDelayToLiveInMillis() {
+        return delayToLiveInMillis;
+    }
 }

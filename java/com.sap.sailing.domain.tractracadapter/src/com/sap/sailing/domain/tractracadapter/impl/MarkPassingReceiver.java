@@ -15,7 +15,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Triple;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -29,9 +29,9 @@ import com.tractrac.clientmodule.data.MarkPassingsData;
 public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetitor, MarkPassingsData, Boolean> {
     private static final Logger logger = Logger.getLogger(MarkPassingReceiver.class.getName());
     
-    public MarkPassingReceiver(DynamicTrackedEvent trackedEvent, com.tractrac.clientmodule.Event tractracEvent,
-            DomainFactory domainFactory) {
-        super(domainFactory, tractracEvent, trackedEvent);
+    public MarkPassingReceiver(DynamicTrackedRegatta trackedRegatta, com.tractrac.clientmodule.Event tractracEvent,
+            Simulator simulator, DomainFactory domainFactory) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator);
     }
 
     /**
@@ -90,8 +90,12 @@ public class MarkPassingReceiver extends AbstractReceiverWithQueue<RaceCompetito
                     markPassings.add(passing);
                 }
             }
-            trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()),
-                    markPassings);
+            if (getSimulator() != null) {
+                getSimulator().delayMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()), markPassings);
+            } else {
+                trackedRace.updateMarkPassings(getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor()),
+                        markPassings);
+            }
         } else {
             logger.warning("Couldn't find tracked race for race " + event.getA().getRace().getName()
                     + ". Dropping mark passing event " + event);

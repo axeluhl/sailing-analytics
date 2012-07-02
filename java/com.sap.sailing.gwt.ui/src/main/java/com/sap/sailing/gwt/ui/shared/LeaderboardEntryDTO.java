@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.RaceIdentifier;
 
 /**
  * Holds a single competitor's scoring details for a single race. It may optionally contain
@@ -14,11 +16,22 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public class LeaderboardEntryDTO implements IsSerializable {
     /**
+     * Identifies the race in which the competitor achieved this score. This makes it possible to find out in which
+     * fleet the competitor started in this column.
+     */
+    public RaceIdentifier race;
+    
+    /**
      * Either <code>null</code> in case no max points, or one of "DNS", "DNF", "OCS", "DND", "RAF", "BFD", "DNC", or "DSQ"
      */
-    public String reasonForMaxPoints;
+    public MaxPointsReason reasonForMaxPoints;
     
     public int netPoints;
+    
+    /**
+     * Tells if the net points have been overridden by a score correction. Can be used to render differently in editing environment.
+     */
+    public boolean netPointsCorrected;
     
     public int totalPoints;
     
@@ -35,6 +48,15 @@ public class LeaderboardEntryDTO implements IsSerializable {
      */
     public List<LegEntryDTO> legDetails;
 
+    /**
+     * <code>null</code>, if the fleet couldn't be determined, e.g., because the tracked race isn't known and therefore
+     * the link to the fleet is not known; otherwise the description of the fleet in which the competitor scored this
+     * entry
+     */
+    public FleetDTO fleet;
+
+    public LeaderboardEntryDTO() { }
+    
     @Override
     public int hashCode() {
         final int prime = 31;

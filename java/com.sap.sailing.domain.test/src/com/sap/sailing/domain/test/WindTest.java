@@ -53,15 +53,20 @@ public class WindTest {
         Wind wind2 = new WindImpl(pos2, now, new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
         track.add(wind1);
         track.add(wind2);
-        assertEquals(2, Util.size(track.getFixes()));
-        Set<Wind> expectedWind = new HashSet<Wind>();
-        expectedWind.add(wind1);
-        expectedWind.add(wind2);
-        Set<Wind> actualWind = new HashSet<Wind>();
-        for (Wind wind : track.getFixes()) {
-            actualWind.add(wind);
+        track.lockForRead();
+        try {
+            assertEquals(2, Util.size(track.getFixes()));
+            Set<Wind> expectedWind = new HashSet<Wind>();
+            expectedWind.add(wind1);
+            expectedWind.add(wind2);
+            Set<Wind> actualWind = new HashSet<Wind>();
+            for (Wind wind : track.getFixes()) {
+                actualWind.add(wind);
+            }
+            assertEquals(expectedWind, actualWind);
+        } finally {
+            track.unlockAfterRead();
         }
-        assertEquals(expectedWind, actualWind);
     }
     
     @Test
@@ -200,5 +205,12 @@ public class WindTest {
         // expectation: take two from left (because they are closer than AVERAGING_INTERVAL_MILLIS apart), one from right side:
         assertEquals((wind1.getKnots() + wind2.getKnots() + wind3.getKnots()) / 3, result.getKnots(), 0.000000001);
         assertEquals(80., result.getBearing().getDegrees(), 5);
+    }
+    
+    @Test
+    public void testWindwardDistanceForReachingLeg() {
+        // TODO construct a tiny course with one upwind, one reaching and one downwind leg, a race with two competitors;
+        // TODO create a tracked race with corresponding WEB wind source; put leader in downwind, trailer in upwind and
+        // TODO test that windward distance includes the full reaching leg's length
     }
 }

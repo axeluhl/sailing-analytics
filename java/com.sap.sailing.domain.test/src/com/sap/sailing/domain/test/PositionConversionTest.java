@@ -42,7 +42,7 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
 
             @Override
             public Iterable<TypeController> getTypeControllersAndStart() {
-                TypeController listener = ControlPointPositionData.subscribe(getEvent(),
+                TypeController listener = ControlPointPositionData.subscribe(getTracTracEvent(),
                         new ICallbackData<ControlPoint, ControlPointPositionData>() {
                             private boolean first = true;
 

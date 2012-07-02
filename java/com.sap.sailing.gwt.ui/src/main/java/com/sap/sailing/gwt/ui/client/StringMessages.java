@@ -92,10 +92,11 @@ public interface StringMessages extends Messages {
     String trackNewEvent();
     String trackableRaces();
     String trackWind();
-    String eventName();
+    String regattaName();
     String event();
     String startTime();
     String regatta();
+    String regattas();
     String startTracking();
     String stopTracking();
     String connections();
@@ -184,11 +185,12 @@ public interface StringMessages extends Messages {
     String actionEditScores();
     String actionOpenBrowser();
     String actionRemove();
+    String actionEditRaces();
     String actionRaceEdit();
     String actionRaceUnlink();
     String actionRaceRemove();
     String filterLeaderboardsByName();
-    String windwardDistanceToOverallLeader();
+    String windwardDistanceToLeader();
     String actions();
     String islinked();
     String yes();
@@ -239,6 +241,7 @@ public interface StringMessages extends Messages {
     String noLeaderboardGroupWithNameFound(String groupName);
     String overview();
     String welcomeToSailingAnalytics();
+    String welcomeToSailingAnalyticsBody();
     String home();
     String clickAndDragToZoomIn();
     String windSpeed();
@@ -294,37 +297,45 @@ public interface StringMessages extends Messages {
     String finishLine();
     String advantageLine();
     String courseMiddleLine();
-    
-    /*Start of simulator related messages*/
-    String simulator();
-    String optionsBar();
-    String update();
-    
-    String setup();
-    String pattern();
-    String strength();
-    String oscillation();
-    String oscillating();
-    String amplitude();
-    String frequency();
-    String noise();
-    
-    String sailing();
+    String jmsPortNumber();
+    String servletPortNumber();
+    String registeredAt(String string);
+    String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
+    String showWindSpeedSeries();
+    String showWindDirectionSeries();
+    String fleet();
     String boatClass();
-    String optimality();
-    String maximumTurns();
-    String raceDirection();
-    String upWind();
-    String downWind();
-    String strategies();
-    String omniscient();
-    String opportunistic();
-    String mixed();
-    String maps();
-    String startEnd();
-    String course();
-    String summary();
-    String replay();
-    String display();
-    /*End of simulator related messages*/
+    String setDelayToLive();
+    String pleaseEnterNonEmptyVenue();
+    String eventWithThisNameAlreadyExists();
+    String venue();
+    String pleaseSelectABoatClass();
+    String regattaWithThisNameAlreadyExists();
+    String seriesWithThisNameAlreadyExists();
+    String fleetWithThisNameAlreadyExists();
+    String fleets();
+    String series();
+    String splitFleet();
+    String color();
+    String medalSeries();
+    String noColor();
+    String noRegatta();
+    String addFleet();
+    String doYouReallyWantToRemoveRegatta(String name);
+    String errorLoadingScoreCorrectionProviders(String message);
+    String selectResultListToImportFrom();
+    String of();
+    String errorObtainingScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
+            String string, String message);
+    String assignRaceNumbersToRaceColumns();
+    String importOfficialResults();
+    String selectAll();
+    String apply();
+    String successfullyUpdatedScores();
+    String errorUpdatingScoresForLeaderboard(String leaderboardName, String message);
+    String maneuverTypesToShowWhenCompetitorIsClicked();
+    String simulateWithStartTimeNow();
+    String boatClassDoesNotMatchSelectedRegatta(String boatClass, String regattaName);
+    String regattaExistForSelectedBoatClass();
+    String reload();
 }

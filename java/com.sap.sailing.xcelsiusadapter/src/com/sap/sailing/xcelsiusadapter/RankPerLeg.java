@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom.Document;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.Distance;
@@ -42,9 +42,9 @@ public class RankPerLeg extends Action {
 
     public void perform() throws Exception {
         // Get data from request
-        final Event event = getEvent();
-        final RaceDefinition race = getRace(event);
-        final TrackedRace trackedRace = getTrackedRace(event, race);
+        final Regatta regatta = getRegatta();
+        final RaceDefinition race = getRace(regatta);
+        final TrackedRace trackedRace = getTrackedRace(regatta, race);
         if (trackedRace != null) {
             final TimePoint time = getTimePoint(trackedRace);
             // Prepare document

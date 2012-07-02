@@ -13,6 +13,8 @@ public class WindDTO implements IsSerializable {
     public Double dampenedTrueWindFromDeg;
     public PositionDTO position;
     public Long timepoint;
+    public Long originTimepoint;
+    public Double confidence;
     
     public WindDTO() {}
 }

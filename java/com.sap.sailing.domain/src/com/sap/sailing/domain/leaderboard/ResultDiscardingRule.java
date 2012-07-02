@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.TimePoint;
 
 /**
@@ -15,5 +16,5 @@ import com.sap.sailing.domain.common.TimePoint;
  *
  */
 public interface ResultDiscardingRule extends Serializable {
-    Set<RaceInLeaderboard> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard, TimePoint timePoint);
+    Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard, TimePoint timePoint);
 }

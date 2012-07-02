@@ -18,8 +18,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  org.moxieapps.gwt.highcharts;bundle-version="1.1.4",
  com.sap.sailing.geocoding,
- com.sap.sailing.server.replication,
- com.sap.sailing.simulator
+ com.sap.sailing.server.replication
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui.test",
@@ -39,3 +38,4 @@ Web-ContextPath: /gwt
 Bundle-ClassPath: WEB-INF/classes/,
  WEB-INF/lib/gwt-maps.jar,
  WEB-INF/lib/gwt-servlet.jar
+TrackLifecycle: true

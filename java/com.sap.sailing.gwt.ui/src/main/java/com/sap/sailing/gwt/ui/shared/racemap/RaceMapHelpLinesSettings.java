@@ -1,7 +1,8 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class RaceMapHelpLinesSettings {
     
@@ -12,29 +13,21 @@ public class RaceMapHelpLinesSettings {
         STARTLINE, FINISHLINE, ADVANTAGELINE, COURSEMIDDLELINE
     }
     
-    private ArrayList<HelpLineTypes> visibleHelpLines;
+    private final Set<HelpLineTypes> visibleHelpLines;
 
     /**
-     * Creates new RaceMapHelpLinesSettings with the {@link HelpLineTypes} <code>STARTLINE</code>, <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
+     * Creates new RaceMapHelpLinesSettings with the {@link HelpLineTypes} <code>STARTLINE</code>,
+     * <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
      */
     public RaceMapHelpLinesSettings() {
-        visibleHelpLines = new ArrayList<HelpLineTypes>();
+        visibleHelpLines = new HashSet<HelpLineTypes>();
         visibleHelpLines.add(HelpLineTypes.STARTLINE);
         visibleHelpLines.add(HelpLineTypes.FINISHLINE);
         visibleHelpLines.add(HelpLineTypes.ADVANTAGELINE);
-        visibleHelpLines.add(HelpLineTypes.COURSEMIDDLELINE);
     }
     
-    public RaceMapHelpLinesSettings(ArrayList<HelpLineTypes> visibleHelpLines) {
-        this.visibleHelpLines = visibleHelpLines;
-    }
-
-    public List<HelpLineTypes> getVisibleHelpLines() {
-        return visibleHelpLines;
-    }
-    
-    public void setVisibleHelpLines(List<HelpLineTypes> visibleHelpLines) {
-        this.visibleHelpLines = new ArrayList<HelpLineTypes>(visibleHelpLines);
+    public RaceMapHelpLinesSettings(Collection<HelpLineTypes> visibleHelpLines) {
+        this.visibleHelpLines = new HashSet<HelpLineTypes>(visibleHelpLines);
     }
 
     public boolean containsHelpLine(HelpLineTypes helpLineType) {
@@ -64,5 +57,9 @@ public class RaceMapHelpLinesSettings {
         } else if (!visibleHelpLines.equals(other.visibleHelpLines))
             return false;
         return true;
+    }
+
+    public boolean isShowAnyHelperLines() {
+        return !visibleHelpLines.isEmpty();
     }
 }

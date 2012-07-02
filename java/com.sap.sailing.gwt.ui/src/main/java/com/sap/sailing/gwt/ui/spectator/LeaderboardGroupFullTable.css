@@ -1,7 +1,5 @@
 @CHARSET "ISO-8859-1";
 
-
-
 .cellTableWidget {
 	margin: 0 13px;
 	table-layout: auto;
@@ -33,18 +31,22 @@
 	background: none;
 }
 
-.cellTableEvenRowCell { /* th */
+.cellTableEvenRowCell { /* td */
 	border: none;
 	background: none;
+	vertical-align: top;
+	padding: 2px 3px;
 }
 
 .cellTableOddRow { /* tr */
 	background: none;
-	
 }
 
 .cellTableOddRowCell { /* td */
 	border: none;
+	background: none;
+	vertical-align: top;
+	padding: 2px 3px;
 }
 
 .cellTableHoveredRow {
@@ -52,39 +54,8 @@
 }
 
 .cellTableSelectedRow {
-
 }
-
 
 .cellTableSelectedRowCell {
 
 }
-
-.cellTableRaceColumnHeader {
-
-}
-
-.cellTableLegColumnHeader {
-
-}
-
-.cellTableLegDetailColumnHeader {
-
-}
-
-.cellTableRaceColumn {
-
-}
-
-.cellTableLegColumn {
-
-}
-
-.cellTableLegDetailColumn {
-
-}
-
-.cellTableTotalColumn {
-
-}
-

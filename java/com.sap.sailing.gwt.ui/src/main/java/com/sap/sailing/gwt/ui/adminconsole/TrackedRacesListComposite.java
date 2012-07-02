@@ -30,38 +30,44 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.EventDisplayer;
-import com.sap.sailing.gwt.ui.client.EventRefresher;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
-import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.components.Component;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialog;
+import com.sap.sailing.gwt.ui.shared.components.SettingsDialogComponent;
 
 /**
- * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link EventDisplayer}, e.g., with
+ * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattaDisplayer}, e.g., with
  * the {@link AdminConsoleEntryPoint}.
  */
-public class TrackedRacesListComposite extends FormPanel implements EventDisplayer, RaceSelectionChangeListener {
+public class TrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>, RegattaDisplayer, RaceSelectionChangeListener {
+    private final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
+
     private final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
 
     private final boolean multiSelection;
@@ -70,31 +76,35 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
 
     private final SelectionModel<RaceDTO> selectionModel;
 
-    private CellTable<RaceDTO> raceTable;
+    private final CellTable<RaceDTO> raceTable;
 
     private ListDataProvider<RaceDTO> raceList;
     
     private Iterable<RaceDTO> allRaces;
-
-    private VerticalPanel panel;
+    
+    private final VerticalPanel panel;
 
     private DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     private DateTimeFormatRenderer timeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
 
-    private Label noTrackedRacesLabel = null;
+    private final Label noTrackedRacesLabel;
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
-    private final EventRefresher eventRefresher;
+    private final RegattaRefresher regattaRefresher;
     private final RaceSelectionProvider raceSelectionProvider;
+    private final StringMessages stringMessages;
 
-    private Button btnUntrack = null;
-    private Button btnRefresh = null;
-    private Button btnRemoveRace = null;
+    private final Button btnUntrack;
+    private final Button btnRefresh;
+    private final Button btnRemoveRace;
+    private final Button btnSetDelayToLive;
 
-    private TextBox filterRacesTextbox;
+    private final TextBox filterRacesTextbox;
+    
+    private final TrackedRacesSettings settings;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
 
@@ -112,29 +122,30 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final EventRefresher eventRefresher, RaceSelectionProvider raceSelectionProvider,
-            StringMessages stringConstants, boolean hasMultiSelection) {
-        if (eventRefresher == null) {
-            throw new IllegalArgumentException("eventRefresher must not be null");
-        }
+            final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
+            StringMessages stringMessages, boolean hasMultiSelection) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        this.eventRefresher = eventRefresher;
+        this.regattaRefresher = regattaRefresher;
         this.multiSelection = hasMultiSelection;
         this.raceSelectionProvider = raceSelectionProvider;
+        this.stringMessages = stringMessages;
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         raceList = new ListDataProvider<RaceDTO>();
         selectionModel = multiSelection ? new MultiSelectionModel<RaceDTO>()
                 : new SingleSelectionModel<RaceDTO>();
+        settings = new TrackedRacesSettings();
+        settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
         panel = new VerticalPanel();
         setWidget(panel);
+
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
-        Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
-        lblFilterEvents.setWordWrap(false);
+        Label lblFilterRaces = new Label(stringMessages.filterRacesByName() + ":");
+        lblFilterRaces.setWordWrap(false);
         filterPanel.setSpacing(5);
-        filterPanel.add(lblFilterEvents);
-        filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
+        filterPanel.add(lblFilterRaces);
+        filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
         filterRacesTextbox = new TextBox();
         filterRacesTextbox.addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -144,27 +155,27 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
         });
         filterPanel.add(filterRacesTextbox);
 
-        noTrackedRacesLabel = new Label(stringConstants.noRacesYet());
+        noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<RaceDTO>(/* pageSize */200, tableRes);
+        raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
         ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(
                 raceList.getList());
-        TextColumn<RaceDTO> eventNameColumn = new TextColumn<RaceDTO>() {
+        TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                return raceDTO.getRegatta().getEvent().name;
+                return raceDTO.getRegatta().name;
             }
         };
-        eventNameColumn.setSortable(true);
+        regattaNameColumn.setSortable(true);
 
-        columnSortHandler.setComparator(eventNameColumn, new Comparator<RaceDTO>() {
+        columnSortHandler.setComparator(regattaNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO t1, RaceDTO t2) {
-                EventDTO eventOne = t1.getEvent();
-                EventDTO eventTwo = t2.getEvent();
+                RegattaDTO eventOne = t1.getRegatta();
+                RegattaDTO eventTwo = t2.getRegatta();
                 boolean ascending = isSortedAscending();
                 if (eventOne.name.equals(eventTwo.name)) {
                     return 0;
@@ -181,15 +192,16 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
             }
         });
 
-        TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
+        TextColumn<RaceDTO> boatClassNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
-                return raceDTO.getRegatta().boatClass.name;
+                final BoatClassDTO boatClass = raceDTO.getRegatta().boatClass;
+                return boatClass == null ? "" : boatClass.name;
             }
         };
-        regattaNameColumn.setSortable(true);
+        boatClassNameColumn.setSortable(true);
 
-        columnSortHandler.setComparator(regattaNameColumn, new Comparator<RaceDTO>() {
+        columnSortHandler.setComparator(boatClassNameColumn, new Comparator<RaceDTO>() {
             @Override
             public int compare(RaceDTO t1, RaceDTO t2) {
                 RegattaDTO regattaOne = t1.getRegatta();
@@ -216,10 +228,10 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
             @Override
             public SafeHtml getValue(RaceDTO raceDTO) {
                 if (raceDTO.currentlyTracked == true) {
-                    EventNameAndRaceName raceIdentifier = (EventNameAndRaceName) raceDTO.getRaceIdentifier();
+                    RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceDTO.getRaceIdentifier();
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     String link = URLFactory.INSTANCE.encode("/gwt/RaceBoard.html?raceName="
-                            + raceIdentifier.getRaceName() + "&eventName=" + raceIdentifier.getEventName()
+                            + raceIdentifier.getRaceName() + "&regattaName=" + raceIdentifier.getRegattaName()
                             + ((debugParam != null && !debugParam.isEmpty()) ? "&gwt.codesvr=" + debugParam : ""));
                     return ANCHORTEMPLATE.cell(link, raceDTO.name);
                 } else {
@@ -289,11 +301,22 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
             }
         };
 
-        raceTable.addColumn(eventNameColumn, stringConstants.event());
-        raceTable.addColumn(regattaNameColumn, stringConstants.regatta());
-        raceTable.addColumn(raceNameColumn, stringConstants.race());
-        raceTable.addColumn(raceStartColumn, stringConstants.startTime());
-        raceTable.addColumn(raceTrackedColumn, stringConstants.tracked());
+        TextColumn<RaceDTO> raceLiveDelayColumn = new TextColumn<RaceDTO>() {
+            @Override
+            public String getValue(RaceDTO raceDTO) {
+                if (raceDTO.delayToLiveInMs > 0)
+                    return "" + raceDTO.delayToLiveInMs / 1000;
+
+                return "";
+            }
+        };
+
+        raceTable.addColumn(regattaNameColumn, stringMessages.regatta());
+        raceTable.addColumn(boatClassNameColumn, stringMessages.boatClass());
+        raceTable.addColumn(raceNameColumn, stringMessages.race());
+        raceTable.addColumn(raceStartColumn, stringMessages.startTime());
+        raceTable.addColumn(raceTrackedColumn, stringMessages.tracked());
+        raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
         raceTable.setWidth("300px");
         raceTable.setSelectionModel(selectionModel);
         raceTable.setVisible(false);
@@ -314,7 +337,7 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
                 if (dontFireNextSelectionChangeEvent) {
                     dontFireNextSelectionChangeEvent = false;
                 } else {
-                    List<EventAndRaceIdentifier> selectedRaceIdentifiers = new ArrayList<EventAndRaceIdentifier>();
+                    List<RegattaAndRaceIdentifier> selectedRaceIdentifiers = new ArrayList<RegattaAndRaceIdentifier>();
                     for (RaceDTO selectedRace : selectedRaces) {
                         selectedRaceIdentifiers.add(selectedRace.getRaceIdentifier());
                     }
@@ -325,7 +348,7 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
-        btnRemoveRace = new Button(stringConstants.remove());
+        btnRemoveRace = new Button(stringMessages.remove());
         btnRemoveRace.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -336,7 +359,7 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
         });
         btnRemoveRace.setEnabled(false);
         trackedRacesButtonPanel.add(btnRemoveRace);
-        btnUntrack = new Button(stringConstants.stopTracking());
+        btnUntrack = new Button(stringMessages.stopTracking());
         btnUntrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
@@ -350,14 +373,31 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
         btnUntrack.setEnabled(false);
         trackedRacesButtonPanel.add(btnUntrack);
 
-        btnRefresh = new Button(stringConstants.refresh());
+        btnRefresh = new Button(stringMessages.refresh());
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                eventRefresher.fillEvents();
+                regattaRefresher.fillRegattas();
             }
         });
         trackedRacesButtonPanel.add(btnRefresh);
+
+        btnSetDelayToLive = new Button(stringMessages.setDelayToLive() + "...");
+        btnSetDelayToLive.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showSetDelayToLiveDialog();
+            }
+        });
+        trackedRacesButtonPanel.add(btnSetDelayToLive);
+    }
+
+    private void showSetDelayToLiveDialog() {
+        TrackedRacesSettings settings = new TrackedRacesSettings();
+        settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS);
+        
+        SettingsDialog<TrackedRacesSettings> settingsDialog = new SettingsDialog<TrackedRacesSettings>(this, stringMessages);
+        settingsDialog.show();
     }
 
     private List<RaceDTO> getSelectedRaces() {
@@ -375,8 +415,8 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
     public void selectRaceByIdentifier(RaceIdentifier raceIdentifier) {
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
-                EventDTO event = race.getEvent();
-                if (event.name.equals(raceIdentifier.getEventName()) && race.name.equals(raceIdentifier.getRaceName())) {
+                RegattaDTO event = race.getRegatta();
+                if (event.name.equals(raceIdentifier.getRegattaName()) && race.name.equals(raceIdentifier.getRaceName())) {
                     dontFireNextSelectionChangeEvent = true;
                     selectionModel.setSelected(race, true);
                     break;
@@ -386,7 +426,7 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
     }
 
     public void clearSelection() {
-        List<EventAndRaceIdentifier> emptySelection =  Collections.emptyList();
+        List<RegattaAndRaceIdentifier> emptySelection =  Collections.emptyList();
         raceSelectionProvider.setSelection(emptySelection, /* listenersNotToNotify */ this);
         if (raceList != null) {
             for (RaceDTO race : raceList.getList()) {
@@ -396,11 +436,12 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
     }
 
     @Override
-    public void fillEvents(List<EventDTO> events) {
-        if (events.isEmpty()) {
+    public void fillRegattas(List<RegattaDTO> regattas) {
+        if (regattas.isEmpty()) {
             raceTable.setVisible(false);
             btnUntrack.setVisible(false);
             btnRemoveRace.setVisible(false);
+            btnSetDelayToLive.setVisible(false);
             noTrackedRacesLabel.setVisible(true);
         } else {
             raceTable.setVisible(true);
@@ -409,16 +450,17 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
             btnRemoveRace.setVisible(true);
             btnRemoveRace.setEnabled(false);
             noTrackedRacesLabel.setVisible(false);
+            btnSetDelayToLive.setVisible(true);
         }
         List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
-        List<EventAndRaceIdentifier> newAllRaceIdentifiers = new ArrayList<EventAndRaceIdentifier>();
-        for (EventDTO event : events) {
-            for (RegattaDTO regatta : event.regattas) {
-                for (RaceDTO race : regatta.races) {
-                    if (race != null) {
-                        newAllRaces.add(race);
-                        newAllRaceIdentifiers.add(race.getRaceIdentifier());
-                    }
+        List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
+        List<RegattaAndRaceIdentifier> newAllRaceIdentifiers = new ArrayList<RegattaAndRaceIdentifier>();
+        for (RegattaDTO regatta : regattas) {
+            newAllRegattas.add(regatta);
+            for (RaceDTO race : regatta.races) {
+                if (race != null) {
+                    newAllRaces.add(race);
+                    newAllRaceIdentifiers.add(race.getRaceIdentifier());
                 }
             }
         }
@@ -436,39 +478,39 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
     }
 
     private void stopTrackingRace(final RaceDTO race) {
-        final EventNameAndRaceName eventNameAndRaceName = (EventNameAndRaceName) race.getRaceIdentifier();
-        sailingService.stopTrackingRace(eventNameAndRaceName, new AsyncCallback<Void>() {
+        final RegattaNameAndRaceName regattaNameAndRaceName = (RegattaNameAndRaceName) race.getRaceIdentifier();
+        sailingService.stopTrackingRace(regattaNameAndRaceName, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
-                        + race.getEvent().name + ": " + caught.getMessage());
+                        + race.getRegatta().name + ": " + caught.getMessage());
             }
 
             @Override
             public void onSuccess(Void result) {
-                eventRefresher.fillEvents();
+                regattaRefresher.fillRegattas();
                 for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                    listener.changeTrackingRace(eventNameAndRaceName, false);
+                    listener.changeTrackingRace(regattaNameAndRaceName, false);
                 }
             }
         });
     }
 
     private void removeAndUntrackRace(final RaceDTO race) {
-        final EventNameAndRaceName eventNameAndRaceName = (EventNameAndRaceName) race.getRaceIdentifier();
-        sailingService.removeAndUntrackRace(eventNameAndRaceName,
+        final RegattaNameAndRaceName regattaNameAndRaceName = (RegattaNameAndRaceName) race.getRaceIdentifier();
+        sailingService.removeAndUntrackRace(regattaNameAndRaceName,
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Exception trying to stop tracking race " + race.name + "in event "
-                                + race.getEvent().name + ": " + caught.getMessage());
+                                + race.getRegatta().name + ": " + caught.getMessage());
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                        eventRefresher.fillEvents();
+                        regattaRefresher.fillRegattas();
                         for (TrackedRaceChangedListener listener : raceIsTrackedRaceChangeListener) {
-                            listener.changeTrackingRace(eventNameAndRaceName, false);
+                            listener.changeTrackingRace(regattaNameAndRaceName, false);
                         }
                     }
                 });
@@ -483,7 +525,7 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
                 boolean failed = false;
                 for (String word : wordsToFilter) {
                     String textAsUppercase = word.toUpperCase().trim();
-                    if (!raceDTO.getEvent().name.toUpperCase().contains(textAsUppercase)
+                    if (!raceDTO.getRegatta().name.toUpperCase().contains(textAsUppercase)
                             && !raceDTO.getRegatta().boatClass.name.toUpperCase().contains(textAsUppercase)
                             && !raceDTO.name.toUpperCase().contains(textAsUppercase)) {
                         failed = true;
@@ -505,7 +547,7 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
     }
 
     @Override
-    public void onRaceSelectionChange(List<EventAndRaceIdentifier> selectedRaces) {
+    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
         for (RaceDTO raceFromAllRaces : raceList.getList()) {
             selectionModel.setSelected(raceFromAllRaces, selectedRaces.contains(raceFromAllRaces.getRaceIdentifier()));
         }
@@ -513,5 +555,53 @@ public class TrackedRacesListComposite extends FormPanel implements EventDisplay
 
     private Iterable<RaceDTO> getAllRaces() {
         return allRaces;
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return true;
+    }
+
+    @Override
+    public SettingsDialogComponent<TrackedRacesSettings> getSettingsDialogComponent() {
+        return new TrackedRacesSettingsDialogComponent<TrackedRacesSettings>(settings, stringMessages);
+    }
+    
+    @Override
+    public void updateSettings(TrackedRacesSettings newSettings) {
+        settings.setDelayToLiveInSeconds(newSettings.getDelayToLiveInSeconds());
+
+        // set the new delay to all selected races
+        List<RegattaAndRaceIdentifier> raceIdentifiersToUpdate = new ArrayList<RegattaAndRaceIdentifier>();
+        for (RaceDTO raceDTO : getSelectedRaces()) {
+            raceIdentifiersToUpdate.add(raceDTO.getRaceIdentifier());
+        }
+
+        if (raceIdentifiersToUpdate != null && !raceIdentifiersToUpdate.isEmpty()) {
+            sailingService.updateRacesDelayToLive(raceIdentifiersToUpdate, settings.getDelayToLiveInSeconds() * 1000l,
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter
+                                    .reportError("Exception trying to set the delay to live for the selected tracked races: "
+                                            + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            regattaRefresher.fillRegattas();
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return "Tracked races";
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return this;
     }
 }

@@ -85,8 +85,14 @@ public class RaceRankComparator implements Comparator<Competitor> {
                     if (o2Leg == null) {
                         result = 1; // o1Leg != null, so o1 has started leg already, o2 hasn't
                     } else {
-                        result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()), timePoint)
-                                .compare(o1Leg, o2Leg);
+                        if (o1Leg.getLeg() != o2Leg.getLeg()) {
+                            // strange: both have the same number of mark passings but are in different legs; something is
+                            // broken, but we can only try our best:
+                            result = trackedRace.getRace().getCourse().getLegs().indexOf(o1Leg.getLeg()) -
+                                    trackedRace.getRace().getCourse().getLegs().indexOf(o2Leg.getLeg());
+                        } else {
+                            result = new WindwardToGoComparator(trackedRace.getTrackedLeg(o1Leg.getLeg()), timePoint).compare(o1Leg, o2Leg);
+                        }
                     }
                 }
             }

@@ -8,14 +8,15 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ExpandableSortableColumn;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 
 public class GwtTestCaseColumnToggling extends GWTTestCase {
@@ -27,6 +28,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     
     //Test data.
     private final String LEADERBOARD_NAME = "test";
+    private static final String DEFAULT_FLEET_NAME = "Default";
     private final String COLUMN1_NAME = "r1";
     private final String EVENT_NAME = "Sailing Team Germany (STG)";
     protected static final boolean tractracTunnel = true; // Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
@@ -79,8 +81,11 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void trackRace(){
-        service.track(rrDao, tractracTunnel ? "tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE,
-                tractracTunnel ? "tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED, false, false, new AsyncCallback<Void>() {
+        service.trackWithTracTrac(/* regattaToAddTo */null, rrDao, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
+                + TracTracConnectionConstants.PORT_TUNNEL_LIVE : "tcp://" + TracTracConnectionConstants.HOST_NAME + ":"
+                + TracTracConnectionConstants.PORT_LIVE, tractracTunnel ? "tcp://" + tractracTunnelHost + ":"
+                + TracTracConnectionConstants.PORT_TUNNEL_STORED : "tcp://" + TracTracConnectionConstants.HOST_NAME
+                + ":" + TracTracConnectionConstants.PORT_STORED, false, false, /* simulateWithStartTimeNow */ false, new AsyncCallback<Void>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -96,10 +101,10 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void createLeaderboard(){
-        service.createLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
-                new AsyncCallback<LeaderboardDTO>() {
+        service.createFlexibleLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
+                new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
-                    public void onSuccess(LeaderboardDTO result) {
+                    public void onSuccess(StrippedLeaderboardDTO result) {
                         System.out.println("Created Leaderboard "+result.name);
                         addColumnToLeaderboard();
                     }
@@ -128,18 +133,18 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                     @Override
                     public void onSuccess(Void result) {
                         System.out.println("Added column to leaderboard.");
-                        RaceInLeaderboardDTO race = new RaceInLeaderboardDTO();
-                        race.setRaceColumnName(COLUMN1_NAME);
+                        RaceColumnDTO race = new RaceColumnDTO();
+                        race.name = COLUMN1_NAME;
                         race.setMedalRace(false);
-                        race.setRaceIdentifier(null);
                         leaderboardPanel.addColumn(leaderboardPanel.createRaceColumn(race));
                         linkTrackedRace();
                     }
                 });
     }
     
-    private void linkTrackedRace(){
-        service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, new EventNameAndRaceName(EVENT_NAME, TRACKED_RACE),
+    private void linkTrackedRace() {
+        service.connectTrackedRaceToLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME, DEFAULT_FLEET_NAME,
+                new RegattaNameAndRaceName(EVENT_NAME, TRACKED_RACE),
                 new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {

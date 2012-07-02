@@ -5,12 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.jms.BytesMessage;
@@ -59,12 +57,17 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private final RacingEventService localService;
     
     /**
+     * <code>null</code>, if this instance is not currently replicating from some master; the master's descriptor otherwise
+     */
+    private ReplicationMasterDescriptor replicatingFromMaster;
+    
+    /**
      * The UUIDs with which this replica is registered by the master identified by the corresponding key
      */
     private final Map<ReplicationMasterDescriptor, String> replicaUUIDs;
     
     public ReplicationServiceImpl(final ReplicationInstancesManager replicationInstancesManager,
-            final MessageBrokerManager messageBrokerManager) {
+            final MessageBrokerManager messageBrokerManager) throws Exception {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
         this.messageBrokerManager = messageBrokerManager;
@@ -142,7 +145,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     private void broadcastOperation(RacingEventServiceOperation<?> operation) throws Exception {
         Topic topic = getReplicationTopic();
         Session session = messageBrokerManager.getSession();
-        getMessageProducer(topic).setDeliveryMode(DeliveryMode.PERSISTENT);
+        getMessageProducer(topic).setDeliveryMode(DeliveryMode.NON_PERSISTENT);
         BytesMessage operationAsMessage = session.createBytesMessage();
         // serialize operation into message
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -151,6 +154,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         oos.close();
         operationAsMessage.writeBytes(bos.toByteArray());
         messageProducer.send(operationAsMessage);
+        replicationInstancesManager.log(operation);
     }
 
     private MessageProducer getMessageProducer(Topic topic) throws JMSException {
@@ -161,24 +165,37 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public List<String> getHostnamesOfReplica() {
-        List<String> result = new ArrayList<String>();
-        for (Iterator<ReplicaDescriptor> i=replicationInstancesManager.getReplicaDescriptors(); i.hasNext(); ) {
-            ReplicaDescriptor d = i.next();
-            result.add(d.getIpAddress().getHostAddress());
-        }
-        return result;
+    public Iterable<ReplicaDescriptor> getReplicaInfo() {
+        return replicationInstancesManager.getReplicaDescriptors();
+    }
+
+    @Override
+    public ReplicationMasterDescriptor isReplicatingFromMaster() {
+        return replicatingFromMaster;
     }
 
     @Override
     public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, JMSException {
+        replicatingFromMaster = master;
         String uuid = registerReplicaWithMaster(master);
         TopicSubscriber replicationSubscription = master.getTopicSubscriber(uuid);
         URL initialLoadURL = master.getInitialLoadURL();
-        replicationSubscription.setMessageListener(new Replicator(master, this));
+        final Replicator replicator = new Replicator(master, this, /* startSuspended */ true);
+        replicationSubscription.setMessageListener(replicator);
         InputStream is = initialLoadURL.openStream();
-        ObjectInputStream ois = new ObjectInputStream(is);
+        ObjectInputStream ois = new ObjectInputStream(is) {
+            @Override
+            protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                try {
+                    return super.resolveClass(desc);
+                } catch (ClassNotFoundException ex) {
+                    String name = desc.getName();
+                    return getClass().getClassLoader().loadClass(name);
+                }
+            }
+        };
         getRacingEventService().initiallyFillFrom(ois);
+        replicator.setSuspended(false); // apply queued operations
     }
 
     /**
@@ -212,6 +229,11 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
 
     protected void registerReplicaUuidForMaster(String uuid, ReplicationMasterDescriptor master) {
         replicaUUIDs.put(master, uuid);
+    }
+
+    @Override
+    public Map<Class<? extends RacingEventServiceOperation<?>>, Integer> getStatistics(ReplicaDescriptor replicaDescriptor) {
+        return replicationInstancesManager.getStatistics(replicaDescriptor);
     }
 
 }

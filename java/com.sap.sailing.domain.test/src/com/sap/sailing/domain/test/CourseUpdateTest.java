@@ -22,7 +22,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseListener;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -31,11 +31,11 @@ import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedEventImpl;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -54,8 +54,8 @@ import difflib.PatchFailedException;
 public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private RaceDefinition race;
     private Course course;
-    private Event domainEvent;
-    private DynamicTrackedEvent trackedEvent;
+    private Regatta domainRegatta;
+    private DynamicTrackedRegatta trackedRegatta;
     private final RouteData[] routeData = new RouteData[1];
     private DomainFactory domainFactory;
 
@@ -67,15 +67,15 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException {
         super.setUp();
         domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
-        domainEvent = domainFactory.getOrCreateEvent(getEvent());
-        trackedEvent = new DynamicTrackedEventImpl(domainEvent);
+        domainRegatta = domainFactory.getOrCreateDefaultRegatta(getTracTracEvent(), /* trackedRegattaRegistry */ null);
+        trackedRegatta = new DynamicTrackedRegattaImpl(domainRegatta);
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
-        receivers.add(new RaceCourseReceiver(domainFactory, trackedEvent, getEvent(), /* millisecondsOverWhichToAverageWind */
+        receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getTracTracEvent(),
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {
                     @Override
                     public void addRaceDefinition(RaceDefinition race) {}
-                },
-                30000) {
+                }, /* delayToLiveInMillis */ 0l, 
+                /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null) {
             @Override
             protected void handleEvent(Triple<Route, RouteData, Race> event) {
                 synchronized (routeData) {
@@ -86,7 +86,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             }
         });
         addListenersForStoredDataAndStartController(receivers);
-        Race tractracRace = getEvent().getRaceList().iterator().next();
+        Race tractracRace = getTracTracEvent().getRaceList().iterator().next();
         // now we expect that there is no 
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace));
         race = domainFactory.getAndWaitForRaceDefinition(tractracRace);
@@ -111,7 +111,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     private void testLegStructure(int minimalNumberOfLegsExpected) throws InterruptedException {
         waitForRouteData();
         assertTrue(course.getLegs().size() >= minimalNumberOfLegsExpected);
-        TrackedRace trackedRace = trackedEvent.getTrackedRace(race);
+        TrackedRace trackedRace = trackedRegatta.getTrackedRace(race);
         assertEquals(course.getLegs().size(), Util.size(trackedRace.getTrackedLegs()));
         Iterator<Leg> legIter = course.getLegs().iterator();
         for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
@@ -269,7 +269,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
     }
     
     @After
-    public void tearDown() throws MalformedURLException, IOException {
+    public void tearDown() throws MalformedURLException, IOException, InterruptedException {
         super.tearDown();
         routeData[0] = null;
     }

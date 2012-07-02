@@ -6,7 +6,9 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -23,7 +25,7 @@ public class RaceRecord {
     private static final String LIVE_URI_PROPERTY = "live-uri";
     private static final String STORED_URI_PROPERTY = "stored-uri";
     
-    private final String eventName;
+    private final String regattaName;
     private final String name;
     private final String replayURL;
     private final String ID;
@@ -33,14 +35,22 @@ public class RaceRecord {
     private final TimePoint racestarttime;
     private final URI liveURI;
     private final URI storedURI;
+    private final List<String> boatClassNames;
     
-    public RaceRecord(URL jsonURL, String eventName, String name, String replayURL, String ID,
-            String trackingstarttime, String trackingendtime, String racestarttime) throws URISyntaxException, IOException {
+    public RaceRecord(URL jsonURL, String regattaName, String name, String replayURL, String ID,
+            String trackingstarttime, String trackingendtime, String racestarttime, String commaSeparatedBoatClassNames)
+            throws URISyntaxException, IOException {
         super();
-        this.eventName = eventName;
+        this.regattaName = regattaName;
         this.name = name;
         this.replayURL = replayURL;
         this.ID = ID;
+        this.boatClassNames = new ArrayList<String>();
+        if (commaSeparatedBoatClassNames != null) {
+            for (String boatClassName : commaSeparatedBoatClassNames.split(",")) {
+                this.boatClassNames.add(boatClassName.trim());
+            }
+        }
         TimePoint tp = null;
         if (trackingstarttime != null) {
             try {
@@ -99,9 +109,9 @@ public class RaceRecord {
     public String getName() {
         return name;
     }
-
+    
     public String getEventName() {
-        return eventName;
+        return regattaName;
     }
 
     public String getReplayURL() {
@@ -122,6 +132,10 @@ public class RaceRecord {
 
     public URL getParamURL() {
         return paramURL;
+    }
+    
+    public Iterable<String> getBoatClassNames() {
+        return boatClassNames;
     }
 
     public TimePoint getTrackingStartTime() {

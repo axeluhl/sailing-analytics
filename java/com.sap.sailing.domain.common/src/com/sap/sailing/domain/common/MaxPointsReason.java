@@ -8,22 +8,43 @@ package com.sap.sailing.domain.common;
  *
  */
 public enum MaxPointsReason {
+    
     /** The competitor finished the race properly */
-    NONE,
+    NONE(true),
     /** Did Not Start */
-    DNS, 
+    DNS(true), 
     /** Did Not Finish */
-    DNF,
+    DNF(true),
     /** DiSQualified */
-    DSQ,
+    DSQ(true),
     /** On Course Side (jumped the gun) */
-    OCS,
+    OCS(true),
     /** Disqualified, non-discardable */
-    DND,
+    DND(false),
+    /** 20 % penalty under rule 30.2 */
+    ZFP(true),
+    /** Took a Scoring penalty under rule 44.3 (a) */
+    SCP(true),
+    /** Disqualification not excludable under rule 90.3 (b) */
+    DNE(false),
+    /** Disqualification for gross misconduct not excludable under rule 90.3 (b) */
+    DGM(false),
+    /** Redress given */
+    RDG(true),
     /** Black Flag Disqualified */
-    BFD,
+    BFD(true),
     /** Did Not Compete */
-    DNC,
+    DNC(true),
     /** Retired After Finishing */
-    RAF
+    RAF(true);
+    
+    private final boolean discardable;
+
+    private MaxPointsReason(boolean discardable) {
+        this.discardable = discardable;
+    }
+
+    public boolean isDiscardable() {
+        return discardable;
+    }
 }

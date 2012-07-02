@@ -2,20 +2,34 @@ package com.sap.sailing.gwt.ui.client;
 
 import java.util.HashMap;
 
+import com.sap.sailing.domain.common.impl.HSVColor;
 
 /**
  * Manages color assignments to objects.
  * 
  * @author Axel Uhl (d043530)
- *
- * @param <T> the type of the objects to which a color is assigned
+ * 
+ * @param <T>
+ *            the type of the objects to which a color is assigned
  */
 public class ColorMap<T> {
     private final HashMap<T, String> idColor;
-    
+
     private int colorCounter;
-    
+
+    private HSVColor[] baseColors;
+
     public ColorMap() {
+        baseColors = new HSVColor[8];
+        baseColors[0] = new HSVColor(0.0f, 1.0f, 1.0f); // Red
+        baseColors[1] = new HSVColor(30.0f, 1.0f, 1.0f); // Orange
+        baseColors[2] = new HSVColor(60.f, 1.0f, 1.0f); // Yellow
+        baseColors[3] = new HSVColor(120.0f, 1.0f, 1.0f); // Green
+        baseColors[4] = new HSVColor(180.0f, 1.0f, 1.0f); // Cyan
+        baseColors[5] = new HSVColor(240.0f, 1.0f, 1.0f); // Blue
+        baseColors[6] = new HSVColor(270.0f, 1.0f, 1.0f); // Pink
+        baseColors[7] = new HSVColor(300.0f, 1.0f, 1.0f); // Magenta
+
         idColor = new HashMap<T, String>();
     }
 
@@ -26,15 +40,15 @@ public class ColorMap<T> {
      *            An ID unique for a competitor.
      * @return A color in hex/html-format (e.g. #ff0000)
      */
-    public String getColorByID(T object){
+    public String getColorByID(T object) {
         String color = idColor.get(object);
-        if (color == null || color.isEmpty()){
-                color = createHexColor(colorCounter++);
-                idColor.put(object, color);
+        if (color == null || color.isEmpty()) {
+            color = createHexColor(colorCounter++);
+            idColor.put(object, color);
         }
         return color;
     }
-    
+
     /**
      * Only use this if you don't want the color to be cached.
      * 
@@ -42,32 +56,15 @@ public class ColorMap<T> {
      *            The index of e.g. a competitor. Make sure, that each competitor has a unique index.
      * @return A color computed using the {@code index}.
      */
-    private String createHexColor(int index){
-        String rs, gs, bs;
-        int r = 0, g = 0, b = 0;
-        double factor = 1 - ((index/6)/6.0);
-        if (index%6 < 2 || index%6 > 4){
-            r = (int) (255*factor);
-        }
-        rs = Integer.toHexString(r);
-        while(rs.length() < 2){
-            rs = "0" + rs;
-        }
-        if (index%6 > 0 && index%6 < 4){
-            g = (int) (220*factor);
-        }
-        gs = Integer.toHexString(g);
-        while(gs.length() < 2){
-            gs = "0" + gs;
-        }
-        if (index%6 > 2){
-            b = (int) (255*factor);
-        }
-        bs = Integer.toHexString(b);
-        while(bs.length() < 2){
-            bs = "0" + bs;
-        }
-        return "#" + rs + gs + bs;
+    private String createHexColor(int index) {
+        int baseColorCount = baseColors.length;
+        int baseColorsIndex = index % baseColorCount;
+        float brightnessDecrease = Math.round(index / baseColorCount) * 0.05f;
+        float saturationDecrease = Math.round(index / baseColorCount) * 0.05f;
+        HSVColor hsvColor = baseColors[baseColorsIndex];
+        HSVColor newColor = new HSVColor(hsvColor.getHue(), hsvColor.getSaturation() - saturationDecrease,
+                hsvColor.getBrightness() - brightnessDecrease);
+        return newColor.getAsHtml();
     }
-    
+
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.geocoding.test;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -37,6 +39,7 @@ public class ReverseGeocoderTest {
     public void getPlacemarkNearSimpleTest() {
         try {
             List<Placemark> placemarks = geocoder.getPlacemarksNear(KIEL_POSITION, 20);
+            assertNotNull(placemarks);
             Assert.assertFalse(placemarks.isEmpty());
         } catch (IOException e) {
             Assert.fail(e.getMessage());

@@ -9,7 +9,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.operationaltransformation.Peer;
@@ -19,7 +21,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
-import com.sap.sailing.server.operationaltransformation.CreateLeaderboard;
+import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sailing.server.operationaltransformation.MoveLeaderboardColumnUp;
 import com.sap.sailing.server.operationaltransformation.OperationalTransformer;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
@@ -48,7 +50,7 @@ public class OperationalTransformationTest {
 
     @Test
     public void testAddLeaderboard() {
-        RacingEventServiceOperation<Leaderboard> addLeaderboardOp = new CreateLeaderboard(LEADERBOARDNAME, new int[] { 5 });
+        RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(LEADERBOARDNAME, new int[] { 5 });
         server.apply(addLeaderboardOp);
         server.waitForNotRunning();
         replica.waitForNotRunning();
@@ -61,7 +63,7 @@ public class OperationalTransformationTest {
 
     @Test
     public void testAddColumnToLeaderboardOnClientAndRemoveLeaderboardOnServer() throws InterruptedException {
-        RacingEventServiceOperation<Void> addLeaderboardColumn = new AddColumnToLeaderboard(
+        RacingEventServiceOperation<RaceColumn> addLeaderboardColumn = new AddColumnToLeaderboard(
                 "newColumn", DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
         server.apply(addLeaderboardColumn);
         RacingEventServiceOperation<Void> removeDefaultLeaderboard = new RemoveLeaderboard(DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME);
@@ -74,10 +76,10 @@ public class OperationalTransformationTest {
 
     @Test
     public void testAddOneColumnOnEachSideThenMoveOneUpOnServerAndRemoveLeaderboardOnClient() throws InterruptedException {
-        RacingEventServiceOperation<Void> addLeaderboardColumnOnServer = new AddColumnToLeaderboard(
+        RacingEventServiceOperation<RaceColumn> addLeaderboardColumnOnServer = new AddColumnToLeaderboard(
                 "newColumn1", DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
         server.apply(addLeaderboardColumnOnServer);
-        RacingEventServiceOperation<Void> addLeaderboardColumnOnReplica = new AddColumnToLeaderboard(
+        RacingEventServiceOperation<RaceColumn> addLeaderboardColumnOnReplica = new AddColumnToLeaderboard(
                 "newColumn2", DefaultLeaderboardName.DEFAULT_LEADERBOARD_NAME, /* medalRace */ true);
         replica.apply(addLeaderboardColumnOnReplica);
         replica.waitForNotRunning();

@@ -89,7 +89,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          *            the value the label displays
          * @return the text to display for the label
          */
-        String formatLabel(SliderBar slider, double value);
+        String formatLabel(SliderBar slider, Double value, Double previousValue);
     }
 
     /**
@@ -103,7 +103,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          * 
          * @return a prototype of this image
          */
-        @Source("slider.png")
+        @Source("slider_blue.png")
         ImageResource slider();
 
         /**
@@ -111,7 +111,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          * 
          * @return a prototype of this image
          */
-        @Source("slider.png")
+        @Source("slider_blue.png")
         ImageResource sliderDisabled();
 
         /**
@@ -119,7 +119,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
          * 
          * @return a prototype of this image
          */
-        @Source("slider.png")
+        @Source("slider_blue.png")
         ImageResource sliderSliding();
 
         @NotStrict
@@ -195,12 +195,12 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * The current value.
      */
-    private Double curValue;
+    protected Double curValue;
 
     /**
      * The knob that slides across the line.
      */
-    private Image knobImage = new Image();
+    protected Image knobImage = new Image();
 
     /**
      * The timer used to continue to shift the knob if the user holds down a key.
@@ -210,37 +210,37 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * The elements used to display labels above the ticks.
      */
-    private List<Element> tickLabelElements = new ArrayList<Element>();
+    protected List<Element> tickLabelElements = new ArrayList<Element>();
 
     /**
      * The elements used to display the marker labels.
      */
-    private List<Element> markerLabelElements = new ArrayList<Element>();
+    protected List<Element> markerLabelElements = new ArrayList<Element>();
 
     /**
      * The formatter used to generate label text.
      */
-    private LabelFormatter tickLabelFormatter;
+    protected LabelFormatter tickLabelFormatter;
 
     /**
      * The line that the knob moves over.
      */
-    private Element lineElement;
+    protected Element lineElement;
 
     /**
      * The offset between the edge of the shell and the line.
      */
-    private int lineLeftOffset = 0;
+    protected int lineLeftOffset = 0;
 
     /**
      * The maximum slider value.
      */
-    private Double maxValue;
+    protected Double maxValue;
 
     /**
      * The minimum slider value.
      */
-    private Double minValue;
+    protected Double minValue;
 
     /**
      * The number of labels to show.
@@ -250,7 +250,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * The number of tick marks to show.
      */
-    private int numTicks = 0;
+    protected int numTicks = 0;
 
     /**
      * A bit indicating whether or not we are currently sliding the slider bar due to keyboard events.
@@ -265,7 +265,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * A bit indicating whether or not the slider is enabled
      */
-    private boolean enabled = true;
+    protected boolean enabled = true;
 
     /**
      * The images used with the sliding bar.
@@ -275,17 +275,17 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * The size of the increments between knob positions.
      */
-    private double stepSize;
+    protected double stepSize;
 
     /**
      * The elements used to display tick marks, which are the vertical lines along the slider bar.
      */
-    private List<Element> tickElements = new ArrayList<Element>();
+    protected List<Element> tickElements = new ArrayList<Element>();
 
     /**
      * The elements used to display additional markers on the slider bar.
      */
-    private List<Element> markerElements = new ArrayList<Element>();
+    protected List<Element> markerElements = new ArrayList<Element>();
 
     private List<Marker> markers = new ArrayList<Marker>();
 
@@ -810,9 +810,9 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the value at the label
      * @return the text to put in the label
      */
-    protected String formatTickLabel(double value) {
+    protected String formatTickLabel(Double value, Double previousValue) {
         if (tickLabelFormatter != null) {
-            return tickLabelFormatter.formatLabel(this, value);
+            return tickLabelFormatter.formatLabel(this, value, previousValue);
         } else {
             return (int) (10 * value) / 10.0 + "";
         }
@@ -847,7 +847,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * Draw the knob where it is supposed to be relative to the line.
      */
-    private void drawKnob() {
+    protected void drawKnob() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
 
@@ -863,7 +863,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * Draw the labels along the line.
      */
-    private void drawTickLabels() {
+    protected void drawTickLabels() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
 
@@ -871,6 +871,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         int lineWidth = lineElement.getOffsetWidth();
         if (numTickLabels > 0) {
             // Create the labels or make them visible
+            Double previousValue = null;
             for (int i = 0; i <= numTickLabels; i++) {
                 Element label = null;
                 if (i < tickLabelElements.size()) {
@@ -892,7 +893,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                 double value = minValue + (getTotalRange() * i / numTickLabels);
                 DOM.setStyleAttribute(label, "visibility", "hidden");
                 DOM.setStyleAttribute(label, "display", "");
-                DOM.setElementProperty(label, "innerHTML", formatTickLabel(value));
+                DOM.setElementProperty(label, "innerHTML", formatTickLabel(value, previousValue));
 
                 // Move to the left so the label width is not clipped by the
                 // shell
@@ -905,6 +906,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                 labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
                 DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
                 DOM.setStyleAttribute(label, "visibility", "visible");
+                
+                previousValue = value;
             }
 
             // Hide unused labels
@@ -921,7 +924,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     /**
      * Draw the tick along the line.
      */
-    private void drawTicks() {
+    protected void drawTicks() {
         if (!isAttached() || !isMinMaxInitialized())
             return;
 
@@ -1099,7 +1102,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the mouse event
      */
     private void slideKnob(Event event) {
-        //Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
+        // Adding scrollLeft to adjust the position, if the user had scrolled with the lower scroll bar
         int x = DOM.eventGetClientX(event) + Window.getScrollLeft();
         if (x > 0) {
             int lineWidth = lineElement.getOffsetWidth();
@@ -1157,7 +1160,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     public void clearMarkers() {
         markers.clear();
     }
-
+    
     public boolean addMarker(String markerName, Double markerPosition) {
         return markers.add(new Marker(markerName, markerPosition));
     }

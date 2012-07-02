@@ -254,7 +254,7 @@ through the /moderator servlet. We may want to consider merging both
 into one in the future.
 
 /admin
-  action=listracesinevent: outputs a JSON object describing the
+  action=listracesinregatta: outputs a JSON object describing the
   		  races and their paramURLs available for tracking in
 		  the following form:
 		    [ { "name": ...,	       // race name
@@ -274,13 +274,13 @@ into one in the future.
     liveURI:      the live data URI for the TracTrac server
     storedURI:	  the stored data URI for the TracTrac server; usually
     		  the port number of this URI is that of liveURI + 1
-  action=stopevent: stops tracking of all races of the event; this
-                  also stops all wind tracking for the races of the event
-    eventname:    name of the event, as returned by the "listevents"
+  action=stopregatta: stops tracking of all races of the regatta; this
+                  also stops all wind tracking for the races of the regatta
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
   action=addrace: starts tracking a single race; if other races of
   		  the same event/regatta are already being tracked,
-		  the race is added to the event
+		  the race is added to the regatta
     paramURL:     the URL from where metadata about the race
                   can be obtained; the resulting document includes
 		  UUIDs of waypoints, competitors, etc.
@@ -289,17 +289,17 @@ into one in the future.
     		  the port number of this URI is that of liveURI + 1
   action=stoprace: stops tracking of a single race, also stopping the
   		  wind trackers that were started for this race; other
- 		  races of the same event that were being tracked will
+ 		  races of the same regatta that were being tracked will
 		  continue being tracked.
-    eventname:    name of the event, as returned by the "listevents"
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet
   action=receiveexpeditionwind: starts a wind tracker that receives
   		  wind data through a UDP port from an Expedition
 		  client; the wind is fed into a wind track for the
-		  race specified by eventname/racename.
-    eventname:    name of the event, as returned by the "listevents"
+		  race specified by regattaname/racename.
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet
@@ -309,14 +309,14 @@ into one in the future.
 		  time and location specified by the Expedition
 		  message.
   action=stopreceivingexpeditionwind: stops an expedition wind tracker
-  		  for the race specified by eventname/racename
-    eventname:    name of the event, as returned by the "listevents"
+  		  for the race specified by regattaname/racename
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet
   action=listwindtrackers: lists all wind trackers currently
                   registered in the server instance. The output
-		  structure is an array of {eventname,racename,windtrackerinfo}
+		  structure is an array of {regattaname,racename,windtrackerinfo}
 		  objects where "windtrackerinfo" is a tracker type-specific
                   string field which may contain, e.g., the tracker type
 		  name or, in case of a UDP port-based tracker,
@@ -326,7 +326,7 @@ into one in the future.
   		  wind track of the race specified. If no time is
 		  specified, the measurement is assumed to have been
 		  taken at the current time.
-    eventname:    name of the event, as returned by the "listevents"
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet
@@ -351,7 +351,7 @@ into one in the future.
 		  will be used as the default. However, it's
 		  unlikely that this will match the time point
 		  of the wind to remove by the millisecond.
-    eventname:    name of the event, as returned by the "listevents"
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet
@@ -380,7 +380,7 @@ into one in the future.
 				}
 			"EXPEDITION": { ... }
 		    }
-    eventname:    name of the event, as returned by the "listevents"
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet
@@ -398,7 +398,7 @@ into one in the future.
 		      "windKnotSpeed": ...,      // wind info
 		      "toLatDeg": ...,      // translated position
 		      "toLngDeg" }	    // translated position
-    eventname:    name of the event, as returned by the "listevents"
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet
@@ -427,24 +427,14 @@ into one in the future.
 		      "boatclass": ..., // optional; name of boat class
 		      "competitors": [  // the event's competitors
 		        { "name", ...,  // competitor's name
+			  "sailID": ... // sail ID if known
 			  "nationality": ..., // 3-letter IOC country code
 			  "nationalityISO2": ..., // 2-letter ISO country code (may be empty)
 			  "nationalityISO3": ..., // 3-letter ISO country code (may be empty)
 			  "team": [ {   // the sailors forming the team
 			    "name": ...,
 			    "description": ... } ... ] } ... ]
-		      "races": [        // list of races in the event
-		        "name": ...,
-			"boatclass": ...,
-			"start": ...,   // race start time as millisecond
-				 	// timestamp, Integer.MAX_VALUE
-					// if not started yet
-		        "legs": [ {     // legs in the course's order
-                          "start": ..., // name of the leg start mark
-			  "end": ... }  // name of the leg end mark
-                          ... ]
-                      ... ]
-  action=listracesinevent:        // list of races in the event
+		      "races": [        // list of races in the regatta
 		        "name": ...,
 			"boatclass": ...,
 			"start": ...,   // race start time as millisecond
@@ -469,7 +459,7 @@ into one in the future.
 			  "knotspeed": ...,        // boat speed in knots
                           "tack": [STARBOARD|PORT] } ... ] // side on which sails are
 		        } ... ] }
-    eventname:    name of the event, as returned by the "listevents"
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet
@@ -496,7 +486,7 @@ into one in the future.
 		        "name": ...,	      // buoy name
 			"lat": ...,	      // optional; if buoy pos known
 			"lng": ... } ... ] }  // optionsl; if buoy pos known
-    eventname:    name of the event, as returned by the "listevents"
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet
@@ -570,7 +560,7 @@ into one in the future.
 			"ranks": [ {           // the overall total ranks, across legs
 			  "competitor": ...,   // name of competitor
 			  "rank": ... } ... ] }
-    eventname:    name of the event, as returned by the "listevents"
+    regattaname:  name of the regatta, as returned by the "listevents"
     		  action on the /moderator servlet
     racename:     name of the race, as returned by the "listevents"
     		  action on the /moderator servlet

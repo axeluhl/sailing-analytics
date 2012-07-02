@@ -11,7 +11,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
  * 
  */
 public interface WindTrackerFactory {
-    WindTracker createWindTracker(DynamicTrackedEvent trackedEvent, RaceDefinition race, boolean correctByDeclination)
+    WindTracker createWindTracker(DynamicTrackedRegatta trackedRegatta, RaceDefinition race, boolean correctByDeclination)
             throws SocketException;
 
     /**

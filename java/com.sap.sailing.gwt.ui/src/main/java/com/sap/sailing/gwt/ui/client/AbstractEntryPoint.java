@@ -69,7 +69,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
 
     @Override
     public void reportError(String message, boolean silentMode) {
-        if(silentMode) {
+        if (silentMode) {
             Window.setStatus(message);
         } else {
             reportError(message);
@@ -77,7 +77,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     }
 
     public void createErrorPage(String message) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel("", stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
 
         RootPanel.get().add(logoAndTitlePanel);

@@ -8,11 +8,12 @@ import java.util.logging.Logger;
 import com.maptrack.client.io.TypeController;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.tractrac.clientmodule.Race;
@@ -25,9 +26,9 @@ import difflib.PatchFailedException;
 /**
  * The ordering of the {@link ControlPoint}s of a {@link Course} are received
  * dynamically through a callback interface. Therefore, when connected to an
- * {@link Event}, these orders are not yet defined. An instance of this class
+ * {@link Regatta}, these orders are not yet defined. An instance of this class
  * can be used to create the listeners needed to receive this information and
- * set it on an {@link Event}.
+ * set it on an {@link Regatta}.
  * 
  * @author Axel Uhl (d043530)
  * 
@@ -36,16 +37,22 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
     private final static Logger logger = Logger.getLogger(RaceCourseReceiver.class.getName());
     
     private final long millisecondsOverWhichToAverageWind;
+    private final long delayToLiveInMillis;
     private final WindStore windStore;
     private final DynamicRaceDefinitionSet raceDefinitionSetToUpdate;
     
-    public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedEvent trackedEvent,
+    public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta,
             com.tractrac.clientmodule.Event tractracEvent, WindStore windStore,
-            DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            long millisecondsOverWhichToAverageWind) {
-        super(domainFactory, tractracEvent, trackedEvent);
+            DynamicRaceDefinitionSet raceDefinitionSetToUpdate, long delayToLiveInMillis,
+            long millisecondsOverWhichToAverageWind, Simulator simulator) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator);
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
-        this.windStore = windStore;
+        this.delayToLiveInMillis = delayToLiveInMillis;
+        if (simulator == null) {
+            this.windStore = windStore;
+        } else {
+            this.windStore = simulator.simulatingWindStore(windStore);
+        }
         this.raceDefinitionSetToUpdate = raceDefinitionSetToUpdate;
     }
 
@@ -81,7 +88,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
             // Therefore, don't create TrackedRace again because it already exists.
             try {
                 getDomainFactory().updateCourseWaypoints(existingRaceDefinitionForRace.getCourse(), event.getB().getPoints());
-                if (getTrackedEvent().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
+                if (getTrackedRegatta().getExistingTrackedRace(existingRaceDefinitionForRace) == null) {
                     createTrackedRace(existingRaceDefinitionForRace);
                 }
             } catch (PatchFailedException e) {
@@ -91,14 +98,18 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<Route, RouteDa
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+event.getC().getName()+". Creating RaceDefinition.");
             // create race definition and add to event
-            getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(getTrackedEvent(), event.getC(), course,
-                    windStore, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+            DynamicTrackedRace trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
+                    getTrackedRegatta(), event.getC(), course, windStore, delayToLiveInMillis,
+                    millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate);
+            if (getSimulator() != null) {
+                getSimulator().setTrackedRace(trackedRace);
+            }
         }
     }
 
     private void createTrackedRace(RaceDefinition race) {
-        getTrackedEvent().createTrackedRace(race,
-                windStore, millisecondsOverWhichToAverageWind,
+        getTrackedRegatta().createTrackedRace(race,
+                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate);
     }

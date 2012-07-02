@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -194,7 +195,9 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private void cachePlacemarks(Position position, Double radius, List<Placemark> placemarks) {
         Collections.sort(placemarks, new Placemark.ByDistance(position));
         if (position != null) {
-            cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
+            synchronized (cache) {
+                cache.put(position, new Triple<Position, Double, List<Placemark>>(position, radius, placemarks));
+            }
         }
     }
     
@@ -211,7 +214,9 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      */
     private void updateCachedPlacemarks(Position cachedPoint, Double newRadius, List<Placemark> newPlacemarks) {
         if (cachedPoint != null) {
-            cache.replace(cachedPoint, new Triple<Position, Double, List<Placemark>>(cachedPoint, newRadius, newPlacemarks));
+            synchronized (cache) {
+                cache.replace(cachedPoint, new Triple<Position, Double, List<Placemark>>(cachedPoint, newRadius, newPlacemarks));
+            }
         }
     }
 
@@ -223,14 +228,16 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
      *         {@link ReverseGeocoderImpl#POSITION_CACHE_DISTANCE_LIMIT the distance limit}
      */
     private Triple<Position, Double, List<Placemark>> checkCache(Position position) {
-        return cache.get(position, POSITION_CACHE_DISTANCE_LIMIT);
+        synchronized (cache) {
+            return cache.get(position, POSITION_CACHE_DISTANCE_LIMIT);
+        }
     }
 
     private JSONArray callNearestService(Position position) throws MalformedURLException, IOException, ParseException {
         StringBuilder url = new StringBuilder(NEARBY_PLACE_SERVICE);
         url.append("&lat=" + Double.toString(position.getLatDeg()));
         url.append("&lng=" + Double.toString(position.getLngDeg()));
-        url.append("&username=" + GEONAMES_USER);
+        url.append("&username=" + getGeonamesUser());
 
         URL request = new URL(url.toString());
         URLConnection connection = request.openConnection();
@@ -248,7 +255,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         url.append("&lng=" + Double.toString(position.getLngDeg()));
         url.append("&radius=" + Double.toString(radius));
         url.append("&maxRows=" + Integer.toString(maxRows));
-        url.append("&username=" + GEONAMES_USER);
+        url.append("&username=" + getGeonamesUser());
 
         URL request = new URL(url.toString());
         URLConnection connection = request.openConnection();
@@ -257,6 +264,11 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
         JSONObject obj = (JSONObject) parser.parse(in);
         JSONArray geonames = (JSONArray) obj.get("geonames");
         return geonames;
+    }
+
+    final String GEONAMES_USER = "sailtracking";
+    private String getGeonamesUser() {
+        return GEONAMES_USER+new Random().nextInt(10);
     }
 
 }

@@ -18,7 +18,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -28,8 +28,8 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
-import com.sap.sailing.domain.common.EventName;
-import com.sap.sailing.domain.common.EventNameAndRaceName;
+import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -39,7 +39,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoWindStore;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
-import com.sap.sailing.domain.tracking.DynamicTrackedEvent;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -49,16 +49,16 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
-import com.sap.sailing.server.operationaltransformation.AddEvent;
+import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
-import com.sap.sailing.server.operationaltransformation.TrackEvent;
+import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 
 public class TrackedRaceContentsReplicationTest extends AbstractServerReplicationTest {
     private Competitor competitor;
     private DynamicTrackedRace trackedRace;
-    private EventNameAndRaceName raceIdentifier;
-    private DynamicTrackedEvent trackedEvent;
+    private RegattaNameAndRaceName raceIdentifier;
+    private DynamicTrackedRegatta trackedRegatta;
     
     @Before
     public void setUp() throws Exception {
@@ -73,22 +73,22 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
                 new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"));
         final String baseEventName = "Test Event";
-        AddEvent addEventOperation = new AddEvent(baseEventName, boatClassName, /* boatClassTypicallyStartsUpwind */ true);
-        Event event = master.apply(addEventOperation);
+        AddDefaultRegatta addEventOperation = new AddDefaultRegatta(baseEventName, boatClassName);
+        Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
         RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Collections.singletonList(competitor));
-        AddRaceDefinition addRaceOperation = new AddRaceDefinition(new EventName(event.getName()), race);
+        AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy1")));
         masterCourse.addWaypoint(1, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy2")));
         masterCourse.addWaypoint(2, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateBuoy("Buoy3")));
         masterCourse.removeWaypoint(1);
-        raceIdentifier = new EventNameAndRaceName(event.getName(), raceName);
-        trackedEvent = master.apply(new TrackEvent(raceIdentifier));
+        raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), raceName);
+        trackedRegatta = master.apply(new TrackRegatta(raceIdentifier));
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory()),
+                        MongoFactory.INSTANCE.getDefaultDomainObjectFactory()), /* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
     }
     
@@ -102,9 +102,14 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         Competitor replicaCompetitor = replicaTrackedRace.getRace().getCompetitors().iterator().next();
         assertNotNull(replicaCompetitor);
         GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = replicaTrackedRace.getTrack(replicaCompetitor);
-        assertEquals(1, Util.size(competitorTrack.getRawFixes()));
-        assertEquals(fix, competitorTrack.getRawFixes().iterator().next());
-        assertNotSame(fix, competitorTrack.getRawFixes().iterator().next());
+        competitorTrack.lockForRead();
+        try {
+            assertEquals(1, Util.size(competitorTrack.getRawFixes()));
+            assertEquals(fix, competitorTrack.getRawFixes().iterator().next());
+            assertNotSame(fix, competitorTrack.getRawFixes().iterator().next());
+        } finally {
+            competitorTrack.unlockAfterRead();
+        }
     }
 
     @Test
@@ -118,9 +123,14 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         Buoy replicaBuoy = replicaTrackedRace.getRace().getCourse().getFirstWaypoint().getBuoys().iterator().next();
 //        assertNotSame(replicaBuoy, masterBuoy); // TODO this would require solving bug 592
         GPSFixTrack<Buoy, GPSFix> replicaBuoyTrack = replicaTrackedRace.getOrCreateTrack(replicaBuoy);
-        assertEquals(1, Util.size(replicaBuoyTrack.getRawFixes()));
-        assertEquals(replicaBuoyTrack.getRawFixes().iterator().next(), fix);
-        assertNotSame(fix, replicaBuoyTrack.getRawFixes().iterator().next());
+        replicaBuoyTrack.lockForRead();
+        try {
+            assertEquals(1, Util.size(replicaBuoyTrack.getRawFixes()));
+            assertEquals(replicaBuoyTrack.getRawFixes().iterator().next(), fix);
+            assertNotSame(fix, replicaBuoyTrack.getRawFixes().iterator().next());
+        } finally {
+            replicaBuoyTrack.unlockAfterRead();
+        }
     }
 
     @Test
@@ -133,10 +143,15 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
                 .getWindSources(WindSourceType.WEB).iterator().next());
-        assertEquals(1, Util.size(replicaWindTrack.getRawFixes()));
-        Wind replicaWind = replicaWindTrack.getRawFixes().iterator().next();
-        assertEquals(wind, replicaWind);
-        assertNotSame(wind, replicaWind);
+        replicaWindTrack.lockForRead();
+        try {
+            assertEquals(1, Util.size(replicaWindTrack.getRawFixes()));
+            Wind replicaWind = replicaWindTrack.getRawFixes().iterator().next();
+            assertEquals(wind, replicaWind);
+            assertNotSame(wind, replicaWind);
+        } finally {
+            replicaWindTrack.unlockAfterRead();
+        }
     }
 
     @Test
@@ -146,12 +161,23 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
         trackedRace.recordWind(wind, webWindSource);
         trackedRace.removeWind(wind, webWindSource);
-        assertEquals(0, Util.size(trackedRace.getOrCreateWindTrack(webWindSource).getRawFixes()));
+        final WindTrack windTrack = trackedRace.getOrCreateWindTrack(webWindSource);
+        windTrack.lockForRead();
+        try {
+            assertEquals(0, Util.size(windTrack.getRawFixes()));
+        } finally {
+            windTrack.unlockAfterRead();
+        }
         Thread.sleep(1000);
         TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
         WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
                 .getWindSources(WindSourceType.WEB).iterator().next());
-        assertEquals(0, Util.size(replicaWindTrack.getRawFixes()));
+        replicaWindTrack.lockForRead();
+        try {
+            assertEquals(0, Util.size(replicaWindTrack.getRawFixes()));
+        } finally {
+            replicaWindTrack.unlockAfterRead();
+        }
     }
     
     @Test
@@ -159,20 +185,32 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
         MongoWindStore windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                 MongoFactory.INSTANCE.getDefaultDomainObjectFactory());
         WindSource webWindSource = new WindSourceImpl(WindSourceType.WEB);
-        WindTrack windTrack = windStore.getWindTrack(trackedEvent, trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
+        WindTrack windTrack = windStore.getWindTrack(trackedRegatta, trackedRace, webWindSource, /* millisecondsOverWhichToAverage */ 10000,
                 /* delayForWindEstimationCacheInvalidation */ 10000);
         final Wind wind = new WindImpl(new DegreePosition(2, 3), new MillisecondsTimePoint(3456),
                 new KnotSpeedWithBearingImpl(13, new DegreeBearingImpl(234)));
         windTrack.add(wind);
         Thread.sleep(1000); // give MongoDB time to read its own writes in a separate session
         WindTrack trackedRaceWebWindTrack = trackedRace.getOrCreateWindTrack(webWindSource);
-        assertEquals(Util.size(windTrack.getRawFixes()), Util.size(trackedRaceWebWindTrack.getRawFixes()));
-        assertEquals(windTrack.getRawFixes().iterator().next(), trackedRaceWebWindTrack.getRawFixes().iterator().next());
-        Thread.sleep(1000); // wait for replication to happen
-        TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
-        WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
-                .getWindSources(WindSourceType.WEB).iterator().next());
-        assertEquals(Util.size(windTrack.getRawFixes()), Util.size(replicaWindTrack.getRawFixes()));
-        assertEquals(windTrack.getRawFixes().iterator().next(), replicaWindTrack.getRawFixes().iterator().next());
+        windTrack.lockForRead();
+        trackedRaceWebWindTrack.lockForRead();
+        try {
+            assertEquals(Util.size(windTrack.getRawFixes()), Util.size(trackedRaceWebWindTrack.getRawFixes()));
+            assertEquals(windTrack.getRawFixes().iterator().next(), trackedRaceWebWindTrack.getRawFixes().iterator().next());
+            Thread.sleep(1000); // wait for replication to happen
+            TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+            WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
+                    .getWindSources(WindSourceType.WEB).iterator().next());
+            replicaWindTrack.lockForRead();
+            try {
+                assertEquals(Util.size(windTrack.getRawFixes()), Util.size(replicaWindTrack.getRawFixes()));
+                assertEquals(windTrack.getRawFixes().iterator().next(), replicaWindTrack.getRawFixes().iterator().next());
+            } finally {
+                replicaWindTrack.unlockAfterRead();
+            }
+        } finally {
+            trackedRaceWebWindTrack.unlockAfterRead();
+            windTrack.unlockAfterRead();
+        }
     }
 }

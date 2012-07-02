@@ -1,25 +1,25 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.common.EventAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class StopTrackingRace extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = -6074168525544219596L;
 
-    public StopTrackingRace(EventAndRaceIdentifier raceIdentifier) {
+    public StopTrackingRace(RegattaAndRaceIdentifier raceIdentifier) {
         super(raceIdentifier);
     }
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        Event event = toState.getEvent(getRaceIdentifier());
-        if (event != null) {
+        Regatta regatta = toState.getRegatta(getRaceIdentifier());
+        if (regatta != null) {
             RaceDefinition r = toState.getRace(getRaceIdentifier());
             if (r != null) {
-                toState.stopTracking(event, r);
+                toState.stopTracking(regatta, r);
             }
         }
         return null;

@@ -28,8 +28,13 @@ public class StoredTrackBasedTestWithTrackedRace extends StoredTrackBasedTest {
     private void copyTracks(Map<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> tracks) {
         for (Map.Entry<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> e : tracks.entrySet()) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(e.getKey());
-            for (GPSFixMoving fix : e.getValue().getRawFixes()) {
-                track.addGPSFix(fix);
+            e.getValue().lockForRead();
+            try {
+                for (GPSFixMoving fix : e.getValue().getRawFixes()) {
+                    track.addGPSFix(fix);
+                }
+            } finally {
+                e.getValue().unlockAfterRead();
             }
             List<MarkPassing> markPassings = new ArrayList<MarkPassing>();
             // add a mark passing for the start gate at the very beginning to make sure everyone is on a valid leg

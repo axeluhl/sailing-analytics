@@ -39,10 +39,10 @@ import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 public abstract class StoredTrackBasedTest extends TrackBasedTest {
     private static final String RESOURCES = "resources/";
 
-    protected DynamicGPSFixTrack<Competitor, GPSFixMoving> readTrack(Competitor competitor, String eventName) throws FileNotFoundException, IOException {
+    protected DynamicGPSFixTrack<Competitor, GPSFixMoving> readTrack(Competitor competitor, String regattaName) throws FileNotFoundException, IOException {
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = null;
-        if (getFile(competitor, eventName).exists()) {
-            ObjectInput oi = getInputStream(competitor, eventName);
+        if (getFile(competitor, regattaName).exists()) {
+            ObjectInput oi = getInputStream(competitor, regattaName);
             track = new DynamicGPSFixMovingTrackImpl<Competitor>(competitor, /* millisecondsOverWhichToAverage */
                     40000);
             try {
@@ -57,26 +57,26 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
         return track;
     }
     
-    ObjectInput getInputStream(Competitor competitor, String eventName) throws FileNotFoundException, IOException {
-        return new ObjectInputStream(new FileInputStream(getFile(competitor, eventName)));
+    ObjectInput getInputStream(Competitor competitor, String regattaName) throws FileNotFoundException, IOException {
+        return new ObjectInputStream(new FileInputStream(getFile(competitor, regattaName)));
     }
 
-    ObjectOutput getOutputStream(Competitor competitor, String eventName) throws FileNotFoundException, IOException {
-        return new ObjectOutputStream(new FileOutputStream(getFile(competitor, eventName)));
+    ObjectOutput getOutputStream(Competitor competitor, String regattaName) throws FileNotFoundException, IOException {
+        return new ObjectOutputStream(new FileOutputStream(getFile(competitor, regattaName)));
     }
 
-    private File getFile(Competitor competitor, String eventName) {
-        return new File(RESOURCES + eventName + "-" + competitor.getName()
+    private File getFile(Competitor competitor, String regattaName) {
+        return new File(RESOURCES + regattaName + "-" + competitor.getName()
                 + (competitor.getBoat().getSailID() == null ? "" : "-" + competitor.getBoat().getSailID()));
     }
     
-    private Set<String> getCompetitorNamesOfStoredTracks(String eventName) {
+    private Set<String> getCompetitorNamesOfStoredTracks(String regattaName) {
         Set<String> result = new HashSet<String>();
         File d = new File(RESOURCES);
         final String separator = "-";
         for (String s : d.list()) {
-            if (s.startsWith(eventName+separator)) {
-                result.add(s.substring(eventName.length()+separator.length()));
+            if (s.startsWith(regattaName+separator)) {
+                result.add(s.substring(regattaName.length()+separator.length()));
             }
         }
         return result;
@@ -97,9 +97,9 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
         return new GPSFixMovingImpl(position, timePoint, speedWithBearing);
     }
 
-    protected void storeTrack(Competitor competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving> track, String eventName)
+    protected void storeTrack(Competitor competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving> track, String regattaName)
             throws FileNotFoundException, IOException {
-        ObjectOutput oo = getOutputStream(competitor, eventName);
+        ObjectOutput oo = getOutputStream(competitor, regattaName);
         for (GPSFixMoving fix : track.getRawFixes()) {
             writeGPSFixMoving(fix, oo);
         }

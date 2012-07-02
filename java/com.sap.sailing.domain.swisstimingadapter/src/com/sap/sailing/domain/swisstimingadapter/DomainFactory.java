@@ -4,7 +4,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Buoy;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
-import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
@@ -13,6 +13,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 
 import difflib.PatchFailedException;
@@ -20,13 +21,13 @@ import difflib.PatchFailedException;
 public interface DomainFactory {
     final static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
     
-    Event getOrCreateEvent(String raceID);
+    Regatta getOrCreateRegatta(String raceID, TrackedRegattaRegistry trackedRegattaRegistry);
 
     Nationality getOrCreateNationality(String nationalityName);
 
     Competitor getOrCreateCompetitor(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, BoatClass boatClass);
 
-    RaceDefinition createRaceDefinition(Event event, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
+    RaceDefinition createRaceDefinition(Regatta regatta, Race race, StartList startList, com.sap.sailing.domain.swisstimingadapter.Course course);
 
     Buoy getOrCreateBuoy(String trackerID);
     
@@ -40,7 +41,8 @@ public interface DomainFactory {
 
     void removeRace(String raceID);
     
-    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, boolean canSendRequests,
+    RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID, 
+            boolean canSendRequests, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, WindStore windStore,
             RaceSpecificMessageLoader messageLoader);
 }

@@ -10,23 +10,32 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.Timed;
+import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.domain.leaderboard.RaceInLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.tracking.Positioned;
-import com.sap.sailing.domain.tracking.TrackedEvent;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 
@@ -73,9 +82,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void addWindTrackDumper(TrackedEvent trackedEvent, TrackedRace trackedRace, WindSource windSource) {
+    public void addWindTrackDumper(TrackedRegatta trackedRegatta, TrackedRace trackedRace, WindSource windSource) {
         WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-        windTrack.addListener(new MongoWindListener(trackedEvent, trackedRace, windSource, this, database));
+        windTrack.addListener(new MongoWindListener(trackedRegatta, trackedRace, windSource, this, database));
     }
 
     public DBCollection getWindTrackCollection() {
@@ -84,9 +93,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
 
-    public DBObject storeWindTrackEntry(Event event, RaceDefinition race, WindSource windSource, Wind wind) {
+    public DBObject storeWindTrackEntry(Regatta regatta, RaceDefinition race, WindSource windSource, Wind wind) {
         BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.EVENT_NAME.name(), event.getName());
+        result.put(FieldNames.EVENT_NAME.name(), regatta.getName());
         result.put(FieldNames.RACE_NAME.name(), race.getName());
         result.put(FieldNames.WIND_SOURCE_NAME.name(), windSource.name());
         if (windSource.getId() != null) {
@@ -96,10 +105,22 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    @Override
-    public void storeRaceIdentifier(RaceIdentifier raceIdentifier, DBObject dbObject) {
+    private void storeRaceIdentifiers(RaceColumn raceColumn, DBObject dbObject) {
+        BasicDBObject raceIdentifiersPerFleet = new BasicDBObject();
+        for (Fleet fleet : raceColumn.getFleets()) {
+            RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
+            if (raceIdentifier != null) {
+                DBObject raceIdentifierForFleet = new BasicDBObject();
+                storeRaceIdentifier(raceIdentifierForFleet, raceIdentifier);
+                raceIdentifiersPerFleet.put(fleet.getName(), raceIdentifierForFleet);
+            }
+        }
+        dbObject.put(FieldNames.RACE_IDENTIFIERS.name(), raceIdentifiersPerFleet);
+    }
+
+    private void storeRaceIdentifier(DBObject dbObject, RaceIdentifier raceIdentifier) {
         if (raceIdentifier != null) {
-            dbObject.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getEventName());
+            dbObject.put(FieldNames.EVENT_NAME.name(), raceIdentifier.getRegattaName());
             dbObject.put(FieldNames.RACE_NAME.name(), raceIdentifier.getRaceName());
         }
     }
@@ -114,32 +135,46 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             logger.throwing(MongoObjectFactoryImpl.class.getName(), "storeLeaderboard", npe);
         }
         BasicDBObject query = new BasicDBObject(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
-        BasicDBObject result = new BasicDBObject();
-        result.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
+        BasicDBObject dbLeaderboard = new BasicDBObject();
+        dbLeaderboard.put(FieldNames.LEADERBOARD_NAME.name(), leaderboard.getName());
+        if (leaderboard instanceof FlexibleLeaderboard) {
+            storeFlexibleLeaderboard((FlexibleLeaderboard) leaderboard, dbLeaderboard);
+        } else if (leaderboard instanceof RegattaLeaderboard) {
+            storeRegattaLeaderboard((RegattaLeaderboard) leaderboard, dbLeaderboard);
+        }
+        storeLeaderboardCorrections(leaderboard, dbLeaderboard);
+        leaderboardCollection.update(query, dbLeaderboard, /* upsrt */ true, /* multi */ false);
+    }
+
+    private void storeRegattaLeaderboard(RegattaLeaderboard leaderboard, DBObject dbLeaderboard) {
+        dbLeaderboard.put(FieldNames.REGATTA_NAME.name(), leaderboard.getRegatta().getName());
+    }
+
+    private void storeFlexibleLeaderboard(FlexibleLeaderboard leaderboard, BasicDBObject dbLeaderboard) {
         BasicDBList dbRaceColumns = new BasicDBList();
-        result.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
-        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
-            BasicDBObject dbRaceColumn = new BasicDBObject();
-            dbRaceColumn.put(FieldNames.LEADERBOARD_COLUMN_NAME.name(), raceColumn.getName());
-            dbRaceColumn.put(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name(), raceColumn.isMedalRace());
-            storeRaceIdentifier(raceColumn.getRaceIdentifier(), dbRaceColumn);
+        dbLeaderboard.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            BasicDBObject dbRaceColumn = storeRaceColumn(raceColumn);
             dbRaceColumns.add(dbRaceColumn);
         }
+    }
+
+    private void storeLeaderboardCorrections(Leaderboard leaderboard, BasicDBObject dbLeaderboard) {
         if (leaderboard.hasCarriedPoints()) {
             BasicDBObject dbCarriedPoints = new BasicDBObject();
-            result.put(FieldNames.LEADERBOARD_CARRIED_POINTS.name(), dbCarriedPoints);
+            dbLeaderboard.put(FieldNames.LEADERBOARD_CARRIED_POINTS.name(), dbCarriedPoints);
             for (Competitor competitor : leaderboard.getCompetitors()) {
                 dbCarriedPoints.put(MongoUtils.escapeDollarAndDot(competitor.getName()), leaderboard.getCarriedPoints(competitor));
             }
         }
         BasicDBObject dbScoreCorrections = new BasicDBObject();
         storeScoreCorrections(leaderboard, dbScoreCorrections);
-        result.put(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name(), dbScoreCorrections);
+        dbLeaderboard.put(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name(), dbScoreCorrections);
         BasicDBList dbResultDiscardingThresholds = new BasicDBList();
         for (int threshold : leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces()) {
             dbResultDiscardingThresholds.add(threshold);
         }
-        result.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
+        dbLeaderboard.put(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name(), dbResultDiscardingThresholds);
         BasicDBObject competitorDisplayNames = new BasicDBObject();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             String displayNameForCompetitor = leaderboard.getDisplayName(competitor);
@@ -147,13 +182,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                 competitorDisplayNames.put(MongoUtils.escapeDollarAndDot(competitor.getName()), displayNameForCompetitor);
             }
         }
-        result.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
-        leaderboardCollection.update(query, result, /* upsrt */ true, /* multi */ false);
+        dbLeaderboard.put(FieldNames.LEADERBOARD_COMPETITOR_DISPLAY_NAMES.name(), competitorDisplayNames);
+    }
+
+    private BasicDBObject storeRaceColumn(RaceColumn raceColumn) {
+        BasicDBObject dbRaceColumn = new BasicDBObject();
+        dbRaceColumn.put(FieldNames.LEADERBOARD_COLUMN_NAME.name(), raceColumn.getName());
+        dbRaceColumn.put(FieldNames.LEADERBOARD_IS_MEDAL_RACE_COLUMN.name(), raceColumn.isMedalRace());
+        storeRaceIdentifiers(raceColumn, dbRaceColumn);
+        return dbRaceColumn;
     }
 
     private void storeScoreCorrections(Leaderboard leaderboard, BasicDBObject dbScoreCorrections) {
         SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
-        for (RaceInLeaderboard raceColumn : leaderboard.getRaceColumns()) {
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             BasicDBObject dbCorrectionForRace = new BasicDBObject();
             for (Competitor competitor : leaderboard.getCompetitors()) {
                 if (scoreCorrection.isScoreCorrected(competitor, raceColumn)) {
@@ -240,7 +282,103 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         BasicDBObject update = new BasicDBObject("$set", new BasicDBObject(FieldNames.LEADERBOARD_GROUP_NAME.name(), newName));
         leaderboardGroupCollection.update(query, update);
     }
-    
-    
 
+    @Override
+    public void storeEvent(Event event) {
+        DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
+        eventCollection.ensureIndex(FieldNames.EVENT_NAME.name());
+        DBObject query = new BasicDBObject();
+        query.put(FieldNames.EVENT_NAME.name(), event.getName());
+        DBObject eventDBObject = new BasicDBObject();
+        eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
+        DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
+        eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
+        eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false);
+    }
+
+    private DBObject getVenueAsDBObject(Venue venue) {
+        DBObject result = new BasicDBObject();
+        result.put(FieldNames.VENUE_NAME.name(), venue.getName());
+        BasicDBList courseAreaList = new BasicDBList();
+        result.put(FieldNames.COURSE_AREAS.name(), courseAreaList);
+        for (CourseArea courseArea : venue.getCourseAreas()) {
+            DBObject dbCourseArea = new BasicDBObject();
+            courseAreaList.add(dbCourseArea);
+            dbCourseArea.put(FieldNames.COURSE_AREA_NAME.name(), courseArea.getName());
+        }
+        return result;
+    }
+
+    @Override
+    public void storeRegatta(Regatta regatta) {
+        DBCollection regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
+        regattasCollection.ensureIndex(FieldNames.REGATTA_NAME.name());
+        DBObject dbRegatta = new BasicDBObject();
+        DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
+        dbRegatta.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
+        dbRegatta.put(FieldNames.REGATTA_BASE_NAME.name(), regatta.getBaseName());
+        if (regatta.getBoatClass() != null) {
+            dbRegatta.put(FieldNames.BOAT_CLASS_NAME.name(), regatta.getBoatClass().getName());
+            dbRegatta.put(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name(), regatta.getBoatClass().typicallyStartsUpwind());
+        }
+        dbRegatta.put(FieldNames.REGATTA_SERIES.name(), storeSeries(regatta.getSeries()));
+        regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false);
+    }
+
+    @Override
+    public void removeRegatta(Regatta regatta) {
+        DBCollection regattasCollection = database.getCollection(CollectionNames.REGATTAS.name());
+        DBObject query = new BasicDBObject(FieldNames.REGATTA_NAME.name(), regatta.getName());
+        regattasCollection.remove(query);
+    }
+
+    private BasicDBList storeSeries(Iterable<? extends Series> series) {
+        BasicDBList dbSeries = new BasicDBList();
+        for (Series s : series) {
+            dbSeries.add(storeSeries(s));
+        }
+        return dbSeries;
+    }
+
+    private DBObject storeSeries(Series s) {
+        DBObject dbSeries = new BasicDBObject();
+        dbSeries.put(FieldNames.SERIES_NAME.name(), s.getName());
+        dbSeries.put(FieldNames.SERIES_IS_MEDAL.name(), s.isMedal());
+        BasicDBList dbFleets = new BasicDBList();
+        for (Fleet fleet : s.getFleets()) {
+            dbFleets.add(storeFleet(fleet));
+        }
+        dbSeries.put(FieldNames.SERIES_FLEETS.name(), dbFleets);
+        BasicDBList dbRaceColumns = new BasicDBList();
+        for (RaceColumn raceColumn : s.getRaceColumns()) {
+            dbRaceColumns.add(storeRaceColumn(raceColumn));
+        }
+        dbSeries.put(FieldNames.SERIES_RACE_COLUMNS.name(), dbRaceColumns);
+        return dbSeries;
+    }
+
+    private DBObject storeFleet(Fleet fleet) {
+        DBObject dbFleet = new BasicDBObject(FieldNames.FLEET_NAME.name(), fleet.getName());
+        if (fleet instanceof FleetImpl) {
+            dbFleet.put(FieldNames.FLEET_ORDERING.name(), ((FleetImpl) fleet).getOrdering());
+            if(fleet.getColor() != null) {
+                Triple<Integer, Integer, Integer> colorAsRGB = fleet.getColor().getAsRGB();
+                // we save the color as a integer value representing the RGB values
+                int colorAsInt = (256 * 256 * colorAsRGB.getC()) + colorAsRGB.getB() * 256 + colorAsRGB.getA(); 
+                dbFleet.put(FieldNames.FLEET_COLOR.name(), colorAsInt);
+            } else {
+                dbFleet.put(FieldNames.FLEET_COLOR.name(), null);
+            }
+        }
+        return dbFleet;
+    }
+
+    @Override
+    public void storeRegattaForRaceID(String raceIDAsString, Regatta regatta) {
+        DBCollection regattaForRaceIDCollection = database.getCollection(CollectionNames.REGATTA_FOR_RACE_ID.name());
+        DBObject query = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
+        DBObject entry = new BasicDBObject(FieldNames.RACE_ID_AS_STRING.name(), raceIDAsString);
+        entry.put(FieldNames.REGATTA_NAME.name(), regatta.getName());
+        regattaForRaceIDCollection.update(query, entry, /* upsrt */ true, /* multi */ false);
+    }
 }

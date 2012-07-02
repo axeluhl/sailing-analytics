@@ -20,12 +20,8 @@ public class RaceMapSettings {
     private long tailLengthInMilliseconds = 100000l;
 
     public RaceMapSettings() {
+        // empty default settings; don't show maneuvers by default
         maneuverTypesToShow = new HashSet<ManeuverType>();
-        maneuverTypesToShow.add(ManeuverType.TACK);
-        maneuverTypesToShow.add(ManeuverType.JIBE);
-        maneuverTypesToShow.add(ManeuverType.PENALTY_CIRCLE);
-        maneuverTypesToShow.add(ManeuverType.MARK_PASSING);
-        
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
     }

@@ -18,27 +18,29 @@ import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 
 public class JSONServiceImpl implements JSONService {
-    private final String eventName;
+    private final String regattaName;
     private final List<RaceRecord> raceRecords;
     
     public JSONServiceImpl(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         JSONObject jsonObject = parseJSONObject(jsonURL.openStream());
         raceRecords = new ArrayList<RaceRecord>();
-        eventName = (String) ((JSONObject) jsonObject.get("event")).get("name");
+        regattaName = (String) ((JSONObject) jsonObject.get("event")).get("name");
         for (Object raceEntry : (JSONArray) jsonObject.get("races")) {
             JSONObject jsonRaceEntry = (JSONObject) raceEntry;
-            RaceRecord raceRecord = new RaceRecord(jsonURL, eventName,
+            RaceRecord raceRecord = new RaceRecord(jsonURL, regattaName,
                     (String) jsonRaceEntry.get("name"), (String) jsonRaceEntry.get("url"),
                     (String) jsonRaceEntry.get("id"),
                     (String) jsonRaceEntry.get("tracking_starttime"),
-                    (String) jsonRaceEntry.get("tracking_endtime"), (String) jsonRaceEntry.get("race_starttime"));
+                    (String) jsonRaceEntry.get("tracking_endtime"),
+                    (String) jsonRaceEntry.get("race_starttime"),
+                    (String) jsonRaceEntry.get("classes"));
             raceRecords.add(raceRecord);
         }
     }
 
     @Override
     public String getEventName() {
-        return eventName;
+        return regattaName;
     }
 
     @Override
