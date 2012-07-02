@@ -13,7 +13,7 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
 
-public abstract class TrackImpl<FixType extends Timed> implements Track<FixType> {
+public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     private static final long serialVersionUID = -4075853657857657528L;
     /**
      * The fixes, ordered by their time points
@@ -79,8 +79,9 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
     }
 
     /**
-     * Callers that want to iterate over the collection returned need to synchronize on <code>this</code> object to avoid
-     * {@link ConcurrentModificationException}s.
+     * Callers that want to iterate over the collection returned need to use {@link #lockForRead()} and {@link #unlockAfterRead()}
+     * to avoid {@link ConcurrentModificationException}s. Should they modify the structure returned, they have to use
+     * {@link #lockForWrite()} and {@link #unlockAfterWrite()}, respectively.
      */
     protected NavigableSet<FixType> getInternalRawFixes() {
         @SuppressWarnings("unchecked")
@@ -88,8 +89,11 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
         return result;
     }
 
+    /**
+     * asserts that the calling thread holds at least one of read and write lock
+     */
     protected void assertReadLock() {
-        if (readWriteLock.getReadHoldCount() < 1) {
+        if (readWriteLock.getReadHoldCount() < 1 && readWriteLock.getWriteHoldCount() < 1) {
             throw new IllegalStateException("Caller must obtain read lock using lockForRead() before calling this method");
         }
     }

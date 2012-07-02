@@ -351,6 +351,10 @@ public interface TrackedRace extends Serializable {
      */
     boolean raceIsKnownToStartUpwind();
     
+    /**
+     * Adds a race change listener to the set of listeners that will be notified about changes to this race.
+     * The listener won't be serialized together with this object.
+     */
     void addListener(RaceChangeListener listener);
     
     void removeListener(RaceChangeListener listener);

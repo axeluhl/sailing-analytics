@@ -46,7 +46,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -256,6 +255,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private long delayToLiveInMillis;
     
     private transient Executor maneuverRecalculator;
+    
+    private transient CrossTrackErrorCache crossTrackErrorCache;
 
     public TrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -274,6 +275,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.startToNextMarkCacheInvalidationListeners = new HashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = new HashMap<Competitor, Util.Triple<TimePoint, TimePoint, List<Maneuver>>>();
         this.buoyTracks = new ConcurrentHashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
+        this.crossTrackErrorCache = new CrossTrackErrorCache(this);
         int i = 0;
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             for (Buoy buoy : waypoint.getBuoys()) {
@@ -335,6 +337,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         maneuverRecalculator = Executors.newSingleThreadExecutor();
         ongoingManeuverCacheRecalculations = new HashMap<Competitor, FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>>();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
+        crossTrackErrorCache = new CrossTrackErrorCache(this);
     }
 
     /**
@@ -786,46 +789,20 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        double distanceInMeters = 0;
-        int count = 0;
-        GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-        GPSFixMoving fix = null;
-        getRace().getCourse().lockForRead();
-        try {
-            for (Leg leg : getRace().getCourse().getLegs()) {
-                final TrackedLeg trackedLeg = getTrackedLeg(leg);
-                final MarkPassing legStartMarkPassing = getMarkPassing(competitor, leg.getFrom());
-                if (legStartMarkPassing != null) {
-                    if (trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
-                        TimePoint legStart = legStartMarkPassing.getTimePoint();
-                        final MarkPassing legEndMarkPassing = getMarkPassing(competitor, leg.getTo());
-                        track.lockForRead();
-                        try {
-                            Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
-                            while (fixIter.hasNext()
-                                    && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
-                                            legEndMarkPassing.getTimePoint()) < 0) && fix.getTimePoint().compareTo(
-                                            timePoint) < 0))) {
-                                fix = fixIter.next();
-                                if (fix.getTimePoint().compareTo(timePoint) < 0) {
-                                    Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
-                                    distanceInMeters += xte.getMeters();
-                                    count++;
-                                }
-                            }
-                        } finally {
-                            track.unlockAfterRead();
-                        }
-                    }
-                }
-                if (fix != null && fix.getTimePoint().compareTo(timePoint) >= 0) {
-                    break;
-                }
+        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        TimePoint from = null;
+        synchronized (markPassings) {
+            if (markPassings != null && !markPassings.isEmpty()) {
+                from = markPassings.iterator().next().getTimePoint();
             }
-        } finally {
-            getRace().getCourse().unlockAfterRead();
         }
-        return count == 0 ? null : new MeterDistance(distanceInMeters / count);
+        Distance result;
+        if (from != null) {
+            result = crossTrackErrorCache.getAverageCrossTrackError(competitor, from, timePoint, /* upwindOnly */ true);
+        } else {
+            result = null;
+        }
+        return result;
     }
 
     @Override
@@ -924,7 +901,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             Position nextPos = getOrCreateTrack(buoy).getEstimatedPosition(timePoint, /* extrapolate */false);
             if (result == null) {
                 result = nextPos;
-            } else {
+            } else if (nextPos != null) {
                 result = result.translateGreatCircle(result.getBearingGreatCircle(nextPos), result.getDistance(nextPos)
                         .scale(0.5));
             }
