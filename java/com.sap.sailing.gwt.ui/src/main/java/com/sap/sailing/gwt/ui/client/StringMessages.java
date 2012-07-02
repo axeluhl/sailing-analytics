@@ -297,6 +297,37 @@ public interface StringMessages extends Messages {
     String finishLine();
     String advantageLine();
     String courseMiddleLine();
+	/*Start of simulator related messages*/
+    String simulator();
+    String optionsBar();
+    String update();
+    
+    String setup();
+    String pattern();
+    String strength();
+    String oscillation();
+    String oscillating();
+    String amplitude();
+    String frequency();
+    String noise();
+    
+    String sailing();
+    String optimality();
+    String maximumTurns();
+    String raceDirection();
+    String upWind();
+    String downWind();
+    String strategies();
+    String omniscient();
+    String opportunistic();
+    String mixed();
+    String maps();
+    String startEnd();
+    String course();
+    String summary();
+    String replay();
+    String display();
+    /*End of simulator related messages*/
     String jmsPortNumber();
     String servletPortNumber();
     String registeredAt(String string);

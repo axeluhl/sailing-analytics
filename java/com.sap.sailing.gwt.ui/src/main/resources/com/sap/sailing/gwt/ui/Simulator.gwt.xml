@@ -17,6 +17,9 @@
 	<!-- Google Maps API -->
 	<inherits name='com.google.gwt.maps.GoogleMaps' />
 	
+	<!-- Highcharts API -->
+  	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+  	
 	<!-- Other module inherits                                      -->
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	

@@ -343,7 +343,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     }
 
     public BoatClassDTO[] getBoatClasses() {
-        BoatClassDTO boatClassDTO = new BoatClassDTO("49er");
+        BoatClassDTO boatClassDTO = new BoatClassDTO("49er",4.995);
 
         return new BoatClassDTO[] { boatClassDTO };
 

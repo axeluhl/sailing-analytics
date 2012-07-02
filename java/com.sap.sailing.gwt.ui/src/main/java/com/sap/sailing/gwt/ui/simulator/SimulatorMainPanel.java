@@ -352,10 +352,12 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         sliderBar.addValueChangeHandler(handler);
 
         sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
-            @Override
-            public String formatLabel(SliderBar slider, double value) {
-                return String.valueOf(Math.round(value));
-            }
+           
+			@Override
+			public String formatLabel(SliderBar slider, Double value,
+					Double previousValue) {
+				 return String.valueOf(Math.round(value));
+			}
         });
 
         sliderBar.setCurrentValue(defaultValue);
