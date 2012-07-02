@@ -275,10 +275,9 @@ public interface SailingServiceAsync {
     void getManeuvers(RaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
             AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>> callback);
 
-    void getLeaderboardGroups(boolean withGeoLocationData, boolean withRaceData,
-            AsyncCallback<List<LeaderboardGroupDTO>> callback);
+    void getLeaderboardGroups(boolean withGeoLocationData, AsyncCallback<List<LeaderboardGroupDTO>> callback);
 
-    void getLeaderboardGroupByName(String groupName, boolean withGeoLocationData, boolean withRaceData,
+    void getLeaderboardGroupByName(String groupName, boolean withGeoLocationData,
             AsyncCallback<LeaderboardGroupDTO> callback);
     
     /**
