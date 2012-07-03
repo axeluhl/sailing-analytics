@@ -479,7 +479,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
     }
     
     private void loadGroups() {
-        sailingService.getLeaderboardGroups(new AsyncCallback<List<LeaderboardGroupDTO>>() {
+        sailingService.getLeaderboardGroups(false /*withGeoLocationData*/, new AsyncCallback<List<LeaderboardGroupDTO>>() {
             @Override
             public void onSuccess(List<LeaderboardGroupDTO> groups) {
                 availableLeaderboardGroups.clear();
@@ -643,7 +643,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
         final LeaderboardGroupDTO selectedGroup = groupsSelectionModel.getSelectedObject();
         splitPanel.setVisible(selectedGroup != null);
         if (selectedGroup != null) {
-            sailingService.getLeaderboardGroupByName(selectedGroup.name, new AsyncCallback<LeaderboardGroupDTO>() {
+            sailingService.getLeaderboardGroupByName(selectedGroup.name, false /*withGeoLocationData*/, new AsyncCallback<LeaderboardGroupDTO>() {
                 @Override
                 public void onFailure(Throwable t) {
                     errorReporter.reportError("Error trying to obtain the leaderboard group " + selectedGroup.name + ": " + t.getMessage());

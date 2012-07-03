@@ -1598,9 +1598,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * and the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
      * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
      * is used for {@link LeaderboardDTO#competitorDisplayNames}.<br />
-     * If <code>withAdditionalData</code> is <code>true</code>, additional data (like location and race dates) will be loaded.
+     * If <code>withGeoLocationData</code> is <code>true</code> the geographical location of all races will be determined.
      */
-    private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withAdditionalData) {
+    private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withGeoLocationData) {
         StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO();
         leaderboardDTO.name = leaderboard.getName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
@@ -1611,15 +1611,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 if (raceColumn.getTrackedRace(fleet) != null) {
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
-                    if (withAdditionalData) {
-                        // Getting the places of the race
-                        PlacemarkOrderDTO racePlaces = getRacePlaces(trackedRace);
-                        // Creating raceDTO and getting the dates
-                        race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
-                        race.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
-                        race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
-                        race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
-                    }
+                    // Optional: Getting the places of the race
+                    PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
+                    // Creating raceDTO and getting the dates
+                    race = new StrippedRaceDTO(trackedRace.getRace().getName(), raceIdentifier, racePlaces);
+                    race.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
+                    race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
+                    race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 }    
                 leaderboardDTO.addRace(raceColumn.getName(), createFleetDTO(fleet), raceColumn.isMedalRace(), raceIdentifier, race);
             }
@@ -2140,31 +2138,32 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public List<LeaderboardGroupDTO> getLeaderboardGroups() {
+    public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData) {
         ArrayList<LeaderboardGroupDTO> leaderboardGroupDTOs = new ArrayList<LeaderboardGroupDTO>();
         Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
         
         for (LeaderboardGroup leaderboardGroup : leaderboardGroups.values()) {
-            leaderboardGroupDTOs.add(convertToLeaderboardGroupDTO(leaderboardGroup));
+            leaderboardGroupDTOs.add(convertToLeaderboardGroupDTO(leaderboardGroup, withGeoLocationData));
         }
         
         return leaderboardGroupDTOs;
     }
 
     @Override
-    public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName) {
-        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName));
+    public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName, boolean withGeoLocationData) {
+        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName), withGeoLocationData);
     }
     
-    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup) {
+    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup, boolean withGeoLocationData) {
         LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO();
         groupDTO.name = leaderboardGroup.getName();
         groupDTO.description = leaderboardGroup.getDescription();
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-            groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, true));
+            groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, withGeoLocationData));
         }
         return groupDTO;
     }
+    
     
     private PlacemarkDTO convertToPlacemarkDTO(Placemark placemark) {
         Position position = placemark.getPosition();
@@ -2184,7 +2183,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description) {
-        return convertToLeaderboardGroupDTO(getService().apply(new CreateLeaderboardGroup(groupName, description, new ArrayList<String>())));
+        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(groupName, description, new ArrayList<String>());
+        return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false);
     }
 
     @Override
