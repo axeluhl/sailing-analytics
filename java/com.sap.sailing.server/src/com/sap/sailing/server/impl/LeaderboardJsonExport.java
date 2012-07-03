@@ -19,9 +19,9 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.server.Servlet;
+import com.sap.sailing.server.SailingServerHttpServlet;
 
-public class LeaderboardJsonExport extends Servlet {
+public class LeaderboardJsonExport extends SailingServerHttpServlet {
     private static final long serialVersionUID = -2460691283231361152L;
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
 

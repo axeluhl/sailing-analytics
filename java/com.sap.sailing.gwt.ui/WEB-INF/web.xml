@@ -4,6 +4,15 @@
 	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 
+	<filter>
+		<filter-name>GWTCacheControlServletFilter</filter-name>
+		<filter-class>com.sap.sailing.server.GWTCacheControlServletFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>GWTCacheControlServletFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
 	<servlet>
 		<display-name>Sailing Service</display-name>
 	    <servlet-name>SailingService</servlet-name>

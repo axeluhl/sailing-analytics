@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.Servlet;
+import com.sap.sailing.server.SailingServerHttpServlet;
 
 /**
  * Subclasses can be used to retrieve messages through an HTTP connection. The connection remains open until the client
@@ -20,7 +20,7 @@ import com.sap.sailing.server.Servlet;
  * @author Axel Uhl (D043530)
  * 
  */
-public abstract class AbstractHttpPostServlet extends Servlet {
+public abstract class AbstractHttpPostServlet extends SailingServerHttpServlet {
     private static final long serialVersionUID = -4275373434350250003L;
 
     @Override
