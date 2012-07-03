@@ -120,7 +120,7 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
         result = Collections.binarySearch(list, e, comparator());
         return result;
     }
-
+    
     @Override
     public boolean remove(Object o) {
         @SuppressWarnings("unchecked")

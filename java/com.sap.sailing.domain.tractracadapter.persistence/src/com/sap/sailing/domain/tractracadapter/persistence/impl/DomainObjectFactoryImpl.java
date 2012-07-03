@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tractracadapter.persistence.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,6 +32,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 TracTracConfiguration ttConfig = loadTracTracConfiguration(o);
                 result.add(ttConfig);
             }
+            Collections.reverse(result);
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded TracTrac configurations. Check MongoDB settings.");

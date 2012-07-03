@@ -21,8 +21,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.locks.Lock;
@@ -46,7 +44,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.base.impl.MeterDistance;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
@@ -85,6 +82,9 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.util.impl.SmartFutureCache;
+import com.sap.sailing.util.impl.SmartFutureCache.AbstractCacheUpdater;
+import com.sap.sailing.util.impl.SmartFutureCache.EmptyUpdateInterval;
 
 public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private static final long serialVersionUID = -4825546964220003507L;
@@ -183,49 +183,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * computed. Clients wanting to know maneuvers for the competitor outside of this time interval need to (re-)compute
      * them.
      */
-    private final Map<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>> maneuverCache;
-    
-    /**
-     * Holds the tasks that have been added to an {@link Executor} already for execution and that, as long as a client
-     * holds the object monitor / lock on this map, aren't cancelled. Note, however, that once the lock is released,
-     * the Futures may be cancelled in case a cache replacement has taken place. Clients can prevent this by calling
-     * {@link FutureTaskWithCancelBlocking#dontCancel()} on the future while holding the lock on
-     * {@link #ongoingManeuverCacheRecalculations}. This will let {@link Future#cancel(boolean)} return <code>false</code>
-     * should it be called on that Future.
-     */
-    private transient Map<Competitor, FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>> ongoingManeuverCacheRecalculations;
-    
-    /**
-     * Once a client has fetched such a Future from {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations} while
-     * holding the object monitor of {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client knows that
-     * the Future hasn't been cancelled yet. To avoid that the Future is cancelled after the client has fetched it from
-     * {@link TrackedRaceImpl##ongoingManeuverCacheRecalculations}, the client can call {@link #dontCancel()} on this
-     * future. After that, calls to {@link #cancel(boolean)} will return <code>false</code> immediately and the Future
-     * will be executed as originally scheduled.
-     * 
-     * @author Axel Uhl (D043530)
-     * 
-     */
-    private static class FutureTaskWithCancelBlocking<V> extends FutureTask<V> {
-        private boolean dontCancel;
-        
-        public FutureTaskWithCancelBlocking(Callable<V> callable) {
-            super(callable);
-        }
-
-        public synchronized void dontCancel() {
-            dontCancel = true;
-        }
-        
-        @Override
-        public synchronized boolean cancel(boolean mayInterruptIfRunning) {
-            if (!dontCancel) {
-                return super.cancel(mayInterruptIfRunning);
-            } else {
-                return false;
-            }
-        }
-    }
+    private transient SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
     
     /**
      * A tracked race can maintain a number of sources for wind information from which a client can select. As all
@@ -255,14 +213,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private long delayToLiveInMillis;
     
-    private transient Executor maneuverRecalculator;
+    private transient CrossTrackErrorCache crossTrackErrorCache;
 
     public TrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
-        this.maneuverRecalculator = Executors.newSingleThreadExecutor();
-        this.ongoingManeuverCacheRecalculations = new HashMap<Competitor, FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>>();
         this.updateCount = 0;
         this.race = race;
         this.windStore = windStore;
@@ -272,8 +228,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis; 
         this.startToNextMarkCacheInvalidationListeners = new HashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
-        this.maneuverCache = new HashMap<Competitor, Util.Triple<TimePoint, TimePoint, List<Maneuver>>>();
+        this.maneuverCache = createManeuverCache();
         this.buoyTracks = new ConcurrentHashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
+        this.crossTrackErrorCache = new CrossTrackErrorCache(this);
         int i = 0;
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             for (Buoy buoy : waypoint.getBuoys()) {
@@ -322,6 +279,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
     }
+
+    private SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> createManeuverCache() {
+        return new SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>(
+                new AbstractCacheUpdater<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval>() {
+                    @Override
+                    public Triple<TimePoint, TimePoint, List<Maneuver>> computeCacheUpdate(Competitor competitor,
+                            EmptyUpdateInterval updateInterval) throws NoWindException {
+                        return computeManeuvers(competitor);
+                    }
+                });
+    }
     
     /**
      * When de-serializing, a possibly remote {@link #windStore} is ignored because it is transient. Instead,
@@ -332,9 +300,9 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         windStore = EmptyWindStore.INSTANCE;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
-        maneuverRecalculator = Executors.newSingleThreadExecutor();
-        ongoingManeuverCacheRecalculations = new HashMap<Competitor, FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>>();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
+        crossTrackErrorCache = new CrossTrackErrorCache(this);
+        maneuverCache = createManeuverCache();
     }
 
     /**
@@ -785,47 +753,29 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        double distanceInMeters = 0;
-        int count = 0;
-        GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
-        GPSFixMoving fix = null;
-        getRace().getCourse().lockForRead();
-        try {
-            for (Leg leg : getRace().getCourse().getLegs()) {
-                final TrackedLeg trackedLeg = getTrackedLeg(leg);
-                final MarkPassing legStartMarkPassing = getMarkPassing(competitor, leg.getFrom());
-                if (legStartMarkPassing != null) {
-                    if (trackedLeg.getLegType(legStartMarkPassing.getTimePoint()) == LegType.UPWIND) {
-                        TimePoint legStart = legStartMarkPassing.getTimePoint();
-                        final MarkPassing legEndMarkPassing = getMarkPassing(competitor, leg.getTo());
-                        track.lockForRead();
-                        try {
-                            Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
-                            while (fixIter.hasNext()
-                                    && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
-                                            legEndMarkPassing.getTimePoint()) < 0) && fix.getTimePoint().compareTo(
-                                            timePoint) < 0))) {
-                                fix = fixIter.next();
-                                if (fix.getTimePoint().compareTo(timePoint) < 0) {
-                                    Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
-                                    distanceInMeters += xte.getMeters();
-                                    count++;
-                                }
-                            }
-                        } finally {
-                            track.unlockAfterRead();
-                        }
-                    }
-                }
-                if (fix != null && fix.getTimePoint().compareTo(timePoint) >= 0) {
-                    break;
-                }
+    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        TimePoint from = null;
+        synchronized (markPassings) {
+            if (markPassings != null && !markPassings.isEmpty()) {
+                from = markPassings.iterator().next().getTimePoint();
             }
-        } finally {
-            getRace().getCourse().unlockAfterRead();
         }
-        return count == 0 ? null : new MeterDistance(distanceInMeters / count);
+        Distance result;
+        if (from != null) {
+            result = getAverageCrossTrackError(competitor, from, timePoint, /* upwindOnly */ true, waitForLatestAnalysis);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
+    public Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalysis)
+            throws NoWindException {
+        Distance result;
+        result = crossTrackErrorCache.getAverageCrossTrackError(competitor, from, to, upwindOnly, waitForLatestAnalysis);
+        return result;
     }
 
     @Override
@@ -924,7 +874,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             Position nextPos = getOrCreateTrack(buoy).getEstimatedPosition(timePoint, /* extrapolate */false);
             if (result == null) {
                 result = nextPos;
-            } else {
+            } else if (nextPos != null) {
                 result = result.translateGreatCircle(result.getBearingGreatCircle(nextPos), result.getDistance(nextPos)
                         .scale(0.5));
             }
@@ -1130,80 +1080,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     protected void setEndOfTrackingReceived(TimePoint endOfTracking) {
         this.endOfTrackingReceived = endOfTracking;
-    }
-
-    protected void triggerManeuverCacheRecalculationForAllCompetitors() {
-        for (Competitor competitor : getRace().getCompetitors()) {
-            triggerManeuverCacheRecalculation(competitor);
-        }
-    }
-    
-    protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
-        final FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>> future =
-                new FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>>(
-                new Callable<Triple<TimePoint, TimePoint, List<Maneuver>>>() {
-                    @Override
-                    public Triple<TimePoint, TimePoint, List<Maneuver>> call() {
-                        try {
-                            return computeManeuversAndUpdateInCache(competitor);
-                        } catch (NoWindException e) {
-                            // cache won't be updated, but that's ok because maneuver detection without wind direction makes no sense
-                            logger.throwing(TrackedRaceImpl.class.getName(), "triggerManeuverCacheRecalculation", e);
-                            throw new NoWindError(e);
-                        }
-                    }
-                });
-        // establish and maintain the following invariant: after lock on ongoingManeuverCacheRecalculations is released,
-        // no Future contained in it is in cancelled state
-        synchronized (ongoingManeuverCacheRecalculations) {
-            FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>> oldFuture = ongoingManeuverCacheRecalculations.put(competitor, future);
-            if (oldFuture != null) {
-                oldFuture.cancel(/* mayInterruptIfRunning */ false);
-            }
-        }
-        maneuverRecalculator.execute(future);
-    }
-
-    private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuversAndUpdateInCache(Competitor competitor) throws NoWindException {
-        // compute the maneuvers for competitor
-        Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
-        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-        if (markPassings != null && !markPassings.isEmpty()) {
-            TimePoint extendedFrom = markPassings.iterator().next().getTimePoint();
-            MarkPassing crossedFinishLine = getMarkPassing(competitor, getRace().getCourse().getLastWaypoint());
-            TimePoint extendedTo;
-            if (crossedFinishLine != null) {
-                extendedTo = crossedFinishLine.getTimePoint();
-            } else {
-                final GPSFixMoving lastRawFix = getTrack(competitor).getLastRawFix();
-                if (lastRawFix != null) {
-                    extendedTo = lastRawFix.getTimePoint();
-                } else {
-                    extendedTo = null;
-                }
-            }
-            if (extendedTo != null) {
-                List<Maneuver> extendedResultForCache = detectManeuvers(
-                        competitor,
-                        approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(),
-                                extendedFrom, extendedTo));
-                synchronized (maneuverCache) {
-                    result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo, extendedResultForCache);
-                    maneuverCache.put(competitor, result);
-                }
-            } else {
-                // competitor has no fixes to consider; remove any maneuver cache entry
-                synchronized (maneuverCache) {
-                    maneuverCache.remove(competitor);
-                }
-            }
-        } else {
-            // competitor hasn't started yet; remove any maneuver cache entry
-            synchronized (maneuverCache) {
-                maneuverCache.remove(competitor);
-            }
-        }
-        return result;
     }
 
     /**
@@ -1592,57 +1468,42 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         return douglasPeucker.approximate(maxDistance, from, to);
     }
 
-    /**
-     * Fetches results from {@link #maneuverCache}. The cache is updated asynchronously after relevant updates have been
-     * received (see {@link #triggerManeuverCacheRecalculation(Competitor)} and
-     * {@link #triggerManeuverCacheRecalculationForAllCompetitors()}). Callers can choose whether to wait for any
-     * ongoing updates by using the <code>waitForLatest</code> parameter. From the cache the interval requested is then
-     * {@link #extractInterval(TimePoint, TimePoint, List) extracted}.
-     * 
-     * @param waitForLatest
-     *            if <code>true</code>, any currently ongoing maneuver recalculation for <code>competitor</code> is
-     *            waited for before returning the result; otherwise, whatever is in the {@link #maneuverCache} for
-     *            <code>competitor</code>, reduced to the interval requested, will be returned.
-     */
-    @Override
-    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest)
-            throws NoWindException {
-        List<Maneuver> allManeuvers;
-        if (waitForLatest) {
-            FutureTaskWithCancelBlocking<Triple<TimePoint, TimePoint, List<Maneuver>>> future;
-            synchronized (ongoingManeuverCacheRecalculations) {
-                // as long as we hold the lock on ongoingManeuverCacheRecalculations, the Futures contained in it are not cancelled
-                future = ongoingManeuverCacheRecalculations.get(competitor);
-                if (future != null) {
-                    future.dontCancel();
-                }
-            }
-            if (future != null) {
-                try {
-                    allManeuvers = future.get().getC();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                // no calculation currently going on; we probably don't know anything about this competitor
-                allManeuvers = Collections.emptyList();
-            }
-        } else {
-            synchronized (maneuverCache) {
-                allManeuvers = maneuverCache.get(competitor).getC();
-            }
+    protected void triggerManeuverCacheRecalculationForAllCompetitors() {
+        for (Competitor competitor : getRace().getCompetitors()) {
+            triggerManeuverCacheRecalculation(competitor);
         }
-        return extractInterval(from, to, allManeuvers);
     }
     
-    private <T extends Timed> List<T> extractInterval(TimePoint from, TimePoint to, List<T> listOfTimed) {
-        List<T> result;
-        result = new LinkedList<T>();
-        for (T timed : listOfTimed) {
-            if (timed.getTimePoint().compareTo(from) >= 0 && timed.getTimePoint().compareTo(to) <= 0) {
-                result.add(timed);
+    protected void triggerManeuverCacheRecalculation(final Competitor competitor) {
+        maneuverCache.triggerUpdate(competitor, /* updateInterval */ null);
+    }
+
+    private Triple<TimePoint, TimePoint, List<Maneuver>> computeManeuvers(Competitor competitor) throws NoWindException {
+        // compute the maneuvers for competitor
+        Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
+        NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+        if (markPassings != null && !markPassings.isEmpty()) {
+            TimePoint extendedFrom = markPassings.iterator().next().getTimePoint();
+            MarkPassing crossedFinishLine = getMarkPassing(competitor, getRace().getCourse().getLastWaypoint());
+            TimePoint extendedTo;
+            if (crossedFinishLine != null) {
+                extendedTo = crossedFinishLine.getTimePoint();
+            } else {
+                final GPSFixMoving lastRawFix = getTrack(competitor).getLastRawFix();
+                if (lastRawFix != null) {
+                    extendedTo = lastRawFix.getTimePoint();
+                } else {
+                    extendedTo = null;
+                }
             }
-        }
+            if (extendedTo != null) {
+                List<Maneuver> extendedResultForCache = detectManeuvers(
+                        competitor,
+                        approximate(competitor, getRace().getBoatClass().getMaximumDistanceForCourseApproximation(),
+                                extendedFrom, extendedTo));
+                result = new Triple<TimePoint, TimePoint, List<Maneuver>>(extendedFrom, extendedTo, extendedResultForCache);
+            } // else competitor has no fixes to consider; remove any maneuver cache entry
+        } // else competitor hasn't started yet; remove any maneuver cache entry
         return result;
     }
 
@@ -1706,6 +1567,42 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 result.addAll(groupChangesInSameDirectionIntoManeuvers(competitor,
                         speedWithBearingOnApproximationAtBeginningOfUnidirectionalCourseChanges,
                         courseChangeSequenceInSameDirection));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Fetches results from {@link #maneuverCache}. The cache is updated asynchronously after relevant updates have been
+     * received (see {@link #triggerManeuverCacheRecalculation(Competitor)} and
+     * {@link #triggerManeuverCacheRecalculationForAllCompetitors()}). Callers can choose whether to wait for any
+     * ongoing updates by using the <code>waitForLatest</code> parameter. From the cache the interval requested is then
+     * {@link #extractInterval(TimePoint, TimePoint, List) extracted}.
+     * 
+     * @param waitForLatest
+     *            if <code>true</code>, any currently ongoing maneuver recalculation for <code>competitor</code> is
+     *            waited for before returning the result; otherwise, whatever is in the {@link #maneuverCache} for
+     *            <code>competitor</code>, reduced to the interval requested, will be returned.
+     */
+    @Override
+    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest)
+            throws NoWindException {
+        Triple<TimePoint, TimePoint, List<Maneuver>> allManeuvers = maneuverCache.get(competitor, waitForLatest);
+        List<Maneuver> result;
+        if (allManeuvers == null) {
+            result = Collections.emptyList();
+        } else {
+            result = extractInterval(from, to, allManeuvers.getC());
+        }
+        return result;
+    }
+    
+    private <T extends Timed> List<T> extractInterval(TimePoint from, TimePoint to, List<T> listOfTimed) {
+        List<T> result;
+        result = new LinkedList<T>();
+        for (T timed : listOfTimed) {
+            if (timed.getTimePoint().compareTo(from) >= 0 && timed.getTimePoint().compareTo(to) <= 0) {
+                result.add(timed);
             }
         }
         return result;
