@@ -170,14 +170,15 @@ public interface SailingServiceAsync {
      *            list will contain one entry per leg of the race {@link Course} for those race columns whose
      *            {@link RaceColumn#getType() name} is contained in <code>namesOfRacesForWhichToLoadLegDetails</code>.
      *            For all other columns, {@link LeaderboardEntryDTO#legDetails} is <code>null</code>.
-     * @param waitForLatestManeuverAnalysis
-     *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
-     *            may not reflect all data already received; otherwise, the method will always block for the latest
-     *            cache updates to have happened before returning.
+     * @param waitForLatestAnalyses
+     *            if <code>false</code>, this method is allowed to read the maneuver analysis and other expensive
+     *            analysis results such as the cross track error from a cache that may not reflect all data already
+     *            received; otherwise, the method will always block for the latest cache updates to have happened before
+     *            returning.
      */
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            boolean waitForLatestManeuverAnalysis, AsyncCallback<LeaderboardDTO> callback);
+            boolean waitForLatestAnalyses, AsyncCallback<LeaderboardDTO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 

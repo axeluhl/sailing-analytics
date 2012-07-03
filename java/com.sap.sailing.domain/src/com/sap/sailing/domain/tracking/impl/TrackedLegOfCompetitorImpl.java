@@ -375,7 +375,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(TimePoint timePoint) throws NoWindException {
+    public Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
         Distance result = null;
         final MarkPassing legStartMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getFrom());
         if (legStartMarkPassing != null) {
@@ -387,7 +387,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             } else {
                 to = legEndMarkPassing.getTimePoint();
             }
-            result = getTrackedRace().getAverageCrossTrackError(competitor, legStart, to);
+            result = getTrackedRace().getAverageCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
         }
         return result;
     }

@@ -397,8 +397,12 @@ public interface TrackedRace extends Serializable {
 
     /**
      * Computes the average cross-track error for the legs with type {@link LegType#UPWIND}.
+     * 
+     * @param waitForLatestAnalysis
+     *            if <code>true</code> and any cache update is currently going on, wait for the update to complete and
+     *            then fetch the updated value; otherwise, serve this requests from whatever is currently in the cache
      */
-    Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
     WindStore getWindStore();
 
@@ -410,5 +414,5 @@ public interface TrackedRace extends Serializable {
      */
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 
-    Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to) throws NoWindException;
+    Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses) throws NoWindException;
 }

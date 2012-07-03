@@ -154,7 +154,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     Distance getWindwardDistanceToOverallLeader(TimePoint timePoint) throws NoWindException;
 
-    Distance getAverageCrossTrackError(TimePoint timePoint) throws NoWindException;
+    Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
     Distance getWindwardDistance(Position pos1, Position pos2, TimePoint at) throws NoWindException;
 
