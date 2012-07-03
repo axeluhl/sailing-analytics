@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.mongodb.driver
 Bundle-Version: 2.6.2
 Bundle-Vendor: MONGODB
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/mongo-2.6.2.jar,
  .
 Export-Package: com.mongodb,

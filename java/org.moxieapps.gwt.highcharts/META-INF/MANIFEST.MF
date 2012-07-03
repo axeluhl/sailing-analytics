@@ -21,3 +21,4 @@ Export-Package: org.moxieapps.gwt.highcharts.client.plotOptions;uses:="o
 Import-Package: com.google.gwt.core.client,com.google.gwt.dom.client,com
  .google.gwt.json.client,com.google.gwt.user.client,com.google.gwt.user.
  client.ui
+Bundle-ActivationPolicy: lazy
