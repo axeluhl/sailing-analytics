@@ -6,9 +6,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sap.sailing.server.Servlet;
+import com.sap.sailing.server.SailingServerHttpServlet;
 
-public class XcelsiusApp extends Servlet {
+public class XcelsiusApp extends SailingServerHttpServlet {
     private static final long serialVersionUID = -6849138354941569249L;
 
     public XcelsiusApp() {

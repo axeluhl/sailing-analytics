@@ -15,7 +15,7 @@ import com.sap.sailing.server.impl.Activator;
 import com.sap.sailing.util.DateParser;
 import com.sap.sailing.util.InvalidDateException;
 
-public abstract class Servlet extends HttpServlet {
+public abstract class SailingServerHttpServlet extends HttpServlet {
     private static final long serialVersionUID = -6514453597593669376L;
 
     protected static final String PARAM_ACTION = "action";
@@ -30,7 +30,7 @@ public abstract class Servlet extends HttpServlet {
 
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
-    protected Servlet() {
+    protected SailingServerHttpServlet() {
         BundleContext context = Activator.getDefault();
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
