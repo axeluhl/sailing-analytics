@@ -10,9 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.server.Servlet;
+import com.sap.sailing.server.SailingServerHttpServlet;
 
-public class ListLeaderboards extends Servlet {
+public class ListLeaderboards extends SailingServerHttpServlet {
     private static final long serialVersionUID = -2193421590275280102L;
 
     @Override

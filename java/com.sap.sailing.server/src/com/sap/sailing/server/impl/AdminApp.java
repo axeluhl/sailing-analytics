@@ -46,10 +46,10 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
-import com.sap.sailing.server.Servlet;
+import com.sap.sailing.server.SailingServerHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
 
-public class AdminApp extends Servlet {
+public class AdminApp extends SailingServerHttpServlet {
     private static final long serialVersionUID = -6849138354941569249L;
     
     private static final String ACTION_NAME_ADD_WIND_TO_MARKS = "addwindtomarksforonehour";

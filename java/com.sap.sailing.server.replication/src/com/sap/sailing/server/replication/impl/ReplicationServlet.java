@@ -16,7 +16,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.Servlet;
+import com.sap.sailing.server.SailingServerHttpServlet;
 import com.sap.sailing.server.replication.ReplicationService;
 import com.sap.sailing.server.replication.ReplicaDescriptor;
 
@@ -27,7 +27,7 @@ import com.sap.sailing.server.replication.ReplicaDescriptor;
  * @author Axel Uhl (D043530)
  * 
  */
-public class ReplicationServlet extends Servlet {
+public class ReplicationServlet extends SailingServerHttpServlet {
     private static final Logger logger = Logger.getLogger(ReplicationServlet.class.getName());
     
     private static final long serialVersionUID = 4835516998934433846L;

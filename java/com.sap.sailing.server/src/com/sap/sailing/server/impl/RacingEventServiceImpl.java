@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -204,16 +206,16 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         this.swissTimingDomainFactory = swissTimingDomainFactory;
         swissTimingAdapterPersistence = SwissTimingAdapterPersistence.INSTANCE;
         windTrackerFactory = ExpeditionWindTrackerFactory.getInstance();
-        regattasByName = new HashMap<String, Regatta>();
-        eventsByName = new HashMap<String, Event>();
-        regattaTrackingCache = new HashMap<Regatta, DynamicTrackedRegatta>();
-        raceTrackersByRegatta = new HashMap<Regatta, Set<RaceTracker>>();
-        raceTrackersByID = new HashMap<Object, RaceTracker>();
-        leaderboardGroupsByName = new HashMap<String, LeaderboardGroup>();
-        leaderboardsByName = new HashMap<String, Leaderboard>();
-        operationExecutionListeners = new HashSet<OperationExecutionListener>();
-        courseListeners = new HashMap<RaceDefinition, CourseChangeReplicator>();
-        persistentRegattasForRaceIDs = new HashMap<String, Regatta>();
+        regattasByName = new ConcurrentHashMap<String, Regatta>();
+        eventsByName = new ConcurrentHashMap<String, Event>();
+        regattaTrackingCache = new ConcurrentHashMap<Regatta, DynamicTrackedRegatta>();
+        raceTrackersByRegatta = new ConcurrentHashMap<Regatta, Set<RaceTracker>>();
+        raceTrackersByID = new ConcurrentHashMap<Object, RaceTracker>();
+        leaderboardGroupsByName = new ConcurrentHashMap<String, LeaderboardGroup>();
+        leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
+        operationExecutionListeners = new ConcurrentSkipListSet<OperationExecutionListener>();
+        courseListeners = new ConcurrentHashMap<RaceDefinition, CourseChangeReplicator>();
+        persistentRegattasForRaceIDs = new ConcurrentHashMap<String, Regatta>();
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
         // Add one default leaderboard that aggregates all races currently tracked by this service.
         // This is more for debugging purposes than for anything else.
@@ -249,7 +251,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     private void loadStoredEvents() {
         for (Event event : domainObjectFactory.loadAllEvents()) {
-            eventsByName.put(event.getName(), event);
+            synchronized (eventsByName) {
+                eventsByName.put(event.getName(), event);
+            }
         }
     }
 
@@ -498,12 +502,12 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public synchronized Iterable<Event> getAllEvents() {
+    public Iterable<Event> getAllEvents() {
         return Collections.unmodifiableCollection(new ArrayList<Event>(eventsByName.values()));
     }
 
     @Override
-    public synchronized Iterable<Regatta> getAllRegattas() {
+    public Iterable<Regatta> getAllRegattas() {
         return Collections.unmodifiableCollection(new ArrayList<Regatta>(regattasByName.values()));
     }
     
@@ -527,7 +531,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public synchronized Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws Exception {
+    public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
         Regatta regatta = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
@@ -585,7 +589,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public synchronized RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname,
+    public RacesHandle addSwissTimingRace(RegattaIdentifier regattaToAddTo, String raceID, String hostname,
             int port, boolean canSendRequests, WindStore windStore, long timeoutInMilliseconds) throws Exception {
         return addRace(
                 regattaToAddTo,
@@ -594,7 +598,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public synchronized RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
+    public RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
             long timeoutInMilliseconds) throws Exception {
         return addRace(
         /* regattaToAddTo */null, getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
@@ -630,7 +634,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public synchronized RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
+    public RacesHandle addRace(RegattaIdentifier regattaToAddTo, RaceTrackingConnectivityParameters params,
             WindStore windStore, long timeoutInMilliseconds) throws Exception {
         RaceTracker tracker = raceTrackersByID.get(params.getTrackerID());
         if (tracker == null) {
@@ -643,8 +647,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 tracker = params.createRaceTracker(regatta, this);
                 assert tracker.getRegatta() == regatta;
             }
-            raceTrackersByID.put(params.getTrackerID(), tracker);
             synchronized (raceTrackersByRegatta) {
+                raceTrackersByID.put(params.getTrackerID(), tracker);
                 Set<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
                 if (trackers == null) {
                     trackers = new HashSet<RaceTracker>();
@@ -736,7 +740,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public synchronized TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
+    public TrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
@@ -746,7 +750,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public synchronized RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
+    public RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
             WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow) throws Exception {
         return addRace(regattaToAddTo, getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
@@ -898,9 +902,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public synchronized void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
-        if (raceTrackersByRegatta.containsKey(regatta)) {
-            synchronized (raceTrackersByRegatta) {
+    public void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
+        synchronized (raceTrackersByRegatta) {
+            if (raceTrackersByRegatta.containsKey(regatta)) {
                 for (RaceTracker raceTracker : raceTrackersByRegatta.get(regatta)) {
                     for (RaceDefinition race : raceTracker.getRaces()) {
                         stopTrackingWind(regatta, race);
@@ -914,7 +918,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public synchronized void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
+    public void stopTrackingAndRemove(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
         stopTracking(regatta);
         if (regatta != null) {
             if (regatta.getName() != null) {
@@ -956,9 +960,9 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                             if (trackersForRegatta != null) {
                                 trackersForRegatta.remove(tracker);
                             }
+                            tracker.stop();
+                            raceTrackersByID.remove(tracker.getID());
                         }
-                        tracker.stop();
-                        raceTrackersByID.remove(tracker.getID());
                         if (trackersForRegatta == null || trackersForRegatta.isEmpty()) {
                             stopTracking(regatta);
                         }
@@ -973,10 +977,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public synchronized void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException {
+    public void stopTracking(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException, InterruptedException {
         logger.info("Stopping tracking for "+race+"...");
-        if (raceTrackersByRegatta.containsKey(regatta)) {
-            synchronized (raceTrackersByRegatta) {
+        synchronized (raceTrackersByRegatta) {
+            if (raceTrackersByRegatta.containsKey(regatta)) {
                 Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
                 while (trackerIter.hasNext()) {
                     RaceTracker raceTracker = trackerIter.next();
@@ -989,19 +993,19 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                         raceTrackersByID.remove(raceTracker.getID());
                     }
                 }
+            } else {
+                logger.warning("Didn't find any trackers for regatta "+regatta);
             }
-        } else {
-            logger.warning("Didn't find any trackers for regatta "+regatta);
-        }
-        stopTrackingWind(regatta, race);
-        // if the last tracked race was removed, remove the entire regatta
-        if (raceTrackersByRegatta.get(regatta).isEmpty()) {
-            stopTracking(regatta);
+            stopTrackingWind(regatta, race);
+            // if the last tracked race was removed, remove the entire regatta
+            if (raceTrackersByRegatta.get(regatta).isEmpty()) {
+                stopTracking(regatta);
+            }
         }
     }
 
     @Override
-    public synchronized void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
+    public void removeRegatta(Regatta regatta) throws MalformedURLException, IOException, InterruptedException {
         for (RaceDefinition race : regatta.getAllRaces()) {
             removeRace(regatta, race);
         }
@@ -1013,7 +1017,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
     
     @Override
-    public synchronized void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException,
+    public void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException,
             IOException, InterruptedException {
         logger.info("Removing the race " + race + "...");
         stopAllTrackersForWhichRaceIsLastReachable(regatta, race);
@@ -1114,7 +1118,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public synchronized void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException {
+    public void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException {
         WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
         if (windTracker != null) {
             windTracker.stop();
@@ -1122,7 +1126,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     @Override
-    public synchronized Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces() {
+    public Iterable<Triple<Regatta, RaceDefinition, String>> getWindTrackedRaces() {
         List<Triple<Regatta, RaceDefinition, String>> result = new ArrayList<Triple<Regatta, RaceDefinition, String>>();
         for (Regatta regatta : getAllRegattas()) {
             for (RaceDefinition race : regatta.getAllRaces()) {
@@ -1387,7 +1391,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @SuppressWarnings("unchecked") // the type-parameters in the casts of the de-serialized collection objects can't be checked
     @Override
-    public synchronized void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    public void initiallyFillFrom(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         logger.info("Performing initial replication load on "+this);
         ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
         try {

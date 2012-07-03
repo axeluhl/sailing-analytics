@@ -33,10 +33,10 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.server.Servlet;
+import com.sap.sailing.server.SailingServerHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
 
-public class ModeratorApp extends Servlet {
+public class ModeratorApp extends SailingServerHttpServlet {
     private static final Logger logger = Logger.getLogger(ModeratorApp.class.getName());
     
     private static final long serialVersionUID = 1333207389294903999L;
