@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.geocoding
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.geocoding,
  com.sap.sailing.geocoding.impl;x-friends:="com.sap.sailing.geocoding.test"
 Require-Bundle: org.json.simple;bundle-version="1.1.0",

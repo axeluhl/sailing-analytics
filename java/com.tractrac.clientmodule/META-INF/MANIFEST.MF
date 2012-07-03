@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Ttcm
+Bundle-Name: TracTrac Client module
 Bundle-SymbolicName: com.tractrac.clientmodule
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -54,3 +54,4 @@ Export-Package: com.maptrack.asio,
  ucar.grib.grib2,
  ucar.unidata.io
 Bundle-ActivationPolicy: lazy
+Bundle-Vendor: TracTrac
