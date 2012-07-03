@@ -203,14 +203,6 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                                 start = legStart;
                             }
                             final MarkPassing legEndMarkPassing = owner.getMarkPassing(competitor, leg.getTo());
-                            if (startAggregate == null) {
-                                startAggregate = cacheForCompetitor.getLastFixAtOrBefore(start);
-                            }
-                            if (startAggregate == null) {
-                                startAggregate = new CrossTrackErrorSumAndNumberOfFixes(/* time point */ null,
-                                        /* distanceInMetersSumFromStart */ 0, /* fixCountFromStart */ 0);
-                            }
-                            CrossTrackErrorSumAndNumberOfFixes endAggregate;
                             TimePoint end;
                             if (legEndMarkPassing == null || legEndMarkPassing.getTimePoint().compareTo(to) >= 0) {
                                 // no next mark passing, or next mark passing is beyond the "to" time point; aggregate up to "to"
@@ -218,8 +210,15 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                             } else {
                                 end = legEndMarkPassing.getTimePoint();
                             }
-                            if (from.compareTo(end) < 0) {
-                                endAggregate = cacheForCompetitor.getLastFixAtOrBefore(end);
+                            if (start.compareTo(end) < 0) {
+                                if (startAggregate == null) {
+                                    startAggregate = cacheForCompetitor.getLastFixAtOrBefore(start);
+                                }
+                                if (startAggregate == null) {
+                                    startAggregate = new CrossTrackErrorSumAndNumberOfFixes(/* time point */ null,
+                                            /* distanceInMetersSumFromStart */ 0, /* fixCountFromStart */ 0);
+                                }
+                                CrossTrackErrorSumAndNumberOfFixes endAggregate = cacheForCompetitor.getLastFixAtOrBefore(end);
                                 if (endAggregate != null) {
                                     distanceInMeters += endAggregate.getDistanceInMetersSumFromStart() - startAggregate.getDistanceInMetersSumFromStart();
                                     count += endAggregate.getFixCountFromStart() - startAggregate.getFixCountFromStart();
@@ -272,6 +271,8 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                             markPassingAtLegEnd != null && markPassingAtLegEnd.getTimePoint().compareTo(fix.getTimePoint()) <= 0) {
                         if (legIter.hasNext()) {
                             currentLeg = legIter.next();
+                            markPassingAtLegStart = owner.getMarkPassing(competitor, currentLeg.getFrom());
+                            markPassingAtLegEnd = owner.getMarkPassing(competitor, currentLeg.getTo());
                         } else {
                             currentLeg = null;
                         }
