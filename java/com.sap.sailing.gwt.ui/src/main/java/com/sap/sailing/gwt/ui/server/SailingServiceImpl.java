@@ -346,7 +346,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     @Override
     public LeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestManeuverAnalysis)
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDTO result = null;
@@ -391,7 +391,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                 return getLeaderboardEntryDTO(entry, raceColumn.getTrackedRace(competitor), competitor, timePoint,
                                        namesOfRaceColumnsForWhichToLoadLegDetails != null
                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()),
-                                        waitForLatestManeuverAnalysis);
+                                        waitForLatestAnalyses);
                             } catch (NoWindException e) {
                                 throw new NoWindError(e);
                             }
@@ -430,13 +430,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     /**
-     * @param waitForLatestManeuverAnalysis
+     * @param waitForLatestAnalyses
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
      */
     private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, TrackedRace trackedRace, Competitor competitor,
-            TimePoint timePoint, boolean addLegDetails, boolean waitForLatestManeuverAnalysis) throws NoWindException {
+            TimePoint timePoint, boolean addLegDetails, boolean waitForLatestAnalyses) throws NoWindException {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
         entryDTO.netPoints = entry.getNetPoints();
@@ -446,7 +446,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         entryDTO.discarded = entry.isDiscarded();
         if (addLegDetails && trackedRace != null) {
             try {
-                RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestManeuverAnalysis);
+                RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses);
                 entryDTO.legDetails = raceDetails.getLegDetails();
                 entryDTO.windwardDistanceToOverallLeaderInMeters = raceDetails.getWindwardDistanceToOverallLeader() == null ? null
                         : raceDetails.getWindwardDistanceToOverallLeader().getMeters();
@@ -492,18 +492,18 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * they will be stored to the cache after calculating them. A cache invalidation {@link RaceChangeListener listener}
      * will be registered with the race which will be triggered for any event received by the race.
      * 
-     * @param waitForLatestManeuverAnalysis
+     * @param waitForLatestAnalyses
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
      */
     private RaceDetails getRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestManeuverAnalysis) throws NoWindException, InterruptedException, ExecutionException {
+            boolean waitForLatestAnalyses) throws NoWindException, InterruptedException, ExecutionException {
         RaceDetails raceDetails;
         if (trackedRace.getEndOfTracking() != null && trackedRace.getEndOfTracking().compareTo(timePoint) < 0) {
             raceDetails = getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(trackedRace, competitor);
         } else {
-            raceDetails = calculateRaceDetails(trackedRace, competitor, timePoint, waitForLatestManeuverAnalysis);
+            raceDetails = calculateRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses);
         }
         return raceDetails;
     }
@@ -613,7 +613,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     private RaceDetails calculateRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestManeuverAnalysis) throws NoWindException {
+            boolean waitForLatestAnalyses) throws NoWindException {
         List<LegEntryDTO> legDetails;
         legDetails = new ArrayList<LegEntryDTO>();
         final Course course = trackedRace.getRace().getCourse();
@@ -626,7 +626,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
                 if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
-                    legEntry = createLegEntry(trackedLeg, timePoint, waitForLatestManeuverAnalysis);
+                    legEntry = createLegEntry(trackedLeg, timePoint, waitForLatestAnalyses);
                 } else {
                     legEntry = null;
                 }
@@ -635,7 +635,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             final Distance windwardDistanceToOverallLeader = trackedRace == null ? null : trackedRace
                     .getWindwardDistanceToOverallLeader(competitor, timePoint);
             final Distance averageCrossTrackError = trackedRace == null ? null : trackedRace.getAverageCrossTrackError(
-                    competitor, timePoint);
+                    competitor, timePoint, waitForLatestAnalyses);
             return new RaceDetails(legDetails, windwardDistanceToOverallLeader, averageCrossTrackError);
         } finally {
             course.unlockAfterRead();
@@ -643,7 +643,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     private LegEntryDTO createLegEntry(TrackedLegOfCompetitor trackedLeg, TimePoint timePoint,
-            boolean waitForLatestManeuverAnalysis) throws NoWindException {
+            boolean waitForLatestAnalyses) throws NoWindException {
         LegEntryDTO result;
         if (trackedLeg == null) {
             result = null;
@@ -651,7 +651,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result = new LegEntryDTO();
             final Speed averageSpeedOverGround = trackedLeg.getAverageSpeedOverGround(timePoint);
             result.averageSpeedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
-            final Distance averageCrossTrackError = trackedLeg.getAverageCrossTrackError(timePoint);
+            final Distance averageCrossTrackError = trackedLeg.getAverageCrossTrackError(timePoint, waitForLatestAnalyses);
             result.averageCrossTrackErrorInMeters = averageCrossTrackError == null ? null : averageCrossTrackError.getMeters();
             Double speedOverGroundInKnots;
             if (trackedLeg.hasFinishedLeg(timePoint))  {
@@ -679,7 +679,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Distance windwardDistanceToGo = trackedLeg.getWindwardDistanceToGo(timePoint);
             result.windwardDistanceToGoInMeters = windwardDistanceToGo == null ? null : windwardDistanceToGo
                     .getMeters();
-            List<Maneuver> maneuvers = trackedLeg.getManeuvers(timePoint, waitForLatestManeuverAnalysis);
+            List<Maneuver> maneuvers = trackedLeg.getManeuvers(timePoint, waitForLatestAnalyses);
             if (maneuvers != null) {
                 result.numberOfTacks = 0;
                 result.numberOfJibes = 0;

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.persistence.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -80,6 +81,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
                 SwissTimingConfiguration stConfig = loadSwissTimingConfiguration(o);
                 result.add(stConfig);
             }
+            Collections.reverse(result);
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE,
