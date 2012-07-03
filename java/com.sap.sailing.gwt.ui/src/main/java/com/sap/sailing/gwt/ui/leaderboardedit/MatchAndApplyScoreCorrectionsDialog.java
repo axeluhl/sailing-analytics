@@ -198,8 +198,8 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     
     private String canonicalizeSailID(String sailID, String defaultNationality) {
         String result = null;
-        MatchResult m = p.exec(sailID);
-        if (p.test(sailID)) {
+        MatchResult m = p.exec(sailID.trim());
+        if (p.test(sailID.trim())) {
             String iocCode = m.getGroup(1);
             if (defaultNationality != null && (iocCode == null || iocCode.trim().length() == 0)) {
                 iocCode = defaultNationality;
