@@ -1,17 +1,18 @@
 .gwt-SliderBar-shell {
-  background: url(images/simulator/slider_bg.png) 0 0 repeat-x;
-  border-radius: 3px;
-  -moz-border-radius: 3px;
-  -webkit-border-radius: 3px;
-  width: 100%;
-  height: 50px;
+    background: url(images/simulator/slider_bg.png) 0 0 repeat-x;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border: 1px solid #ccc;
+    height: 36px;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-line {
-  background: #efefef;
-  height: 12px;
-  width: 100%;
-  top: 18px;
+  border: 1px solid #919191;
+  background-color: #818181;
+  height: 4px;
+  width: 90%;
+  top: 23px;
   overflow: hidden;
 }
 
@@ -20,7 +21,7 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-knob {
-  top: 12px;
+  top: 14px;
   width: 11px;
   height: 21px;
   z-index: 1;
@@ -28,21 +29,21 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-tick {
-  top: 13px;
-  width: 2px;
-  height: 5px;
-  background: #efefef;
+  top: 18px;
+  width: 1px;
+  height: 6pt;
+  background: #919191;
   overflow: hidden;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-mark {
-  top: 18px;
-  width: 3px;
-  height: 12px;
-  background: #fcbb22;
+  top: 21pt;
+  width: 6px;
+  height: 6pt;
+  background: #f0ab00;
   overflow: hidden;
-  border-left: 3px solid #7c7b7c;
-  border-right: 3px solid #7c7b7c;
+  border-left: 4px solid #fff;
+  border-right: 4px solid #fff;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-tick-disabled {
@@ -53,13 +54,13 @@
   font-size: 12px;
   cursor: default;
   font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
-  top: 0;
+  top: 5px;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-markerlabel {
-  top: 31px;
+  top: 30pt;
   font-size: 12px;
-  color: #fcbb22;
+  color: #bc9434;
   cursor: default;
   font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
 }
