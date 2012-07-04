@@ -1,6 +1,10 @@
 .gwt-SliderBar-shell {
-	width: 100%;
-	height: 50px;
+  background: url(images/simulator/slider_bg.png) 0 0 repeat-x;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  width: 100%;
+  height: 50px;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-line {
@@ -61,7 +65,7 @@
 }
 
 .gwt-SliderBar-shell-focused {
-  
+
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-line-sliding {
