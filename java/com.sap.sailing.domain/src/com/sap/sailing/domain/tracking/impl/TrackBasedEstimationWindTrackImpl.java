@@ -393,15 +393,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             cacheInvalidationTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    // to avoid deadlock with another invalidateCache() and with scheduleCacheInvalidation we need
-                    // to obtain the TrackBasedEstimationWindTrackImpl.this monitor first (see bug 746).
-                    lockForWrite();
-                    try {
-                        cacheInvalidationTimer.cancel(); // terminates the timer thread
-                        refreshCacheIncrementally();
-                    } finally {
-                        unlockAfterWrite();
-                    }
+                    // no locking required here; the incremental cache refresh protects the inner cache structures from concurrent modifications
+                    cacheInvalidationTimer.cancel(); // terminates the timer thread
+                    refreshCacheIncrementally();
                 }
             }, delayForCacheInvalidationInMilliseconds);
         }
