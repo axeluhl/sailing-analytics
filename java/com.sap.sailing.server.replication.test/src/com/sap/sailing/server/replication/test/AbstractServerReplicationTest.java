@@ -52,9 +52,14 @@ public abstract class AbstractServerReplicationTest {
      */
     @Before
     public void setUp() throws Exception {
-        Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(true, /* master=null means create a new one */ null,
-                /* replica=null means create a new one */ null);
-        result.getA().startToReplicateFrom(result.getB());
+        try {
+            Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = basicSetUp(
+                    true, /* master=null means create a new one */ null,
+            /* replica=null means create a new one */null);
+            result.getA().startToReplicateFrom(result.getB());
+        } catch (Throwable t) {
+            tearDown();
+        }
     }
 
     /**
@@ -140,11 +145,11 @@ public abstract class AbstractServerReplicationTest {
 
     @After
     public void tearDown() throws Exception {
-        masterReplicator.unregisterReplica(replicaDescriptor);
         brokerMgr.closeSessions();
         brokerMgr.closeConnections();
         brokerMgr.stopMessageBroker();
         Activator.removeTemporaryTestBrokerPersistenceDirectory(brokerPersistenceDir);
+        masterReplicator.unregisterReplica(replicaDescriptor);
     }
 
     static class ReplicationServiceTestImpl extends ReplicationServiceImpl {
