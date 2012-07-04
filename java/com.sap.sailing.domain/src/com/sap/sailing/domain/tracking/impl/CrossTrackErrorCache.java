@@ -41,7 +41,7 @@ import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
 public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     private static final Logger logger = Logger.getLogger(CrossTrackErrorCache.class.getName());
     
-    private class CrossTrackErrorSumAndNumberOfFixes implements Timed {
+    private static class CrossTrackErrorSumAndNumberOfFixes implements Timed {
         private static final long serialVersionUID = -278130726836884454L;
         private final TimePoint timePoint;
         private final double distanceInMetersSumFromStart;
@@ -68,7 +68,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
         }
     }
     
-    private class CrossTrackErrorSumAndNumberOfFixesTrack extends TrackImpl<CrossTrackErrorSumAndNumberOfFixes> {
+    private static class CrossTrackErrorSumAndNumberOfFixesTrack extends TrackImpl<CrossTrackErrorSumAndNumberOfFixes> {
         private static final long serialVersionUID = 4884868659665863604L;
         
         public void deleteAllLaterThan(TimePoint from) {

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -133,29 +132,29 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
      * Holds the {@link Event} objects for those event registered with this service. Note that there may be {@link Event}
      * objects that exist outside this service for events not (yet) registered here.
      */
-    protected final Map<String, Event> eventsByName;
+    protected final ConcurrentHashMap<String, Event> eventsByName;
 
     /**
      * Holds the {@link Regatta} objects for those races registered with this service. Note that there may be {@link Regatta}
      * objects that exist outside this service for regattas not (yet) registered here.
      */
-    protected final Map<String, Regatta> regattasByName;
+    protected final ConcurrentHashMap<String, Regatta> regattasByName;
     
-    private final Map<RaceDefinition, CourseChangeReplicator> courseListeners;
+    private final ConcurrentHashMap<RaceDefinition, CourseChangeReplicator> courseListeners;
     
-    protected final Map<Regatta, Set<RaceTracker>> raceTrackersByRegatta;
+    protected final ConcurrentHashMap<Regatta, Set<RaceTracker>> raceTrackersByRegatta;
     
     /**
      * Remembers the trackers by paramURL/liveURI/storedURI to avoid duplication
      */
-    protected final Map<Object, RaceTracker> raceTrackersByID;
+    protected final ConcurrentHashMap<Object, RaceTracker> raceTrackersByID;
     
     /**
      * Leaderboards managed by this racing event service
      */
-    private final Map<String, Leaderboard> leaderboardsByName;
+    private final ConcurrentHashMap<String, Leaderboard> leaderboardsByName;
     
-    private final Map<String, LeaderboardGroup> leaderboardGroupsByName;
+    private final ConcurrentHashMap<String, LeaderboardGroup> leaderboardGroupsByName;
     
     private Set<DynamicTrackedRegatta> regattasObservedForDefaultLeaderboard = new HashSet<DynamicTrackedRegatta>();
     
@@ -167,15 +166,15 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     
     private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
 
-    private final Map<Regatta, DynamicTrackedRegatta> regattaTrackingCache;
+    private final ConcurrentHashMap<Regatta, DynamicTrackedRegatta> regattaTrackingCache;
     
-    private final Set<OperationExecutionListener> operationExecutionListeners;
+    private final ConcurrentHashMap<OperationExecutionListener, OperationExecutionListener> operationExecutionListeners;
     
     /**
      * Keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
      * {@link #setRegattaForRace(Regatta, RaceDefinition)}.
      */
-    private final Map<String, Regatta> persistentRegattasForRaceIDs;
+    private final ConcurrentHashMap<String, Regatta> persistentRegattasForRaceIDs;
 
     /**
      * The globally used configuration of the time delay (in milliseconds) to the 'live' timepoint used for each new tracked race.  
@@ -213,7 +212,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         raceTrackersByID = new ConcurrentHashMap<Object, RaceTracker>();
         leaderboardGroupsByName = new ConcurrentHashMap<String, LeaderboardGroup>();
         leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
-        operationExecutionListeners = new ConcurrentSkipListSet<OperationExecutionListener>();
+        operationExecutionListeners = new ConcurrentHashMap<OperationExecutionListener, OperationExecutionListener>();
         courseListeners = new ConcurrentHashMap<RaceDefinition, CourseChangeReplicator>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<String, Regatta>();
         delayToLiveInMillis = TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS;
@@ -1365,14 +1364,14 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     }
 
     <T> void replicate(RacingEventServiceOperation<T> operation) {
-        for (OperationExecutionListener listener : operationExecutionListeners) {
+        for (OperationExecutionListener listener : operationExecutionListeners.keySet()) {
             listener.executed(operation); // TODO consider exception handling
         }
     }
 
     @Override
     public void addOperationExecutionListener(OperationExecutionListener listener) {
-        operationExecutionListeners.add(listener);
+        operationExecutionListeners.put(listener, listener);
     }
 
     @Override
