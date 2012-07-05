@@ -4,13 +4,9 @@
 package com.sap.sailing.gwt.ui.simulator.util;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
-import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.ImageData;
-import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseMoveHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.geom.LatLng;
@@ -31,8 +27,6 @@ public class WindFieldMapMouseMoveHandler implements MapMouseMoveHandler {
     private ImageData lastImageData = null;
     private double lastToolx;
     private double lastTooly;
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
-
 
     public WindFieldMapMouseMoveHandler(FullCanvasOverlay canvasOverlay) {
         super();

@@ -16,8 +16,7 @@ public class SimulatorEntryPoint extends AbstractEntryPoint {
     private int   yRes = 5;
     private boolean autoUpdate = true;
     
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
-
+    private static Logger logger = Logger.getLogger(SimulatorEntryPoint.class.getName());
 
     @Override
     public void onModuleLoad() {

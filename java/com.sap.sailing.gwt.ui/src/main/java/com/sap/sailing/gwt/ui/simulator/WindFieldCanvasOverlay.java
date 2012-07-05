@@ -7,18 +7,15 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.TimeListenerWithStoppingCriteria;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
@@ -55,7 +52,7 @@ public class WindFieldCanvasOverlay extends FullCanvasOverlay implements TimeLis
     
     protected final Timer timer;
 
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    private static Logger logger = Logger.getLogger(WindFieldCanvasOverlay.class.getName());
 
     public WindFieldCanvasOverlay(Timer timer) {
         super();

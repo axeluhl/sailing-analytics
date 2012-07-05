@@ -7,8 +7,7 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.domain;bundle-version="1.0.0",
- com.sap.sailing.server;bundle-version="1.0.0",
- org.junit4
+ com.sap.sailing.server;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.servlet;version="2.5.0",
  javax.servlet.http;version="2.5.0",
@@ -16,5 +15,5 @@ Import-Package: javax.servlet;version="2.5.0",
 Bundle-ClassPath: .,
  lib/ssj.jar
 Export-Package: com.sap.sailing.simulator,
- com.sap.sailing.simulator.impl;x-friends:="com.sap.sailing.simulator.test"
+ com.sap.sailing.simulator.impl
 Web-ContextPath: /simulator

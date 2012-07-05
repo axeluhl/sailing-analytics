@@ -73,7 +73,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private WindFieldGenParamsDTO windParams;
     private final Timer timer;
     private SimpleBusyIndicator busyIndicator;
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    private static Logger logger = Logger.getLogger(SimulatorMainPanel.class.getName());
 
     private SimulatorMap simulatorMap;
     private final StringMessages stringMessages;

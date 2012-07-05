@@ -1,6 +1,5 @@
 package com.sap.sailing.simulator;
 
-import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.Bearing;

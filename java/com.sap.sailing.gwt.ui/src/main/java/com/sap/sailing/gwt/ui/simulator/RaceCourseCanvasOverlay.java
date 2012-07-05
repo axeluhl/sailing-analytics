@@ -3,13 +3,11 @@ package com.sap.sailing.gwt.ui.simulator;
 import java.util.logging.Logger;
 
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.maps.client.InfoWindow;
 import com.google.gwt.maps.client.InfoWindowContent;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.event.MapClickHandler;
 import com.google.gwt.maps.client.event.MapDoubleClickHandler;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
-import com.google.gwt.maps.client.event.MarkerMouseOutHandler;
 import com.google.gwt.maps.client.event.MarkerMouseOverHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
@@ -37,7 +35,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     private RaceCourseMapMouseMoveHandler raceCourseMapMouseMoveHandler = new RaceCourseMapMouseMoveHandler();
 
-    private static Logger logger = Logger.getLogger("com.sap.sailing");
+    private static Logger logger = Logger.getLogger(RaceCourseCanvasOverlay.class.getName());
 
     private class RaceCourseMapMouseMoveHandler implements MapMouseMoveHandler {
 
