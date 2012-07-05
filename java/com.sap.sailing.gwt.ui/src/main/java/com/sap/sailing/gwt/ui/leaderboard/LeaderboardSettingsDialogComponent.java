@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -74,9 +75,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         hp.add(vpMeneuvers);
         VerticalPanel vpLeft = new VerticalPanel();
         vpLeft.setSpacing(5);
-        VerticalPanel vpRight = new VerticalPanel();
-        vpRight.setSpacing(5);
-        vpLeft.add(new Label(stringConstants.timing()));
+
+        // add headline
+        vpLeft.add(dialog.createHeadline(stringConstants.timing()));
         Label delayLabel = new Label(stringConstants.delayInSeconds());
         vpLeft.add(delayLabel);
         vpLeft.add(delayInSecondsBox);
@@ -91,27 +92,42 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             raceDetailCheckboxes.put(type, checkbox);
             vpLeft.add(checkbox);
         }
-        vpLeft.add(new Label(stringConstants.legDetailsToShow()));
+        
+        hp.add(legDetailsToShow(dialog));
+        
+        hp.add(createSelectedRacesPanel(dialog));
+        return hp;
+    }
+
+	private FlowPanel legDetailsToShow(DataEntryDialog<?> dialog) {
+		FlowPanel legDetailsToShow = new FlowPanel();
+		
+		legDetailsToShow.add(dialog.createHeadline(stringConstants.legDetailsToShow()));
+		
         List<DetailType> currentLegDetailSelection = legDetailSelection;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
-            vpLeft.add(checkbox);
+            legDetailsToShow.add(checkbox);
         }
-        hp.add(vpLeft);
+        return legDetailsToShow;
+	}
+
+	private FlowPanel createSelectedRacesPanel(DataEntryDialog<?> dialog) {
+        FlowPanel selectedRacesPanel = new FlowPanel();
         
-        vpRight.add(new Label(stringConstants.selectedRaces()));
+		selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces()));
+		
         List<RaceColumnDTO> allColumns = raceAllRaceColumns;
         for (RaceColumnDTO expandableSortableColumn : allColumns) {
             CheckBox checkbox = dialog.createCheckbox(expandableSortableColumn.getRaceColumnName());
             checkbox.setValue(raceColumnSelection.contains(expandableSortableColumn));
             raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
-            vpRight.add(checkbox);
+            selectedRacesPanel.add(checkbox);
         }
-        hp.add(vpRight);
-        return hp;
-    }
+        return selectedRacesPanel;
+	}
 
     @Override
     public LeaderboardSettings getResult() {
