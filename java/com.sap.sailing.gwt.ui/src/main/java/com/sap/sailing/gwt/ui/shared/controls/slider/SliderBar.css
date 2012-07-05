@@ -31,6 +31,10 @@
   overflow: hidden;
 }
 
+.gwt-SliderBar-shell:focus{
+	outline: none; 
+}
+
 .gwt-SliderBar-shell .gwt-SliderBar-mark {
   top: 18px;
   width: 3px;
