@@ -15,10 +15,9 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
-
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -28,7 +27,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
@@ -253,6 +251,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 				"controlPanelInnerWrapper");
         controlPanel.setTitle("Control Settings");
         controlPanel.getElement().setClassName("controlPanel");
+        controlPanel.getElement().setId("masterPanelLeft");
         controlPanel.add(controlPanelInnerWrapper);
         createWindSetup(controlPanelInnerWrapper);
         createSailingSetup(controlPanelInnerWrapper);
