@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.gwt.ui.adminconsole.ReplicationPanel;
 
 /**
  * Holds information about a replica, to be displayed, e.g., by {@link ReplicationPanel}.
