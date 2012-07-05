@@ -235,6 +235,16 @@ public abstract class DataEntryDialog<T> {
         headlineLabel.getElement().getStyle().setPaddingTop(1, Unit.EM);
         return headlineLabel;
     }
+    
+    public FlowPanel createHeadline(String headlineText) {
+    	FlowPanel headlinePanel = new FlowPanel();
+    	
+        Label headlineLabel = new Label(headlineText);
+        
+        headlinePanel.addStyleName("dialogHeadline");
+        headlinePanel.add(headlineLabel);
+        return headlinePanel;
+    }
 
     public CheckBox createCheckbox(String checkboxLabel) {
         CheckBox result = new CheckBox(checkboxLabel);
