@@ -1,18 +1,13 @@
-.gwt-SliderBar-shell {
-    background: url(images/simulator/slider_bg.png) 0 0 repeat-x;
-    border-radius: 3px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    border: 1px solid #ccc;
-    height: 36px;
+gwt-SliderBar-shell {
+    width: 100%;
+    height: 50px;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-line {
-  border: 1px solid #919191;
-  background-color: #818181;
-  height: 4px;
-  width: 90%;
-  top: 23px;
+  background: #efefef;
+  height: 12px;
+  width: 100%;
+  top: 18px;
   overflow: hidden;
 }
 
@@ -21,7 +16,7 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-knob {
-  top: 14px;
+  top: 12px;
   width: 11px;
   height: 21px;
   z-index: 1;
@@ -29,21 +24,25 @@
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-tick {
-  top: 18px;
-  width: 1px;
-  height: 6pt;
-  background: #919191;
+  top: 13px;
+  width: 2px;
+  height: 5px;
+  background: #efefef;
   overflow: hidden;
 }
 
+.gwt-SliderBar-shell:focus{
+    outline: none; 
+}
+
 .gwt-SliderBar-shell .gwt-SliderBar-mark {
-  top: 21pt;
-  width: 6px;
-  height: 6pt;
-  background: #f0ab00;
+  top: 18px;
+  width: 3px;
+  height: 12px;
+  background: #fcbb22;
   overflow: hidden;
-  border-left: 4px solid #fff;
-  border-right: 4px solid #fff;
+  border-left: 3px solid #7c7b7c;
+  border-right: 3px solid #7c7b7c;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-tick-disabled {
@@ -54,10 +53,88 @@
   font-size: 12px;
   cursor: default;
   font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
-  top: 5px;
+  top: 0;
 }
 
 .gwt-SliderBar-shell .gwt-SliderBar-markerlabel {
+  top: 31px;
+  font-size: 12px;
+  color: #fcbb22;
+  cursor: default;
+  font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+}
+
+.gwt-SliderBar-shell-focused {
+  
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-line-sliding {
+  cursor: pointer;
+}
+
+
+
+/* styles for the masterPanel */
+#masterPanelLeft .gwt-SliderBar-shell {
+    background: url(images/simulator/slider_bg.png) 0 0 repeat-x;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border: 1px solid #ccc;
+    height: 36px;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-line {
+  border: 1px solid #919191;
+  background-color: #818181;
+  height: 4px;
+  width: 90%;
+  top: 23px;
+  overflow: hidden;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-line-disabled {
+  border: 1px solid gray;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-knob {
+  top: 14px;
+  width: 11px;
+  height: 21px;
+  z-index: 1;
+  cursor: pointer;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-tick {
+  top: 18px;
+  width: 1px;
+  height: 6pt;
+  background: #919191;
+  overflow: hidden;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-mark {
+  top: 21pt;
+  width: 6px;
+  height: 6pt;
+  background: #f0ab00;
+  overflow: hidden;
+  border-left: 4px solid #fff;
+  border-right: 4px solid #fff;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-tick-disabled {
+  background: gray;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-ticklabel {
+  font-size: 12px;
+  cursor: default;
+  font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+  top: 5px;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-markerlabel {
   top: 30pt;
   font-size: 12px;
   color: #bc9434;
@@ -65,10 +142,10 @@
   font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
 }
 
-.gwt-SliderBar-shell-focused {
+#masterPanelLeft .gwt-SliderBar-shell-focused {
 
 }
 
-.gwt-SliderBar-shell .gwt-SliderBar-line-sliding {
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-line-sliding {
   cursor: pointer;
 }
