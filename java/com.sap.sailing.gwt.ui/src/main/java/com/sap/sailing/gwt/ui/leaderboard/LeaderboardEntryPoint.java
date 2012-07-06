@@ -87,11 +87,15 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         } else {
             Timer timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
             timer.setLivePlayDelayInMillis(5000l);
+            final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
             LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
-                    createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap()),
+                    leaderboardSettings,
                     getPreselectedRace(Window.Location.getParameterMap()), new CompetitorSelectionModel(
                             /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
                     LeaderboardEntryPoint.this, stringMessages, userAgentType, showRaceDetails);
+            if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
+                timer.play();
+            }
             contentScrollPanel.setWidget(leaderboardPanel);
         }
 
