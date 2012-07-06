@@ -160,7 +160,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow,
                 namesOfRaceColumnsToShow, /* nameOfRacesToShow */null, autoExpandPreSelectedRace,
                 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
-                1000 * (delayInSecondsValue == null ? 0 : delayInSecondsValue.longValue()), null, true);
+                1000 * (delayInSecondsValue == null ? 0 : delayInSecondsValue.longValue()), null, true,
+                /* updateUponPlayStateChange */ true);
     }
 
     @Override

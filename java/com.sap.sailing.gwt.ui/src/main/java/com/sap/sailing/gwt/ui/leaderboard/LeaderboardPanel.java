@@ -264,7 +264,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     public void updateSettings(LeaderboardSettings newSettings) {
-        if (!currentlyHandlingPlayStateChange) {
+        if (!newSettings.updateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
             settingsUpdatedExplicitly = true;
         }
         List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
@@ -963,6 +963,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedRaceColumns = new ArrayList<RaceColumnDTO>();
         this.selectedManeuverDetails = new ArrayList<DetailType>();
 
+        settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
         selectedLegDetails.addAll(settings.getLegDetailsToShow());
         selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
         selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
