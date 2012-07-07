@@ -20,6 +20,7 @@ public class LeaderboardSettings {
     private final boolean autoExpandPreSelectedRace;
     private final Long delayBetweenAutoAdvancesInMilliseconds;
     private final Long delayInMilliseconds;
+    private final boolean updateUponPlayStateChange;
     
     /**
      * An optional sort column; if <code>null</code>, the leaderboard sorting won't be touched when updating the settings.
@@ -29,21 +30,12 @@ public class LeaderboardSettings {
     private final boolean sortAscending;
     
     /**
-     * @param meneuverDetailsToShow
-     * @param legDetailsToShow
-     * @param raceDetailsToShow
-     * @param namesOfRacesToShow
-     * @param autoExpandPreSelectedRace
-     * @param delayBetweenAutoAdvancesInMilliseconds
-     * @param delayInMilliseconds
-     * @param nameOfRaceToSort
-     * @param sortAscending
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
      */
     public LeaderboardSettings(List<DetailType> meneuverDetailsToShow, List<DetailType> legDetailsToShow,
             List<DetailType> raceDetailsToShow, List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds,
-            Long delayInMilliseconds, String nameOfRaceToSort, boolean sortAscending) {
+            Long delayInMilliseconds, String nameOfRaceToSort, boolean sortAscending, boolean updateUponPlayStateChange) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
@@ -57,6 +49,7 @@ public class LeaderboardSettings {
         this.maneuverDetailsToShow = meneuverDetailsToShow;
         this.nameOfRaceToSort = nameOfRaceToSort;
         this.sortAscending = sortAscending;
+        this.updateUponPlayStateChange = updateUponPlayStateChange;
     }
   
     public List<DetailType> getManeuverDetailsToShow() {
@@ -112,6 +105,14 @@ public class LeaderboardSettings {
 
     public boolean isSortAscending() {
         return sortAscending;
+    }
+
+    /**
+     * If <code>true</code>, an update of the settings will behave like a manual settings update, meaning that
+     * the settings won't automatically be replaced / adjusted when the play state changes.
+     */
+    public boolean updateUponPlayStateChange() {
+        return updateUponPlayStateChange;
     }
 
 }
