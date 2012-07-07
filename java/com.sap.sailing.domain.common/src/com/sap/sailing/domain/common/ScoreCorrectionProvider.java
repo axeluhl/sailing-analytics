@@ -21,5 +21,16 @@ public interface ScoreCorrectionProvider extends Named {
      */
     public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception;
 
+    /**
+     * @param eventName
+     *            as provided by the keys of the result map returned by
+     *            {@link #getHasResultsForBoatClassFromDateByEventName()}
+     * @param boatClassName
+     *            as provided by the {@link Pair#getA()} method on the values of the map returned by
+     *            {@link #getHasResultsForBoatClassFromDateByEventName()}
+     * @param millisecondsTimePoint
+     *            a time point as returned in the {@link Pair#getB()} component of the values in the map returned by
+     *            {@link #getHasResultsForBoatClassFromDateByEventName()}.
+     */
     public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName, TimePoint millisecondsTimePoint) throws Exception;
 }
