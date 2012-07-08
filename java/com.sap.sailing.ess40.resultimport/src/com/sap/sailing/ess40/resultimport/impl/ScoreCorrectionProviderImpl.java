@@ -59,6 +59,9 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
         while (line != null) {
             String[] split = line.split(",");
             String sailID = split[0].trim();
+            if (sailID.startsWith("\"") && sailID.endsWith("\"")) {
+                sailID = sailID.substring(1, sailID.length()-1);
+            }
             List<Pair<String, Integer>> competitorEntry = new ArrayList<Pair<String, Integer>>();
             result.put(sailID, competitorEntry);
             for (int i=1; i<split.length-1; i+=2) {
@@ -87,7 +90,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
             TimePoint millisecondsTimePoint) throws Exception {
         URL actUrl = getCsvUrls(actName).iterator().next();
         Pair<TimePoint, Map<String, List<Pair<String, Integer>>>> actResults = getActResults(actUrl);
-        return new RegattaScoreCorrectionsImpl(this, actResults);
+        return new RegattaScoreCorrectionsImpl(this, actResults.getB());
     }
 
 }
