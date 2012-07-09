@@ -338,4 +338,5 @@ public interface StringMessages extends Messages {
     String boatClassDoesNotMatchSelectedRegatta(String boatClass, String regattaName);
     String regattaExistForSelectedBoatClass();
     String reload();
+    String addRegatta();
 }
