@@ -59,19 +59,19 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         delayBetweenAutoAdvancesInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds/1000l, 4);
         delayInSecondsBox = dialog.createLongBox(delayInMilliseconds/1000l, 4);
-        FlowPanel DialogPanel = new FlowPanel();
+        FlowPanel dialogPanel = new FlowPanel();
         
-        DialogPanel.add(createMeneuverDetailSelection(dialog));
+        dialogPanel.add(createMeneuverDetailSelection(dialog));
         
-        DialogPanel.add(createDelayInSeconds(dialog));
+        dialogPanel.add(createDelayInSeconds(dialog));
         
-        DialogPanel.add(createCurrentRaceDetailSelection(dialog));
+        dialogPanel.add(createCurrentRaceDetailSelection(dialog));
         
-        DialogPanel.add(legDetailsToShow(dialog));
+        dialogPanel.add(legDetailsToShow(dialog));
         
-        DialogPanel.add(createSelectedRacesPanel(dialog));
+        dialogPanel.add(createSelectedRacesPanel(dialog));
         
-        return DialogPanel;
+        return dialogPanel;
     }
 
 	private FlowPanel createMeneuverDetailSelection(DataEntryDialog<?> dialog) {
