@@ -1146,10 +1146,31 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     /**
-     * The time point for which the leaderboard currently shows results
+     * The time point for which the leaderboard currently shows results. In {@link PlayModes#Replay replay mode} this is
+     * the {@link #timer}'s time point. In {@link PlayModes#Live live mode} the {@link #timer}'s time is quantizes to the
+     * closest full second to increase the likelihood of cache hits in the back end.
      */
     protected Date getLeaderboardDisplayDate() {
-        return timer.getTime();
+        Date result;
+        if (timer.getPlayMode() == PlayModes.Live) {
+            // quantize in live mode
+            result = quantize(timer.getTime(), 1000 /* milliseconds = 1s */);
+        } else {
+            result = timer.getTime();
+        }
+        return result;
+    }
+
+    private Date quantize(Date date, long toFullMilliseconds) {
+        long millis = date.getTime();
+        long quantizedMillis;
+        long mod = millis % toFullMilliseconds;
+        if (mod < toFullMilliseconds/2) {
+            quantizedMillis = (millis / toFullMilliseconds) * toFullMilliseconds;
+        } else {
+            quantizedMillis = (millis / toFullMilliseconds + 1) * toFullMilliseconds;
+        }
+        return new Date(quantizedMillis);
     }
 
     /**
