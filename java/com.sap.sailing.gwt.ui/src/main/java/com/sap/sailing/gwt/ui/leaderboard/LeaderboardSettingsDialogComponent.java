@@ -60,25 +60,29 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         delayBetweenAutoAdvancesInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds/1000l, 4);
         delayInSecondsBox = dialog.createLongBox(delayInMilliseconds/1000l, 4);
         FlowPanel dialogPanel = new FlowPanel();
-        
-        dialogPanel.add(createMeneuverDetailSelection(dialog));
-        
-        dialogPanel.add(createDelayInSeconds(dialog));
-        
-        dialogPanel.add(createCurrentRaceDetailSelection(dialog));
-        
-        dialogPanel.add(legDetailsToShow(dialog));
-        
         dialogPanel.add(createSelectedRacesPanel(dialog));
-        
+        dialogPanel.add(createRaceDetailPanel(dialog));
+        dialogPanel.add(createLegDetailsPanel(dialog));
+        dialogPanel.add(createMeneuverDetailsPanel(dialog));
+        dialogPanel.add(createTimingDetailsPanel(dialog));
+        dialogPanel.add(createHelpPanel(dialog));
         return dialogPanel;
     }
 
-	private FlowPanel createMeneuverDetailSelection(DataEntryDialog<?> dialog) {
+	private FlowPanel createHelpPanel(DataEntryDialog<?> dialog) {
+		FlowPanel helpPanel = new FlowPanel();
+
+		helpPanel.add(dialog.createHeadline("Description"));
+		helpPanel.addStyleName("SettingsDialogComponent helpPanel");
+		
+		return helpPanel;
+	}
+    
+	private FlowPanel createMeneuverDetailsPanel(DataEntryDialog<?> dialog) {
 		FlowPanel meneuverPanel = new FlowPanel();
 		
 		meneuverPanel.add(dialog.createHeadline(stringConstants.maneuverTypes()));
-		meneuverPanel.addStyleName("meneuverSettings");
+		meneuverPanel.addStyleName("SettingsDialogComponent meneuverSettings");
 		
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
@@ -90,11 +94,11 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 		return meneuverPanel;
 	}
     
-    private FlowPanel createDelayInSeconds(DataEntryDialog<?> dialog) {
+    private FlowPanel createTimingDetailsPanel(DataEntryDialog<?> dialog) {
     	FlowPanel timingPanel = new FlowPanel();
 
 	    timingPanel.add(dialog.createHeadline(stringConstants.timing()));
-	    timingPanel.addStyleName("timingSettings");
+	    timingPanel.addStyleName("SettingsDialogComponent timingSettings");
 	    
 	    Label delayLabel = new Label(stringConstants.delayInSeconds());
 	    timingPanel.add(delayLabel);
@@ -105,11 +109,11 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     	return timingPanel;
     }
 
-	private FlowPanel createCurrentRaceDetailSelection(DataEntryDialog<?> dialog) {
+	private FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog) {
 		FlowPanel raceDetailDialog = new FlowPanel();
 
         raceDetailDialog.add(dialog.createHeadline(stringConstants.raceDetailsToShow()));
-        raceDetailDialog.addStyleName("raceDetailSettings");
+        raceDetailDialog.addStyleName("SettingsDialogComponent raceDetailSettings");
 
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
@@ -122,11 +126,11 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         return raceDetailDialog;
 	}
 
-	private FlowPanel legDetailsToShow(DataEntryDialog<?> dialog) {
+	private FlowPanel createLegDetailsPanel(DataEntryDialog<?> dialog) {
 		FlowPanel legDetailsToShow = new FlowPanel();
 		
 		legDetailsToShow.add(dialog.createHeadline(stringConstants.legDetailsToShow()));
-		legDetailsToShow.addStyleName("legDetailsSettings");
+		legDetailsToShow.addStyleName("SettingsDialogComponent legDetailsSettings");
 		
         List<DetailType> currentLegDetailSelection = legDetailSelection;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
@@ -142,7 +146,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel selectedRacesPanel = new FlowPanel();
         
 		selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces()));
-		selectedRacesPanel.addStyleName("selectedRacesSettings");
+		selectedRacesPanel.addStyleName("SettingsDialogComponent selectedRacesSettings");
 		
         List<RaceColumnDTO> allColumns = raceAllRaceColumns;
         for (RaceColumnDTO expandableSortableColumn : allColumns) {
