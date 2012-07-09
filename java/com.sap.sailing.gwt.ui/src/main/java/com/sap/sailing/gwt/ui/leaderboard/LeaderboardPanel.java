@@ -1151,26 +1151,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * closest full second to increase the likelihood of cache hits in the back end.
      */
     protected Date getLeaderboardDisplayDate() {
-        Date result;
-        if (timer.getPlayMode() == PlayModes.Live) {
-            // quantize in live mode
-            result = quantize(timer.getTime(), 1000 /* milliseconds = 1s */);
-        } else {
-            result = timer.getTime();
-        }
-        return result;
-    }
-
-    private Date quantize(Date date, long toFullMilliseconds) {
-        long millis = date.getTime();
-        long quantizedMillis;
-        long mod = millis % toFullMilliseconds;
-        if (mod < toFullMilliseconds/2) {
-            quantizedMillis = (millis / toFullMilliseconds) * toFullMilliseconds;
-        } else {
-            quantizedMillis = (millis / toFullMilliseconds + 1) * toFullMilliseconds;
-        }
-        return new Date(quantizedMillis);
+        return timer.getTime();
     }
 
     /**
