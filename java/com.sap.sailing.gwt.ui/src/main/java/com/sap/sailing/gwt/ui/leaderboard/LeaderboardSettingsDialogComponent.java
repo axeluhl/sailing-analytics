@@ -72,15 +72,29 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             maneuverDetailCheckboxes.put(detailType, checkbox);
             vpMeneuvers.add(checkbox);
         }
+        
         hp.add(vpMeneuvers);
-        VerticalPanel vpLeft = new VerticalPanel();
-        vpLeft.setSpacing(5);
+        
+        hp.add(createCurrentRaceDetailSelection(dialog));
+        
+        hp.add(legDetailsToShow(dialog));
+        
+        hp.add(createSelectedRacesPanel(dialog));
+        
+        return hp;
+    }
+
+	private FlowPanel createCurrentRaceDetailSelection(DataEntryDialog<?> dialog) {
+		FlowPanel vpLeft = new FlowPanel();
 
         // add headline
+		vpLeft.addStyleName("TEST");
         vpLeft.add(dialog.createHeadline(stringConstants.timing()));
         Label delayLabel = new Label(stringConstants.delayInSeconds());
         vpLeft.add(delayLabel);
         vpLeft.add(delayInSecondsBox);
+        
+        
         Label delayBetweenAutoAdvancesLabel = new Label(stringConstants.delayBetweenAutoAdvances());
         vpLeft.add(delayBetweenAutoAdvancesLabel);
         vpLeft.add(delayBetweenAutoAdvancesInSecondsBox);
@@ -92,12 +106,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             raceDetailCheckboxes.put(type, checkbox);
             vpLeft.add(checkbox);
         }
-        
-        hp.add(legDetailsToShow(dialog));
-        
-        hp.add(createSelectedRacesPanel(dialog));
-        return hp;
-    }
+        return vpLeft;
+	}
 
 	private FlowPanel legDetailsToShow(DataEntryDialog<?> dialog) {
 		FlowPanel legDetailsToShow = new FlowPanel();
