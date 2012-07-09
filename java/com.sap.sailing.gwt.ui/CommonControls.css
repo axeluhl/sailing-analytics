@@ -473,3 +473,10 @@
   background: url(images/playbuttonPause-hover.png) 0 0 no-repeat !important;
   cursor: pointer;
 }
+
+
+/* Dialogs */
+.dialogInnerHeadline {
+	font-family: UbuntuMedium, Arial, Verdana, sans-serif;
+	background: #e5e5e5;
+}
