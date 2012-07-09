@@ -8,10 +8,8 @@ import java.util.Map;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
@@ -61,52 +59,63 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         delayBetweenAutoAdvancesInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds/1000l, 4);
         delayInSecondsBox = dialog.createLongBox(delayInMilliseconds/1000l, 4);
-        HorizontalPanel hp = new HorizontalPanel();
-        VerticalPanel vpMeneuvers = new VerticalPanel();
-        vpMeneuvers.setSpacing(5);
-        vpMeneuvers.add(new Label(stringConstants.maneuverTypes()));
+        FlowPanel DialogPanel = new FlowPanel();
+        
+        DialogPanel.add(createMeneuverDetailSelection(dialog));
+        
+        DialogPanel.add(createDelayInSeconds(dialog));
+        
+        DialogPanel.add(createCurrentRaceDetailSelection(dialog));
+        
+        DialogPanel.add(legDetailsToShow(dialog));
+        
+        DialogPanel.add(createSelectedRacesPanel(dialog));
+        
+        return DialogPanel;
+    }
+
+	private FlowPanel createMeneuverDetailSelection(DataEntryDialog<?> dialog) {
+		FlowPanel meneuverPanel = new FlowPanel();
+		
+		meneuverPanel.add(dialog.createHeadline(stringConstants.maneuverTypes()));
+		
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType, stringConstants));
             checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
             maneuverDetailCheckboxes.put(detailType, checkbox);
-            vpMeneuvers.add(checkbox);
+            meneuverPanel.add(checkbox);
         }
-        
-        hp.add(vpMeneuvers);
-        
-        hp.add(createCurrentRaceDetailSelection(dialog));
-        
-        hp.add(legDetailsToShow(dialog));
-        
-        hp.add(createSelectedRacesPanel(dialog));
-        
-        return hp;
+		return meneuverPanel;
+	}
+    
+    private FlowPanel createDelayInSeconds(DataEntryDialog<?> dialog) {
+    	FlowPanel timingPanel = new FlowPanel();
+
+	    timingPanel.add(dialog.createHeadline(stringConstants.timing()));
+	    Label delayLabel = new Label(stringConstants.delayInSeconds());
+	    timingPanel.add(delayLabel);
+	    timingPanel.add(delayInSecondsBox);
+        Label delayBetweenAutoAdvancesLabel = new Label(stringConstants.delayBetweenAutoAdvances());
+        timingPanel.add(delayBetweenAutoAdvancesLabel);
+        timingPanel.add(delayBetweenAutoAdvancesInSecondsBox);
+    	return timingPanel;
     }
 
 	private FlowPanel createCurrentRaceDetailSelection(DataEntryDialog<?> dialog) {
-		FlowPanel vpLeft = new FlowPanel();
+		FlowPanel raceDetailDialog = new FlowPanel();
 
-        // add headline
-		vpLeft.addStyleName("TEST");
-        vpLeft.add(dialog.createHeadline(stringConstants.timing()));
-        Label delayLabel = new Label(stringConstants.delayInSeconds());
-        vpLeft.add(delayLabel);
-        vpLeft.add(delayInSecondsBox);
-        
-        
-        Label delayBetweenAutoAdvancesLabel = new Label(stringConstants.delayBetweenAutoAdvances());
-        vpLeft.add(delayBetweenAutoAdvancesLabel);
-        vpLeft.add(delayBetweenAutoAdvancesInSecondsBox);
-        vpLeft.add(new Label(stringConstants.raceDetailsToShow()));
+        raceDetailDialog.add(dialog.createHeadline(stringConstants.raceDetailsToShow()));
+
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
             raceDetailCheckboxes.put(type, checkbox);
-            vpLeft.add(checkbox);
+            raceDetailDialog.add(checkbox);
         }
-        return vpLeft;
+        
+        return raceDetailDialog;
 	}
 
 	private FlowPanel legDetailsToShow(DataEntryDialog<?> dialog) {
