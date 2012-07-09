@@ -78,7 +78,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 	private FlowPanel createHelpPanel(DataEntryDialog<?> dialog) {
 		FlowPanel helpPanel = new FlowPanel();
 
-		helpPanel.add(dialog.createHeadline("Description"));
+		helpPanel.add(dialog.createHeadline("Description", false));
 		helpPanel.addStyleName("SettingsDialogComponent helpPanel");
 		
 		helpPanel.add(descriptionTextLabel);
@@ -89,7 +89,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 	private FlowPanel createMeneuverDetailsPanel(DataEntryDialog<?> dialog) {
 		FlowPanel meneuverPanel = new FlowPanel();
 		
-		meneuverPanel.add(dialog.createHeadline(stringConstants.maneuverTypes()));
+		meneuverPanel.add(dialog.createHeadline(stringConstants.maneuverTypes(), true));
 		meneuverPanel.addStyleName("SettingsDialogComponent meneuverSettings");
 		
 		FlowPanel meneuverContent = new FlowPanel();
@@ -110,18 +110,23 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private FlowPanel createTimingDetailsPanel(DataEntryDialog<?> dialog) {
     	FlowPanel timingPanel = new FlowPanel();
 
-	    timingPanel.add(dialog.createHeadline(stringConstants.timing()));
+	    timingPanel.add(dialog.createHeadline(stringConstants.timing(), true));
 	    timingPanel.addStyleName("SettingsDialogComponent timingSettings");
 	    
 	    FlowPanel timingContent = new FlowPanel();
 	    timingContent.addStyleName("dialogInnerContent");
 	    
+	    FlowPanel delayInSecondsWrapper = new FlowPanel();
 	    Label delayLabel = new Label(stringConstants.delayInSeconds());
-	    timingContent.add(delayLabel);
-	    timingContent.add(delayInSecondsBox);
+	    delayInSecondsWrapper.add(delayLabel);
+	    delayInSecondsWrapper.add(delayInSecondsBox);
+	    timingContent.add(delayInSecondsWrapper);
+	    
+	    FlowPanel delayBetweenAutoAdvancesWrapper = new FlowPanel();
         Label delayBetweenAutoAdvancesLabel = new Label(stringConstants.delayBetweenAutoAdvances());
-        timingContent.add(delayBetweenAutoAdvancesLabel);
-        timingContent.add(delayBetweenAutoAdvancesInSecondsBox);
+        delayBetweenAutoAdvancesWrapper.add(delayBetweenAutoAdvancesLabel);
+        delayBetweenAutoAdvancesWrapper.add(delayBetweenAutoAdvancesInSecondsBox);
+        timingContent.add(delayBetweenAutoAdvancesWrapper);
         
         timingPanel.add(timingContent);
     	return timingPanel;
@@ -130,7 +135,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 	private FlowPanel createRaceDetailPanel(DataEntryDialog<?> dialog) {
 		FlowPanel raceDetailDialog = new FlowPanel();
 
-        raceDetailDialog.add(dialog.createHeadline(stringConstants.raceDetailsToShow()));
+        raceDetailDialog.add(dialog.createHeadline(stringConstants.raceDetailsToShow(), true));
         raceDetailDialog.addStyleName("SettingsDialogComponent raceDetailSettings");
 
         FlowPanel raceDetailDialogContent = new FlowPanel();
@@ -169,7 +174,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 	private FlowPanel createLegDetailsPanel(DataEntryDialog<?> dialog) {
 		FlowPanel legDetailsToShow = new FlowPanel();
 		
-		legDetailsToShow.add(dialog.createHeadline(stringConstants.legDetailsToShow()));
+		legDetailsToShow.add(dialog.createHeadline(stringConstants.legDetailsToShow(), true));
 		legDetailsToShow.addStyleName("SettingsDialogComponent legDetailsSettings");
 		
 		FlowPanel legDetailsContent = new FlowPanel();
@@ -194,7 +199,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel selectedRacesContent = new FlowPanel();
         selectedRacesContent.addStyleName("dialogInnerContent");
         
-        selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces()));
+        selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces(), true));
 		
         List<RaceColumnDTO> allColumns = raceAllRaceColumns;
         for (RaceColumnDTO expandableSortableColumn : allColumns) {
