@@ -115,14 +115,18 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         raceDetailDialog.add(dialog.createHeadline(stringConstants.raceDetailsToShow()));
         raceDetailDialog.addStyleName("SettingsDialogComponent raceDetailSettings");
 
+        FlowPanel raceDetailDialogContent = new FlowPanel();
+        raceDetailDialogContent.addStyleName("dialogInnerContent");
+        
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
             raceDetailCheckboxes.put(type, checkbox);
-            raceDetailDialog.add(checkbox);
+            raceDetailDialogContent.add(checkbox);
         }
         
+        raceDetailDialog.add(raceDetailDialogContent);
         return raceDetailDialog;
 	}
 
