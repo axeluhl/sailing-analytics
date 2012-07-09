@@ -132,13 +132,18 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 		legDetailsToShow.add(dialog.createHeadline(stringConstants.legDetailsToShow()));
 		legDetailsToShow.addStyleName("SettingsDialogComponent legDetailsSettings");
 		
+		FlowPanel legDetailsContent = new FlowPanel();
+		legDetailsContent.addStyleName("dialogInnerContent");
+		
         List<DetailType> currentLegDetailSelection = legDetailSelection;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
             checkbox.setValue(currentLegDetailSelection.contains(type));
             legDetailCheckboxes.put(type, checkbox);
-            legDetailsToShow.add(checkbox);
+            legDetailsContent.add(checkbox);
         }
+        
+        legDetailsToShow.add(legDetailsContent);
         return legDetailsToShow;
 	}
 
@@ -150,7 +155,6 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         selectedRacesContent.addStyleName("dialogInnerContent");
         
         selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces()));
-		
 		
         List<RaceColumnDTO> allColumns = raceAllRaceColumns;
         for (RaceColumnDTO expandableSortableColumn : allColumns) {
