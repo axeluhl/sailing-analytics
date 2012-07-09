@@ -476,6 +476,10 @@
 
 
 /* Dialogs */
+.SettingsDialogComponent {
+    padding: 0 0 15px 0;	
+}
+
 .SettingsDialogComponent .dialogInnerHeadline {
     background: url(images/settingsDialog_bg.png) repeat-x 0 0 #E5E5E5;
     border: 1px solid #CCCCCC;
@@ -488,6 +492,10 @@
     margin: 0 0 10px 0;
 }
 
-.SettingsDialogComponent {
-    padding: 0 0 15px 0;	
+.SettingsDialogComponent .dialogInnerContent {
+	padding: 0 9px 0 5px;
+}
+
+.timingSettings .dialogInnerContent {
+    padding: 0 9px 0 9px;
 }
