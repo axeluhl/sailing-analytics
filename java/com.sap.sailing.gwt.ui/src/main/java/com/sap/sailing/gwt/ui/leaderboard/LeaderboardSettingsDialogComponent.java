@@ -5,6 +5,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -35,6 +39,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final boolean autoExpandPreSelectedRace;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final long delayInMilliseconds;
+    private final Label descriptionTextLabel;
 
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
@@ -53,6 +58,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
+        this.descriptionTextLabel = new Label();
     }
     
     @Override
@@ -74,6 +80,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
 		helpPanel.add(dialog.createHeadline("Description"));
 		helpPanel.addStyleName("SettingsDialogComponent helpPanel");
+		
+		helpPanel.add(descriptionTextLabel);
 		
 		return helpPanel;
 	}
@@ -132,6 +140,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
+            setDescriptionMouseHandlers(checkbox, DetailTypeFormatter.format(type, stringConstants));
             raceDetailCheckboxes.put(type, checkbox);
             raceDetailDialogContent.add(checkbox);
         }
@@ -140,6 +149,23 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         return raceDetailDialog;
 	}
 
+	private void setDescriptionMouseHandlers(final FocusWidget widget, final String descriptiontext) {
+		widget.addMouseOverHandler(new MouseOverHandler() {
+			
+			@Override
+			public void onMouseOver(MouseOverEvent arg0) {
+				descriptionTextLabel.setText(descriptiontext);
+			}
+		});
+		widget.addMouseOutHandler(new MouseOutHandler() {
+			
+			@Override
+			public void onMouseOut(MouseOutEvent arg0) {
+				descriptionTextLabel.setText("");
+			}
+		});
+	}
+	
 	private FlowPanel createLegDetailsPanel(DataEntryDialog<?> dialog) {
 		FlowPanel legDetailsToShow = new FlowPanel();
 		
