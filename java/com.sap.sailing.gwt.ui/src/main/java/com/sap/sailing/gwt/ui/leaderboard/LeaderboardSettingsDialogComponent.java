@@ -84,13 +84,18 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 		meneuverPanel.add(dialog.createHeadline(stringConstants.maneuverTypes()));
 		meneuverPanel.addStyleName("SettingsDialogComponent meneuverSettings");
 		
+		FlowPanel meneuverContent = new FlowPanel();
+		meneuverContent.addStyleName("dialogInnerContent");
+		
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(detailType, stringConstants));
             checkbox.setValue(currentMeneuverDetailSelection.contains(detailType));
             maneuverDetailCheckboxes.put(detailType, checkbox);
-            meneuverPanel.add(checkbox);
+            meneuverContent.add(checkbox);
         }
+        
+        meneuverPanel.add(meneuverContent);
 		return meneuverPanel;
 	}
     
