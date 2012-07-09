@@ -215,8 +215,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     private transient CrossTrackErrorCache crossTrackErrorCache;
 
-    public TrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, WindStore windStore,
-            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final WindStore windStore,
+            long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
         this.updateCount = 0;
@@ -265,9 +265,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         }
         markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
         windTracks = new HashMap<WindSource, WindTrack>();
-        final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
-                trackedRegatta, this, millisecondsOverWhichToAverageWind);
-        windTracks.putAll(loadedWindTracks);
+        new Thread("Wind loader for tracked race "+getRace().getName()) {
+            @Override
+            public void run() {
+                final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
+                        trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
+                windTracks.putAll(loadedWindTracks);
+            }
+        }.start();
         // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
         // one "WEB" track for manual or REST-based wind reception; other wind tracks may be added as fixes are received
         // for them.
