@@ -236,12 +236,17 @@ public abstract class DataEntryDialog<T> {
         return headlineLabel;
     }
     
-    public FlowPanel createHeadline(String headlineText) {
+    public FlowPanel createHeadline(String headlineText, boolean regularHeadline) {
     	FlowPanel headlinePanel = new FlowPanel();
     	
         Label headlineLabel = new Label(headlineText);
         
-        headlinePanel.addStyleName("dialogInnerHeadline");
+        if (regularHeadline) {
+        	headlinePanel.addStyleName("dialogInnerHeadline");
+		} else {
+			headlinePanel.addStyleName("dialogInnerHeadlineOther");
+		}
+        
         headlinePanel.add(headlineLabel);
         return headlinePanel;
     }
