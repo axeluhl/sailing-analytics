@@ -78,6 +78,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 		FlowPanel meneuverPanel = new FlowPanel();
 		
 		meneuverPanel.add(dialog.createHeadline(stringConstants.maneuverTypes()));
+		meneuverPanel.addStyleName("meneuverSettings");
 		
         List<DetailType> currentMeneuverDetailSelection = maneuverDetailSelection;
         for (DetailType detailType : ManeuverCountRaceColumn.getAvailableManeuverDetailColumnTypes()) {
@@ -93,6 +94,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     	FlowPanel timingPanel = new FlowPanel();
 
 	    timingPanel.add(dialog.createHeadline(stringConstants.timing()));
+	    timingPanel.addStyleName("timingSettings");
+	    
 	    Label delayLabel = new Label(stringConstants.delayInSeconds());
 	    timingPanel.add(delayLabel);
 	    timingPanel.add(delayInSecondsBox);
@@ -106,6 +109,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 		FlowPanel raceDetailDialog = new FlowPanel();
 
         raceDetailDialog.add(dialog.createHeadline(stringConstants.raceDetailsToShow()));
+        raceDetailDialog.addStyleName("raceDetailSettings");
 
         List<DetailType> currentRaceDetailSelection = raceDetailSelection;
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
@@ -122,6 +126,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 		FlowPanel legDetailsToShow = new FlowPanel();
 		
 		legDetailsToShow.add(dialog.createHeadline(stringConstants.legDetailsToShow()));
+		legDetailsToShow.addStyleName("legDetailsSettings");
 		
         List<DetailType> currentLegDetailSelection = legDetailSelection;
         for (DetailType type : LegColumn.getAvailableLegDetailColumnTypes()) {
@@ -137,6 +142,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         FlowPanel selectedRacesPanel = new FlowPanel();
         
 		selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces()));
+		selectedRacesPanel.addStyleName("selectedRacesSettings");
 		
         List<RaceColumnDTO> allColumns = raceAllRaceColumns;
         for (RaceColumnDTO expandableSortableColumn : allColumns) {
