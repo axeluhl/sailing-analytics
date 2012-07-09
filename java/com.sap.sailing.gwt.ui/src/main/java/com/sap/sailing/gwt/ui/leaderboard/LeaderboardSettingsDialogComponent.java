@@ -100,12 +100,17 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 	    timingPanel.add(dialog.createHeadline(stringConstants.timing()));
 	    timingPanel.addStyleName("SettingsDialogComponent timingSettings");
 	    
+	    FlowPanel timingContent = new FlowPanel();
+	    timingContent.addStyleName("dialogInnerContent");
+	    
 	    Label delayLabel = new Label(stringConstants.delayInSeconds());
-	    timingPanel.add(delayLabel);
-	    timingPanel.add(delayInSecondsBox);
+	    timingContent.add(delayLabel);
+	    timingContent.add(delayInSecondsBox);
         Label delayBetweenAutoAdvancesLabel = new Label(stringConstants.delayBetweenAutoAdvances());
-        timingPanel.add(delayBetweenAutoAdvancesLabel);
-        timingPanel.add(delayBetweenAutoAdvancesInSecondsBox);
+        timingContent.add(delayBetweenAutoAdvancesLabel);
+        timingContent.add(delayBetweenAutoAdvancesInSecondsBox);
+        
+        timingPanel.add(timingContent);
     	return timingPanel;
     }
 
