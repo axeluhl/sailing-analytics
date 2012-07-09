@@ -241,7 +241,7 @@ public abstract class DataEntryDialog<T> {
     	
         Label headlineLabel = new Label(headlineText);
         
-        headlinePanel.addStyleName("dialogHeadline");
+        headlinePanel.addStyleName("dialogInnerHeadline");
         headlinePanel.add(headlineLabel);
         return headlinePanel;
     }
