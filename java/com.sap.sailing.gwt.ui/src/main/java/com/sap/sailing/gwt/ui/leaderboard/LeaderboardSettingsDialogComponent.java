@@ -144,17 +144,23 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 
 	private FlowPanel createSelectedRacesPanel(DataEntryDialog<?> dialog) {
         FlowPanel selectedRacesPanel = new FlowPanel();
+        selectedRacesPanel.addStyleName("SettingsDialogComponent selectedRacesSettings");
         
-		selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces()));
-		selectedRacesPanel.addStyleName("SettingsDialogComponent selectedRacesSettings");
+        FlowPanel selectedRacesContent = new FlowPanel();
+        selectedRacesContent.addStyleName("dialogInnerContent");
+        
+        selectedRacesPanel.add(dialog.createHeadline(stringConstants.selectedRaces()));
+		
 		
         List<RaceColumnDTO> allColumns = raceAllRaceColumns;
         for (RaceColumnDTO expandableSortableColumn : allColumns) {
             CheckBox checkbox = dialog.createCheckbox(expandableSortableColumn.getRaceColumnName());
             checkbox.setValue(raceColumnSelection.contains(expandableSortableColumn));
             raceColumnCheckboxes.put(expandableSortableColumn, checkbox);
-            selectedRacesPanel.add(checkbox);
+            selectedRacesContent.add(checkbox);
         }
+        
+        selectedRacesPanel.add(selectedRacesContent);
         return selectedRacesPanel;
 	}
 
