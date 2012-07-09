@@ -383,11 +383,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             if (leaderboardsByName.containsKey(newName)) {
                 throw new IllegalArgumentException("Leaderboard with name "+newName+" already exists");
             }
-            Leaderboard toRename = leaderboardsByName.remove(oldName);
+            Leaderboard toRename = leaderboardsByName.get(oldName);
             if (toRename instanceof FlexibleLeaderboard) {
                 ((FlexibleLeaderboard) toRename).setName(newName);
+                leaderboardsByName.remove(oldName);
                 leaderboardsByName.put(newName, toRename);
                 mongoObjectFactory.renameLeaderboard(oldName, newName);
+                syncGroupsAfterLeaderboardChange(toRename, true);
             } else {
                 throw new IllegalArgumentException("Leaderboard with name "+newName+" is not a FlexibleLeaderboard and therefore cannot be renamed");
             }
@@ -425,7 +427,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         synchronized (leaderboardGroupsByName) {
             for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
                 for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                    if (leaderboard.getName().equals(updatedLeaderboard.getName())) {
+                    if (leaderboard == updatedLeaderboard) {
                         int index = leaderboardGroup.getIndexOf(leaderboard);
                         leaderboardGroup.removeLeaderboard(leaderboard);
                         leaderboardGroup.addLeaderboardAt(updatedLeaderboard, index);

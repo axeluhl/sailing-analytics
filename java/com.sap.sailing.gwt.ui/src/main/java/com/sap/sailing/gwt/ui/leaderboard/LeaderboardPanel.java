@@ -1146,7 +1146,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     /**
-     * The time point for which the leaderboard currently shows results
+     * The time point for which the leaderboard currently shows results. In {@link PlayModes#Replay replay mode} this is
+     * the {@link #timer}'s time point. In {@link PlayModes#Live live mode} the {@link #timer}'s time is quantizes to the
+     * closest full second to increase the likelihood of cache hits in the back end.
      */
     protected Date getLeaderboardDisplayDate() {
         return timer.getTime();
