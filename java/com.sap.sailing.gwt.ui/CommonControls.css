@@ -377,7 +377,7 @@
 
 .gwt-DialogBox .Caption { 
     font-size: 14px;
-    padding: 11px 10px;
+    padding: 14px 10px;
     background: url(images/dialogBox-bg.png) 0 0 repeat-x;
     -webkit-border-top-left-radius: 5px;
 	-webkit-border-top-right-radius: 5px;
@@ -498,4 +498,12 @@
 
 .timingSettings .dialogInnerContent {
     padding: 0 9px 0 9px;
+}
+
+.SettingsDialogComponent .gwt-CheckBox {
+	padding: 0 10px 0 0;
+}
+
+.timingSettings .gwt-Label {
+	float: left;
 }
