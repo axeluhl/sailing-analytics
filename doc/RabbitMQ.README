@@ -1,0 +1,12 @@
+On Windows, setting up RabbitMQ requires downloading Erlang and and RabbitMQ installer.
+Although on 64bit, the 64bit Erlang wouldn't work for me, and I installed the 32bit Erlang
+and RabbitMQ versions. Those worked ok.
+
+I had to set the following global environment variables:
+
+  ERLANG_HOME=c:/Program Files/erl5.9.1/erts-5.9.1/
+  RABBITMQ_NODENAME=rabbit@localhost
+
+The RABBITMQ_NODENAME setting avoids a strange issue that otherwise happened in my case
+when Erlang is trying to lookup my hostname and can't resolve it although it's resolvable
+using, e.g., ping.
