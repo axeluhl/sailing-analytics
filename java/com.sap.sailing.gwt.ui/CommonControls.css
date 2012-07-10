@@ -508,3 +508,13 @@
 	float: left;
 	padding: 0 10px 0 0;
 }
+
+.dialogInnerHeadlineOther {
+	font-family: UbuntuMedium, Arial, Verdana, sans-serif;
+	color: #e84a1a;
+	padding-left: 9px;
+}
+
+.helpPanel {
+	margin-top: 15px;
+}
