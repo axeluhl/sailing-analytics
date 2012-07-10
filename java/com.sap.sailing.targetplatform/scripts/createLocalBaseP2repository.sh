@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
-ECLIPSE_HOME=C:/Projects/sailing/dev/eclipse_versions/v371_jee/eclipse
-SAILING_GIT_HOME=C:/Projects/sailing/dev/git
+ECLIPSE_HOME=c:/apps/eclipse371
+SAILING_GIT_HOME=c:/data/SAP/sailing/workspace
 TARGET_PLATFORM_BASE_DIR=${SAILING_GIT_HOME}/java/com.sap.sailing.targetplatform.base
 
 ECLIPSE_VM_ARGS="-Xmx256m"

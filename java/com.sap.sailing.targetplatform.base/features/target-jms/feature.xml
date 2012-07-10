@@ -13,6 +13,13 @@
    </license>
 
    <plugin
+         id="com.rabbitmq.client"
+         download-size="0"
+         install-size="0"
+         version="2.8.4"
+         unpack="false"/>
+
+   <plugin
          id="org.apache.activemq.activeio-core"
          download-size="0"
          install-size="0"
