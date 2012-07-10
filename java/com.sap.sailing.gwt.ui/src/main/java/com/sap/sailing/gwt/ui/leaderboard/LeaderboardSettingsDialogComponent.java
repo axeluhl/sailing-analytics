@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.dom.client.Style.Float;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
@@ -117,6 +119,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 	    timingContent.addStyleName("dialogInnerContent");
 	    
 	    FlowPanel delayInSecondsWrapper = new FlowPanel();
+	    delayInSecondsWrapper.getElement().getStyle().setFloat(Float.LEFT);
+	    delayInSecondsWrapper.getElement().getStyle().setPaddingRight(20, Unit.PX);
+
 	    Label delayLabel = new Label(stringConstants.delayInSeconds());
 	    delayInSecondsWrapper.add(delayLabel);
 	    delayInSecondsWrapper.add(delayInSecondsBox);
