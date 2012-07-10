@@ -366,7 +366,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
             String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor);
             String competitorColorBarStyle;
-            if(LeaderboardPanel.this.isEmbedded) {
+            if (LeaderboardPanel.this.isEmbedded) {
                 competitorColorBarStyle = "style=\"border-bottom: 2px solid "+competitorColor+";\"";
             } else {
                 competitorColorBarStyle = "style=\"border: none;\"";
