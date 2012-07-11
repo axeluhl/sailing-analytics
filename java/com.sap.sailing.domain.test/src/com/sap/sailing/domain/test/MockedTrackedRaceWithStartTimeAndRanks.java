@@ -424,4 +424,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         return null;
     }
 
+    @Override
+    public void waitUntilWindLoadingComplete() {
+        // TODO Auto-generated method stub
+        
+    }
 }

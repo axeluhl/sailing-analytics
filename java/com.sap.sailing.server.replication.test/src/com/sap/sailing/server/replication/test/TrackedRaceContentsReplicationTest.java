@@ -199,6 +199,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
             assertEquals(windTrack.getRawFixes().iterator().next(), trackedRaceWebWindTrack.getRawFixes().iterator().next());
             Thread.sleep(1000); // wait for replication to happen
             TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
+            replicaTrackedRace.waitUntilWindLoadingComplete();
             WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
                     .getWindSources(WindSourceType.WEB).iterator().next());
             replicaWindTrack.lockForRead();
