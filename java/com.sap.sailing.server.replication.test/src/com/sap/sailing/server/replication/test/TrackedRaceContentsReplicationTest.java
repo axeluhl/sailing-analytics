@@ -90,6 +90,7 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(MongoFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         MongoFactory.INSTANCE.getDefaultDomainObjectFactory()), /* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
+        trackedRace.waitUntilWindLoadingComplete();
     }
     
     @Test
@@ -199,7 +200,6 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
             assertEquals(windTrack.getRawFixes().iterator().next(), trackedRaceWebWindTrack.getRawFixes().iterator().next());
             Thread.sleep(1000); // wait for replication to happen
             TrackedRace replicaTrackedRace = replica.getTrackedRace(raceIdentifier);
-            replicaTrackedRace.waitUntilWindLoadingComplete();
             WindTrack replicaWindTrack = replicaTrackedRace.getOrCreateWindTrack(replicaTrackedRace
                     .getWindSources(WindSourceType.WEB).iterator().next());
             replicaWindTrack.lockForRead();
