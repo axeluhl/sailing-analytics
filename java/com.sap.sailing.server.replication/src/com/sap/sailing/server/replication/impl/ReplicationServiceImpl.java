@@ -173,19 +173,6 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         // start receiving messages already now, but start in suspended mode
         new Thread(replicator, "Replicator receiving from "+master.getHostname()+"/"+master.getExchangeName()).start();
         InputStream is = initialLoadURL.openStream();
-        /* TODO check if the class loading magic below is still needed after changing to ObjectInputStreamResolvingAgainstDomainFactory...
-        ObjectInputStream ois = new ObjectInputStream(is) {
-            @Override
-            protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-                try {
-                    return super.resolveClass(desc);
-                } catch (ClassNotFoundException ex) {
-                    String name = desc.getName();
-                    return getClass().getClassLoader().loadClass(name);
-                }
-            }
-        };
-        */
         final RacingEventService racingEventService = getRacingEventService();
         ObjectInputStream ois = racingEventService.getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);
         racingEventService.initiallyFillFrom(ois);
