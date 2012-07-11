@@ -705,9 +705,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<RegattaDTO> getRegattas() throws IllegalArgumentException {
         List<RegattaDTO> result = new ArrayList<RegattaDTO>();
         for (Regatta regatta : getService().getAllRegattas()) {
-//            if(Util.size(regatta.getAllRaces()) > 0) {
-                result.add(getRegattaDTO(regatta));
-//            }
+            result.add(getRegattaDTO(regatta));
         }
         return result;
     }

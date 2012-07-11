@@ -67,8 +67,8 @@ public class ReplicationPanel extends FlowPanel {
                     public void onSuccess(final Triple<Pair<String, String>, Integer, Integer> masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber) {
                         sailingService.startReplicatingFromMaster(masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
-                                /* TODO servlet port */ masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getC(),
-                                /* TODO JMS port */ masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getB(), new AsyncCallback<Void>() {
+                                masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getC(),
+                                masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getB(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable e) {
                                 errorReporter.reportError(stringMessages.errorStartingReplication(
@@ -103,7 +103,7 @@ public class ReplicationPanel extends FlowPanel {
                 if (replicatingFromMaster != null) {
                     registeredReplicas.insertRow(i);
                     registeredReplicas.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
-                            replicatingFromMaster.getJmsPort(), replicatingFromMaster.getServletPort())));
+                            replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort())));
                     i++;
                 }
                 for (ReplicaDTO replica : replicas.getReplicas()) {
@@ -159,12 +159,12 @@ public class ReplicationPanel extends FlowPanel {
             Grid grid = new Grid(4, 2);
             grid.setWidget(0, 0, new Label(stringMessages.hostname()));
             grid.setWidget(0, 1, hostnameEntryField);
-            grid.setWidget(0, 0, new Label(stringMessages.exchangeName()));
-            grid.setWidget(0, 1, exchangenameEntryField);
-            grid.setWidget(2, 0, new Label(stringMessages.jmsPortNumber()));
+            grid.setWidget(1, 0, new Label(stringMessages.exchangeName()));
+            grid.setWidget(1, 1, exchangenameEntryField);
+            grid.setWidget(2, 0, new Label(stringMessages.messagingPortNumber()));
             grid.setWidget(2, 1, messagingPortField);
             grid.setWidget(3, 0, new Label(stringMessages.servletPortNumber()));
-            grid.setWidget(4, 1, servletPortField);
+            grid.setWidget(3, 1, servletPortField);
             return grid;
         }
         

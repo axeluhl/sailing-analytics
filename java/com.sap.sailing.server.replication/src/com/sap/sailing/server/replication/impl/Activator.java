@@ -25,7 +25,7 @@ public class Activator implements BundleActivator {
         replicationInstancesManager = new ReplicationInstancesManager();
         ReplicationService serverReplicationMasterService = new ReplicationServiceImpl(exchangeName, replicationInstancesManager);
         bundleContext.registerService(ReplicationService.class, serverReplicationMasterService, null);
-        logger.info("Registered replication service "+serverReplicationMasterService);
+        logger.info("Registered replication service "+serverReplicationMasterService+" using exchange name "+exchangeName);
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
