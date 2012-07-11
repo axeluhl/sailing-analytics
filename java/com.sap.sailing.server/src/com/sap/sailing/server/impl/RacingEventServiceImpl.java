@@ -197,6 +197,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             SwissTimingFactory swissTimingFactory,
             com.sap.sailing.domain.swisstimingadapter.DomainFactory swissTimingDomainFactory,
             DomainFactory tractracDomainFactory) {
+        assert swissTimingDomainFactory.getBaseDomainFactory() == tractracDomainFactory.getBaseDomainFactory();
         logger.info("Created " + this);
         this.tractracDomainFactory = tractracDomainFactory;
         this.domainObjectFactory = domainObjectFactory;
@@ -236,6 +237,11 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 swissTimingFactory, swissTimingDomainFactory, tractracDomainFactory);
     }
 
+    @Override
+    public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
+        return getTracTracDomainFactory().getBaseDomainFactory();
+    }
+    
     private void loadRaceIDToRegattaAssociations() {
         persistentRegattasForRaceIDs.putAll(domainObjectFactory.loadRaceIDToRegattaAssociations(this));
     }
@@ -493,7 +499,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         }
     }
 
-    private DomainFactory getDomainFactory() {
+    private DomainFactory getTracTracDomainFactory() {
         return tractracDomainFactory;
     }
     
@@ -533,7 +539,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta addRegatta(URL jsonURL, URI liveURI, URI storedURI, WindStore windStore, long timeoutInMilliseconds) throws Exception {
-        JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
+        JSONService jsonService = getTracTracDomainFactory().parseJSONURL(jsonURL);
         Regatta regatta = null;
         for (RaceRecord rr : jsonService.getRaceRecords()) {
             URL paramURL = rr.getParamURL();
@@ -570,7 +576,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Pair<String, List<RaceRecord>> getTracTracRaceRecords(URL jsonURL) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
-        JSONService jsonService = getDomainFactory().parseJSONURL(jsonURL);
+        JSONService jsonService = getTracTracDomainFactory().parseJSONURL(jsonURL);
         return new Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
     }
     
@@ -602,7 +608,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public RacesHandle addTracTracRace(URL paramURL, URI liveURI, URI storedURI, WindStore windStore,
             long timeoutInMilliseconds) throws Exception {
         return addRace(
-        /* regattaToAddTo */null, getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
+        /* regattaToAddTo */null, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
         /* startOfTracking */null,
         /* endOfTracking */null, delayToLiveInMillis, /* simulateWithStartTimeNow */false, windStore), windStore,
                 timeoutInMilliseconds);
@@ -754,7 +760,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public RacesHandle addTracTracRace(RegattaIdentifier regattaToAddTo, URL paramURL, URI liveURI,
             URI storedURI, TimePoint startOfTracking, TimePoint endOfTracking,
             WindStore windStore, long timeoutInMilliseconds, boolean simulateWithStartTimeNow) throws Exception {
-        return addRace(regattaToAddTo, getDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
+        return addRace(regattaToAddTo, getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI, startOfTracking,
                         endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, windStore), windStore, timeoutInMilliseconds);
     }
 

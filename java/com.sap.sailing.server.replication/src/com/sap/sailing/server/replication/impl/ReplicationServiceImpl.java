@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -174,6 +173,7 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         // start receiving messages already now, but start in suspended mode
         new Thread(replicator, "Replicator receiving from "+master.getHostname()+"/"+master.getExchangeName()).start();
         InputStream is = initialLoadURL.openStream();
+        /* TODO check if the class loading magic below is still needed after changing to ObjectInputStreamResolvingAgainstDomainFactory...
         ObjectInputStream ois = new ObjectInputStream(is) {
             @Override
             protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
@@ -185,7 +185,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
                 }
             }
         };
-        getRacingEventService().initiallyFillFrom(ois);
+        */
+        final RacingEventService racingEventService = getRacingEventService();
+        ObjectInputStream ois = racingEventService.getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);
+        racingEventService.initiallyFillFrom(ois);
         replicator.setSuspended(false); // apply queued operations
     }
 

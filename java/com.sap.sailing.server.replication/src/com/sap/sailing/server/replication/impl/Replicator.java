@@ -1,14 +1,12 @@
 package com.sap.sailing.server.replication.impl;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
 import com.rabbitmq.client.QueueingConsumer.Delivery;
 import com.rabbitmq.client.ShutdownSignalException;
@@ -83,7 +81,10 @@ public class Replicator implements Runnable {
                         new ByteArrayInputStream(bytesFromMessage));
                 RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
                 applyOrQueue(operation);
-            } catch (ShutdownSignalException | ConsumerCancelledException | InterruptedException | IOException | ClassNotFoundException e) {
+            } catch (ShutdownSignalException sse) {
+                logger.info("Received "+sse.getMessage()+". Terminating "+this);
+                break;
+            } catch (Throwable e) {
                 logger.info("Exception while processing replica: "+e.getMessage());
                 logger.throwing(Replicator.class.getName(), "run", e);
             } finally {

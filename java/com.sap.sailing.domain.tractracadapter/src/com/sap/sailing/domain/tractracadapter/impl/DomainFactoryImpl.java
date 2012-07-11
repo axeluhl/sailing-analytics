@@ -102,6 +102,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
+    public com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
+        return baseDomainFactory;
+    }
+    
+    @Override
     public Position createPosition(
             com.tractrac.clientmodule.data.Position position) {
         return new DegreePosition(position.getLatitude(), position.getLongitude());
