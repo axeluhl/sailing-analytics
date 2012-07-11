@@ -53,7 +53,7 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         QueueingConsumer consumer = new QueueingConsumer(channel);
         String queueName = channel.queueDeclare().getQueue();
         channel.queueBind(queueName, exchangeName, "");
-        channel.basicConsume(queueName, consumer);
+        channel.basicConsume(queueName, /* auto-ack */ true, consumer);
         return consumer;
     }
 

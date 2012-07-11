@@ -56,7 +56,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      */
     private final Map<ReplicationMasterDescriptor, String> replicaUUIDs;
     
-    private final Channel channel;
+    /**
+     * Channel used by a master server to publish replication operations; <code>null</code> in servers that don't have replicas registered
+     */
+    private Channel masterChannel;
     
     /**
      * The name of the RabbitMQ exchange to which this replication service sends its replication operations in
@@ -72,7 +75,6 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         racingEventServiceTracker.open();
         localService = null;
         this.exchangeName = exchangeName;
-        channel = createChannel(exchangeName);
     }
     
     /**
@@ -86,11 +88,14 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
         this.localService = localService;
         this.exchangeName = exchangeName;
-        channel = createChannel(exchangeName);
     }
     
     private Channel createChannel(String exchangeName) throws IOException {
-        return new ConnectionFactory().newConnection().createChannel();
+        final ConnectionFactory connectionFactory = new ConnectionFactory();
+        connectionFactory.setHost("localhost"); // ...and use default port
+        Channel result = connectionFactory.newConnection().createChannel();
+        result.exchangeDeclare(exchangeName, "fanout");
+        return result;
     }
 
     @Override
@@ -105,9 +110,14 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public void registerReplica(ReplicaDescriptor replica) {
+    public void registerReplica(ReplicaDescriptor replica) throws IOException {
         if (!replicationInstancesManager.hasReplicas()) {
             addAsListenerToRacingEventService();
+            synchronized (this) {
+                if (masterChannel == null) {
+                    masterChannel = createChannel(exchangeName);
+                }
+            }
         }
         replicationInstancesManager.registerReplica(replica);
     }
@@ -121,6 +131,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         replicationInstancesManager.unregisterReplica(replica);
         if (!replicationInstancesManager.hasReplicas()) {
             removeAsListenerFromRacingEventService();
+            synchronized (this) {
+                masterChannel.close();
+                masterChannel = null;
+            }
         }
     }
 
@@ -134,8 +148,10 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         ObjectOutputStream oos = new ObjectOutputStream(bos);
         oos.writeObject(operation);
         oos.close();
-        channel.basicPublish(exchangeName, /* routingKey */ "", /* properties */ null, bos.toByteArray());
-        replicationInstancesManager.log(operation);
+        if (masterChannel != null) {
+            masterChannel.basicPublish(exchangeName, /* routingKey */"", /* properties */null, bos.toByteArray());
+            replicationInstancesManager.log(operation);
+        }
     }
 
     @Override

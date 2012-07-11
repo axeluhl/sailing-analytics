@@ -144,9 +144,9 @@ public class ReplicationPanel extends FlowPanel {
                 final AsyncCallback<Triple<Pair<String, String>, Integer, Integer>> callback) {
             super(stringMessages.add(), stringMessages.enterMaster(),
                     stringMessages.ok(), stringMessages.cancel(), validator, callback);
-            hostnameEntryField = createTextBox("");
-            exchangenameEntryField = createTextBox("");
-            messagingPortField = createIntegerBox(61616, /* visible length */ 5);
+            hostnameEntryField = createTextBox("localhost");
+            exchangenameEntryField = createTextBox("sapsailinganalytics");
+            messagingPortField = createIntegerBox(0, /* visible length */ 5);
             servletPortField = createIntegerBox(8888, /* visibleLength */ 5);
         }
         

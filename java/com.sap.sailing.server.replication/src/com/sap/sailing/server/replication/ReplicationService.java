@@ -31,7 +31,7 @@ public interface ReplicationService {
      * Registers a replica with this master instance. The <code>replica</code> will be considered in the result of
      * {@link #getReplicaInfo()} when this call has succeeded.
      */
-    void registerReplica(ReplicaDescriptor replica);
+    void registerReplica(ReplicaDescriptor replica) throws IOException;
 
     void unregisterReplica(ReplicaDescriptor replica) throws IOException;
 
