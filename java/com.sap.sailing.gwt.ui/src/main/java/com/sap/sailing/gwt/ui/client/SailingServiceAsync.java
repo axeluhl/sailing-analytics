@@ -330,7 +330,8 @@ public interface SailingServiceAsync {
 
     void getReplicaInfo(AsyncCallback<ReplicationStateDTO> callback);
 
-    void startReplicatingFromMaster(String masterName, int servletPort, int jmsPort, AsyncCallback<Void> callback);
+    void startReplicatingFromMaster(String masterName, String exchangeName, int servletPort, int messagingPort,
+            AsyncCallback<Void> callback);
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 

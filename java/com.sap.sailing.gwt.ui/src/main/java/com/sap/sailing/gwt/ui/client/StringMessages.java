@@ -291,7 +291,7 @@ public interface StringMessages extends Messages {
     String errorFetchingReplicaData(String message);
     String averageCrossTrackErrorInMeters();
     String enterMaster();
-    String errorStartingReplication(String hostname, String message);
+    String errorStartingReplication(String hostname, String exchangeName, String message);
     String helpLines();
     String startLine();
     String finishLine();
@@ -339,4 +339,5 @@ public interface StringMessages extends Messages {
     String regattaExistForSelectedBoatClass();
     String reload();
     String addRegatta();
+    String exchangeName();
 }

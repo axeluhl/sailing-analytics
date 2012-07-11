@@ -3,8 +3,6 @@ package com.sap.sailing.server.replication;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.jms.JMSException;
-
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.replication.impl.ReplicationServlet;
 
@@ -27,16 +25,15 @@ public interface ReplicationService {
      * the JMS replication topic is created, then subscribing for the master's JMS replication topic and asking the servlet
      * for the stream containing the initial load. 
      */
-    void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, JMSException;
+    void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException;
 
     /**
-     * Registers a replica with this master instance. If the replication topic hasn't been created in the
-     * JMS message broker yet, it will be when this method returns. The <code>replica</code> will be considered
-     * in the result of {@link #getReplicaInfo()} when this call has succeeded.
+     * Registers a replica with this master instance. The <code>replica</code> will be considered in the result of
+     * {@link #getReplicaInfo()} when this call has succeeded.
      */
-    void registerReplica(ReplicaDescriptor replica) throws JMSException;
+    void registerReplica(ReplicaDescriptor replica);
 
-    void unregisterReplica(ReplicaDescriptor replica) throws JMSException;
+    void unregisterReplica(ReplicaDescriptor replica) throws IOException;
 
     /**
      * For a replica replicating off this master, provides statistics in the form of number of operations sent to that

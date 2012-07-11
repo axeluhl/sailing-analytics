@@ -96,7 +96,7 @@ public class SimpleRabbitMQTest {
         @Override
         public void run() {
             try {
-                channel.basicConsume(getQueueName(), true, consumer);
+                channel.basicConsume(getQueueName(), /* auto-ack */ true, consumer);
                 QueueingConsumer.Delivery delivery = consumer.nextDelivery();
                 final String s = new String(delivery.getBody());
                 received.put(this, s);

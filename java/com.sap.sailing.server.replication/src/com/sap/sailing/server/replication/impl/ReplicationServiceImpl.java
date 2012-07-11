@@ -11,16 +11,12 @@ import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.jms.BytesMessage;
-import javax.jms.DeliveryMode;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
-
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.rabbitmq.client.AMQP.Exchange;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.QueueingConsumer;
 import com.sap.sailing.server.OperationExecutionListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -31,8 +27,8 @@ import com.sap.sailing.server.replication.ReplicationService;
 /**
  * Can observe a {@link RacingEventService} for the operations it performs that require replication. Only observes as
  * long as there are replicas registered. If the last replica is de-registered, the service stops observing the
- * {@link RacingEventService}. Operations received that require replication are broadcast to the
- * {@link #getReplicationTopic() replication topic}.
+ * {@link RacingEventService}. Operations received that require replication are sent to the {@link Exchange} to which
+ * replica queues can bind. The exchange name is provided to this service during construction.
  * <p>
  * 
  * This service object {@link RacingEventService#addOperationExecutionListener(OperationExecutionListener) registers} as
@@ -45,12 +41,6 @@ import com.sap.sailing.server.replication.ReplicationService;
  */
 public class ReplicationServiceImpl implements ReplicationService, OperationExecutionListener, HasRacingEventService {
     private final ReplicationInstancesManager replicationInstancesManager;
-    
-    private final MessageBrokerManager messageBrokerManager;
-    
-    private MessageProducer messageProducer;
-    
-    private Topic replicationTopic;
     
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     
@@ -66,29 +56,43 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
      */
     private final Map<ReplicationMasterDescriptor, String> replicaUUIDs;
     
-    public ReplicationServiceImpl(final ReplicationInstancesManager replicationInstancesManager,
-            final MessageBrokerManager messageBrokerManager) throws Exception {
+    private final Channel channel;
+    
+    /**
+     * The name of the RabbitMQ exchange to which this replication service sends its replication operations in
+     * serialized form. Clients need to know this name to be able to bind their queues to the exchange.
+     */
+    private final String exchangeName;
+    
+    public ReplicationServiceImpl(String exchangeName, final ReplicationInstancesManager replicationInstancesManager) throws IOException {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
-        this.messageBrokerManager = messageBrokerManager;
         racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(
                 Activator.getDefaultContext(), RacingEventService.class.getName(), null);
         racingEventServiceTracker.open();
         localService = null;
+        this.exchangeName = exchangeName;
+        channel = createChannel(exchangeName);
     }
     
     /**
-     * Like {@link #ReplicationServiceImpl(ReplicationInstancesManager, MessageBrokerManager)}, only that instead of using
+     * Like {@link #ReplicationServiceImpl(String, ReplicationInstancesManager)}, only that instead of using
      * an OSGi service tracker to discover the {@link RacingEventService}, the service to replicate is "injected" here.
+     * @param exchangeName the name of the exchange to which replicas can bind
      */
-    public ReplicationServiceImpl(final ReplicationInstancesManager replicationInstancesManager,
-            final MessageBrokerManager messageBrokerManager, RacingEventService localService) {
+    public ReplicationServiceImpl(String exchangeName,
+            final ReplicationInstancesManager replicationInstancesManager, RacingEventService localService) throws IOException {
         this.replicationInstancesManager = replicationInstancesManager;
         replicaUUIDs = new HashMap<ReplicationMasterDescriptor, String>();
-        this.messageBrokerManager = messageBrokerManager;
         this.localService = localService;
+        this.exchangeName = exchangeName;
+        channel = createChannel(exchangeName);
     }
     
+    private Channel createChannel(String exchangeName) throws IOException {
+        return new ConnectionFactory().newConnection().createChannel();
+    }
+
     @Override
     public RacingEventService getRacingEventService() {
         RacingEventService result;
@@ -101,13 +105,9 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public void registerReplica(ReplicaDescriptor replica) throws JMSException {
-        Topic topic = getReplicationTopic();
-        assert topic != null;
+    public void registerReplica(ReplicaDescriptor replica) {
         if (!replicationInstancesManager.hasReplicas()) {
             addAsListenerToRacingEventService();
-            messageBrokerManager.createAndStartConnection();
-            messageBrokerManager.createSession(/* transacted */ false);
         }
         replicationInstancesManager.registerReplica(replica);
     }
@@ -117,51 +117,25 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public void unregisterReplica(ReplicaDescriptor replica) throws JMSException {
+    public void unregisterReplica(ReplicaDescriptor replica) throws IOException {
         replicationInstancesManager.unregisterReplica(replica);
         if (!replicationInstancesManager.hasReplicas()) {
             removeAsListenerFromRacingEventService();
-            messageBrokerManager.closeSessions();
-            messageBrokerManager.closeConnections();
         }
     }
 
     private void removeAsListenerFromRacingEventService() {
         getRacingEventService().removeOperationExecutionListener(this);
-        messageProducer = null;
     }
 
-    private Topic getReplicationTopic() throws JMSException{
-        if (replicationTopic == null) {
-            Session session = messageBrokerManager.getSession();
-            if (session == null) {
-                session = messageBrokerManager.createSession(true);
-            }
-            replicationTopic = session.createTopic(SAILING_SERVER_REPLICATION_TOPIC);
-        }
-        return replicationTopic;
-    }
-    
     private void broadcastOperation(RacingEventServiceOperation<?> operation) throws Exception {
-        Topic topic = getReplicationTopic();
-        Session session = messageBrokerManager.getSession();
-        getMessageProducer(topic).setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-        BytesMessage operationAsMessage = session.createBytesMessage();
         // serialize operation into message
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
         oos.writeObject(operation);
         oos.close();
-        operationAsMessage.writeBytes(bos.toByteArray());
-        messageProducer.send(operationAsMessage);
+        channel.basicPublish(exchangeName, /* routingKey */ "", /* properties */ null, bos.toByteArray());
         replicationInstancesManager.log(operation);
-    }
-
-    private MessageProducer getMessageProducer(Topic topic) throws JMSException {
-        if (messageProducer == null) {
-            messageProducer = messageBrokerManager.getSession().createProducer(topic);
-        }
-        return messageProducer;
     }
 
     @Override
@@ -175,13 +149,12 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
     }
 
     @Override
-    public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException, JMSException {
+    public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException {
         replicatingFromMaster = master;
-        String uuid = registerReplicaWithMaster(master);
-        TopicSubscriber replicationSubscription = master.getTopicSubscriber(uuid);
+        registerReplicaWithMaster(master);
+        QueueingConsumer consumer = master.getConsumer();
         URL initialLoadURL = master.getInitialLoadURL();
-        final Replicator replicator = new Replicator(master, this, /* startSuspended */ true);
-        replicationSubscription.setMessageListener(replicator);
+        final Replicator replicator = new Replicator(master, this, /* startSuspended */ true, consumer);
         InputStream is = initialLoadURL.openStream();
         ObjectInputStream ois = new ObjectInputStream(is) {
             @Override

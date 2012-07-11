@@ -6,12 +6,12 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-
+import com.rabbitmq.client.ConsumerCancelledException;
+import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.QueueingConsumer.Delivery;
+import com.rabbitmq.client.ShutdownSignalException;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
@@ -30,10 +30,13 @@ import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
  * @author Axel Uhl (d043530)
  * 
  */
-public class Replicator implements MessageListener {
+public class Replicator implements Runnable {
+    private final static Logger logger = Logger.getLogger(Replicator.class.getName());
+    
     private final ReplicationMasterDescriptor master;
     private final HasRacingEventService racingEventServiceTracker;
     private final List<RacingEventServiceOperation<?>> queue;
+    private final QueueingConsumer consumer;
     
     /**
      * If the replicator is suspended, messages received are queued.
@@ -47,44 +50,50 @@ public class Replicator implements MessageListener {
      *            descriptor of the master server from which this replicator receives messages
      * @param racingEventServiceTracker
      *            OSGi service tracker for the replica to which to apply the messages received
+     * @param consumer the RabbitMQ consumer from which to load messages
      */
-    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker) {
-        this(master, racingEventServiceTracker, /* startSuspended */ false);
+    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, QueueingConsumer consumer) {
+        this(master, racingEventServiceTracker, /* startSuspended */ false, consumer);
     }
     
-    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, boolean startSuspended) {
+    public Replicator(ReplicationMasterDescriptor master, HasRacingEventService racingEventServiceTracker, boolean startSuspended, QueueingConsumer consumer) {
         this.queue = new ArrayList<RacingEventServiceOperation<?>>();
         this.master = master;
         this.racingEventServiceTracker = racingEventServiceTracker;
         this.suspended = startSuspended;
+        this.consumer = consumer;
+    }
+    
+    /**
+     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's a serialized
+     * {@link RacingEventServiceOperation}, and applies it to the {@link RacingEventService} which is obtained from the
+     * service tracker passed to this replicator at construction time.
+     */
+    @Override
+    public void run() {
+        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+        while (true) {
+            try {
+                Delivery delivery = consumer.nextDelivery();
+                byte[] bytesFromMessage = delivery.getBody();
+                // Set this object's class's class loader as context for de-serialization so that all exported classes
+                // of all required bundles/packages can be deserialized at least
+                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+                ObjectInputStream ois = DomainFactory.INSTANCE.createObjectInputStreamResolvingAgainstThisFactory(
+                        new ByteArrayInputStream(bytesFromMessage));
+                RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
+                applyOrQueue(operation);
+            } catch (ShutdownSignalException | ConsumerCancelledException | InterruptedException | IOException | ClassNotFoundException e) {
+                logger.info("Exception while processing replica: "+e.getMessage());
+                logger.throwing(Replicator.class.getName(), "run", e);
+            } finally {
+                Thread.currentThread().setContextClassLoader(oldClassLoader);
+            }
+        }
     }
     
     public synchronized boolean isQueueEmpty() {
         return queue.isEmpty();
-    }
-
-    /**
-     * Receives a single message, assuming it's a {@link RacingEventServiceOperation}, and applies it to the
-     * {@link RacingEventService} which is obtained from the service tracker passed to this replicator at construction
-     * time.
-     */
-    @Override
-    public synchronized void onMessage(Message m) {
-        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            byte[] bytesFromMessage = getBytes((BytesMessage) m);
-            // Set this object's class's class loader as context for de-serialization so that all exported classes
-            // of all required bundles/packages can be deserialized at least
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-            ObjectInputStream ois = DomainFactory.INSTANCE.createObjectInputStreamResolvingAgainstThisFactory(
-                    new ByteArrayInputStream(bytesFromMessage));
-            RacingEventServiceOperation<?> operation = (RacingEventServiceOperation<?>) ois.readObject();
-            applyOrQueue(operation);
-        } catch (IOException | ClassNotFoundException | JMSException e) {
-            throw new RuntimeException(e);
-        } finally {
-            Thread.currentThread().setContextClassLoader(oldClassLoader);
-        }
     }
 
     /**
@@ -132,12 +141,6 @@ public class Replicator implements MessageListener {
 
     public synchronized boolean isSuspended() {
         return suspended;
-    }
-
-    private byte[] getBytes(BytesMessage m) throws JMSException {
-        byte[] buf = new byte[(int) m.getBodyLength()];
-        m.readBytes(buf);
-        return buf;
     }
 
     @Override
