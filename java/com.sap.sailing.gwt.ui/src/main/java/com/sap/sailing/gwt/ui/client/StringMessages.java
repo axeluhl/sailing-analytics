@@ -339,4 +339,10 @@ public interface StringMessages extends Messages {
     String regattaExistForSelectedBoatClass();
     String reload();
     String addRegatta();
+    String course();
+    String courseLayout();
+    String buoy();
+    String gate();
+    String buoys();
+    String waypoint();
 }
