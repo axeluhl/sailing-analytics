@@ -2209,7 +2209,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         if (replicatingFromMaster == null) {
             master = null;
         } else {
-            master = new ReplicationMasterDTO(replicatingFromMaster.getHostname(), replicatingFromMaster.getJMSPort(),
+            master = new ReplicationMasterDTO(replicatingFromMaster.getHostname(), replicatingFromMaster.getMessagingPort(),
                     replicatingFromMaster.getServletPort());
         }
         return new ReplicationStateDTO(master, replicaDTOs);

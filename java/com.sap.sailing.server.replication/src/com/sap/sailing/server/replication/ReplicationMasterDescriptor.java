@@ -18,7 +18,7 @@ public interface ReplicationMasterDescriptor {
 
     URL getInitialLoadURL() throws MalformedURLException;
 
-    int getJMSPort();
+    int getMessagingPort();
     
     int getServletPort();
 
@@ -30,4 +30,6 @@ public interface ReplicationMasterDescriptor {
      * {@link QueueingConsumer#nextDelivery()} on the consumer returned in order to obtain the next message.
      */
     QueueingConsumer getConsumer() throws IOException;
+
+    String getExchangeName();
 }

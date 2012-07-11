@@ -15,12 +15,15 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     private final String hostname;
     private final String exchangeName;
     private final int servletPort;
-    private final int jmsPort;
+    private final int messagingPort;
     
-    public ReplicationMasterDescriptorImpl(String hostname, String exchangeName, int servletPort, int jmsPort) {
+    /**
+     * @param messagingPort 0 means use default port
+     */
+    public ReplicationMasterDescriptorImpl(String hostname, String exchangeName, int servletPort, int messagingPort) {
         this.hostname = hostname;
         this.servletPort = servletPort;
-        this.jmsPort = jmsPort;
+        this.messagingPort = messagingPort;
         this.exchangeName = exchangeName;
     }
 
@@ -40,6 +43,10 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     public QueueingConsumer getConsumer() throws IOException {
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost(getHostname());
+        int port = getMessagingPort();
+        if (port != 0) {
+            connectionFactory.setPort(port);
+        }
         Connection connection = connectionFactory.newConnection();
         Channel channel = connection.createChannel();
         channel.exchangeDeclare(exchangeName, "fanout");
@@ -50,9 +57,12 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
         return consumer;
     }
 
+    /**
+     * @return 0 means use default port
+     */
     @Override
-    public int getJMSPort() {
-        return jmsPort;
+    public int getMessagingPort() {
+        return messagingPort;
     }
 
     @Override
@@ -63,5 +73,10 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
     @Override
     public String getHostname() {
         return hostname;
+    }
+    
+    @Override
+    public String getExchangeName() {
+        return exchangeName;
     }
 }

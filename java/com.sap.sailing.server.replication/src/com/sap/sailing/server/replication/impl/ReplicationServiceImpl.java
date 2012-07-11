@@ -155,6 +155,8 @@ public class ReplicationServiceImpl implements ReplicationService, OperationExec
         QueueingConsumer consumer = master.getConsumer();
         URL initialLoadURL = master.getInitialLoadURL();
         final Replicator replicator = new Replicator(master, this, /* startSuspended */ true, consumer);
+        // start receiving messages already now, but start in suspended mode
+        new Thread(replicator, "Replicator receiving from "+master.getHostname()+"/"+master.getExchangeName()).run();
         InputStream is = initialLoadURL.openStream();
         ObjectInputStream ois = new ObjectInputStream(is) {
             @Override

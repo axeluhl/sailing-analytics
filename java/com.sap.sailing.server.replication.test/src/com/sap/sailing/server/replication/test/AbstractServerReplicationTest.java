@@ -78,7 +78,7 @@ public abstract class AbstractServerReplicationTest {
         masterReplicator = new ReplicationServiceImpl(exchangeName, rim, this.master);
         replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost());
         masterReplicator.registerReplica(replicaDescriptor);
-        ReplicationMasterDescriptor masterDescriptor = new ReplicationMasterDescriptorImpl(null, exchangeName, 0, 0);
+        ReplicationMasterDescriptor masterDescriptor = new ReplicationMasterDescriptorImpl("localhost", exchangeName, 0, 0);
         ReplicationServiceTestImpl replicaReplicator = new ReplicationServiceTestImpl(exchangeName, resolveAgainst, rim,
                 replicaDescriptor, this.replica, this.master, masterReplicator);
         Pair<ReplicationServiceTestImpl, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
