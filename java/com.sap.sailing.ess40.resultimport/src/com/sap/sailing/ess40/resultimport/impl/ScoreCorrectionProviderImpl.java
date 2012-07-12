@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Base64Utils;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
@@ -53,6 +54,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private Pair<TimePoint, Map<String, List<Pair<String, Integer>>>> getActResults(URL actUrl) throws IOException {
         Map<String, List<Pair<String, Integer>>> result = new HashMap<String, List<Pair<String,Integer>>>();
         HttpURLConnection conn = (HttpURLConnection) actUrl.openConnection();
+        String authStringEnc = new String(Base64Utils.toBase64("tempuser:ocspwd07".getBytes()));
+        conn.setRequestProperty("Authorization", "Basic "+authStringEnc);
         TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
         BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) conn.getContent()));
         String line = br.readLine();
