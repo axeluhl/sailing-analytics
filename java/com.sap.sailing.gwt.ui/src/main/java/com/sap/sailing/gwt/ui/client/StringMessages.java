@@ -338,4 +338,11 @@ public interface StringMessages extends Messages {
     String boatClassDoesNotMatchSelectedRegatta(String boatClass, String regattaName);
     String regattaExistForSelectedBoatClass();
     String reload();
+    String addRegatta();
+    String course();
+    String courseLayout();
+    String buoy();
+    String gate();
+    String buoys();
+    String waypoint();
 }

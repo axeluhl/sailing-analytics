@@ -142,7 +142,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
     }
 
     private void createRegattaDetails(Panel parentPanel) {
-        Button addRegattaBtn = new Button("Add regatta");
+        Button addRegattaBtn = new Button(stringMessages.addRegatta());
         parentPanel.add(addRegattaBtn);
         addRegattaBtn.addClickHandler(new ClickHandler() {
             @Override

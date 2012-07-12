@@ -264,7 +264,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     public void updateSettings(LeaderboardSettings newSettings) {
-        if (!currentlyHandlingPlayStateChange) {
+        if (!newSettings.updateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
             settingsUpdatedExplicitly = true;
         }
         List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
@@ -366,7 +366,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
             String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor);
             String competitorColorBarStyle;
-            if(LeaderboardPanel.this.isEmbedded) {
+            if (LeaderboardPanel.this.isEmbedded) {
                 competitorColorBarStyle = "style=\"border-bottom: 2px solid "+competitorColor+";\"";
             } else {
                 competitorColorBarStyle = "style=\"border: none;\"";
@@ -963,10 +963,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         this.selectedRaceColumns = new ArrayList<RaceColumnDTO>();
         this.selectedManeuverDetails = new ArrayList<DetailType>();
 
+        settingsUpdatedExplicitly = !settings.updateUponPlayStateChange();
         selectedLegDetails.addAll(settings.getLegDetailsToShow());
         selectedManeuverDetails.addAll(settings.getManeuverDetailsToShow());
         selectedRaceDetails.addAll(settings.getRaceDetailsToShow());
         setAutoExpandPreSelectedRace(settings.isAutoExpandPreSelectedRace());
+        if (settings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
+            timer.setRefreshInterval(settings.getDelayBetweenAutoAdvancesInMilliseconds());
+        }
 
         this.timer = timer;
         timer.addPlayStateListener(this);
@@ -1142,7 +1146,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     /**
-     * The time point for which the leaderboard currently shows results
+     * The time point for which the leaderboard currently shows results. In {@link PlayModes#Replay replay mode} this is
+     * the {@link #timer}'s time point. In {@link PlayModes#Live live mode} the {@link #timer}'s time is quantizes to the
+     * closest full second to increase the likelihood of cache hits in the back end.
      */
     protected Date getLeaderboardDisplayDate() {
         return timer.getTime();

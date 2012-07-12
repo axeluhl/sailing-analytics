@@ -36,7 +36,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 
 public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkScoreCorrectionDTO> {
-    private static final RegExp p = RegExp.compile("^([A-Z][A-Z][A-Z])[^0-9]*([0-9]*)$");
+    private static final RegExp p = RegExp.compile("^([A-Z][A-Z][A-Z])\\s*[^0-9]*([0-9]*)$");
     
     private static final double MEDAL_RACE_FACTOR = 2;
 
@@ -196,6 +196,10 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
         }
     }
     
+    /**
+     * Try to match three-letter country code and number, optionally separated by whitespaces. If there is no match,
+     * use the first 20 characters of the sailID.
+     */
     private String canonicalizeSailID(String sailID, String defaultNationality) {
         String result = null;
         MatchResult m = p.exec(sailID.trim());
@@ -208,6 +212,9 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 String number = m.getGroup(2);
                 result = iocCode + number;
             }
+        }
+        if (result == null) {
+            result = sailID.substring(0, Math.min(20, sailID.length()));
         }
         return result;
     }

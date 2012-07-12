@@ -344,7 +344,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             computeFromAndTo(date, competitorsToShow);
                     final int requestID = ++boatPositionRequestIDCounter;
 
-                    GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, race, date, 
+                    GetRaceMapDataAction getRaceMapDataAction = new GetRaceMapDataAction(sailingService, race, date,
                             fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, new AsyncCallback<RaceMapDataDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -403,7 +403,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     List<String> windSourceTypeNames = new ArrayList<String>();
                     windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
                     windSourceTypeNames.add(WindSourceType.COMBINED.name());
-                  GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames,
+                    GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, race, date, 1000L, 1, windSourceTypeNames,
                         new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -434,7 +434,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     }
                                     showWindSensorsOnMap(windSourcesToShow);
                                 }
-
                             });
                     
                     asyncActionsExecutor.execute(getWindInfoAction);
