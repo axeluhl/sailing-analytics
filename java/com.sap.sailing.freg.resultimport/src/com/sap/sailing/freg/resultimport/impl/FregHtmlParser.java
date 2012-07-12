@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.freg.resultimport.CompetitorRow;
 
 public class FregHtmlParser {
@@ -113,10 +115,79 @@ public class FregHtmlParser {
     }
 
     private CompetitorRow createCompetitorRow(List<String> tdContent) {
-        int totalRank = getInt(tdContent.get(0));
-        String sailID = getSailID(tdContent.get(1)).replace("&nbsp;", " ");
-        // TODO Auto-generated method stub
-        return null;
+        Integer totalRank = getInt(tdContent.get(0));
+        String sailID = getSailID(tdContent.get(1)).replace("&nbsp;", " ").trim();
+        List<String> names = getNames(tdContent.get(2));
+        Double scoreAfterDiscarding = getScore(tdContent.get(3));
+        Double totalPointsBeforeDiscarding = getScore(tdContent.get(4));
+        List<Triple<Integer, String, Pair<Double, Boolean>>> rankAndMaxPointsReasonAndPointsAndDiscarded =
+                new ArrayList<Triple<Integer, String, Pair<Double, Boolean>>>();
+        for (int i=5; i<tdContent.size()-1; i++) {
+            Triple<Integer, String, Pair<Double, Boolean>> rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace =
+                    getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(tdContent.get(i));
+            rankAndMaxPointsReasonAndPointsAndDiscarded.add(rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace);
+        }
+        return new CompetitorRowImpl(totalRank, sailID, names, scoreAfterDiscarding, totalPointsBeforeDiscarding,
+                rankAndMaxPointsReasonAndPointsAndDiscarded);
+    }
+
+    private Triple<Integer, String, Pair<Double, Boolean>> getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(
+            String cell) {
+        boolean isDiscarded;
+        String maxPointsReason;
+        String results;
+        List<String> discarded = getTagContents(cell, "strike");
+        if (discarded.isEmpty()) {
+            List<String> colorized = getTagContents(cell, "span"); // could be a background-color-styled span for 1st and 2nd rank
+            if (colorized.isEmpty()) {
+                results = cell;
+            } else {
+                results = colorized.get(0);
+            }
+            isDiscarded = false;
+        } else {
+            results = discarded.get(0);
+            isDiscarded = true;
+        }
+        String[] lines = results.split("<(br|BR)>");
+        Integer rank;
+        try {
+            rank = Integer.valueOf(lines[0]);
+            maxPointsReason = null;
+        } catch (NumberFormatException nfe) {
+            // must have been a disqualification / max-points-reason
+            rank = null;
+            maxPointsReason = lines[0];
+        }
+        Double points = Double.valueOf(getTagContents(lines[1], "i").get(0));
+        return new Triple<Integer, String, Pair<Double, Boolean>>(rank, maxPointsReason, new Pair<Double, Boolean>(points, isDiscarded));
+    }
+
+    private Double getScore(String cell) {
+        String scoreAsString;
+        List<String> boldScore = getTagContents(cell, "b");
+        if (boldScore.isEmpty()) {
+            scoreAsString = cell.trim();
+        } else {
+            scoreAsString = boldScore.get(0);
+        }
+        return Double.valueOf(scoreAsString);
+    }
+
+    private List<String> getNames(String cell) {
+        String pContents;
+        List<String> pContentsList = getTagContents(cell, "p");
+        if (pContentsList.isEmpty()) {
+            pContents = cell;
+        } else {
+            pContents = pContentsList.get(0);
+        }
+        List<String> names = getTagContents(pContents, "span");
+        List<String> result = new ArrayList<String>(names.size());
+        for (String name : names) {
+            result.add(name.replace("&nbsp;", " ").trim());
+        }
+        return result;
     }
 
     private String getSailID(String cell) {

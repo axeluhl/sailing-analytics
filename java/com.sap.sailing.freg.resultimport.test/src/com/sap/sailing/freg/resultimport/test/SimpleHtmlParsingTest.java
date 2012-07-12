@@ -58,5 +58,16 @@ public class SimpleHtmlParsingTest {
         final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("freg_html_export_sample.html");
         List<CompetitorRow> result = parser.getCompetitorRows(resourceAsStream);
         assertFalse(result.isEmpty());
+        assertEquals(75, result.size());
+        for (CompetitorRow row : result) {
+            if (row.getNames().contains("HOLZAPFEL Alexander")) {
+                assertEquals("GER 8975", row.getSailID());
+                assertEquals(60.00, row.getScoreAfterDiscarding(), 0.000000001);
+                assertEquals(74.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertEquals((int) 11, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getA());
+                assertEquals((double) 11, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getC().getA(), 0.000000001);
+                assertEquals(false, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getC().getB());
+            }
+        }
     }
 }
