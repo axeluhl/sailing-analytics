@@ -15,7 +15,7 @@ public class RaceMapSettings {
 
     private boolean showTails = true;
 
-    private boolean showAllCompetitors = true;
+    private boolean showAllCompetitors = false;
 
     private RaceMapZoomSettings zoomSettings;
 
@@ -23,7 +23,7 @@ public class RaceMapSettings {
 
     private long tailLengthInMilliseconds = 100000l;
 
-    private int maxVisibleCompetitorsCount = 100;
+    private int maxVisibleCompetitorsCount = 50;
     
     public RaceMapSettings() {
         // empty default settings; don't show maneuvers by default
