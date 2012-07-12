@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import com.sap.sailing.freg.resultimport.CompetitorEntry;
 import com.sap.sailing.freg.resultimport.CompetitorRow;
+import com.sap.sailing.freg.resultimport.RegattaResults;
 
 public class FregHtmlParser {
     private static final Logger logger = Logger.getLogger(FregHtmlParser.class.getName());
@@ -98,16 +99,26 @@ public class FregHtmlParser {
      * @param is closed before the method returns, also in case of exception
      * @throws IOException 
      */
-    public List<CompetitorRow> getCompetitorRows(InputStream is) throws IOException {
+    public RegattaResults getRegattaResults(InputStream is) throws IOException {
         try {
-            List<CompetitorRow> result = new ArrayList<CompetitorRow>();
+            final List<CompetitorRow> result = new ArrayList<CompetitorRow>();
             List<String> rowContents = getRowContents(is);
             is.close();
+            final List<String> metadata = getTagContents(rowContents.get(0), "b"); // header information like regatta name and dates are all in <B> tags
             for (int i = 2; i < rowContents.size() - 1; i++) {
                 List<String> tdContent = getTagContents(rowContents.get(i), "td");
                 result.add(createCompetitorRow(tdContent));
             }
-            return result;
+            return new RegattaResults() {
+                @Override
+                public List<String> getMetadata() {
+                    return metadata;
+                }
+                @Override
+                public List<CompetitorRow> getCompetitorResults() {
+                    return result;
+                }
+            };
         } finally {
             is.close();
         }

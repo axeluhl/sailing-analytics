@@ -57,7 +57,7 @@ public class SimpleHtmlParsingTest {
     public void testGetCompetitorRows505() throws IOException {
         FregHtmlParser parser = new FregHtmlParser();
         final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("freg_html_export_sample.html");
-        List<CompetitorRow> result = parser.getCompetitorRows(resourceAsStream);
+        List<CompetitorRow> result = parser.getRegattaResults(resourceAsStream).getCompetitorResults();
         assertFalse(result.isEmpty());
         assertEquals(75, result.size());
         for (CompetitorRow row : result) {
@@ -94,7 +94,7 @@ public class SimpleHtmlParsingTest {
     public void testGetCompetitorRows29er() throws IOException {
         FregHtmlParser parser = new FregHtmlParser();
         final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("eurocup_29er_29e.htm");
-        List<CompetitorRow> result = parser.getCompetitorRows(resourceAsStream);
+        List<CompetitorRow> result = parser.getRegattaResults(resourceAsStream).getCompetitorResults();
         assertFalse(result.isEmpty());
         assertEquals(62, result.size());
         for (CompetitorRow row : result) {
