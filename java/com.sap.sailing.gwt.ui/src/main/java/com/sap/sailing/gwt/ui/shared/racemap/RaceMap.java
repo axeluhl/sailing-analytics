@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -127,13 +128,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     /**
      * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the first fix shown
-     * in {@link #tails} is .
+     * in {@link #tails} is. If a key is contained in this map, it is also contained in {@link #lastShownFix} and vice versa.
      */
     private final Map<CompetitorDTO, Integer> firstShownFix;
 
     /**
      * Key set is equal to that of {@link #tails} and tells what the index in in {@link #fixes} of the last fix shown in
-     * {@link #tails} is .
+     * {@link #tails} is. If a key is contained in this map, it is also contained in {@link #firstShownFix} and vice versa.
      */
     private final Map<CompetitorDTO, Integer> lastShownFix;
 
@@ -276,7 +277,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
                         Set<CompetitorDTO> competitorDTOsOfUnusedMarkers = new HashSet<CompetitorDTO>(boatCanvasOverlays.keySet());
                         for (CompetitorDTO competitorDTO : getCompetitorsToShow()) {
-                                boolean usedExistingMarker = updateBoatCanvasForCompetitor(competitorDTO);
+                                boolean usedExistingMarker = updateBoatCanvasForCompetitor(competitorDTO, timer.getTime());
                                 if (usedExistingMarker) {
                                     competitorDTOsOfUnusedMarkers.remove(competitorDTO);
                                 }
@@ -372,7 +373,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                                     // Do mark specific actions
                                     showMarksOnMap(raceMapDataDTO.coursePositions);
                                     showStartAndFinishLines(raceMapDataDTO.coursePositions);
-                                    showAdvantageLine(competitorsToShow);
+                                    showAdvantageLine(competitorsToShow, date);
                                         
                                     // Rezoom the map
                                     // TODO make this a loop across the LatLngBoundsCalculators, pulling them from a collection updated in updateSettings
@@ -602,7 +603,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         updateTail(tail, competitorDTO, tailsFromTime, tailsToTime);
                         competitorDTOsOfUnusedTails.remove(competitorDTO);
                     }
-                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO);
+                    boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, date);
                     if (usedExistingBoatCanvas) {
                         competitorDTOsOfUnusedBoatCanvases.remove(competitorDTO);
                     }
@@ -652,7 +653,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return null;
     }
 
-    private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow) {
+    private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date) {
         if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null
                 && lastCombinedWindTrackInfoDTO.windFixes.size() > 0) {
             // find competitor with highest rank
@@ -661,7 +662,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     lastShownFix.containsKey(visibleLeaderInfo.getB()) && lastShownFix.get(visibleLeaderInfo.getB()) != -1
                     && visibleLeaderInfo.getA() > 0 && visibleLeaderInfo.getA() <= lastRaceTimesInfo.getLegInfos().size()) {
                 LegInfoDTO legInfoDTO = lastRaceTimesInfo.getLegInfos().get(visibleLeaderInfo.getA()-1);
-                GPSFixDTO lastBoatFix = getBoatFix(visibleLeaderInfo.getB());
+                GPSFixDTO lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
                 double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible area of the map; bug 616
                 double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().boatClass.getHullLengthInMeters()/1000.; // one hull length
                 // implement and use Position.translateRhumb()
@@ -860,16 +861,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    private boolean updateBoatCanvasForCompetitor(CompetitorDTO competitorDTO) {
+    private boolean updateBoatCanvasForCompetitor(CompetitorDTO competitorDTO, Date date) {
         boolean usedExistingCanvas = false;
-        if (lastShownFix.containsKey(competitorDTO) && lastShownFix.get(competitorDTO) != -1) {
-            GPSFixDTO lastBoatFix = getBoatFix(competitorDTO);
+        GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
+        if (lastBoatFix != null) {
             BoatCanvasOverlay boatCanvas = boatCanvasOverlays.get(competitorDTO);
             if (boatCanvas == null) {
                 boatCanvas = createBoatCanvas(competitorDTO, displayHighlighted(competitorDTO));
                 map.addOverlay(boatCanvas);
                 boatCanvasOverlays.put(competitorDTO, boatCanvas);
-                
                 boatCanvas.setSelected(displayHighlighted(competitorDTO));
                 boatCanvas.setBoatFix(lastBoatFix);
                 boatCanvas.redraw(true);
@@ -912,7 +912,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         boatCanvas.getCanvas().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO);
+                GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
                 LatLng where = LatLng.newInstance(latestFixForCompetitor.position.latDeg, latestFixForCompetitor.position.lngDeg);
                 map.getInfoWindow().open(where,
                         new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor)));
@@ -938,7 +938,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private void showCompetitorInfoWindow(final CompetitorDTO competitorDTO, LatLng where) {
-        GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO); 
+        GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime()); 
         //TODO find closed fixed where the mouse was (where) BUG 470
         map.getInfoWindow().open(where,
                 new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor)));
@@ -1005,7 +1005,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
                 from.put(competitorDTO, fixes.get(competitorDTO).get(firstShownFix.get(competitorDTO)).timepoint);
                 Map<CompetitorDTO, Date> to = new HashMap<CompetitorDTO, Date>();
-                to.put(competitorDTO, getBoatFix(competitorDTO).timepoint);
+                to.put(competitorDTO, getBoatFix(competitorDTO, timer.getTime()).timepoint);
                 sailingService.getDouglasPoints(race, from, to, 3,
                         new AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>>() {
                             @Override
@@ -1114,10 +1114,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (indexOfLast == -1) {
             indexOfLast = i - 1;
         }
-        if (indexOfFirst != -1) {
+        if (indexOfFirst != -1 && indexOfLast != -1) {
             firstShownFix.put(competitorDTO, indexOfFirst);
-        }
-        if (indexOfLast != -1) {
             lastShownFix.put(competitorDTO, indexOfLast);
         }
         PolylineOptions options = PolylineOptions.newInstance(
@@ -1292,13 +1290,45 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     /**
-     * @return The last shown GPS fix for the given competitor, or <code>null</code> if no fix is available
+     * @param date
+     *            the point in time for which to determine the competitor's boat position; approximated by using the fix
+     *            from {@link #fixes} whose time point comes closest to this date
+     * 
+     * @return The GPS fix for the given competitor from {@link #fixes} that is closest to <code>date</code>, or
+     *         <code>null</code> if no fix is available
      */
-    protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO) {
-        if(fixes.containsKey(competitorDTO) && lastShownFix.containsKey(competitorDTO)) {
-            return fixes.get(competitorDTO).get(lastShownFix.get(competitorDTO));
+    protected GPSFixDTO getBoatFix(CompetitorDTO competitorDTO, Date date) {
+        GPSFixDTO result = null;
+        List<GPSFixDTO> competitorFixes = fixes.get(competitorDTO);
+        if (competitorFixes != null && !competitorFixes.isEmpty()) {
+            int i = Collections.binarySearch(competitorFixes, new GPSFixDTO(date, null, null, null, null, null, false), new Comparator<GPSFixDTO>() {
+                @Override
+                public int compare(GPSFixDTO o1, GPSFixDTO o2) {
+                    return o1.timepoint.compareTo(o2.timepoint);
+                }
+            });
+            if (i<0) {
+                i = -i-1; // no perfect match; i is now the insertion point
+                // if the insertion point is at the end, use last fix
+                if (i >= competitorFixes.size()) {
+                    result = competitorFixes.get(competitorFixes.size()-1);
+                } else if (i == 0) {
+                    // if the insertion point is at the beginning, use first fix
+                    result = competitorFixes.get(0);
+                } else {
+                    // competitorFixes must have at least two elements, and i points neither to the end nor the beginning;
+                    // get the fix from i and i+1 whose timepoint is closer to date
+                    if (date.getTime() - competitorFixes.get(i-1).timepoint.getTime() < competitorFixes.get(i).timepoint.getTime() - date.getTime()) {
+                        result = competitorFixes.get(i-1);
+                    } else {
+                        result = competitorFixes.get(i);
+                    }
+                }
+            } else {
+                result = competitorFixes.get(i);
+            }
         }
-        return null;
+        return result;
     }
 
     /**
@@ -1545,7 +1575,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             for (CompetitorDTO competitor : competitors) {
                 try {
-                    GPSFixDTO competitorFix = forMap.getBoatFix(competitor);
+                    GPSFixDTO competitorFix = forMap.getBoatFix(competitor, forMap.timer.getTime());
                     PositionDTO competitorPosition = competitorFix != null ? competitorFix.position : null;
                     LatLng competitorLatLng = competitorPosition != null ? LatLng.newInstance(competitorPosition.latDeg,
                             competitorPosition.lngDeg) : null;
