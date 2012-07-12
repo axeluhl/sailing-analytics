@@ -1281,6 +1281,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             intoThisIndex++;
         }
+        // invariant: for one CompetitorDTO, either both of firstShownFix and lastShownFix have an entry for that key,
+        // or both don't
         if (indexOfFirstShownFix != -1) {
             firstShownFix.put(competitorDTO, indexOfFirstShownFix);
         }
