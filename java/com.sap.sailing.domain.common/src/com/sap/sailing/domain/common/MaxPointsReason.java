@@ -36,7 +36,9 @@ public enum MaxPointsReason {
     /** Did Not Compete */
     DNC(true),
     /** Retired After Finishing */
-    RAF(true);
+    RAF(true),
+    /** Discretionary Penalty Imposed by the race committee */
+    DPI(true);
     
     private final boolean discardable;
 
