@@ -13,11 +13,11 @@ import com.sap.sailing.freg.resultimport.RegattaResults;
 
 public class ScoreCorrectionForRaceImpl implements ScoreCorrectionsForRace {
     private final int raceNumberStartingWithOne;
-    private final Map<String, ScoreCorrectionForCompetitorInRace> scoreCorrectionsByTeamName;
+    private final Map<String, ScoreCorrectionForCompetitorInRace> scoreCorrectionsBySailID;
     
     public ScoreCorrectionForRaceImpl(RegattaResults regattaResult, int raceNumberStartingWithZero) {
         this.raceNumberStartingWithOne = raceNumberStartingWithZero+1;
-        this.scoreCorrectionsByTeamName = new HashMap<String, ScoreCorrectionForCompetitorInRace>();
+        this.scoreCorrectionsBySailID = new HashMap<String, ScoreCorrectionForCompetitorInRace>();
         for (CompetitorRow competitorRow : regattaResult.getCompetitorResults()) {
             String teamName = competitorRow.getTeamName();
             CompetitorEntry competitorEntry;
@@ -26,7 +26,7 @@ public class ScoreCorrectionForRaceImpl implements ScoreCorrectionsForRace {
             } else {
                 competitorEntry = null;
             }
-            scoreCorrectionsByTeamName.put(teamName,
+            scoreCorrectionsBySailID.put(competitorRow.getSailID(),
                     new ScoreCorrectionForCompetitorInRaceImpl(competitorRow.getSailID(), teamName, competitorEntry));
         }
     }
@@ -38,12 +38,12 @@ public class ScoreCorrectionForRaceImpl implements ScoreCorrectionsForRace {
 
     @Override
     public Set<String> getSailIDs() {
-        return scoreCorrectionsByTeamName.keySet();
+        return scoreCorrectionsBySailID.keySet();
     }
 
     @Override
     public ScoreCorrectionForCompetitorInRace getScoreCorrectionForCompetitor(String sailID) {
-        return scoreCorrectionsByTeamName.get(sailID);
+        return scoreCorrectionsBySailID.get(sailID);
     }
 
 }
