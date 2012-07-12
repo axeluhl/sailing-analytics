@@ -1,16 +1,20 @@
 package com.sap.sailing.freg.resultimport;
 
-import java.util.List;
 
 public interface CompetitorRow {
 
-    List<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded();
+    Iterable<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded();
 
     Double getTotalPointsBeforeDiscarding();
 
     Double getScoreAfterDiscarding();
 
-    List<String> getNames();
+    Iterable<String> getNames();
+    
+    /**
+     * Concatenates the {@link #getNames() names} with a "+"
+     */
+    String getTeamName();
 
     String getSailID();
 

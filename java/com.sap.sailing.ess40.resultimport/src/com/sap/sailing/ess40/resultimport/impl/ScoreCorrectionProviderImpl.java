@@ -90,7 +90,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
 
     @Override
     public RegattaScoreCorrections getScoreCorrections(String actName, String boatClassName,
-            TimePoint millisecondsTimePoint) throws Exception {
+            TimePoint timePoint) throws Exception {
         URL actUrl = getCsvUrls(actName).iterator().next();
         Pair<TimePoint, Map<String, List<Pair<String, Integer>>>> actResults = getActResults(actUrl);
         return new RegattaScoreCorrectionsImpl(this, actResults.getB());

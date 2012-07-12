@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.freg.resultimport.CompetitorRow;
 import com.sap.sailing.freg.resultimport.impl.FregHtmlParser;
 
@@ -61,14 +62,14 @@ public class SimpleHtmlParsingTest {
         assertFalse(result.isEmpty());
         assertEquals(75, result.size());
         for (CompetitorRow row : result) {
-            if (row.getNames().contains("HOLZAPFEL Alexander")) {
+            if (Util.contains(row.getNames(), "HOLZAPFEL Alexander")) {
                 assertEquals("GER 8975", row.getSailID());
                 assertEquals(60.00, row.getScoreAfterDiscarding(), 0.000000001);
                 assertEquals(74.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
                 assertEquals((int) 11, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getRank());
                 assertEquals((double) 11, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getScore(), 0.000000001);
                 assertEquals(false, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).isDiscarded());
-            } else if (row.getNames().contains("BART Cedric")) {
+            } else if (Util.contains(row.getNames(), "BART Cedric")) {
                 assertEquals("SUI 8543", row.getSailID());
                 assertEquals(55.00, row.getScoreAfterDiscarding(), 0.000000001);
                 assertEquals(74.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
@@ -78,7 +79,7 @@ public class SimpleHtmlParsingTest {
                 assertEquals((int) 19, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(3).getRank());
                 assertEquals((double) 19, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(3).getScore(), 0.000000001);
                 assertEquals(true, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(3).isDiscarded());
-            } else if (row.getNames().contains("LEWNS Chris")) {
+            } else if (Util.contains(row.getNames(), "LEWNS Chris")) {
                 assertEquals("GBR 9057", row.getSailID());
                 assertEquals(64.00, row.getScoreAfterDiscarding(), 0.000000001);
                 assertEquals(140.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
@@ -98,7 +99,7 @@ public class SimpleHtmlParsingTest {
         assertFalse(result.isEmpty());
         assertEquals(62, result.size());
         for (CompetitorRow row : result) {
-            if (row.getNames().contains("HOLSTE Kim (M1993)")) {
+            if (Util.contains(row.getNames(), "HOLSTE Kim (M1993)")) {
                 assertEquals("GER 1864", row.getSailID());
                 assertEquals(58.00, row.getScoreAfterDiscarding(), 0.000000001);
                 assertEquals(169.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);

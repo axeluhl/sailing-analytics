@@ -1,21 +1,19 @@
 package com.sap.sailing.freg.resultimport.impl;
 
-import java.util.List;
-
 import com.sap.sailing.freg.resultimport.CompetitorEntry;
 import com.sap.sailing.freg.resultimport.CompetitorRow;
 
 public class CompetitorRowImpl implements CompetitorRow {
     private final Integer totalRank;
     private final String sailID;
-    private final List<String> names;
+    private final Iterable<String> names;
     private final Double scoreAfterDiscarding;
     private final Double totalPointsBeforeDiscarding;
-    private final List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded;
+    private final Iterable<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded;
     private final String clubName;
     
-    public CompetitorRowImpl(Integer totalRank, String sailID, List<String> names, Double scoreAfterDiscarding,
-            Double totalPointsBeforeDiscarding, List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded, String clubName) {
+    public CompetitorRowImpl(Integer totalRank, String sailID, Iterable<String> names, Double scoreAfterDiscarding,
+            Double totalPointsBeforeDiscarding, Iterable<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded, String clubName) {
         super();
         this.totalRank = totalRank;
         this.sailID = sailID;
@@ -37,7 +35,7 @@ public class CompetitorRowImpl implements CompetitorRow {
     }
 
     @Override
-    public List<String> getNames() {
+    public Iterable<String> getNames() {
         return names;
     }
 
@@ -52,7 +50,7 @@ public class CompetitorRowImpl implements CompetitorRow {
     }
 
     @Override
-    public List<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded() {
+    public Iterable<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded() {
         return rankAndMaxPointsReasonAndPointsAndDiscarded;
     }
 
@@ -60,5 +58,19 @@ public class CompetitorRowImpl implements CompetitorRow {
     public String getClubName() {
         return clubName;
     }
-    
+
+    @Override
+    public String getTeamName() {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        for (String name : getNames()) {
+            if (first) {
+                first = false;
+            } else {
+                result.append("+");
+            }
+            result.append(name);
+        }
+        return result.toString();
+    }
 }

@@ -13,13 +13,6 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
     private final int points;
     private final MaxPointsReason maxPointsReason;
     
-    public ScoreCorrectionForCompetitorInRaceImpl(String teamName, int points, MaxPointsReason maxPointsReason) {
-        super();
-        this.teamName = teamName;
-        this.points = points;
-        this.maxPointsReason = maxPointsReason;
-    }
-
     public ScoreCorrectionForCompetitorInRaceImpl(String teamName, Pair<String, Integer> rankAndPoints) {
         this.teamName = teamName;
         if (rankAndPoints == null) {
