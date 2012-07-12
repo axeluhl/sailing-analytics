@@ -57,6 +57,8 @@
 		<module>com.sap.sailing.kiworesultimport.test</module>
 		<module>com.sap.sailing.ess40.resultimport</module>
 		<module>com.sap.sailing.ess40.resultimport.test</module>
+		<module>com.sap.sailing.freg.resultimport</module>
+		<module>com.sap.sailing.freg.resultimport.test</module>
 	</modules>
 	
 	<properties>

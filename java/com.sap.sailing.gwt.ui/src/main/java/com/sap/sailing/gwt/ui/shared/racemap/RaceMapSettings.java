@@ -12,13 +12,19 @@ public class RaceMapSettings {
     private final Set<ManeuverType> maneuverTypesToShow;
 
     private boolean showOnlySelectedCompetitors = false;
-    
+
+    private boolean showTails = true;
+
+    private boolean showAllCompetitors = false;
+
     private RaceMapZoomSettings zoomSettings;
 
     private RaceMapHelpLinesSettings helpLinesSettings;
 
     private long tailLengthInMilliseconds = 100000l;
 
+    private int maxVisibleCompetitorsCount = 50;
+    
     public RaceMapSettings() {
         // empty default settings; don't show maneuvers by default
         maneuverTypesToShow = new HashSet<ManeuverType>();
@@ -76,6 +82,30 @@ public class RaceMapSettings {
 
     public void setHelpLinesSettings(RaceMapHelpLinesSettings helpLinesSettings) {
         this.helpLinesSettings = helpLinesSettings;
+    }
+
+    public int getMaxVisibleCompetitorsCount() {
+        return maxVisibleCompetitorsCount;
+    }
+
+    public void setMaxVisibleCompetitorsCount(int maxVisibleCompetitorsCount) {
+        this.maxVisibleCompetitorsCount = maxVisibleCompetitorsCount;
+    }
+
+    public boolean isShowTails() {
+        return showTails;
+    }
+
+    public void setShowTails(boolean showTails) {
+        this.showTails = showTails;
+    }
+
+    public boolean isShowAllCompetitors() {
+        return showAllCompetitors;
+    }
+
+    public void setShowAllCompetitors(boolean showAllCompetitors) {
+        this.showAllCompetitors = showAllCompetitors;
     }
 
 }
