@@ -2,8 +2,7 @@ package com.sap.sailing.freg.resultimport.impl;
 
 import java.util.List;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.freg.resultimport.CompetitorEntry;
 import com.sap.sailing.freg.resultimport.CompetitorRow;
 
 public class CompetitorRowImpl implements CompetitorRow {
@@ -12,11 +11,10 @@ public class CompetitorRowImpl implements CompetitorRow {
     private final List<String> names;
     private final Double scoreAfterDiscarding;
     private final Double totalPointsBeforeDiscarding;
-    private final List<Triple<Integer, String, Pair<Double, Boolean>>> rankAndMaxPointsReasonAndPointsAndDiscarded;
+    private final List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded;
     
     public CompetitorRowImpl(Integer totalRank, String sailID, List<String> names, Double scoreAfterDiscarding,
-            Double totalPointsBeforeDiscarding,
-            List<Triple<Integer, String, Pair<Double, Boolean>>> rankAndMaxPointsReasonAndPointsAndDiscarded) {
+            Double totalPointsBeforeDiscarding, List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded) {
         super();
         this.totalRank = totalRank;
         this.sailID = sailID;
@@ -52,7 +50,7 @@ public class CompetitorRowImpl implements CompetitorRow {
     }
 
     @Override
-    public List<Triple<Integer, String, Pair<Double, Boolean>>> getRankAndMaxPointsReasonAndPointsAndDiscarded() {
+    public List<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded() {
         return rankAndMaxPointsReasonAndPointsAndDiscarded;
     }
     

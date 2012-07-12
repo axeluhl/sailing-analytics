@@ -64,9 +64,9 @@ public class SimpleHtmlParsingTest {
                 assertEquals("GER 8975", row.getSailID());
                 assertEquals(60.00, row.getScoreAfterDiscarding(), 0.000000001);
                 assertEquals(74.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
-                assertEquals((int) 11, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getA());
-                assertEquals((double) 11, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getC().getA(), 0.000000001);
-                assertEquals(false, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getC().getB());
+                assertEquals((int) 11, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getRank());
+                assertEquals((double) 11, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getScore(), 0.000000001);
+                assertEquals(false, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).isDiscarded());
             }
         }
     }

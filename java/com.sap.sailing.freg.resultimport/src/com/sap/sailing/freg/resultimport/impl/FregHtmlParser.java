@@ -10,8 +10,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.common.impl.Util.Triple;
+import com.sap.sailing.freg.resultimport.CompetitorEntry;
 import com.sap.sailing.freg.resultimport.CompetitorRow;
 
 public class FregHtmlParser {
@@ -120,10 +119,9 @@ public class FregHtmlParser {
         List<String> names = getNames(tdContent.get(2));
         Double scoreAfterDiscarding = getScore(tdContent.get(3));
         Double totalPointsBeforeDiscarding = getScore(tdContent.get(4));
-        List<Triple<Integer, String, Pair<Double, Boolean>>> rankAndMaxPointsReasonAndPointsAndDiscarded =
-                new ArrayList<Triple<Integer, String, Pair<Double, Boolean>>>();
+        List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded = new ArrayList<CompetitorEntry>();
         for (int i=5; i<tdContent.size()-1; i++) {
-            Triple<Integer, String, Pair<Double, Boolean>> rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace =
+            CompetitorEntry rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace =
                     getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(tdContent.get(i));
             rankAndMaxPointsReasonAndPointsAndDiscarded.add(rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace);
         }
@@ -131,7 +129,7 @@ public class FregHtmlParser {
                 rankAndMaxPointsReasonAndPointsAndDiscarded);
     }
 
-    private Triple<Integer, String, Pair<Double, Boolean>> getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(
+    private CompetitorEntry getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(
             String cell) {
         boolean isDiscarded;
         String maxPointsReason;
@@ -160,7 +158,7 @@ public class FregHtmlParser {
             maxPointsReason = lines[0];
         }
         Double points = Double.valueOf(getTagContents(lines[1], "i").get(0));
-        return new Triple<Integer, String, Pair<Double, Boolean>>(rank, maxPointsReason, new Pair<Double, Boolean>(points, isDiscarded));
+        return new CompetitorEntryImpl(rank, maxPointsReason, points, isDiscarded);
     }
 
     private Double getScore(String cell) {
