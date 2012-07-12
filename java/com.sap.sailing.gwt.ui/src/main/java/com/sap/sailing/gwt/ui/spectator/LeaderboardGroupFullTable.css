@@ -28,7 +28,7 @@
 }
 
 .cellTableEvenRow { /* tr */
-	background: none;
+	background: #dddbdb;
 }
 
 .cellTableEvenRowCell { /* td */

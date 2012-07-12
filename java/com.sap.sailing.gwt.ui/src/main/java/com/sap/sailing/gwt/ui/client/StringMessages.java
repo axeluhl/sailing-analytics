@@ -33,6 +33,7 @@ public interface StringMessages extends Messages {
     String total();
     String carry();
     String competitor();
+    String competitors();
     String defaultLeaderboard();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
@@ -139,7 +140,7 @@ public interface StringMessages extends Messages {
     String port();
     String raceStartTimeColumn();
     String showOnlySelected();
-    String tailLength();
+    String lengthInSeconds();
     String selectedRaces();
     String stressTest();
     String numberOfManeuvers();
@@ -212,7 +213,7 @@ public interface StringMessages extends Messages {
     String startDateNotAvailable();
     String startDate();
     String unknownManeuver();
-    String tailLengthMustBeNonNegative();
+    String tailLengthMustBePositive();
     String failedToLoadRaceInformation(String message);
     String competitorPassedMarkAtDate(String competitorName, String markName, String dateTime);
     String valueForCompetitorAt(String competitorName, String dateTime, String valueWithUnit);
@@ -345,4 +346,8 @@ public interface StringMessages extends Messages {
     String gate();
     String buoys();
     String waypoint();
+    String showAllCompetitors();
+    String boatTails();
+    String maximalCount();
+    String maxVisibleCompetitorsCountMustBePositive();
 }
