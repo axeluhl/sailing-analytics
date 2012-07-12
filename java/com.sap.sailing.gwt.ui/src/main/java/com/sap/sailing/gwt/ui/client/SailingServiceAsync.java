@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -39,6 +40,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
+import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 
@@ -401,4 +403,12 @@ public interface SailingServiceAsync {
             Date timePointWhenResultPublished, AsyncCallback<RegattaScoreCorrectionDTO> asyncCallback);
 
     void getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<WindInfoForRaceDTO> callback);
+
+    void getRaceCourse(RaceIdentifier raceIdentifier, Date date, AsyncCallback<RaceCourseDTO> callback);
+
+    void removeControlPointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToDelete,
+            AsyncCallback<Void> callback);
+
+    void addControlPointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition,
+            AsyncCallback<Void> callback);
 }

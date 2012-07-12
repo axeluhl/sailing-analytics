@@ -51,6 +51,11 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         regattaDisplayers.add(trackedRacesManagementPanel);
         trackedRacesManagementPanel.setSize("90%", "90%");
         tabPanel.add(trackedRacesManagementPanel, stringMessages.trackedRaces(),false);
+        RaceCourseManagementPanel raceCourseManagementPanel = new RaceCourseManagementPanel(sailingService, this, this, stringMessages);
+        regattaDisplayers.add(raceCourseManagementPanel);
+        raceCourseManagementPanel.setSize("90%", "90%");
+        tabPanel.add(raceCourseManagementPanel, stringMessages.courseLayout(),false);
+
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
         WindPanel windPanel = new WindPanel(sailingService, asyncActionsExecutor, this, this, stringMessages);
         regattaDisplayers.add(windPanel);
