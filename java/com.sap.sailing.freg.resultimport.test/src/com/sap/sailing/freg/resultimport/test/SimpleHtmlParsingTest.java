@@ -44,5 +44,9 @@ public class SimpleHtmlParsingTest {
         assertNotNull(rowContents);
         assertTrue(!rowContents.isEmpty());
         resourceAsStream.close();
+        for (int i=2; i<rowContents.size()-1; i++) {
+            List<String> tdContent = parser.getTdContents(rowContents.get(i));
+            assertEquals("Expected "+tdContent+" index "+i+" to have size 14 but was "+tdContent.size(), 14, tdContent.size());
+        }
     }
 }

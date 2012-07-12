@@ -6,10 +6,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FregHtmlParser {
+    private static final Logger logger = Logger.getLogger(FregHtmlParser.class.getName());
+    
     public List<String> getRowContents(InputStream is) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         Pattern tr = Pattern.compile("<(tr|TR)( [^>]*)?>");
@@ -51,5 +54,48 @@ public class FregHtmlParser {
             }
         }
         return tableRows;
+    }
+
+    public List<String> getTdContents(String trContents) {
+        Pattern td = Pattern.compile("<(td|TD)( [^>]*)?>");
+        Pattern slashTd = Pattern.compile("</(td|TD)( [^>]*)?>");
+        boolean inTd = false;
+        StringBuilder tdContents = new StringBuilder();
+        List<String> result = new ArrayList<String>(); // the contents of the <td> tags found
+        String readLine = trContents;
+        int start = 0;
+        int end = 0;
+        boolean finished = false;
+        while (!finished) {
+            if (!inTd) {
+                final Matcher trMatcher = td.matcher(readLine);
+                boolean foundTd = trMatcher.find(end);
+                if (foundTd) {
+                    start = trMatcher.end(0);
+                    inTd = true;
+                } else {
+                    finished = true;
+                }
+            } else { // we are within the contents of a <tr> tag here
+                final Matcher slashTdMatcher = slashTd.matcher(readLine);
+                boolean foundSlashTd = slashTdMatcher.find(start);
+                if (foundSlashTd) {
+                    end = slashTdMatcher.start();
+                    inTd = false;
+                    tdContents.append(readLine.substring(start, end));
+                    result.add(tdContents.toString());
+                    tdContents.delete(0, tdContents.length());
+                } else {
+                    end = readLine.length();
+                }
+                if (!foundSlashTd) {
+                    tdContents.append('\n'); 
+                    finished = true;
+                    logger.warning("unclosed <td> tag in table row \""+trContents+"\"");
+                    start = 0;
+                }
+            }
+        }
+        return result;
     }
 }
