@@ -1246,7 +1246,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     if (fixIter.hasNext()) {
                         final WindSource windSource = new WindSourceImpl(WindSourceType.COMBINED);
                         GPSFixMoving fix = fixIter.next();
-                        while (fix != null && fix.getTimePoint().compareTo(toTimePointExcluding) < 0) {
+                        while (fix != null && (fix.getTimePoint().compareTo(toTimePointExcluding) < 0 ||
+                                (fix.getTimePoint().equals(toTimePointExcluding) && toTimePointExcluding.equals(fromTimePoint)))) {
                             Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
                             TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
                                     fix.getTimePoint());
