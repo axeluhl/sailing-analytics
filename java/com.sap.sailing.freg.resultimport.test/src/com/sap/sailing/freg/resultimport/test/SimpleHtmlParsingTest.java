@@ -1,6 +1,7 @@
 package com.sap.sailing.freg.resultimport.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -14,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.junit.Test;
 
+import com.sap.sailing.freg.resultimport.CompetitorRow;
 import com.sap.sailing.freg.resultimport.impl.FregHtmlParser;
 
 public class SimpleHtmlParsingTest {
@@ -45,8 +47,16 @@ public class SimpleHtmlParsingTest {
         assertTrue(!rowContents.isEmpty());
         resourceAsStream.close();
         for (int i=2; i<rowContents.size()-1; i++) {
-            List<String> tdContent = parser.getTdContents(rowContents.get(i));
+            List<String> tdContent = parser.getTagContents(rowContents.get(i), "td");
             assertEquals("Expected "+tdContent+" index "+i+" to have size 14 but was "+tdContent.size(), 14, tdContent.size());
         }
+    }
+    
+    @Test
+    public void testGetCompetitorRows() throws IOException {
+        FregHtmlParser parser = new FregHtmlParser();
+        final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("freg_html_export_sample.html");
+        List<CompetitorRow> result = parser.getCompetitorRows(resourceAsStream);
+        assertFalse(result.isEmpty());
     }
 }
