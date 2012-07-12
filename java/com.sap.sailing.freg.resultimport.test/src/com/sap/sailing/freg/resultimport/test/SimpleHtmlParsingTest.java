@@ -3,6 +3,7 @@ package com.sap.sailing.freg.resultimport.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
@@ -67,6 +68,24 @@ public class SimpleHtmlParsingTest {
                 assertEquals((int) 11, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getRank());
                 assertEquals((double) 11, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getScore(), 0.000000001);
                 assertEquals(false, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).isDiscarded());
+            } else if (row.getNames().contains("BART Cedric")) {
+                assertEquals("SUI 8543", row.getSailID());
+                assertEquals(55.00, row.getScoreAfterDiscarding(), 0.000000001);
+                assertEquals(74.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertEquals((int) 2, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(2).getRank());
+                assertEquals((double) 2, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(2).getScore(), 0.000000001);
+                assertEquals(false, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(2).isDiscarded());
+                assertEquals((int) 19, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(3).getRank());
+                assertEquals((double) 19, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(3).getScore(), 0.000000001);
+                assertEquals(true, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(3).isDiscarded());
+            } else if (row.getNames().contains("LEWNS Chris")) {
+                assertEquals("GBR 9057", row.getSailID());
+                assertEquals(64.00, row.getScoreAfterDiscarding(), 0.000000001);
+                assertEquals(140.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertNull(row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).getRank());
+                assertEquals("DNF", row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).getMaxPointsReason());
+                assertEquals((double) 76, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).getScore(), 0.000000001);
+                assertEquals(true, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).isDiscarded());
             }
         }
     }
