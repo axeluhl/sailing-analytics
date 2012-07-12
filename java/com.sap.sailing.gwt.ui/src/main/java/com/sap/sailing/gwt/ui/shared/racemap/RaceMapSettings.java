@@ -31,7 +31,18 @@ public class RaceMapSettings {
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
     }
+    
+    /**
+     * @return 0 if {@link #isShowTails()} returns <code>false</code>; {@link #getTailLengthInMilliseconds()} otherwise
+     */
+    public long getEffectiveTailLengthInMilliseconds() {
+        return isShowTails() ? getTailLengthInMilliseconds() : 0;
+    }
 
+    /**
+     * The tail length as set in the dialog; feeds into {@link #getEffectiveTailLengthInMilliseconds()}, but only if
+     * {@link #isShowTails()} is <code>true</code>.
+     */
     public long getTailLengthInMilliseconds() {
         return tailLengthInMilliseconds;
     }

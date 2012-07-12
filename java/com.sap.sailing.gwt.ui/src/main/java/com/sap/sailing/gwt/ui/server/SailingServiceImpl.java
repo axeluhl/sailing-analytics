@@ -115,6 +115,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -1234,6 +1235,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         }
                     } finally {
                         track.unlockAfterRead();
+                    }
+                    if (fixes.isEmpty()) {
+                        // then there was no (smoothened) fix between fromTimePoint and toTimePointExcluding; estimate...
+                        TimePoint middle = new MillisecondsTimePoint((toTimePointExcluding.asMillis()+fromTimePoint.asMillis())/2);
+                        fixes.add(new GPSFixMovingImpl(track.getEstimatedPosition(middle, extrapolate), middle,
+                                        track.getEstimatedSpeed(middle)));
                     }
                     Iterator<GPSFixMoving> fixIter = fixes.iterator();
                     if (fixIter.hasNext()) {

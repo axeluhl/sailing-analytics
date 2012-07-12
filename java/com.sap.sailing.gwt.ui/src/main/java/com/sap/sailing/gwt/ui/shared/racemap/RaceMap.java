@@ -457,7 +457,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     protected Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> computeFromAndTo(
             Date upTo, Iterable<CompetitorDTO> competitorsToShow) {
-        Date tailstart = new Date(upTo.getTime() - settings.getTailLengthInMilliseconds());
+        Date tailstart = new Date(upTo.getTime() - settings.getEffectiveTailLengthInMilliseconds());
         Map<CompetitorDTO, Date> from = new HashMap<CompetitorDTO, Date>();
         Map<CompetitorDTO, Date> to = new HashMap<CompetitorDTO, Date>();
         Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<CompetitorDTO, Boolean>();
@@ -589,7 +589,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected void showBoatsOnMap(final Date date, final Iterable<CompetitorDTO> competitorsToShow) {
         if (map != null) {
-            Date tailsFromTime = settings.isShowTails() ? new Date(date.getTime() - settings.getTailLengthInMilliseconds()) : new Date(date.getTime());
+            Date tailsFromTime = new Date(date.getTime() - settings.getEffectiveTailLengthInMilliseconds());
             Date tailsToTime = new Date(date.getTime());
             Set<CompetitorDTO> competitorDTOsOfUnusedTails = new HashSet<CompetitorDTO>(tails.keySet());
             Set<CompetitorDTO> competitorDTOsOfUnusedBoatCanvases = new HashSet<CompetitorDTO>(boatCanvasOverlays.keySet());
@@ -1556,7 +1556,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             settings.setMaxVisibleCompetitorsCount(newSettings.getMaxVisibleCompetitorsCount());
             requiredRedraw = true;
         }
-        if(requiredRedraw) {
+        if (requiredRedraw) {
             redraw();
         }
     }
