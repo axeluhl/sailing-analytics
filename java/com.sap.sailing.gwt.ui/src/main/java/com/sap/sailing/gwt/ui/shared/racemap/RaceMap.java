@@ -588,7 +588,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected void showBoatsOnMap(final Date date, final Iterable<CompetitorDTO> competitorsToShow) {
         if (map != null) {
-            Date tailsFromTime = settings.isShowTails() ? new Date(date.getTime() - settings.getTailLengthInMilliseconds()) : new Date(date.getTime() - 1000l);
+            Date tailsFromTime = settings.isShowTails() ? new Date(date.getTime() - settings.getTailLengthInMilliseconds()) : new Date(date.getTime());
             Date tailsToTime = new Date(date.getTime());
             Set<CompetitorDTO> competitorDTOsOfUnusedTails = new HashSet<CompetitorDTO>(tails.keySet());
             Set<CompetitorDTO> competitorDTOsOfUnusedBoatCanvases = new HashSet<CompetitorDTO>(boatCanvasOverlays.keySet());
@@ -1114,8 +1114,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (indexOfLast == -1) {
             indexOfLast = i - 1;
         }
-        if (indexOfFirst != -1 && indexOfLast != -1) {
+        if (indexOfFirst != -1) {
             firstShownFix.put(competitorDTO, indexOfFirst);
+        }
+        if (indexOfLast != -1) {
             lastShownFix.put(competitorDTO, indexOfLast);
         }
         PolylineOptions options = PolylineOptions.newInstance(
