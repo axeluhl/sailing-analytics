@@ -54,7 +54,7 @@ public class SimpleHtmlParsingTest {
     }
     
     @Test
-    public void testGetCompetitorRows() throws IOException {
+    public void testGetCompetitorRows505() throws IOException {
         FregHtmlParser parser = new FregHtmlParser();
         final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("freg_html_export_sample.html");
         List<CompetitorRow> result = parser.getCompetitorRows(resourceAsStream);
@@ -86,6 +86,32 @@ public class SimpleHtmlParsingTest {
                 assertEquals("DNF", row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).getMaxPointsReason());
                 assertEquals((double) 76, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).getScore(), 0.000000001);
                 assertEquals(true, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).isDiscarded());
+            }
+        }
+    }
+
+    @Test
+    public void testGetCompetitorRows29er() throws IOException {
+        FregHtmlParser parser = new FregHtmlParser();
+        final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("eurocup_29er_29e.htm");
+        List<CompetitorRow> result = parser.getCompetitorRows(resourceAsStream);
+        assertFalse(result.isEmpty());
+        assertEquals(62, result.size());
+        for (CompetitorRow row : result) {
+            if (row.getNames().contains("HOLSTE Kim (M1993)")) {
+                assertEquals("GER 1864", row.getSailID());
+                assertEquals(58.00, row.getScoreAfterDiscarding(), 0.000000001);
+                assertEquals(169.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertEquals((int) 25, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getRank());
+                assertEquals((double) 25, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getScore(), 0.000000001);
+                assertEquals(false, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).isDiscarded());
+                assertEquals((int) 38, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(1).getRank());
+                assertEquals((double) 38, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(1).getScore(), 0.000000001);
+                assertEquals(true, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(1).isDiscarded());
+                assertNull(row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(6).getRank());
+                assertEquals("DSQ", row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(6).getMaxPointsReason());
+                assertEquals((double) 63, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(6).getScore(), 0.000000001);
+                assertEquals(true, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(6).isDiscarded());
             }
         }
     }

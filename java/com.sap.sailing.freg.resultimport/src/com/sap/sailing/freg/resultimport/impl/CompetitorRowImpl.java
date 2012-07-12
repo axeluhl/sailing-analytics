@@ -12,9 +12,10 @@ public class CompetitorRowImpl implements CompetitorRow {
     private final Double scoreAfterDiscarding;
     private final Double totalPointsBeforeDiscarding;
     private final List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded;
+    private final String clubName;
     
     public CompetitorRowImpl(Integer totalRank, String sailID, List<String> names, Double scoreAfterDiscarding,
-            Double totalPointsBeforeDiscarding, List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded) {
+            Double totalPointsBeforeDiscarding, List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded, String clubName) {
         super();
         this.totalRank = totalRank;
         this.sailID = sailID;
@@ -22,6 +23,7 @@ public class CompetitorRowImpl implements CompetitorRow {
         this.scoreAfterDiscarding = scoreAfterDiscarding;
         this.totalPointsBeforeDiscarding = totalPointsBeforeDiscarding;
         this.rankAndMaxPointsReasonAndPointsAndDiscarded = rankAndMaxPointsReasonAndPointsAndDiscarded;
+        this.clubName = clubName;
     }
 
     @Override
@@ -52,6 +54,11 @@ public class CompetitorRowImpl implements CompetitorRow {
     @Override
     public List<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded() {
         return rankAndMaxPointsReasonAndPointsAndDiscarded;
+    }
+
+    @Override
+    public String getClubName() {
+        return clubName;
     }
     
 }

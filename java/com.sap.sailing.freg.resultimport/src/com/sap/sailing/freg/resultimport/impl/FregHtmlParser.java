@@ -125,8 +125,10 @@ public class FregHtmlParser {
                     getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(tdContent.get(i));
             rankAndMaxPointsReasonAndPointsAndDiscarded.add(rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace);
         }
+        String[] clubNameAndCountry = getTagContents(tdContent.get(tdContent.size()-1), "p").get(0).split("<(br|BR)>");
+        String clubName = clubNameAndCountry[0].replace("&nbsp;", " ").trim();
         return new CompetitorRowImpl(totalRank, sailID, names, scoreAfterDiscarding, totalPointsBeforeDiscarding,
-                rankAndMaxPointsReasonAndPointsAndDiscarded);
+                rankAndMaxPointsReasonAndPointsAndDiscarded, clubName);
     }
 
     private CompetitorEntry getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(

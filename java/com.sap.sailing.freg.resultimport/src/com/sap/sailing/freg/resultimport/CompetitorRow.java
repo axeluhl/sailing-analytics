@@ -15,5 +15,7 @@ public interface CompetitorRow {
     String getSailID();
 
     Integer getTotalRank();
+    
+    String getClubName();
 
 }
