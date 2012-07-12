@@ -37,6 +37,7 @@
       <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.kiworesultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.server" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.server.replication" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.www" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xcelsiusadapter" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
