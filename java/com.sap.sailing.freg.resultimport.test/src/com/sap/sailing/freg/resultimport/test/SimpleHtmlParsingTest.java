@@ -66,27 +66,27 @@ public class SimpleHtmlParsingTest {
                 assertEquals("GER 8975", row.getSailID());
                 assertEquals(60.00, row.getScoreAfterDiscarding(), 0.000000001);
                 assertEquals(74.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
-                assertEquals((int) 11, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getRank());
-                assertEquals((double) 11, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getScore(), 0.000000001);
-                assertEquals(false, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).isDiscarded());
+                assertEquals((int) 11, (int) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getRank());
+                assertEquals((double) 11, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getScore(), 0.000000001);
+                assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).isDiscarded());
             } else if (Util.contains(row.getNames(), "BART Cedric")) {
                 assertEquals("SUI 8543", row.getSailID());
                 assertEquals(55.00, row.getScoreAfterDiscarding(), 0.000000001);
                 assertEquals(74.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
-                assertEquals((int) 2, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(2).getRank());
-                assertEquals((double) 2, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(2).getScore(), 0.000000001);
-                assertEquals(false, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(2).isDiscarded());
-                assertEquals((int) 19, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(3).getRank());
-                assertEquals((double) 19, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(3).getScore(), 0.000000001);
-                assertEquals(true, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(3).isDiscarded());
+                assertEquals((int) 2, (int) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 2).getRank());
+                assertEquals((double) 2, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 2).getScore(), 0.000000001);
+                assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 2).isDiscarded());
+                assertEquals((int) 19, (int) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 3).getRank());
+                assertEquals((double) 19, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 3).getScore(), 0.000000001);
+                assertEquals(true, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 3).isDiscarded());
             } else if (Util.contains(row.getNames(), "LEWNS Chris")) {
                 assertEquals("GBR 9057", row.getSailID());
                 assertEquals(64.00, row.getScoreAfterDiscarding(), 0.000000001);
                 assertEquals(140.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
-                assertNull(row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).getRank());
-                assertEquals("DNF", row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).getMaxPointsReason());
-                assertEquals((double) 76, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).getScore(), 0.000000001);
-                assertEquals(true, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(7).isDiscarded());
+                assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 7).getRank());
+                assertEquals("DNF", Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 7).getMaxPointsReason());
+                assertEquals((double) 76, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 7).getScore(), 0.000000001);
+                assertEquals(true, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 7).isDiscarded());
             }
         }
     }
@@ -103,16 +103,16 @@ public class SimpleHtmlParsingTest {
                 assertEquals("GER 1864", row.getSailID());
                 assertEquals(58.00, row.getScoreAfterDiscarding(), 0.000000001);
                 assertEquals(169.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
-                assertEquals((int) 25, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getRank());
-                assertEquals((double) 25, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).getScore(), 0.000000001);
-                assertEquals(false, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(0).isDiscarded());
-                assertEquals((int) 38, (int) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(1).getRank());
-                assertEquals((double) 38, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(1).getScore(), 0.000000001);
-                assertEquals(true, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(1).isDiscarded());
-                assertNull(row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(6).getRank());
-                assertEquals("DSQ", row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(6).getMaxPointsReason());
-                assertEquals((double) 63, (double) row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(6).getScore(), 0.000000001);
-                assertEquals(true, row.getRankAndMaxPointsReasonAndPointsAndDiscarded().get(6).isDiscarded());
+                assertEquals((int) 25, (int) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getRank());
+                assertEquals((double) 25, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getScore(), 0.000000001);
+                assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).isDiscarded());
+                assertEquals((int) 38, (int) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 1).getRank());
+                assertEquals((double) 38, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 1).getScore(), 0.000000001);
+                assertEquals(true, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 1).isDiscarded());
+                assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 6).getRank());
+                assertEquals("DSQ", Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 6).getMaxPointsReason());
+                assertEquals((double) 63, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 6).getScore(), 0.000000001);
+                assertEquals(true, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 6).isDiscarded());
             }
         }
     }
