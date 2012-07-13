@@ -23,11 +23,11 @@ public interface DomainFactory {
     
     /**
      * The waypoint created is weakly cached so that when requested again by
-     * {@link #getExistingWaypointById(Serializable)} it is found.
+     * {@link #getExistingWaypointById(Waypoint)} it is found.
      */
     Waypoint createWaypoint(ControlPoint controlPoint);
     
-    Waypoint getExistingWaypointById(Serializable id);
+    Waypoint getExistingWaypointById(Waypoint waypointPrototype);
 
     /**
      * Caches an existing waypoint. This is useful, e.g., after de-serialization of a waypoint that has a yet unknown ID.

@@ -45,7 +45,7 @@ public class WaypointImpl implements Waypoint {
     public Waypoint resolve(DomainFactory domainFactory) {
         Waypoint result;
         synchronized (domainFactory) {
-            result = domainFactory.getExistingWaypointById(getId());
+            result = domainFactory.getExistingWaypointById(this);
             if (result == null) {
                 domainFactory.cacheWaypoint(this);
                 result = this;

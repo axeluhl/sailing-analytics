@@ -20,6 +20,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.InfoWindowContent;
+import com.google.gwt.maps.client.MapType;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.Maps;
 import com.google.gwt.maps.client.control.ControlAnchor;
@@ -265,6 +266,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 // Add the map to the HTML host page
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
+                map.setCurrentMapType(MapType.getSatelliteMap());
                 RaceMap.this.add(map, 0, 0);
                 RaceMap.this.add(combinedWindPanel, 10, 10);
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);

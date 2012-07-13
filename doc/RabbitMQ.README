@@ -1,3 +1,5 @@
+See http://www.rabbitmq.com/download.html
+
 On Windows, setting up RabbitMQ requires downloading Erlang and and RabbitMQ installer.
 Although on 64bit, the 64bit Erlang wouldn't work for me, and I installed the 32bit Erlang
 and RabbitMQ versions. Those worked ok.
