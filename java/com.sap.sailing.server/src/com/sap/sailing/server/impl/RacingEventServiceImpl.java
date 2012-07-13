@@ -550,7 +550,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta getOrCreateRegatta(String baseEventName, String boatClassName) {
-        Regatta regatta = new RegattaImpl(baseEventName, com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(
+        Regatta regatta = new RegattaImpl(baseEventName, getBaseDomainFactory().getOrCreateBoatClass(
                 boatClassName), this);
         Regatta result = regattasByName.get(regatta.getName());
         if (result == null) {
@@ -565,7 +565,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public Regatta createRegatta(String baseEventName, String boatClassName,
             Iterable<? extends Series> series, boolean persistent) {
         Regatta regatta = new RegattaImpl(baseEventName,
-                com.sap.sailing.domain.base.DomainFactory.INSTANCE.getOrCreateBoatClass(boatClassName), series, persistent);
+                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent);
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on "+this);
         cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
         if (persistent) {

@@ -1270,8 +1270,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                     WindDTO windDTO2 = createWindDTOFromAlreadyAveraged(wind2, trackedRace.getOrCreateWindTrack(windSource), toTimePointExcluding);
                                     GPSFixDTO extrapolated = new GPSFixDTO(
                                             to.get(competitorDTO),
-                                            new PositionDTO(position.getLatDeg(), position.getLngDeg()),
-                                            createSpeedWithBearingDTO(speedWithBearing), windDTO2,
+                                            position==null?null:new PositionDTO(position.getLatDeg(), position.getLngDeg()),
+                                            speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO2,
                                             tack2, legType2, /* extrapolated */ true);
                                     fixesForCompetitor.add(extrapolated);
                                 }
