@@ -63,6 +63,7 @@ public interface StringMessages extends Messages {
     String renameRace();
     String openSelectedLeaderboard();
     String rank();
+    String totalRank();
     String collapse();
     String expand();
     String leg();

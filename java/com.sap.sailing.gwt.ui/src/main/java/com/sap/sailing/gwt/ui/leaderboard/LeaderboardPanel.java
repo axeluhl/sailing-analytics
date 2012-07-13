@@ -927,7 +927,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public Header<String> getHeader() {
-            return new TextHeader(stringMessages.rank());
+            return new TextHeader(stringMessages.totalRank());
         }
     }
 

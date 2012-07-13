@@ -1236,8 +1236,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     if (fixes.isEmpty()) {
                         // then there was no (smoothened) fix between fromTimePoint and toTimePointExcluding; estimate...
                         TimePoint middle = new MillisecondsTimePoint((toTimePointExcluding.asMillis()+fromTimePoint.asMillis())/2);
-                        fixes.add(new GPSFixMovingImpl(track.getEstimatedPosition(middle, extrapolate), middle,
-                                        track.getEstimatedSpeed(middle)));
+                        Position estimatedPosition = track.getEstimatedPosition(middle, extrapolate);
+                        SpeedWithBearing estimatedSpeed = track.getEstimatedSpeed(middle);
+                        if(estimatedPosition != null && estimatedSpeed != null) {
+                            fixes.add(new GPSFixMovingImpl(estimatedPosition, middle, estimatedSpeed));
+                        }
                     }
                     Iterator<GPSFixMoving> fixIter = fixes.iterator();
                     if (fixIter.hasNext()) {
