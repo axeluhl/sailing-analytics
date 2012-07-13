@@ -10,13 +10,13 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
     private static final Logger logger = Logger.getLogger(ScoreCorrectionForCompetitorInRaceImpl.class.getName());
     
     private final String teamName;
-    private final int points;
+    private final Double points;
     private final MaxPointsReason maxPointsReason;
     
-    public ScoreCorrectionForCompetitorInRaceImpl(String teamName, Pair<String, Integer> rankAndPoints) {
+    public ScoreCorrectionForCompetitorInRaceImpl(String teamName, Pair<String, Double> rankAndPoints) {
         this.teamName = teamName;
         if (rankAndPoints == null) {
-            points = 0;
+            points = 0.0;
             maxPointsReason = null;
         } else {
             MaxPointsReason mpe;
@@ -50,7 +50,7 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
 
     @Override
     public Double getPoints() {
-        return (double) points;
+        return points;
     }
 
     @Override

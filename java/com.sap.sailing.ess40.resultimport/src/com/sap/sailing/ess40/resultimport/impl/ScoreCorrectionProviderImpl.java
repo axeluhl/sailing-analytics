@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Base64Utils;
@@ -24,8 +26,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     private static final long serialVersionUID = -4870646572106575667L;
     
-    private static final String[] ACT_NAMES = { "muscat", "qingdao", "istanbul", "porto" /*, "cardiff" */};
-
     private static final String EXTREME_40_CLASS_NAME = "extreme 40";
 
     @Override
@@ -51,39 +51,71 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
      *         scored in that race. Usually, if the first component is a number, the score can be expected to be
      *         <code>#competitors+1 - rank</code>. A disqualification gets 0 points.
      */
-    private Pair<TimePoint, Map<String, List<Pair<String, Integer>>>> getActResults(URL actUrl) throws IOException {
-        Map<String, List<Pair<String, Integer>>> result = new HashMap<String, List<Pair<String,Integer>>>();
+    private Pair<TimePoint, Map<String, List<Pair<String, Double>>>> getActResults(URL actUrl) throws IOException {
+        Pattern quotedCompetitorNameAndAllTheRest = Pattern.compile("^\"([^\"]*)\",(.*)$");
+        Map<String, List<Pair<String, Double>>> result = new HashMap<String, List<Pair<String, Double>>>();
         HttpURLConnection conn = (HttpURLConnection) actUrl.openConnection();
-        String authStringEnc = new String(Base64Utils.toBase64("tempuser:ocspwd07".getBytes()));
-        conn.setRequestProperty("Authorization", "Basic "+authStringEnc);
+        authenticate(conn);
         TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
         BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) conn.getContent()));
         String line = br.readLine();
         while (line != null) {
-            String[] split = line.split(",");
-            String sailID = split[0].trim();
-            if (sailID.startsWith("\"") && sailID.endsWith("\"")) {
-                sailID = sailID.substring(1, sailID.length()-1);
+            String[] split;
+            String sailID;
+            Matcher quotedCompetitorNameAndAllTheRestMatcher = quotedCompetitorNameAndAllTheRest.matcher(line);
+            if (quotedCompetitorNameAndAllTheRestMatcher.matches()) {
+                sailID = quotedCompetitorNameAndAllTheRestMatcher.group(1);
+                split = quotedCompetitorNameAndAllTheRestMatcher.group(2).split(",");
+            } else {
+                String[] preSplit = line.split(",");
+                sailID = preSplit[0].trim();
+                if (sailID.startsWith("\"") && sailID.endsWith("\"")) {
+                    sailID = sailID.substring(1, sailID.length()-1);
+                }
+                split = new String[preSplit.length-1];
+                System.arraycopy(preSplit, 1, split, 0, split.length);
             }
-            List<Pair<String, Integer>> competitorEntry = new ArrayList<Pair<String, Integer>>();
+            List<Pair<String, Double>> competitorEntry = new ArrayList<Pair<String, Double>>();
             result.put(sailID, competitorEntry);
-            for (int i=1; i<split.length-1; i+=2) {
+            for (int i=0; i<split.length-1; i+=2) {
                 String rankOrMaxPointsReason = split[i];
-                Integer points = Integer.valueOf(split[i+1]);
-                competitorEntry.add(new Pair<String, Integer>(rankOrMaxPointsReason, points));
+                Double points = Double.valueOf(split[i+1]);
+                competitorEntry.add(new Pair<String, Double>(rankOrMaxPointsReason, points));
             }
             line = br.readLine();
         }
-        return new Pair<TimePoint, Map<String, List<Pair<String, Integer>>>>(lastModified, result);
+        return new Pair<TimePoint, Map<String, List<Pair<String, Double>>>>(lastModified, result);
+    }
+
+    private void authenticate(HttpURLConnection conn) {
+        String authStringEnc = new String(Base64Utils.toBase64("tempuser:ocspwd07".getBytes()));
+        conn.setRequestProperty("Authorization", "Basic "+authStringEnc);
     }
 
     @Override
     public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
         Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String, TimePoint>>>();
-        for (String actName : ACT_NAMES) {
+        for (String actName : getAvailableActNames()) {
             URL actUrl = getCsvUrls(actName).iterator().next();
-            Pair<TimePoint, Map<String, List<Pair<String, Integer>>>> actResults = getActResults(actUrl);
+            Pair<TimePoint, Map<String, List<Pair<String, Double>>>> actResults = getActResults(actUrl);
             result.put(actName, Collections.singleton(new Pair<String, TimePoint>(EXTREME_40_CLASS_NAME, actResults.getA())));
+        }
+        return result;
+    }
+
+    private Iterable<String> getAvailableActNames() throws IOException {
+        List<String> result = new ArrayList<String>();
+        URL url = new URL("http://www.extremesailingseries.com/app/results/csv_uploads/");
+        Pattern p = Pattern.compile("<a href=\"([^\"]*)\\.csv\">");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        authenticate(conn);
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        String readLine;
+        while ((readLine = br.readLine()) != null) {
+            Matcher m = p.matcher(readLine);
+            if (m.find()) {
+                result.add(m.group(1));
+            }
         }
         return result;
     }
@@ -92,7 +124,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
     public RegattaScoreCorrections getScoreCorrections(String actName, String boatClassName,
             TimePoint timePoint) throws Exception {
         URL actUrl = getCsvUrls(actName).iterator().next();
-        Pair<TimePoint, Map<String, List<Pair<String, Integer>>>> actResults = getActResults(actUrl);
+        Pair<TimePoint, Map<String, List<Pair<String, Double>>>> actResults = getActResults(actUrl);
         return new RegattaScoreCorrectionsImpl(this, actResults.getB());
     }
 
