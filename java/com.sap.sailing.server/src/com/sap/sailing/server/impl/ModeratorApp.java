@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -122,8 +123,11 @@ public class ModeratorApp extends SailingServerHttpServlet {
                             jsonFix.put("knotspeed", fix.getSpeed().getKnots());
                             String tackName;
                             try {
-                                tackName = trackedRace.getTack(competitor, fix.getTimePoint()).name();
-                                jsonFix.put("tack", tackName);
+                                final Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                                if (tack != null) {
+                                    tackName = tack.name();
+                                    jsonFix.put("tack", tackName);
+                                }
                             } catch (NoWindException e) {
                                 // don't output tack
                             }

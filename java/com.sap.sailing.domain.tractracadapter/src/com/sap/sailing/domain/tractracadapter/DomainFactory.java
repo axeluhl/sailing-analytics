@@ -51,6 +51,8 @@ import difflib.PatchFailedException;
 
 public interface DomainFactory {
     static DomainFactory INSTANCE = new DomainFactoryImpl(com.sap.sailing.domain.base.DomainFactory.INSTANCE);
+    
+    com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
     com.sap.sailing.domain.common.Position createPosition(Position position);
 

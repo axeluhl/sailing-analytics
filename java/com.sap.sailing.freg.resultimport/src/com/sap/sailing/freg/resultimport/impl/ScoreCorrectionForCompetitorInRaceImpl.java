@@ -4,54 +4,48 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.freg.resultimport.CompetitorEntry;
 
 public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionForCompetitorInRace {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionForCompetitorInRaceImpl.class.getName());
     
     private final String teamName;
+    private final String sailID;
     private final int points;
     private final MaxPointsReason maxPointsReason;
+    private final boolean discarded;
     
-    public ScoreCorrectionForCompetitorInRaceImpl(String teamName, int points, MaxPointsReason maxPointsReason) {
-        super();
+    public ScoreCorrectionForCompetitorInRaceImpl(String sailID, String teamName, CompetitorEntry competitorEntry) {
+        this.sailID = sailID;
         this.teamName = teamName;
-        this.points = points;
-        this.maxPointsReason = maxPointsReason;
-    }
-
-    public ScoreCorrectionForCompetitorInRaceImpl(String teamName, Pair<String, Integer> rankAndPoints) {
-        this.teamName = teamName;
-        if (rankAndPoints == null) {
+        if (competitorEntry == null) {
             points = 0;
             maxPointsReason = null;
+            discarded = false;
         } else {
-            MaxPointsReason mpe;
-            try {
-                Integer.valueOf(rankAndPoints.getA().trim());
-                mpe = null;
-            } catch (NumberFormatException nfe) {
+            this.discarded = competitorEntry.isDiscarded();
+            points = (int) (double) competitorEntry.getScore();
+            MaxPointsReason mpe = null;
+            if (competitorEntry.getMaxPointsReason() != null && competitorEntry.getMaxPointsReason().length() > 0) {
                 // no int; try parsing a MaxPointsReason
                 try {
-                    mpe = MaxPointsReason.valueOf(rankAndPoints.getA().trim());
+                    mpe = MaxPointsReason.valueOf(competitorEntry.getMaxPointsReason());
                 } catch (IllegalArgumentException iae) {
-                    logger.info("Don't understand rank "+rankAndPoints.getA());
+                    logger.info("Don't understand rank "+competitorEntry.getMaxPointsReason());
                     mpe = null;
                 }
             }
             maxPointsReason = mpe;
-            points = rankAndPoints.getB();
         }
     }
 
     @Override
     public String getSailID() {
-        return teamName;
+        return sailID;
     }
 
     @Override
     public String getCompetitorName() {
-        // TODO map team name to skipper name
         return teamName;
     }
 
@@ -70,7 +64,7 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
      */
     @Override
     public Boolean isDiscarded() {
-        return false;
+        return discarded;
     }
 
 }

@@ -92,12 +92,12 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         
         courseActionsPanel = new HorizontalPanel();
         courseActionsPanel.setSpacing(10);
-        Button insertLegBtn = new Button("Insert Leg");
-        insertLegBtn.addClickHandler(new ClickHandler() {
+        Button insertRoundBtn = new Button("Insert round (2 waypoints)");
+        insertRoundBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if(wayPointSelectionModel.getSelectedSet().size() != 2) {
-                    Window.alert("To insert (copy) a leg you have to select two waypoints.");
+                    Window.alert("To insert (copy) a round you have to select two waypoints.");
                     return;
                 } else {
                     Map<Integer, String> controlPointsToInsert = new TreeMap<Integer, String>();
@@ -119,14 +119,14 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 }
             }
         });
-        courseActionsPanel.add(insertLegBtn);
+        courseActionsPanel.add(insertRoundBtn);
         
-        Button removeLegBtn = new Button("Remove Leg");
-        removeLegBtn.addClickHandler(new ClickHandler() {
+        Button removeRoundBtn = new Button("Remove Round (2 waypoints)");
+        removeRoundBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if(wayPointSelectionModel.getSelectedSet().size() != 2) {
-                    Window.alert("To delete a leg you have to select two waypoints.");
+                    Window.alert("To delete a round you have to select two waypoints.");
                     return;
                 } else {
                     Map<Integer, WaypointDTO> controlPointsToDelete = new TreeMap<Integer, WaypointDTO>();
@@ -147,7 +147,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 }
             }
         });
-        courseActionsPanel.add(removeLegBtn);
+        courseActionsPanel.add(removeRoundBtn);
         
         Button refreshBtn = new Button(stringMessages.refresh());
         refreshBtn.addClickHandler(new ClickHandler() {

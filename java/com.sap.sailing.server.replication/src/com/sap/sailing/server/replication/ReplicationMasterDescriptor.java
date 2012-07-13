@@ -1,11 +1,10 @@
 package com.sap.sailing.server.replication;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 
-import javax.jms.JMSException;
-import javax.jms.TopicSubscriber;
+import com.rabbitmq.client.QueueingConsumer;
 
 /**
  * Identifies a master server instance from which a replica can obtain an initial load and continuous updates.
@@ -19,11 +18,18 @@ public interface ReplicationMasterDescriptor {
 
     URL getInitialLoadURL() throws MalformedURLException;
 
-    TopicSubscriber getTopicSubscriber(String clientID) throws JMSException, UnknownHostException;
-    
-    int getJMSPort();
+    int getMessagingPort();
     
     int getServletPort();
 
     String getHostname();
+
+    /**
+     * Creates a queue, declares the master's fanout exchange on the calling client and binds the queue to the exchange.
+     * Then, adds a consumer to the queue just created and starts consuming. The caller may keep calling
+     * {@link QueueingConsumer#nextDelivery()} on the consumer returned in order to obtain the next message.
+     */
+    QueueingConsumer getConsumer() throws IOException;
+
+    String getExchangeName();
 }

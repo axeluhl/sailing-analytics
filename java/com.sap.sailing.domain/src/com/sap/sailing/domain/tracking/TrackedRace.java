@@ -415,4 +415,12 @@ public interface TrackedRace extends Serializable {
     List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
 
     Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses) throws NoWindException;
+
+    /**
+     * When provided with a {@link WindStore} during construction, the tracked race will asynchronously load the wind
+     * data for this tracked race from the wind store in a background thread and update this tracked race with the results.
+     * Clients that want to wait for the wind loading process to complete can do so by calling this method which will block
+     * until the wind loading has completed.
+     */
+    void waitUntilWindLoadingComplete() throws InterruptedException;
 }

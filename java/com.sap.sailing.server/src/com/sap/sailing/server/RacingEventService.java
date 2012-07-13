@@ -433,4 +433,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Event addEvent(String eventName, String venue, List<String> regattaNames);
 
+    com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
+
 }

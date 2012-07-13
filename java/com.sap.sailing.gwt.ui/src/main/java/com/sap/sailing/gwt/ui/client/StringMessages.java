@@ -33,6 +33,7 @@ public interface StringMessages extends Messages {
     String total();
     String carry();
     String competitor();
+    String competitors();
     String defaultLeaderboard();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
@@ -62,6 +63,7 @@ public interface StringMessages extends Messages {
     String renameRace();
     String openSelectedLeaderboard();
     String rank();
+    String totalRank();
     String collapse();
     String expand();
     String leg();
@@ -139,7 +141,7 @@ public interface StringMessages extends Messages {
     String port();
     String raceStartTimeColumn();
     String showOnlySelected();
-    String tailLength();
+    String lengthInSeconds();
     String selectedRaces();
     String stressTest();
     String numberOfManeuvers();
@@ -212,7 +214,7 @@ public interface StringMessages extends Messages {
     String startDateNotAvailable();
     String startDate();
     String unknownManeuver();
-    String tailLengthMustBeNonNegative();
+    String tailLengthMustBePositive();
     String failedToLoadRaceInformation(String message);
     String competitorPassedMarkAtDate(String competitorName, String markName, String dateTime);
     String valueForCompetitorAt(String competitorName, String dateTime, String valueWithUnit);
@@ -291,13 +293,13 @@ public interface StringMessages extends Messages {
     String errorFetchingReplicaData(String message);
     String averageCrossTrackErrorInMeters();
     String enterMaster();
-    String errorStartingReplication(String hostname, String message);
+    String errorStartingReplication(String hostname, String exchangeName, String message);
     String helpLines();
     String startLine();
     String finishLine();
     String advantageLine();
     String courseMiddleLine();
-    String jmsPortNumber();
+    String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
     String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
@@ -339,10 +341,15 @@ public interface StringMessages extends Messages {
     String regattaExistForSelectedBoatClass();
     String reload();
     String addRegatta();
+    String exchangeName();
     String course();
     String courseLayout();
     String buoy();
     String gate();
     String buoys();
     String waypoint();
+    String showAllCompetitors();
+    String boatTails();
+    String maximalCount();
+    String maxVisibleCompetitorsCountMustBePositive();
 }

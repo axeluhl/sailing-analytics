@@ -93,15 +93,15 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public synchronized void cacheWaypoint(Waypoint waypoint) {
-        if (getExistingWaypointById(waypoint.getId()) != null) {
+        if (getExistingWaypointById(waypoint) != null) {
             throw new IllegalArgumentException("Trying to cache an already cached waypoint: "+waypoint);
         }
         waypointCache.put(waypoint.getId(), waypoint);
     }
 
     @Override
-    public Waypoint getExistingWaypointById(Serializable id) {
-        return waypointCache.get(id);
+    public Waypoint getExistingWaypointById(Waypoint waypointPrototype) {
+        return waypointCache.get(waypointPrototype.getId());
     }
 
     @Override
