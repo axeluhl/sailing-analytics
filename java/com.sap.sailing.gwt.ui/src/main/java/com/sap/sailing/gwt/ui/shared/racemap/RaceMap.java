@@ -267,7 +267,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 map.setScrollWheelZoomEnabled(true);
                 map.setContinuousZoom(true);
                 map.setCurrentMapType(MapType.getSatelliteMap());
-                RaceMap.this.add(map, 0, 0);
                 RaceMap.this.add(combinedWindPanel, 10, 10);
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
                 map.setSize("100%", "100%");
