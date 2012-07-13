@@ -1452,12 +1452,19 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * <p>
      * 
      * For the unlikely case of 0 degrees difference, {@link Tack#STARBOARD} will result.
+     * 
+     * @return <code>null</code> in case the boat's bearing cannot be determined for <code>timePoint</code>
      * @throws NoWindException 
      */
     @Override
     public Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        return getTack(getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */false), timePoint,
-                getTrack(competitor).getEstimatedSpeed(timePoint).getBearing());
+        final SpeedWithBearing estimatedSpeed = getTrack(competitor).getEstimatedSpeed(timePoint);
+        Tack result = null;
+        if (estimatedSpeed != null) {
+            result = getTack(getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */false), timePoint,
+                estimatedSpeed.getBearing());
+        }
+        return result;
     }
 
     /**

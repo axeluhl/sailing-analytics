@@ -43,10 +43,13 @@ public class WaypointImpl implements Waypoint {
 
     @Override
     public Waypoint resolve(DomainFactory domainFactory) {
-        Waypoint result = domainFactory.getExistingWaypointById(getId());
-        if (result == null) {
-            domainFactory.cacheWaypoint(this);
-            result = this;
+        Waypoint result;
+        synchronized (domainFactory) {
+            result = domainFactory.getExistingWaypointById(getId());
+            if (result == null) {
+                domainFactory.cacheWaypoint(this);
+                result = this;
+            }
         }
         return result;
     }

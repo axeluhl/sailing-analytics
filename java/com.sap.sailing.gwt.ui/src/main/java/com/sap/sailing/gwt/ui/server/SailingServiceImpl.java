@@ -1291,9 +1291,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     private GPSFixDTO createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated) {
-        return new GPSFixDTO(fix.getTimePoint().asDate(), new PositionDTO(fix
+        return new GPSFixDTO(fix.getTimePoint().asDate(), fix.getPosition()==null?null:new PositionDTO(fix
                 .getPosition().getLatDeg(), fix.getPosition().getLngDeg()),
-                createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated);
+                speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated);
     }
 
     @Override
