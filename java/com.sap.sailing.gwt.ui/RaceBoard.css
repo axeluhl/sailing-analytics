@@ -229,7 +229,7 @@ img.openColumn {
 	background-repeat: no-repeat, repeat-x;
 	width: 27px;
 	height: 23px;	
-    margin: 0 5px 0 1px;
+    margin: 0 12px 0 1px;
 	-webkit-border-radius: 0px 3px 3px 0px;
 	border-radius: 0px 3px 3px 0px; 
 }
@@ -251,9 +251,24 @@ img.openColumn {
     font-size: 14px;
     margin: 0 0 0 0;
     padding: 2px 7px 2px 3px;
-    height: 19px;   
+    height: 18px; 
+    display: inline-block;
+    text-decoration: none;
+    -moz-border-radius: 5px 0 0 5px;
+    -webkit-border-radius: 5px 0 0 5px;
+    border-radius: 5px 0 0 5px;
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
 .raceBoardNavigation-innerElement:hover {
     background: url("images/btn-cta-orangeleft.png") repeat-x scroll center -30px transparent;
     cursor: pointer;
+}
+
+.timePanelButton {
+	float: left;
+	padding: 3px 10px 4px;
 }
