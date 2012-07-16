@@ -400,19 +400,31 @@
 	border-bottom-left-radius: 5px;
 }
 	
-.gwt-Button {
+.gwt-Button, .gwt-Button:visited {
 	background: url(images/btn-cta-orangeleft.png) center 0 repeat-x;
-	color: #fff;
 	font-family: UbuntuBold, Verdana, Arial, sans-serif;
-	font-size: 14px;
 	border: none;
-	padding: 5px 3px;
 	margin: 0 0 0 5px;
-	cursor: pointer;
-	-webkit-border-radius: 3px;
-	-moz-border-radius: 3px;
-	border-radius: 3px;	
+/*     background: #222 url(images/alert-overlay.png) repeat-x; */
+    display: inline-block;
+    padding: 5px 10px 6px;
+    color: #fff;
+    text-decoration: none;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    position: relative;
+    cursor: pointer;
 }	
+
+.gwt-Button:active {
+    top: 1px;
+}
 
 .gwt-Button:hover {
     background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
@@ -424,6 +436,11 @@
   color: #888;
   background: #F1F1F1;
   border: 1px solid #919090;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border: none;
+  text-shadow: none;
 }
 
 .gwt-Button[disabled]:hover {
@@ -432,6 +449,18 @@
   background: #F1F1F1;
   border: 1px solid #919090;
 }
+
+.gwt-Button[disabled]:active {
+  cursor: default;
+  color: #888;
+  background: #F1F1F1;
+  border: 1px solid #919090;
+  top: 0;
+}
+
+.gwt-ButtonLarge
+.gwt-ButtonMedium
+.gwt-ButtonSmall
 
 .gwt-DialogBox .boxPanel {
 	padding: 0 0 10px 0;
