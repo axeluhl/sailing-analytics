@@ -69,7 +69,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     private final Image playModeImage;
     protected Date lastReceivedDataTimepoint;
     private final Button slowDownButton;
-    private final Button speedUpButton;
+	private final Button speedUpButton;
 
     /**
      * The live delay may be adjusted automatically if the server decides so. However, if the user explicitly sets a live delay,
@@ -271,10 +271,9 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
        
         playSpeedBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         playSpeedBox.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        speedUpButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        speedUpButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        slowDownButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        slowDownButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
+
+        speedUpButton.addStyleName("timePanelButton");
+        slowDownButton.addStyleName("timePanelButton");
 
         // time delay
         FlowPanel timeDelayPanel = new FlowPanel();
