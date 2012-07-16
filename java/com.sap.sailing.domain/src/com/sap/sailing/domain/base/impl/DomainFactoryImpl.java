@@ -4,12 +4,14 @@ import java.awt.TrayIcon.MessageType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
@@ -39,7 +41,12 @@ public class DomainFactoryImpl implements DomainFactory {
     
     private final Map<Serializable, Competitor> competitorCache;
     
-    private final WeakHashMap<Serializable, Waypoint> waypointCache;
+    /**
+     * Weakly references the waypoints. If a waypoint is no longer strongly referenced, the corresponding reference contained
+     * as value will have its referred object be <code>null</code>. In this case, the methods reading from this cache will purge
+     * the record and behave as if the record hadn't existed at the time of the read operation.
+     */
+    private final ConcurrentHashMap<Serializable, WeakReference<Waypoint>> waypointCache;
 
     private final Set<String> mayStartWithNoUpwindLeg;
     
@@ -48,7 +55,7 @@ public class DomainFactoryImpl implements DomainFactory {
         buoyCache = new HashMap<String, Buoy>();
         boatClassCache = new HashMap<String, BoatClass>();
         competitorCache = new HashMap<Serializable, Competitor>();
-        waypointCache = new WeakHashMap<Serializable, Waypoint>();
+        waypointCache = new ConcurrentHashMap<Serializable, WeakReference<Waypoint>>();
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
     }
     
@@ -85,23 +92,49 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public synchronized Waypoint createWaypoint(ControlPoint controlPoint) {
-        Waypoint result = new WaypointImpl(controlPoint);
-        waypointCache.put(result.getId(), result);
-        return result;
-    }
-
-    @Override
-    public synchronized void cacheWaypoint(Waypoint waypoint) {
-        if (getExistingWaypointById(waypoint) != null) {
-            throw new IllegalArgumentException("Trying to cache an already cached waypoint: "+waypoint);
+    public Waypoint createWaypoint(ControlPoint controlPoint) {
+        synchronized (waypointCache) {
+            Waypoint result = new WaypointImpl(controlPoint);
+            waypointCache.put(result.getId(), new WeakReference<Waypoint>(result));
+            return result;
         }
-        waypointCache.put(waypoint.getId(), waypoint);
     }
 
     @Override
     public Waypoint getExistingWaypointById(Waypoint waypointPrototype) {
-        return waypointCache.get(waypointPrototype.getId());
+        synchronized (waypointCache) {
+            Waypoint result = null;
+            Reference<Waypoint> ref = waypointCache.get(waypointPrototype.getId());
+            if (ref != null) {
+                result = ref.get();
+                if (result == null) {
+                    // waypoint was finalized; remove entry from cache
+                    waypointCache.remove(waypointPrototype.getId());
+                }
+            }
+            return result;
+        }
+    }
+
+    @Override
+    public Waypoint getExistingWaypointByIdOrCache(Waypoint waypoint) {
+        synchronized (waypointCache) {
+            Waypoint result = null;
+            Reference<Waypoint> ref = waypointCache.get(waypoint.getId());
+            if (ref != null) {
+                result = ref.get();
+                if (result == null) {
+                    // waypoint was finalized; remove entry from cache and add anew
+                    result = waypoint;
+                    waypointCache.put(waypoint.getId(), new WeakReference<Waypoint>(waypoint));
+                } // else, result is the waypoint found in the cache; return it
+            } else {
+                // No entry found in the cache; not even a stale, finalized one. Create a new entry:
+                result = waypoint;
+                waypointCache.put(waypoint.getId(), new WeakReference<Waypoint>(waypoint));
+            }
+            return result;
+        }
     }
 
     @Override
