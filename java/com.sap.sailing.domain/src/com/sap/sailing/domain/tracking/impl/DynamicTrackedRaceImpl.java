@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -394,7 +395,12 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                     }
                 }
                 synchronized (markPassingsForCompetitor) {
-                    markPassingsForCompetitor.add(markPassing);
+                    if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
+                        logger.severe("Received mark passing "+markPassing+" for race "+getRace()+
+                                " but the waypoint does not exist in course "+getRace().getCourse());
+                    } else {
+                        markPassingsForCompetitor.add(markPassing);
+                    }
                 }
                 Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing.getWaypoint());
                 synchronized (markPassingsInOrderForWaypoint) {
