@@ -384,10 +384,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
     }
 
     public boolean isMinMaxInitialized() {
-        if (minValue == null || maxValue == null)
-            return false;
-
-        return true;
+        return minValue != null && maxValue != null;
     }
 
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Double> handler) {
@@ -848,16 +845,15 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * Draw the knob where it is supposed to be relative to the line.
      */
     protected void drawKnob() {
-        if (!isAttached() || !isMinMaxInitialized())
-            return;
-
-        // Move the knob to the correct position
-        Element knobElement = knobImage.getElement();
-        int lineWidth = lineElement.getOffsetWidth();
-        int knobWidth = knobElement.getOffsetWidth();
-        int knobLeftOffset = (int) (lineLeftOffset + (getKnobPercent() * lineWidth) - (knobWidth / 2));
-        knobLeftOffset = Math.min(knobLeftOffset, lineLeftOffset + lineWidth - (knobWidth / 2) - 1);
-        DOM.setStyleAttribute(knobElement, "left", knobLeftOffset + "px");
+        if (isAttached() && isMinMaxInitialized()) {
+            // Move the knob to the correct position
+            Element knobElement = knobImage.getElement();
+            int lineWidth = lineElement.getOffsetWidth();
+            int knobWidth = knobElement.getOffsetWidth();
+            int knobLeftOffset = (int) (lineLeftOffset + (getKnobPercent() * lineWidth) - (knobWidth / 2));
+            knobLeftOffset = Math.min(knobLeftOffset, lineLeftOffset + lineWidth - (knobWidth / 2) - 1);
+            DOM.setStyleAttribute(knobElement, "left", knobLeftOffset + "px");
+        }
     }
 
     /**
