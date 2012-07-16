@@ -860,59 +860,58 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * Draw the labels along the line.
      */
     protected void drawTickLabels() {
-        if (!isAttached() || !isMinMaxInitialized())
-            return;
-
-        // Draw the tick labels
-        int lineWidth = lineElement.getOffsetWidth();
-        if (numTickLabels > 0) {
-            // Create the labels or make them visible
-            Double previousValue = null;
-            for (int i = 0; i <= numTickLabels; i++) {
-                Element label = null;
-                if (i < tickLabelElements.size()) {
-                    label = tickLabelElements.get(i);
-                } else { // Create the new label
-                    label = DOM.createDiv();
-                    DOM.setStyleAttribute(label, "position", "absolute");
-                    DOM.setStyleAttribute(label, "display", "none");
-                    if (enabled) {
-                        DOM.setElementProperty(label, "className", "gwt-SliderBar-ticklabel");
-                    } else {
-                        DOM.setElementProperty(label, "className", "gwt-SliderBar-ticklabel-disabled");
+        if (isAttached() && isMinMaxInitialized()) {
+            // Draw the tick labels
+            int lineWidth = lineElement.getOffsetWidth();
+            if (numTickLabels > 0) {
+                // Create the labels or make them visible
+                Double previousValue = null;
+                for (int i = 0; i <= numTickLabels; i++) {
+                    Element label = null;
+                    if (i < tickLabelElements.size()) {
+                        label = tickLabelElements.get(i);
+                    } else { // Create the new label
+                        label = DOM.createDiv();
+                        DOM.setStyleAttribute(label, "position", "absolute");
+                        DOM.setStyleAttribute(label, "display", "none");
+                        if (enabled) {
+                            DOM.setElementProperty(label, "className", "gwt-SliderBar-ticklabel");
+                        } else {
+                            DOM.setElementProperty(label, "className", "gwt-SliderBar-ticklabel-disabled");
+                        }
+                        DOM.appendChild(getElement(), label);
+                        tickLabelElements.add(label);
                     }
-                    DOM.appendChild(getElement(), label);
-                    tickLabelElements.add(label);
+
+                    // Set the label text
+                    double value = minValue + (getTotalRange() * i / numTickLabels);
+                    DOM.setStyleAttribute(label, "visibility", "hidden");
+                    DOM.setStyleAttribute(label, "display", "");
+                    DOM.setElementProperty(label, "innerHTML", formatTickLabel(value, previousValue));
+
+                    // Move to the left so the label width is not clipped by the
+                    // shell
+                    DOM.setStyleAttribute(label, "left", "0px");
+
+                    // Position the label and make it visible
+                    int labelWidth = label.getOffsetWidth();
+                    int labelLeftOffset = lineLeftOffset + (lineWidth * i / numTickLabels) - (labelWidth / 2);
+                    labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
+                    labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
+                    DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
+                    DOM.setStyleAttribute(label, "visibility", "visible");
+
+                    previousValue = value;
                 }
 
-                // Set the label text
-                double value = minValue + (getTotalRange() * i / numTickLabels);
-                DOM.setStyleAttribute(label, "visibility", "hidden");
-                DOM.setStyleAttribute(label, "display", "");
-                DOM.setElementProperty(label, "innerHTML", formatTickLabel(value, previousValue));
-
-                // Move to the left so the label width is not clipped by the
-                // shell
-                DOM.setStyleAttribute(label, "left", "0px");
-
-                // Position the label and make it visible
-                int labelWidth = label.getOffsetWidth();
-                int labelLeftOffset = lineLeftOffset + (lineWidth * i / numTickLabels) - (labelWidth / 2);
-                labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
-                labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
-                DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
-                DOM.setStyleAttribute(label, "visibility", "visible");
-                
-                previousValue = value;
-            }
-
-            // Hide unused labels
-            for (int i = (numTickLabels + 1); i < tickLabelElements.size(); i++) {
-                DOM.setStyleAttribute(tickLabelElements.get(i), "display", "none");
-            }
-        } else { // Hide all labels
-            for (Element elem : tickLabelElements) {
-                DOM.setStyleAttribute(elem, "display", "none");
+                // Hide unused labels
+                for (int i = (numTickLabels + 1); i < tickLabelElements.size(); i++) {
+                    DOM.setStyleAttribute(tickLabelElements.get(i), "display", "none");
+                }
+            } else { // Hide all labels
+                for (Element elem : tickLabelElements) {
+                    DOM.setStyleAttribute(elem, "display", "none");
+                }
             }
         }
     }
@@ -921,46 +920,45 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * Draw the tick along the line.
      */
     protected void drawTicks() {
-        if (!isAttached() || !isMinMaxInitialized())
-            return;
-
-        // Draw the ticks
-        int lineWidth = lineElement.getOffsetWidth();
-        if (numTicks > 0) {
-            // Create the ticks or make them visible
-            for (int i = 0; i <= numTicks; i++) {
-                Element tick = null;
-                if (i < tickElements.size()) {
-                    tick = tickElements.get(i);
-                } else { // Create the new tick
-                    tick = DOM.createDiv();
-                    DOM.setStyleAttribute(tick, "position", "absolute");
-                    DOM.setStyleAttribute(tick, "display", "none");
-                    DOM.appendChild(getElement(), tick);
-                    tickElements.add(tick);
+        if (isAttached() && isMinMaxInitialized()) {
+            // Draw the ticks
+            int lineWidth = lineElement.getOffsetWidth();
+            if (numTicks > 0) {
+                // Create the ticks or make them visible
+                for (int i = 0; i <= numTicks; i++) {
+                    Element tick = null;
+                    if (i < tickElements.size()) {
+                        tick = tickElements.get(i);
+                    } else { // Create the new tick
+                        tick = DOM.createDiv();
+                        DOM.setStyleAttribute(tick, "position", "absolute");
+                        DOM.setStyleAttribute(tick, "display", "none");
+                        DOM.appendChild(getElement(), tick);
+                        tickElements.add(tick);
+                    }
+                    if (enabled) {
+                        DOM.setElementProperty(tick, "className", "gwt-SliderBar-tick");
+                    } else {
+                        DOM.setElementProperty(tick, "className", "gwt-SliderBar-tick gwt-SliderBar-tick-disabled");
+                    }
+                    // Position the tick and make it visible
+                    DOM.setStyleAttribute(tick, "visibility", "hidden");
+                    DOM.setStyleAttribute(tick, "display", "");
+                    int tickWidth = tick.getOffsetWidth();
+                    int tickLeftOffset = lineLeftOffset + (lineWidth * i / numTicks) - (tickWidth / 2);
+                    tickLeftOffset = Math.min(tickLeftOffset, lineLeftOffset + lineWidth - tickWidth);
+                    DOM.setStyleAttribute(tick, "left", tickLeftOffset + "px");
+                    DOM.setStyleAttribute(tick, "visibility", "visible");
                 }
-                if (enabled) {
-                    DOM.setElementProperty(tick, "className", "gwt-SliderBar-tick");
-                } else {
-                    DOM.setElementProperty(tick, "className", "gwt-SliderBar-tick gwt-SliderBar-tick-disabled");
-                }
-                // Position the tick and make it visible
-                DOM.setStyleAttribute(tick, "visibility", "hidden");
-                DOM.setStyleAttribute(tick, "display", "");
-                int tickWidth = tick.getOffsetWidth();
-                int tickLeftOffset = lineLeftOffset + (lineWidth * i / numTicks) - (tickWidth / 2);
-                tickLeftOffset = Math.min(tickLeftOffset, lineLeftOffset + lineWidth - tickWidth);
-                DOM.setStyleAttribute(tick, "left", tickLeftOffset + "px");
-                DOM.setStyleAttribute(tick, "visibility", "visible");
-            }
 
-            // Hide unused ticks
-            for (int i = (numTicks + 1); i < tickElements.size(); i++) {
-                DOM.setStyleAttribute(tickElements.get(i), "display", "none");
-            }
-        } else { // Hide all ticks
-            for (Element elem : tickElements) {
-                DOM.setStyleAttribute(elem, "display", "none");
+                // Hide unused ticks
+                for (int i = (numTicks + 1); i < tickElements.size(); i++) {
+                    DOM.setStyleAttribute(tickElements.get(i), "display", "none");
+                }
+            } else { // Hide all ticks
+                for (Element elem : tickElements) {
+                    DOM.setStyleAttribute(elem, "display", "none");
+                }
             }
         }
     }
@@ -1020,58 +1018,57 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * Draw the marker labels.
      */
     private void drawMarkerLabels() {
-        if (!isAttached() || !isMinMaxInitialized())
-            return;
-
-        int numMarkers = markers.size();
-        // Draw the marker labels
-        int lineWidth = lineElement.getOffsetWidth();
-        if (numMarkers > 0) {
-            // Create the labels or make them visible
-            for (int i = 0; i < numMarkers; i++) {
-                Marker marker = markers.get(i);
-                Element label = null;
-                if (i < markerLabelElements.size()) {
-                    label = markerLabelElements.get(i);
-                } else { // Create the new label
-                    label = DOM.createDiv();
-                    DOM.setStyleAttribute(label, "position", "absolute");
-                    DOM.setStyleAttribute(label, "display", "none");
-                    if (enabled) {
-                        DOM.setElementProperty(label, "className", "gwt-SliderBar-markerlabel");
-                    } else {
-                        DOM.setElementProperty(label, "className", "gwt-SliderBar-markerlabel-disabled");
+        if (isAttached() && isMinMaxInitialized()) {
+            int numMarkers = markers.size();
+            // Draw the marker labels
+            int lineWidth = lineElement.getOffsetWidth();
+            if (numMarkers > 0) {
+                // Create the labels or make them visible
+                for (int i = 0; i < numMarkers; i++) {
+                    Marker marker = markers.get(i);
+                    Element label = null;
+                    if (i < markerLabelElements.size()) {
+                        label = markerLabelElements.get(i);
+                    } else { // Create the new label
+                        label = DOM.createDiv();
+                        DOM.setStyleAttribute(label, "position", "absolute");
+                        DOM.setStyleAttribute(label, "display", "none");
+                        if (enabled) {
+                            DOM.setElementProperty(label, "className", "gwt-SliderBar-markerlabel");
+                        } else {
+                            DOM.setElementProperty(label, "className", "gwt-SliderBar-markerlabel-disabled");
+                        }
+                        DOM.appendChild(getElement(), label);
+                        markerLabelElements.add(label);
                     }
-                    DOM.appendChild(getElement(), label);
-                    markerLabelElements.add(label);
+
+                    // Set the marker label text
+                    DOM.setStyleAttribute(label, "visibility", "hidden");
+                    DOM.setStyleAttribute(label, "display", "");
+                    DOM.setElementProperty(label, "innerHTML", marker.name);
+
+                    // Move to the left so the label width is not clipped by the
+                    // shell
+                    DOM.setStyleAttribute(label, "left", "0px");
+
+                    // Position the label and make it visible
+                    double markerLinePosition = (marker.position - minValue) * lineWidth / getTotalRange();
+                    int labelWidth = label.getOffsetWidth();
+                    int labelLeftOffset = lineLeftOffset + (int) markerLinePosition - (labelWidth / 2);
+                    labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
+
+                    DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
+                    DOM.setStyleAttribute(label, "visibility", "visible");
                 }
 
-                // Set the marker label text
-                DOM.setStyleAttribute(label, "visibility", "hidden");
-                DOM.setStyleAttribute(label, "display", "");
-                DOM.setElementProperty(label, "innerHTML", marker.name);
-
-                // Move to the left so the label width is not clipped by the
-                // shell
-                DOM.setStyleAttribute(label, "left", "0px");
-
-                // Position the label and make it visible
-                double markerLinePosition = (marker.position - minValue) * lineWidth / getTotalRange();
-                int labelWidth = label.getOffsetWidth();
-                int labelLeftOffset = lineLeftOffset + (int) markerLinePosition - (labelWidth / 2);
-                labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
-
-                DOM.setStyleAttribute(label, "left", labelLeftOffset + "px");
-                DOM.setStyleAttribute(label, "visibility", "visible");
-            }
-
-            // Hide unused labels
-            for (int i = (numMarkers + 1); i < markerLabelElements.size(); i++) {
-                DOM.setStyleAttribute(markerLabelElements.get(i), "display", "none");
-            }
-        } else { // Hide all labels
-            for (Element elem : markerLabelElements) {
-                DOM.setStyleAttribute(elem, "display", "none");
+                // Hide unused labels
+                for (int i = (numMarkers + 1); i < markerLabelElements.size(); i++) {
+                    DOM.setStyleAttribute(markerLabelElements.get(i), "display", "none");
+                }
+            } else { // Hide all labels
+                for (Element elem : markerLabelElements) {
+                    DOM.setStyleAttribute(elem, "display", "none");
+                }
             }
         }
     }
