@@ -30,6 +30,40 @@ public class SimpleHtmlParsingTest {
     }
     
     @Test
+    public void testEmptyAndDashedScores() throws IOException {
+        final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("pre_world_505_s.htm");
+        FregHtmlParser parser = new FregHtmlParser();
+        List<CompetitorRow> result = parser.getRegattaResults(resourceAsStream).getCompetitorResults();
+        assertFalse(result.isEmpty());
+        assertEquals(117, result.size());
+        for (CompetitorRow row : result) {
+            if (Util.contains(row.getNames(), "NIEMINEN Jukka")) {
+                assertEquals("FIN 8768", row.getSailID());
+                assertEquals(118, row.getScoreAfterDiscarding(), 0.000000001);
+                assertEquals(118.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getRank());
+                assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getScore());
+                assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).isDiscarded());
+                assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 1).getRank());
+                assertEquals((double) 118.00, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 1).getScore(), 0.000000001);
+                assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 1).isDiscarded());
+            } else if (Util.contains(row.getNames(), "HAGAN Douglas")) {
+                assertEquals("AUS 8817", row.getSailID());
+                assertEquals(235.00, row.getScoreAfterDiscarding(), 0.000000001);
+                assertEquals(235.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+                assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getRank());
+                assertEquals("DNF", Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getMaxPointsReason());
+                assertEquals((double) 117.00, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).getScore(), 0.000000001);
+                assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 0).isDiscarded());
+                assertNull(Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 1).getRank());
+                assertEquals("DNF", Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 1).getMaxPointsReason());
+                assertEquals((double) 118.00, (double) Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 1).getScore(), 0.000000001);
+                assertEquals(false, Util.get(row.getRankAndMaxPointsReasonAndPointsAndDiscarded(), 1).isDiscarded());
+            }
+        }
+    }
+    
+    @Test
     public void matchAngleBracketTest() {
         Pattern tr = Pattern.compile("<(tr|TR)( [^>]*)?>");
         Matcher matcher = tr.matcher("Humba humba <tr><td>Trala</td></td>");
