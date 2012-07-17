@@ -128,7 +128,7 @@ img.openColumn {
     margin: -4px 10px 0 0;
     padding: 0;
     float: left;
-    background-color: #7c7b7c;
+    background: #7c7b7c url(images/alert-overlay.png) repeat-x;
 }
 
 .globalNavigation-leaderBoard {
@@ -250,4 +250,26 @@ img.openColumn {
 .timePanelButton {
 	float: left;
 	padding: 3px 10px 4px;
+}
+
+.playPauseButton {
+	padding: 0;
+	width: 28px;
+	height: 24px;
+	background: url(images/timeslider-play-active-icon.png) 0 0 no-repeat;
+    cursor: pointer;
+}
+
+.playPauseButton:hover{
+  background: url(images/playbutton-hover.png) 0 0 no-repeat !important;
+  cursor: pointer;
+}
+
+.playPauseButtonPause {
+	background: url(images/timeslider-pause-icon.png) 0 0 no-repeat;
+}
+
+.playPauseButtonPause:hover {
+  background: url(images/playbuttonPause-hover.png) 0 0 no-repeat !important;
+  cursor: pointer;
 }
