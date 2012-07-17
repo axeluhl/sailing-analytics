@@ -396,8 +396,22 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                 }
                 synchronized (markPassingsForCompetitor) {
                     if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
+                        StringBuilder courseWaypointsWithID = new StringBuilder();
+                        boolean first = true;
+                        for (Waypoint courseWaypoint : getRace().getCourse().getWaypoints()) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                courseWaypointsWithID.append(" -> ");
+                            }
+                            courseWaypointsWithID.append(courseWaypoint.toString());
+                            courseWaypointsWithID.append(" (ID=");
+                            courseWaypointsWithID.append(courseWaypoint.getId());
+                            courseWaypointsWithID.append(")");
+                        }
                         logger.severe("Received mark passing "+markPassing+" for race "+getRace()+
-                                " but the waypoint does not exist in course "+getRace().getCourse());
+                                " for waypoint ID"+markPassing.getWaypoint().getId()+
+                                " but the waypoint does not exist in course "+courseWaypointsWithID);
                     } else {
                         markPassingsForCompetitor.add(markPassing);
                     }
