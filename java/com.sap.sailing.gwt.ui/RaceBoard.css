@@ -131,6 +131,10 @@ img.openColumn {
     background-color: #7c7b7c;
 }
 
+.globalNavigation-leaderBoard {
+	margin-right: 5px;
+}
+
 .globalNavigation-leaderBoardGroup a, .globalNavigation-leaderBoard a {
 	color: #fff;
 	text-decoration: none;
