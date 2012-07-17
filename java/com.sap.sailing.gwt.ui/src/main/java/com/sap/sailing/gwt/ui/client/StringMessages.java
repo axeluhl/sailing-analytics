@@ -63,6 +63,7 @@ public interface StringMessages extends Messages {
     String renameRace();
     String openSelectedLeaderboard();
     String rank();
+    String totalRank();
     String collapse();
     String expand();
     String leg();
@@ -292,13 +293,13 @@ public interface StringMessages extends Messages {
     String errorFetchingReplicaData(String message);
     String averageCrossTrackErrorInMeters();
     String enterMaster();
-    String errorStartingReplication(String hostname, String message);
+    String errorStartingReplication(String hostname, String exchangeName, String message);
     String helpLines();
     String startLine();
     String finishLine();
     String advantageLine();
     String courseMiddleLine();
-    String jmsPortNumber();
+    String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
     String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
@@ -340,6 +341,7 @@ public interface StringMessages extends Messages {
     String regattaExistForSelectedBoatClass();
     String reload();
     String addRegatta();
+    String exchangeName();
     String course();
     String courseLayout();
     String buoy();
@@ -350,4 +352,11 @@ public interface StringMessages extends Messages {
     String boatTails();
     String maximalCount();
     String maxVisibleCompetitorsCountMustBePositive();
+    String fregResultImportUrls();
+    String errorRefreshingFregUrlList(String message);
+    String successfullyUpdatedFregUrls();
+    String errorRemovingFregUrls(String message);
+    String pleaseEnterNonEmptyUrl();
+    String addFragUrl();
+    String errorAddingFragUrl(String message);
 }

@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -394,7 +395,26 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
                     }
                 }
                 synchronized (markPassingsForCompetitor) {
-                    markPassingsForCompetitor.add(markPassing);
+                    if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
+                        StringBuilder courseWaypointsWithID = new StringBuilder();
+                        boolean first = true;
+                        for (Waypoint courseWaypoint : getRace().getCourse().getWaypoints()) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                courseWaypointsWithID.append(" -> ");
+                            }
+                            courseWaypointsWithID.append(courseWaypoint.toString());
+                            courseWaypointsWithID.append(" (ID=");
+                            courseWaypointsWithID.append(courseWaypoint.getId());
+                            courseWaypointsWithID.append(")");
+                        }
+                        logger.severe("Received mark passing "+markPassing+" for race "+getRace()+
+                                " for waypoint ID"+markPassing.getWaypoint().getId()+
+                                " but the waypoint does not exist in course "+courseWaypointsWithID);
+                    } else {
+                        markPassingsForCompetitor.add(markPassing);
+                    }
                 }
                 Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing.getWaypoint());
                 synchronized (markPassingsInOrderForWaypoint) {

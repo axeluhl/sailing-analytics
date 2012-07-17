@@ -1,30 +1,33 @@
 package com.sap.sailing.freg.resultimport.impl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.freg.resultimport.CompetitorEntry;
+import com.sap.sailing.freg.resultimport.CompetitorRow;
+import com.sap.sailing.freg.resultimport.RegattaResults;
 
 public class ScoreCorrectionForRaceImpl implements ScoreCorrectionsForRace {
     private final int raceNumberStartingWithOne;
-    private final Map<String, ScoreCorrectionForCompetitorInRace> scoreCorrectionsByTeamName;
+    private final Map<String, ScoreCorrectionForCompetitorInRace> scoreCorrectionsBySailID;
     
-    public ScoreCorrectionForRaceImpl(Map<String, List<Pair<String, Integer>>> actResults, int raceNumberStartingWithZero) {
+    public ScoreCorrectionForRaceImpl(RegattaResults regattaResult, int raceNumberStartingWithZero) {
         this.raceNumberStartingWithOne = raceNumberStartingWithZero+1;
-        this.scoreCorrectionsByTeamName = new HashMap<String, ScoreCorrectionForCompetitorInRace>();
-        for (Map.Entry<String, List<Pair<String, Integer>>> e : actResults.entrySet()) {
-            String teamName = e.getKey();
-            Pair<String, Integer> rankAndPoints;
-            if (raceNumberStartingWithZero < e.getValue().size()) {
-                rankAndPoints = e.getValue().get(raceNumberStartingWithZero);
+        this.scoreCorrectionsBySailID = new HashMap<String, ScoreCorrectionForCompetitorInRace>();
+        for (CompetitorRow competitorRow : regattaResult.getCompetitorResults()) {
+            String teamName = competitorRow.getTeamName();
+            CompetitorEntry competitorEntry;
+            if (raceNumberStartingWithZero < Util.size(competitorRow.getRankAndMaxPointsReasonAndPointsAndDiscarded())) {
+                competitorEntry = Util.get(competitorRow.getRankAndMaxPointsReasonAndPointsAndDiscarded(), raceNumberStartingWithZero);
             } else {
-                rankAndPoints = null;
+                competitorEntry = null;
             }
-            scoreCorrectionsByTeamName.put(teamName, new ScoreCorrectionForCompetitorInRaceImpl(teamName, rankAndPoints));
+            scoreCorrectionsBySailID.put(competitorRow.getSailID(),
+                    new ScoreCorrectionForCompetitorInRaceImpl(competitorRow.getSailID(), teamName, competitorEntry));
         }
     }
 
@@ -35,12 +38,12 @@ public class ScoreCorrectionForRaceImpl implements ScoreCorrectionsForRace {
 
     @Override
     public Set<String> getSailIDs() {
-        return scoreCorrectionsByTeamName.keySet();
+        return scoreCorrectionsBySailID.keySet();
     }
 
     @Override
     public ScoreCorrectionForCompetitorInRace getScoreCorrectionForCompetitor(String sailID) {
-        return scoreCorrectionsByTeamName.get(sailID);
+        return scoreCorrectionsBySailID.get(sailID);
     }
 
 }

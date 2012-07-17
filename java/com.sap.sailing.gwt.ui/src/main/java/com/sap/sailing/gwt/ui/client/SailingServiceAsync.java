@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Color;
@@ -332,7 +333,8 @@ public interface SailingServiceAsync {
 
     void getReplicaInfo(AsyncCallback<ReplicationStateDTO> callback);
 
-    void startReplicatingFromMaster(String masterName, int servletPort, int jmsPort, AsyncCallback<Void> callback);
+    void startReplicatingFromMaster(String masterName, String exchangeName, int servletPort, int messagingPort,
+            AsyncCallback<Void> callback);
 
     void getEvents(AsyncCallback<List<EventDTO>> callback);
 
@@ -410,4 +412,10 @@ public interface SailingServiceAsync {
 
     void addControlPointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition,
             AsyncCallback<Void> callback);
+
+    void getFregResultUrls(AsyncCallback<List<String>> asyncCallback);
+
+    void removeFregURLs(Set<String> toRemove, AsyncCallback<Void> asyncCallback);
+
+    void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
 }

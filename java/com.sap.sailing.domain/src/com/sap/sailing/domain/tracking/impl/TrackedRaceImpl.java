@@ -213,6 +213,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private long delayToLiveInMillis;
     
+    /**
+     * The constructor loads wind fixes from the {@link #windStore} asynchronously. When completed, this flag is set to
+     * <code>true</code>, and all threads currently waiting on this object are notified.
+     */
+    private boolean windLoadingCompleted;
+    
     private transient CrossTrackErrorCache crossTrackErrorCache;
 
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final WindStore windStore,
@@ -271,6 +277,10 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
                         trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
                 windTracks.putAll(loadedWindTracks);
+                synchronized (TrackedRaceImpl.this) {
+                    windLoadingCompleted = true;
+                    TrackedRaceImpl.this.notifyAll();
+                }
             }
         }.start();
         // by default, a tracked race offers one course-based wind estimation, one track-based wind estimation track and
@@ -283,6 +293,13 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.trackedRegatta = trackedRegatta;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
+    }
+    
+    @Override
+    public synchronized void waitUntilWindLoadingComplete() throws InterruptedException {
+        while (!windLoadingCompleted) {
+            wait();
+        }
     }
 
     private SmartFutureCache<Competitor, Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> createManeuverCache() {
@@ -1435,12 +1452,19 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * <p>
      * 
      * For the unlikely case of 0 degrees difference, {@link Tack#STARBOARD} will result.
+     * 
+     * @return <code>null</code> in case the boat's bearing cannot be determined for <code>timePoint</code>
      * @throws NoWindException 
      */
     @Override
     public Tack getTack(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        return getTack(getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */false), timePoint,
-                getTrack(competitor).getEstimatedSpeed(timePoint).getBearing());
+        final SpeedWithBearing estimatedSpeed = getTrack(competitor).getEstimatedSpeed(timePoint);
+        Tack result = null;
+        if (estimatedSpeed != null) {
+            result = getTack(getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */false), timePoint,
+                estimatedSpeed.getBearing());
+        }
+        return result;
     }
 
     /**

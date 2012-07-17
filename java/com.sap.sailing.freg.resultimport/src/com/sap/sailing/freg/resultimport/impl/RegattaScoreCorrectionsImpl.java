@@ -2,31 +2,32 @@ package com.sap.sailing.freg.resultimport.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
-import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.freg.resultimport.CompetitorRow;
+import com.sap.sailing.freg.resultimport.RegattaResults;
 
 public class RegattaScoreCorrectionsImpl implements RegattaScoreCorrections {
     private final ScoreCorrectionProviderImpl provider;
     private final Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces;
     
     public RegattaScoreCorrectionsImpl(ScoreCorrectionProviderImpl scoreCorrectionProviderImpl,
-            Map<String, List<Pair<String, Integer>>> actResults) {
+            RegattaResults regattaResult) {
         this.provider = scoreCorrectionProviderImpl;
         List<ScoreCorrectionsForRace> scfr = new ArrayList<ScoreCorrectionsForRace>();
-        int maxSize = getMaxListSize(actResults);
+        int maxSize = getMaxListSize(regattaResult);
         for (int i=0; i<maxSize; i++) {
-            scfr.add(new ScoreCorrectionForRaceImpl(actResults, i));
+            scfr.add(new ScoreCorrectionForRaceImpl(regattaResult, i));
         }
         this.scoreCorrectionsForRaces = scfr;
     }
 
-    private int getMaxListSize(Map<String, List<Pair<String, Integer>>> actResults) {
+    private int getMaxListSize(RegattaResults regattaResult) {
         int result = 0;
-        for (Map.Entry<String, List<Pair<String, Integer>>> e : actResults.entrySet()) {
-            result = Math.max(result, e.getValue().size());
+        for (CompetitorRow competitorRow : regattaResult.getCompetitorResults()) {
+            result = Math.max(result, Util.size(competitorRow.getRankAndMaxPointsReasonAndPointsAndDiscarded()));
         }
         return result;
     }

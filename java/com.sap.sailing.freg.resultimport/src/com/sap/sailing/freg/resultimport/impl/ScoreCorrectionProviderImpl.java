@@ -1,15 +1,13 @@
 package com.sap.sailing.freg.resultimport.impl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.net.URLConnection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,78 +17,89 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.freg.resultimport.FregResultProvider;
+import com.sap.sailing.freg.resultimport.RegattaResults;
 
-public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
-    private static final long serialVersionUID = -4870646572106575667L;
+public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, FregResultProvider {
+    private static final long serialVersionUID = 5853404150107387702L;
     
-    private static final String[] ACT_NAMES = { "muscat", "qingdao", "istanbul", "porto" /*, "cardiff" */};
+    private final Set<URL> allUrls;
 
-    private static final String EXTREME_40_CLASS_NAME = "extreme 40";
+    public ScoreCorrectionProviderImpl() throws MalformedURLException {
+        allUrls = new HashSet<URL>();
+        /*
+         * For testing, consider using the following URLs:
+         *   allUrls.add(new URL("http://www.axel-uhl.de/freg/freg_html_export_sample.html"));
+         *   allUrls.add(new URL("http://www.axel-uhl.de/freg/eurocup_29er_29e.htm"));
+         */
+    }
 
     @Override
     public String getName() {
-        return "Extreme Sailing Series 40 Scores from SailRacer.org";
+        return "FREG HTML Score Importer";
     }
     
-    private List<URL> getCsvUrls(String... actNames) throws MalformedURLException {
-        List<URL> result = new ArrayList<URL>();
-        for (String actName : actNames) {
-            result.add(new URL("http://www.extremesailingseries.com/app/results/csv_uploads/"+actName+".csv"));
+    @Override
+    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() {
+        Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String,TimePoint>>>();
+        FregHtmlParser parser = new FregHtmlParser();
+        for (URL url : getAllUrls()) {
+            URLConnection conn;
+            try {
+                conn = url.openConnection();
+                TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
+                RegattaResults regattaResult = parser.getRegattaResults((InputStream) conn.getContent());
+                final String boatClassName = getBoatClassName(regattaResult);
+                result.put(boatClassName, Collections.singleton(new Pair<String, TimePoint>(boatClassName, lastModified)));
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
         return result;
     }
-    
+
     /**
-     * @return A pair whose first component is the time point of the last modification to the act results, the second
-     *         element is a map whose keys are the sail IDs (in the Extreme Sailing Series we'll use the team names as
-     *         the sail IDs, such as "SAP Extreme Sailing Team" or just "SAP" for short); values with be a list
-     *         representing the act's races, from first to last, where each {@link Pair} holds in its first component a
-     *         string describing the rank, which could be an integer number formatted as a string, or a three-letter
-     *         disqualification reason such as "DNC", "DNF" or "DNS"; the second component is the points the competitor
-     *         scored in that race. Usually, if the first component is a number, the score can be expected to be
-     *         <code>#competitors+1 - rank</code>. A disqualification gets 0 points.
+     * @return the first non-empty string of the list of metadata, hoping it's something pointing at the boat class at least...
      */
-    private Pair<TimePoint, Map<String, List<Pair<String, Integer>>>> getActResults(URL actUrl) throws IOException {
-        Map<String, List<Pair<String, Integer>>> result = new HashMap<String, List<Pair<String,Integer>>>();
-        HttpURLConnection conn = (HttpURLConnection) actUrl.openConnection();
-        TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
-        BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) conn.getContent()));
-        String line = br.readLine();
-        while (line != null) {
-            String[] split = line.split(",");
-            String sailID = split[0].trim();
-            if (sailID.startsWith("\"") && sailID.endsWith("\"")) {
-                sailID = sailID.substring(1, sailID.length()-1);
+    private String getBoatClassName(RegattaResults regattaResult) {
+        List<String> metadata = regattaResult.getMetadata();
+        for (String metadatum : metadata) {
+            if (metadatum != null && metadatum.length() > 0) {
+                return metadatum;
             }
-            List<Pair<String, Integer>> competitorEntry = new ArrayList<Pair<String, Integer>>();
-            result.put(sailID, competitorEntry);
-            for (int i=1; i<split.length-1; i+=2) {
-                String rankOrMaxPointsReason = split[i];
-                Integer points = Integer.valueOf(split[i+1]);
-                competitorEntry.add(new Pair<String, Integer>(rankOrMaxPointsReason, points));
-            }
-            line = br.readLine();
         }
-        return new Pair<TimePoint, Map<String, List<Pair<String, Integer>>>>(lastModified, result);
+        return null;
     }
 
     @Override
-    public Map<String, Set<Pair<String, TimePoint>>> getHasResultsForBoatClassFromDateByEventName() throws Exception {
-        Map<String, Set<Pair<String, TimePoint>>> result = new HashMap<String, Set<Pair<String, TimePoint>>>();
-        for (String actName : ACT_NAMES) {
-            URL actUrl = getCsvUrls(actName).iterator().next();
-            Pair<TimePoint, Map<String, List<Pair<String, Integer>>>> actResults = getActResults(actUrl);
-            result.put(actName, Collections.singleton(new Pair<String, TimePoint>(EXTREME_40_CLASS_NAME, actResults.getA())));
-        }
-        return result;
+    public Iterable<URL> getAllUrls() {
+        return Collections.unmodifiableSet(allUrls);
     }
 
     @Override
-    public RegattaScoreCorrections getScoreCorrections(String actName, String boatClassName,
-            TimePoint millisecondsTimePoint) throws Exception {
-        URL actUrl = getCsvUrls(actName).iterator().next();
-        Pair<TimePoint, Map<String, List<Pair<String, Integer>>>> actResults = getActResults(actUrl);
-        return new RegattaScoreCorrectionsImpl(this, actResults.getB());
+    public RegattaScoreCorrections getScoreCorrections(String eventName, String boatClassName,
+            TimePoint timePoint) throws Exception {
+        FregHtmlParser parser = new FregHtmlParser();
+        for (URL url : getAllUrls()) {
+            final URLConnection conn = url.openConnection();
+            RegattaResults regattaResult = parser.getRegattaResults((InputStream) conn.getContent());
+            if ((boatClassName == null && getBoatClassName(regattaResult) == null) ||
+                    boatClassName.equals(getBoatClassName(regattaResult))) {
+                return new RegattaScoreCorrectionsImpl(this, regattaResult);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void registerResultUrl(URL url) {
+        allUrls.add(url);
+    }
+
+    @Override
+    public void removeResultUrl(URL url) {
+        allUrls.remove(url);
     }
 
 }

@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.ui.leaderboardedit;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,7 +45,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
 
     private final LeaderboardDTO leaderboard;
     private final Map<CompetitorDTO, String> defaultOfficialSailIDsForCompetitors;
-    private final Set<String> allOfficialRaceIDs;
+    private final Set<String> allOfficialSailIDs;
     private final Map<RaceColumnDTO, String> raceColumnToOfficialRaceNameOrNumber;
     private final RegattaScoreCorrectionDTO regattaScoreCorrection;
     private final Map<CompetitorDTO, CheckBox> competitorCheckboxes;
@@ -60,7 +63,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                         sailingService, stringMessages, errorReporter));
         this.regattaScoreCorrection = result;
         this.leaderboard = leaderboardPanel.getLeaderboard();
-        this.allOfficialRaceIDs = new HashSet<String>();
+        this.allOfficialSailIDs = new LinkedHashSet<String>();
         this.defaultOfficialSailIDsForCompetitors = new HashMap<CompetitorDTO, String>();
         mapCompetitorsAndInitializeAllOfficialRaceIDs(leaderboard, result);
         this.raceColumnToOfficialRaceNameOrNumber = createRaceColumnNameToOfficialRaceNameOrNumberSuggestion(leaderboard, result);
@@ -152,7 +155,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
 
     private void fillOfficialSailIDChoosers() {
         for (CompetitorDTO competitor : leaderboard.competitors) {
-            ListBox listbox = createListBoxWithGridUpdateChangeHandler(allOfficialRaceIDs, /* selection */
+            ListBox listbox = createListBoxWithGridUpdateChangeHandler(allOfficialSailIDs, /* selection */
                     defaultOfficialSailIDsForCompetitors.get(competitor));
             officialSailIDChoosers.put(competitor, listbox);
         }
@@ -186,14 +189,17 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
     private void mapCompetitorsAndInitializeAllOfficialRaceIDs(LeaderboardDTO leaderboard,
             RegattaScoreCorrectionDTO regattaScoreCorrection) {
         Map<String, CompetitorDTO> canonicalizedLeaderboardSailIDToCompetitors = canonicalizeLeaderboardSailIDs(leaderboard);
+        List<String> allOfficialSailIDsAsSortableList = new ArrayList<String>();
         for (Map<String, ScoreCorrectionEntryDTO> scoreCorrectionsBySailID : regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber().values()) {
             for (String officialSailID : scoreCorrectionsBySailID.keySet()) {
-                allOfficialRaceIDs.add(officialSailID);
+                allOfficialSailIDsAsSortableList.add(officialSailID);
                 String canonicalizedResultSailID = canonicalizeSailID(officialSailID, /* defaultNationality */ null);
                 CompetitorDTO competitor = canonicalizedLeaderboardSailIDToCompetitors.get(canonicalizedResultSailID);
                 defaultOfficialSailIDsForCompetitors.put(competitor, officialSailID);
             }
         }
+        Collections.sort(allOfficialSailIDsAsSortableList);
+        allOfficialSailIDs.addAll(allOfficialSailIDsAsSortableList);
     }
     
     /**

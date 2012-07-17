@@ -432,7 +432,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     } else {
                         result = -1; // o1 scores "better", comes first, because it has the right boat class name
                     }
-                } else if (lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
+                } else if (o2.getC().getA() != null && lowercaseBoatClassNames.contains(o2.getC().getA().toLowerCase())) {
                     result = 1;
                 } else {
                     // both don't seem to have the right boat class; compare by time stamp; newest first

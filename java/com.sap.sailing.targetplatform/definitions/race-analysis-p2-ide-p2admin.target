@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="Race Analysis Target (IDE) for the p2 Admin" sequenceNumber="50">
+<target name="Race Analysis Target (IDE) for the p2 Admin" sequenceNumber="58">
 <locations>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.jetty.bundles.f.feature.group" version="7.5.4"/>
 <repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-7.x/7.5.4.v20111024/"/>
 </location>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.1.R37x_v20110907-7uF9LFpFFSuN6-tKJIXPMYaq7NTP"/>
+<unit id="org.eclipse.equinox.core.sdk.feature.group" version="3.7.1.v20110928-1809-7uF9LFpHFUqIcLhnJMmHQGXy3BJB"/>
 <repository location="http://download.eclipse.org/releases/indigo"/>
 </location>
 <location path="${project_loc:com.sap.sailing.targetplatform.base}/gen/p2" type="Directory"/>

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -217,7 +218,7 @@ public interface SailingService extends RemoteService {
     
     ReplicationStateDTO getReplicaInfo();
 
-    void startReplicatingFromMaster(String masterName, int servletPort, int jmsPort) throws Exception;
+    void startReplicatingFromMaster(String masterName, String exchangeName, int servletPort, int messagingPort) throws Exception;
 
     void updateRaceDelayToLive(RegattaAndRaceIdentifier regattaAndRaceIdentifier, long delayToLiveInMs);
 
@@ -245,4 +246,10 @@ public interface SailingService extends RemoteService {
     void removeControlPointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToDelete);
 
     void addControlPointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition);
+
+    List<String> getFregResultUrls();
+
+    void removeFregURLs(Set<String> toRemove) throws Exception;
+
+    void addFragUrl(String result) throws Exception;
 }

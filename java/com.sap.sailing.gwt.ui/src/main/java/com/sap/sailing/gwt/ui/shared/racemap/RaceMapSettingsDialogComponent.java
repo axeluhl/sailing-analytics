@@ -94,7 +94,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         for (ZoomTypes zoomType : ZoomTypes.values()) {
             if (zoomType != ZoomTypes.NONE) {
                 CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatZoomType(zoomType, stringMessages));
-                cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType));
+                cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), false);
                 checkboxAndZoomType.add(new Pair<CheckBox, ZoomTypes>(cb, zoomType));
                 zoomSettingsBoxesPanel.add(cb);
                 
