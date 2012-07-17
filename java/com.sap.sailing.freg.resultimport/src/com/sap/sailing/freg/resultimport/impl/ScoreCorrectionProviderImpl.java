@@ -27,9 +27,11 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Fre
 
     public ScoreCorrectionProviderImpl() throws MalformedURLException {
         allUrls = new HashSet<URL>();
-        // add test URLs
-        allUrls.add(new URL("http://www.axel-uhl.de/freg/freg_html_export_sample.html"));
-        allUrls.add(new URL("http://www.axel-uhl.de/freg/eurocup_29er_29e.htm"));
+        /*
+         * For testing, consider using the following URLs:
+         *   allUrls.add(new URL("http://www.axel-uhl.de/freg/freg_html_export_sample.html"));
+         *   allUrls.add(new URL("http://www.axel-uhl.de/freg/eurocup_29er_29e.htm"));
+         */
     }
 
     @Override
@@ -82,7 +84,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Fre
         for (URL url : getAllUrls()) {
             final URLConnection conn = url.openConnection();
             RegattaResults regattaResult = parser.getRegattaResults((InputStream) conn.getContent());
-            if (boatClassName.equals(getBoatClassName(regattaResult))) {
+            if ((boatClassName == null && getBoatClassName(regattaResult) == null) ||
+                    boatClassName.equals(getBoatClassName(regattaResult))) {
                 return new RegattaScoreCorrectionsImpl(this, regattaResult);
             }
         }
