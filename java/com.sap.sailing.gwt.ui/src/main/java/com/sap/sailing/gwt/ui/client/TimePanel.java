@@ -109,10 +109,10 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         vp.setStyleName("timePanelInnerWrapper");
         vp.setSize("100%", "100%");
         
-        SimplePanel s = new SimplePanel();
-        s.setStyleName("timePanelSlider");
-        s.getElement().getStyle().setPaddingLeft(66, Unit.PX);
-        s.getElement().getStyle().setPaddingRight(66, Unit.PX);
+        SimplePanel timePanelSlider = new SimplePanel();
+        timePanelSlider.setStyleName("timePanelSlider");
+        timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
+        timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
 
         playButtonImg = resources.timesliderPlayActiveIcon();
         pauseButtonImg = resources.timesliderPauseIcon();
@@ -148,8 +148,8 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
         });
         
-        vp.add(s);
-        s.add(timeSlider);
+        vp.add(timePanelSlider);
+        timePanelSlider.add(timeSlider);
 
         FlowPanel controlsPanel = new FlowPanel();
         
