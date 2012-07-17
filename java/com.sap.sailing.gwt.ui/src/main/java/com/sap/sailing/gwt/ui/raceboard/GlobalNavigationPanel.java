@@ -60,6 +60,8 @@ public class GlobalNavigationPanel extends FlowPanel {
         }
         
         HTML linkHtml = new HTML(ANCHORTEMPLATE.anchor(URLFactory.INSTANCE.encode(url), linkName));
+        linkHtml.addStyleName("gwt-Button");
+        linkHtml.addStyleName("globalNavigationLink");
         linkHtml.addStyleName(STYLE_NAME_PREFIX + styleNameExtension);
         linkHtml.setTitle(setHtmlTitle);
         add(linkHtml);
