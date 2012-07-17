@@ -213,24 +213,30 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     /**
-     * Projects <code>speed</code> onto the wind direction to see how fast a boat travels
-     * "along the wind's direction."
+     * Projects <code>speed</code> onto the wind direction for upwind/downwind legs to see how fast a boat travels
+     * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto
+     * the leg's direction.
      * 
      * @throws NoWindException in case the wind direction is not known
      */
     private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, TimePoint at) throws NoWindException {
         SpeedWithBearing result = null;
         if (speed != null) {
-            Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
-            if (wind == null) {
-                throw new NoWindException("Need at least wind direction to determine windward speed");
+            Bearing projectToBearing;
+            if (getTrackedLeg().isUpOrDownwindLeg(at)) {
+                Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
+                if (wind == null) {
+                    throw new NoWindException("Need at least wind direction to determine windward speed");
+                }
+                projectToBearing = wind.getBearing();
+            } else {
+                projectToBearing = getTrackedLeg().getLegBearing(at);
             }
-            Bearing bearing = wind.getBearing();
-            double cos = Math.cos(speed.getBearing().getRadians() - wind.getBearing().getRadians());
+            double cos = Math.cos(speed.getBearing().getRadians() - projectToBearing.getRadians());
             if (cos < 0) {
-                bearing = bearing.reverse();
+                projectToBearing = projectToBearing.reverse();
             }
-            result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), bearing);
+            result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
         }
         return result;
     }
