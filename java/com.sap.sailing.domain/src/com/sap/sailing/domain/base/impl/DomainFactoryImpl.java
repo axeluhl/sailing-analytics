@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,16 +47,42 @@ public class DomainFactoryImpl implements DomainFactory {
      * as value will have its referred object be <code>null</code>. In this case, the methods reading from this cache will purge
      * the record and behave as if the record hadn't existed at the time of the read operation.
      */
-    private final ConcurrentHashMap<Serializable, WeakReference<Waypoint>> waypointCache;
+    private final ConcurrentHashMap<Serializable, WeakWaypointReference> waypointCache;
+    
+    private final ReferenceQueue<Waypoint> waypointCacheReferenceQueue;
+    
+    /**
+     * Weak references to {@link Waypoint} objects of this type are registered with
+     * {@link DomainFactoryImpl#waypointCacheReferenceQueue} upon construction so that when their referents are no
+     * longer strongly referenced and the reference was nulled, they are entered into that queue.
+     * Methods managing the {@link #waypointCache} can poll the queue and then remove cache entries based on
+     * the {@link #id} stored in the reference.
+     * 
+     * @author Axel Uhl (D043530)
+     * 
+     */
+    private class WeakWaypointReference extends WeakReference<Waypoint> {
+        private final Serializable id;
+        
+        public WeakWaypointReference(Waypoint waypoint) {
+            super(waypoint, waypointCacheReferenceQueue);
+            this.id = waypoint.getId();
+        }
+        
+        public void removeCacheEntry() {
+            waypointCache.remove(id);
+        }
+    }
 
     private final Set<String> mayStartWithNoUpwindLeg;
     
     public DomainFactoryImpl() {
+        waypointCacheReferenceQueue = new ReferenceQueue<Waypoint>();
         nationalityCache = new HashMap<String, Nationality>();
         buoyCache = new HashMap<String, Buoy>();
         boatClassCache = new HashMap<String, BoatClass>();
         competitorCache = new HashMap<Serializable, Competitor>();
-        waypointCache = new ConcurrentHashMap<Serializable, WeakReference<Waypoint>>();
+        waypointCache = new ConcurrentHashMap<Serializable, WeakWaypointReference>();
         mayStartWithNoUpwindLeg = new HashSet<String>(Arrays.asList(new String[] { "extreme40", "ess", "ess40" }));
     }
     
@@ -94,8 +121,9 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Waypoint createWaypoint(ControlPoint controlPoint) {
         synchronized (waypointCache) {
+            expungeStaleWaypointCacheEntries();
             Waypoint result = new WaypointImpl(controlPoint);
-            waypointCache.put(result.getId(), new WeakReference<Waypoint>(result));
+            waypointCache.put(result.getId(), new WeakWaypointReference(result));
             return result;
         }
     }
@@ -103,6 +131,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Waypoint getExistingWaypointById(Waypoint waypointPrototype) {
         synchronized (waypointCache) {
+            expungeStaleWaypointCacheEntries();
             Waypoint result = null;
             Reference<Waypoint> ref = waypointCache.get(waypointPrototype.getId());
             if (ref != null) {
@@ -119,6 +148,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Waypoint getExistingWaypointByIdOrCache(Waypoint waypoint) {
         synchronized (waypointCache) {
+            expungeStaleWaypointCacheEntries();
             Waypoint result = null;
             Reference<Waypoint> ref = waypointCache.get(waypoint.getId());
             if (ref != null) {
@@ -126,14 +156,21 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (result == null) {
                     // waypoint was finalized; remove entry from cache and add anew
                     result = waypoint;
-                    waypointCache.put(waypoint.getId(), new WeakReference<Waypoint>(waypoint));
+                    waypointCache.put(waypoint.getId(), new WeakWaypointReference(waypoint));
                 } // else, result is the waypoint found in the cache; return it
             } else {
                 // No entry found in the cache; not even a stale, finalized one. Create a new entry:
                 result = waypoint;
-                waypointCache.put(waypoint.getId(), new WeakReference<Waypoint>(waypoint));
+                waypointCache.put(waypoint.getId(), new WeakWaypointReference(waypoint));
             }
             return result;
+        }
+    }
+
+    private void expungeStaleWaypointCacheEntries() {
+        Reference<? extends Waypoint> ref;
+        while ((ref=waypointCacheReferenceQueue.poll()) != null) {
+            ((WeakWaypointReference) ref).removeCacheEntry();
         }
     }
 
