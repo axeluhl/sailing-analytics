@@ -404,7 +404,7 @@
 	font-family: UbuntuBold, Verdana, Arial, sans-serif;
 	border: none;
 	margin: 0 0 0 5px;
-    background: #222 url(images/alert-overlay.png) repeat-x;
+    background: url(images/btn-cta-orangeleft.png) center top repeat-x;
     display: inline-block;
     padding: 5px 10px 6px;
     color: #fff;
@@ -492,12 +492,4 @@
 	line-height: 1.4;
 }
 
-.playPauseImage:hover{
-  background: url(images/playbutton-hover.png) 0 0 no-repeat !important;
-  cursor: pointer;
-}
 
-.playPauseImagePause:hover {
-  background: url(images/playbuttonPause-hover.png) 0 0 no-repeat !important;
-  cursor: pointer;
-}
