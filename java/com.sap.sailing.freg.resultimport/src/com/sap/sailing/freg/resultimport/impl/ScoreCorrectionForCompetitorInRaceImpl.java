@@ -24,7 +24,7 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
             discarded = false;
         } else {
             this.discarded = competitorEntry.isDiscarded();
-            points = (int) (double) competitorEntry.getScore();
+            points = (int) (competitorEntry.getScore() == null ? 0 : (double) competitorEntry.getScore());
             MaxPointsReason mpe = null;
             if (competitorEntry.getMaxPointsReason() != null && competitorEntry.getMaxPointsReason().length() > 0) {
                 // no int; try parsing a MaxPointsReason
