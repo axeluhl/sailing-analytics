@@ -352,4 +352,11 @@ public interface StringMessages extends Messages {
     String boatTails();
     String maximalCount();
     String maxVisibleCompetitorsCountMustBePositive();
+    String fregResultImportUrls();
+    String errorRefreshingFregUrlList(String message);
+    String successfullyUpdatedFregUrls();
+    String errorRemovingFregUrls(String message);
+    String pleaseEnterNonEmptyUrl();
+    String addFragUrl();
+    String errorAddingFragUrl(String message);
 }

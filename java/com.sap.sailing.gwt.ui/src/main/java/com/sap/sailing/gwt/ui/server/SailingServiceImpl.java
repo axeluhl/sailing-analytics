@@ -120,6 +120,7 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
+import com.sap.sailing.freg.resultimport.FregResultProvider;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
@@ -2459,5 +2460,47 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             ScoreCorrectionForCompetitorInRace scoreCorrectionForCompetitor) {
         return new ScoreCorrectionEntryDTO(scoreCorrectionForCompetitor.getPoints(),
                 scoreCorrectionForCompetitor.isDiscarded(), scoreCorrectionForCompetitor.getMaxPointsReason());
+    }
+    
+    private FregResultProvider getFregService() {
+        FregResultProvider result = null;
+        for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
+            if (scp instanceof FregResultProvider) {
+                result = (FregResultProvider) scp;
+                break;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<String> getFregResultUrls() {
+        List<String> result = new ArrayList<String>();
+        final FregResultProvider fregService = getFregService();
+        if (fregService != null) {
+            Iterable<URL> allUrls = fregService.getAllUrls();
+            for (URL url : allUrls) {
+                result.add(url.toString());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void removeFregURLs(Set<String> toRemove) throws Exception {
+        FregResultProvider fregService = getFregService();
+        if (fregService != null) {
+            for (String urlToRemove : toRemove) {
+                fregService.removeResultUrl(new URL(urlToRemove));
+            }
+        }
+    }
+
+    @Override
+    public void addFragUrl(String result) throws Exception {
+        FregResultProvider fregService = getFregService();
+        if (fregService != null) {
+            fregService.registerResultUrl(new URL(result));
+        }
     }
 }

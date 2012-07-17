@@ -70,17 +70,18 @@ public class AdminConsoleEntryPoint extends AbstractEntryPoint implements Regatt
         leaderboardConfigPanel.setSize("90%", "90%");
         tabPanel.add(leaderboardConfigPanel, stringMessages.leaderboardConfiguration(), /* asHTML */ false);
         regattaDisplayers.add(leaderboardConfigPanel);
+        tabPanel.add(new FregResultImportUrlPanel(sailingService, this, stringMessages), stringMessages.fregResultImportUrls(), /* asHTML */ false);
         tabPanel.add(new ReplicationPanel(sailingService, this, stringMessages), stringMessages.replication(), /* asHTML */ false);
         
         tabPanel.selectTab(0);
         tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
-			@Override
-			public void onSelection(SelectionEvent<Integer> event) {
-				if (leaderboardConfigPanel.isVisible()) {
-				    leaderboardConfigPanel.loadAndRefreshAllData();
-				}
-			}
-		});
+            @Override
+            public void onSelection(SelectionEvent<Integer> event) {
+                if (leaderboardConfigPanel.isVisible()) {
+                    leaderboardConfigPanel.loadAndRefreshAllData();
+                }
+            }
+        });
         fillRegattas();
     }
 
