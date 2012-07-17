@@ -65,7 +65,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     private final ImageResource playModeLiveActiveImg;
     private final ImageResource playModeReplayActiveImg;
     private final ImageResource playModeInactiveImg;
-    private final Image playPauseImage;
+    private final Button playPauseButton;
     private final Image playModeImage;
     protected Date lastReceivedDataTimepoint;
     private final Button slowDownButton;
@@ -117,7 +117,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playButtonImg = resources.timesliderPlayActiveIcon();
         pauseButtonImg = resources.timesliderPauseIcon();
         playSpeedImg = resources.timesliderPlaySpeedIcon();
-        playPauseImage = new Image(playButtonImg);
+        playPauseButton = new Button("");
 
         playModeLiveActiveImg = resources.timesliderPlayStateLiveActiveIcon();
         playModeReplayActiveImg = resources.timesliderPlayStateReplayActiveIcon();
@@ -161,7 +161,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playControlPanel.setStyleName("timePanel-controls-play");
         controlsPanel.add(playControlPanel);
         
-        playPauseImage.addClickHandler(new ClickHandler() {
+        playPauseButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 switch(TimePanel.this.timer.getPlayState()) {
@@ -177,11 +177,9 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
                 }
             }
         });
-        playPauseImage.getElement().getStyle().setFloat(Style.Float.LEFT);
-        playPauseImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        playPauseImage.setTitle(stringMessages.startStopPlaying());
-        playPauseImage.getElement().addClassName("playPauseImage");
-        playControlPanel.add(playPauseImage);
+        playPauseButton.setTitle(stringMessages.startStopPlaying());
+        playPauseButton.getElement().addClassName("playPauseButton");
+        playControlPanel.add(playPauseButton);
 
         backToLivePlayButton = new Button(stringMessages.playModeLive());
         backToLivePlayButton.addClickHandler(new ClickHandler() {
@@ -378,8 +376,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         setJumpToLiveEnablement(liveModeToBeMadePossible && playMode != PlayModes.Live);
         switch (playState) {
         case Playing:
-            playPauseImage.setResource(pauseButtonImg);
-            playPauseImage.getElement().addClassName("playPauseImagePause");
+            playPauseButton.getElement().addClassName("playPauseButtonPause");
             if (playMode == PlayModes.Live) {
                 playModeImage.setResource(playModeLiveActiveImg);
             } else {
@@ -387,9 +384,8 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
             break;
         case Paused:
-        	playPauseImage.getElement().removeClassName("playPauseImagePause");
+        	playPauseButton.getElement().removeClassName("playPauseButtonPause");
         case Stopped:
-            playPauseImage.setResource(playButtonImg);
             playModeImage.setResource(playModeInactiveImg);
             break;
         }
