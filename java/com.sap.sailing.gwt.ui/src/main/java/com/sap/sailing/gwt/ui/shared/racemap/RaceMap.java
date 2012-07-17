@@ -27,6 +27,7 @@ import com.google.gwt.maps.client.control.ControlPosition;
 import com.google.gwt.maps.client.control.LargeMapControl3D;
 import com.google.gwt.maps.client.control.MenuMapTypeControl;
 import com.google.gwt.maps.client.control.ScaleControl;
+import com.google.gwt.maps.client.event.MapClickHandler;
 import com.google.gwt.maps.client.event.MapDragEndHandler;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
@@ -269,6 +270,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 RaceMap.this.add(combinedWindPanel, 10, 10);
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
                 map.setSize("100%", "100%");
+                map.addMapClickHandler(new MapClickHandler() {
+                    @Override
+                    public void onClick(MapClickEvent event) {
+                        if (event.getOverlay() == null) { // nothing hit; consider click on map the play/pause action
+                            if (timer.getPlayState() == PlayStates.Playing) {
+                                timer.pause();
+                            } else if (timer.getPlayState() == PlayStates.Paused || timer.getPlayState() == PlayStates.Stopped) {
+                                timer.play();
+                            }
+                        }
+                    }
+                });
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
