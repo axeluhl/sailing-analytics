@@ -125,18 +125,24 @@ public class FregHtmlParser {
     }
 
     private CompetitorRow createCompetitorRow(List<String> tdContent) {
-        Integer totalRank = getInt(tdContent.get(0));
-        String sailID = getSailID(tdContent.get(1)).replace("&nbsp;", " ").trim();
-        List<String> names = getNames(tdContent.get(2));
-        Double scoreAfterDiscarding = getScore(tdContent.get(3));
-        Double totalPointsBeforeDiscarding = getScore(tdContent.get(4));
+        List<String> bold = getTagContents(tdContent.get(0), "b");
+        Integer totalRank;
+        if (bold != null && !bold.isEmpty()) {
+            totalRank = getInt(bold.get(0).trim());
+        } else {
+            totalRank = getInt(tdContent.get(0).trim());
+        }
+        String sailID = getSailID(tdContent.get(1).trim()).replace("&nbsp;", " ").trim();
+        List<String> names = getNames(tdContent.get(2).trim());
+        Double scoreAfterDiscarding = getScore(tdContent.get(3).trim());
+        Double totalPointsBeforeDiscarding = getScore(tdContent.get(4).trim());
         List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded = new ArrayList<CompetitorEntry>();
         for (int i=5; i<tdContent.size()-1; i++) {
             CompetitorEntry rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace =
-                    getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(tdContent.get(i));
+                    getRankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace(tdContent.get(i).trim());
             rankAndMaxPointsReasonAndPointsAndDiscarded.add(rankAndMaxPointsReasonAndPointsAndDiscardedForOnceRace);
         }
-        String[] clubNameAndCountry = getTagContents(tdContent.get(tdContent.size()-1), "p").get(0).split("<(br|BR)>");
+        String[] clubNameAndCountry = getTagContents(tdContent.get(tdContent.size()-1).trim(), "p").get(0).trim().split("<(br|BR)>");
         String clubName = clubNameAndCountry[0].replace("&nbsp;", " ").trim();
         return new CompetitorRowImpl(totalRank, sailID, names, scoreAfterDiscarding, totalPointsBeforeDiscarding,
                 rankAndMaxPointsReasonAndPointsAndDiscarded, clubName);
@@ -147,6 +153,7 @@ public class FregHtmlParser {
         boolean isDiscarded;
         String maxPointsReason;
         String results;
+        cell = cell.replace("&nbsp;", "");
         List<String> discarded = getTagContents(cell, "strike");
         if (discarded.isEmpty()) {
             List<String> colorized = getTagContents(cell, "span"); // could be a background-color-styled span for 1st and 2nd rank
@@ -168,9 +175,13 @@ public class FregHtmlParser {
         } catch (NumberFormatException nfe) {
             // must have been a disqualification / max-points-reason
             rank = null;
-            maxPointsReason = lines[0];
+            if (lines.length==0 || lines[0].trim().length() == 0 || lines[0].trim().contains("--")) {
+                maxPointsReason = "DNC";
+            } else {
+                maxPointsReason = lines[0];
+            }
         }
-        Double points = Double.valueOf(getTagContents(lines[1], "i").get(0));
+        Double points = lines.length < 2 ? null : Double.valueOf(getTagContents(lines[1], "i").get(0));
         return new CompetitorEntryImpl(rank, maxPointsReason, points, isDiscarded);
     }
 
