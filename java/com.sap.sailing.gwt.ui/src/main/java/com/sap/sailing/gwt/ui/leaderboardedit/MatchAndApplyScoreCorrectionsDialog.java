@@ -16,14 +16,17 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -307,11 +310,42 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     ScoreCorrectionEntryDTO officialCorrectionEntry =
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                         .get(raceNameOrNumber).get(officialSailID);
-                    final Double officialTotalPoints = officialCorrectionEntry.getScore();
-                    final Double officialNetPoints = officialTotalPoints == null ? null :
-                        raceColumn.isMedalRace() ? officialTotalPoints / MEDAL_RACE_FACTOR : officialTotalPoints;
-                    cell.add(new Label(officialNetPoints+"/"+officialTotalPoints+"/"+officialCorrectionEntry.getMaxPointsReason()+
-                        (officialCorrectionEntry.getDiscarded()?"/discarded":"")));
+                    final Double officialTotalPoints = officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
+                    final Double officialNetPoints = officialCorrectionEntry.getScore() == null ? null :
+                        raceColumn.isMedalRace() ? officialCorrectionEntry.getScore() / MEDAL_RACE_FACTOR : officialCorrectionEntry.getScore();
+                    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+                    boolean entriesDiffer =
+                            ((officialNetPoints == null && entry.netPoints != 0) || (officialNetPoints != null && !new Double(entry.netPoints).equals(officialNetPoints))) ||
+                            ((officialTotalPoints == null && entry.totalPoints != 0) || (officialTotalPoints != null && !new Double(entry.totalPoints).equals(officialTotalPoints))) ||
+                            ((officialCorrectionEntry.getMaxPointsReason() == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
+                                    officialCorrectionEntry.getMaxPointsReason() != null && officialCorrectionEntry.getMaxPointsReason() != entry.reasonForMaxPoints);
+                    if (entriesDiffer) {
+                        sb.appendHtmlConstant("<span style=\"color: #0000FF;\"><b>");
+                    }
+                    if (officialNetPoints == null) {
+                        sb.append(0);
+                    } else {
+                        sb.append(officialNetPoints);
+                    }
+                    sb.appendEscaped("/");
+                    if (officialTotalPoints == null) {
+                        sb.append(0);
+                    } else {
+                        sb.append(officialTotalPoints);
+                    }
+                    sb.appendEscaped("/");
+                    if (officialCorrectionEntry.getMaxPointsReason() != null) {
+                        sb.appendEscaped(officialCorrectionEntry.getMaxPointsReason().name());
+                    } else {
+                        sb.appendEscaped(MaxPointsReason.NONE.name());
+                    }
+                    if (officialCorrectionEntry.isDiscarded()) {
+                        sb.appendEscaped("/discarded");
+                    }
+                    if (entriesDiffer) {
+                        sb.appendHtmlConstant("</b></span>");
+                    }
+                    cell.add(new HTML(sb.toSafeHtml()));
                 }
                 cell.add(cellCheckboxes.get(new Pair<CompetitorDTO, RaceColumnDTO>(competitor, raceColumn)));
                 grid.setWidget(row, column++, cell);
