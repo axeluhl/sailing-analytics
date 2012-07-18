@@ -1563,7 +1563,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             settings.setHelpLinesSettings(newSettings.getHelpLinesSettings());
             requiredRedraw = true;
         }
-        if (newSettings.isShowOnlySelectedCompetitors() != settings.isShowAllCompetitors() ||
+        if (newSettings.isShowAllCompetitors() != settings.isShowAllCompetitors() ||
                 newSettings.getMaxVisibleCompetitorsCount() != settings.getMaxVisibleCompetitorsCount()) {
             settings.setShowAllCompetitors(newSettings.isShowAllCompetitors());
             settings.setMaxVisibleCompetitorsCount(newSettings.getMaxVisibleCompetitorsCount());
