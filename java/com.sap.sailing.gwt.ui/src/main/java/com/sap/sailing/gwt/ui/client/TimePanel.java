@@ -189,8 +189,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
                 TimePanel.this.timer.play();
             }
         });
-        backToLivePlayButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        backToLivePlayButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        backToLivePlayButton.addStyleName("backToLivePlayButton");
         backToLivePlayButton.setTitle(stringMessages.backToLive());
         playControlPanel.add(backToLivePlayButton);
 
@@ -205,7 +204,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         dateLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         dateLabel.getElement().setClassName("dateLabel");
         timeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        timeLabel.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
         timeLabel.getElement().setClassName("timeLabel");
         
         FlowPanel playModeControlPanel = new FlowPanel();
