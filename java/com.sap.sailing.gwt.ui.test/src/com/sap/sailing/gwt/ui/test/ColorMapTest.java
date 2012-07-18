@@ -24,5 +24,22 @@ public class ColorMapTest {
         }
         assertEquals(amountOfDistinctColorsToCreate, existingColors.size());
     }
-
+    
+    /**
+     * A function only useful for visual tests.
+     * It creates an HTML file (as string) with 100 distinct colors on top of the water color of the google map.
+     */
+    public void createColorMapAsHtml() {
+        ColorMap<Integer> colorMap = new ColorMap<Integer>();
+        int amountOfDistinctColorsToCreate = 100;
+        
+        String colorMapAsHtml = "<html><head></head><body style='background-color: #A5BFDD'>";       
+     
+        for(int i = 1; i <= amountOfDistinctColorsToCreate; i++) {
+            colorMapAsHtml += "<div style='height:3px; background-color:" + colorMap.getColorByID(i) + "'></div><br/>";
+        }
+        
+        colorMapAsHtml += "</body></html>";
+        System.out.println(colorMapAsHtml);
+    }
 }
