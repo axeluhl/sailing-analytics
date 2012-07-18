@@ -266,12 +266,6 @@ body ::-webkit-scrollbar-track {
 	-moz-box-shadow: 0 0 20px #858585;
 }
 
-.timeLineInnerPanel {
-	/*height: 100%;*/
-	margin-top: 5px;
-	/*padding: 38px 24px 0 24px;*/
-}
-
 .timeLineInnerBgPanel {
  
 }
@@ -349,6 +343,7 @@ body ::-webkit-scrollbar-track {
 .timePanelSlider {
 	margin: 0 12px;
 	height: 49px;
+	padding-top: 5px;
 }
 
 .timePanelInnerWrapper {
