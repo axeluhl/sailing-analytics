@@ -283,3 +283,8 @@ img.openColumn {
     float: left;
     padding: 3px 10px 4px;
 }
+
+.dockLayoutPanel div[style="position: absolute; overflow: hidden; left: 0px; right: 0px; bottom: 0px; height: 90px;"] {
+	box-shadow: 0 0 8px #424242;
+	z-index: 10;
+}
