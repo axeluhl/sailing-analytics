@@ -8,8 +8,8 @@ echo Active branch is: $active_branch
 cd $exec_dir
 server_instance=`basename \`pwd\` | sed -e 's/[12]$//'`
 echo Active server is: $server_instance
-#if [ $active_branch == $server_instance ]
-#then
+if [ $active_branch == $server_instance ]
+then
 p2PluginRepository=$GIT_DIR/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/x86_64
 echo p2 repository for branch $active_branch: $p2PluginRepository
 echo Remove old installation
@@ -23,8 +23,8 @@ cp -v $GIT_DIR/java/target/configuration/jetty/etc/realm.properties configuratio
 cp -r -v $p2PluginRepository/configuration/org.eclipse.equinox.simpleconfigurator configuration
 cp -v $p2PluginRepository/plugins/*.jar plugins
 echo Done.
-#else
-#   echo "********** CANCEL INSTALLATION **************************"
-#   echo "ACTIVE BRANCH DOES NOT FIT THE CURRENT SERVER INSTANCE!!!"
-#fi
+else
+   echo "********** CANCEL INSTALLATION **************************"
+   echo "ACTIVE BRANCH DOES NOT FIT THE CURRENT SERVER INSTANCE!!!"
+fi
 
