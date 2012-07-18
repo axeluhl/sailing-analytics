@@ -277,3 +277,9 @@ img.openColumn {
   background: url(images/playbuttonPause-hover.png) 0 0 no-repeat !important;
   cursor: pointer;
 }
+
+
+.backToLivePlayButton {
+    float: left;
+    padding: 3px 10px 4px;
+}
