@@ -310,27 +310,36 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     ScoreCorrectionEntryDTO officialCorrectionEntry =
                         regattaScoreCorrection.getScoreCorrectionsByRaceNameOrNumber()
                         .get(raceNameOrNumber).get(officialSailID);
-                    final Double officialTotalPoints = officialCorrectionEntry.getScore();
-                    final Double officialNetPoints = officialTotalPoints == null ? null :
-                        raceColumn.isMedalRace() ? officialTotalPoints / MEDAL_RACE_FACTOR : officialTotalPoints;
+                    final Double officialTotalPoints = officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
+                    final Double officialNetPoints = officialCorrectionEntry.getScore() == null ? null :
+                        raceColumn.isMedalRace() ? officialCorrectionEntry.getScore() / MEDAL_RACE_FACTOR : officialCorrectionEntry.getScore();
                     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-                    boolean entriesDiffer =  (!new Double(entry.netPoints).equals(officialNetPoints) ||
+                    boolean entriesDiffer =
+                            ((officialNetPoints == null && entry.netPoints != 0) || (officialNetPoints != null && !new Double(entry.netPoints).equals(officialNetPoints))) ||
                             ((officialTotalPoints == null && entry.totalPoints != 0) || (officialTotalPoints != null && !new Double(entry.totalPoints).equals(officialTotalPoints))) ||
                             ((officialCorrectionEntry.getMaxPointsReason() == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
-                                    officialCorrectionEntry.getMaxPointsReason() != null && officialCorrectionEntry.getMaxPointsReason() != entry.reasonForMaxPoints));
+                                    officialCorrectionEntry.getMaxPointsReason() != null && officialCorrectionEntry.getMaxPointsReason() != entry.reasonForMaxPoints);
                     if (entriesDiffer) {
                         sb.appendHtmlConstant("<span style=\"color: #0000FF;\"><b>");
                     }
-                    sb.append(officialNetPoints);
+                    if (officialNetPoints == null) {
+                        sb.append(0);
+                    } else {
+                        sb.append(officialNetPoints);
+                    }
                     sb.appendEscaped("/");
-                    sb.append(officialTotalPoints);
+                    if (officialTotalPoints == null) {
+                        sb.append(0);
+                    } else {
+                        sb.append(officialTotalPoints);
+                    }
                     sb.appendEscaped("/");
                     if (officialCorrectionEntry.getMaxPointsReason() != null) {
                         sb.appendEscaped(officialCorrectionEntry.getMaxPointsReason().name());
                     } else {
                         sb.appendEscaped(MaxPointsReason.NONE.name());
                     }
-                    if (officialCorrectionEntry.getDiscarded()) {
+                    if (officialCorrectionEntry.isDiscarded()) {
                         sb.appendEscaped("/discarded");
                     }
                     if (entriesDiffer) {
