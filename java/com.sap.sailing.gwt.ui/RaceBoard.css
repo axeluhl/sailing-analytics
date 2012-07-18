@@ -247,6 +247,10 @@ img.openColumn {
     cursor: pointer;
 }
 
+.raceBoardNavigation-innerElement label {
+	cursor: pointer;
+}
+
 .timePanelButton {
 	float: left;
 	padding: 3px 10px 4px;
