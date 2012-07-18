@@ -1,8 +1,0 @@
-/target
-.metadata
-*.class
-*.swp
-*~
-manifest.txt
-java/com.sap.sailing.gwt.ui/gwt-unitCache/*
-java/com.sap.sailing.gwt.ui/war/WEB-INF/deploy/*
