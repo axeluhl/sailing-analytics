@@ -447,6 +447,7 @@ body ::-webkit-scrollbar-track {
 .gwt-Button:active {
     top: 1px;
     position: relative;
+    border: none;
 }
 
 .gwt-Button:hover {
