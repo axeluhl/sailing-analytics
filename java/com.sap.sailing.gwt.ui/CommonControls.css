@@ -356,10 +356,6 @@ body ::-webkit-scrollbar-track {
     box-shadow: inset 0px -7px 13px 0px rgba(84, 84, 84, 1);
 }
 
-.backToLivePlayButton {
-	float: left;
-	padding: 3px 10px 4px;
-}
 
 .LogoAndTitlePanel {
     height: 68px;
