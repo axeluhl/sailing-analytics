@@ -25,7 +25,7 @@ public class RegattaScoreCorrectionDTO implements IsSerializable {
             return score;
         }
 
-        public Boolean getDiscarded() {
+        public Boolean isDiscarded() {
             return discarded;
         }
 
