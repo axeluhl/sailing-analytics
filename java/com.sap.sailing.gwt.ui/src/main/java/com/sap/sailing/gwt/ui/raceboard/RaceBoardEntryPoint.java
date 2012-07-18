@@ -194,5 +194,6 @@ public class RaceBoardEntryPoint extends AbstractEntryPoint {
         p.addNorth(toolbarPanel, 40);
         p.addSouth(timePanel, 90);                     
         p.add(raceBoardPanel);
+        p.addStyleName("dockLayoutPanel");
     }    
 }
