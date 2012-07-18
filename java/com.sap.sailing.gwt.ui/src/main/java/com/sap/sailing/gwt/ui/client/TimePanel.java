@@ -59,8 +59,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     protected final StringMessages stringMessages;
     protected final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
     protected final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
-    private final ImageResource playButtonImg;
-    private final ImageResource pauseButtonImg;
     private final ImageResource playSpeedImg;
     private final ImageResource playModeLiveActiveImg;
     private final ImageResource playModeReplayActiveImg;
@@ -114,8 +112,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
         timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
 
-        playButtonImg = resources.timesliderPlayActiveIcon();
-        pauseButtonImg = resources.timesliderPauseIcon();
         playSpeedImg = resources.timesliderPlaySpeedIcon();
         playPauseButton = new Button("");
 
