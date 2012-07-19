@@ -354,7 +354,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceName);
             String result = "";
             if (leaderboardEntryDTO != null) {
-                result = result+leaderboardEntryDTO.netPoints;
+                result = scoreFormat.format(leaderboardEntryDTO.netPoints);
             }
             return result;
         }

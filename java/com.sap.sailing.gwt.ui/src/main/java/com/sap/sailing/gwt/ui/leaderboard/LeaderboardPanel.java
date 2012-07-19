@@ -19,6 +19,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -92,6 +93,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private static final int SAIL_ID_COLUMN_INDEX = 1;
 
     private static final int CARRY_COLUMN_INDEX = 3;
+    
+    protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.00");
 
     private final SailingServiceAsync sailingService;
 
@@ -489,15 +492,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
                         html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                        html.appendHtmlConstant(entry.totalPoints == 0 ? "" : ""+entry.totalPoints);
+                        html.appendHtmlConstant(entry.totalPoints == 0 ? "" : scoreFormat.format(entry.totalPoints));
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.appendHtmlConstant(entry.netPoints == 0 ? "" : ""+entry.netPoints);
+                        html.appendHtmlConstant(entry.netPoints == 0 ? "" : scoreFormat.format(entry.netPoints));
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
-                    html.appendHtmlConstant(" <span title=\""+entry.netPoints+"/"+entry.totalPoints+"\" style=\"opacity: 0.5;\">");
+                    html.appendHtmlConstant(" <span title=\""+scoreFormat.format(entry.netPoints)+"/"+
+                            scoreFormat.format(entry.totalPoints)+"\" style=\"opacity: 0.5;\">");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
                     }
@@ -565,7 +569,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         @Override
         public String getValue(LeaderboardRowDTO object) {
             final double totalPoints = object.fieldsByRaceColumnName.get(getRaceColumnName()).totalPoints;
-            return "" + (totalPoints == 0 ? "" : totalPoints);
+            return "" + (totalPoints == 0 ? "" : scoreFormat.format(totalPoints));
         }
 
         @Override
@@ -836,7 +840,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         @Override
         public String getValue(LeaderboardRowDTO object) {
             double totalPoints = getLeaderboard().getTotalPoints(object);
-            return "" + (totalPoints==0 ? "" : totalPoints);
+            return "" + (totalPoints==0 ? "" : scoreFormat.format(totalPoints));
         }
 
         @Override
@@ -880,7 +884,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return object.carriedPoints == null ? "" : "" + object.carriedPoints;
+            return object.carriedPoints == null ? "" : scoreFormat.format(object.carriedPoints);
         }
 
         @Override
