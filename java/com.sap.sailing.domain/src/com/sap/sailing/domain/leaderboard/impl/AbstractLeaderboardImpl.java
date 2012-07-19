@@ -43,7 +43,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     /**
      * The factor by which a medal race score is multiplied in the overall point scheme
      */
-    private static final int MEDAL_RACE_FACTOR = 2;
+    private static final double MEDAL_RACE_FACTOR = 2.0;
     
     private final SettableScoreCorrection scoreCorrection;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
@@ -290,8 +290,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     @Override
     public double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
         return isDiscarded(competitor, raceColumn, timePoint) ?
-                0 :
-                (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1) * getNetPoints(competitor, raceColumn, timePoint);
+                0.0 :
+                (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1.0) * getNetPoints(competitor, raceColumn, timePoint);
     }
     
     @Override
@@ -315,7 +315,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         boolean discarded = isDiscarded(competitor, race, timePoint);
         return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), correctedResults.isCorrected(),
                 discarded ? 0
-                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? MEDAL_RACE_FACTOR : 1),
+                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? MEDAL_RACE_FACTOR : 1.0),
                         correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
     }
     
@@ -348,7 +348,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 Entry entry = new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(),
                         correctedResults.isCorrected(), discarded ? 0 : correctedResults.getCorrectedScore()
-                                * (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1), correctedResults.getMaxPointsReason(), discarded,
+                                * (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1.0), correctedResults.getMaxPointsReason(), discarded,
                                 raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
