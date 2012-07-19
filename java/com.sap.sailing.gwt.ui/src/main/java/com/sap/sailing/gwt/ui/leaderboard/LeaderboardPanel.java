@@ -497,7 +497,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
-                    html.appendHtmlConstant(" <span style=\"opacity: 0.5;\">");
+                    html.appendHtmlConstant(" <span title=\""+entry.netPoints+"/"+entry.totalPoints+"\" style=\"opacity: 0.5;\">");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
                     }
