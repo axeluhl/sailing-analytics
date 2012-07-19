@@ -205,7 +205,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
                         dbCorrectionForCompetitor.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(),
                                 maxPointsReason.name());
                     }
-                    Integer explicitScoreCorrection = scoreCorrection
+                    Double explicitScoreCorrection = scoreCorrection
                             .getExplicitScoreCorrection(competitor, raceColumn);
                     if (explicitScoreCorrection != null) {
                         dbCorrectionForCompetitor.put(FieldNames.LEADERBOARD_CORRECTED_SCORE.name(),

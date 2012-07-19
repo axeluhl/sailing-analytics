@@ -40,8 +40,8 @@ public interface Leaderboard extends Named {
      */
     public interface Entry {
         int getTrackedPoints();
-        int getNetPoints() throws NoWindException;
-        int getTotalPoints() throws NoWindException;
+        double getNetPoints() throws NoWindException;
+        double getTotalPoints() throws NoWindException;
         MaxPointsReason getMaxPointsReason();
         boolean isDiscarded() throws NoWindException;
         /**
@@ -77,7 +77,7 @@ public interface Leaderboard extends Named {
      * the <code>competitor</code>. Returns <code>0</code> if there is no carried points definition for
      * <code>competitor</code>.
      */
-    int getCarriedPoints(Competitor competitor);
+    double getCarriedPoints(Competitor competitor);
 
     /**
      * Shorthand for {@link TrackedRace#getRank(Competitor, com.sap.sailing.domain.common.TimePoint)} with the
@@ -106,7 +106,7 @@ public interface Leaderboard extends Named {
      * @param race
      *            a race that is contained in the {@link #getRaceColumns()} result
      */
-    int getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
 
     /**
      * Tells if and why a competitor received "penalty" points for a race (however the scoring rules define the
@@ -125,7 +125,7 @@ public interface Leaderboard extends Named {
      * @param race
      *            a race that is contained in the {@link #getRaceColumns()} result
      */
-    int getTotalPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    double getTotalPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
 
     /**
      * Tells whether the contribution of <code>raceColumn</code> is discarded in the current leaderboard's standings for
@@ -139,7 +139,7 @@ public interface Leaderboard extends Named {
      * Sums up the {@link #getTotalPoints(Competitor, TrackedRace, TimePoint) total points} of <code>competitor</code>
      * across all races tracked by this leaderboard.
      */
-    int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
     
     /**
      * Sorts the competitors according to their ranking in the race column specified. Only competitors who have a score
@@ -191,7 +191,7 @@ public interface Leaderboard extends Named {
      * simply added to the scores tracked by this leaderboard in the {@link #getTotalPoints(Competitor, TimePoint)}
      * method.
      */
-    void setCarriedPoints(Competitor competitor, int carriedPoints);
+    void setCarriedPoints(Competitor competitor, double carriedPoints);
     
     /**
      * Reverses the effect of {@link #setCarriedPoints(Competitor, int)}, i.e., afterwards, asking {@link #getCarriedPoints(Competitor)}

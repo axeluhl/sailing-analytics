@@ -168,11 +168,11 @@ public interface SailingService extends RemoteService {
      * @return the new net points in {@link Pair#getA()} and the new total points in {@link Pair#getB()} for time point
      * <code>date</code> after the max points reason has been updated to <code>maxPointsReasonAsString</code>.
      */
-    Triple<Integer, Integer, Boolean> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString,
+    Triple<Double, Double, Boolean> updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString,
             String raceColumnName, MaxPointsReason maxPointsReason, Date date) throws NoWindException;
 
-    Triple<Integer, Integer, Boolean> updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString,
-            String columnName, Integer correctedScore, Date date) throws NoWindException;
+    Triple<Double, Double, Boolean> updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString,
+            String columnName, Double correctedScore, Date date) throws NoWindException;
 
     void updateCompetitorDisplayNameInLeaderboard(String leaderboardName, String competitorIdAsString, String displayName);
     

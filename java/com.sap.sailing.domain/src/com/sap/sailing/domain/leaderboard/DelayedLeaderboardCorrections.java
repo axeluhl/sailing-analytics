@@ -19,9 +19,9 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  *
  */
 public interface DelayedLeaderboardCorrections extends RaceColumnListener, Serializable {
-    void correctScore(String competitorName, RaceColumn raceColumn, int correctedScore);
+    void correctScore(String competitorName, RaceColumn raceColumn, double correctedScore);
     
-    void setCarriedPoints(String competitorName, int carriedPoints);
+    void setCarriedPoints(String competitorName, double carriedPoints);
 
     void setMaxPointsReason(String competitorName, RaceColumn raceColumn, MaxPointsReason maxPointsReason);
 
