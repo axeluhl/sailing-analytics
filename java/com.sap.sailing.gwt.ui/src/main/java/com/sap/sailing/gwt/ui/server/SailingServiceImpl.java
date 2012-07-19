@@ -373,10 +373,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             throws NoWindException, InterruptedException, ExecutionException {
         Triple<String, Date, Collection<String>> key = new Triple<String, Date, Collection<String>>(
                 leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails);
-        FutureTask<LeaderboardDTO> future;
+        FutureTask<LeaderboardDTO> future = null;
         boolean cacheHit = false;
         synchronized (leaderboardByNameCache) {
-            future = leaderboardByNameCache.get(key);
+            if (!waitForLatestAnalyses) {
+                future = leaderboardByNameCache.get(key);
+            }
             if (future == null) {
                 future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
                     @Override
