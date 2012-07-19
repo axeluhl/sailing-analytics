@@ -266,7 +266,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         DBObject carriedPoints = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
         if (carriedPoints != null) {
             for (String competitorName : carriedPoints.keySet()) {
-                Integer carriedPointsForCompetitor = (Integer) carriedPoints.get(competitorName);
+                Double carriedPointsForCompetitor = (Double) carriedPoints.get(competitorName);
                 if (carriedPointsForCompetitor != null) {
                     correctionsToUpdate.setCarriedPoints(MongoUtils.unescapeDollarAndDot(competitorName), carriedPointsForCompetitor);
                 }
@@ -284,7 +284,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                     .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
                 }
                 if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
-                    correctionsToUpdate.correctScore(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, (Integer) dbScoreCorrectionForCompetitorInRace
+                    correctionsToUpdate.correctScore(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, (Double) dbScoreCorrectionForCompetitorInRace
                                     .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name()));
                 }
             }

@@ -564,7 +564,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            final int totalPoints = object.fieldsByRaceColumnName.get(getRaceColumnName()).totalPoints;
+            final double totalPoints = object.fieldsByRaceColumnName.get(getRaceColumnName()).totalPoints;
             return "" + (totalPoints == 0 ? "" : totalPoints);
         }
 
@@ -835,7 +835,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            int totalPoints = getLeaderboard().getTotalPoints(object);
+            double totalPoints = getLeaderboard().getTotalPoints(object);
             return "" + (totalPoints==0 ? "" : totalPoints);
         }
 
@@ -888,8 +888,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return new Comparator<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                    return (o1.carriedPoints == null ? 0 : o1.carriedPoints)
-                            - (o2.carriedPoints == null ? 0 : o2.carriedPoints);
+                    Double o1CarriedPoints = o1.carriedPoints;
+                    if (o1CarriedPoints == null) {
+                        o1CarriedPoints = 0.0;
+                    }
+                    Double o2CarriedPoints = o2.carriedPoints;
+                    if (o2CarriedPoints == null) {
+                        o2CarriedPoints = 0.0;
+                    }
+                    return o1CarriedPoints.compareTo(o2CarriedPoints);
                 }
             };
         }

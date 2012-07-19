@@ -74,7 +74,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                                 @Override
                                 public void onSuccess(Void v) {
-                                    row.carriedPoints = value==null||value.length()==0 ? null : Integer.valueOf(value.trim());
+                                    row.carriedPoints = value==null||value.length()==0 ? null : Double.valueOf(value.trim());
                                     EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
                                 }
                             });
@@ -227,7 +227,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     getBusyIndicator().setBusy(true);
                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id,
                             raceColumnName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
-                            getLeaderboardDisplayDate(), new AsyncCallback<Triple<Integer, Integer, Boolean>>() {
+                            getLeaderboardDisplayDate(), new AsyncCallback<Triple<Double, Double, Boolean>>() {
                                 @Override
                                 public void onFailure(Throwable t) {
                                     getBusyIndicator().setBusy(false);
@@ -238,7 +238,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 }
 
                                 @Override
-                                public void onSuccess(Triple<Integer, Integer, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                                public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
                                     getBusyIndicator().setBusy(false);
                                     row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints = value == null
                                             || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
@@ -322,8 +322,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getBusyIndicator().setBusy(true);
                     getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.id, raceName,
-                            value == null || value.trim().length() == 0 ? null : Integer.valueOf(value.trim()), getLeaderboardDisplayDate(),
-                    new AsyncCallback<Triple<Integer, Integer, Boolean>>() {
+                            value == null || value.trim().length() == 0 ? null : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
+                    new AsyncCallback<Triple<Double, Double, Boolean>>() {
                         @Override
                         public void onFailure(Throwable t) {
                             getBusyIndicator().setBusy(false);
@@ -334,7 +334,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         }
 
                         @Override
-                        public void onSuccess(Triple<Integer, Integer, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                        public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
                             getBusyIndicator().setBusy(false);
                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceName);
                                     leaderboardEntryDTO.netPoints = value == null || value.length() == 0 ? newNetAndTotalPointsAndIsCorrected

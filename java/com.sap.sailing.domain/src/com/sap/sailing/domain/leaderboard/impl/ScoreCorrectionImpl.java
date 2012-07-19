@@ -33,11 +33,11 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     /**
      * If no score correction is provided here, the uncorrected points are the default.
      */
-    private final Map<Pair<Competitor, RaceColumn>, Integer> correctedScores;
+    private final Map<Pair<Competitor, RaceColumn>, Double> correctedScores;
     
     public ScoreCorrectionImpl() {
         this.maxPointsReasons = new HashMap<Util.Pair<Competitor,RaceColumn>, MaxPointsReason>();
-        this.correctedScores = new HashMap<Util.Pair<Competitor,RaceColumn>, Integer>();
+        this.correctedScores = new HashMap<Util.Pair<Competitor,RaceColumn>, Double>();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     @Override
-    public void correctScore(Competitor competitor, RaceColumn raceColumn, int points) {
+    public void correctScore(Competitor competitor, RaceColumn raceColumn, double points) {
         correctedScores.put(raceColumn.getKey(competitor), points);
     }
     
@@ -85,21 +85,21 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     @Override
     public Result getCorrectedScore(Callable<Integer> uncorrectedScore, final Competitor competitor, final RaceColumn raceColumn,
             TimePoint timePoint, int numberOfCompetitorsInLeaderboard) {
-        int result;
+        double result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn);
         if (maxPointsReason == MaxPointsReason.NONE) {
             result = getCorrectedNonMaxedScore(competitor, raceColumn, uncorrectedScore);
         } else {
             // allow explicit override even when max points reason is specified; calculation may be wrong,
             // e.g., in case we have an untracked race and the number of competitors is estimated incorrectly
-            Integer correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
+            Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
             if (correctedNonMaxedScore == null) {
                 result = getMaxPoints(raceColumn.getTrackedRace(competitor), numberOfCompetitorsInLeaderboard);
             } else {
                 result = correctedNonMaxedScore;
             }
         }
-        final int correctedScore = result;
+        final double correctedScore = result;
         return new Result() {
             @Override
             public MaxPointsReason getMaxPointsReason() {
@@ -107,7 +107,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             }
             
             @Override
-            public int getCorrectedScore() {
+            public double getCorrectedScore() {
                 return correctedScore;
             }
 
@@ -123,8 +123,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * reasons, computes the corrected score. If {@link #correctedScores} contains an entry for the <code>competitor</code>'s key,
      * it is used. Otherwise, the <code>uncorrectedScore</code> is returned.
      */
-    protected int getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn, Callable<Integer> uncorrectedScore) {
-        Integer correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
+    protected double getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn, Callable<Integer> uncorrectedScore) {
+        Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
         if (correctedNonMaxedScore == null) {
             try {
                 return uncorrectedScore.call();
@@ -141,7 +141,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     @Override
-    public Integer getExplicitScoreCorrection(Competitor competitor, RaceColumn raceColumn) {
+    public Double getExplicitScoreCorrection(Competitor competitor, RaceColumn raceColumn) {
         return correctedScores.get(raceColumn.getKey(competitor));
     }
 

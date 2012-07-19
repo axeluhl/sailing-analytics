@@ -29,7 +29,7 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     private final Regatta regatta;
 
     public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Double> scoreComparator) {
         super(scoreCorrection, resultDiscardingRule, scoreComparator);
         this.regatta = regatta;
         regatta.addRaceColumnListener(this);

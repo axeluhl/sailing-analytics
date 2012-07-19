@@ -21,7 +21,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  */
 public interface ScoreCorrection extends Serializable {
     public interface Result {
-        int getCorrectedScore();
+        double getCorrectedScore();
         MaxPointsReason getMaxPointsReason();
         boolean isCorrected();
     }
