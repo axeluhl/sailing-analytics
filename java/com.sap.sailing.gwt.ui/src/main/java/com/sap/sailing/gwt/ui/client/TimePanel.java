@@ -329,7 +329,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     /**
      * @param min must not be <code>null</code>
      * @param max must not be <code>null</code>
-     * @param fireEvent TODO
      */
     public void setMinMax(Date min, Date max, boolean fireEvent) {
         assert min != null && max != null;
