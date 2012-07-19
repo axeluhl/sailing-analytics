@@ -241,6 +241,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     private final com.sap.sailing.domain.common.CountryCodeFactory countryCodeFactory;
     
     private final Executor executor;
+    
+    private final Executor computeLeadearboardByNameExecutor;
 
     /**
      * In live operations, {@link #getLeaderboardByName(String, Date, Collection, boolean)} is the application's
@@ -286,6 +288,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        computeLeadearboardByNameExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameCache = new LinkedHashMap<Triple<String,Date,Collection<String>>, FutureTask<LeaderboardDTO>>() {
             private static final long serialVersionUID = 3775119859130148488L;
@@ -371,6 +374,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public LeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
             throws NoWindException, InterruptedException, ExecutionException {
+        long startOfRequestHandling = System.currentTimeMillis();
         Triple<String, Date, Collection<String>> key = new Triple<String, Date, Collection<String>>(
                 leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails);
         FutureTask<LeaderboardDTO> future = null;
@@ -388,7 +392,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                         return result;
                     }
                 });
-                executor.execute(future);
+                computeLeadearboardByNameExecutor.execute(future);
                 leaderboardByNameCache.put(key, future);
             } else {
                 cacheHit = true;
@@ -402,6 +406,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         }
         logger.info("getLeaderboardByName cache hit vs. miss: "+leaderboardByNameCacheHitCount+"/"+leaderboardByNameCacheMissCount);
         LeaderboardDTO result = future.get();
+        logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
+                (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
 
