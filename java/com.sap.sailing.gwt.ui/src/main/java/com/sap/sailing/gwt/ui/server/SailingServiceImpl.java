@@ -242,6 +242,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private final Executor executor;
     
+    private final Executor computeLeadearboardByNameExecutor;
+
+    /**
+     * In live operations, {@link #getLeaderboardByName(String, Date, Collection, boolean)} is the application's
+     * bottleneck. When two clients ask the same data for the same leaderboard with their
+     * <code>waitForLatestAnalyses</code> parameters set to <code>false</code>, expansion state and (quantized) time
+     * stamp, no two computations should be spawned for the two clients. Instead, if the computation is still running,
+     * all clients asking the same wait for the single result. Results are cached in this LRU-based evicting cache.
+     */
+    private final Map<Triple<String, Date, Collection<String>>, FutureTask<LeaderboardDTO>> leaderboardByNameCache;
+    private int leaderboardByNameCacheHitCount;
+    private int leaderboardByNameCacheMissCount;
+    
     /**
      * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
      * can depend on the results of the tasks run by {@link #raceDetailsExecutor}, and an {@link Executor} doesn't
@@ -275,7 +288,16 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        computeLeadearboardByNameExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        leaderboardByNameCache = new LinkedHashMap<Triple<String,Date,Collection<String>>, FutureTask<LeaderboardDTO>>() {
+            private static final long serialVersionUID = 3775119859130148488L;
+            private static final int MAX_ENTRIES = 100;
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<Triple<String,Date,Collection<String>>, FutureTask<LeaderboardDTO>> eldest) {
+                return size() > MAX_ENTRIES;
+            }
+        };
     }
     
     public void destroy() {
@@ -349,7 +371,47 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public LeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
+    public LeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
+            throws NoWindException, InterruptedException, ExecutionException {
+        long startOfRequestHandling = System.currentTimeMillis();
+        Triple<String, Date, Collection<String>> key = new Triple<String, Date, Collection<String>>(
+                leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails);
+        FutureTask<LeaderboardDTO> future = null;
+        boolean cacheHit = false;
+        synchronized (leaderboardByNameCache) {
+            if (!waitForLatestAnalyses) {
+                future = leaderboardByNameCache.get(key);
+            }
+            if (future == null) {
+                future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
+                    @Override
+                    public LeaderboardDTO call() throws Exception {
+                        LeaderboardDTO result = computeLeaderboardByName(leaderboardName, date,
+                                namesOfRaceColumnsForWhichToLoadLegDetails, waitForLatestAnalyses);
+                        return result;
+                    }
+                });
+                computeLeadearboardByNameExecutor.execute(future);
+                leaderboardByNameCache.put(key, future);
+            } else {
+                cacheHit = true;
+            }
+        }
+        if (cacheHit) {
+            leaderboardByNameCacheHitCount++;
+            logger.info("Cache hit in getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+")");
+        } else {
+            leaderboardByNameCacheMissCount++;
+        }
+        logger.info("getLeaderboardByName cache hit vs. miss: "+leaderboardByNameCacheHitCount+"/"+leaderboardByNameCacheMissCount);
+        LeaderboardDTO result = future.get();
+        logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
+                (System.currentTimeMillis()-startOfRequestHandling)+"ms");
+        return result;
+    }
+
+    private LeaderboardDTO computeLeaderboardByName(String leaderboardName, Date date,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
@@ -420,7 +482,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
-        logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
+        logger.fine("computeLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
@@ -1345,7 +1407,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             Iterable<TrackedLeg> trackedLegs = trackedRace.getTrackedLegs();
             synchronized(trackedLegs) {
                 int legNumber = 1;
-                for(TrackedLeg trackedLeg: trackedLegs) {
+                for (TrackedLeg trackedLeg: trackedLegs) {
                     LegInfoDTO legInfoDTO = new LegInfoDTO(legNumber);
                     legInfoDTO.name = "L" + legNumber;
                     try {
@@ -1362,7 +1424,30 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     legNumber++;
                 }
             }
-        }        
+        }   
+        
+        // special instrumentation for strange race times
+        if (raceTimesInfo.startOfTracking != null) {
+            Date earliest = raceTimesInfo.startOfTracking;
+            boolean allDatesWithin24h = true;
+            if (raceTimesInfo.startOfRace != null && Math.abs(raceTimesInfo.startOfRace.getTime()-earliest.getTime())<24*3600*1000) {
+                allDatesWithin24h = false;
+            }
+            if (raceTimesInfo.newestTrackingEvent != null && Math.abs(raceTimesInfo.newestTrackingEvent.getTime()-earliest.getTime())<24*3600*1000) {
+                allDatesWithin24h = false;
+            }
+            if (raceTimesInfo.endOfTracking != null && Math.abs(raceTimesInfo.endOfTracking.getTime()-earliest.getTime())<24*3600*1000) {
+                allDatesWithin24h = false;
+            }
+            if (raceTimesInfo.endOfRace != null && Math.abs(raceTimesInfo.endOfRace.getTime()-earliest.getTime())<24*3600*1000) {
+                allDatesWithin24h = false;
+            }
+            if (!allDatesWithin24h) {
+                logger.warning("Not all raceTimeInfos times are at the same day.");
+                logger.warning(raceTimesInfo.toString());
+            }
+        }
+
         return raceTimesInfo;
     }
     
@@ -2067,7 +2152,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             // Filling the mark passings
             Set<MarkPassing> competitorMarkPassings = race.getMarkPassings(competitor);
             if (competitorMarkPassings != null) {
-                for (MarkPassing markPassing : race.getMarkPassings(competitor)) {
+                for (MarkPassing markPassing : competitorMarkPassings) {
                     MillisecondsTimePoint time = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis());
                     markPassingsData.add(new Triple<String, Date, Double>(markPassing.getWaypoint().getName(), time
                             .asDate(), getCompetitorRaceDataEntry(detailType, race, competitor, time)));
