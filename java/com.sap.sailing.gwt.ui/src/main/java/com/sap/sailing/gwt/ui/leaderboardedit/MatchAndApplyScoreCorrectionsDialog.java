@@ -258,7 +258,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                         if (officialCorrectionEntry.getScore() != null) {
                             double officialTotalPoints = officialCorrectionEntry.getScore().doubleValue();
                             double officialNetPoints = raceColumn.isMedalRace() ? officialTotalPoints / MEDAL_RACE_FACTOR : officialTotalPoints;
-                            result.addScoreUpdate(competitor, raceColumn, (int) Math.round(officialNetPoints));
+                            result.addScoreUpdate(competitor, raceColumn, officialNetPoints);
                         }
                     }
                 }
