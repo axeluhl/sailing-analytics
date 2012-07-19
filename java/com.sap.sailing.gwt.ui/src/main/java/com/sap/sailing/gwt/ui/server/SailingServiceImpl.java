@@ -1300,7 +1300,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated);
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public RaceTimesInfoDTO getRaceTimesInfo(RaceIdentifier raceIdentifier) {
         RaceTimesInfoDTO raceTimesInfo = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
@@ -1362,7 +1363,30 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     legNumber++;
                 }
             }
-        }        
+        }   
+        
+        // special instrumentation for strange race times
+        if(raceTimesInfo.startOfTracking != null) {
+            boolean allDatesAtSameDay = true;
+            int initialDay = raceTimesInfo.startOfTracking.getDay();
+            if(raceTimesInfo.startOfRace != null && raceTimesInfo.startOfRace.getDay() != initialDay) {
+            	allDatesAtSameDay = false;
+            }
+            if(raceTimesInfo.newestTrackingEvent != null && raceTimesInfo.newestTrackingEvent.getDay() != initialDay) {
+            	allDatesAtSameDay = false;
+            }
+            if(raceTimesInfo.endOfTracking != null && raceTimesInfo.endOfTracking.getDay() != initialDay) {
+            	allDatesAtSameDay = false;
+            }
+            if(raceTimesInfo.endOfRace != null && raceTimesInfo.endOfRace.getDay() != initialDay) {
+            	allDatesAtSameDay = false;
+            }
+            if(!allDatesAtSameDay) {
+        		logger.warning("Not all raceTimeInfos times are at the same day.");
+        		logger.warning(raceTimesInfo.toString());
+        	}
+        }
+
         return raceTimesInfo;
     }
     
