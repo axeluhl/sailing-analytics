@@ -8,9 +8,9 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 public class UpdateLeaderboardCarryValue extends AbstractLeaderboardOperation<Void> {
     private static final long serialVersionUID = 5467731814788887426L;
     private final String competitorIdAsString;
-    private final Integer newCarriedValue;
+    private final Double newCarriedValue;
     
-    public UpdateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Integer newCarriedValue) {
+    public UpdateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Double newCarriedValue) {
         super(leaderboardName);
         this.competitorIdAsString = competitorIdAsString;
         this.newCarriedValue = newCarriedValue;

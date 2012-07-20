@@ -40,7 +40,7 @@ public class UpdateLeaderboardScoreCorrectionMetadata extends AbstractLeaderboar
             SettableScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
             if (scoreCorrection != null) {
                 scoreCorrection.setComment(comment);
-                scoreCorrection.setLastCorrected(timePointOfLastCorrectionValidity);
+                scoreCorrection.setTimePointOfLastCorrectionsValidity(timePointOfLastCorrectionValidity);
             } else {
                 throw new IllegalArgumentException("Leaderboard "+getLeaderboardName()+" has no score corrections to which to apply metadata "+
                         timePointOfLastCorrectionValidity+"/"+comment);

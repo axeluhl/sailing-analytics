@@ -199,7 +199,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         if (result != null) {
             DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
-            loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections);
+            loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, scoreCorrection);
         }
         return result;
     }
@@ -262,7 +262,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private void loadLeaderboardCorrections(DBObject dbLeaderboard, DelayedLeaderboardCorrections correctionsToUpdate) {
+    private void loadLeaderboardCorrections(DBObject dbLeaderboard, DelayedLeaderboardCorrections correctionsToUpdate,
+            SettableScoreCorrection scoreCorrectionToUpdate) {
         DBObject carriedPoints = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
         if (carriedPoints != null) {
             for (String competitorName : carriedPoints.keySet()) {
@@ -273,6 +274,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         DBObject dbScoreCorrection = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name());
+        if (dbScoreCorrection.containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_TIMESTAMP.name())) {
+            scoreCorrectionToUpdate.setTimePointOfLastCorrectionsValidity(
+                    new MillisecondsTimePoint((Long) dbScoreCorrection.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_TIMESTAMP.name())));
+            dbScoreCorrection.removeField(FieldNames.LEADERBOARD_SCORE_CORRECTION_TIMESTAMP.name());
+        }
+        if (dbScoreCorrection.containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name())) {
+            scoreCorrectionToUpdate.setComment((String) dbScoreCorrection.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name()));
+            dbScoreCorrection.removeField(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name());
+        }
         for (String raceName : dbScoreCorrection.keySet()) {
             DBObject dbScoreCorrectionForRace = (DBObject) dbScoreCorrection.get(raceName);
             for (String competitorName : dbScoreCorrectionForRace.keySet()) {

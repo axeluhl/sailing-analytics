@@ -185,7 +185,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     @Override
-    public void setLastCorrected(TimePoint timePointOfLastCorrectionsValidity) {
+    public void setTimePointOfLastCorrectionsValidity(TimePoint timePointOfLastCorrectionsValidity) {
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
     }
 

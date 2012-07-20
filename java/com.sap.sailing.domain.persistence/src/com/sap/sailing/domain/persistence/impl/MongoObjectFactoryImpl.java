@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -217,6 +218,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             if (!dbCorrectionForRace.isEmpty()) {
                 dbScoreCorrections.put(raceColumn.getName(), dbCorrectionForRace);
             }
+        }
+        final TimePoint timePointOfLastCorrectionsValidity = scoreCorrection.getTimePointOfLastCorrectionsValidity();
+        if (timePointOfLastCorrectionsValidity != null) {
+            dbScoreCorrections.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_TIMESTAMP.name(), timePointOfLastCorrectionsValidity.asMillis());
+        }
+        if (scoreCorrection.getComment() != null) {
+            dbScoreCorrections.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name(), scoreCorrection.getComment());
         }
     }
 

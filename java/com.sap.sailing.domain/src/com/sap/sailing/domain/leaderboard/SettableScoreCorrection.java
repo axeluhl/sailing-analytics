@@ -34,7 +34,7 @@ public interface SettableScoreCorrection extends ScoreCorrection {
 
     boolean hasCorrectionFor(RaceColumn raceInLeaderboard);
 
-    void setLastCorrected(TimePoint timePointOfLastCorrectionsValidity);
+    void setTimePointOfLastCorrectionsValidity(TimePoint timePointOfLastCorrectionsValidity);
     
     void setComment(String scoreCorrectionComment);
 }
