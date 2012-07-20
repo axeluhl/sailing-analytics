@@ -132,11 +132,13 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     /**
+     * @param scoreCorrection must not be <code>null</code>
      * @param scoreComparator the comparator to use to compare basic scores, such as net points
      * @param name must not be <code>null</code>
      */
     public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Double> scoreComparator) {
+        assert scoreCorrection != null;
         this.carriedPoints = new HashMap<Competitor, Double>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();

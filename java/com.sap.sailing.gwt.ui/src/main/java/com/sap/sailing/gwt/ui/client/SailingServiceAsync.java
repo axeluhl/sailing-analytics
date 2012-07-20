@@ -234,6 +234,9 @@ public interface SailingServiceAsync {
     void updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString, String columnName,
             Double correctedScore, Date date, AsyncCallback<Triple<Double, Double, Boolean>> asyncCallback);
 
+    void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
+            String comment, AsyncCallback<Void> callback);
+
     void updateLeaderboardScoreCorrectionsAndMaxPointsReasons(BulkScoreCorrectionDTO updates,
             AsyncCallback<Void> callback);
 

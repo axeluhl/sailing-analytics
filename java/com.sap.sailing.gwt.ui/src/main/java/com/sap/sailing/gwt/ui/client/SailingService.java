@@ -252,4 +252,7 @@ public interface SailingService extends RemoteService {
     void removeFregURLs(Set<String> toRemove) throws Exception;
 
     void addFragUrl(String result) throws Exception;
+
+    Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
+            String comment);
 }
