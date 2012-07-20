@@ -57,7 +57,8 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
                 @Override
                 public int compare(RaceColumn o1, RaceColumn o2) {
                     try {
-                        return leaderboard.getNetPoints(competitor, o1, timePoint) - leaderboard.getNetPoints(competitor, o2, timePoint);
+                        return Double.valueOf(leaderboard.getNetPoints(competitor, o1, timePoint)).compareTo(
+                                Double.valueOf(leaderboard.getNetPoints(competitor, o2, timePoint)));
                     } catch (NoWindException e) {
                         throw new NoWindError(e);
                     }

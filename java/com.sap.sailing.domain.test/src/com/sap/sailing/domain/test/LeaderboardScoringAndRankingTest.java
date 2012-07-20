@@ -87,12 +87,12 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(competitors.get(5), rankedCompetitors.get(9));
         
         // Now test the total points and make sure the other competitors advanced by one, too
-        assertEquals(11, leaderboard.getTotalPoints(competitors.get(5), f1Column, now));
+        assertEquals(11, leaderboard.getTotalPoints(competitors.get(5), f1Column, now), 0.000000001);
         for (int i=0; i<5; i++) {
-            assertEquals(i+1, leaderboard.getTotalPoints(competitors.get(i), f1Column, now));
+            assertEquals(i+1, leaderboard.getTotalPoints(competitors.get(i), f1Column, now), 0.000000001);
         }
         for (int i=6; i<10; i++) {
-            assertEquals(i, leaderboard.getTotalPoints(competitors.get(i), f1Column, now));
+            assertEquals(i, leaderboard.getTotalPoints(competitors.get(i), f1Column, now), 0.000000001);
         }
     }
 
@@ -198,7 +198,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later));
+        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertEquals(Arrays.asList(new Competitor[] { c[0], c[1], c[2] }), rankedCompetitors);
     }
 
@@ -217,7 +217,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later));
+        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertTrue(rankedCompetitors.indexOf(c[0]) == rankedCompetitors.indexOf(c[1])-1);
     }
 
@@ -235,7 +235,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         createAndAttachTrackedRaces(series.get(2), "Medal", m1);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         // assert that both have equal score
-        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later));
+        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         // assert that c[0] ranks better than c[1] (reason: c[0] ranked better in medal race)
         assertEquals(rankedCompetitors.indexOf(c[0]), rankedCompetitors.indexOf(c[1])-1);
     }
@@ -255,7 +255,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later));
+        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertEquals(rankedCompetitors.indexOf(c[0]), rankedCompetitors.indexOf(c[1])-1);
     }
 

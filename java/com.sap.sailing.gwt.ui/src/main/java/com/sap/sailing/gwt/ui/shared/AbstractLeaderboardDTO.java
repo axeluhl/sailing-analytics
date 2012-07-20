@@ -69,16 +69,16 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         return false;
     }
 
-    public int getTotalPoints(LeaderboardRowDTO object) {
-        int totalPoints = object.carriedPoints == null ? 0 : object.carriedPoints;
+    public double getTotalPoints(LeaderboardRowDTO object) {
+        double totalPoints = object.carriedPoints == null ? 0 : object.carriedPoints;
         for (LeaderboardEntryDTO e : object.fieldsByRaceColumnName.values()) {
             totalPoints += e.totalPoints;
         }
         return totalPoints;
     }
 
-    public int getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
-        int result = 0;
+    public double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
+        double result = 0;
         LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
             LeaderboardEntryDTO field = row.fieldsByRaceColumnName.get(nameOfLastRaceSoFar);

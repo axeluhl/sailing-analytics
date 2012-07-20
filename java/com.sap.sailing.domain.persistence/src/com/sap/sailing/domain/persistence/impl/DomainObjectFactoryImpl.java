@@ -199,7 +199,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         if (result != null) {
             DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
-            loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections);
+            loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, scoreCorrection);
         }
         return result;
     }
@@ -262,17 +262,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private void loadLeaderboardCorrections(DBObject dbLeaderboard, DelayedLeaderboardCorrections correctionsToUpdate) {
+    private void loadLeaderboardCorrections(DBObject dbLeaderboard, DelayedLeaderboardCorrections correctionsToUpdate,
+            SettableScoreCorrection scoreCorrectionToUpdate) {
         DBObject carriedPoints = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
         if (carriedPoints != null) {
             for (String competitorName : carriedPoints.keySet()) {
-                Integer carriedPointsForCompetitor = (Integer) carriedPoints.get(competitorName);
+                Double carriedPointsForCompetitor = ((Number) carriedPoints.get(competitorName)).doubleValue();
                 if (carriedPointsForCompetitor != null) {
                     correctionsToUpdate.setCarriedPoints(MongoUtils.unescapeDollarAndDot(competitorName), carriedPointsForCompetitor);
                 }
             }
         }
         DBObject dbScoreCorrection = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name());
+        if (dbScoreCorrection.containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_TIMESTAMP.name())) {
+            scoreCorrectionToUpdate.setTimePointOfLastCorrectionsValidity(
+                    new MillisecondsTimePoint((Long) dbScoreCorrection.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_TIMESTAMP.name())));
+            dbScoreCorrection.removeField(FieldNames.LEADERBOARD_SCORE_CORRECTION_TIMESTAMP.name());
+        }
+        if (dbScoreCorrection.containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name())) {
+            scoreCorrectionToUpdate.setComment((String) dbScoreCorrection.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name()));
+            dbScoreCorrection.removeField(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name());
+        }
         for (String raceName : dbScoreCorrection.keySet()) {
             DBObject dbScoreCorrectionForRace = (DBObject) dbScoreCorrection.get(raceName);
             for (String competitorName : dbScoreCorrectionForRace.keySet()) {
@@ -284,8 +294,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                     .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
                 }
                 if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
-                    correctionsToUpdate.correctScore(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, (Integer) dbScoreCorrectionForCompetitorInRace
-                                    .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name()));
+                    final Double leaderboardCorrectedScore = ((Number) dbScoreCorrectionForCompetitorInRace
+                            .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())).doubleValue();
+                    correctionsToUpdate.correctScore(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, (Double) leaderboardCorrectedScore);
                 }
             }
         }

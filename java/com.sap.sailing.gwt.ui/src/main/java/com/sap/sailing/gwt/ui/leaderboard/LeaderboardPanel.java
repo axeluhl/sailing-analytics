@@ -19,6 +19,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -92,6 +93,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private static final int SAIL_ID_COLUMN_INDEX = 1;
 
     private static final int CARRY_COLUMN_INDEX = 3;
+    
+    protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.00");
 
     private final SailingServiceAsync sailingService;
 
@@ -489,15 +492,16 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
                         html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                        html.appendHtmlConstant(entry.totalPoints == 0 ? "" : ""+entry.totalPoints);
+                        html.appendHtmlConstant(entry.totalPoints == 0 ? "" : scoreFormat.format(entry.totalPoints));
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.appendHtmlConstant(entry.netPoints == 0 ? "" : ""+entry.netPoints);
+                        html.appendHtmlConstant(entry.netPoints == 0 ? "" : scoreFormat.format(entry.netPoints));
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
-                    html.appendHtmlConstant(" <span title=\""+entry.netPoints+"/"+entry.totalPoints+"\" style=\"opacity: 0.5;\">");
+                    html.appendHtmlConstant(" <span title=\""+scoreFormat.format(entry.netPoints)+"/"+
+                            scoreFormat.format(entry.totalPoints)+"\" style=\"opacity: 0.5;\">");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
                     }
@@ -562,10 +566,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             legColumns = new ArrayList<LegColumn>();
         }
 
-        @Override
         public String getValue(LeaderboardRowDTO object) {
-            final int totalPoints = object.fieldsByRaceColumnName.get(getRaceColumnName()).totalPoints;
-            return "" + (totalPoints == 0 ? "" : totalPoints);
+            // The following code exists only for robustness. This method should never be called because
+            // RaceColumn implements its own render(...) method which doesn't make use of getValue(...)
+            final double totalPoints = object.fieldsByRaceColumnName.get(getRaceColumnName()).totalPoints;
+            return "" + (totalPoints == 0 ? "" : scoreFormat.format(totalPoints));
         }
 
         @Override
@@ -835,8 +840,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            int totalPoints = getLeaderboard().getTotalPoints(object);
-            return "" + (totalPoints==0 ? "" : totalPoints);
+            double totalPoints = getLeaderboard().getTotalPoints(object);
+            return "" + (totalPoints==0 ? "" : scoreFormat.format(totalPoints));
         }
 
         @Override
@@ -880,7 +885,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return object.carriedPoints == null ? "" : "" + object.carriedPoints;
+            return object.carriedPoints == null ? "" : scoreFormat.format(object.carriedPoints);
         }
 
         @Override
@@ -888,8 +893,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             return new Comparator<LeaderboardRowDTO>() {
                 @Override
                 public int compare(LeaderboardRowDTO o1, LeaderboardRowDTO o2) {
-                    return (o1.carriedPoints == null ? 0 : o1.carriedPoints)
-                            - (o2.carriedPoints == null ? 0 : o2.carriedPoints);
+                    Double o1CarriedPoints = o1.carriedPoints;
+                    if (o1CarriedPoints == null) {
+                        o1CarriedPoints = 0.0;
+                    }
+                    Double o2CarriedPoints = o2.carriedPoints;
+                    if (o2CarriedPoints == null) {
+                        o2CarriedPoints = 0.0;
+                    }
+                    return o1CarriedPoints.compareTo(o2CarriedPoints);
                 }
             };
         }
