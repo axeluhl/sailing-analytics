@@ -206,6 +206,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardCarryVa
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPointsReason;
 import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrection;
+import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardScoreCorrectionMetadata;
 import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationFactory;
@@ -418,7 +419,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         LeaderboardDTO result = null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            result = new LeaderboardDTO();
+            result = new LeaderboardDTO(leaderboard.getScoreCorrection()==null ?
+                        null : leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
+                    leaderboard.getScoreCorrection()==null?null:leaderboard.getScoreCorrection().getComment());
             final TimePoint timePoint = new MillisecondsTimePoint(date);
             result.competitors = new ArrayList<CompetitorDTO>();
             result.name = leaderboard.getName();
@@ -1944,7 +1947,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Integer carriedPoints) {
+    public void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Double carriedPoints) {
         getService().apply(new UpdateLeaderboardCarryValue(leaderboardName, competitorIdAsString, carriedPoints));
     }
 
@@ -1962,6 +1965,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return getService().apply(
                 new UpdateLeaderboardScoreCorrection(leaderboardName, columnName, competitorIdAsString, correctedScore,
                         new MillisecondsTimePoint(date)));
+    }
+    
+    @Override
+    public Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity, String comment) {
+        return getService().apply(
+                new UpdateLeaderboardScoreCorrectionMetadata(leaderboardName, new MillisecondsTimePoint(timePointOfLastCorrectionValidity), comment));
     }
     
     @Override

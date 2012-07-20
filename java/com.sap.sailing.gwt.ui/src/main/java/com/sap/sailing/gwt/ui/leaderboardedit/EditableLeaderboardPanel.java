@@ -63,7 +63,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
                     getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.id,
-                            value == null || value.length() == 0 ? null : Integer.valueOf(value.trim()),
+                            value == null || value.length() == 0 ? null : Double.valueOf(value.trim()),
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable t) {
@@ -338,7 +338,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             getBusyIndicator().setBusy(false);
                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceName);
                                     leaderboardEntryDTO.netPoints = value == null || value.length() == 0 ? newNetAndTotalPointsAndIsCorrected
-                                            .getA() : Integer.valueOf(value.trim());
+                                            .getA() : Double.valueOf(value.trim());
                                     leaderboardEntryDTO.totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
                             leaderboardEntryDTO.netPointsCorrected = newNetAndTotalPointsAndIsCorrected.getC();
                             getCell().setViewData(row, null); // ensure that getValue() is called again

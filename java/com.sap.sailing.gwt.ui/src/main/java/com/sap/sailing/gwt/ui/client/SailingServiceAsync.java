@@ -226,13 +226,16 @@ public interface SailingServiceAsync {
     void disconnectLeaderboardColumnFromTrackedRace(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Void> callback);
 
-    void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Integer carriedPoints, AsyncCallback<Void> callback);
+    void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Double carriedPoints, AsyncCallback<Void> callback);
 
     void updateLeaderboardMaxPointsReason(String leaderboardName, String competitorIdAsString, String raceColumnName,
             MaxPointsReason maxPointsReason, Date date, AsyncCallback<Triple<Double, Double, Boolean>> asyncCallback);
 
     void updateLeaderboardScoreCorrection(String leaderboardName, String competitorIdAsString, String columnName,
             Double correctedScore, Date date, AsyncCallback<Triple<Double, Double, Boolean>> asyncCallback);
+
+    void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
+            String comment, AsyncCallback<Void> callback);
 
     void updateLeaderboardScoreCorrectionsAndMaxPointsReasons(BulkScoreCorrectionDTO updates,
             AsyncCallback<Void> callback);

@@ -566,8 +566,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             legColumns = new ArrayList<LegColumn>();
         }
 
-        @Override
         public String getValue(LeaderboardRowDTO object) {
+            // The following code exists only for robustness. This method should never be called because
+            // RaceColumn implements its own render(...) method which doesn't make use of getValue(...)
             final double totalPoints = object.fieldsByRaceColumnName.get(getRaceColumnName()).totalPoints;
             return "" + (totalPoints == 0 ? "" : scoreFormat.format(totalPoints));
         }

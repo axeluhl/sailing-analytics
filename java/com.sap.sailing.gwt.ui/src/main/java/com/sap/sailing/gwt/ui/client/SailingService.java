@@ -162,7 +162,7 @@ public interface SailingService extends RemoteService {
     
     Map<String, RegattaAndRaceIdentifier> getRegattaAndRaceNameOfTrackedRaceConnectedToLeaderboardColumn(String leaderboardName, String raceColumnName);
 
-    void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Integer carriedPoints);
+    void updateLeaderboardCarryValue(String leaderboardName, String competitorIdAsString, Double carriedPoints);
 
     /**
      * @return the new net points in {@link Pair#getA()} and the new total points in {@link Pair#getB()} for time point
@@ -252,4 +252,7 @@ public interface SailingService extends RemoteService {
     void removeFregURLs(Set<String> toRemove) throws Exception;
 
     void addFragUrl(String result) throws Exception;
+
+    Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
+            String comment);
 }

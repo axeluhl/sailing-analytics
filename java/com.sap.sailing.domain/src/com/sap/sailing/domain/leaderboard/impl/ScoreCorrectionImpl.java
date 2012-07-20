@@ -35,6 +35,20 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      */
     private final Map<Pair<Competitor, RaceColumn>, Double> correctedScores;
     
+    /**
+     * If <code>null</code>, despite a non-<code>null</code> {@link #timePointOfLastCorrectionsValidity} value the result have to be assumed
+     * to be preliminary and need to be displayed with a corresponding hint.
+     */
+    private String comment;
+    
+    /**
+     * Tells when the score correction was last updated. This should usually be the "validity time" and not the
+     * "transaction time." In other words, if scores provided by the race committee are updated to this score correction
+     * at time X, and the race committee's scores are tagged with time Y, then this method should return Y, not X. If
+     * Y is not available for some reason, X may be used as a default.
+     */
+    private TimePoint timePointOfLastCorrectionsValidity;
+    
     public ScoreCorrectionImpl() {
         this.maxPointsReasons = new HashMap<Util.Pair<Competitor,RaceColumn>, MaxPointsReason>();
         this.correctedScores = new HashMap<Util.Pair<Competitor,RaceColumn>, Double>();
@@ -158,6 +172,26 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             }
         }
         return false;
+    }
+
+    @Override
+    public TimePoint getTimePointOfLastCorrectionsValidity() {
+        return timePointOfLastCorrectionsValidity;
+    }
+
+    @Override
+    public String getComment() {
+        return comment;
+    }
+
+    @Override
+    public void setTimePointOfLastCorrectionsValidity(TimePoint timePointOfLastCorrectionsValidity) {
+        this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
+    }
+
+    @Override
+    public void setComment(String scoreCorrectionComment) {
+        this.comment = scoreCorrectionComment;
     }
 
 }
