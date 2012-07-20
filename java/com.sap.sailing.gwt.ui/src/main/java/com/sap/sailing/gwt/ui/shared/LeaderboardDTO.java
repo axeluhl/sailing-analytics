@@ -26,6 +26,8 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements IsSerializ
     private Date timePointOfLastCorrectionsValidity;
     
     private String comment;
+    
+    LeaderboardDTO() {} // for serialization
 
     public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment) {
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
