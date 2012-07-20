@@ -419,7 +419,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         LeaderboardDTO result = null;
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
-            result = new LeaderboardDTO(leaderboard.getScoreCorrection()==null ?
+            result = new LeaderboardDTO(leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity()==null ?
                         null : leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
                     leaderboard.getScoreCorrection()==null?null:leaderboard.getScoreCorrection().getComment());
             final TimePoint timePoint = new MillisecondsTimePoint(date);
