@@ -412,7 +412,7 @@ public interface TrackedRace extends Serializable {
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose {@link #getRank(Competitor)} is 0 will
      * be sorted "worst".
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
 
     Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses) throws NoWindException;
 

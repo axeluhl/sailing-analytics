@@ -26,7 +26,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements IsSerializ
     private Date timePointOfLastCorrectionsValidity;
     
     private String comment;
-    
+
     LeaderboardDTO() {} // for serialization
 
     public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment) {
@@ -76,5 +76,4 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements IsSerializ
         return super.equals(obj) && ((competitors == null) ?
             (((LeaderboardDTO) competitors) != null) ? false : (!competitors.equals(((LeaderboardDTO) obj).competitors)) ? false : true : true);
     }
-
 }

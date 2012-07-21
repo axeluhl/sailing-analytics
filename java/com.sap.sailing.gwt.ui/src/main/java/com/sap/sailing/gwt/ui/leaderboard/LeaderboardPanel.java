@@ -591,7 +591,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                             @Override
                             public void onFailure(Throwable caught) {
                                 getErrorReporter().reportError(
-                                        "Error trying to obtain leaderboard contents: " + caught.getMessage());
+                                        stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
+                                        /* silentMode */ timer.getPlayMode() == PlayModes.Live);
                             }
                         });
             }
@@ -1291,40 +1292,49 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             selectedRaceColumns.addAll(getRaceColumnsToAddImplicitly(leaderboard));
             setLeaderboard(leaderboard);
             adjustColumnLayout(leaderboard);
+            adjustDelayToLive();
             getData().getList().clear();
-            if (leaderboard != null) {
-                getData().getList().addAll(getRowsToDisplay(leaderboard));
-                for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
-                    SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
-                    c.updateMinMax(leaderboard);
-                    // Toggle pre-selected race, if the setting is set and it isn't open yet
-                    if (!autoExpandPerformedOnce && isAutoExpandPreSelectedRace()
-                            && c instanceof RaceColumn<?>
-                            && ((RaceColumn<?>) c).getRace().hasTrackedRace(preSelectedRace)) {
-                        ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
-                        if (!expandableSortableColumn.isExpanded()) {
-                            expandableSortableColumn.toggleExpansion();
-                            autoExpandPerformedOnce = true;
-                        }
-                    }
-                }
-                Comparator<LeaderboardRowDTO> comparator = getComparatorForSelectedSorting();
-                if (comparator != null) {
-                    Collections.sort(getData().getList(), comparator);
-                } else {
-                    SortableColumn<LeaderboardRowDTO, ?> columnToSortFor = getDefaultSortColumn();
-                    // if no sorting was selected, sort by ascending rank and mark
-                    // table header so
-                    sort(columnToSortFor, true);
-                }
-                // Reselect the selected rows
-                clearSelection();
-                for (LeaderboardRowDTO row : data.getList()) {
-                    if (competitorSelectionProvider.isSelected(row.competitor)) {
-                        leaderboardSelectionModel.setSelected(row, true);
+            getData().getList().addAll(getRowsToDisplay(leaderboard));
+            for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
+                SortableColumn<?, ?> c = (SortableColumn<?, ?>) getLeaderboardTable().getColumn(i);
+                c.updateMinMax(leaderboard);
+                // Toggle pre-selected race, if the setting is set and it isn't open yet
+                if (!autoExpandPerformedOnce && isAutoExpandPreSelectedRace() && c instanceof RaceColumn<?>
+                        && ((RaceColumn<?>) c).getRace().hasTrackedRace(preSelectedRace)) {
+                    ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
+                    if (!expandableSortableColumn.isExpanded()) {
+                        expandableSortableColumn.toggleExpansion();
+                        autoExpandPerformedOnce = true;
                     }
                 }
             }
+            Comparator<LeaderboardRowDTO> comparator = getComparatorForSelectedSorting();
+            if (comparator != null) {
+                Collections.sort(getData().getList(), comparator);
+            } else {
+                SortableColumn<LeaderboardRowDTO, ?> columnToSortFor = getDefaultSortColumn();
+                // if no sorting was selected, sort by ascending rank and mark
+                // table header so
+                sort(columnToSortFor, true);
+            }
+            // Reselect the selected rows
+            clearSelection();
+            for (LeaderboardRowDTO row : data.getList()) {
+                if (competitorSelectionProvider.isSelected(row.competitor)) {
+                    leaderboardSelectionModel.setSelected(row, true);
+                }
+            }
+        }
+    }
+
+    /**
+     * Based on the {@link #selectedRaceColumns}' {@link RaceColumnDTO#getDelayToLiveInMillis()} for the race that has
+     * the latest {@link RaceColumnDTO#getStartDate(FleetDTO) start time}, if no {@link #settingsUpdatedExplicitly
+     * explicit setting changes} were performed, automatically adjusts the delay accordingly.
+     */
+    private void adjustDelayToLive() {
+        if (!settingsUpdatedExplicitly && leaderboard.getDelayToLiveInMillisForLatestRace() != null) {
+            setDelayInMilliseconds(leaderboard.getDelayToLiveInMillisForLatestRace());
         }
     }
 
