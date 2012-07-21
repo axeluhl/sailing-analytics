@@ -450,6 +450,25 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
             result.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+            // Computing the competitor leg ranks is expensive, especially in live mode, in case new events keep invalidating
+            // the ranks cache in TrackedLegImpl. Then problem then is that the sorting based on wind data is repeated for each
+            // competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg details
+            // are requested only once and pass them into getLeaderboardEntryDTO TODO
+            final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache = new HashMap<Leg, LinkedHashMap<Competitor,Integer>>();
+            for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                // if details for the column are requested, cache the leg's ranks
+                if (namesOfRaceColumnsForWhichToLoadLegDetails != null
+                                        && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName())) {
+                    for (Fleet fleet : raceColumn.getFleets()) {
+                        TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                        if (trackedRace != null) {
+                            for (TrackedLeg trackedLeg : trackedRace.getTrackedLegs()) {
+                                legRanksCache.put(trackedLeg.getLeg(), trackedLeg.getRanks(timePoint));
+                            }
+                        }
+                    }
+                }
+            }
             for (final Competitor competitor : leaderboard.getCompetitorsFromBestToWorst(timePoint)) {
                 CompetitorDTO competitorDTO = getCompetitorDTO(competitor);
                 LeaderboardRowDTO row = new LeaderboardRowDTO();
@@ -467,7 +486,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                                 return getLeaderboardEntryDTO(entry, raceColumn.getTrackedRace(competitor), competitor, timePoint,
                                        namesOfRaceColumnsForWhichToLoadLegDetails != null
                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn.getName()),
-                                        waitForLatestAnalyses);
+                                        waitForLatestAnalyses, legRanksCache);
                             } catch (NoWindException e) {
                                 throw new NoWindError(e);
                             }
@@ -510,9 +529,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
+     * @param legRanksCache TODO
      */
     private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, TrackedRace trackedRace, Competitor competitor,
-            TimePoint timePoint, boolean addLegDetails, boolean waitForLatestAnalyses) throws NoWindException {
+            TimePoint timePoint, boolean addLegDetails, boolean waitForLatestAnalyses,
+            Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache) throws NoWindException {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
         entryDTO.netPoints = entry.getNetPoints();
@@ -522,7 +543,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         entryDTO.discarded = entry.isDiscarded();
         if (addLegDetails && trackedRace != null) {
             try {
-                RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses);
+                RaceDetails raceDetails = getRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses, legRanksCache);
                 entryDTO.legDetails = raceDetails.getLegDetails();
                 entryDTO.windwardDistanceToOverallLeaderInMeters = raceDetails.getWindwardDistanceToOverallLeader() == null ? null
                         : raceDetails.getWindwardDistanceToOverallLeader().getMeters();
@@ -567,25 +588,25 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * way equals the end of the tracking time, the query results will be looked up in a cache first and if not found,
      * they will be stored to the cache after calculating them. A cache invalidation {@link RaceChangeListener listener}
      * will be registered with the race which will be triggered for any event received by the race.
-     * 
      * @param waitForLatestAnalyses
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
      */
     private RaceDetails getRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalyses) throws NoWindException, InterruptedException, ExecutionException {
+            boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache) throws NoWindException, InterruptedException, ExecutionException {
         RaceDetails raceDetails;
         if (trackedRace.getEndOfTracking() != null && trackedRace.getEndOfTracking().compareTo(timePoint) < 0) {
-            raceDetails = getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(trackedRace, competitor);
+            raceDetails = getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(trackedRace, competitor, legRanksCache);
         } else {
-            raceDetails = calculateRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses);
+            raceDetails = calculateRaceDetails(trackedRace, competitor, timePoint, waitForLatestAnalyses, legRanksCache);
         }
         return raceDetails;
     }
 
     private RaceDetails getRaceDetailsForEndOfTrackingFromCacheOrCalculateAndCache(final TrackedRace trackedRace,
-            final Competitor competitor) throws NoWindException, InterruptedException, ExecutionException {
+            final Competitor competitor, final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache)
+                    throws NoWindException, InterruptedException, ExecutionException {
         final Pair<TrackedRace, Competitor> key = new Pair<TrackedRace, Competitor>(trackedRace, competitor);
         RunnableFuture<RaceDetails> raceDetails;
         synchronized (raceDetailsAtEndOfTrackingCache) {
@@ -595,7 +616,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     @Override
                     public RaceDetails call() throws Exception {
                         return calculateRaceDetails(trackedRace, competitor, trackedRace.getEndOfTracking(),
-                                /* waitForLatestManeuverAnalysis */ true /* because this is done only once after end of tracking */);
+                                /* waitForLatestManeuverAnalysis */ true /* because this is done only once after end of tracking */, legRanksCache);
                     }
                 });
                 raceDetailsExecutor.execute(raceDetails);
@@ -689,7 +710,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     private RaceDetails calculateRaceDetails(TrackedRace trackedRace, Competitor competitor, TimePoint timePoint,
-            boolean waitForLatestAnalyses) throws NoWindException {
+            boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache) throws NoWindException {
         List<LegEntryDTO> legDetails;
         legDetails = new ArrayList<LegEntryDTO>();
         final Course course = trackedRace.getRace().getCourse();
@@ -702,7 +723,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 // immediately. Make sure we're tolerant against disappearing legs! See bug 794.
                 TrackedLegOfCompetitor trackedLeg = trackedRace.getTrackedLeg(competitor, leg);
                 if (trackedLeg != null && trackedLeg.hasStartedLeg(timePoint)) {
-                    legEntry = createLegEntry(trackedLeg, timePoint, waitForLatestAnalyses);
+                    legEntry = createLegEntry(trackedLeg, timePoint, waitForLatestAnalyses, legRanksCache);
                 } else {
                     legEntry = null;
                 }
@@ -719,7 +740,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     private LegEntryDTO createLegEntry(TrackedLegOfCompetitor trackedLeg, TimePoint timePoint,
-            boolean waitForLatestAnalyses) throws NoWindException {
+            boolean waitForLatestAnalyses, Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache) throws NoWindException {
         LegEntryDTO result;
         if (trackedLeg == null) {
             result = null;
@@ -742,8 +763,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.estimatedTimeToNextWaypointInSeconds = trackedLeg.getEstimatedTimeToNextMarkInSeconds(timePoint);
             result.timeInMilliseconds = trackedLeg.getTimeInMilliSeconds(timePoint);
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
-            result.gapToLeaderInSeconds = trackedLeg.getGapToLeaderInSeconds(timePoint);
-            result.rank = trackedLeg.getRank(timePoint);
+            result.gapToLeaderInSeconds = trackedLeg.getGapToLeaderInSeconds(timePoint,
+                    legRanksCache.get(trackedLeg.getLeg()).entrySet().iterator().next().getKey());
+            LinkedHashMap<Competitor, Integer> legRanks = legRanksCache.get(trackedLeg.getLeg());
+            if (legRanks != null) {
+                result.rank = legRanks.get(trackedLeg.getCompetitor());
+            } else {
+                result.rank = trackedLeg.getRank(timePoint);
+            }
             result.started = trackedLeg.hasStartedLeg(timePoint);
             Speed velocityMadeGood;
             if (trackedLeg.hasFinishedLeg(timePoint)) {

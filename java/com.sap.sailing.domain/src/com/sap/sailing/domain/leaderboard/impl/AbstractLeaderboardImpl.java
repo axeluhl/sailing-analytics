@@ -249,7 +249,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      * or otherwise a rank improved (lowered) by the number of disqualifications of competitors whose tracked rank is better (lower)
      * than <code>rank</code>.
      */
-    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace, TimePoint timePoint, int rank) {
+    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace, TimePoint timePoint, int rank) throws NoWindException {
         int correctedRank = rank;
         List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
         int betterCompetitorRank=1;
