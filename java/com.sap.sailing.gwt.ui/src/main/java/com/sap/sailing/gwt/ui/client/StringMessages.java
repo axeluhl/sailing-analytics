@@ -362,4 +362,5 @@ public interface StringMessages extends Messages {
     String errorAddingFragUrl(String message);
     String errorTryingToObtainLeaderboardContents(String message);
     String lastScoreUpdate();
+    String errorBrowserUnsupported();
 }
