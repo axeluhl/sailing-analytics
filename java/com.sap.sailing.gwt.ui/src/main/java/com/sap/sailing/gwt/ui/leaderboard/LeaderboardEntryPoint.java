@@ -36,7 +36,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_AUTO_EXPAND_PRESELECTED_RACE = "autoExpandPreselectedRace";
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
-    private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLivelMillis";
+    private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
     private String leaderboardName;
     private String leaderboardGroupName;
     
@@ -83,7 +83,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         String tvModeParam = Window.Location.getParameter("tvMode");
         if (tvModeParam != null) {
             Timer timer = new Timer(PlayModes.Replay, 1000l);
-            timer.setLivePlayDelayInMillis(5000l);
+            timer.setLivePlayDelayInMillis(delayToLiveMillis);
             TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
                     userAgentType, null, timer, logoAndTitlePanel, mainPanel, showRaceDetails);
             contentScrollPanel.setWidget(tvViewPanel);
