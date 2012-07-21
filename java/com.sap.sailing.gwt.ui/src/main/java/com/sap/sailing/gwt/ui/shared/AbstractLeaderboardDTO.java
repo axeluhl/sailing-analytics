@@ -126,23 +126,24 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
      * @param fleetDTO
      *            must not be null
      */
-    public void addRace(String raceColumnName, FleetDTO fleetDTO, boolean medalRace,
+    public RaceColumnDTO addRace(String raceColumnName, FleetDTO fleetDTO, boolean medalRace,
             RegattaAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
         assert fleetDTO != null;
-        RaceColumnDTO raceInLeaderboardDTO = getOrCreateRaceColumn(raceColumnName);
+        RaceColumnDTO raceColumnDTO = getOrCreateRaceColumn(raceColumnName);
         boolean contains = false;
-        for (FleetDTO fleet : raceInLeaderboardDTO.getFleets()) {
+        for (FleetDTO fleet : raceColumnDTO.getFleets()) {
             if (fleet.name.equals(fleetDTO.name)) {
                 contains = true;
                 break;
             }
         }
         if (!contains) {
-            raceInLeaderboardDTO.addFleet(fleetDTO);
+            raceColumnDTO.addFleet(fleetDTO);
         }
-        raceInLeaderboardDTO.setMedalRace(medalRace);
-        raceInLeaderboardDTO.setRaceIdentifier(fleetDTO, trackedRaceIdentifier);
-        raceInLeaderboardDTO.setRace(fleetDTO, race);
+        raceColumnDTO.setMedalRace(medalRace);
+        raceColumnDTO.setRaceIdentifier(fleetDTO, trackedRaceIdentifier);
+        raceColumnDTO.setRace(fleetDTO, race);
+        return raceColumnDTO;
     }
 
     /**

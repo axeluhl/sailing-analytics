@@ -431,11 +431,13 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 for (Fleet fleet : raceColumn.getFleets()) {
                     RegattaAndRaceIdentifier raceIdentifier = null;
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    final FleetDTO fleetDTO = createFleetDTO(fleet);
                     if (trackedRace != null) {
+                        raceColumnDTO.setDelayToLiveInMillis(fleetDTO, trackedRace.getDelayToLiveInMillis());
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
                     }
-                    result.addRace(raceColumn.getName(), createFleetDTO(fleet), raceColumn.isMedalRace(),
+                    result.addRace(raceColumn.getName(), fleetDTO, raceColumn.isMedalRace(),
                             raceIdentifier, /* StrippedRaceDTO */ null);
                 }
                 result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
@@ -1796,8 +1798,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             StrippedRaceDTO race = null;
             for (Fleet fleet : raceColumn.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = null;
+                long delayToLiveInMillis = 0;
                 if (raceColumn.getTrackedRace(fleet) != null) {
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    delayToLiveInMillis = trackedRace.getDelayToLiveInMillis();
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
                     // Optional: Getting the places of the race
                     PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
@@ -1807,7 +1811,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     race.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                     race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 }    
-                leaderboardDTO.addRace(raceColumn.getName(), createFleetDTO(fleet), raceColumn.isMedalRace(), raceIdentifier, race);
+                final FleetDTO fleetDTO = createFleetDTO(fleet);
+                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), fleetDTO,
+                        raceColumn.isMedalRace(), raceIdentifier, race);
+                raceColumnDTO.setDelayToLiveInMillis(fleetDTO, delayToLiveInMillis);
             }
         }
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();

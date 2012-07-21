@@ -17,11 +17,13 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
     private List<FleetDTO> fleets;
     private Map<FleetDTO, RegattaAndRaceIdentifier> trackedRaceIdentifiersPerFleet;
     private Map<FleetDTO, StrippedRaceDTO> racesPerFleet;
+    private Map<FleetDTO, Long> delayToLiveInMillisPerFleet;
 
     public RaceColumnDTO() {
         trackedRaceIdentifiersPerFleet = new HashMap<FleetDTO, RegattaAndRaceIdentifier>();
         racesPerFleet = new HashMap<FleetDTO, StrippedRaceDTO>();
         fleets = new ArrayList<FleetDTO>();
+        delayToLiveInMillisPerFleet = new HashMap<FleetDTO, Long>();
     }
     
     public String getRaceColumnName() {
@@ -179,5 +181,13 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
 
     public void addFleet(FleetDTO fleet) {
         fleets.add(fleet);
+    }
+
+    public long getDelayToLiveInMillis(FleetDTO fleet) {
+        return delayToLiveInMillisPerFleet.get(fleet);
+    }
+
+    public void setDelayToLiveInMillis(FleetDTO fleet, long delayToLiveInMillis) {
+        this.delayToLiveInMillisPerFleet.put(fleet, delayToLiveInMillis);
     }
 }
