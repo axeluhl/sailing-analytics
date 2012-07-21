@@ -24,6 +24,7 @@ public class UserAgentDetails {
 	
 	public UserAgentDetails(String userAgent) {
 		
+		userAgent = userAgent.toLowerCase();
 		try {
             if (userAgent.indexOf("msie") != -1 && !(userAgent.indexOf("opera") != -1) && (userAgent.indexOf("webtv") == -1)) {
                 String ieVersionString = userAgent.substring(userAgent.indexOf("msie ") + 5);
