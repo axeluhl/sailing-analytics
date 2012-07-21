@@ -359,5 +359,5 @@ public interface StringMessages extends Messages {
     String pleaseEnterNonEmptyUrl();
     String addFragUrl();
     String errorAddingFragUrl(String message);
-    String errorBrowserUnsupported();
+    String warningBrowserUnsupported();
 }

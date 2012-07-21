@@ -52,7 +52,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         
         /* throw warning using alert if browser is unsupported */
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
-        	Window.alert(stringMessages.errorBrowserUnsupported());
+        	Window.alert(stringMessages.warningBrowserUnsupported());
         }
         
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
