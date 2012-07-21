@@ -7,5 +7,7 @@ public interface UserAgentChecker {
     public final UserAgentCheckerImpl INSTANCE = new UserAgentCheckerImpl();
     
     public UserAgentTypes checkUserAgent(String userAgent);
+    
+    public boolean isUserAgentSupported(String userAgent);
 
 }
