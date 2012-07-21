@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
-import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
+import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewModes;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
@@ -38,7 +38,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
     private final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
-    private final UserAgentTypes userAgentType;
+    private final UserAgentDetails userAgent;
     private final UserDTO userDTO;
     private final LogoAndTitlePanel logoAndTitlePanel;
     private final DockLayoutPanel dockPanel;
@@ -60,13 +60,13 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
      * @param logoAndTitlePanel allowed to be <code>null</code>
      */
     public TVViewPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            String leaderboardName, UserAgentTypes userAgentType, UserDTO userDTO, Timer timer,
+            String leaderboardName, UserAgentDetails userAgent, UserDTO userDTO, Timer timer,
             LogoAndTitlePanel logoAndTitlePanel, DockLayoutPanel dockPanel, boolean showRaceDetails) {
         setSize("100%", "100%");
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.userAgentType = userAgentType;
+        this.userAgent = userAgent;
         this.userDTO = userDTO;
         this.logoAndTitlePanel = logoAndTitlePanel;
         this.dockPanel = dockPanel;
@@ -91,7 +91,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         timer.play();
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(), settings,
         /* preSelectedRace */null, selectionModel, timer, leaderboardName, null, errorReporter, stringMessages,
-                userAgentType, showRaceDetails) {
+                userAgent, showRaceDetails) {
             @Override
             protected void setLeaderboard(LeaderboardDTO leaderboard) {
                 super.setLeaderboard(leaderboard);
@@ -123,7 +123,7 @@ public class TVViewPanel extends SimplePanel implements RaceTimesInfoProviderLis
         List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
         raceSelectionModel.setSelection(singletonList);
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, userDTO, timer, raceSelectionModel, leaderboardName, null,
-                errorReporter, stringMessages, userAgentType, RaceBoardViewModes.ONESCREEN, raceTimesInfoProvider);
+                errorReporter, stringMessages, userAgent, RaceBoardViewModes.ONESCREEN, raceTimesInfoProvider);
         return raceBoardPanel;
     }
     

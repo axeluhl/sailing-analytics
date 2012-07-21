@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-
 /**
  * This class holds user agent specific details like type and version.
  * 
@@ -10,9 +9,18 @@ package com.sap.sailing.gwt.ui.client;
 public class UserAgentDetails {
 
     public enum AgentTypes { MSIE, FIREFOX, SAFARI, OPERA, CHROME, UNKNOWN }
+
+    public static enum PlatformTypes{ DESKTOP, MOBILE, UNKNOWN }
+
+	static final String[] MOBILE_SPECIFIC_SUBSTRING = { "iPhone", "Android", "MIDP", "Opera Mobi", "iPad",
+	"Opera Mini", "BlackBerry", "HP iPAQ", "IEMobile", "MSIEMobile", "Windows Phone", "HTC", "LG", "MOT",
+	"Nokia", "Symbian", "Fennec", "Maemo", "Tear", "Midori", "armv", "Windows CE", "WindowsCE", "Smartphone",
+	"240x320", "176x220", "320x320", "160x160", "webOS", "Palm", "Sagem", "Samsung", "SGH", "SIE",
+	"SonyEricsson", "MMP", "UCWEB" };
 	
 	private AgentTypes type;
 	private Integer[] version;
+	private PlatformTypes platform;
 	
 	public UserAgentDetails(String userAgent) {
 		
@@ -54,6 +62,15 @@ public class UserAgentDetails {
         	/* Silently ignore but provide default values */
         	setType(AgentTypes.UNKNOWN);
         	setVersion(new Integer[] {-1, -1});
+        }
+
+        setPlatform(UserAgentDetails.PlatformTypes.DESKTOP);
+        for (String mobile : UserAgentDetails.MOBILE_SPECIFIC_SUBSTRING) {
+            if (userAgent.contains(mobile) || userAgent.contains(mobile.toUpperCase())
+                    || userAgent.contains(mobile.toLowerCase())) {
+                setPlatform(UserAgentDetails.PlatformTypes.MOBILE);
+                break;
+            }
         }
 		
 	}
@@ -104,5 +121,13 @@ public class UserAgentDetails {
 
 	public void setVersion(Integer[] version) {
 		this.version = version;
+	}
+
+	public PlatformTypes getPlatform() {
+		return platform;
+	}
+
+	public void setPlatform(PlatformTypes platform) {
+		this.platform = platform;
 	}	
 }
