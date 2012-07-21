@@ -21,6 +21,8 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public int[] discardThresholds;
     public RegattaDTO regatta;
 
+    private Long delayToLiveInMillisForLatestRace;
+    
     public AbstractLeaderboardDTO() {
         races = new ArrayList<RaceColumnDTO>();
     }
@@ -324,4 +326,12 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         return competitorDisplayNames.get(competitor) != null;
     }
 
+
+    public Long getDelayToLiveInMillisForLatestRace() {
+        return delayToLiveInMillisForLatestRace;
+    }
+
+    public void setDelayToLiveInMillisForLatestRace(Long delayToLiveInMillisForLatestRace) {
+        this.delayToLiveInMillisForLatestRace = delayToLiveInMillisForLatestRace;
+    }
 }

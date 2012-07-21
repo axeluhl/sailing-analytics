@@ -1332,21 +1332,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      * explicit setting changes} were performed, automatically adjusts the delay accordingly.
      */
     private void adjustDelayToLive() {
-        if (!settingsUpdatedExplicitly) {
-            long latestNonNullDelayToLiveInMillis = 0; // if we don't fine anything, use zero delay ("now")
-            Date latestStartTime = new Date(0l);
-            for (RaceColumnDTO raceColumn : selectedRaceColumns) {
-                for (FleetDTO fleet : raceColumn.getFleets()) {
-                    Date startTime = raceColumn.getStartDate(fleet);
-                    if (startTime != null && startTime.after(latestStartTime)) {
-                        Long delayToLiveInMillis = raceColumn.getDelayToLiveInMillis(fleet);
-                        if (delayToLiveInMillis != null) {
-                            latestNonNullDelayToLiveInMillis = delayToLiveInMillis;
-                        }
-                    }
-                }
-            }
-            setDelayInMilliseconds(latestNonNullDelayToLiveInMillis);
+        if (!settingsUpdatedExplicitly && leaderboard.getDelayToLiveInMillisForLatestRace() != null) {
+            setDelayInMilliseconds(leaderboard.getDelayToLiveInMillisForLatestRace());
         }
     }
 

@@ -426,6 +426,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result.competitors = new ArrayList<CompetitorDTO>();
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
+            TimePoint startOfLatestRace = null;
+            Long delayToLiveInMillisForLatestRace = null;
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace());
                 for (Fleet fleet : raceColumn.getFleets()) {
@@ -433,7 +435,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     final FleetDTO fleetDTO = createFleetDTO(fleet);
                     if (trackedRace != null) {
-                        raceColumnDTO.setDelayToLiveInMillis(fleetDTO, trackedRace.getDelayToLiveInMillis());
+                        if (startOfLatestRace == null || (trackedRace.getStartOfRace() != null && trackedRace.getStartOfRace().compareTo(startOfLatestRace) > 0)) {
+                            delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
+                        }
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
                     }
@@ -442,6 +446,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             }
+            result.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
             result.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
@@ -1792,16 +1797,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      */
     private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withGeoLocationData) {
         StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO();
+        TimePoint startOfLatestRace = null;
+        Long delayToLiveInMillisForLatestRace = null;
         leaderboardDTO.name = leaderboard.getName();
         leaderboardDTO.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             StrippedRaceDTO race = null;
             for (Fleet fleet : raceColumn.getFleets()) {
                 RegattaAndRaceIdentifier raceIdentifier = null;
-                long delayToLiveInMillis = 0;
                 if (raceColumn.getTrackedRace(fleet) != null) {
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                    delayToLiveInMillis = trackedRace.getDelayToLiveInMillis();
+                    if (startOfLatestRace == null || (trackedRace.getStartOfRace() != null && trackedRace.getStartOfRace().compareTo(startOfLatestRace) > 0)) {
+                        delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
+                    }
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
                     // Optional: Getting the places of the race
                     PlacemarkOrderDTO racePlaces = withGeoLocationData ? getRacePlaces(trackedRace) : null;
@@ -1812,13 +1820,12 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     race.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 }    
                 final FleetDTO fleetDTO = createFleetDTO(fleet);
-                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), fleetDTO,
-                        raceColumn.isMedalRace(), raceIdentifier, race);
-                raceColumnDTO.setDelayToLiveInMillis(fleetDTO, delayToLiveInMillis);
+                leaderboardDTO.addRace(raceColumn.getName(), fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race);
             }
         }
         leaderboardDTO.hasCarriedPoints = leaderboard.hasCarriedPoints();
         leaderboardDTO.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
+        leaderboardDTO.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
         return leaderboardDTO;
     }
 
