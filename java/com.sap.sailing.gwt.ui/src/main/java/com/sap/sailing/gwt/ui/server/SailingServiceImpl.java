@@ -1427,31 +1427,30 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     legNumber++;
                 }
             }
+            // special instrumentation for strange race times
+            if (raceTimesInfo.startOfTracking != null) {
+                long earliestInMs = raceTimesInfo.startOfTracking.getTime();
+                long timeToCheck = 24*3600*1000; // 24h
+                boolean allDatesWithin24h = true;
+                if (raceTimesInfo.startOfRace != null && Math.abs(raceTimesInfo.startOfRace.getTime()-earliestInMs)>timeToCheck) {
+                    allDatesWithin24h = false;
+                }
+                if (raceTimesInfo.newestTrackingEvent != null && Math.abs(raceTimesInfo.newestTrackingEvent.getTime()-earliestInMs)>timeToCheck) {
+                    allDatesWithin24h = false;
+                }
+                if (raceTimesInfo.endOfTracking != null && Math.abs(raceTimesInfo.endOfTracking.getTime()-earliestInMs)>timeToCheck) {
+                    allDatesWithin24h = false;
+                }
+                if (raceTimesInfo.endOfRace != null && Math.abs(raceTimesInfo.endOfRace.getTime()-earliestInMs)>timeToCheck) {
+                    allDatesWithin24h = false;
+                }
+                if (!allDatesWithin24h) {
+                    logger.warning("Not all raceTimeInfos times are at the same day.");
+                    logger.warning(raceTimesInfo.toString());
+                }
+            }
         }   
         
-        // special instrumentation for strange race times
-        if (raceTimesInfo.startOfTracking != null) {
-            long earliestInMs = raceTimesInfo.startOfTracking.getTime();
-            long timeToCheck = 24*3600*1000; // 24h
-            boolean allDatesWithin24h = true;
-            if (raceTimesInfo.startOfRace != null && Math.abs(raceTimesInfo.startOfRace.getTime()-earliestInMs)>timeToCheck) {
-                allDatesWithin24h = false;
-            }
-            if (raceTimesInfo.newestTrackingEvent != null && Math.abs(raceTimesInfo.newestTrackingEvent.getTime()-earliestInMs)>timeToCheck) {
-                allDatesWithin24h = false;
-            }
-            if (raceTimesInfo.endOfTracking != null && Math.abs(raceTimesInfo.endOfTracking.getTime()-earliestInMs)>timeToCheck) {
-                allDatesWithin24h = false;
-            }
-            if (raceTimesInfo.endOfRace != null && Math.abs(raceTimesInfo.endOfRace.getTime()-earliestInMs)>timeToCheck) {
-                allDatesWithin24h = false;
-            }
-            if (!allDatesWithin24h) {
-                logger.warning("Not all raceTimeInfos times are at the same day.");
-                logger.warning(raceTimesInfo.toString());
-            }
-        }
-
         return raceTimesInfo;
     }
     
