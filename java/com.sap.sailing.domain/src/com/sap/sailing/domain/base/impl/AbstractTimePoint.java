@@ -41,6 +41,11 @@ public abstract class AbstractTimePoint implements TimePoint {
     public TimePoint plus(long milliseconds) {
         return new MillisecondsTimePoint(asMillis()+milliseconds);
     }
+    
+    @Override
+    public TimePoint minus(long milliseconds) {
+        return plus(-milliseconds);
+    }
 
     @Override
     public boolean after(TimePoint other) {

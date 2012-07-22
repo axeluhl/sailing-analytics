@@ -10,6 +10,8 @@ public interface TimePoint extends Comparable<TimePoint>, Serializable {
     
     TimePoint plus(long milliseconds);
     
+    TimePoint minus(long milliseconds);
+    
     boolean after(TimePoint other);
     
     boolean before(TimePoint other);
