@@ -289,7 +289,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        computeLeadearboardByNameExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        computeLeadearboardByNameExecutor = Executors.newFixedThreadPool(10*Runtime.getRuntime().availableProcessors());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameCache = new LinkedHashMap<Triple<String,Date,Collection<String>>, FutureTask<LeaderboardDTO>>() {
             private static final long serialVersionUID = 3775119859130148488L;
