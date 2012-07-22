@@ -38,6 +38,21 @@ public abstract class AbstractTimePoint implements TimePoint {
     }
     
     @Override
+    public TimePoint plus(long milliseconds) {
+        return new MillisecondsTimePoint(asMillis()+milliseconds);
+    }
+
+    @Override
+    public boolean after(TimePoint other) {
+        return this.compareTo(other) > 0;
+    }
+
+    @Override
+    public boolean before(TimePoint other) {
+        return this.compareTo(other) < 0;
+    }
+
+    @Override
     public int hashCode() {
         return (int) (asMillis() & Integer.MAX_VALUE);
     }
