@@ -355,7 +355,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
             for (Map.Entry<Waypoint, MarkPassing> e : oldMarkPassings.entrySet()) {
                 if (!foundOldWaypoints.contains(e.getKey())) {
                     TimePoint timePointOfRemovedMarkPassing = e.getValue().getTimePoint();
-                    if (timePointOfRemovedMarkPassing.compareTo(from) < 0) {
+                    if (from == null || timePointOfRemovedMarkPassing.compareTo(from) < 0) {
                         from = timePointOfRemovedMarkPassing;
                     }
                 }
