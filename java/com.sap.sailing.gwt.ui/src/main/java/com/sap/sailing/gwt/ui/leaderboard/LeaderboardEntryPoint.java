@@ -97,7 +97,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                             /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
                     LeaderboardEntryPoint.this, stringMessages, userAgentType, showRaceDetails);
             if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-                timer.play();
+                timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
             }
             contentScrollPanel.setWidget(leaderboardPanel);
         }
