@@ -755,7 +755,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 lock = readWriteLock.readLock();
             }
         }
-        lock.lock();
+        Util.lock(lock);
         try {
             if (rankedCompetitors == null) {
                 rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the write lock after updating the cache
@@ -1353,6 +1353,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));
         }
+        Map<TrackedLeg, LegType> legTypesCache = new HashMap<TrackedLeg, LegType>();
         getRace().getCourse().lockForRead(); // ensure the course doesn't change, particularly lose the leg we're interested in, while we're running
         try {
             for (Competitor competitor : getRace().getCompetitors()) {
@@ -1361,7 +1362,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
                     LegType legType;
                     try {
-                        legType = trackedLeg.getLegType(timePoint);
+                        legType = legTypesCache.get(trackedLeg);
+                        if (legType == null) {
+                            legType = trackedLeg.getLegType(timePoint);
+                            legTypesCache.put(trackedLeg, legType);
+                        }
                         if (legType != LegType.REACHING) {
                             GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
                             if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {

@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.confidence.Weigher;
@@ -182,7 +183,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * Synchronizes serialization on this object to avoid the cache being updated while being written.
      */
     private synchronized void writeObject(ObjectOutputStream s) throws IOException {
-        cacheLock.readLock().lock();
+        Util.lock(cacheLock.readLock());
         lockForRead();
         try {
             s.defaultWriteObject();
@@ -227,7 +228,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         // can't use lockForWrite() here because caching can happen while holding the read lock, and the lock can't be
         // upgraded. But lockForRead() and synchronization will do the job because all invalidations lock the write lock,
         // and all contains() checks and get() calls use synchronization too.
-        cacheLock.writeLock().lock();
+        Util.lock(cacheLock.writeLock());
         try {
             // synchronization necessary to protect writeObject from ConcurrentModificationException
             synchronized (this) {
@@ -239,7 +240,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
                         timePointsWithCachedNullResultFastContains.add(timePoint);
                     }
                 } else {
-                    cacheLock.writeLock().lock();
+                    Util.lock(cacheLock.writeLock());
                     try {
                         cache.add(fix);
                     } finally {
@@ -281,7 +282,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
      * running.
      */
     private void invalidateCache() {
-        cacheLock.writeLock().lock();
+        Util.lock(cacheLock.writeLock());
         try {
             Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
                     : getCachedFixes().tailSet(scheduledRefreshInterval.getStart(), /* inclusive */true)).iterator();
@@ -317,7 +318,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     private void refreshCacheIncrementally() {
         Set<WindWithConfidence<TimePoint>> windFixesToRecalculate = new HashSet<WindWithConfidence<TimePoint>>();
         Set<TimePoint> cachedNullResultsToRecalculate = new HashSet<TimePoint>();
-        cacheLock.readLock().lock();
+        Util.lock(cacheLock.readLock());
         try {
             Iterator<WindWithConfidence<TimePoint>> iter = (scheduledRefreshInterval.getStart() == null ? getCachedFixes()
                     : getCachedFixes().tailSet(scheduledRefreshInterval.getStart(), /* inclusive */true)).iterator();
@@ -362,7 +363,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
             }
         }
         // apply the computed cache deltas
-        cacheLock.writeLock().lock();
+        Util.lock(cacheLock.writeLock());
         try {
             for (TimePoint nullRemoval : nullRemovals) {
                 timePointsWithCachedNullResult.remove(nullRemoval);
@@ -402,7 +403,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
     }
 
     private void clearCache() {
-        cacheLock.writeLock().lock();
+        Util.lock(cacheLock.writeLock());
         try {
             cache.clear();
             timePointsWithCachedNullResult.clear();
@@ -422,7 +423,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl impl
         WindWithConfidence<TimePoint> cachedFix = null;
         WindWithConfidence<TimePoint> result = null;
         final boolean nullResultCacheContains;
-        cacheLock.readLock().lock();
+        Util.lock(cacheLock.readLock());
         try {
             nullResultCacheContains = nullResultCacheContains(timePoint);
             if (nullResultCacheContains) {

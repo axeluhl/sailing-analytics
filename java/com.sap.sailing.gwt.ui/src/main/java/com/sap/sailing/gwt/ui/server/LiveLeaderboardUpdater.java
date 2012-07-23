@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
@@ -93,6 +95,12 @@ public class LiveLeaderboardUpdater implements Runnable {
     
     private int cacheHitCount;
     private int cacheMissCount;
+
+    /**
+     * If {@link #running}, holds the thread created by {@link #start()}. This thread will be stopped if computing an update
+     * takes longer than {@link #UPDATE_TIMEOUT_IN_MILLIS} milliseconds.
+     */
+    private Thread thread;
     
     public LiveLeaderboardUpdater(String leaderboardName, SailingServiceImpl sailingService) {
         this.leaderboardName = leaderboardName;
@@ -138,7 +146,8 @@ public class LiveLeaderboardUpdater implements Runnable {
 
     private synchronized void start() {
         running = true;
-        new Thread(this, "LiveLeaderboardUpdater for leaderboard "+getLeaderboard().getName()).start();
+        thread = new Thread(this, "LiveLeaderboardUpdater for leaderboard "+getLeaderboard().getName());
+        thread.start();
     }
 
     /**
@@ -179,42 +188,80 @@ public class LiveLeaderboardUpdater implements Runnable {
     @Override
     public void run() {
         assert running;
-        logger.info("Starting "+LiveLeaderboardUpdater.class.getSimpleName()+" thread for leaderboard "+leaderboardName);
-        while (true) {
-            MillisecondsTimePoint now = MillisecondsTimePoint.now();
-            TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
-            synchronized (this) {
-                if (timePoint.asMillis() - lastRequest.asMillis() >= UPDATE_TIMEOUT_IN_MILLIS) {
-                    running = false;
-                    break; // make sure no-one sets running to true again while outside the synchronized block and before re-evaluating the while condition
+        Timer interruptTimer = null;
+        TimerTask interruptTask = null;
+        try {
+            logger.info("Starting " + LiveLeaderboardUpdater.class.getSimpleName() + " thread for leaderboard "
+                    + leaderboardName);
+            interruptTimer = new Timer("Interrupt timer for "+LiveLeaderboardUpdater.class.getSimpleName()+" for leaderboard "+leaderboardName);
+            // interrupt the current thread if not producing a single result within the overall timeout
+            while (true) {
+                MillisecondsTimePoint now = MillisecondsTimePoint.now();
+                TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
+                synchronized (this) {
+                    if (timePoint.asMillis() - lastRequest.asMillis() >= UPDATE_TIMEOUT_IN_MILLIS) {
+                        running = false;
+                        break; // make sure no-one sets running to true again while outside the synchronized block and
+                               // before re-evaluating the while condition
+                    }
                 }
-            }
-            TimePoint timeLastUpdateWasStarted = now;
-            try {
-                final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
-                LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboardName, timePoint,
-                        namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */ false);
-                updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, newCacheValue);
-            } catch (NoWindException e) {
-                logger.info("Unable to update cached leaderboard results for leaderboard "+leaderboardName+": "+e.getMessage());
-                logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
+                TimePoint timeLastUpdateWasStarted = now;
                 try {
-                    Thread.sleep(1000); // avoid running into the same NoWindException too quickly
-                } catch (InterruptedException e1) {
-                    logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e1);
-                }
-            }
-            TimePoint computeLeaderboardByNameFinishedAt = MillisecondsTimePoint.now();
-            long millisToSleep = MINIMUM_TIME_BETWEEN_UPDATES - (computeLeaderboardByNameFinishedAt.asMillis()-timeLastUpdateWasStarted.asMillis());
-            if (millisToSleep > 0) {
-                try {
-                    Thread.sleep(millisToSleep);
-                } catch (InterruptedException e) {
+                    final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
+                    interruptTask = new TimerTask() {
+                        @Override
+                        public void run() {
+                            synchronized (LiveLeaderboardUpdater.this) {
+                                if (thread != null) {
+                                    logger.severe("Interrupting "+LiveLeaderboardUpdater.class.getSimpleName()+" thread "+thread+
+                                            " after not receiving an update in "+UPDATE_TIMEOUT_IN_MILLIS+"ms");
+                                    thread.interrupt();
+                                }
+                            }
+                        }
+                    };
+                    interruptTimer.schedule(interruptTask, UPDATE_TIMEOUT_IN_MILLIS);
+                    LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboardName, timePoint,
+                            namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */false);
+                    updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, newCacheValue);
+                } catch (NoWindException e) {
+                    logger.info("Unable to update cached leaderboard results for leaderboard " + leaderboardName + ": "
+                            + e.getMessage());
                     logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
+                    try {
+                        Thread.sleep(1000); // avoid running into the same NoWindException too quickly
+                    } catch (InterruptedException e1) {
+                        logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e1);
+                    }
                 }
+                if (interruptTask != null) {
+                    interruptTask.cancel();
+                }
+                TimePoint computeLeaderboardByNameFinishedAt = MillisecondsTimePoint.now();
+                long millisToSleep = MINIMUM_TIME_BETWEEN_UPDATES
+                        - (computeLeaderboardByNameFinishedAt.asMillis() - timeLastUpdateWasStarted.asMillis());
+                if (millisToSleep > 0) {
+                    try {
+                        Thread.sleep(millisToSleep);
+                    } catch (InterruptedException e) {
+                        logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
+                    }
+                }
+            }
+            logger.info("" + LiveLeaderboardUpdater.class.getSimpleName() + " thread for leaderboard "
+                    + leaderboardName + " ending");
+        } catch (Throwable t) {
+            running = false;
+            logger.info("exception in "+LiveLeaderboardUpdater.class.getName()+".run(): "+t.getMessage());
+            logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", t);
+        } finally {
+            if (interruptTask != null) {
+                interruptTask.cancel();
+            }
+            if (interruptTimer != null) {
+                interruptTimer.cancel();
             }
         }
-        logger.info(""+LiveLeaderboardUpdater.class.getSimpleName()+" thread for leaderboard "+leaderboardName+" ending");
     }
 
     /**
