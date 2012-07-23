@@ -100,16 +100,19 @@ public class LiveLeaderboardUpdater implements Runnable {
     
     public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws NoWindException {
         final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
         LeaderboardDTO result = null;
         synchronized (this) {
             if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
                 result = currentLiveLeaderboard;
-                cacheHitCount++;
+                lastRequest = timePoint;
+                if (result != null) {
+                    cacheHitCount++;
+                }
             }
         }
         if (result == null) { // current cache doesn't have the column details requested; re-calculate
             cacheMissCount++;
-            TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
             result = sailingService.computeLeaderboardByName(leaderboardName, timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
                     /* waitForLatestAnalyses */ false);
             updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails, result, timePoint);
