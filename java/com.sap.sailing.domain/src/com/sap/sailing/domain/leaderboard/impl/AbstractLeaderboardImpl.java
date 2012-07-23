@@ -508,4 +508,21 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         }
     }
 
+    @Override
+    public long getDelayToLiveInMillis() {
+        TimePoint startOfLatestRace = null;
+        Long delayToLiveInMillisForLatestRace = null;
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                if (trackedRace != null) {
+                    if (startOfLatestRace == null
+                            || (trackedRace.getStartOfRace() != null && trackedRace.getStartOfRace().compareTo(startOfLatestRace) > 0)) {
+                        delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
+                    }
+                }
+            }
+        }
+        return delayToLiveInMillisForLatestRace;
+    }
 }

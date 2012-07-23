@@ -578,23 +578,23 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (getLeaderboard().getLegCount(getRaceColumnName()) != -1) {
                 callWhenExpansionDataIsLoaded.run();
             } else {
-                getSailingService().getLeaderboardByName(getLeaderboardName(), getLeaderboardDisplayDate(),
+                getSailingService().getLeaderboardByName(getLeaderboardName(),
+                        timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
                 /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                /* waitForLatestAnalyses */ timer.getPlayMode() != PlayModes.Live,
-                        new AsyncCallback<LeaderboardDTO>() {
-                            @Override
-                            public void onSuccess(LeaderboardDTO result) {
-                                updateLeaderboard(result);
-                                callWhenExpansionDataIsLoaded.run();
-                            }
+                new AsyncCallback<LeaderboardDTO>() {
+                    @Override
+                    public void onSuccess(LeaderboardDTO result) {
+                        updateLeaderboard(result);
+                        callWhenExpansionDataIsLoaded.run();
+                    }
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                getErrorReporter().reportError(
-                                        stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
-                                        /* silentMode */ timer.getPlayMode() == PlayModes.Live);
-                            }
-                        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        getErrorReporter().reportError(
+                                stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
+                                /* silentMode */ timer.getPlayMode() == PlayModes.Live);
+                    }
+                });
             }
         }
 
@@ -1240,9 +1240,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     private void loadCompleteLeaderboard(Date date) {
         if (needsDataLoading()) {
-            GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService, getLeaderboardName(), date,
+            GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService, getLeaderboardName(),
+                    timer.getPlayMode() == PlayModes.Live ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                    /* waitForLatestAnalyses */ timer.getPlayMode() != PlayModes.Live,
                     new AsyncCallback<LeaderboardDTO>() {
                 @Override
                 public void onSuccess(LeaderboardDTO result) {

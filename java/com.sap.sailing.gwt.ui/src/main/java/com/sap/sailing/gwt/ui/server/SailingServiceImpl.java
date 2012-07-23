@@ -243,18 +243,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     
     private final Executor executor;
     
-    private final Executor computeLeadearboardByNameExecutor;
-
     /**
-     * In live operations, {@link #getLeaderboardByName(String, Date, Collection, boolean)} is the application's
-     * bottleneck. When two clients ask the same data for the same leaderboard with their
-     * <code>waitForLatestAnalyses</code> parameters set to <code>false</code>, expansion state and (quantized) time
-     * stamp, no two computations should be spawned for the two clients. Instead, if the computation is still running,
-     * all clients asking the same wait for the single result. Results are cached in this LRU-based evicting cache.
+     * {@link #getLeaderboardByName(String, Date, Collection)} is the application's bottleneck. When two clients ask the
+     * same data for the same leaderboard with their <code>waitForLatestAnalyses</code> parameters set to
+     * <code>false</code>, expansion state and (quantized) time stamp, no two computations should be spawned for the two
+     * clients. Instead, if the computation is still running, all clients asking the same wait for the single result.
+     * Results are cached in this LRU-based evicting cache.
      */
-    private final Map<Triple<String, Date, Collection<String>>, FutureTask<LeaderboardDTO>> leaderboardByNameCache;
-    private int leaderboardByNameCacheHitCount;
-    private int leaderboardByNameCacheMissCount;
+    private final Map<String, LiveLeaderboardUpdater> leaderboardByNameLiveUpdaters;
     
     /**
      * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
@@ -289,16 +285,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         swissTimingFactory = SwissTimingFactory.INSTANCE;
         countryCodeFactory = com.sap.sailing.domain.common.CountryCodeFactory.INSTANCE;
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        computeLeadearboardByNameExecutor = Executors.newFixedThreadPool(10*Runtime.getRuntime().availableProcessors());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        leaderboardByNameCache = new LinkedHashMap<Triple<String,Date,Collection<String>>, FutureTask<LeaderboardDTO>>() {
-            private static final long serialVersionUID = 3775119859130148488L;
-            private static final int MAX_ENTRIES = 100;
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<Triple<String,Date,Collection<String>>, FutureTask<LeaderboardDTO>> eldest) {
-                return size() > MAX_ENTRIES;
-            }
-        };
+        leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
     }
     
     public void destroy() {
@@ -371,48 +359,45 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
     
+    /**
+     * If <code>date</code> is <code>null</code>, the {@link LiveLeaderboardUpdater} for the
+     * <code>leaderboardName</code> requested is obtained or created if it doesn't exist yet. The request is then passed
+     * on to the live leaderboard updater which will respond with its live {@link LeaderboardDTO} if it has at least the
+     * columns requested as per <code>namesOfRaceColumnsForWhichToLoadLegDetails</code>. Otherwise, the updater will add
+     * the missing columns to its profile and start a synchronous computation for the requesting client, the result of
+     * which will be used as live leaderboard cache update.
+     * <p>
+     * 
+     * Otherwise, the leaderboard is {@link #computeLeaderboardByName(String, Date, Collection, boolean) computed}
+     * synchronously on the fly.
+     */
     @Override
     public LeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails)
             throws NoWindException, InterruptedException, ExecutionException {
+        LeaderboardDTO result;
+        boolean liveMode = date == null;
         long startOfRequestHandling = System.currentTimeMillis();
-        Triple<String, Date, Collection<String>> key = new Triple<String, Date, Collection<String>>(
-                leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails);
-        FutureTask<LeaderboardDTO> future = null;
-        boolean cacheHit = false;
-        synchronized (leaderboardByNameCache) {
-            if (!waitForLatestAnalyses) {
-                future = leaderboardByNameCache.get(key);
+        if (liveMode) {
+            LiveLeaderboardUpdater liveLeaderboardUpdater;
+            synchronized (leaderboardByNameLiveUpdaters) {
+                liveLeaderboardUpdater = leaderboardByNameLiveUpdaters.get(leaderboardName);
+                if (liveLeaderboardUpdater == null) {
+                    liveLeaderboardUpdater = new LiveLeaderboardUpdater(leaderboardName, this);
+                    leaderboardByNameLiveUpdaters.put(leaderboardName, liveLeaderboardUpdater);
+                }
             }
-            if (future == null) {
-                future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
-                    @Override
-                    public LeaderboardDTO call() throws Exception {
-                        LeaderboardDTO result = computeLeaderboardByName(leaderboardName, date,
-                                namesOfRaceColumnsForWhichToLoadLegDetails, waitForLatestAnalyses);
-                        return result;
-                    }
-                });
-                computeLeadearboardByNameExecutor.execute(future);
-                leaderboardByNameCache.put(key, future);
-            } else {
-                cacheHit = true;
-            }
-        }
-        if (cacheHit) {
-            leaderboardByNameCacheHitCount++;
-            logger.info("Cache hit in getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+")");
+            result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
         } else {
-            leaderboardByNameCacheMissCount++;
+            result = computeLeaderboardByName(leaderboardName, new MillisecondsTimePoint(date), namesOfRaceColumnsForWhichToLoadLegDetails,
+                    /* waitForLatestAnalyses */ true); // in replay mode we'de like to know things exactly and can afford it
         }
-        logger.info("getLeaderboardByName cache hit vs. miss: "+leaderboardByNameCacheHitCount+"/"+leaderboardByNameCacheMissCount);
-        LeaderboardDTO result = future.get();
         logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
 
-    private LeaderboardDTO computeLeaderboardByName(String leaderboardName, Date date,
+    protected LeaderboardDTO computeLeaderboardByName(String leaderboardName, final TimePoint timePoint,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
@@ -422,12 +407,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             result = new LeaderboardDTO(leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity()==null ?
                         null : leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
                     leaderboard.getScoreCorrection()==null?null:leaderboard.getScoreCorrection().getComment());
-            final TimePoint timePoint = new MillisecondsTimePoint(date);
             result.competitors = new ArrayList<CompetitorDTO>();
             result.name = leaderboard.getName();
             result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
-            TimePoint startOfLatestRace = null;
-            Long delayToLiveInMillisForLatestRace = null;
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace());
                 for (Fleet fleet : raceColumn.getFleets()) {
@@ -435,9 +417,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                     final FleetDTO fleetDTO = createFleetDTO(fleet);
                     if (trackedRace != null) {
-                        if (startOfLatestRace == null || (trackedRace.getStartOfRace() != null && trackedRace.getStartOfRace().compareTo(startOfLatestRace) > 0)) {
-                            delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
-                        }
                         raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta()
                                 .getName(), trackedRace.getRace().getName());
                     }
@@ -446,14 +425,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
                 result.setCompetitorsFromBestToWorst(raceColumnDTO, getCompetitorDTOList(leaderboard.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
             }
-            result.setDelayToLiveInMillisForLatestRace(delayToLiveInMillisForLatestRace);
+            result.setDelayToLiveInMillisForLatestRace(leaderboard.getDelayToLiveInMillis());
             result.rows = new HashMap<CompetitorDTO, LeaderboardRowDTO>();
             result.hasCarriedPoints = leaderboard.hasCarriedPoints();
             result.discardThresholds = leaderboard.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces();
             // Computing the competitor leg ranks is expensive, especially in live mode, in case new events keep invalidating
             // the ranks cache in TrackedLegImpl. Then problem then is that the sorting based on wind data is repeated for each
             // competitor, leading to square effort. We therefore need to compute the leg ranks for those race where leg details
-            // are requested only once and pass them into getLeaderboardEntryDTO TODO
+            // are requested only once and pass them into getLeaderboardEntryDTO
             final Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache = new HashMap<Leg, LinkedHashMap<Competitor,Integer>>();
             for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 // if details for the column are requested, cache the leg's ranks
@@ -511,7 +490,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
-        logger.fine("computeLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
+        logger.fine("computeLeaderboardByName("+leaderboardName+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }

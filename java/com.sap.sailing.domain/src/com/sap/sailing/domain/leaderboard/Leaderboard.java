@@ -240,4 +240,10 @@ public interface Leaderboard extends Named {
     void addRaceColumnListener(RaceColumnListener listener);
     
     void removeRaceColumnListener(RaceColumnListener listener);
+    
+    /**
+     * For this leaderboard computes the delay to live of the {@link TrackedRace} linked to any of the leaderboard's
+     * columns that has the latest start date. If no tracked race is linked to the leaderboard, <code>null</code> is returned.
+     */
+    long getDelayToLiveInMillis();
 }
