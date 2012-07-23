@@ -166,6 +166,10 @@ public interface SailingServiceAsync {
      * filled in. The column details are filled for the races whose named are provided in
      * <code>namesOfRacesForWhichToLoadLegDetails</code>.
      * 
+     * @param date
+     *            the time point for the leaderboard data to retrieve, or <code>null</code> for "live mode" which means
+     *            that the server will produce whatever it has ready for the currently active live delay set on the
+     *            server; in live mode, data served may be taken from caches that lag up to a few seconds.
      * @param namesOfRaceColumnsForWhichToLoadLegDetails
      *            if <code>null</code>, no {@link LeaderboardEntryDTO#legDetails leg details} will be present in the
      *            result ({@link LeaderboardEntryDTO#legDetails} will be <code>null</code> for all
@@ -173,15 +177,10 @@ public interface SailingServiceAsync {
      *            list will contain one entry per leg of the race {@link Course} for those race columns whose
      *            {@link RaceColumn#getType() name} is contained in <code>namesOfRacesForWhichToLoadLegDetails</code>.
      *            For all other columns, {@link LeaderboardEntryDTO#legDetails} is <code>null</code>.
-     * @param waitForLatestAnalyses
-     *            if <code>false</code>, this method is allowed to read the maneuver analysis and other expensive
-     *            analysis results such as the cross track error from a cache that may not reflect all data already
-     *            received; otherwise, the method will always block for the latest cache updates to have happened before
-     *            returning.
      */
     void getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            boolean waitForLatestAnalyses, AsyncCallback<LeaderboardDTO> callback);
+            AsyncCallback<LeaderboardDTO> callback);
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 

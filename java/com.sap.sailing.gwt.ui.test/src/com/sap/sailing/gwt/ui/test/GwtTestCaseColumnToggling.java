@@ -162,34 +162,32 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     private void getLeaderboard(){
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
-        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* waitForLatestManeuverAnalysis */ true,
-                new AsyncCallback<LeaderboardDTO>() {
+        service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, new AsyncCallback<LeaderboardDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                fail("Failed to get leaderboard.");
+                finishTest();
+            }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        fail("Failed to get leaderboard.");
-                        finishTest();
+            @Override
+            public void onSuccess(LeaderboardDTO result) {
+                System.out.println("Got leaderboard.");
+                
+                leaderboard = result;
+                leaderboardPanel.updateLeaderboard(leaderboard);
+                for (int i = 0; i < leaderboardPanel.getLeaderboardTable()
+                        .getColumnCount(); i++) {
+                    Column<LeaderboardRowDTO, ?> c = leaderboardPanel.getLeaderboardTable().getColumn(i);
+                    if (c instanceof ExpandableSortableColumn<?>) {
+                        @SuppressWarnings("unchecked")
+                        ExpandableSortableColumn<LeaderboardRowDTO> myRc = (ExpandableSortableColumn<LeaderboardRowDTO>) c;
+                        rc = myRc;
+                        rc.setEnableLegDrillDown(true);
                     }
-
-                    @Override
-                    public void onSuccess(LeaderboardDTO result) {
-                        System.out.println("Got leaderboard.");
-                        
-                        leaderboard = result;
-                        leaderboardPanel.updateLeaderboard(leaderboard);
-                        for (int i = 0; i < leaderboardPanel.getLeaderboardTable()
-                                .getColumnCount(); i++) {
-                            Column<LeaderboardRowDTO, ?> c = leaderboardPanel.getLeaderboardTable().getColumn(i);
-                            if (c instanceof ExpandableSortableColumn<?>) {
-                                @SuppressWarnings("unchecked")
-                                ExpandableSortableColumn<LeaderboardRowDTO> myRc = (ExpandableSortableColumn<LeaderboardRowDTO>) c;
-                                rc = myRc;
-                                rc.setEnableLegDrillDown(true);
-                            }
-                        }
-                        removeColumnAndAssert();
-                    }
-                });
+                }
+                removeColumnAndAssert();
+            }
+        });
     }
     
     private void removeColumnAndAssert(){
