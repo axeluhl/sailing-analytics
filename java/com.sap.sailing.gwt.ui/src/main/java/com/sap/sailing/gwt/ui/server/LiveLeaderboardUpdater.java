@@ -74,10 +74,11 @@ public class LiveLeaderboardUpdater implements Runnable {
     
     /**
      * For each String from <code>namesOfRaceColumnsForWhichToLoadLegDetails</code> passed to
-     * {@link #getLiveLeaderboard(Collection)}, records the time of the last request here when the
+     * {@link #getLiveLeaderboard(Collection)}, records the validity time point of the last request here when the
      * {@link #currentLiveLeaderboard} has been updated with results containing this column details. This updater will
-     * stop computing the details for that column if the time for the update calculation is more than
-     * {@link #UPDATE_TIMEOUT_IN_MILLIS} milliseconds after the time point recorded here.<p>
+     * stop computing the details for that column if the validity time for the update calculation is more than
+     * {@link #UPDATE_TIMEOUT_IN_MILLIS} milliseconds after the time point recorded here.
+     * <p>
      */
     private final Map<String, TimePoint> timePointOfLastRequestForColumnDetails;
     
@@ -107,6 +108,7 @@ public class LiveLeaderboardUpdater implements Runnable {
     public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws NoWindException {
         final MillisecondsTimePoint now = MillisecondsTimePoint.now();
         TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
+        updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails, timePoint);
         LeaderboardDTO result = null;
         synchronized (this) {
             if (running && columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
@@ -121,7 +123,6 @@ public class LiveLeaderboardUpdater implements Runnable {
             cacheMissCount++;
             result = sailingService.computeLeaderboardByName(leaderboardName, timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
                     /* waitForLatestAnalyses */ false);
-            updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails, result, timePoint);
             updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, result);
         }
         ensureRunning();
@@ -151,9 +152,10 @@ public class LiveLeaderboardUpdater implements Runnable {
      * 
      * This method assumes that <code>namesOfRaceColumnsForWhichToLoadLegDetails</code> tells the column names for which
      * <code>result</code> has the details.
+     * 
+     * @param timePoint the validity time point for the request; not the wall clock time when the request was sent
      */
-    private synchronized void updateRequestTimes(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            LeaderboardDTO result, TimePoint timePoint) {
+    private synchronized void updateRequestTimes(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, TimePoint timePoint) {
         lastRequest = timePoint;
         for (String nameOfRaceColumn : namesOfRaceColumnsForWhichToLoadLegDetails) {
             if (!timePointOfLastRequestForColumnDetails.containsKey(nameOfRaceColumn) ||
@@ -178,11 +180,16 @@ public class LiveLeaderboardUpdater implements Runnable {
     public void run() {
         assert running;
         logger.info("Starting "+LiveLeaderboardUpdater.class.getSimpleName()+" thread for leaderboard "+leaderboardName);
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
-        TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
-        TimePoint timeLastUpdateWasStarted;
-        while (running) {
-            timeLastUpdateWasStarted = now;
+        while (true) {
+            MillisecondsTimePoint now = MillisecondsTimePoint.now();
+            TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
+            synchronized (this) {
+                if (timePoint.asMillis() - lastRequest.asMillis() >= UPDATE_TIMEOUT_IN_MILLIS) {
+                    running = false;
+                    break; // make sure no-one sets running to true again while outside the synchronized block and before re-evaluating the while condition
+                }
+            }
+            TimePoint timeLastUpdateWasStarted = now;
             try {
                 final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
                 LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboardName, timePoint,
@@ -197,15 +204,8 @@ public class LiveLeaderboardUpdater implements Runnable {
                     logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e1);
                 }
             }
-            now = MillisecondsTimePoint.now();
-            timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
-            synchronized (this) {
-                if (timePoint.asMillis() - lastRequest.asMillis() >= UPDATE_TIMEOUT_IN_MILLIS) {
-                    running = false;
-                    break; // make sure no-one sets running to true again while outside the synchronized block and before re-evaluating the while condition
-                }
-            }
-            long millisToSleep = MINIMUM_TIME_BETWEEN_UPDATES - (now.asMillis()-timeLastUpdateWasStarted.asMillis());
+            TimePoint computeLeaderboardByNameFinishedAt = MillisecondsTimePoint.now();
+            long millisToSleep = MINIMUM_TIME_BETWEEN_UPDATES - (computeLeaderboardByNameFinishedAt.asMillis()-timeLastUpdateWasStarted.asMillis());
             if (millisToSleep > 0) {
                 try {
                     Thread.sleep(millisToSleep);
