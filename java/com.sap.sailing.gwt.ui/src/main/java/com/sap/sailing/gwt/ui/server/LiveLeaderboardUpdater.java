@@ -45,6 +45,12 @@ public class LiveLeaderboardUpdater implements Runnable {
      */
     private static final long UPDATE_TIMEOUT_IN_MILLIS = 60000l;
     
+    /**
+     * A kind of "throttle"; if leaderboard updates are computed in less than this time, don't start a new update before this time has
+     * passed since starting the last update.
+     */
+    private static final long MINIMUM_TIME_BETWEEN_UPDATES = 1000l;
+    
     private final String leaderboardName;
     
     private final SailingServiceImpl sailingService;
@@ -103,7 +109,7 @@ public class LiveLeaderboardUpdater implements Runnable {
         TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
         LeaderboardDTO result = null;
         synchronized (this) {
-            if (columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
+            if (running && columnNamesForWhichCurrentLiveLeaderboardHasTheDetails.containsAll(namesOfRaceColumnsForWhichToLoadLegDetails)) {
                 result = currentLiveLeaderboard;
                 lastRequest = timePoint;
                 if (result != null) {
@@ -171,8 +177,12 @@ public class LiveLeaderboardUpdater implements Runnable {
     @Override
     public void run() {
         assert running;
-        TimePoint timePoint = MillisecondsTimePoint.now().minus(getLeaderboard().getDelayToLiveInMillis());
+        logger.info("Starting "+LiveLeaderboardUpdater.class.getSimpleName()+" thread for leaderboard "+leaderboardName);
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
+        TimePoint timeLastUpdateWasStarted;
         while (running) {
+            timeLastUpdateWasStarted = now;
             try {
                 final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
                 LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboardName, timePoint,
@@ -187,14 +197,24 @@ public class LiveLeaderboardUpdater implements Runnable {
                     logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e1);
                 }
             }
-            timePoint = MillisecondsTimePoint.now().minus(getLeaderboard().getDelayToLiveInMillis());
+            now = MillisecondsTimePoint.now();
+            timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
             synchronized (this) {
                 if (timePoint.asMillis() - lastRequest.asMillis() >= UPDATE_TIMEOUT_IN_MILLIS) {
                     running = false;
                     break; // make sure no-one sets running to true again while outside the synchronized block and before re-evaluating the while condition
                 }
             }
+            long millisToSleep = MINIMUM_TIME_BETWEEN_UPDATES - (now.asMillis()-timeLastUpdateWasStarted.asMillis());
+            if (millisToSleep > 0) {
+                try {
+                    Thread.sleep(millisToSleep);
+                } catch (InterruptedException e) {
+                    logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
+                }
+            }
         }
+        logger.info(""+LiveLeaderboardUpdater.class.getSimpleName()+" thread for leaderboard "+leaderboardName+" ending");
     }
 
     /**

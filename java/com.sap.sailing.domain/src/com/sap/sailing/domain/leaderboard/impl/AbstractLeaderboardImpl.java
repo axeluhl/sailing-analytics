@@ -509,7 +509,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     @Override
-    public long getDelayToLiveInMillis() {
+    public Long getDelayToLiveInMillis() {
         TimePoint startOfLatestRace = null;
         Long delayToLiveInMillisForLatestRace = null;
         for (RaceColumn raceColumn : getRaceColumns()) {
