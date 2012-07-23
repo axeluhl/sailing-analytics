@@ -188,11 +188,13 @@ public class LiveLeaderboardUpdater implements Runnable {
     @Override
     public void run() {
         assert running;
+        Timer interruptTimer = null;
+        TimerTask interruptTask = null;
         try {
             logger.info("Starting " + LiveLeaderboardUpdater.class.getSimpleName() + " thread for leaderboard "
                     + leaderboardName);
+            interruptTimer = new Timer("Interrupt timer for "+LiveLeaderboardUpdater.class.getSimpleName()+" for leaderboard "+leaderboardName);
             // interrupt the current thread if not producing a single result within the overall timeout
-            Timer interruptTimer = new Timer("Interrupt timer for "+LiveLeaderboardUpdater.class.getSimpleName()+" for leaderboard "+leaderboardName);
             while (true) {
                 MillisecondsTimePoint now = MillisecondsTimePoint.now();
                 TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
@@ -206,7 +208,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                 TimePoint timeLastUpdateWasStarted = now;
                 try {
                     final Set<String> namesOfRaceColumnsForWhichToLoadLegDetails = getColumnNamesForWhichToFetchDetails(timePoint);
-                    TimerTask interruptTask = new TimerTask() {
+                    interruptTask = new TimerTask() {
                         @Override
                         public void run() {
                             synchronized (LiveLeaderboardUpdater.this) {
@@ -221,7 +223,6 @@ public class LiveLeaderboardUpdater implements Runnable {
                     interruptTimer.schedule(interruptTask, UPDATE_TIMEOUT_IN_MILLIS);
                     LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboardName, timePoint,
                             namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */false);
-                    interruptTask.cancel();
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, newCacheValue);
                 } catch (NoWindException e) {
                     logger.info("Unable to update cached leaderboard results for leaderboard " + leaderboardName + ": "
@@ -232,6 +233,9 @@ public class LiveLeaderboardUpdater implements Runnable {
                     } catch (InterruptedException e1) {
                         logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e1);
                     }
+                }
+                if (interruptTask != null) {
+                    interruptTask.cancel();
                 }
                 TimePoint computeLeaderboardByNameFinishedAt = MillisecondsTimePoint.now();
                 long millisToSleep = MINIMUM_TIME_BETWEEN_UPDATES
@@ -250,6 +254,13 @@ public class LiveLeaderboardUpdater implements Runnable {
             running = false;
             logger.info("exception in "+LiveLeaderboardUpdater.class.getName()+".run(): "+t.getMessage());
             logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", t);
+        } finally {
+            if (interruptTask != null) {
+                interruptTask.cancel();
+            }
+            if (interruptTimer != null) {
+                interruptTimer.cancel();
+            }
         }
     }
 
