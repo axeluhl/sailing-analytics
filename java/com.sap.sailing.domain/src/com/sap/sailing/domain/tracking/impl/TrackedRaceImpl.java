@@ -82,6 +82,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.SmartFutureCache;
 import com.sap.sailing.util.impl.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sailing.util.impl.SmartFutureCache.EmptyUpdateInterval;
@@ -755,7 +756,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 lock = readWriteLock.readLock();
             }
         }
-        Util.lock(lock);
+        LockUtil.lock(lock);
         try {
             if (rankedCompetitors == null) {
                 rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the write lock after updating the cache

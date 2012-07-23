@@ -24,8 +24,8 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.NamedImpl;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.util.CourseAsWaypointList;
+import com.sap.sailing.util.impl.LockUtil;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -69,7 +69,7 @@ public class CourseImpl extends NamedImpl implements Course {
     
     @Override
     public void lockForRead() {
-        Util.lock(lock.readLock());
+        LockUtil.lock(lock.readLock());
     }
 
     @Override
@@ -109,7 +109,7 @@ public class CourseImpl extends NamedImpl implements Course {
     
     @Override
     public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
-        Util.lock(lock.writeLock());
+        LockUtil.lock(lock.writeLock());
         try {
             waypoints.add(zeroBasedPosition, waypointToAdd);
             Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
@@ -139,7 +139,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public void removeWaypoint(int zeroBasedPosition) {
         if (zeroBasedPosition >= 0) {
             Waypoint removedWaypoint;
-            Util.lock(lock.writeLock());
+            LockUtil.lock(lock.writeLock());
             try {
                 boolean isLast = zeroBasedPosition == waypoints.size() - 1;
                 removedWaypoint = waypoints.remove(zeroBasedPosition);
@@ -354,7 +354,7 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
-        Util.lock(lock.writeLock());
+        LockUtil.lock(lock.writeLock());
         try {
             Iterable<Waypoint> courseWaypoints = getWaypoints();
             List<Waypoint> newWaypointList = new LinkedList<Waypoint>();

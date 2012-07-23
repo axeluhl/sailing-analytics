@@ -9,9 +9,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
+import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
 
 public class TrackImpl<FixType extends Timed> implements Track<FixType> {
@@ -63,7 +63,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
 
     @Override
     public void lockForRead() {
-        Util.lock(readWriteLock.readLock());
+        LockUtil.lock(readWriteLock.readLock());
     }
 
     @Override
@@ -72,7 +72,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     }
     
     protected void lockForWrite() {
-        Util.lock(readWriteLock.writeLock());
+        LockUtil.lock(readWriteLock.writeLock());
     }
     
     protected void unlockAfterWrite() {

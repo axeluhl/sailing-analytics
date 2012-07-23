@@ -12,7 +12,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
 
 /**
@@ -193,7 +192,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         public V call() {
                             try {
                                 V preResult = cacheUpdateComputer.computeCacheUpdate(key, joinedUpdateInterval);
-                                Util.lock(getOrCreateLockForKey(key).writeLock());
+                                LockUtil.lock(getOrCreateLockForKey(key).writeLock());
                                 try {
                                     V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult, joinedUpdateInterval);
                                     if (result == null) {
@@ -239,7 +238,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 }
             } // else no calculation currently going on; value has been fetched from latest cache entry
         } else {
-            Util.lock(getOrCreateLockForKey(key).readLock());
+            LockUtil.lock(getOrCreateLockForKey(key).readLock());
             try {
                 value = cache.get(key);
             } finally {
