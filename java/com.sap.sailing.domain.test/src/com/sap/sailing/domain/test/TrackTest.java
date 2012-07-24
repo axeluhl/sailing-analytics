@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -334,6 +335,7 @@ public class TrackTest {
     @Test
     public void testDistanceTraveledOnSmoothenedTrackThenAddingOutlier() {
         DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        final int timeBetweenFixesInMillis = 1000;
         Bearing bearing = new DegreeBearingImpl(123);
         Speed speed = new KnotSpeedImpl(7);
         Position p = new DegreePosition(0, 0);
@@ -344,12 +346,39 @@ public class TrackTest {
         for (int i=0; i<steps; i++) {
             GPSFix fix = new GPSFixImpl(p, start);
             track.addGPSFix(fix);
-            next = start.plus(1000);
+            next = start.plus(timeBetweenFixesInMillis);
             p = p.translateGreatCircle(bearing, speed.travel(start, next));
             start = next;
             bearing = new DegreeBearingImpl(bearing.getDegrees() + 1);
         }
         assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        TimePoint timePointForOutliner = new MillisecondsTimePoint(now.asMillis() + ((int) steps/2) * timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
+        Position outlierPosition = new DegreePosition(90, 90);
+        GPSFix outlier = new GPSFixImpl(outlierPosition, timePointForOutliner);
+        track.addGPSFix(outlier);
+        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        TimePoint timePointForLateOutliner = new MillisecondsTimePoint(now.asMillis() + (steps-1)*timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
+        Position lateOutlierPosition = new DegreePosition(90, 90);
+        GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutliner);
+        track.addGPSFix(lateOutlier);
+        GPSFix polishedLastFix = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
+        // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
+        assertEquals(lateOutlier, polishedLastFix);
+        track.lockForRead();
+        try {
+            assertEquals(steps+1, Util.size(track.getFixes())); // what will later be detected as outlier is now an additional fix
+        } finally {
+            track.unlockAfterRead();
+        }
+        // now add another "normal" fix, making the lateOutlier really an outlier
+        GPSFix fix = new GPSFixImpl(p, start); // the "overshoot" from the previous loop can be used to generate the next "regular" fix
+        track.addGPSFix(fix);
+        track.lockForRead();
+        try {
+            assertEquals(steps+1, Util.size(track.getFixes())); // the one "normal" late fix is added on top of the <steps> fixes, but the two outliers should now be removed
+        } finally {
+            track.unlockAfterRead();
+        }
     }
     
     @Test
