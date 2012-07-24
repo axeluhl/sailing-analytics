@@ -379,6 +379,9 @@ public class TrackTest {
         } finally {
             track.unlockAfterRead();
         }
+        GPSFix polishedLastFix2 = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
+        // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
+        assertEquals(fix, polishedLastFix2);
     }
     
     @Test
