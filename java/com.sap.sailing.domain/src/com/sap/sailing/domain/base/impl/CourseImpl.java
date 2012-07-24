@@ -44,7 +44,7 @@ public class CourseImpl extends NamedImpl implements Course {
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
-        lock = new ReentrantReadWriteLock();
+        lock = new ReentrantReadWriteLock(/* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
         listeners = new HashSet<CourseListener>();
         this.waypoints = new ArrayList<Waypoint>();
         waypointIndexes = new HashMap<Waypoint, Integer>();
