@@ -180,6 +180,7 @@ public interface StringMessages extends Messages {
     String jibe();
     String penaltyCircle();
     String markPassing();
+    String mark();
     String otherManeuver();
     String douglasPeuckerPoints();
     String filterRacesByName();

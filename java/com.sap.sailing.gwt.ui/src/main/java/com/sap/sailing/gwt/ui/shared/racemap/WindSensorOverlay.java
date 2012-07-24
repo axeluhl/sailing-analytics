@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.Overlay;
@@ -34,6 +35,8 @@ public class WindSensorOverlay extends CanvasOverlay {
     private int canvasWidth;
     private int canvasHeight;
 
+    private final NumberFormat numberFormat = NumberFormat.getFormat("0.0");
+    
     public WindSensorOverlay(RaceMapImageManager raceMapImageManager, StringMessages stringMessages) {
         super();
         this.raceMapImageManager = raceMapImageManager;
@@ -68,9 +71,10 @@ public class WindSensorOverlay extends CanvasOverlay {
                 setLatLngPosition(LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg));
                 Point sensorPositionInPx = getMap().convertLatLngToDivPixel(getLatLngPosition());
                 getPane().setWidgetPosition(getCanvas(), sensorPositionInPx.getX() - canvasWidth / 2, sensorPositionInPx.getY() - canvasHeight / 2);
-                String title = stringMessages.wind() + " "
-                        + Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()+ " ("
-                                + WindSourceTypeFormatter.format(windSource, stringMessages) + ")";
+                String title = stringMessages.wind() + " " + Math.round(windDTO.dampenedTrueWindFromDeg) + " ";
+                title += stringMessages.degreesShort()+ " ("+ WindSourceTypeFormatter.format(windSource, stringMessages) + "), ";
+                title += stringMessages.windSpeed() + numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots);
+                
                 getCanvas().setTitle(title);
                 hasValidWind = true;
             }
