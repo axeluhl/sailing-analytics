@@ -262,9 +262,9 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                     * e.getSpeed().getMetersPerSecond())
                     && (next == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
                             * e.getSpeed().getMetersPerSecond())
-                    && (maxSpeedForSmoothening == null
-                            || (previous == null || speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0) || (next == null || speedToNext
-                            .compareTo(maxSpeedForSmoothening) <= 0));
+                    && (maxSpeedForSmoothing == null
+                            || (previous == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (next == null || speedToNext
+                            .compareTo(maxSpeedForSmoothing) <= 0));
             e.cacheValidity(result);
         }
         return result;
