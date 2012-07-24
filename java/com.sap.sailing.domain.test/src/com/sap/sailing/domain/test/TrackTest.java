@@ -20,10 +20,13 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -326,6 +329,27 @@ public class TrackTest {
         } finally {
             track.unlockAfterRead();
         }
+    }
+    
+    @Test
+    public void testDistanceTraveledOnSmoothenedTrackThenAddingOutlier() {
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        Bearing bearing = new DegreeBearingImpl(123);
+        Speed speed = new KnotSpeedImpl(7);
+        Position p = new DegreePosition(0, 0);
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint start = now;
+        final int steps = 10;
+        TimePoint next = null;
+        for (int i=0; i<steps; i++) {
+            GPSFix fix = new GPSFixImpl(p, start);
+            track.addGPSFix(fix);
+            next = start.plus(1000);
+            p = p.translateGreatCircle(bearing, speed.travel(start, next));
+            start = next;
+            bearing = new DegreeBearingImpl(bearing.getDegrees() + 1);
+        }
+        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
     }
     
     @Test
