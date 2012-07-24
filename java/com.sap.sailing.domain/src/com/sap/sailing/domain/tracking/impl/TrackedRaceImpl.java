@@ -856,9 +856,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint) {
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings != null) {
-            for (MarkPassing markPassing : markPassings) {
-                if (markPassing.getWaypoint() == waypoint) {
-                    return markPassing;
+            synchronized (markPassings) {
+                for (MarkPassing markPassing : markPassings) {
+                    if (markPassing.getWaypoint() == waypoint) {
+                        return markPassing;
+                    }
                 }
             }
         }
