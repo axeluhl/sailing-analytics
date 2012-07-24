@@ -271,12 +271,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
                 map.setSize("100%", "100%");
                 map.addMapClickHandler(new MapClickHandler() {
+                    private PlayModes oldPlayMode = null;
                     @Override
                     public void onClick(MapClickEvent event) {
                         if (event.getOverlay() == null) { // nothing hit; consider click on map the play/pause action
                             if (timer.getPlayState() == PlayStates.Playing) {
+                                oldPlayMode = timer.getPlayMode();
                                 timer.pause();
                             } else if (timer.getPlayState() == PlayStates.Paused || timer.getPlayState() == PlayStates.Stopped) {
+                                if (oldPlayMode != null) {
+                                    timer.setPlayMode(oldPlayMode);
+                                }
                                 timer.play();
                             }
                         }
