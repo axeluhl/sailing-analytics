@@ -126,7 +126,7 @@ img.openColumn {
 
 .globalNavigation-leaderBoardGroup, .globalNavigation-leaderBoard, .globalNavigation-home {
     margin: -4px 10px 0 0;
-    padding: 0;
+    padding: 0px 0px 4px;
     float: left;
     background: #7c7b7c url(images/alert-overlay.png) repeat-x;
 }
@@ -253,7 +253,6 @@ img.openColumn {
 
 .timePanelButton {
 	float: left;
-	padding: 3px 10px 4px;
 }
 
 .playPauseButton {
