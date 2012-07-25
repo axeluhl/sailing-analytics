@@ -909,7 +909,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     protected BoatCanvasOverlay createBoatCanvas(final CompetitorDTO competitorDTO, boolean highlighted) {
         final BoatCanvasOverlay boatCanvas = new BoatCanvasOverlay(competitorDTO, raceMapImageManager);
         boatCanvas.setSelected(highlighted);
-        boatCanvas.getCanvas().setTitle(competitorDTO.name);
+        boatCanvas.getCanvas().setTitle(competitorDTO.sailID + ", " + competitorDTO.name);
         boatCanvas.getCanvas().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -1001,6 +1001,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         final VerticalPanel vPanel = new VerticalPanel();
         vPanel.setWidth("350px");
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.competitor(), competitorDTO.name));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.sailNumber(), competitorDTO.sailID));
         Integer rank = null;
         if (quickRanks != null) {
             for (QuickRankDTO quickRank : quickRanks) {
