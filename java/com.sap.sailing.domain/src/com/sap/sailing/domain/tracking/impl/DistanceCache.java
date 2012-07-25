@@ -95,10 +95,12 @@ public class DistanceCache {
         LockUtil.lock(lock.readLock());
         try {
             Pair<TimePoint, Pair<TimePoint, Distance>> result = null;
-            Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> entryForTo = distanceCache.ceiling(createDummy(to));
+            Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> entryForTo = distanceCache.floor(createDummy(to));
             if (entryForTo != null) {
-                result = new Pair<TimePoint, Pair<TimePoint, Distance>>(entryForTo.getA(),
-                        entryForTo.getB().floor(new Pair<TimePoint, Distance>(from, null)));
+                final Pair<TimePoint, Distance> fromCeiling = entryForTo.getB().ceiling(new Pair<TimePoint, Distance>(from, null));
+                if (fromCeiling != null) {
+                    result = new Pair<TimePoint, Pair<TimePoint, Distance>>(entryForTo.getA(), fromCeiling);
+                }
             }
             return result;
         } finally {

@@ -358,7 +358,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         Distance result;
         lockForRead();
         try {
-            Pair<TimePoint, Pair<TimePoint, Distance>> bestCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(from, to);
+            Pair<TimePoint, Pair<TimePoint, Distance>> bestCacheEntry = getDistanceCache().getEarliestFromAndDistanceAtOrAfterFrom(from, to);
             if (bestCacheEntry != null) {
                 // compute the missing stretches between best cache entry's "from" and our "from" and the cache entry's "to" and our "to"
                 Distance distanceFromFromToBeginningOfCacheEntry = Distance.NULL;
@@ -407,7 +407,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } finally {
             unlockAfterRead();
         }
-        distanceCache.cache(from, to, result);
+        getDistanceCache().cache(from, to, result);
         return result;
     }
 
@@ -650,7 +650,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 distanceCacheInvalidationStart = lower.getTimePoint();
             }
         }
-        distanceCache.invalidateAllAtOrLaterThan(distanceCacheInvalidationStart);
+        getDistanceCache().invalidateAllAtOrLaterThan(distanceCacheInvalidationStart);
         Iterable<FixType> highers = getLaterFixesWhoseValidityMayBeAffected(gpsFix);
         for (FixType higher : highers) {
             higher.invalidateCache();
@@ -701,6 +701,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } finally {
             unlockAfterRead();
         }
+    }
+
+    protected DistanceCache getDistanceCache() {
+        return distanceCache;
     }
 
 }
