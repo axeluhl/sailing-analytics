@@ -19,6 +19,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -34,10 +35,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -184,6 +187,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     private final VerticalPanel contentPanel;
     private final HorizontalPanel refreshAndSettingsPanel;
 
+    private final FlowPanel informationPanel;
+    private final Label scoreCorrectionLastUpdateTimeLabel;
+    private final Label scoreCorrectionCommentLabel;
+
+    private final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG); 
+    private final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
+
     private boolean isEmbedded = false;
 
     private static LeaderboardResources resources = GWT.create(LeaderboardResources.class);
@@ -264,6 +274,10 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     @Override
     public boolean isEmbedded() {
         return isEmbedded;
+    }
+
+    protected VerticalPanel getContentPanel() {
+        return contentPanel;
     }
 
     public void updateSettings(LeaderboardSettings newSettings) {
@@ -1029,10 +1043,18 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         }
         contentPanel = new VerticalPanel();
         contentPanel.setStyleName("leaderboardContent");
+        informationPanel = new FlowPanel();
+        informationPanel.setStyleName("leaderboardInfo");
+        scoreCorrectionLastUpdateTimeLabel = new Label("");
+        scoreCorrectionCommentLabel = new Label("");
+        informationPanel.add(scoreCorrectionCommentLabel);
+        informationPanel.add(scoreCorrectionLastUpdateTimeLabel);
+
         DockPanel toolbarPanel = new DockPanel();
         toolbarPanel.setStyleName("leaderboardContent-toolbar");
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         if (!isEmbedded) {
+            toolbarPanel.add(informationPanel, DockPanel.WEST);
             toolbarPanel.add(busyIndicator, DockPanel.WEST);
         }
         toolbarPanel.setWidth("100%");
@@ -1323,6 +1345,14 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (competitorSelectionProvider.isSelected(row.competitor)) {
                     leaderboardSelectionModel.setSelected(row, true);
                 }
+            }
+            scoreCorrectionCommentLabel.setText(leaderboard.getComment() != null ? leaderboard.getComment(): "");
+            if(leaderboard.getTimePointOfLastCorrectionsValidity() != null) {
+                Date lastCorrectionDate = leaderboard.getTimePointOfLastCorrectionsValidity();
+                String lastUpdate = dateFormatter.format(lastCorrectionDate) + " " + timeFormatter.format(lastCorrectionDate);
+                scoreCorrectionLastUpdateTimeLabel.setText(stringMessages.lastScoreUpdate() + ": " + lastUpdate);
+            } else {
+                scoreCorrectionLastUpdateTimeLabel.setText("");
             }
         }
     }

@@ -76,4 +76,12 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements IsSerializ
         return super.equals(obj) && ((competitors == null) ?
             (((LeaderboardDTO) competitors) != null) ? false : (!competitors.equals(((LeaderboardDTO) obj).competitors)) ? false : true : true);
     }
+
+	public void setTimePointOfLastCorrectionsValidity(Date timePointOfLastCorrectionsValidity) {
+		this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
 }
