@@ -358,38 +358,51 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         Distance result;
         lockForRead();
         try {
-            Pair<TimePoint, Distance> bestCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(from, to);
+            Pair<TimePoint, Pair<TimePoint, Distance>> bestCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(from, to);
             if (bestCacheEntry != null) {
-                
-            }
-            double distanceInNauticalMiles = 0;
-            if (from.compareTo(to) < 0) {
-                // getEstimatedposition's current implementation returns a position equal to that of a fix at "from" if there is one
-                // with exactly that time stamp
-                Position fromPos = getEstimatedPosition(from, /* extrapolate */false);
-                if (fromPos == null) {
-                    result = Distance.NULL;
-                } else {
-                    lockForRead();
-                    try {
-                        NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
-                        /* fromInclusive */false, new DummyGPSFix(to),
-                        /* toInclusive */false);
-                        for (GPSFix fix : subset) {
-                            double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(fix.getPosition())
-                                    .getNauticalMiles();
-                            distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
-                            fromPos = fix.getPosition();
-                        }
-                    } finally {
-                        unlockAfterRead();
-                    }
-                    Position toPos = getEstimatedPosition(to, false);
-                    distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
-                    result = new NauticalMileDistance(distanceInNauticalMiles);
+                // compute the missing stretches between best cache entry's "from" and our "from" and the cache entry's "to" and our "to"
+                Distance distanceFromFromToBeginningOfCacheEntry = Distance.NULL;
+                Distance distanceFromEndOfCacheEntryToTo = Distance.NULL;
+                if (!bestCacheEntry.getB().getA().equals(from)) {
+                    assert bestCacheEntry.getB().getA().after(from);
+                    distanceFromFromToBeginningOfCacheEntry = getDistanceTraveled(from, bestCacheEntry.getB().getA());
                 }
+                if (!bestCacheEntry.getA().equals(to)) {
+                    assert bestCacheEntry.getA().before(to);
+                    distanceFromEndOfCacheEntryToTo = getDistanceTraveled(bestCacheEntry.getA(), to);
+                }
+                result = distanceFromFromToBeginningOfCacheEntry.add(bestCacheEntry.getB().getB()).add(distanceFromEndOfCacheEntryToTo);
             } else {
-                result = Distance.NULL;
+                double distanceInNauticalMiles = 0;
+                if (from.compareTo(to) < 0) {
+                    // getEstimatedposition's current implementation returns a position equal to that of a fix at "from"
+                    // if there is one
+                    // with exactly that time stamp
+                    Position fromPos = getEstimatedPosition(from, /* extrapolate */false);
+                    if (fromPos == null) {
+                        result = Distance.NULL;
+                    } else {
+                        lockForRead();
+                        try {
+                            NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
+                            /* fromInclusive */false, new DummyGPSFix(to),
+                            /* toInclusive */false);
+                            for (GPSFix fix : subset) {
+                                double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(
+                                        fix.getPosition()).getNauticalMiles();
+                                distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
+                                fromPos = fix.getPosition();
+                            }
+                        } finally {
+                            unlockAfterRead();
+                        }
+                        Position toPos = getEstimatedPosition(to, false);
+                        distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
+                        result = new NauticalMileDistance(distanceInNauticalMiles);
+                    }
+                } else {
+                    result = Distance.NULL;
+                }
             }
         } finally {
             unlockAfterRead();

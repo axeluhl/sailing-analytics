@@ -86,17 +86,19 @@ public class DistanceCache {
     }
     
     /**
-     * Looks up the entry for <code>to</code>. If not found, <code>null</code> is returned. If found, the earliest
-     * pair of from/distance that is at or after <code>from</code> will be returned. If there is no entry that is
-     * at or after <code>from</code>, <code>null</code> is returned.
+     * Looks up the entry closest to but no later than <code>to</code>. If not found, <code>null</code> is returned. If
+     * found, the earliest pair of from/distance that is at or after <code>from</code> will be returned, together with
+     * the <code>to</code> value of the entry. If there is no entry that is at or after <code>from</code>,
+     * <code>null</code> is returned.
      */
-    public Pair<TimePoint, Distance> getEarliestFromAndDistanceAtOrAfterFrom(TimePoint from, TimePoint to) {
+    public Pair<TimePoint, Pair<TimePoint, Distance>> getEarliestFromAndDistanceAtOrAfterFrom(TimePoint from, TimePoint to) {
         LockUtil.lock(lock.readLock());
         try {
-            Pair<TimePoint, Distance> result = null;
-            NavigableSet<Pair<TimePoint, Distance>> entryForTo = getEntryForTo(to);
+            Pair<TimePoint, Pair<TimePoint, Distance>> result = null;
+            Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> entryForTo = distanceCache.ceiling(createDummy(to));
             if (entryForTo != null) {
-                result = entryForTo.floor(new Pair<TimePoint, Distance>(from, null));
+                result = new Pair<TimePoint, Pair<TimePoint, Distance>>(entryForTo.getA(),
+                        entryForTo.getB().floor(new Pair<TimePoint, Distance>(from, null)));
             }
             return result;
         } finally {
@@ -121,7 +123,7 @@ public class DistanceCache {
             lock.writeLock().unlock();
         }
     }
-
+    
     private NavigableSet<Pair<TimePoint, Distance>> getEntryForTo(TimePoint to) {
         NavigableSet<Pair<TimePoint, Distance>> result = null;
         Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> dummyForTo = createDummy(to);

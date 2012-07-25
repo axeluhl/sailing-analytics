@@ -384,6 +384,66 @@ public class TrackTest {
         assertEquals(fix, polishedLastFix2);
         // check total distance; should have one more normal segment with the two outliers removed
         assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        // try a second time because now the DistanceCache may/shall kick in
+        assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
+    }
+    
+    @Test
+    public void testDistanceCacheAccessForPartialStrip() {
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        final int timeBetweenFixesInMillis = 1000;
+        Bearing bearing = new DegreeBearingImpl(123);
+        Speed speed = new KnotSpeedImpl(7);
+        Position p = new DegreePosition(0, 0);
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint start = now;
+        final int steps = 10;
+        TimePoint next = null;
+        for (int i=0; i<steps; i++) {
+            GPSFix fix = new GPSFixImpl(p, start);
+            track.addGPSFix(fix);
+            next = start.plus(timeBetweenFixesInMillis);
+            p = p.translateGreatCircle(bearing, speed.travel(start, next));
+            start = next;
+            bearing = new DegreeBearingImpl(bearing.getDegrees() + 1);
+        }
+        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        TimePoint timePointForOutliner = new MillisecondsTimePoint(now.asMillis() + ((int) steps/2) * timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
+        Position outlierPosition = new DegreePosition(90, 90);
+        GPSFix outlier = new GPSFixImpl(outlierPosition, timePointForOutliner);
+        track.addGPSFix(outlier);
+        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        TimePoint timePointForLateOutliner = new MillisecondsTimePoint(now.asMillis() + (steps-1)*timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
+        Position lateOutlierPosition = new DegreePosition(90, 90);
+        GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutliner);
+        track.addGPSFix(lateOutlier);
+        GPSFix polishedLastFix = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
+        // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
+        assertEquals(lateOutlier, polishedLastFix);
+        track.lockForRead();
+        try {
+            assertEquals(steps+1, Util.size(track.getFixes())); // what will later be detected as outlier is now an additional fix
+        } finally {
+            track.unlockAfterRead();
+        }
+        // now add another "normal" fix, making the lateOutlier really an outlier
+        GPSFix fix = new GPSFixImpl(p, start); // the "overshoot" from the previous loop can be used to generate the next "regular" fix
+        track.addGPSFix(fix);
+        track.lockForRead();
+        try {
+            assertEquals(steps+1, Util.size(track.getFixes())); // the one "normal" late fix is added on top of the <steps> fixes, but the two outliers should now be removed
+        } finally {
+            track.unlockAfterRead();
+        }
+        GPSFix polishedLastFix2 = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
+        // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
+        assertEquals(fix, polishedLastFix2);
+        // check total distance; should have one more normal segment with the two outliers removed
+        assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        // try a second time because now the DistanceCache may/shall kick in
+        assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        // check if the cache responds correctly if fetching an in-between interval
+        assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
     }
     
     @Test
