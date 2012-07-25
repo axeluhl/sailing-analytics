@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -102,12 +103,30 @@ public class DistanceCache {
             lock.readLock().unlock();
         }
     }
+    
+    /**
+     * Removes all cache entries that have a <code>to</code> time point that is at or after <code>timePoint</code>.
+     */
+    public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
+        LockUtil.lock(lock.writeLock());
+        try {
+            Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> dummy = createDummy(timePoint);
+            NavigableSet<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>> toRemove = distanceCache.tailSet(dummy, /* inclusive */ true);
+            for (Iterator<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>> i=toRemove.iterator(); i.hasNext(); ) {
+                Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> entryToRemove = i.next();
+                assert entryToRemove.getA().compareTo(timePoint) >= 0;
+                i.remove();
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
 
     private NavigableSet<Pair<TimePoint, Distance>> getEntryForTo(TimePoint to) {
         NavigableSet<Pair<TimePoint, Distance>> result = null;
         Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> dummyForTo = createDummy(to);
         Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> entryForTo = distanceCache.floor(dummyForTo);
-        if (entryForTo.getA().equals(to)) {
+        if (entryForTo != null && entryForTo.getA().equals(to)) {
             result = entryForTo.getB();
         }
         return result;

@@ -240,14 +240,14 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
      * the fix is considered invalid.
      */
     @Override
-    protected boolean isValid(PartialNavigableSetView<GPSFixMoving> filteredView, GPSFixMoving e) {
+    protected boolean isValid(NavigableSet<GPSFixMoving> rawFixes, GPSFixMoving e) {
         assertReadLock();
         boolean result;
         if (e.isValidityCached()) {
             result = e.isValid();
         } else {
-            GPSFixMoving previous = filteredView.lowerInternal(e);
-            GPSFixMoving next = filteredView.higherInternal(e);
+            GPSFixMoving previous = rawFixes.lower(e);
+            GPSFixMoving next = rawFixes.higher(e);
             Speed speedToPrevious = Speed.NULL;
             if (previous != null) {
                 speedToPrevious = previous.getPosition().getDistance(e.getPosition())
