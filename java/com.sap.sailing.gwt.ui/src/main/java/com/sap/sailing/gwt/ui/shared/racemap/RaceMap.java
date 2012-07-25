@@ -270,11 +270,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 RaceMap.this.add(combinedWindPanel, 10, 10);
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
                 map.setSize("100%", "100%");
-                    private PlayModes oldPlayMode = null;
-                                oldPlayMode = timer.getPlayMode();
-                                if (oldPlayMode != null) {
-                                    timer.setPlayMode(oldPlayMode);
-                                }
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
