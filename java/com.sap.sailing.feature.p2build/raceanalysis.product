@@ -9,7 +9,8 @@
    <launcherArgs>
       <programArgs>-os ${target.os} -ws ${target.ws} -arch ${target.arch} -nl ${target.nl} -consoleLog -console -clean</programArgs>
       <vmArgs>-Declipse.ignoreApp=true -Dosgi.noShutdown=true
--Xmx1024m -Djetty.home=configuration/jetty</vmArgs>
+-Xmx1024m -Djetty.home=configuration/jetty
+-XX:+UseMembar</vmArgs>
    </launcherArgs>
 
    <windowImages/>
@@ -43,13 +44,13 @@
       <plugin id="com.sap.sailing.xcelsiusadapter" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
-      <plugin id="org.eclipse.jetty.osgi.boot" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.jetty.continuation" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.deploy" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.http" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.io" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.jmx" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.nested" autoStart="true" startLevel="4" />
+      <plugin id="org.eclipse.jetty.osgi.boot" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.jetty.security" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.server" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.servlet" autoStart="true" startLevel="4" />

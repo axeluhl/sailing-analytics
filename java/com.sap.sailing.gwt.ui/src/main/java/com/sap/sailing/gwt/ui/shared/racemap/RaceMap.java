@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -27,7 +28,6 @@ import com.google.gwt.maps.client.control.ControlPosition;
 import com.google.gwt.maps.client.control.LargeMapControl3D;
 import com.google.gwt.maps.client.control.MenuMapTypeControl;
 import com.google.gwt.maps.client.control.ScaleControl;
-import com.google.gwt.maps.client.event.MapClickHandler;
 import com.google.gwt.maps.client.event.MapDragEndHandler;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
@@ -43,6 +43,7 @@ import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -71,7 +72,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
@@ -270,18 +270,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 RaceMap.this.add(combinedWindPanel, 10, 10);
                 RaceMap.this.raceMapImageManager.loadMapIcons(map);
                 map.setSize("100%", "100%");
-                map.addMapClickHandler(new MapClickHandler() {
-                    @Override
-                    public void onClick(MapClickEvent event) {
-                        if (event.getOverlay() == null) { // nothing hit; consider click on map the play/pause action
-                            if (timer.getPlayState() == PlayStates.Playing) {
-                                timer.pause();
-                            } else if (timer.getPlayState() == PlayStates.Paused || timer.getPlayState() == PlayStates.Stopped) {
-                                timer.play();
-                            }
-                        }
-                    }
-                });
+                    private PlayModes oldPlayMode = null;
+                                oldPlayMode = timer.getPlayMode();
+                                if (oldPlayMode != null) {
+                                    timer.setPlayMode(oldPlayMode);
+                                }
                 map.addMapZoomEndHandler(new MapZoomEndHandler() {
                     @Override
                     public void onZoomEnd(MapZoomEndEvent event) {
@@ -362,7 +355,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             fromAndToAndOverlap.getA(), fromAndToAndOverlap.getB(), true, new AsyncCallback<RaceMapDataDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
+                            errorReporter.reportError("Error obtaining racemap data: " + caught.getMessage(), true /*silentMode */);
                         }
 
                         @Override
@@ -420,7 +413,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         new AsyncCallback<WindInfoForRaceDTO>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(), timer.getPlayMode() == PlayModes.Live);
+                                    errorReporter.reportError("Error obtaining wind information: " + caught.getMessage(), true /*silentMode */);
                                 }
 
                                 @Override
@@ -940,7 +933,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         windSensorOverlay.getCanvas().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                showWindSensorInfoWindow(windSource, windTrackInfoDTO);
+                showWindSensorInfoWindow(windSensorOverlay);
             }
         });
         return windSensorOverlay;
@@ -953,17 +946,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private void showCompetitorInfoWindow(final CompetitorDTO competitorDTO, LatLng where) {
         GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime()); 
         //TODO find closed fixed where the mouse was (where) BUG 470
-        map.getInfoWindow().open(where,
-                new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor)));
+        InfoWindowContent infoWindowContent = new InfoWindowContent(getInfoWindowContent(competitorDTO, latestFixForCompetitor));
+        map.getInfoWindow().open(where, infoWindowContent);
     }
 
     private String formatPosition(double lat, double lng) {
-        NumberFormat numberFormat = NumberFormat.getFormat("0.0");
-        String result = stringMessages.position() + ": " + numberFormat.format(lat) + " lat, " + numberFormat.format(lng) + " lng";
+        NumberFormat numberFormat = NumberFormat.getFormat("0.00000");
+        String result = numberFormat.format(lat) + " lat, " + numberFormat.format(lng) + " lng";
         return result;
     }
     
-    private void showWindSensorInfoWindow(final WindSource windSource, final WindTrackInfoDTO windTrackInfoDTO) {
+    private void showWindSensorInfoWindow(final WindSensorOverlay windSensorOverlay) {
+    	WindSource windSource = windSensorOverlay.getWindSource();
+    	WindTrackInfoDTO windTrackInfoDTO = windSensorOverlay.getWindTrackInfoDTO();
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
         if(windDTO != null && windDTO.position != null) {
             LatLng where = LatLng.newInstance(windDTO.position.latDeg, windDTO.position.lngDeg);
@@ -971,27 +966,46 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
 
+    private Widget createInfoWindowLabelAndValue(String labelName, String value) {
+    	FlowPanel flowPanel = new FlowPanel();
+        Label label = new Label(labelName + ":");
+        label.setWordWrap(false);
+        label.getElement().getStyle().setFloat(Style.Float.LEFT);
+        label.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        label.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
+        flowPanel.add(label);
+
+        Label valueLabel = new Label(value);
+        valueLabel.setWordWrap(false);
+        valueLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
+        valueLabel.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        flowPanel.add(valueLabel);
+
+        return flowPanel;
+    }
+    
     private Widget getInfoWindowContent(MarkDTO markDTO) {
-        VerticalPanel result = new VerticalPanel();
-        result.add(new Label("Mark: " + markDTO.name));
-        result.add(new Label(formatPosition(markDTO.position.latDeg, markDTO.position.lngDeg)));
-        return result;
+        VerticalPanel vPanel = new VerticalPanel();
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.mark(), markDTO.name));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(markDTO.position.latDeg, markDTO.position.lngDeg)));
+        return vPanel;
     }
 
     private Widget getInfoWindowContent(WindSource windSource, WindTrackInfoDTO windTrackInfoDTO) {
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
         NumberFormat numberFormat = NumberFormat.getFormat("0.0");
-        VerticalPanel result = new VerticalPanel();
-        result.add(new Label(stringMessages.windSource() + ": " + WindSourceTypeFormatter.format(windSource, stringMessages)));
-        result.add(new Label(stringMessages.wind() + ": " +  Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
-        result.add(new Label(stringMessages.windSpeed() + ": " + numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
-        result.add(new Label(formatPosition(windDTO.position.latDeg, windDTO.position.lngDeg)));
-        return result;
+        VerticalPanel vPanel = new VerticalPanel();
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSource(), WindSourceTypeFormatter.format(windSource, stringMessages)));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.wind(), Math.round(windDTO.dampenedTrueWindFromDeg) + " " + stringMessages.degreesShort()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.windSpeed(), numberFormat.format(windDTO.dampenedTrueWindSpeedInKnots)));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(windDTO.position.latDeg, windDTO.position.lngDeg)));
+        return vPanel;
     }
 
     private Widget getInfoWindowContent(CompetitorDTO competitorDTO, GPSFixDTO lastFix) {
-        final VerticalPanel result = new VerticalPanel();
-        result.add(new Label(stringMessages.competitor() + ": " + competitorDTO.name));
+        final VerticalPanel vPanel = new VerticalPanel();
+        vPanel.setWidth("350px");
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.competitor(), competitorDTO.name));
         Integer rank = null;
         if (quickRanks != null) {
             for (QuickRankDTO quickRank : quickRanks) {
@@ -1002,13 +1016,13 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         }
         if (rank != null) {
-            result.add(new Label(stringMessages.rank() + ": " + rank));
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.rank(), String.valueOf(rank)));
         }
-        result.add(new Label(stringMessages.speed() + ": "
-                + NumberFormatterFactory.getDecimalFormat(1).format(lastFix.speedWithBearing.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()));
-        result.add(new Label(stringMessages.bearing() + ": "+ (int) lastFix.speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.speed(),
+                NumberFormatterFactory.getDecimalFormat(1).format(lastFix.speedWithBearing.speedInKnots) + " "+stringMessages.averageSpeedInKnotsUnit()));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.bearing(), (int) lastFix.speedWithBearing.bearingInDegrees + " "+stringMessages.degreesShort()));
         if (lastFix.wind != null) {
-            result.add(new Label(stringMessages.degreesBoatToTheWind() + ": " +  (int) Math.abs(
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.degreesBoatToTheWind(), (int) Math.abs(
                     new DegreeBearingImpl(lastFix.speedWithBearing.bearingInDegrees).getDifferenceTo(
                     new DegreeBearingImpl(lastFix.wind.dampenedTrueWindFromDeg)).getDegrees()) + " "+stringMessages.degreesShort()));
         }
@@ -1023,7 +1037,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         new AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error obtaining douglas positions: " + caught.getMessage());
+                                errorReporter.reportError("Error obtaining douglas positions: " + caught.getMessage(), true /*silentMode */);
                             }
 
                             @Override
@@ -1043,7 +1057,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         new AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error obtaining maneuvers: " + caught.getMessage());
+                                errorReporter.reportError("Error obtaining maneuvers: " + caught.getMessage(), true /*silentMode */);
                             }
 
                             @Override
@@ -1060,7 +1074,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
             }
         }
-        return result;
+        return vPanel;
     }
 
     private Iterable<CompetitorDTO> getCompetitorsToShow() {
