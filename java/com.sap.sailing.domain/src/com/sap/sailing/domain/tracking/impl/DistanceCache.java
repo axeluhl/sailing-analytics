@@ -2,12 +2,15 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.Comparator;
 import java.util.NavigableSet;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
+import com.sap.sailing.util.impl.LockUtil;
 
 /**
  * Computing {@link #getDistanceTraveled(TimePoint, TimePoint)} is more expensive the longer the track is and the
@@ -66,16 +69,19 @@ import com.sap.sailing.util.impl.ArrayListNavigableSet;
  */
 public class DistanceCache {
     private final NavigableSet<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>> distanceCache;
+    
+    private final ReadWriteLock lock;
+    
+    private static final Comparator<Pair<TimePoint, ?>> timePointInPairComparator = new Comparator<Pair<TimePoint, ?>>() {
+        @Override
+        public int compare(Pair<TimePoint, ?> o1, Pair<TimePoint, ?> o2) {
+            return o1.getA().compareTo(o2.getA());
+        }
+    };
 
     public DistanceCache() {
-        this.distanceCache = new ArrayListNavigableSet<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>>(
-                new Comparator<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>>() {
-                    @Override
-                    public int compare(Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> o1,
-                            Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> o2) {
-                        return o1.getA().compareTo(o2.getA());
-                    }
-                });
+        lock = new ReentrantReadWriteLock(/* fair */ true);
+        this.distanceCache = new ArrayListNavigableSet<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>>(timePointInPairComparator);
     }
     
     /**
@@ -84,12 +90,17 @@ public class DistanceCache {
      * at or after <code>from</code>, <code>null</code> is returned.
      */
     public Pair<TimePoint, Distance> getEarliestFromAndDistanceAtOrAfterFrom(TimePoint from, TimePoint to) {
-        Pair<TimePoint, Distance> result = null;
-        NavigableSet<Pair<TimePoint, Distance>> entryForTo = getEntryForTo(to);
-        if (entryForTo != null) {
-            result = entryForTo.floor(new Pair<TimePoint, Distance>(from, null));
+        LockUtil.lock(lock.readLock());
+        try {
+            Pair<TimePoint, Distance> result = null;
+            NavigableSet<Pair<TimePoint, Distance>> entryForTo = getEntryForTo(to);
+            if (entryForTo != null) {
+                result = entryForTo.floor(new Pair<TimePoint, Distance>(from, null));
+            }
+            return result;
+        } finally {
+            lock.readLock().unlock();
         }
-        return result;
     }
 
     private NavigableSet<Pair<TimePoint, Distance>> getEntryForTo(TimePoint to) {
@@ -103,7 +114,19 @@ public class DistanceCache {
     }
     
     public void cache(TimePoint from, TimePoint to, Distance distance) {
-        
+        LockUtil.lock(lock.writeLock());
+        try {
+            NavigableSet<Pair<TimePoint, Distance>> entryForTo = getEntryForTo(to);
+            if (entryForTo == null) {
+                entryForTo = new ArrayListNavigableSet<Pair<TimePoint, Distance>>(timePointInPairComparator);
+                Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> pairForTo = new Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>(
+                        to, entryForTo);
+                distanceCache.add(pairForTo);
+            }
+            entryForTo.add(new Pair<TimePoint, Distance>(from, distance));
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
     
     private Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> createDummy(TimePoint to) {
