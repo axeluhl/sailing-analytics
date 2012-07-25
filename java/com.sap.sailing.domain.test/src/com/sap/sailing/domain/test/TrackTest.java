@@ -382,6 +382,8 @@ public class TrackTest {
         GPSFix polishedLastFix2 = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
         // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
         assertEquals(fix, polishedLastFix2);
+        // check total distance; should have one more normal segment with the two outliers removed
+        assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
     }
     
     @Test
