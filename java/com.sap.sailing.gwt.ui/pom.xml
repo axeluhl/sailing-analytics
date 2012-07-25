@@ -42,6 +42,7 @@
           <!-- GWT version detected from dependencyManagement -->
           <execution>
 	        <configuration>
+		   <extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
 	          <modules>
 		        <module>com.sap.sailing.gwt.ui.RaceBoard</module>
 		        <module>com.sap.sailing.gwt.ui.Spectator</module>
