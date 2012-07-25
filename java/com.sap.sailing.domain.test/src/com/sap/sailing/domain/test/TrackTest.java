@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -338,7 +339,21 @@ public class TrackTest {
     
     @Test
     public void testDistanceTraveledOnSmoothenedTrackThenAddingOutlier() {
-        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        final Set<TimePoint> invalidationCalls = new HashSet<TimePoint>();
+        final DistanceCache distanceCache = new DistanceCache() {
+            @Override
+            public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
+                super.invalidateAllAtOrLaterThan(timePoint);
+                invalidationCalls.add(timePoint);
+            }
+        };
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
+            private static final long serialVersionUID = -7277196393160609503L;
+            @Override
+            protected DistanceCache getDistanceCache() {
+                return distanceCache;
+            }
+        };
         final int timeBetweenFixesInMillis = 1000;
         Bearing bearing = new DegreeBearingImpl(123);
         Speed speed = new KnotSpeedImpl(7);
@@ -355,16 +370,41 @@ public class TrackTest {
             start = next;
             bearing = new DegreeBearingImpl(bearing.getDegrees() + 1);
         }
+        invalidationCalls.clear();
         assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
-        TimePoint timePointForOutliner = new MillisecondsTimePoint(now.asMillis() + ((int) steps/2) * timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
+        final Pair<TimePoint, Pair<TimePoint, Distance>> fullIntervalCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start);
+        assertNotNull(fullIntervalCacheEntry); // no more entry for "to"-value start in cache
+        assertEquals(start, fullIntervalCacheEntry.getA());
+        assertEquals(now, fullIntervalCacheEntry.getB().getA());
+        TimePoint timePointForOutlier = new MillisecondsTimePoint(now.asMillis() + ((int) steps/2) * timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
         Position outlierPosition = new DegreePosition(90, 90);
-        GPSFix outlier = new GPSFixImpl(outlierPosition, timePointForOutliner);
+        GPSFix outlier = new GPSFixImpl(outlierPosition, timePointForOutlier);
         track.addGPSFix(outlier);
-        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
-        TimePoint timePointForLateOutliner = new MillisecondsTimePoint(now.asMillis() + (steps-1)*timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
+        assertEquals(1, invalidationCalls.size());
+        assertEquals(timePointForOutlier, invalidationCalls.iterator().next()); // outlier doesn't turn its preceding element into an outlier
+        assertNull(distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start)); // no more entry for "to"-value start in cache
+        invalidationCalls.clear();
+        final TimePoint timePointOfLastOriginalFix = track.getLastRawFix().getTimePoint();
+        assertEquals(speed.getMetersPerSecond() * (steps - 1),
+                track.getDistanceTraveled(now, timePointOfLastOriginalFix).getMeters(), 0.01);
+        final Pair<TimePoint, Pair<TimePoint, Distance>> newFullIntervalCacheEntry = distanceCache
+                .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
+        assertNotNull(newFullIntervalCacheEntry); // no more entry for "to"-value start in cache
+        assertEquals(timePointOfLastOriginalFix, newFullIntervalCacheEntry.getA());
+        assertEquals(now, newFullIntervalCacheEntry.getB().getA());
+        TimePoint timePointForLateOutlier = new MillisecondsTimePoint(now.asMillis() + (steps-1)*timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
         Position lateOutlierPosition = new DegreePosition(90, 90);
-        GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutliner);
+        GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutlier);
         track.addGPSFix(lateOutlier);
+        assertEquals(1, invalidationCalls.size());
+        assertEquals(timePointForLateOutlier, invalidationCalls.iterator().next());
+        invalidationCalls.clear();
+        // expect the invalidation to have started after the single cache entry, so the cache entry still has to be there:
+        final Pair<TimePoint, Pair<TimePoint, Distance>> stillPresentFullIntervalCacheEntry = distanceCache
+                .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
+        assertNotNull(stillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache
+        assertEquals(timePointOfLastOriginalFix, stillPresentFullIntervalCacheEntry.getA());
+        assertEquals(now, stillPresentFullIntervalCacheEntry.getB().getA());
         GPSFix polishedLastFix = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
         // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
         assertEquals(lateOutlier, polishedLastFix);
@@ -377,6 +417,16 @@ public class TrackTest {
         // now add another "normal" fix, making the lateOutlier really an outlier
         GPSFix fix = new GPSFixImpl(p, start); // the "overshoot" from the previous loop can be used to generate the next "regular" fix
         track.addGPSFix(fix);
+        assertEquals(1, invalidationCalls.size());
+        // now assert that the fix addition also invalidated what is now detected as an outlier
+        assertEquals(timePointForLateOutlier, invalidationCalls.iterator().next());
+        assertTrue(timePointForLateOutlier.compareTo(fix.getTimePoint()) < 0);
+        // expect the invalidation to have started at the outlier, leaving the previous result ending at the fix right before the outlier intact
+        final Pair<TimePoint, Pair<TimePoint, Distance>> stillStillPresentFullIntervalCacheEntry = distanceCache
+                .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
+        assertNotNull(stillStillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache
+        assertEquals(timePointOfLastOriginalFix, stillStillPresentFullIntervalCacheEntry.getA());
+        assertEquals(now, stillStillPresentFullIntervalCacheEntry.getB().getA());
         track.lockForRead();
         try {
             assertEquals(steps+1, Util.size(track.getFixes())); // the one "normal" late fix is added on top of the <steps> fixes, but the two outliers should now be removed
@@ -384,11 +434,7 @@ public class TrackTest {
             track.unlockAfterRead();
         }
         GPSFix polishedLastFix2 = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
-        // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
         assertEquals(fix, polishedLastFix2);
-        // check total distance; should have one more normal segment with the two outliers removed
-        assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
-        // try a second time because now the DistanceCache may/shall kick in
         assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
     }
     
