@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -59,6 +60,7 @@ import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.PlayStateListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -425,13 +427,13 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            sb.appendHtmlConstant("<img title=\"" + object.competitor.countryName + "\" src=\""
-                    + getFlagURL(object.competitor.twoLetterIsoCountryCode) + "\"/>&nbsp;");
+        	ImageResourceRenderer renderer = new ImageResourceRenderer();
+        	ImageResource flagImageResource = FlagImageResolver.getFlagImageResource(object.competitor.twoLetterIsoCountryCode);
+        	if(flagImageResource != null) {
+            	sb.append(renderer.render(flagImageResource));
+            	sb.appendHtmlConstant("&nbsp;");
+        	}
             sb.appendEscaped(object.competitor.sailID);
-        }
-
-        private String getFlagURL(String twoLetterIsoCountryCode) {
-            return "/gwt/images/flags/" + twoLetterIsoCountryCode.toLowerCase() + ".png";
         }
 
         @Override
