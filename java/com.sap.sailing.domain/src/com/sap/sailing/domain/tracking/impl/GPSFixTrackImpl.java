@@ -375,7 +375,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             } else {
                 double distanceInNauticalMiles = 0;
                 if (from.compareTo(to) < 0) {
-                    // getEstimatedposition's current implementation returns a position equal to that of a fix at "from"
+                    // getEstimatedPosition's current implementation returns a position equal to that of a fix at "from"
                     // if there is one
                     // with exactly that time stamp
                     Position fromPos = getEstimatedPosition(from, /* extrapolate */false);
