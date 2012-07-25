@@ -218,8 +218,8 @@ public abstract class ExpandableSortableColumn<C> extends SortableColumn<Leaderb
         this.togglingInProcess = togglingInProcess;
     }
 
-    public void setEnableLegDrillDown(boolean enableLegDrillDown) {
-        this.enableExpansion = enableLegDrillDown;
+    public void setEnableExpansion(boolean enableExpansion) {
+        this.enableExpansion = enableExpansion;
     }
 
     protected void defaultRender(Context context, LeaderboardRowDTO object, SafeHtmlBuilder html) {

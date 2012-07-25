@@ -115,7 +115,8 @@ public class LiveLeaderboardUpdater implements Runnable {
     
     public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws NoWindException {
         final MillisecondsTimePoint now = MillisecondsTimePoint.now();
-        TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
+        final Long delayToLiveInMillis = getLeaderboard().getDelayToLiveInMillis();
+        TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
         updateRequestTimes(namesOfRaceColumnsForWhichToLoadLegDetails, timePoint);
         LeaderboardDTO result = null;
         synchronized (this) {
@@ -197,7 +198,8 @@ public class LiveLeaderboardUpdater implements Runnable {
             // interrupt the current thread if not producing a single result within the overall timeout
             while (true) {
                 MillisecondsTimePoint now = MillisecondsTimePoint.now();
-                TimePoint timePoint = now.minus(getLeaderboard().getDelayToLiveInMillis());
+                final Long delayToLiveInMillis = getLeaderboard().getDelayToLiveInMillis();
+                TimePoint timePoint = delayToLiveInMillis == null ? now : now.minus(delayToLiveInMillis);
                 synchronized (this) {
                     if (timePoint.asMillis() - lastRequest.asMillis() >= UPDATE_TIMEOUT_IN_MILLIS) {
                         running = false;

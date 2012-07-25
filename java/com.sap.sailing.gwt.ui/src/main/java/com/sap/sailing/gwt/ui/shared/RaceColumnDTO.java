@@ -128,8 +128,6 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
         result = prime * result + (medalRace ? 1231 : 1237);
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((racesPerFleet == null) ? 0 : racesPerFleet.hashCode());
-        result = prime * result
-                + ((trackedRaceIdentifiersPerFleet == null) ? 0 : trackedRaceIdentifiersPerFleet.hashCode());
         return result;
     }
 
@@ -158,11 +156,6 @@ public class RaceColumnDTO extends NamedDTO implements IsSerializable {
             if (other.racesPerFleet != null)
                 return false;
         } else if (!racesPerFleet.equals(other.racesPerFleet))
-            return false;
-        if (trackedRaceIdentifiersPerFleet == null) {
-            if (other.trackedRaceIdentifiersPerFleet != null)
-                return false;
-        } else if (!trackedRaceIdentifiersPerFleet.equals(other.trackedRaceIdentifiersPerFleet))
             return false;
         return true;
     }
