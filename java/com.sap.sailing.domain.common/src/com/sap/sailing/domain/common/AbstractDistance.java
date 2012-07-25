@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common;
 
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
+import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 
 public abstract class AbstractDistance implements Distance {
 
@@ -64,5 +65,10 @@ public abstract class AbstractDistance implements Distance {
     @Override
     public String toString() {
         return getMeters()+"m";
+    }
+    
+    @Override
+    public Distance add(Distance d) {
+        return new NauticalMileDistance(getNauticalMiles()+d.getNauticalMiles());
     }
 }

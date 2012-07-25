@@ -2,7 +2,6 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -102,7 +101,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * Once the {@link #getDistanceTraveled(TimePoint, TimePoint)} has computed its value, it adds the result to the
      * cache.
      */
-    private final NavigableSet<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>> distanceCache;
+    private final DistanceCache distanceCache;
     
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
@@ -114,14 +113,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
         this.listeners = new HashSet<GPSTrackListener<ItemType, FixType>>();
-        this.distanceCache = new ArrayListNavigableSet<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>>(
-                new Comparator<Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>>>() {
-                    @Override
-                    public int compare(Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> o1,
-                            Pair<TimePoint, NavigableSet<Pair<TimePoint, Distance>>> o2) {
-                        return o1.getA().compareTo(o2.getA());
-                    }
-                });
+        this.distanceCache = new DistanceCache();
     }
 
     @Override
