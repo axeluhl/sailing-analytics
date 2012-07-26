@@ -1522,9 +1522,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         // compute the maneuvers for competitor
         Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-        if (markPassings != null && !markPassings.isEmpty()) {
-            TimePoint extendedFrom = markPassings.iterator().next().getTimePoint();
-            MarkPassing crossedFinishLine = getMarkPassing(competitor, getRace().getCourse().getLastWaypoint());
+        boolean markPassingsNotEmpty;
+        TimePoint extendedFrom = null;
+        MarkPassing crossedFinishLine = null;
+        synchronized (markPassings) {
+            markPassingsNotEmpty = markPassings != null && !markPassings.isEmpty();
+            if (markPassingsNotEmpty) {
+                extendedFrom = markPassings.iterator().next().getTimePoint();
+                crossedFinishLine = getMarkPassing(competitor, getRace().getCourse().getLastWaypoint());
+            }
+        }
+        if (markPassingsNotEmpty) {
             TimePoint extendedTo;
             if (crossedFinishLine != null) {
                 extendedTo = crossedFinishLine.getTimePoint();
