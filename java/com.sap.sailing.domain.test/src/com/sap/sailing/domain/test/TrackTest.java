@@ -35,9 +35,11 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.impl.DistanceCache;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
@@ -89,6 +91,39 @@ public class TrackTest {
         track.addGPSFix(gpsFix3);
         track.addGPSFix(gpsFix4);
         track.addGPSFix(gpsFix5);
+    }
+    
+    /**
+     * The DistanceCache must not contain any intervals pointing backwards because otherwise an endless recursion will
+     * result during the next cache look-up. This test performs a {@link GPSFixTrack#getDistanceTraveled(TimePoint, TimePoint)} with
+     * <code>from</code> later than <code>to</code> and ensures that no reversed entry is written to the cache.
+     */
+    @Test
+    public void testDistanceTraveledBackwardsQuery() {
+        final Set<Triple<TimePoint, TimePoint, Distance>> cacheEntries = new HashSet<>();
+        final DistanceCache distanceCache = new DistanceCache() {
+            @Override
+            public void cache(TimePoint from, TimePoint to, Distance distance) {
+                super.cache(from, to, distance);
+                cacheEntries.add(new Triple<>(from, to, distance));
+            }
+            
+        };
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
+            private static final long serialVersionUID = -7277196393160609503L;
+            @Override
+            protected DistanceCache getDistanceCache() {
+                return distanceCache;
+            }
+        };
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint earlier = now.minus(10000);
+        TimePoint later = now.plus(10000);
+        Distance result = track.getDistanceTraveled(now, earlier);
+        assertEquals(Distance.NULL, result);
+        assertTrue(cacheEntries.isEmpty());
+        Distance nextResult = track.getDistanceTraveled(now, later);
+        assertEquals(Distance.NULL, nextResult);
     }
     
     @Test

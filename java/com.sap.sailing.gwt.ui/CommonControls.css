@@ -517,4 +517,11 @@ body ::-webkit-scrollbar-track {
 	line-height: 1.4;
 }
 
+.minMaxBackgroundBar {
+	left: 0px;
+	background-image: url(images/greyBar.png);
+	background-position: left;
+	background-repeat: no-repeat;
+}
+
 
