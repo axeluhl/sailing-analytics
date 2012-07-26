@@ -59,7 +59,7 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
 
             Context2d context2d = getCanvas().getContext2d();
 
-            context2d.setFont("12px bold 'UbuntuRegular', Arial, Verdana, sans-serif");
+            context2d.setFont("12px bold Verdana sans-serif");
             TextMetrics measureText = context2d.measureText(competitorDTO.sailID);
             double textWidth = measureText.getWidth();
 
@@ -68,7 +68,8 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
             getCanvas().setCoordinateSpaceWidth(canvasWidth);
             
             // Change origin and dimensions to match true size (a stroke makes the shape a bit larger)
-//            context2d.strokeRect(cornerRadius/2, cornerRadius/2, canvasWidth-cornerRadius, canvasHeight-cornerRadius);
+            context2d.setFillStyle("gray");
+            context2d.strokeRect(cornerRadius/2, cornerRadius/2, canvasWidth-cornerRadius, canvasHeight-cornerRadius);
             context2d.setFillStyle(CssColor.make("rgba(255,255,255,0.75)"));
             context2d.fillRect(cornerRadius/2, cornerRadius/2, canvasWidth-cornerRadius, canvasHeight-cornerRadius);
             
