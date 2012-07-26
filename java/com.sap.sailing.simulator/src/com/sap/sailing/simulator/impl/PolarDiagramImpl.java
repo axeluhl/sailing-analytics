@@ -1,8 +1,12 @@
 package com.sap.sailing.simulator.impl;
 
+import java.util.Map;
+import java.util.NavigableMap;
+
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.simulator.PolarDiagram;
 
@@ -61,6 +65,25 @@ public class PolarDiagramImpl implements PolarDiagram {
 	public WindSide getWindSide(Bearing bearing) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public NavigableMap<Speed, NavigableMap<Bearing, Speed>> polarDiagramPlot(
+			Double bearingStep) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Bearing getTargetDirection() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setTargetDirection(Bearing newTargetDirection) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
