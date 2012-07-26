@@ -182,7 +182,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                         @SuppressWarnings("unchecked")
                         ExpandableSortableColumn<LeaderboardRowDTO> myRc = (ExpandableSortableColumn<LeaderboardRowDTO>) c;
                         rc = myRc;
-                        rc.setEnableLegDrillDown(true);
+                        rc.setEnableExpansion(true);
                     }
                 }
                 removeColumnAndAssert();
