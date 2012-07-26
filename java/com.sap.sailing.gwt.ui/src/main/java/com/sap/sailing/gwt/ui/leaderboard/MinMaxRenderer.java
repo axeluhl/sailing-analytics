@@ -44,11 +44,9 @@ public class MinMaxRenderer {
         int percent = getPercentage(row);
         String stringValue = valueProvider.getStringValueToRender(row);
         stringValue = stringValue == null ? "" : stringValue;
-        sb.appendHtmlConstant(
-                "<div " + (title == null ? "" : "title=\"" + title + "\" ")
-                        + "style=\"left: 0px; background-image: url(/gwt/images/greyBar.png); "
-                        + " background-position: left; background-repeat: no-repeat; background-size: " + percent
-                        + "% 25px; \">").appendEscaped(stringValue).appendHtmlConstant("</div>");
+        sb.appendHtmlConstant("<div " + (title == null ? "" : "title=\"" + title + "\" ")
+        		+ "class=\"minMaxBackgroundBar\" "
+                + "style=\"background-size: " + percent + "% 25px; \">").appendEscaped(stringValue).appendHtmlConstant("</div>");
     }
 
     /**

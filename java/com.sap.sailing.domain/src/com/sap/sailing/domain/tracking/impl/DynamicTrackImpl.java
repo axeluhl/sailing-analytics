@@ -22,7 +22,7 @@ public class DynamicTrackImpl<ItemType, FixType extends GPSFix> extends
         lockForWrite();
         try {
             getInternalRawFixes().add(gpsFix);
-            invalidateValidityCaches(gpsFix);
+            invalidateValidityAndDistanceCaches(gpsFix);
         } finally {
             unlockAfterWrite();
         }
