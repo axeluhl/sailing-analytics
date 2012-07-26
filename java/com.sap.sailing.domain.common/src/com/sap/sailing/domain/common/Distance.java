@@ -68,6 +68,11 @@ public interface Distance extends Comparable<Distance>, Serializable {
         public Distance add(Distance d) {
             return d;
         }
+        
+        @Override
+        public String toString() {
+            return "0m";
+        }
     };
     
     double getGeographicalMiles();
