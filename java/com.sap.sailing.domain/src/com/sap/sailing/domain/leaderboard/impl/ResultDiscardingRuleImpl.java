@@ -57,8 +57,14 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
                 @Override
                 public int compare(RaceColumn o1, RaceColumn o2) {
                     try {
-                        return Double.valueOf(leaderboard.getNetPoints(competitor, o1, timePoint)).compareTo(
+                        int result = Double.valueOf(leaderboard.getNetPoints(competitor, o1, timePoint)).compareTo(
                                 Double.valueOf(leaderboard.getNetPoints(competitor, o2, timePoint)));
+                        if (result == 0 && o1 != o2) {
+                            // when both races have equal score, don't treat them as equal but prefer the one
+                            // lexicographically closer; see also bug 892
+                            result = o1.getName().compareTo(o2.getName());
+                        }
+                        return result;
                     } catch (NoWindException e) {
                         throw new NoWindError(e);
                     }
