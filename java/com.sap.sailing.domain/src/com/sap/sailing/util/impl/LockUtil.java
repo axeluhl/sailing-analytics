@@ -1,5 +1,7 @@
 package com.sap.sailing.util.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.logging.Logger;
@@ -17,14 +19,18 @@ public class LockUtil {
      * After five seconds and not having retrieved the lock, tries again until the lock has been acquired.
      * @throws InterruptedException 
      */
-    public static void lock(Lock lock) {
+    public static void lock(Lock lock, String lockDescriptionForTimeoutLogMessage) {
         boolean locked = false;
         boolean interrupted = false;
         while (!locked) {
             try {
                 locked = lock.tryLock(NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK, TimeUnit.SECONDS);
                 if (!locked) {
-                    logger.info("Couldn't acquire lock in "+NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK+"s. Trying again...");
+                    final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    new Throwable("This is where the lock couldn't be acquired").printStackTrace(new PrintStream(
+                            bos));
+                    logger.info("Couldn't acquire lock in "+NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK+"s at "+
+                            new String(bos.toByteArray())+"\nTrying again...");
                 }
             }
             catch (InterruptedException ex) {
@@ -36,5 +42,21 @@ public class LockUtil {
             // were acquiring the lock
             Thread.currentThread().interrupt();
         }
+    }
+    
+    public static void lockForRead(NamedReentrantReadWriteLock lock) {
+        lock(lock.readLock(), "readLock "+lock.getName());
+    }
+    
+    public static void unlockAfterRead(NamedReentrantReadWriteLock lock) {
+        lock.readLock().unlock();
+    }
+    
+    public static void lockForWrite(NamedReentrantReadWriteLock lock) {
+        lock(lock.writeLock());
+    }
+    
+    public static void unlockAfterWrite(NamedReentrantReadWriteLock lock) {
+        lock.writeLock().unlock();
     }
 }

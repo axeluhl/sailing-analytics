@@ -251,11 +251,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             i++;
         }
         trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
-        synchronized (race.getCourse()) {
+        race.getCourse().lockForRead();
+        try {
             for (Leg leg : race.getCourse().getLegs()) {
                 trackedLegs.put(leg, createTrackedLeg(leg));
             }
             getRace().getCourse().addCourseListener(this);
+        } finally {
+            race.getCourse().unlockAfterRead();
         }
         markPassingsForCompetitor = new HashMap<Competitor, NavigableSet<MarkPassing>>();
         tracks = new HashMap<Competitor, GPSFixTrack<Competitor, GPSFixMoving>>();
@@ -703,7 +706,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public synchronized int getRank(Competitor competitor) throws NoWindException {
+    public int getRank(Competitor competitor) throws NoWindException {
         return getRank(competitor, MillisecondsTimePoint.now());
     }
 
@@ -1142,7 +1145,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public synchronized void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+    public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
         // assuming that getRace().getCourse()'s write lock is held by the current thread
         updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
         getOrCreateMarkPassingsInOrderAsNavigableSet(waypointThatGotAdded);
@@ -1222,7 +1225,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     @Override
-    public synchronized void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+    public  void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
         // assuming that getRace().getCourse()'s write lock is held by the current thread
         updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
         Leg toRemove = null;

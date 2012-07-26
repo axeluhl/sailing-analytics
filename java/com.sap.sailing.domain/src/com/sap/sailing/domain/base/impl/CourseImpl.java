@@ -11,7 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,6 +25,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.util.CourseAsWaypointList;
 import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -40,11 +40,12 @@ public class CourseImpl extends NamedImpl implements Course {
     private final Map<Waypoint, Integer> waypointIndexes;
     private final List<Leg> legs;
     private transient Set<CourseListener> listeners;
-    private transient ReadWriteLock lock;
+    private transient NamedReentrantReadWriteLock lock;
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
-        lock = new ReentrantReadWriteLock(/* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
+        lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+name,
+                /* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
         listeners = new HashSet<CourseListener>();
         this.waypoints = new ArrayList<Waypoint>();
         waypointIndexes = new HashMap<Waypoint, Integer>();
@@ -69,18 +70,18 @@ public class CourseImpl extends NamedImpl implements Course {
     
     @Override
     public void lockForRead() {
-        LockUtil.lock(lock.readLock());
+        LockUtil.lockForRead(lock);
     }
 
     @Override
     public void unlockAfterRead() {
-        lock.readLock().unlock();
+        LockUtil.unlockAfterRead(lock);
     }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<>();
-        lock = new ReentrantReadWriteLock();
+        lock = new NamedReentrantReadWriteLock("lock for CourseImpl "+this.getName(), /* fair */ true);
     }
     
     /**
@@ -109,7 +110,7 @@ public class CourseImpl extends NamedImpl implements Course {
     
     @Override
     public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
-        LockUtil.lock(lock.writeLock());
+        LockUtil.lockForWrite(lock);
         try {
             waypoints.add(zeroBasedPosition, waypointToAdd);
             Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
@@ -131,7 +132,7 @@ public class CourseImpl extends NamedImpl implements Course {
             }
             notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
         } finally {
-            lock.writeLock().unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
