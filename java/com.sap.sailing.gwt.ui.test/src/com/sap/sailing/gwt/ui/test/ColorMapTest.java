@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.sap.sailing.gwt.ui.client.ColorMap;
 
 public class ColorMapTest {
-
+	
     @Test
     public void testHundredDistinctColors() {
         ColorMap<Integer> colorMap = new ColorMap<Integer>();

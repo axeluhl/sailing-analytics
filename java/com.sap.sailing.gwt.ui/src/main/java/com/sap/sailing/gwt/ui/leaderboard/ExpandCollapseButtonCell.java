@@ -13,7 +13,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
 
-    private static final LeaderboardResources RESOURCES = GWT.create(LeaderboardResources.class);
+    private static final LeaderboardResources leaderboardResources = GWT.create(LeaderboardResources.class);
 
     private final SafeHtml html;
     private final Delegate<SafeHtml> delegate;
@@ -32,7 +32,7 @@ public class ExpandCollapseButtonCell extends AbstractCell<SafeHtml> {
         this.column = column;
         this.delegate = delegate;
 
-        String imageSrc = column.isExpanded() ? RESOURCES.minusIcon().getSafeUri().asString() : RESOURCES
+        String imageSrc = column.isExpanded() ? leaderboardResources.minusIcon().getSafeUri().asString() : leaderboardResources
                 .plusIcon().getSafeUri().asString();
         SafeHtmlBuilder sb = new SafeHtmlBuilder();
         sb.appendHtmlConstant("<div class=\"openColumn\">");

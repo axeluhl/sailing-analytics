@@ -64,6 +64,10 @@ public interface Distance extends Comparable<Distance>, Serializable {
             return Speed.NULL;
         }
         
+        @Override
+        public Distance add(Distance d) {
+            return d;
+        }
     };
     
     double getGeographicalMiles();
@@ -88,4 +92,6 @@ public interface Distance extends Comparable<Distance>, Serializable {
      * then the resulting speed will be negative.
      */
     Speed inTime(long milliseconds);
+    
+    Distance add(Distance d);
 }
