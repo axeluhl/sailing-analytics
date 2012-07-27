@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
@@ -78,8 +79,12 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
             int i=0;
             Iterator<RaceColumn> badRacesIter = sortedRaces.descendingIterator();
             while (badRacesIter.hasNext() && i<resultsToDiscard) {
-                result.add(badRacesIter.next());
-                i++;
+                final RaceColumn badRace = badRacesIter.next();
+                final MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, badRace, timePoint);
+                if (maxPointsReason == null || maxPointsReason.isDiscardable()) {
+                    result.add(badRace);
+                    i++;
+                }
             }
         } else {
             result = Collections.emptySet();
