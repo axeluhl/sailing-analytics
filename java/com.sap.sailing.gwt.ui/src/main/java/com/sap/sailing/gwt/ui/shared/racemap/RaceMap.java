@@ -1529,6 +1529,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         map.removeOverlay(removed);
                     }
                     removeTail(competitor);
+                    showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
                 }
             } else {
                 // "lowlight" currently selected competitor
@@ -1537,8 +1538,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     boatCanvas.setSelected(displayHighlighted(competitor));
                     boatCanvas.redraw(true);
                 }
+                showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
             }
-            showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
         }
         //Trigger auto-zoom if needed
         RaceMapZoomSettings zoomSettings = settings.getZoomSettings();
