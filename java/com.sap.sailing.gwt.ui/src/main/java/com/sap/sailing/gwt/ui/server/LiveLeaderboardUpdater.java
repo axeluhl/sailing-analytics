@@ -53,7 +53,7 @@ public class LiveLeaderboardUpdater implements Runnable {
      */
     private static final long MINIMUM_TIME_BETWEEN_UPDATES = 1000l;
     
-    private final String leaderboardName;
+    private final Leaderboard leaderboard;
     
     private final SailingServiceImpl sailingService;
     
@@ -102,15 +102,15 @@ public class LiveLeaderboardUpdater implements Runnable {
      */
     private Thread thread;
     
-    public LiveLeaderboardUpdater(String leaderboardName, SailingServiceImpl sailingService) {
-        this.leaderboardName = leaderboardName;
+    public LiveLeaderboardUpdater(Leaderboard leaderboard, SailingServiceImpl sailingService) {
+        this.leaderboard = leaderboard;
         this.sailingService = sailingService;
         this.timePointOfLastRequestForColumnDetails = new HashMap<String, TimePoint>();
         this.columnNamesForWhichCurrentLiveLeaderboardHasTheDetails = new HashSet<String>();
     }
     
     private Leaderboard getLeaderboard() {
-        return sailingService.getService().getLeaderboardByName(leaderboardName);
+        return leaderboard;
     }
     
     public LeaderboardDTO getLiveLeaderboard(Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails) throws NoWindException {
@@ -130,7 +130,7 @@ public class LiveLeaderboardUpdater implements Runnable {
         }
         if (result == null) { // current cache doesn't have the column details requested; re-calculate
             cacheMissCount++;
-            result = sailingService.computeLeaderboardByName(leaderboardName, timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
+            result = sailingService.computeLeaderboardByName(leaderboard, timePoint, namesOfRaceColumnsForWhichToLoadLegDetails,
                     /* waitForLatestAnalyses */ false);
             updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, result);
         }
@@ -193,8 +193,8 @@ public class LiveLeaderboardUpdater implements Runnable {
         TimerTask interruptTask = null;
         try {
             logger.info("Starting " + LiveLeaderboardUpdater.class.getSimpleName() + " thread for leaderboard "
-                    + leaderboardName);
-            interruptTimer = new Timer("Interrupt timer for "+LiveLeaderboardUpdater.class.getSimpleName()+" for leaderboard "+leaderboardName);
+                    + leaderboard.getName());
+            interruptTimer = new Timer("Interrupt timer for "+LiveLeaderboardUpdater.class.getSimpleName()+" for leaderboard "+leaderboard.getName());
             // interrupt the current thread if not producing a single result within the overall timeout
             while (true) {
                 MillisecondsTimePoint now = MillisecondsTimePoint.now();
@@ -223,11 +223,11 @@ public class LiveLeaderboardUpdater implements Runnable {
                         }
                     };
                     interruptTimer.schedule(interruptTask, UPDATE_TIMEOUT_IN_MILLIS);
-                    LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboardName, timePoint,
+                    LeaderboardDTO newCacheValue = sailingService.computeLeaderboardByName(leaderboard, timePoint,
                             namesOfRaceColumnsForWhichToLoadLegDetails, /* waitForLatestAnalyses */false);
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, newCacheValue);
                 } catch (NoWindException e) {
-                    logger.info("Unable to update cached leaderboard results for leaderboard " + leaderboardName + ": "
+                    logger.info("Unable to update cached leaderboard results for leaderboard " + leaderboard.getName() + ": "
                             + e.getMessage());
                     logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", e);
                     try {
@@ -251,7 +251,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                 }
             }
             logger.info("" + LiveLeaderboardUpdater.class.getSimpleName() + " thread for leaderboard "
-                    + leaderboardName + " ending");
+                    + leaderboard.getName() + " ending");
         } catch (Throwable t) {
             running = false;
             logger.info("exception in "+LiveLeaderboardUpdater.class.getName()+".run(): "+t.getMessage());

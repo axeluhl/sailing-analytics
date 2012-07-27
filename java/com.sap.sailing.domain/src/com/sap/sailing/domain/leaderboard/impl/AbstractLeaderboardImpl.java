@@ -171,7 +171,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         return result;
     }
     
-    private Iterable<TrackedRace> getTrackedRaces() {
+    @Override
+    public Iterable<TrackedRace> getTrackedRaces() {
         Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
         for (RaceColumn r : getRaceColumns()) {
             for (Fleet fleet : r.getFleets()) {
@@ -530,4 +531,5 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     public Comparator<Double> getScoreComparator() {
         return scoreComparator;
     }
+
 }
