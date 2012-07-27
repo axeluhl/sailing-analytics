@@ -62,7 +62,7 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
                         if (result == 0 && o1 != o2) {
                             // when both races have equal score, don't treat them as equal but prefer the one
                             // lexicographically closer; see also bug 892
-                            result = o1.getName().compareTo(o2.getName());
+                            result = o2.getName().compareTo(o1.getName());
                         }
                         return result;
                     } catch (NoWindException e) {
