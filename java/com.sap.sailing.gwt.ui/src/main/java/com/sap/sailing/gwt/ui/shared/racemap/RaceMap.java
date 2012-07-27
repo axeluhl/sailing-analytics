@@ -1195,7 +1195,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         result.addPolylineMouseOverHandler(new PolylineMouseOverHandler() {
             @Override
             public void onMouseOver(PolylineMouseOverEvent event) {
-                map.setTitle(competitorDTO.name);
+                map.setTitle(competitorDTO.sailID + ", " + competitorDTO.name);
             }
         });
         result.addPolylineMouseOutHandler(new PolylineMouseOutHandler() {
