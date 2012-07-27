@@ -110,12 +110,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
     
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
-        super(/* nameForReadWriteLock */ GPSFixTrackImpl.class.getSimpleName()+" for "+trackedItem.toString());
+        super(/* nameForReadWriteLock */ GPSFixTrackImpl.class.getSimpleName()+(trackedItem==null?"":(" for "+trackedItem.toString())));
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
         this.listeners = new HashSet<GPSTrackListener<ItemType, FixType>>();
-        this.distanceCache = new DistanceCache(trackedItem.toString());
+        this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
