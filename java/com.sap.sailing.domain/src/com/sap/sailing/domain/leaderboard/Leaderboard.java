@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -246,4 +247,6 @@ public interface Leaderboard extends Named {
      * columns that has the latest start date. If no tracked race is linked to the leaderboard, <code>null</code> is returned.
      */
     Long getDelayToLiveInMillis();
+    
+    Comparator<Double> getScoreComparator();
 }
