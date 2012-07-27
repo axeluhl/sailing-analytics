@@ -33,7 +33,7 @@ public class LockUtil {
                     new Throwable("This is where the lock couldn't be acquired").printStackTrace(new PrintStream(
                             bos));
                     logger.info("Couldn't acquire lock "+lockDescriptionForTimeoutLogMessage+" in "+NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK+"s at "+
-                            getCurrentStackTrace()+"\nTrying again...");
+                            getCurrentStackTrace()+"Trying again...");
                 }
             }
             catch (InterruptedException ex) {
@@ -78,7 +78,7 @@ public class LockUtil {
 
     private static String getCurrentStackTrace() {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        new Throwable("This is where the lock couldn't be acquired").printStackTrace(new PrintStream(
+        new Throwable("This is where the lock interaction happened").printStackTrace(new PrintStream(
                 bos));
         String stackTrace = new String(bos.toByteArray());
         return stackTrace;
