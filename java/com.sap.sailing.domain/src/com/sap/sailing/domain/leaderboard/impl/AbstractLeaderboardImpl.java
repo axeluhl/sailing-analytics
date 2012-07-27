@@ -525,4 +525,9 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         }
         return delayToLiveInMillisForLatestRace;
     }
+    
+    @Override
+    public Comparator<Double> getScoreComparator() {
+        return scoreComparator;
+    }
 }

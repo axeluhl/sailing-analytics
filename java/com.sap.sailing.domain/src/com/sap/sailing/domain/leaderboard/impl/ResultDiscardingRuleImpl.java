@@ -3,15 +3,17 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
@@ -53,27 +55,34 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
         Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
             result = new HashSet<RaceColumn>();
-            TreeSet<RaceColumn> sortedRaces = new TreeSet<RaceColumn>(new Comparator<RaceColumn>() {
+            List<RaceColumn> sortedRaces = new ArrayList<RaceColumn>();
+            Comparator<RaceColumn> comparator = new Comparator<RaceColumn>() {
                 @Override
                 public int compare(RaceColumn o1, RaceColumn o2) {
                     try {
-                        return Double.valueOf(leaderboard.getNetPoints(competitor, o1, timePoint)).compareTo(
-                                Double.valueOf(leaderboard.getNetPoints(competitor, o2, timePoint)));
+                        // invert to get bad races first
+                        return -leaderboard.getScoreComparator().compare(leaderboard.getNetPoints(competitor, o1, timePoint),
+                                leaderboard.getNetPoints(competitor, o2, timePoint));
                     } catch (NoWindException e) {
                         throw new NoWindError(e);
                     }
                 }
-            });
+            };
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 if (!raceColumn.isMedalRace()) {
                     sortedRaces.add(raceColumn);
                 }
             }
+            Collections.sort(sortedRaces, comparator);
             int i=0;
-            Iterator<RaceColumn> badRacesIter = sortedRaces.descendingIterator();
+            Iterator<RaceColumn> badRacesIter = sortedRaces.iterator();
             while (badRacesIter.hasNext() && i<resultsToDiscard) {
-                result.add(badRacesIter.next());
-                i++;
+                final RaceColumn badRace = badRacesIter.next();
+                final MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, badRace, timePoint);
+                if (maxPointsReason == null || maxPointsReason.isDiscardable()) {
+                    result.add(badRace);
+                    i++;
+                }
             }
         } else {
             result = Collections.emptySet();
