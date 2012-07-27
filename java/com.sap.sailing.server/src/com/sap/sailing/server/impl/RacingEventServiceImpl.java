@@ -534,7 +534,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta getRegattaByName(String name) {
-        return regattasByName.get(name);
+        return name == null ? null : regattasByName.get(name);
     }
 
     @Override
