@@ -268,6 +268,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
      */
     private final Set<CacheInvalidationListener> cacheInvalidationListeners;
+    
+    private final LeaderboardDTOCache leaderboardDTOCache;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -287,6 +289,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
+        leaderboardDTOCache = new LeaderboardDTOCache(this);
     }
     
     public void destroy() {
@@ -389,7 +392,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
             result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
         } else {
-            result = computeLeaderboardByName(getService().getLeaderboardByName(leaderboardName),
+            result = leaderboardDTOCache.getLeaderboardByName(getService().getLeaderboardByName(leaderboardName),
                     new MillisecondsTimePoint(date), namesOfRaceColumnsForWhichToLoadLegDetails,
                     /* waitForLatestAnalyses */ true); // in replay mode we'de like to know things exactly and can afford it
         }
