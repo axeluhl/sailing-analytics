@@ -1471,6 +1471,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
                     }
                 }
+                showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
             } else {
                 // adding a single competitor; may need to re-load data, so refresh:
                 timeChanged(timer.getTime());
@@ -1481,6 +1482,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             if (boatCanvas != null) {
                 boatCanvas.setSelected(displayHighlighted(competitor));
                 boatCanvas.redraw(true);
+                showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
             } else {
                 // seems like an internal error not to find the lowlighted marker; but maybe the
                 // competitor was added late to the race;
@@ -1536,6 +1538,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     boatCanvas.redraw(true);
                 }
             }
+            showCompetitorInfoOnMap(timer.getTime(), competitorSelection.getSelectedCompetitors());
         }
         //Trigger auto-zoom if needed
         RaceMapZoomSettings zoomSettings = settings.getZoomSettings();

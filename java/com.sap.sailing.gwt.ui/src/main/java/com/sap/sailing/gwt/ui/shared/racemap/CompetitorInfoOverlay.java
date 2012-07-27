@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 
 /**
- * A google map overlay based on a HTML5 canvas for drawing competitor information
+ * A google map overlay based on a HTML5 canvas for drawing competitor information close to the boat
  */
 public class CompetitorInfoOverlay extends CanvasOverlay {
 
@@ -56,6 +56,10 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
     protected void redraw(boolean force) {
         if (boatFix != null) {
             LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
+            String infoText = competitorDTO.sailID;
+            if(infoText == null || infoText.isEmpty()) {
+            	infoText = competitorDTO.name;
+            }
 
             Context2d context2d = getCanvas().getContext2d();
 
@@ -69,7 +73,7 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
             
             // Change origin and dimensions to match true size (a stroke makes the shape a bit larger)
             context2d.setFillStyle("gray");
-            context2d.strokeRect(cornerRadius/2, cornerRadius/2, canvasWidth-cornerRadius, canvasHeight-cornerRadius);
+//            context2d.strokeRect(cornerRadius/2, cornerRadius/2, canvasWidth-cornerRadius, canvasHeight-cornerRadius);
             context2d.setFillStyle(CssColor.make("rgba(255,255,255,0.75)"));
             context2d.fillRect(cornerRadius/2, cornerRadius/2, canvasWidth-cornerRadius, canvasHeight-cornerRadius);
             
@@ -83,7 +87,6 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
             getPane().setWidgetPosition(getCanvas(), boatPositionInPx.getX(), boatPositionInPx.getY());
         }
     }
-
     
     public GPSFixDTO getBoatFix() {
         return boatFix;
