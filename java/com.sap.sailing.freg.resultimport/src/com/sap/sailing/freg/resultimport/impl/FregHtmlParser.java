@@ -44,16 +44,17 @@ public class FregHtmlParser {
                 if (foundSlashTr) {
                     end = slashTrMatcher.start();
                     inTr = false;
-                    trContents.append(readLine.substring(start, end));
-                    tableRows.add(trContents.toString());
-                    trContents.delete(0, trContents.length());
                 } else {
                     end = readLine.length();
                 }
+                trContents.append(readLine.substring(start, end));
                 if (!foundSlashTr) {
                     trContents.append('\n'); 
                     readLine = br.readLine();
                     start = 0;
+                } else {
+                    tableRows.add(trContents.toString());
+                    trContents.delete(0, trContents.length());
                 }
             }
         }

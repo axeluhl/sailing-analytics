@@ -82,6 +82,7 @@ import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.util.impl.LockUtil;
 import com.sap.sailing.util.impl.SmartFutureCache;
 import com.sap.sailing.util.impl.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sailing.util.impl.SmartFutureCache.EmptyUpdateInterval;
@@ -736,7 +737,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
     
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException {
         ReadWriteLock readWriteLock;
         synchronized (competitorRankingsLocks) {
             readWriteLock = competitorRankingsLocks.get(timePoint);
@@ -755,7 +756,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 lock = readWriteLock.readLock();
             }
         }
-        lock.lock();
+        LockUtil.lock(lock);
         try {
             if (rankedCompetitors == null) {
                 rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the write lock after updating the cache
@@ -855,9 +856,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public MarkPassing getMarkPassing(Competitor competitor, Waypoint waypoint) {
         final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
         if (markPassings != null) {
-            for (MarkPassing markPassing : markPassings) {
-                if (markPassing.getWaypoint() == waypoint) {
-                    return markPassing;
+            synchronized (markPassings) {
+                for (MarkPassing markPassing : markPassings) {
+                    if (markPassing.getWaypoint() == waypoint) {
+                        return markPassing;
+                    }
                 }
             }
         }
@@ -1353,6 +1356,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         for (LegType legType : LegType.values()) {
             bearings.put(legType, new BearingWithConfidenceCluster<TimePoint>(weigher));
         }
+        Map<TrackedLeg, LegType> legTypesCache = new HashMap<TrackedLeg, LegType>();
         getRace().getCourse().lockForRead(); // ensure the course doesn't change, particularly lose the leg we're interested in, while we're running
         try {
             for (Competitor competitor : getRace().getCompetitors()) {
@@ -1361,7 +1365,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                     TrackedLeg trackedLeg = getTrackedLeg(leg.getLeg());
                     LegType legType;
                     try {
-                        legType = trackedLeg.getLegType(timePoint);
+                        legType = legTypesCache.get(trackedLeg);
+                        if (legType == null) {
+                            legType = trackedLeg.getLegType(timePoint);
+                            legTypesCache.put(trackedLeg, legType);
+                        }
                         if (legType != LegType.REACHING) {
                             GPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
                             if (!track.hasDirectionChange(timePoint, getManeuverDegreeAngleThreshold())) {
@@ -1514,9 +1522,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         // compute the maneuvers for competitor
         Triple<TimePoint, TimePoint, List<Maneuver>> result = null;
         NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
-        if (markPassings != null && !markPassings.isEmpty()) {
-            TimePoint extendedFrom = markPassings.iterator().next().getTimePoint();
-            MarkPassing crossedFinishLine = getMarkPassing(competitor, getRace().getCourse().getLastWaypoint());
+        boolean markPassingsNotEmpty;
+        TimePoint extendedFrom = null;
+        MarkPassing crossedFinishLine = null;
+        synchronized (markPassings) {
+            markPassingsNotEmpty = markPassings != null && !markPassings.isEmpty();
+            if (markPassingsNotEmpty) {
+                extendedFrom = markPassings.iterator().next().getTimePoint();
+                crossedFinishLine = getMarkPassing(competitor, getRace().getCourse().getLastWaypoint());
+            }
+        }
+        if (markPassingsNotEmpty) {
             TimePoint extendedTo;
             if (crossedFinishLine != null) {
                 extendedTo = crossedFinishLine.getTimePoint();

@@ -180,6 +180,7 @@ public interface StringMessages extends Messages {
     String jibe();
     String penaltyCircle();
     String markPassing();
+    String mark();
     String otherManeuver();
     String douglasPeuckerPoints();
     String filterRacesByName();
@@ -359,4 +360,6 @@ public interface StringMessages extends Messages {
     String pleaseEnterNonEmptyUrl();
     String addFragUrl();
     String errorAddingFragUrl(String message);
+    String errorTryingToObtainLeaderboardContents(String message);
+    String lastScoreUpdate();
 }

@@ -30,7 +30,7 @@ public class Util {
         }
     }
     
-    public static <T> int indexOf(Iterable<? extends T> i, T t) {
+    public static <T> int indexO(Iterable<? extends T> i, T t) {
         int result;
         if (i instanceof List<?>) {
             List<?> list = (List<?>) i;

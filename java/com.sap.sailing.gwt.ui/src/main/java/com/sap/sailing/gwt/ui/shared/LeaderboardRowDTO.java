@@ -13,7 +13,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class LeaderboardRowDTO implements IsSerializable {
     public CompetitorDTO competitor;
     public Map<String, LeaderboardEntryDTO> fieldsByRaceColumnName;
-    public Integer carriedPoints;
+    public Double carriedPoints;
     
     @Override
     public int hashCode() {

@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
+import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
@@ -21,6 +22,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
@@ -31,6 +33,22 @@ import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
+    @Test
+    public void testStoreAndRetrieveLeaderboardWithCommentedScoreCorrection() {
+        final String leaderboardName = "TestLeaderboard";
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
+        FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, scoreCorrection,
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter());
+        scoreCorrection.setComment("Humba");
+        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        scoreCorrection.setTimePointOfLastCorrectionsValidity(now);
+        new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
+        Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
+        assertEquals("Humba", loadedLeaderboard.getScoreCorrection().getComment());
+        assertEquals(now, loadedLeaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity());
+    }
+    
     @Test
     public void testStoreAndRetrieveSimpleLeaderboard() {
         final String leaderboardName = "TestLeaderboard";
@@ -48,7 +66,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     public void testStoreAndRetrieveLeaderboardWithCarryColumn() {
         final String leaderboardName = "TestLeaderboard";
         final String raceColumnName = "My First Race";
-        final int carriedPointsForWolfgangHunger = 3;
+        final double carriedPointsForWolfgangHunger = 3.7;
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter());
@@ -65,7 +83,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
                 .getDiscardIndexResultsStartingWithHowManyRaces()));
         assertEquals(1, Util.size(loadedLeaderboard.getCompetitors()));
         assertEquals(competitor, loadedLeaderboard.getCompetitors().iterator().next());
-        assertEquals(carriedPointsForWolfgangHunger, loadedLeaderboard.getCarriedPoints(competitor));
+        assertEquals(carriedPointsForWolfgangHunger, loadedLeaderboard.getCarriedPoints(competitor), 0.000000001);
     }
 
     @Test
@@ -73,7 +91,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final String leaderboardName = "TestLeaderboard";
         final String raceColumnName1 = "My First Race 1";
         final String raceColumnName2 = "My First Race 2";
-        final int correctedPoints = 2;
+        final double correctedPoints = 2.75;
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
                 new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter());
@@ -90,7 +108,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false, leaderboard.getFleet(null));
         assertEquals(leaderboardName, loadedLeaderboard.getName());
         assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
-        assertEquals(correctedPoints, (int) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1));
+        assertEquals(correctedPoints, (double) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1), 0.00000001);
         assertFalse(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2));
     }
 
@@ -125,7 +143,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final String leaderboardName = "TestLeaderboard";
         final String raceColumnName1 = "My First Race 1";
         final String raceColumnName2 = "My First Race 2";
-        final int correctedPoints = 2;
+        final double correctedPoints = 2.55;
         final MaxPointsReason maxPointsReason = MaxPointsReason.DNF;
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ScoreCorrectionImpl(),
@@ -144,7 +162,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         RaceColumn loadedColumn2 = loadedLeaderboard.addRace(raceWithOneCompetitor2, raceColumnName2, /* medalRace, ignored */ false, leaderboard.getFleet(null));
         assertEquals(leaderboardName, loadedLeaderboard.getName());
         assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn1));
-        assertEquals(correctedPoints, (int) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1));
+        assertEquals(correctedPoints, (double) loadedLeaderboard.getScoreCorrection().getExplicitScoreCorrection(competitor, loadedColumn1), 0.000000001);
         assertTrue(loadedLeaderboard.getScoreCorrection().isScoreCorrected(competitor, loadedColumn2));
         assertEquals(maxPointsReason, loadedLeaderboard.getScoreCorrection().getMaxPointsReason(competitor, loadedColumn2));
     }

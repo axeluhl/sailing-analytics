@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.util.CourseAsWaypointList;
+import com.sap.sailing.util.impl.LockUtil;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -43,7 +44,7 @@ public class CourseImpl extends NamedImpl implements Course {
     
     public CourseImpl(String name, Iterable<Waypoint> waypoints) {
         super(name);
-        lock = new ReentrantReadWriteLock();
+        lock = new ReentrantReadWriteLock(/* fair */ true); // if non-fair, course update may need to wait forever for many concurrent readers
         listeners = new HashSet<CourseListener>();
         this.waypoints = new ArrayList<Waypoint>();
         waypointIndexes = new HashMap<Waypoint, Integer>();
@@ -68,7 +69,7 @@ public class CourseImpl extends NamedImpl implements Course {
     
     @Override
     public void lockForRead() {
-        lock.readLock().lock();
+        LockUtil.lock(lock.readLock());
     }
 
     @Override
@@ -108,7 +109,7 @@ public class CourseImpl extends NamedImpl implements Course {
     
     @Override
     public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
-        lock.writeLock().lock();
+        LockUtil.lock(lock.writeLock());
         try {
             waypoints.add(zeroBasedPosition, waypointToAdd);
             Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
@@ -138,7 +139,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public void removeWaypoint(int zeroBasedPosition) {
         if (zeroBasedPosition >= 0) {
             Waypoint removedWaypoint;
-            lock.writeLock().lock();
+            LockUtil.lock(lock.writeLock());
             try {
                 boolean isLast = zeroBasedPosition == waypoints.size() - 1;
                 removedWaypoint = waypoints.remove(zeroBasedPosition);
@@ -353,7 +354,7 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
-        lock.writeLock().lock();
+        LockUtil.lock(lock.writeLock());
         try {
             Iterable<Waypoint> courseWaypoints = getWaypoints();
             List<Waypoint> newWaypointList = new LinkedList<Waypoint>();

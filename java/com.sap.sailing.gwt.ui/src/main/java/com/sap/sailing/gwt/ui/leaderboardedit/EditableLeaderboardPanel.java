@@ -27,6 +27,11 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.datepicker.client.DateBox;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -55,7 +60,10 @@ import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
  */
 public class EditableLeaderboardPanel extends LeaderboardPanel {
     private static EditableLeaderboardResources resources = GWT.create(EditableLeaderboardResources.class);
-
+    
+    final DateBox lastScoreCorrectionTimeBox;
+    final TextBox lastScoreCorrectionCommentBox;
+    
     private class EditableCarryColumn extends CarryColumn {
         public EditableCarryColumn() {
             super(new EditTextCell());
@@ -63,7 +71,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 @Override
                 public void update(final int rowIndex, final LeaderboardRowDTO row, final String value) {
                     getSailingService().updateLeaderboardCarryValue(getLeaderboardName(), row.competitor.id,
-                            value == null || value.length() == 0 ? null : Integer.valueOf(value.trim()),
+                            value == null || value.length() == 0 ? null : Double.valueOf(value.trim()),
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable t) {
@@ -74,7 +82,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
                                 @Override
                                 public void onSuccess(Void v) {
-                                    row.carriedPoints = value==null||value.length()==0 ? null : Integer.valueOf(value.trim());
+                                    row.carriedPoints = value==null||value.length()==0 ? null : Double.valueOf(value.trim());
                                     EditableLeaderboardPanel.this.getData().getList().set(rowIndex, row);
                                 }
                             });
@@ -227,7 +235,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     getBusyIndicator().setBusy(true);
                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.id,
                             raceColumnName, value == null || value.trim().length() == 0 ? null : MaxPointsReason.valueOf(value.trim()),
-                            getLeaderboardDisplayDate(), new AsyncCallback<Triple<Integer, Integer, Boolean>>() {
+                            getLeaderboardDisplayDate(), new AsyncCallback<Triple<Double, Double, Boolean>>() {
                                 @Override
                                 public void onFailure(Throwable t) {
                                     getBusyIndicator().setBusy(false);
@@ -238,7 +246,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 }
 
                                 @Override
-                                public void onSuccess(Triple<Integer, Integer, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                                public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
                                     getBusyIndicator().setBusy(false);
                                     row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints = value == null
                                             || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
@@ -322,8 +330,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     getBusyIndicator().setBusy(true);
                     getSailingService().updateLeaderboardScoreCorrection(getLeaderboardName(), row.competitor.id, raceName,
-                            value == null || value.trim().length() == 0 ? null : Integer.valueOf(value.trim()), getLeaderboardDisplayDate(),
-                    new AsyncCallback<Triple<Integer, Integer, Boolean>>() {
+                            value == null || value.trim().length() == 0 ? null : Double.valueOf(value.trim()), getLeaderboardDisplayDate(),
+                    new AsyncCallback<Triple<Double, Double, Boolean>>() {
                         @Override
                         public void onFailure(Throwable t) {
                             getBusyIndicator().setBusy(false);
@@ -334,11 +342,11 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         }
 
                         @Override
-                        public void onSuccess(Triple<Integer, Integer, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                        public void onSuccess(Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
                             getBusyIndicator().setBusy(false);
                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceName);
                                     leaderboardEntryDTO.netPoints = value == null || value.length() == 0 ? newNetAndTotalPointsAndIsCorrected
-                                            .getA() : Integer.valueOf(value.trim());
+                                            .getA() : Double.valueOf(value.trim());
                                     leaderboardEntryDTO.totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
                             leaderboardEntryDTO.netPointsCorrected = newNetAndTotalPointsAndIsCorrected.getC();
                             getCell().setViewData(row, null); // ensure that getValue() is called again
@@ -354,14 +362,14 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceName);
             String result = "";
             if (leaderboardEntryDTO != null) {
-                result = result+leaderboardEntryDTO.netPoints;
+                result = scoreFormat.format(leaderboardEntryDTO.netPoints);
             }
             return result;
         }
     }
 
-    public EditableLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            String leaderboardName, String leaderboardGroupName, ErrorReporter errorReporter,
+    public EditableLeaderboardPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentTypes userAgentType) {
         super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                 /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */false),
@@ -377,8 +385,59 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 performImport(stringMessages);
             }
         });
+        
+        Grid scoreCorrectionInfoGrid = new Grid(3,3);
+        scoreCorrectionInfoGrid.setCellPadding(3);
+        scoreCorrectionInfoGrid.setWidget(0,  0, new Label("Last score correction time:"));
+        lastScoreCorrectionTimeBox = new DateBox();
+        scoreCorrectionInfoGrid.setWidget(0,  1, lastScoreCorrectionTimeBox);
+
+        scoreCorrectionInfoGrid.setWidget(1,  0, new Label("Last score correction comment:"));
+        lastScoreCorrectionCommentBox = new TextBox();
+        scoreCorrectionInfoGrid.setWidget(1,  1, lastScoreCorrectionCommentBox);
+
+        final Button saveScoreCorrectionInfoBtn = new Button(stringMessages.save());
+        scoreCorrectionInfoGrid.setWidget(2,  1, saveScoreCorrectionInfoBtn);
+        
+        saveScoreCorrectionInfoBtn.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				final String lastScoreCorrectionComment = lastScoreCorrectionCommentBox.getText();
+				final Date lastScoreCorrectionTime = lastScoreCorrectionTimeBox.getValue();
+				
+				sailingService.updateLeaderboardScoreCorrectionMetadata(getLeaderboardName(), lastScoreCorrectionTime, lastScoreCorrectionComment, new AsyncCallback<Void>() {
+					@Override
+					public void onSuccess(Void noarg) {
+						updateScoreCorrectionInformation(lastScoreCorrectionComment, lastScoreCorrectionTime);
+					}
+					
+					@Override
+					public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error saving score correction information: " + caught.getMessage());
+					}
+				});
+			}
+		});
+ 
+        final Button setScoreCorrectionDefaultTimeBtn = new Button("Set time to 'now'");
+        scoreCorrectionInfoGrid.setWidget(0,  2, setScoreCorrectionDefaultTimeBtn);
+
+        setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				lastScoreCorrectionTimeBox.setValue(new Date());
+			}
+		});
+        
+        getContentPanel().insert(scoreCorrectionInfoGrid, 0);
     }
 
+    private void updateScoreCorrectionInformation(String lastScoreCorrectionComment, Date lastScoreCorrectionTime) {
+    	getLeaderboard().setComment(lastScoreCorrectionComment);
+    	getLeaderboard().setTimePointOfLastCorrectionsValidity(lastScoreCorrectionTime);
+    	updateLeaderboard(getLeaderboard());
+    }
+    
     private void performImport(final StringMessages stringMessages) {
         getBusyIndicator().setBusy(true);
         getSailingService().getScoreCorrectionProviderDTOs(new AsyncCallback<Iterable<ScoreCorrectionProviderDTO>>() {
@@ -476,5 +535,14 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         return list;
     }
 
-    
+    @Override
+    protected void updateLeaderboard(LeaderboardDTO leaderboard) {
+    	super.updateLeaderboard(leaderboard);
+        if (leaderboard != null) {
+        	String lastScoreCorrectionComment = leaderboard.getComment();
+        	Date lastScoreCorrectionTime = leaderboard.getTimePointOfLastCorrectionsValidity();
+        	lastScoreCorrectionCommentBox.setText(lastScoreCorrectionComment != null ? lastScoreCorrectionComment : "");
+        	lastScoreCorrectionTimeBox.setValue(lastScoreCorrectionTime != null ? lastScoreCorrectionTime : new Date());
+        }
+    }   
 }

@@ -16,20 +16,20 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 public class BulkScoreCorrectionDTO implements IsSerializable {
     private String leaderboardName;
     private Map<String, Map<String, MaxPointsReason>> maxPointsUpdatesForRaceColumnByCompetitorIdAsString;
-    private Map<String, Map<String, Integer>> scoreUpdatesForRaceColumnByCompetitorIdAsString;
+    private Map<String, Map<String, Double>> scoreUpdatesForRaceColumnByCompetitorIdAsString;
 
     public BulkScoreCorrectionDTO() {}
     
     public BulkScoreCorrectionDTO(String leaderboardName) {
         this.leaderboardName = leaderboardName;
         maxPointsUpdatesForRaceColumnByCompetitorIdAsString = new HashMap<String, Map<String,MaxPointsReason>>();
-        scoreUpdatesForRaceColumnByCompetitorIdAsString = new HashMap<String, Map<String,Integer>>();
+        scoreUpdatesForRaceColumnByCompetitorIdAsString = new HashMap<String, Map<String, Double>>();
     }
     
-    public void addScoreUpdate(CompetitorDTO competitor, RaceColumnDTO raceColumn, int newScore) {
-        Map<String, Integer> map = scoreUpdatesForRaceColumnByCompetitorIdAsString.get(competitor.id);
+    public void addScoreUpdate(CompetitorDTO competitor, RaceColumnDTO raceColumn, double newScore) {
+        Map<String, Double> map = scoreUpdatesForRaceColumnByCompetitorIdAsString.get(competitor.id);
         if (map == null) {
-            map = new HashMap<String, Integer>();
+            map = new HashMap<String, Double>();
             scoreUpdatesForRaceColumnByCompetitorIdAsString.put(competitor.id, map);
         }
         map.put(raceColumn.name, newScore);
@@ -48,7 +48,7 @@ public class BulkScoreCorrectionDTO implements IsSerializable {
         return maxPointsUpdatesForRaceColumnByCompetitorIdAsString;
     }
 
-    public Map<String, Map<String, Integer>> getScoreUpdatesForRaceColumnByCompetitorIdAsString() {
+    public Map<String, Map<String, Double>> getScoreUpdatesForRaceColumnByCompetitorIdAsString() {
         return scoreUpdatesForRaceColumnByCompetitorIdAsString;
     }
 

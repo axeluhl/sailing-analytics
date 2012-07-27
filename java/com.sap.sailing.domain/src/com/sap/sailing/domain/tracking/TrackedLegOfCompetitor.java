@@ -115,6 +115,12 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * competitor hasn't started the leg yet.
      */
     Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException;
+    
+    /**
+     * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
+     * can share this knowledge to speed up computation as compared to {@link #getGapToLeaderInSeconds(TimePoint)}.
+     */
+    Double getGapToLeaderInSeconds(TimePoint timePoint, Competitor leaderInLegAtTimePoint) throws NoWindException;
 
     boolean hasStartedLeg(TimePoint timePoint);
     

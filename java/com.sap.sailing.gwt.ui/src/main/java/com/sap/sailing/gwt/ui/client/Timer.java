@@ -258,9 +258,11 @@ public class Timer {
     }
     
     public void setLivePlayDelayInMillis(long delayInMilliseconds) {
-        this.livePlayDelayInMillis = delayInMilliseconds;
-        if (getPlayState() == PlayStates.Playing) {
-            setTime(new Date().getTime() - delayInMilliseconds);
+        if (this.livePlayDelayInMillis != delayInMilliseconds) {
+            this.livePlayDelayInMillis = delayInMilliseconds;
+            if (getPlayMode() == PlayModes.Live) {
+                setTime(new Date().getTime() - delayInMilliseconds);
+            }
         }
     }
     

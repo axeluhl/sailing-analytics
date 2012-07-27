@@ -51,7 +51,7 @@ public class TestColumnSwapping {
         leaderboardCreationDate = new Date();
         try {
             // get Leaderboard with name and current date
-            leaderboardOriginalDTO = new LeaderboardDTO();
+            leaderboardOriginalDTO = new LeaderboardDTO(null, null);
             leaderboardOriginalDTO.addRace("Race1", DEFAULT_FLEET, true, null, null);
             leaderboardOriginalDTO.addRace("Race3", DEFAULT_FLEET, true, null, null);
             leaderboardOriginalDTO.addRace("Race2", DEFAULT_FLEET, true, null, null);
@@ -81,7 +81,7 @@ public class TestColumnSwapping {
         sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[0], true);
         sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[2], false);
         try {
-            lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null, /* waitForLatestManeuverAnalysis */ true);
+            lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null);
         } catch (Exception e) {
             // e.printStackTrace();
             fail(e.getLocalizedMessage());
@@ -101,7 +101,7 @@ public class TestColumnSwapping {
 
     @Test
     public void testLeaderBoardDTOMethods() {
-        lb = new LeaderboardDTO();
+        lb = new LeaderboardDTO(null, null);
         assertNotNull("Leaderboard != NULL", lb);
         lb.addRace("1", DEFAULT_FLEET, false, null, null);
         lb.addRace("2", DEFAULT_FLEET, false, null, null);
@@ -116,7 +116,7 @@ public class TestColumnSwapping {
     public void testColumnSwappingFabian() {
         service.moveLeaderboardColumnUp(LEADERBOARDNAME, "Race3");
         try {
-            leaderboardDTO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist, /* waitForLatestManeuverAnalysis */ true);
+            leaderboardDTO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

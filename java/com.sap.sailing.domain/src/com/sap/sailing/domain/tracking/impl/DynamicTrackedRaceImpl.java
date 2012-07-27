@@ -378,7 +378,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
             NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
             synchronized (markPassingsForCompetitor) {
                 for (MarkPassing oldMarkPassing : markPassingsForCompetitor) {
-                    if(oldStartMarkPassing == null) {
+                    if (oldStartMarkPassing == null) {
                         oldStartMarkPassing = oldMarkPassing;
                     }
                     oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);

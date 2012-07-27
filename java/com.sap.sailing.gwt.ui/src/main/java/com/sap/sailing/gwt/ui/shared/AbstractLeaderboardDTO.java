@@ -21,6 +21,8 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
     public int[] discardThresholds;
     public RegattaDTO regatta;
 
+    private Long delayToLiveInMillisForLatestRace;
+    
     public AbstractLeaderboardDTO() {
         races = new ArrayList<RaceColumnDTO>();
     }
@@ -69,16 +71,16 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         return false;
     }
 
-    public int getTotalPoints(LeaderboardRowDTO object) {
-        int totalPoints = object.carriedPoints == null ? 0 : object.carriedPoints;
+    public double getTotalPoints(LeaderboardRowDTO object) {
+        double totalPoints = object.carriedPoints == null ? 0 : object.carriedPoints;
         for (LeaderboardEntryDTO e : object.fieldsByRaceColumnName.values()) {
             totalPoints += e.totalPoints;
         }
         return totalPoints;
     }
 
-    public int getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
-        int result = 0;
+    public double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
+        double result = 0;
         LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
             LeaderboardEntryDTO field = row.fieldsByRaceColumnName.get(nameOfLastRaceSoFar);
@@ -126,23 +128,24 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
      * @param fleetDTO
      *            must not be null
      */
-    public void addRace(String raceColumnName, FleetDTO fleetDTO, boolean medalRace,
+    public RaceColumnDTO addRace(String raceColumnName, FleetDTO fleetDTO, boolean medalRace,
             RegattaAndRaceIdentifier trackedRaceIdentifier, StrippedRaceDTO race) {
         assert fleetDTO != null;
-        RaceColumnDTO raceInLeaderboardDTO = getOrCreateRaceColumn(raceColumnName);
+        RaceColumnDTO raceColumnDTO = getOrCreateRaceColumn(raceColumnName);
         boolean contains = false;
-        for (FleetDTO fleet : raceInLeaderboardDTO.getFleets()) {
+        for (FleetDTO fleet : raceColumnDTO.getFleets()) {
             if (fleet.name.equals(fleetDTO.name)) {
                 contains = true;
                 break;
             }
         }
         if (!contains) {
-            raceInLeaderboardDTO.addFleet(fleetDTO);
+            raceColumnDTO.addFleet(fleetDTO);
         }
-        raceInLeaderboardDTO.setMedalRace(medalRace);
-        raceInLeaderboardDTO.setRaceIdentifier(fleetDTO, trackedRaceIdentifier);
-        raceInLeaderboardDTO.setRace(fleetDTO, race);
+        raceColumnDTO.setMedalRace(medalRace);
+        raceColumnDTO.setRaceIdentifier(fleetDTO, trackedRaceIdentifier);
+        raceColumnDTO.setRace(fleetDTO, race);
+        return raceColumnDTO;
     }
 
     /**
@@ -323,4 +326,12 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         return competitorDisplayNames.get(competitor) != null;
     }
 
+
+    public Long getDelayToLiveInMillisForLatestRace() {
+        return delayToLiveInMillisForLatestRace;
+    }
+
+    public void setDelayToLiveInMillisForLatestRace(Long delayToLiveInMillisForLatestRace) {
+        this.delayToLiveInMillisForLatestRace = delayToLiveInMillisForLatestRace;
+    }
 }

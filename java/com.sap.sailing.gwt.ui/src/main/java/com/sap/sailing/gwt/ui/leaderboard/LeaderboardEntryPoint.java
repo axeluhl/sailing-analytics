@@ -36,6 +36,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
     private static final String PARAM_AUTO_EXPAND_PRESELECTED_RACE = "autoExpandPreselectedRace";
     private static final String PARAM_REGATTA_NAME = "regattaName";
     private static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
+    private static final String PARAM_DELAY_TO_LIVE_MILLIS = "delayToLiveMillis";
     private String leaderboardName;
     private String leaderboardGroupName;
     
@@ -46,13 +47,15 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                 && Window.Location.getParameter(PARAM_SHOW_RACE_DETAILS).equalsIgnoreCase("true");
         final boolean embedded = Window.Location.getParameter(PARAM_EMBEDDED) != null
                 && Window.Location.getParameter(PARAM_EMBEDDED).equalsIgnoreCase("true");
+        final long delayToLiveMillis = Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS) != null ?
+                Long.valueOf(Window.Location.getParameter(PARAM_DELAY_TO_LIVE_MILLIS)) : 5000l; // default 5s
         sailingService.getLeaderboardNames(new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
                 leaderboardName = Window.Location.getParameter("name");
                 leaderboardGroupName = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
                 if (leaderboardNames.contains(leaderboardName)) {
-                    createUI(showRaceDetails, embedded);
+                    createUI(showRaceDetails, embedded, delayToLiveMillis);
                 } else {
                     RootPanel.get().add(new Label(stringMessages.noSuchLeaderboard()));
                 }
@@ -65,7 +68,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         });
     }
     
-    private void createUI(boolean showRaceDetails, boolean embedded) {
+    private void createUI(boolean showRaceDetails, boolean embedded, long delayToLiveMillis) {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
         LogoAndTitlePanel logoAndTitlePanel = null;
@@ -80,13 +83,13 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
         String tvModeParam = Window.Location.getParameter("tvMode");
         if (tvModeParam != null) {
             Timer timer = new Timer(PlayModes.Replay, 1000l);
-            timer.setLivePlayDelayInMillis(5000l);
+            timer.setLivePlayDelayInMillis(delayToLiveMillis);
             TVViewPanel tvViewPanel = new TVViewPanel(sailingService, stringMessages, this, leaderboardName,
                     userAgentType, null, timer, logoAndTitlePanel, mainPanel, showRaceDetails);
             contentScrollPanel.setWidget(tvViewPanel);
         } else {
             Timer timer = new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l);
-            timer.setLivePlayDelayInMillis(5000l);
+            timer.setLivePlayDelayInMillis(delayToLiveMillis);
             final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
             LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, new AsyncActionsExecutor(),
                     leaderboardSettings,
@@ -94,7 +97,7 @@ public class LeaderboardEntryPoint extends AbstractEntryPoint {
                             /* hasMultiSelection */true), timer, leaderboardName, leaderboardGroupName,
                     LeaderboardEntryPoint.this, stringMessages, userAgentType, showRaceDetails);
             if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-                timer.play();
+                timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, always goes "live"
             }
             contentScrollPanel.setWidget(leaderboardPanel);
         }

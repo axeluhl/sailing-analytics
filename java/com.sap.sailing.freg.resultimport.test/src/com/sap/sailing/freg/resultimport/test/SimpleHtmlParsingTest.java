@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.freg.resultimport.CompetitorRow;
+import com.sap.sailing.freg.resultimport.RegattaResults;
 import com.sap.sailing.freg.resultimport.impl.FregHtmlParser;
 
 public class SimpleHtmlParsingTest {
@@ -27,6 +28,24 @@ public class SimpleHtmlParsingTest {
         final String readLine = br.readLine();
         assertNotNull(readLine);
         br.close();
+    }
+
+    @Test
+    public void testMultiLineTD() throws IOException {
+        final InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("Coupe-internationale-de-france.htm");
+        FregHtmlParser parser = new FregHtmlParser();
+        final RegattaResults regattaResults = parser.getRegattaResults(resourceAsStream);
+        List<CompetitorRow> result = regattaResults.getCompetitorResults();
+        assertFalse(result.isEmpty());
+        assertEquals(57, result.size());
+        assertTrue(regattaResults.getMetadata().contains("PRE- WORLD \n      2012 - COUPE INTERNATIONALE DE FRANCE 505"));
+        for (CompetitorRow row : result) {
+            if (Util.contains(row.getNames(), "MARTIN Aline")) {
+                assertEquals("FRA 8716", row.getSailID());
+                assertEquals(111, row.getScoreAfterDiscarding(), 0.000000001);
+                assertEquals(230.00, row.getTotalPointsBeforeDiscarding(), 0.000000001);
+            }
+        }
     }
     
     @Test

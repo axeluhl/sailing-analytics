@@ -192,7 +192,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         public V call() {
                             try {
                                 V preResult = cacheUpdateComputer.computeCacheUpdate(key, joinedUpdateInterval);
-                                getOrCreateLockForKey(key).writeLock().lock();
+                                LockUtil.lock(getOrCreateLockForKey(key).writeLock());
                                 try {
                                     V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult, joinedUpdateInterval);
                                     if (result == null) {
@@ -238,7 +238,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 }
             } // else no calculation currently going on; value has been fetched from latest cache entry
         } else {
-            getOrCreateLockForKey(key).readLock().lock();
+            LockUtil.lock(getOrCreateLockForKey(key).readLock());
             try {
                 value = cache.get(key);
             } finally {
