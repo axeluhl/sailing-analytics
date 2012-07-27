@@ -23,9 +23,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,6 +80,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.SmartFutureCache;
 import com.sap.sailing.util.impl.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sailing.util.impl.SmartFutureCache.EmptyUpdateInterval;
@@ -163,7 +161,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * time point. Readers use the read lock. Checking / entering a lock into this map uses <code>synchronized</code> on
      * the map itself.
      */
-    private transient Map<TimePoint, ReadWriteLock> competitorRankingsLocks;
+    private transient Map<TimePoint, NamedReentrantReadWriteLock> competitorRankingsLocks;
 
     /**
      * legs appear in the order in which they appear in the race's course
@@ -296,7 +294,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         windTracks.put(trackBasedWindSource, getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
         this.trackedRegatta = trackedRegatta;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
-        competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
+        competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
     }
     
     @Override
@@ -314,7 +312,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                             EmptyUpdateInterval updateInterval) throws NoWindException {
                         return computeManeuvers(competitor);
                     }
-                });
+                }, /* nameForLocks */ "Maneuver cache for race "+getRace().getName());
     }
     
     /**
@@ -325,7 +323,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         ois.defaultReadObject();
         windStore = EmptyWindStore.INSTANCE;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
-        competitorRankingsLocks = new HashMap<TimePoint, ReadWriteLock>();
+        competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
         directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         maneuverCache = createManeuverCache();
@@ -741,25 +739,30 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException {
-        ReadWriteLock readWriteLock;
+        NamedReentrantReadWriteLock readWriteLock;
         synchronized (competitorRankingsLocks) {
             readWriteLock = competitorRankingsLocks.get(timePoint);
             if (readWriteLock == null) {
-                readWriteLock = new ReentrantReadWriteLock();
+                readWriteLock = new NamedReentrantReadWriteLock("competitor rankings for race "+getRace().getName()+
+                        " for time point "+timePoint, /* fair */ false);
                 competitorRankingsLocks.put(timePoint, readWriteLock);
             }
         }
         List<Competitor> rankedCompetitors;
-        final Lock lock;
+        boolean lockForWrite;
         synchronized (competitorRankings) {
             rankedCompetitors = competitorRankings.get(timePoint);
             if (rankedCompetitors == null) {
-                lock = readWriteLock.writeLock();
+                lockForWrite = true;
             } else {
-                lock = readWriteLock.readLock();
+                lockForWrite = false;
             }
         }
-        LockUtil.lock(lock);
+        if (lockForWrite) {
+            LockUtil.lockForWrite(readWriteLock);
+        } else {
+            LockUtil.lockForRead(readWriteLock);
+        }
         try {
             if (rankedCompetitors == null) {
                 rankedCompetitors = competitorRankings.get(timePoint); // try again; maybe a writer released the write lock after updating the cache
@@ -777,7 +780,11 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
             return rankedCompetitors;
         } finally {
-            lock.unlock();
+            if (lockForWrite) {
+                LockUtil.unlockAfterWrite(readWriteLock);
+            } else {
+                LockUtil.unlockAfterRead(readWriteLock);
+            }
         }
     }
 

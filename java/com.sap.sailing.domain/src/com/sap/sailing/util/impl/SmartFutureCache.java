@@ -9,7 +9,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
 import com.sap.sailing.util.impl.SmartFutureCache.UpdateInterval;
@@ -44,7 +43,9 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
     private final CacheUpdater<K, V, U> cacheUpdateComputer;
     
-    private final Map<K, ReentrantReadWriteLock> locksForKeys;
+    private final Map<K, NamedReentrantReadWriteLock> locksForKeys;
+    
+    private final String nameForLocks;
     
     /**
      * An immutable "interval" description for a cache update
@@ -150,19 +151,20 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         }
     }
     
-    public SmartFutureCache(CacheUpdater<K, V, U> cacheUpdateComputer) {
+    public SmartFutureCache(CacheUpdater<K, V, U> cacheUpdateComputer, String nameForLocks) {
         this.ongoingRecalculations = new ConcurrentHashMap<K, FutureTaskWithCancelBlocking<V, U>>();
         this.cache = new ConcurrentHashMap<K, V>();
         this.recalculator = Executors.newSingleThreadExecutor();
         this.cacheUpdateComputer = cacheUpdateComputer;
-        this.locksForKeys = new ConcurrentHashMap<K, ReentrantReadWriteLock>();
+        this.locksForKeys = new ConcurrentHashMap<K, NamedReentrantReadWriteLock>();
+        this.nameForLocks = nameForLocks;
     }
     
-    private ReentrantReadWriteLock getOrCreateLockForKey(K key) {
+    private NamedReentrantReadWriteLock getOrCreateLockForKey(K key) {
         synchronized (locksForKeys) {
-            ReentrantReadWriteLock result = locksForKeys.get(key);
+            NamedReentrantReadWriteLock result = locksForKeys.get(key);
             if (result == null) {
-                result = new ReentrantReadWriteLock();
+                result = new NamedReentrantReadWriteLock(nameForLocks+" for key "+key, /* fair */ false);
                 locksForKeys.put(key, result);
             }
             return result;
@@ -192,7 +194,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         public V call() {
                             try {
                                 V preResult = cacheUpdateComputer.computeCacheUpdate(key, joinedUpdateInterval);
-                                LockUtil.lock(getOrCreateLockForKey(key).writeLock());
+                                LockUtil.lockForWrite(getOrCreateLockForKey(key));
                                 try {
                                     V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult, joinedUpdateInterval);
                                     if (result == null) {
@@ -202,7 +204,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                                     }
                                     return result;
                                 } finally {
-                                    getOrCreateLockForKey(key).writeLock().unlock();
+                                    LockUtil.unlockAfterWrite(getOrCreateLockForKey(key));
                                     ongoingRecalculations.remove(key);
                                 }
                             } catch (Throwable e) {
@@ -238,11 +240,11 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 }
             } // else no calculation currently going on; value has been fetched from latest cache entry
         } else {
-            LockUtil.lock(getOrCreateLockForKey(key).readLock());
+            LockUtil.lockForRead(getOrCreateLockForKey(key));
             try {
                 value = cache.get(key);
             } finally {
-                getOrCreateLockForKey(key).readLock().unlock();
+                LockUtil.unlockAfterRead(getOrCreateLockForKey(key));
             }
         }
         return value;

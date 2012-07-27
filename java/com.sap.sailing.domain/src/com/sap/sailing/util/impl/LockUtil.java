@@ -29,7 +29,7 @@ public class LockUtil {
                     final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     new Throwable("This is where the lock couldn't be acquired").printStackTrace(new PrintStream(
                             bos));
-                    logger.info("Couldn't acquire lock in "+NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK+"s at "+
+                    logger.info("Couldn't acquire lock "+lockDescriptionForTimeoutLogMessage+" in "+NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK+"s at "+
                             new String(bos.toByteArray())+"\nTrying again...");
                 }
             }
@@ -53,7 +53,7 @@ public class LockUtil {
     }
     
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
-        lock(lock.writeLock());
+        lock(lock.writeLock(), "writeLock "+lock.getName());
     }
     
     public static void unlockAfterWrite(NamedReentrantReadWriteLock lock) {

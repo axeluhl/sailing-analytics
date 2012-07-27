@@ -11,7 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -140,7 +139,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public void removeWaypoint(int zeroBasedPosition) {
         if (zeroBasedPosition >= 0) {
             Waypoint removedWaypoint;
-            LockUtil.lock(lock.writeLock());
+            LockUtil.lockForWrite(lock);
             try {
                 boolean isLast = zeroBasedPosition == waypoints.size() - 1;
                 removedWaypoint = waypoints.remove(zeroBasedPosition);
@@ -162,7 +161,7 @@ public class CourseImpl extends NamedImpl implements Course {
                 }
                 notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
             } finally {
-                lock.writeLock().unlock();
+                LockUtil.unlockAfterWrite(lock);
             }
         }
     }
@@ -355,7 +354,7 @@ public class CourseImpl extends NamedImpl implements Course {
 
     @Override
     public void update(List<ControlPoint> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException {
-        LockUtil.lock(lock.writeLock());
+        LockUtil.lockForWrite(lock);
         try {
             Iterable<Waypoint> courseWaypoints = getWaypoints();
             List<Waypoint> newWaypointList = new LinkedList<Waypoint>();
@@ -387,7 +386,7 @@ public class CourseImpl extends NamedImpl implements Course {
             CourseAsWaypointList courseAsWaypointList = new CourseAsWaypointList(this);
             patch.applyToInPlace(courseAsWaypointList);
         } finally {
-            lock.writeLock().unlock();
+            LockUtil.unlockAfterWrite(lock);
         }
     }
     
