@@ -1,7 +1,11 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -10,6 +14,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -49,24 +54,57 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      */
     private TimePoint timePointOfLastCorrectionsValidity;
     
+    private transient Set<ScoreCorrectionListener> scoreCorrectionListeners;
+    
     public ScoreCorrectionImpl() {
         this.maxPointsReasons = new HashMap<Util.Pair<Competitor,RaceColumn>, MaxPointsReason>();
         this.correctedScores = new HashMap<Util.Pair<Competitor,RaceColumn>, Double>();
+        this.scoreCorrectionListeners = new HashSet<ScoreCorrectionListener>();
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        this.scoreCorrectionListeners = new HashSet<ScoreCorrectionListener>();
+    }
+
+    @Override
+    public void addScoreCorrectionListener(ScoreCorrectionListener listener) {
+        scoreCorrectionListeners.add(listener);
+    }
+
+    @Override
+    public void removeScoreCorrectionListener(ScoreCorrectionListener listener) {
+        scoreCorrectionListeners.remove(listener);
+    }
+    
+    private void notifyListeners(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
+        for (ScoreCorrectionListener listener : scoreCorrectionListeners) {
+            listener.correctedScoreChanced(competitor, oldCorrectedScore, newCorrectedScore);
+        }
+    }
+
+    private void notifyListeners(Competitor competitor, MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
+        for (ScoreCorrectionListener listener : scoreCorrectionListeners) {
+            listener.maxPointsReasonChanced(competitor, oldMaxPointsReason, newMaxPointsReason);
+        }
     }
 
     @Override
     public void setMaxPointsReason(Competitor competitor, RaceColumn raceColumn, MaxPointsReason reason) {
         Pair<Competitor, RaceColumn> key = raceColumn.getKey(competitor);
+        MaxPointsReason oldMaxPointsReason;
         if (reason == null) {
-            maxPointsReasons.remove(key);
+            oldMaxPointsReason = maxPointsReasons.remove(key);
         } else {
-            maxPointsReasons.put(key, reason);
+            oldMaxPointsReason = maxPointsReasons.put(key, reason);
         }
+        notifyListeners(competitor, oldMaxPointsReason, reason);
     }
 
     @Override
     public void correctScore(Competitor competitor, RaceColumn raceColumn, double points) {
-        correctedScores.put(raceColumn.getKey(competitor), points);
+        Double oldScore = correctedScores.put(raceColumn.getKey(competitor), points);
+        notifyListeners(competitor, oldScore, points);
     }
     
     @Override
@@ -77,7 +115,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     
     @Override
     public void uncorrectScore(Competitor competitor, RaceColumn raceColumn) {
-        correctedScores.remove(raceColumn.getKey(competitor));
+        Double oldScore = correctedScores.remove(raceColumn.getKey(competitor));
+        notifyListeners(competitor, oldScore, null);
     }
 
     @Override
