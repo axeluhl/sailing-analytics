@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider {
 	private static final long serialVersionUID = -52564333737320563L;
 
-	private static final String name = "Official Results from 'WinRegatta Plus#";
+	private static final String name = "Results from 'WinRegatta Plus'";
 
     @Override
     public String getName() {

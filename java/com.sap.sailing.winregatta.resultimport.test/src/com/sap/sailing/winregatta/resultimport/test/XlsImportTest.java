@@ -1,0 +1,43 @@
+package com.sap.sailing.winregatta.resultimport.test;
+
+import static org.junit.Assert.assertEquals;
+
+import static org.junit.Assert.assertNotNull;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+import org.junit.Test;
+
+import com.sap.sailing.winregatta.resultimport.CompetitorResultBean;
+import com.sap.sailing.winregatta.resultimport.CompetitorResultsXlsImporter;
+
+public class XlsImportTest {
+    private static final String SAMPLE_INPUT_NAME = "Erg_Drachen_Wannseewoche_2012_Beispiel.xlsx";
+    private static final String RESOURCES = "resources/";
+
+    private InputStream getInputStream(String filename) throws FileNotFoundException, IOException {
+        return new FileInputStream(getFile(filename));
+    }
+
+    private File getFile(String filename) {
+        return new File(RESOURCES + filename);
+    }
+
+    private InputStream getSampleInputStream() throws FileNotFoundException, IOException {
+        return getInputStream(SAMPLE_INPUT_NAME);
+    }
+
+    @Test
+    public void testLoadingSampleXLS() throws Exception {
+    	CompetitorResultsXlsImporter resultlistFromXlsImporter = new CompetitorResultsXlsImporter();
+    	List<CompetitorResultBean> resultList = resultlistFromXlsImporter.readResultlist(getSampleInputStream(), "Erg_Drachen");
+
+    	assertNotNull(resultList);
+    	assertEquals(19, resultList.size());
+    }
+}
