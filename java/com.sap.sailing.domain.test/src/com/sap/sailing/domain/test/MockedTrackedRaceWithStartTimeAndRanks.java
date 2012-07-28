@@ -429,4 +429,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
         // TODO Auto-generated method stub
         
     }
+
+	@Override
+	public Iterable<Buoy> getBuoys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

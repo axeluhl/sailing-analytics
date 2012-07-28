@@ -17,38 +17,48 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 
 public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
-    private final CellTable<WaypointDTO> courseWaypointsTable;
+    private final CellTable<MarkDTO> buoysTable;
+    private final ListDataProvider<MarkDTO> buoyDataProvider;
+    private final SingleSelectionModel<MarkDTO> buoySelectionModel; 
+	
+	private final CellTable<WaypointDTO> courseWaypointsTable;
+    private final MultiSelectionModel<WaypointDTO> wayPointSelectionModel; 
+    private final ListDataProvider<WaypointDTO> waypointDataProvider;
+
     private final Label courseDataRequestTimeLabel;
     
-    private final ListDataProvider<WaypointDTO> waypointDataProvider;
-    
     private final HorizontalPanel courseActionsPanel;
-
-    private final MultiSelectionModel<WaypointDTO> wayPointSelectionModel; 
     
     public RaceCourseManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         super(sailingService, errorReporter, regattaRefresher, stringMessages);
 
         courseDataRequestTimeLabel = new Label();
-        this.selectedRaceContentPanel.add(courseDataRequestTimeLabel);
+        selectedRaceContentPanel.add(courseDataRequestTimeLabel);
+        
+        Grid grid = new Grid(1, 2);
+        grid.setCellPadding(10);
+        selectedRaceContentPanel.add(grid);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         courseWaypointsTable = new CellTable<WaypointDTO>(/* pageSize */10000, tableRes);
-        this.selectedRaceContentPanel.add(courseWaypointsTable);
+        grid.setWidget(0,  0, courseWaypointsTable);
         wayPointSelectionModel = new MultiSelectionModel<WaypointDTO>();
         courseWaypointsTable.setSelectionModel(wayPointSelectionModel);
         
@@ -89,6 +99,34 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
         waypointDataProvider = new ListDataProvider<WaypointDTO>();
         waypointDataProvider.addDataDisplay(courseWaypointsTable);
+
+        // race buoys table
+        buoysTable = new CellTable<MarkDTO>(/* pageSize */10000, tableRes);
+        grid.setWidget(0,  1, buoysTable);
+        buoySelectionModel = new SingleSelectionModel<MarkDTO>();
+        buoysTable.setSelectionModel(buoySelectionModel);
+        
+        TextColumn<MarkDTO> buoyNameColumn = new TextColumn<MarkDTO>() {
+            @Override
+            public String getValue(MarkDTO markDTO) {
+                return markDTO.name;
+            }
+        }; 
+        buoysTable.addColumn(buoyNameColumn, stringMessages.buoy());
+
+        final SafeHtmlCell buoyPositionCell = new SafeHtmlCell();
+        Column<MarkDTO, SafeHtml> buoyPositionColumn = new Column<MarkDTO, SafeHtml>(buoyPositionCell) {
+            @Override
+            public SafeHtml getValue(MarkDTO mark) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                builder.appendEscaped(mark.name + ", " + stringMessages.position() + ": " + mark.position.toFormattedString());
+                return builder.toSafeHtml();
+            }
+        };
+        buoysTable.addColumn(buoyPositionColumn, stringMessages.position());
+
+        buoyDataProvider = new ListDataProvider<MarkDTO>();
+        buoyDataProvider.addDataDisplay(buoysTable);
         
         courseActionsPanel = new HorizontalPanel();
         courseActionsPanel.setSpacing(10);
@@ -148,6 +186,30 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         });
         courseActionsPanel.add(removeRoundBtn);
+
+        Button swapBuoyBtn = new Button("Swap buoy");
+        swapBuoyBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if(wayPointSelectionModel.getSelectedSet().size() != 1 || buoySelectionModel.getSelectedObject() == null) {
+                    Window.alert("To swap 2 buoys you have the select a course waypoint and a buoy.");
+                    return;
+                } else {
+                	// Todo: implement the swap buoy function
+//                    sailingService.swapBuoysOfRaceCourse(singleSelectedRace,..., new AsyncCallback<Void>() {
+//                        @Override
+//                        public void onSuccess(Void arg0) {
+//                            refreshSelectedRaceData();
+//                        }
+//                        
+//                        @Override
+//                        public void onFailure(Throwable arg0) {
+//                        }
+//                    });
+                }
+            }
+        });
+        courseActionsPanel.add(swapBuoyBtn);
         
         Button refreshBtn = new Button(stringMessages.refresh());
         refreshBtn.addClickHandler(new ClickHandler() {
@@ -169,8 +231,18 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             
             sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
                 @Override
-                public void onSuccess(RaceCourseDTO result) {
-                    updateCourseInfo(result);
+                public void onSuccess(final RaceCourseDTO raceCourseDTO) {
+                    sailingService.getRaceBuoys(singleSelectedRace, new Date(),  new AsyncCallback<RaceBuoysDTO>() {
+                        @Override
+                        public void onSuccess(RaceBuoysDTO raceBuoysDTO) {
+                            updateCourseAndBuoysInfo(raceCourseDTO, raceBuoysDTO);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            RaceCourseManagementPanel.this.errorReporter.reportError("Error trying to obtain the buoys of the race: " + caught.getMessage());
+                        }
+                    });
                 }
 
                 @Override
@@ -183,8 +255,9 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         }
     }
 
-    private void updateCourseInfo(RaceCourseDTO courseDTO) {
+    private void updateCourseAndBuoysInfo(RaceCourseDTO courseDTO, RaceBuoysDTO buoysDTO) {
         waypointDataProvider.setList(courseDTO.waypoints);
+        buoyDataProvider.setList(new ArrayList<MarkDTO>(buoysDTO.buoys));
         courseDataRequestTimeLabel.setText(courseDTO.requestTime.toString());
     }
 }

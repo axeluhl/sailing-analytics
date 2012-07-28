@@ -111,6 +111,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
         LockUtil.lock(lock.writeLock());
         try {
+        	logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "'");
             waypoints.add(zeroBasedPosition, waypointToAdd);
             Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
             updatesToWaypointIndexes.put(waypointToAdd, zeroBasedPosition);
