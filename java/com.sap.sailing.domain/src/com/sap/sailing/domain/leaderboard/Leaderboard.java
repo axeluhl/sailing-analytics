@@ -249,4 +249,9 @@ public interface Leaderboard extends Named {
     Long getDelayToLiveInMillis();
     
     Comparator<Double> getScoreComparator();
+    
+    /**
+     * Obtains all {@link TrackedRace}s currently attached to any of the columns of this leaderboard
+     */
+    Iterable<TrackedRace> getTrackedRaces();
 }

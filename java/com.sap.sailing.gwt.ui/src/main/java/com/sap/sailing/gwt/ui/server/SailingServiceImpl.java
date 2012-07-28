@@ -269,6 +269,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
      */
     private final Set<CacheInvalidationListener> cacheInvalidationListeners;
+    
+    private final LeaderboardDTOCache leaderboardDTOCache;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -288,6 +290,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
+        leaderboardDTOCache = new LeaderboardDTOCache(this);
     }
     
     public void destroy() {
@@ -384,13 +387,14 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             synchronized (leaderboardByNameLiveUpdaters) {
                 liveLeaderboardUpdater = leaderboardByNameLiveUpdaters.get(leaderboardName);
                 if (liveLeaderboardUpdater == null) {
-                    liveLeaderboardUpdater = new LiveLeaderboardUpdater(leaderboardName, this);
+                    liveLeaderboardUpdater = new LiveLeaderboardUpdater(getService().getLeaderboardByName(leaderboardName), this);
                     leaderboardByNameLiveUpdaters.put(leaderboardName, liveLeaderboardUpdater);
                 }
             }
             result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
         } else {
-            result = computeLeaderboardByName(leaderboardName, new MillisecondsTimePoint(date), namesOfRaceColumnsForWhichToLoadLegDetails,
+            result = leaderboardDTOCache.getLeaderboardByName(getService().getLeaderboardByName(leaderboardName),
+                    new MillisecondsTimePoint(date), namesOfRaceColumnsForWhichToLoadLegDetails,
                     /* waitForLatestAnalyses */ true); // in replay mode we'de like to know things exactly and can afford it
         }
         logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
@@ -398,12 +402,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    protected LeaderboardDTO computeLeaderboardByName(String leaderboardName, final TimePoint timePoint,
+    protected LeaderboardDTO computeLeaderboardByName(final Leaderboard leaderboard, final TimePoint timePoint,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDTO result = null;
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             result = new LeaderboardDTO(leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity()==null ?
                         null : leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
@@ -491,7 +494,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
-        logger.fine("computeLeaderboardByName("+leaderboardName+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
+        logger.fine("computeLeaderboardByName("+leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
