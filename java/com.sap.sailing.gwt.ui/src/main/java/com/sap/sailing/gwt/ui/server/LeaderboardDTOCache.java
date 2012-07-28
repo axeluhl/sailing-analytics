@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -21,12 +22,14 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -69,6 +72,10 @@ public class LeaderboardDTOCache {
      */
     private final Executor computeLeadearboardByNameExecutor;
     
+    private final WeakHashMap<Leaderboard, RaceColumnListener> raceColumnListeners;
+    
+    private final WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener> scoreCorrectionListeners;
+    
     private class CacheInvalidationListener implements RaceChangeListener {
         private final Leaderboard leaderboard;
         private final TrackedRace trackedRace;
@@ -80,74 +87,76 @@ public class LeaderboardDTOCache {
         
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-            removeFromCache();
+            removeFromCache(leaderboard);
         }
 
         @Override
         public void buoyPositionChanged(GPSFix fix, Buoy buoy) {
-            removeFromCache();
+            removeFromCache(leaderboard);
         }
 
         @Override
         public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
                 Iterable<MarkPassing> markPassings) {
-            removeFromCache();
+            removeFromCache(leaderboard);
         }
 
         @Override
         public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            removeFromCache();
+            removeFromCache(leaderboard);
         }
 
         @Override
         public void windDataReceived(Wind wind, WindSource windSource) {
-            removeFromCache();
+            removeFromCache(leaderboard);
         }
 
         @Override
         public void windDataRemoved(Wind wind, WindSource windSource) {
-            removeFromCache();
+            removeFromCache(leaderboard);
         }
 
         @Override
         public void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
-            removeFromCache();
+            removeFromCache(leaderboard);
         }
 
         @Override
         public void raceTimesChanged(TimePoint startOfTracking, TimePoint endOfTracking, TimePoint startTimeReceived) {
-            removeFromCache();
+            removeFromCache(leaderboard);
         }
 
         @Override
         public void delayToLiveChanged(long delayToLiveInMillis) {
-            removeFromCache();
+            removeFromCache(leaderboard);
         }
 
         @Override
         public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
-            removeFromCache();
-        }
-
-        private void removeFromCache() {
-            synchronized (leaderboardCache) {
-                leaderboardCache.remove(leaderboard);
-            }
-            synchronized (invalidationListenersPerLeaderboard) {
-                Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard.remove(leaderboard);
-                if (listenersMap != null) {
-                    Set<CacheInvalidationListener> listeners = listenersMap.get(trackedRace);
-                    if (listeners != null) {
-                        for (CacheInvalidationListener listener : listeners) {
-                            listener.removeFromTrackedRace();
-                        }
-                    }
-                }
-            }
+            removeFromCache(leaderboard);
         }
 
         private void removeFromTrackedRace() {
             trackedRace.removeListener(this);
+        }
+    }
+    
+    private class CacheInvalidationUponScoreCorrectionListener implements ScoreCorrectionListener {
+        private final Leaderboard leaderboard;
+        
+        public CacheInvalidationUponScoreCorrectionListener(Leaderboard leaderboard) {
+            this.leaderboard = leaderboard;
+        }
+
+        @Override
+        public void correctedScoreChanced(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
+            removeFromCache(leaderboard);
+        }
+
+        @Override
+        public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
+                MaxPointsReason newMaxPointsReason) {
+            removeFromCache(leaderboard);
         }
     }
 
@@ -157,6 +166,31 @@ public class LeaderboardDTOCache {
         this.leaderboardCache = new WeakHashMap<Leaderboard, Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>>();
         this.computeLeadearboardByNameExecutor = Executors.newFixedThreadPool(10*Runtime.getRuntime().availableProcessors());
         this.invalidationListenersPerLeaderboard = new WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>>();
+        this.raceColumnListeners = new WeakHashMap<Leaderboard, RaceColumnListener>();
+        this.scoreCorrectionListeners = new WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener>();
+    }
+    
+    private void removeFromCache(Leaderboard leaderboard) {
+        synchronized (leaderboardCache) {
+            leaderboardCache.remove(leaderboard);
+        }
+        synchronized (invalidationListenersPerLeaderboard) {
+            Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard
+                    .remove(leaderboard);
+            if (listenersMap != null) {
+                for (Map.Entry<TrackedRace, Set<CacheInvalidationListener>> e : listenersMap.entrySet()) {
+                    for (CacheInvalidationListener listener : e.getValue()) {
+                        listener.removeFromTrackedRace();
+                    }
+                }
+            }
+        }
+        synchronized (raceColumnListeners) {
+            leaderboard.removeRaceColumnListener(raceColumnListeners.remove(leaderboard));
+        }
+        synchronized (scoreCorrectionListeners) {
+            leaderboard.getScoreCorrection().removeScoreCorrectionListener(scoreCorrectionListeners.remove(leaderboard));
+        }
     }
     
     /**
@@ -168,7 +202,12 @@ public class LeaderboardDTOCache {
         for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
             registerListener(leaderboard, trackedRace);
         }
-        leaderboard.addRaceColumnListener(new RaceColumnListener() {
+        final CacheInvalidationUponScoreCorrectionListener scoreCorrectionListener = new CacheInvalidationUponScoreCorrectionListener(leaderboard);
+        leaderboard.getScoreCorrection().addScoreCorrectionListener(scoreCorrectionListener);
+        synchronized (scoreCorrectionListeners) {
+            scoreCorrectionListeners.put(leaderboard, scoreCorrectionListener);
+        }
+        final RaceColumnListener raceColumnListener = new RaceColumnListener() {
             private static final long serialVersionUID = 8165124797028386317L;
             @Override
             public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
@@ -187,16 +226,24 @@ public class LeaderboardDTOCache {
                     }
                 }
             }
-        });
+        };
+        leaderboard.addRaceColumnListener(raceColumnListener);
+        synchronized (raceColumnListeners) {
+            raceColumnListeners.put(leaderboard, raceColumnListener);
+        }
     }
 
     private void registerListener(final Leaderboard leaderboard, TrackedRace trackedRace) {
-        final CacheInvalidationListener listener = new CacheInvalidationListener(leaderboard, trackedRace);
-        trackedRace.addListener(listener);
-        Map<TrackedRace, Set<CacheInvalidationListener>> invalidationListeners = invalidationListenersPerLeaderboard.get(leaderboard);
-        if (invalidationListeners == null) {
-            invalidationListeners = new HashMap<TrackedRace, Set<CacheInvalidationListener>>();
-            invalidationListenersPerLeaderboard.put(leaderboard, invalidationListeners);
+        Map<TrackedRace, Set<CacheInvalidationListener>> invalidationListeners;
+        final CacheInvalidationListener listener;
+        synchronized (invalidationListenersPerLeaderboard) {
+            listener = new CacheInvalidationListener(leaderboard, trackedRace);
+            trackedRace.addListener(listener);
+            invalidationListeners = invalidationListenersPerLeaderboard.get(leaderboard);
+            if (invalidationListeners == null) {
+                invalidationListeners = new HashMap<TrackedRace, Set<CacheInvalidationListener>>();
+                invalidationListenersPerLeaderboard.put(leaderboard, invalidationListeners);
+            }
         }
         Set<CacheInvalidationListener> listeners = invalidationListeners.get(trackedRace);
         if (listeners == null) {
@@ -216,16 +263,30 @@ public class LeaderboardDTOCache {
         Map<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> map = null;
         boolean cacheHit = false;
         synchronized (leaderboardCache) {
-            if (!waitForLatestAnalyses) {
-                map = leaderboardCache.get(leaderboard);
-                if (map == null) {
-                    future = null;
-                    map = new HashMap<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>();
-                    leaderboardCache.put(leaderboard, map);
-                    registerAsListener(leaderboard);
-                } else {
-                    future = map.get(key);
-                }
+            map = leaderboardCache.get(leaderboard);
+            if (map == null) {
+                future = null;
+                map = new LinkedHashMap<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>() {
+                    private static final long serialVersionUID = 7287916997229815039L;
+                    @Override
+                    protected boolean removeEldestEntry(Map.Entry<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> e) {
+                        return size() > 10; // remember 10 LeaderboardDTOs per leaderborad
+                    }
+                };
+                leaderboardCache.put(leaderboard, map);
+                registerAsListener(leaderboard);
+            } else {
+                /*
+                 * Waiting for latest analyses results largely regards wind estimation and maneuver cache; see
+                 * SmartFutureCache. Even if waitForLatestAnalysis is requested, it is OK to cache. The cache would be
+                 * invalidated when the race changes, forcing a new re-calculation based on the latest analysis results.
+                 * Once the race stabilizes, the latest analysis results for maneuvers and wind estimation will no
+                 * longer change and can quickly be obtained from the respective SmartFutureCache. At the same time, if
+                 * a LeaderboardDTOCache entry is found, that was based on the latest analysis results at the time. If
+                 * new evidence is received, that would also invalidate the LeaderboardDTOCache. Therefore, it's okay to
+                 * re-use the LeaderboardDTOCache match even if the latest analysis results are requested.
+                 */
+                future = map.get(key);
             }
             if (future == null) {
                 future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
