@@ -203,6 +203,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                 synchronized (this) {
                     if (timePoint.asMillis() - lastRequest.asMillis() >= UPDATE_TIMEOUT_IN_MILLIS) {
                         running = false;
+                        currentLiveLeaderboard = null; // declare cache contents for invalid because they will later be too old
                         break; // make sure no-one sets running to true again while outside the synchronized block and
                                // before re-evaluating the while condition
                     }
@@ -253,7 +254,10 @@ public class LiveLeaderboardUpdater implements Runnable {
             logger.info("" + LiveLeaderboardUpdater.class.getSimpleName() + " thread for leaderboard "
                     + leaderboard.getName() + " ending");
         } catch (Throwable t) {
-            running = false;
+            synchronized (this) {
+                running = false;
+                currentLiveLeaderboard = null;
+            }
             logger.info("exception in "+LiveLeaderboardUpdater.class.getName()+".run(): "+t.getMessage());
             logger.throwing(LiveLeaderboardUpdater.class.getName(), "run", t);
         } finally {

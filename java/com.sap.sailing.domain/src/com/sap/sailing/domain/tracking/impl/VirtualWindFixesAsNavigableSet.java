@@ -76,7 +76,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     protected TimePoint lowerToResolution(TimePoint timePoint) {
         TimePoint result;
-        final TimePoint timePointOfLastEvent = getTrackedRace().getTimePointOfLastEvent();
+        final TimePoint timePointOfLastEvent = getTrackedRace().getTimePointOfNewestEvent();
         if (timePointOfLastEvent == null) {
             // nothing received yet; "lowering" to end of time
             result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / getResolutionInMilliseconds()
@@ -92,7 +92,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     protected TimePoint floorToResolution(TimePoint timePoint) {
         TimePoint result;
-        final TimePoint timePointOfLastEvent = getTrackedRace().getTimePointOfLastEvent();
+        final TimePoint timePointOfLastEvent = getTrackedRace().getTimePointOfNewestEvent();
         if (timePointOfLastEvent == null) {
             // nothing received yet; "lowering" to end of time
             result = new MillisecondsTimePoint((Long.MAX_VALUE - 1) / getResolutionInMilliseconds()

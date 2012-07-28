@@ -29,6 +29,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -43,7 +44,9 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
  * {@link SailingServiceImpl#computeLeaderboardByName(String, com.sap.sailing.domain.common.TimePoint, Collection, boolean)} call.
  * By listening as {@link RaceChangeListener} on all tracked races attached to the leaderboard, and by updating this list
  * by listening as {@link RaceColumnListener} on the {@link Leaderboard}, each time a race attached to a leaderboard for which
- * this cache holds one or more {@link LeaderboardDTO}s changes, the cache entries for that leaderboard are removed.
+ * this cache holds one or more {@link LeaderboardDTO}s changes, the cache entries for that leaderboard are removed. Also,
+ * when the {@link ScoreCorrection}s of a leaderboard change, a {@link ScoreCorrectionListener} that is registered will be
+ * notified and removes the leaderboard's cache entries from this cache.
  * 
  * @author Axel Uhl (D043530)
  * 
@@ -52,7 +55,7 @@ public class LeaderboardDTOCache {
     private static final Logger logger = Logger.getLogger(LeaderboardDTOCache.class.getName());
     
     /**
-     * In live operations, {@link #getLeaderboardByName(String, Date, Collection, boolean)} is the application's
+     * In live operations, {@link #getLeaderboardByName(String, Date, Collection)} is the application's
      * bottleneck. When two clients ask the same data for the same leaderboard with their
      * <code>waitForLatestAnalyses</code> parameters set to <code>false</code>, expansion state and (quantized) time
      * stamp, no two computations should be spawned for the two clients. Instead, if the computation is still running,
@@ -61,6 +64,13 @@ public class LeaderboardDTOCache {
     private final WeakHashMap<Leaderboard, Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>> leaderboardCache;
     private int leaderboardByNameCacheHitCount;
     private int leaderboardByNameCacheMissCount;
+    
+    /**
+     * Tells if leaderboard computations shall wait for long-running analyses to complete or if they instead use the
+     * last good analysis result, even if it is a bit outdated as compared to the time point queried. This particularly
+     * applies to the wind estimation and the maneuver analysis.
+     */
+    private final boolean waitForLatestAnalyses;
     
     private final WeakHashMap<Leaderboard, Map<TrackedRace, Set<CacheInvalidationListener>>> invalidationListenersPerLeaderboard;
     
@@ -160,8 +170,9 @@ public class LeaderboardDTOCache {
         }
     }
 
-    public LeaderboardDTOCache(SailingServiceImpl sailingService) {
+    public LeaderboardDTOCache(SailingServiceImpl sailingService, boolean waitForLatestAnalyses) {
         this.sailingService = sailingService;
+        this.waitForLatestAnalyses = waitForLatestAnalyses;
         // if the leaderboard becomes weakly referenced and eventually GCed, then so can the cached results for it
         this.leaderboardCache = new WeakHashMap<Leaderboard, Map<Util.Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>>>();
         this.computeLeadearboardByNameExecutor = Executors.newFixedThreadPool(10*Runtime.getRuntime().availableProcessors());
@@ -252,12 +263,52 @@ public class LeaderboardDTOCache {
         }
         listeners.add(listener);
     }
+    
+    /**
+     * Finds out the time point when any of the {@link Leaderboard#getTrackedRaces() tracked races currently attached to
+     * the <code>leaderboard</code>} and the {@link Leaderboard#getScoreCorrection() score corrections} have last been
+     * modified. If no tracked race is attached and no time-stamped score corrections have been applied to the leaderboard,
+     * <code>null</code> is returned.
+     */
+    private TimePoint getTimePointOfLatestModification(Leaderboard leaderboard) {
+        TimePoint result = null;
+        for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
+            if (result == null || trackedRace.getTimePointOfNewestEvent().after(result)) {
+                result = trackedRace.getTimePointOfNewestEvent();
+            }
+        }
+        TimePoint timePointOfLastScoreCorrection = leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity();
+        if (timePointOfLastScoreCorrection != null && (result == null || timePointOfLastScoreCorrection.after(result))) {
+            result = timePointOfLastScoreCorrection;
+        }
+        return result;
+    }
 
+    /**
+     * If the cache holds entries for the <code>leaderboard</code> requested, compare <code>timePoint</code> to the
+     * {@link #getLatestModification latest modification} affecting the <code>leaderboard</code>. If
+     * <code>timePoint</code> is after that time, adjust it to the {@link #getLatestModification latest modification
+     * time} for cache lookup and computation. This will increase chances that a subsequent request will achieve a cache
+     * hit.
+     * <p>
+     * 
+     * The {@link #waitForLatestAnalyses} field is passed on to
+     * {@link SailingServiceImpl#computeLeaderboardByName(Leaderboard, TimePoint, Collection, boolean)} if a new cache
+     * entry needs to be computed. Caching distinguished between
+     */
     public LeaderboardDTO getLeaderboardByName(final Leaderboard leaderboard, final TimePoint timePoint,
-            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails)
             throws NoWindException, InterruptedException, ExecutionException {
         long startOfRequestHandling = System.currentTimeMillis();
-        Util.Pair<TimePoint, Collection<String>> key = new Util.Pair<TimePoint, Collection<String>>(timePoint,
+        final TimePoint adjustedTimePoint;
+        TimePoint timePointOfLastModification = getTimePointOfLatestModification(leaderboard);
+        if (timePoint.after(timePointOfLastModification)) {
+            adjustedTimePoint = timePointOfLastModification; 
+            logger.fine("Adjusted time point in getLeaderboardByName from "+timePoint+" to "+adjustedTimePoint);
+        } else {
+            adjustedTimePoint = timePoint;
+        }
+        Util.Pair<TimePoint, Collection<String>> key = new Util.Pair<TimePoint, Collection<String>>(adjustedTimePoint,
                 namesOfRaceColumnsForWhichToLoadLegDetails);
         FutureTask<LeaderboardDTO> future = null;
         Map<Pair<TimePoint, Collection<String>>, FutureTask<LeaderboardDTO>> map = null;
@@ -292,7 +343,7 @@ public class LeaderboardDTOCache {
                 future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
                     @Override
                     public LeaderboardDTO call() throws Exception {
-                        LeaderboardDTO result = sailingService.computeLeaderboardByName(leaderboard, timePoint,
+                        LeaderboardDTO result = sailingService.computeLeaderboardByName(leaderboard, adjustedTimePoint,
                                 namesOfRaceColumnsForWhichToLoadLegDetails, waitForLatestAnalyses);
                         return result;
                     }
@@ -305,13 +356,13 @@ public class LeaderboardDTOCache {
         }
         if (cacheHit) {
             leaderboardByNameCacheHitCount++;
-            logger.info("Cache hit in getLeaderboardByName("+leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+")");
+            logger.info("Cache hit in getLeaderboardByName("+leaderboard.getName()+", "+adjustedTimePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+")");
         } else {
             leaderboardByNameCacheMissCount++;
         }
         logger.info("getLeaderboardByName cache hit vs. miss: "+leaderboardByNameCacheHitCount+"/"+leaderboardByNameCacheMissCount);
         LeaderboardDTO result = future.get();
-        logger.fine("getLeaderboardByName("+leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
+        logger.fine("getLeaderboardByName("+leaderboard.getName()+", "+adjustedTimePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
