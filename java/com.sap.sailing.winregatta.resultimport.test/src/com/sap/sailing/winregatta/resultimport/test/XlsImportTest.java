@@ -1,7 +1,6 @@
 package com.sap.sailing.winregatta.resultimport.test;
 
 import static org.junit.Assert.assertEquals;
-
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
@@ -13,8 +12,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.sap.sailing.winregatta.resultimport.CompetitorResultBean;
-import com.sap.sailing.winregatta.resultimport.CompetitorResultsXlsImporter;
+import com.sap.sailing.winregatta.resultimport.CompetitorResult;
+import com.sap.sailing.winregatta.resultimport.RegattaResults;
+import com.sap.sailing.winregatta.resultimport.impl.CompetitorResultsXlsImporter;
 
 public class XlsImportTest {
     private static final String SAMPLE_INPUT_NAME = "Erg_Drachen_Wannseewoche_2012_Beispiel.xlsx";
@@ -35,9 +35,10 @@ public class XlsImportTest {
     @Test
     public void testLoadingSampleXLS() throws Exception {
     	CompetitorResultsXlsImporter resultlistFromXlsImporter = new CompetitorResultsXlsImporter();
-    	List<CompetitorResultBean> resultList = resultlistFromXlsImporter.readResultlist(getSampleInputStream(), "Erg_Drachen");
+    	RegattaResults regattaResults = resultlistFromXlsImporter.getRegattaResults(getSampleInputStream(), "Erg_Drachen");
 
-    	assertNotNull(resultList);
-    	assertEquals(19, resultList.size());
+    	assertNotNull(regattaResults);
+    	assertNotNull(regattaResults.getCompetitorResults());
+    	assertEquals(19, regattaResults.getCompetitorResults().size());
     }
 }

@@ -1,10 +1,13 @@
-package com.sap.sailing.winregatta.resultimport;
+package com.sap.sailing.winregatta.resultimport.impl;
 
 import java.util.Date;
 
-public class CompetitorResultBean
+import com.sap.sailing.winregatta.resultimport.CompetitorEntry;
+import com.sap.sailing.winregatta.resultimport.CompetitorResult;
+
+public class CompetitorResultImpl implements CompetitorResult
 {
-	private String totalRank;
+	private Integer totalRank;
 	private String country;
 	private String sailID;
 	private String teamMember1Name;
@@ -17,23 +20,23 @@ public class CompetitorResultBean
 	private String teamMember3Club;
 	private String teamMember3DSVNumber;
 	private String race1Rank;
-	private String race1Score;
+	private double race1Score;
 	private String race2Rank;
-	private String race2Score;
-	private String totalScore;
+	private double race2Score;
+	private double totalScore;
 	
-	public CompetitorResultBean() {
+	public CompetitorResultImpl() {
 	}
 
 	public Object getResultKey() {
 		return sailID;
 	}
 
-	public String getTotalRank() {
+	public Integer getTotalRank() {
 		return totalRank;
 	}
 
-	public void setTotalRank(String totalRank) {
+	public void setTotalRank(Integer totalRank) {
 		this.totalRank = totalRank;
 	}
 
@@ -133,11 +136,11 @@ public class CompetitorResultBean
 		this.race1Rank = race1Rank;
 	}
 
-	public String getRace1Score() {
+	public double getRace1Score() {
 		return race1Score;
 	}
 
-	public void setRace1Score(String race1Score) {
+	public void setRace1Score(double race1Score) {
 		this.race1Score = race1Score;
 	}
 
@@ -149,19 +152,19 @@ public class CompetitorResultBean
 		this.race2Rank = race2Rank;
 	}
 
-	public String getRace2Score() {
+	public double getRace2Score() {
 		return race2Score;
 	}
 
-	public void setRace2Score(String race2Score) {
+	public void setRace2Score(double race2Score) {
 		this.race2Score = race2Score;
 	}
 
-	public String getTotalScore() {
+	public double getTotalScore() {
 		return totalScore;
 	}
 
-	public void setTotalScore(String totalScore) {
+	public void setTotalScore(double totalScore) {
 		this.totalScore = totalScore;
 	}
 
@@ -189,5 +192,41 @@ public class CompetitorResultBean
 				valueAsDate = null;
 			}
 		}
+	}
+
+	@Override
+	public Iterable<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Double getTotalPointsBeforeDiscarding() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Double getScoreAfterDiscarding() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Iterable<String> getNames() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getTeamName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getClubName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
