@@ -120,6 +120,17 @@ public class PolarDiagram49Test {
     		}
     		fw.write(xLine + "\n");
     		fw.write(yLine + "\n");
+    		polarDiagram.setTargetDirection(new DegreeBearingImpl(10.0));
+    		
+    		xLine = "";
+    		yLine = "";
+   
+    		for (Bearing b : polarDiagram.optimalDirectionsUpwind()) {
+    			xLine += "," + polarDiagram.getSpeedAtBearing(b).getKnots() * Math.cos(Math.PI/2 - b.getRadians());
+    			yLine += "," + polarDiagram.getSpeedAtBearing(b).getKnots() * Math.sin(Math.PI/2 - b.getRadians());
+    		}
+    		fw.write(xLine + "\n");
+    		fw.write(yLine + "\n");
     	}
     	
     	fw.close();
