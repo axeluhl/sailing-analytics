@@ -2,6 +2,9 @@
 <workbook>
 	<worksheet name="Erg_Drachen">
 		<section startRow="0" endRow="11">
+			<mapping cell="A2">regattaInfo.eventName</mapping>
+			<mapping cell="A3">regattaInfo.boatClass</mapping>
+			<mapping cell="A4">regattaInfo.date</mapping>
 		</section>
 		<loop startRow="12" endRow="12" items="competitors" var="competitor"
 			varType="com.sap.sailing.winregatta.resultimport.impl.CompetitorResultImpl">

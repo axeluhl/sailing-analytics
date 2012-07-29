@@ -55,17 +55,9 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Win
         return result;
     }
 
-    /**
-     * @return the first non-empty string of the list of metadata, hoping it's something pointing at the boat class at least...
-     */
     private String getBoatClassName(RegattaResults regattaResult) {
-        List<String> metadata = regattaResult.getMetadata();
-        for (String metadatum : metadata) {
-            if (metadatum != null && metadatum.length() > 0) {
-                return metadatum;
-            }
-        }
-        return null;
+        Map<String, String> metadata = regattaResult.getMetadata();
+        return metadata.get("boatClass");
     }
 
     @Override

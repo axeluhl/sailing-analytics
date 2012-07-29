@@ -353,13 +353,13 @@ public interface StringMessages extends Messages {
     String boatTails();
     String maximalCount();
     String maxVisibleCompetitorsCountMustBePositive();
-    String fregResultImportUrls();
-    String errorRefreshingFregUrlList(String message);
-    String successfullyUpdatedFregUrls();
-    String errorRemovingFregUrls(String message);
+    String resultImportUrls();
+    String errorRefreshingResultImportUrlList(String message);
+    String successfullyUpdatedResultImportUrls();
+    String errorRemovingResultImportUrls(String message);
     String pleaseEnterNonEmptyUrl();
-    String addFragUrl();
-    String errorAddingFragUrl(String message);
+    String addResultImportUrl();
+    String errorAddingResultImportUrl(String message);
     String errorTryingToObtainLeaderboardContents(String message);
     String lastScoreUpdate();
 }

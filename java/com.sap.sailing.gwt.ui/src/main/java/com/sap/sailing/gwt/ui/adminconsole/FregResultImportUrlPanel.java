@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -24,6 +25,7 @@ public class FregResultImportUrlPanel extends FlowPanel {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
+    private String selectedProviderName = "FREG";
     
     public FregResultImportUrlPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
@@ -53,6 +55,29 @@ public class FregResultImportUrlPanel extends FlowPanel {
             }
         });
         VerticalPanel vp = new VerticalPanel();
+        HorizontalPanel providerSelectionPanel = new HorizontalPanel();
+        vp.add(providerSelectionPanel);
+        
+        RadioButton fregProviderRB = new RadioButton("providerSelection", "FREG");
+        fregProviderRB.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				selectedProviderName = "FREG";
+				refreshUrlList();
+			}
+		});
+        providerSelectionPanel.add(fregProviderRB);
+        
+        RadioButton winRegattaProviderRB = new RadioButton("providerSelection", "WinRegatta");
+        winRegattaProviderRB.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				selectedProviderName = "WinRegatta";
+				refreshUrlList();
+			}
+		});
+		providerSelectionPanel.add(winRegattaProviderRB);
+
         vp.add(urlListBox);
         HorizontalPanel buttonPanel = new HorizontalPanel();
         vp.add(buttonPanel);
@@ -64,10 +89,10 @@ public class FregResultImportUrlPanel extends FlowPanel {
     }
 
     private void refreshUrlList() {
-        sailingService.getFregResultUrls(new AsyncCallback<List<String>>() {
+        sailingService.getResultImportUrls(selectedProviderName, new AsyncCallback<List<String>>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorRefreshingFregUrlList(caught.getMessage()));
+                errorReporter.reportError(stringMessages.errorRefreshingResultImportUrlList(caught.getMessage()));
             }
 
             @Override
@@ -88,23 +113,23 @@ public class FregResultImportUrlPanel extends FlowPanel {
                 urlListBox.removeItem(i);
             }
         }
-        sailingService.removeFregURLs(toRemove, new AsyncCallback<Void>() {
+        sailingService.removeResultImportURLs(selectedProviderName, toRemove, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-                errorReporter.reportError(stringMessages.errorRemovingFregUrls(caught.getMessage()));
+                errorReporter.reportError(stringMessages.errorRemovingResultImportUrls(caught.getMessage()));
                 refreshUrlList();
             }
 
             @Override
             public void onSuccess(Void result) {
-                Window.setStatus(stringMessages.successfullyUpdatedFregUrls());
+                Window.setStatus(stringMessages.successfullyUpdatedResultImportUrls());
             }
         });
     }
 
     private void addUrl() {
-        final DataEntryDialog<String> dialog = new TextfieldEntryDialog(stringMessages.addFragUrl(),
-                stringMessages.addFragUrl(), stringMessages.add(), stringMessages.cancel(), "http://",
+        final DataEntryDialog<String> dialog = new TextfieldEntryDialog(stringMessages.addResultImportUrl(),
+                stringMessages.addResultImportUrl(), stringMessages.add(), stringMessages.cancel(), "http://",
                 new DataEntryDialog.Validator<String>() {
                     @Override
                     public String getErrorMessage(String valueToValidate) {
@@ -121,18 +146,18 @@ public class FregResultImportUrlPanel extends FlowPanel {
             }
 
             @Override
-            public void onSuccess(String result) {
-                urlListBox.addItem(result);
-                sailingService.addFragUrl(result, new AsyncCallback<Void>() {
+            public void onSuccess(String url) {
+                urlListBox.addItem(url);
+                sailingService.addResultImportUrl(selectedProviderName, url, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError(stringMessages.errorAddingFragUrl(caught.getMessage()));
+                        errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught.getMessage()));
                         refreshUrlList(); // take back our pre-mature addition
                     }
 
                     @Override
                     public void onSuccess(Void result) {
-                        Window.setStatus(stringMessages.successfullyUpdatedFregUrls());
+                        Window.setStatus(stringMessages.successfullyUpdatedResultImportUrls());
                     }
                 });
             }

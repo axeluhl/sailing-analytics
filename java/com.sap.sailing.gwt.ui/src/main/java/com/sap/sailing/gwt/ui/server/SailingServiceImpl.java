@@ -212,6 +212,7 @@ import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationFactory;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
+import com.sap.sailing.winregatta.resultimport.WinRegattaResultProvider;
 
 /**
  * The server side implementation of the RPC service.
@@ -2565,34 +2566,72 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
-    @Override
-    public List<String> getFregResultUrls() {
-        List<String> result = new ArrayList<String>();
-        final FregResultProvider fregService = getFregService();
-        if (fregService != null) {
-            Iterable<URL> allUrls = fregService.getAllUrls();
-            for (URL url : allUrls) {
-                result.add(url.toString());
+    private WinRegattaResultProvider getWinRegattaService() {
+    	WinRegattaResultProvider result = null;
+        for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
+            if (scp instanceof WinRegattaResultProvider) {
+                result = (WinRegattaResultProvider) scp;
+                break;
             }
         }
         return result;
     }
 
     @Override
-    public void removeFregURLs(Set<String> toRemove) throws Exception {
-        FregResultProvider fregService = getFregService();
-        if (fregService != null) {
-            for (String urlToRemove : toRemove) {
-                fregService.removeResultUrl(new URL(urlToRemove));
+    public List<String> getResultImportUrls(String resultProviderName) {
+        List<String> result = new ArrayList<String>();
+
+        if("FREG".equals(resultProviderName)) {
+            FregResultProvider fregService = getFregService();
+            if (fregService != null) {
+                Iterable<URL> allUrls = fregService.getAllUrls();
+                for (URL url : allUrls) {
+                    result.add(url.toString());
+                }
+            }
+        } else if("WinRegatta".equals(resultProviderName)) {
+            WinRegattaResultProvider winRegattaService = getWinRegattaService();
+            if (winRegattaService != null) {
+                Iterable<URL> allUrls = winRegattaService.getAllUrls();
+                for (URL url : allUrls) {
+                    result.add(url.toString());
+                }
             }
         }
+        return result;
     }
 
     @Override
-    public void addFragUrl(String result) throws Exception {
-        FregResultProvider fregService = getFregService();
-        if (fregService != null) {
-            fregService.registerResultUrl(new URL(result));
-        }
+    public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
+        if("FREG".equals(resultProviderName)) {
+        	FregResultProvider fregService = getFregService();
+            if (fregService != null) {
+                for (String urlToRemove : toRemove) {
+                    fregService.removeResultUrl(new URL(urlToRemove));
+                }
+            }
+        } else if("WinRegatta".equals(resultProviderName)) {
+            WinRegattaResultProvider winRegattaService = getWinRegattaService();
+            if (winRegattaService != null) {
+                for (String urlToRemove : toRemove) {
+                	winRegattaService.removeResultUrl(new URL(urlToRemove));
+                }
+            }
+        }        
     }
+
+    @Override
+    public void addResultImportUrl(String resultProviderName, String url) throws Exception {
+        if("FREG".equals(resultProviderName)) {
+            FregResultProvider fregService = getFregService();
+            if (fregService != null) {
+                fregService.registerResultUrl(new URL(url));
+            }
+        } else if("WinRegatta".equals(resultProviderName)) {
+            WinRegattaResultProvider winRegattaService = getWinRegattaService();
+            if (winRegattaService != null) {
+            	winRegattaService.registerResultUrl(new URL(url));
+            }
+        }        
+    }    
 }

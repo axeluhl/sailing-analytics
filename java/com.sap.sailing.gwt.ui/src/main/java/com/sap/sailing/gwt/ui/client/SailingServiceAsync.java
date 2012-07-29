@@ -415,9 +415,12 @@ public interface SailingServiceAsync {
     void addControlPointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition,
             AsyncCallback<Void> callback);
 
-    void getFregResultUrls(AsyncCallback<List<String>> asyncCallback);
+	void getResultImportUrls(String resultProviderName,
+			AsyncCallback<List<String>> callback);
 
-    void removeFregURLs(Set<String> toRemove, AsyncCallback<Void> asyncCallback);
+	void removeResultImportURLs(String resultProviderName,
+			Set<String> toRemove, AsyncCallback<Void> callback);
 
-    void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
+	void addResultImportUrl(String resultProviderName, String url,
+			AsyncCallback<Void> callback);
 }

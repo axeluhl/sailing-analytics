@@ -20,7 +20,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.geocoding,
  com.sap.sailing.server.replication,
  com.googlecode.java-diff-utils;bundle-version="1.3.0",
- com.sap.sailing.freg.resultimport
+ com.sap.sailing.freg.resultimport,
+ com.sap.sailing.winregatta.resultimport;bundle-version="1.0.0"
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.gwt.ui.client;x-friends:="com.sap.sailing.gwt.ui.test",

@@ -8,11 +8,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
-import com.sap.sailing.winregatta.resultimport.CompetitorResult;
 import com.sap.sailing.winregatta.resultimport.RegattaResults;
 import com.sap.sailing.winregatta.resultimport.impl.CompetitorResultsXlsImporter;
 
@@ -38,7 +37,14 @@ public class XlsImportTest {
     	RegattaResults regattaResults = resultlistFromXlsImporter.getRegattaResults(getSampleInputStream(), "Erg_Drachen");
 
     	assertNotNull(regattaResults);
+    	assertNotNull(regattaResults.getMetadata());
     	assertNotNull(regattaResults.getCompetitorResults());
     	assertEquals(19, regattaResults.getCompetitorResults().size());
+    	
+    	Map<String, String> metadata = regattaResults.getMetadata();
+    	assertNotNull(metadata.get("boatClass"));
+    	assertEquals("Drachen", metadata.get("boatClass"));
+    	assertNotNull(metadata.get("eventName"));
+    	assertEquals("Wannsee Woche", metadata.get("eventName"));
     }
 }

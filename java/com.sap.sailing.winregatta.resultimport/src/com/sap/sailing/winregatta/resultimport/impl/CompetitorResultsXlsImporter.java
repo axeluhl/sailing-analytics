@@ -34,16 +34,18 @@ public class CompetitorResultsXlsImporter {
 					jxlsImportTemplatePath));
 
 		final List<CompetitorResult> results = new ArrayList<CompetitorResult>();
+		final RegattaInfo regattaInfo = new RegattaInfo();
 		HashMap<String, Object> beans = new HashMap<String, Object>();
 		beans.put("competitors", results);
+		beans.put("regattaInfo", regattaInfo);
 
 		readXlsSheetGeneric(xlsIs, sheetName, new BufferedInputStream(
 				readerXlsConfig), "Erg_Drachen", beans, CompetitorResultImpl.class);
 
         return new RegattaResults() {
             @Override
-            public List<String> getMetadata() {
-                return new ArrayList<String>();
+            public  Map<String, String> getMetadata() {
+                return regattaInfo.toMap();
             }
             @Override
             public List<CompetitorResult> getCompetitorResults() {
