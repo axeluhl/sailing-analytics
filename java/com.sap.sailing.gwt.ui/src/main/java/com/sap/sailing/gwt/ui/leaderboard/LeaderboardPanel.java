@@ -1014,7 +1014,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
         getLeaderboardTable().setWidth("100%");
-        if (userAgent.getPlatform() == UserAgentDetails.PlatformTypes.MOBILE) {
+        if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
             leaderboardSelectionModel = new ToggleSelectionModel<LeaderboardRowDTO>();
         } else {
             leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();

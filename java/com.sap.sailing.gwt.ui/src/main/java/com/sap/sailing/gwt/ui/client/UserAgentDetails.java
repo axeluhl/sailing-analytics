@@ -21,6 +21,7 @@ public class UserAgentDetails {
 	private AgentTypes type;
 	private Integer[] version;
 	private PlatformTypes platform;
+	private String userAgentRaw;
 	
 	public UserAgentDetails(String userAgent) {
 		
@@ -64,16 +65,28 @@ public class UserAgentDetails {
         	setType(AgentTypes.UNKNOWN);
         	setVersion(new Integer[] {-1, -1});
         }
+		
+		userAgentRaw = userAgent;
 
+	}
+	
+	/**
+	 * Returns indicator if agent is mobile or desktop. Do NOT invoke this
+	 * method repeatedly (e.g. at every request) because it has runtime of O(~20)!
+	 *  
+	 * @return {@link PlatformTypes} describing if user agent is mobile or not
+	 */
+	public PlatformTypes isMobile() {
         setPlatform(UserAgentDetails.PlatformTypes.DESKTOP);
         for (String mobile : UserAgentDetails.MOBILE_SPECIFIC_SUBSTRING) {
-            if (userAgent.contains(mobile) || userAgent.contains(mobile.toUpperCase())
-                    || userAgent.contains(mobile.toLowerCase())) {
+            if (userAgentRaw.contains(mobile) || userAgentRaw.contains(mobile.toUpperCase())
+                    || userAgentRaw.contains(mobile.toLowerCase())) {
                 setPlatform(UserAgentDetails.PlatformTypes.MOBILE);
                 break;
             }
         }
-		
+        
+        return getPlatform();
 	}
 	
     private Integer[] parseVersionString(String versionString) {
