@@ -52,7 +52,7 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
         
         /* throw warning using alert if browser is unsupported */
         if (!UserAgentChecker.INSTANCE.isUserAgentSupported(userAgent)) {
-        	Window.alert(stringMessages.warningBrowserUnsupported());
+            Window.alert(stringMessages.warningBrowserUnsupported());
         }
         
         ServiceDefTarget sailingServiceDef = (ServiceDefTarget) sailingService;
@@ -84,7 +84,6 @@ public abstract class AbstractEntryPoint implements EntryPoint, ErrorReporter {
     public void createErrorPage(String message) {
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-
         RootPanel.get().add(logoAndTitlePanel);
         RootPanel.get().add(new Label(message));
     }
