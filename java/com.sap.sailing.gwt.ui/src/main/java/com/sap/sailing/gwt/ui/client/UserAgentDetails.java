@@ -65,7 +65,7 @@ public class UserAgentDetails {
         	setType(AgentTypes.UNKNOWN);
         	setVersion(new Integer[] {-1, -1});
         }
-		
+
 		userAgentRaw = userAgent;
 
 	}
