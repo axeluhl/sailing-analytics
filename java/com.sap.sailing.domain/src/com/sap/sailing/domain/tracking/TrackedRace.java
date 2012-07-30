@@ -13,10 +13,10 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -186,6 +186,11 @@ public interface TrackedRace extends Serializable {
      * new track will be created in case no track was present for <code>buoy</code> so far.
      */
     GPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
+
+    /**
+     * Retrieves all buoys assigned to the race. They are not necessarily part of the race course.
+     */
+    Iterable<Buoy> getBuoys();
 
     /**
      * If the <code>waypoint</code> only has one {@link #getBuoys() buoy}, its position at time <code>timePoint</code>

@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -420,4 +421,6 @@ public interface SailingServiceAsync {
     void removeFregURLs(Set<String> toRemove, AsyncCallback<Void> asyncCallback);
 
     void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
+
+	void getRaceBuoys(RaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceBuoysDTO> callback);
 }

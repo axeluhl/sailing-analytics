@@ -145,6 +145,7 @@ import com.sap.sailing.gwt.ui.shared.PlacemarkDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
@@ -1504,6 +1505,27 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         return result;
     }
 
+    @Override
+    public RaceBuoysDTO getRaceBuoys(RaceIdentifier raceIdentifier, Date date) {
+    	RaceBuoysDTO raceBuoysDTO = new RaceBuoysDTO();
+        TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+        	raceBuoysDTO.buoys = new HashSet<MarkDTO>();
+        	Iterable<Buoy> buoys = trackedRace.getBuoys();
+        	for (Buoy buoy : buoys) {
+                GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
+                Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
+                if (positionAtDate != null) {
+                    MarkDTO markDTO = new MarkDTO(buoy.getName(), positionAtDate.getLatDeg(),
+                            positionAtDate.getLngDeg());
+                    raceBuoysDTO.buoys.add(markDTO);
+                }
+			}
+        }
+        return raceBuoysDTO;
+    }
+    
     @Override
     public RaceCourseDTO getRaceCourse(RaceIdentifier raceIdentifier, Date date) {
         RaceCourseDTO result = new RaceCourseDTO();
