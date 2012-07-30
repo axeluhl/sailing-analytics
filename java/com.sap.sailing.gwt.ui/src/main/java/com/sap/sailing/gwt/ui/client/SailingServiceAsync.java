@@ -409,10 +409,10 @@ public interface SailingServiceAsync {
 
     void getRaceCourse(RaceIdentifier raceIdentifier, Date date, AsyncCallback<RaceCourseDTO> callback);
 
-    void removeControlPointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToDelete,
+    void removeWaypointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToDelete,
             AsyncCallback<Void> callback);
 
-    void addControlPointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition,
+    void addWaypointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition,
             AsyncCallback<Void> callback);
 
     void getFregResultUrls(AsyncCallback<List<String>> asyncCallback);

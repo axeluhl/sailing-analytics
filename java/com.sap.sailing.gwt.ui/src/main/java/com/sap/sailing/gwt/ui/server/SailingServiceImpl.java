@@ -1539,38 +1539,34 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void addControlPointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition) {
+    public void addWaypointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Course course = trackedRace.getRace().getCourse();
             Iterable<Waypoint> waypoints = course.getWaypoints();
             Map<String, ControlPoint> controlPointsByName = new HashMap<String, ControlPoint>();
-            
-            int waypointsCount = Util.size(waypoints);
-            if(waypointsCount >= 3) {
-                List<ControlPoint> newControlPoints = new ArrayList<ControlPoint>();
-                for (Waypoint wayPoint : waypoints) {
-                    ControlPoint controlPoint = wayPoint.getControlPoint();
-                    newControlPoints.add(controlPoint);
-                    controlPointsByName.put(controlPoint.getName(), controlPoint);
+            List<ControlPoint> newControlPoints = new ArrayList<ControlPoint>();
+            for (Waypoint wayPoint : waypoints) {
+                ControlPoint controlPoint = wayPoint.getControlPoint();
+                newControlPoints.add(controlPoint);
+                controlPointsByName.put(controlPoint.getName(), controlPoint);
+            }
+            for (String controlPointName : controlPointNames) {
+                ControlPoint controlPointToInsert = controlPointsByName.get(controlPointName);
+                if (controlPointToInsert != null) {
+                    newControlPoints.add(insertPosition, controlPointToInsert);
                 }
-                for(String controlPointName: controlPointNames) {
-                    ControlPoint controlPointToInsert = controlPointsByName.get(controlPointName);
-                    if(controlPointToInsert != null) {
-                        newControlPoints.add(insertPosition, controlPointToInsert);
-                    }
-                }
-                try {
-                    course.update(newControlPoints, com.sap.sailing.domain.base.DomainFactory.INSTANCE);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+            }
+            try {
+                course.update(newControlPoints, com.sap.sailing.domain.base.DomainFactory.INSTANCE);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
     }
 
     @Override
-    public void removeControlPointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToDelete) {
+    public void removeWaypointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToRemove) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Course course = trackedRace.getRace().getCourse();
@@ -1580,7 +1576,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 newControlPoints.add(wayPoint.getControlPoint());
             }
             int indexOffset = 0;
-            for(WaypointDTO waypointToRemove: waypointsToDelete) {
+            for (WaypointDTO waypointToRemove : waypointsToRemove) {
                 newControlPoints.remove(waypointToRemove.courseIndex - indexOffset);
                 indexOffset++;
             }

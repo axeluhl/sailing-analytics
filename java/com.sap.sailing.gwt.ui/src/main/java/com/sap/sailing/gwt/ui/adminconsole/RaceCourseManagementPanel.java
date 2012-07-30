@@ -29,6 +29,15 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 
+/**
+ * A panel that has a race selection (inherited from {@link AbstractRaceManagementPanel}) and which adds a table
+ * for a selected race showing the race's waypoints together with the number of mark passings already received for that
+ * waypoint. Also, the control can be used to send course updates into the tracked race, mostly to simulate these types
+ * of events. Conceivably, this may in the future also become a way to set up and edit courses for a tracked race.
+ * 
+ * @author Frank Mittag (C5163874), Axel Uhl (D043530)
+ *
+ */
 public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     private final CellTable<WaypointDTO> courseWaypointsTable;
     private final Label courseDataRequestTimeLabel;
@@ -78,7 +87,6 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         };
         courseWaypointsTable.addColumn(buoysColumn, stringMessages.buoys());
-
         TextColumn<WaypointDTO> markPassingsCountColumn = new TextColumn<WaypointDTO>() {
             @Override
             public String getValue(WaypointDTO waypointDTO) {
@@ -86,69 +94,27 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         }; 
         courseWaypointsTable.addColumn(markPassingsCountColumn, stringMessages.markPassing());
-
         waypointDataProvider = new ListDataProvider<WaypointDTO>();
         waypointDataProvider.addDataDisplay(courseWaypointsTable);
-        
         courseActionsPanel = new HorizontalPanel();
         courseActionsPanel.setSpacing(10);
         Button insertRoundBtn = new Button("Insert round (2 waypoints)");
         insertRoundBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if(wayPointSelectionModel.getSelectedSet().size() != 2) {
-                    Window.alert("To insert (copy) a round you have to select two waypoints.");
-                    return;
-                } else {
-                    Map<Integer, String> controlPointsToInsert = new TreeMap<Integer, String>();
-                    for(WaypointDTO selectedWaypoint: wayPointSelectionModel.getSelectedSet()) {
-                        controlPointsToInsert.put(selectedWaypoint.courseIndex, selectedWaypoint.name);
-                    }
-                    int insertPosition = waypointDataProvider.getList().size()-2;
-                    sailingService.addControlPointsToRaceCourse(singleSelectedRace,
-                            new ArrayList<String>(controlPointsToInsert.values()), insertPosition, new AsyncCallback<Void>() {
-                        @Override
-                        public void onSuccess(Void arg0) {
-                            refreshSelectedRaceData();
-                        }
-                        
-                        @Override
-                        public void onFailure(Throwable arg0) {
-                        }
-                    });
-                }
+                insertRound(sailingService);
             }
+
         });
         courseActionsPanel.add(insertRoundBtn);
-        
         Button removeRoundBtn = new Button("Remove Round (2 waypoints)");
         removeRoundBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if(wayPointSelectionModel.getSelectedSet().size() != 2) {
-                    Window.alert("To delete a round you have to select two waypoints.");
-                    return;
-                } else {
-                    Map<Integer, WaypointDTO> controlPointsToDelete = new TreeMap<Integer, WaypointDTO>();
-                    for(WaypointDTO selectedWaypoint: wayPointSelectionModel.getSelectedSet()) {
-                        controlPointsToDelete.put(selectedWaypoint.courseIndex, selectedWaypoint);
-                    }
-                    sailingService.removeControlPointsFromRaceCourse(singleSelectedRace,
-                            new ArrayList<WaypointDTO>(controlPointsToDelete.values()), new AsyncCallback<Void>() {
-                        @Override
-                        public void onSuccess(Void arg0) {
-                            refreshSelectedRaceData();
-                        }
-                        
-                        @Override
-                        public void onFailure(Throwable arg0) {
-                        }
-                    });
-                }
+                removeRound(sailingService);
             }
         });
         courseActionsPanel.add(removeRoundBtn);
-        
         Button refreshBtn = new Button(stringMessages.refresh());
         refreshBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -162,11 +128,36 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         this.selectedRaceContentPanel.add(courseActionsPanel);
     }
 
+    private void insertRound(final SailingServiceAsync sailingService) {
+        if(wayPointSelectionModel.getSelectedSet().size() != 2) {
+            Window.alert("To insert (copy) a round you have to select two waypoints.");
+            return;
+        } else {
+            Map<Integer, String> controlPointsToInsert = new TreeMap<Integer, String>();
+            for (WaypointDTO selectedWaypoint: wayPointSelectionModel.getSelectedSet()) {
+                controlPointsToInsert.put(selectedWaypoint.courseIndex, selectedWaypoint.name);
+            }
+            int insertPosition = waypointDataProvider.getList().size()-2;
+            sailingService.addWaypointsToRaceCourse(singleSelectedRace,
+                    new ArrayList<String>(controlPointsToInsert.values()), insertPosition, new AsyncCallback<Void>() {
+                @Override
+                public void onSuccess(Void arg0) {
+                    refreshSelectedRaceData();
+                }
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    RaceCourseManagementPanel.this.errorReporter.reportError("Error trying to add a round to race "+
+                            singleSelectedRace+": " + caught.getMessage());
+                }
+            });
+        }
+    }
+
     @Override
     void refreshSelectedRaceData() {
         if (singleSelectedRace != null && selectedRaceDTO != null) {
             courseActionsPanel.setVisible(true);
-            
             sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
                 @Override
                 public void onSuccess(RaceCourseDTO result) {
@@ -186,5 +177,30 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     private void updateCourseInfo(RaceCourseDTO courseDTO) {
         waypointDataProvider.setList(courseDTO.waypoints);
         courseDataRequestTimeLabel.setText(courseDTO.requestTime.toString());
+    }
+
+    private void removeRound(final SailingServiceAsync sailingService) {
+        if(wayPointSelectionModel.getSelectedSet().size() != 2) {
+            Window.alert("To delete a round you have to select two waypoints.");
+            return;
+        } else {
+            Map<Integer, WaypointDTO> controlPointsToDelete = new TreeMap<Integer, WaypointDTO>();
+            for(WaypointDTO selectedWaypoint: wayPointSelectionModel.getSelectedSet()) {
+                controlPointsToDelete.put(selectedWaypoint.courseIndex, selectedWaypoint);
+            }
+            sailingService.removeWaypointsFromRaceCourse(singleSelectedRace,
+                    new ArrayList<WaypointDTO>(controlPointsToDelete.values()), new AsyncCallback<Void>() {
+                @Override
+                public void onSuccess(Void arg0) {
+                    refreshSelectedRaceData();
+                }
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    RaceCourseManagementPanel.this.errorReporter.reportError("Error trying to remove a round from race "+
+                            singleSelectedRace+": " + caught.getMessage());
+                }
+            });
+        }
     }
 }
