@@ -270,7 +270,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      */
     private final Set<CacheInvalidationListener> cacheInvalidationListeners;
     
-    private final LeaderboardDTOCache leaderboardDTOCache;
+    private final LeaderboardDTOCache leaderboardDTOCacheWaitingForLatestAnalysis;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -290,7 +290,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
-        leaderboardDTOCache = new LeaderboardDTOCache(this);
+        leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ true);
     }
     
     public void destroy() {
@@ -393,9 +393,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             }
             result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
         } else {
-            result = leaderboardDTOCache.getLeaderboardByName(getService().getLeaderboardByName(leaderboardName),
-                    new MillisecondsTimePoint(date), namesOfRaceColumnsForWhichToLoadLegDetails,
-                    /* waitForLatestAnalyses */ true); // in replay mode we'de like to know things exactly and can afford it
+            // in replay we'd like up-to-date results; they are still cached
+            // which is OK because the cache is invalidated whenever any of the tracked races attached to the leaderboard changes.
+            result = leaderboardDTOCacheWaitingForLatestAnalysis.getLeaderboardByName(getService().getLeaderboardByName(leaderboardName),
+                    new MillisecondsTimePoint(date), namesOfRaceColumnsForWhichToLoadLegDetails); 
         }
         logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
@@ -852,7 +853,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                 raceDTO.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
-                raceDTO.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
                 raceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 raceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis(); 
