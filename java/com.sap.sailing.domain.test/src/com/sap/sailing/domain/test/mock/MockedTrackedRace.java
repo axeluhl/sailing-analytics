@@ -663,4 +663,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public void waitUntilWindLoadingComplete() throws InterruptedException {
         // TODO Auto-generated method stub
     }
+
+	@Override
+	public Iterable<Buoy> getBuoys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
