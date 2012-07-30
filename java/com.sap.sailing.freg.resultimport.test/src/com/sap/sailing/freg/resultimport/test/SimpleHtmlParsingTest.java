@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.freg.resultimport.CompetitorRow;
-import com.sap.sailing.freg.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.CompetitorRow;
+import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.freg.resultimport.impl.FregHtmlParser;
 
 public class SimpleHtmlParsingTest {
@@ -38,7 +38,7 @@ public class SimpleHtmlParsingTest {
         List<CompetitorRow> result = regattaResults.getCompetitorResults();
         assertFalse(result.isEmpty());
         assertEquals(57, result.size());
-        assertTrue(regattaResults.getMetadata().contains("PRE- WORLD \n      2012 - COUPE INTERNATIONALE DE FRANCE 505"));
+        assertTrue(regattaResults.getMetadata().get("info1").contains("PRE- WORLD \n      2012 - COUPE INTERNATIONALE DE FRANCE 505"));
         for (CompetitorRow row : result) {
             if (Util.contains(row.getNames(), "MARTIN Aline")) {
                 assertEquals("FRA 8716", row.getSailID());

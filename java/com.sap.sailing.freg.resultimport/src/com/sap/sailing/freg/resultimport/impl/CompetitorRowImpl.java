@@ -1,7 +1,7 @@
 package com.sap.sailing.freg.resultimport.impl;
 
-import com.sap.sailing.freg.resultimport.CompetitorEntry;
-import com.sap.sailing.freg.resultimport.CompetitorRow;
+import com.sap.sailing.resultimport.CompetitorEntry;
+import com.sap.sailing.resultimport.CompetitorRow;
 
 public class CompetitorRowImpl implements CompetitorRow {
     private final Integer totalRank;

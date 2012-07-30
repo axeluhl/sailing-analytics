@@ -1,4 +1,4 @@
-package com.sap.sailing.winregatta.resultimport;
+package com.sap.sailing.resultimport;
 
 import java.util.List;
 import java.util.Map;
@@ -9,5 +9,5 @@ public interface RegattaResults {
      */
     Map<String, String> getMetadata();
     
-    List<CompetitorResult> getCompetitorResults();
+    List<CompetitorRow> getCompetitorResults();
 }

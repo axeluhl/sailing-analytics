@@ -8,7 +8,6 @@ import java.net.URLConnection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,10 +16,10 @@ import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.freg.resultimport.FregResultProvider;
-import com.sap.sailing.freg.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.UrlResultProvider;
+import com.sap.sailing.resultimport.RegattaResults;
 
-public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, FregResultProvider {
+public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, UrlResultProvider {
     private static final long serialVersionUID = 5853404150107387702L;
     
     private final Set<URL> allUrls;
@@ -63,8 +62,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Fre
      * @return the first non-empty string of the list of metadata, hoping it's something pointing at the boat class at least...
      */
     private String getBoatClassName(RegattaResults regattaResult) {
-        List<String> metadata = regattaResult.getMetadata();
-        for (String metadatum : metadata) {
+        Map<String, String> metadata = regattaResult.getMetadata();
+        for (String metadatum : metadata.values()) {
             if (metadatum != null && metadatum.length() > 0) {
                 return metadatum;
             }

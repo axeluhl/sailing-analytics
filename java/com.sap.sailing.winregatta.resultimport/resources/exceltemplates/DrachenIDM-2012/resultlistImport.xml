@@ -11,7 +11,7 @@
 			<section startRow="12" endRow="12">
 				<mapping row="12" col="0">competitor.totalRank</mapping>
 				<mapping row="12" col="1">competitor.country</mapping>
-				<mapping row="12" col="2">competitor.sailID</mapping>
+				<mapping row="12" col="2">competitor.sailNumber</mapping>
 				<mapping row="12" col="3">competitor.teamMember1Name</mapping>
 				<mapping row="12" col="4">competitor.teamMember1Club</mapping>
 				<mapping row="12" col="5">competitor.teamMember1DSVNumber</mapping>

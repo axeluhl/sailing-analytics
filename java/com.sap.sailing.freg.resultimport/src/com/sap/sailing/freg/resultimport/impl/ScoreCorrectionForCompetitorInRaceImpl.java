@@ -4,7 +4,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
-import com.sap.sailing.freg.resultimport.CompetitorEntry;
+import com.sap.sailing.resultimport.CompetitorEntry;
 
 public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionForCompetitorInRace {
     private static final Logger logger = Logger.getLogger(ScoreCorrectionForCompetitorInRaceImpl.class.getName());

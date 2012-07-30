@@ -16,8 +16,8 @@ import net.sf.jxls.reader.ReaderConfig;
 import net.sf.jxls.reader.XLSReadStatus;
 import net.sf.jxls.reader.XLSReader;
 
-import com.sap.sailing.winregatta.resultimport.CompetitorResult;
-import com.sap.sailing.winregatta.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.CompetitorRow;
+import com.sap.sailing.resultimport.RegattaResults;
 
 public class CompetitorResultsXlsImporter {
 	private static String jxlsImportTemplatePath = "/exceltemplates/DrachenIDM-2012/resultlistImport.xml";
@@ -33,7 +33,7 @@ public class CompetitorResultsXlsImporter {
 			throw new IllegalStateException(String.format("Can not read classpath resource '%s'",
 					jxlsImportTemplatePath));
 
-		final List<CompetitorResult> results = new ArrayList<CompetitorResult>();
+		final List<CompetitorRow> results = new ArrayList<CompetitorRow>();
 		final RegattaInfo regattaInfo = new RegattaInfo();
 		HashMap<String, Object> beans = new HashMap<String, Object>();
 		beans.put("competitors", results);
@@ -48,7 +48,7 @@ public class CompetitorResultsXlsImporter {
                 return regattaInfo.toMap();
             }
             @Override
-            public List<CompetitorResult> getCompetitorResults() {
+            public List<CompetitorRow> getCompetitorResults() {
                 return results;
             }
         };

@@ -6,8 +6,8 @@ import java.util.List;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.freg.resultimport.CompetitorRow;
-import com.sap.sailing.freg.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.CompetitorRow;
+import com.sap.sailing.resultimport.RegattaResults;
 
 public class RegattaScoreCorrectionsImpl implements RegattaScoreCorrections {
     private final ScoreCorrectionProviderImpl provider;

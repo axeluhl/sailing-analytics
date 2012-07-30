@@ -7,9 +7,9 @@ import java.util.Set;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionForCompetitorInRace;
 import com.sap.sailing.domain.common.RegattaScoreCorrections.ScoreCorrectionsForRace;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.freg.resultimport.CompetitorEntry;
-import com.sap.sailing.freg.resultimport.CompetitorRow;
-import com.sap.sailing.freg.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.CompetitorEntry;
+import com.sap.sailing.resultimport.CompetitorRow;
+import com.sap.sailing.resultimport.RegattaResults;
 
 public class ScoreCorrectionForRaceImpl implements ScoreCorrectionsForRace {
     private final int raceNumberStartingWithOne;

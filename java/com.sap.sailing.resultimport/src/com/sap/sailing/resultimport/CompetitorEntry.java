@@ -1,7 +1,6 @@
-package com.sap.sailing.winregatta.resultimport;
+package com.sap.sailing.resultimport;
 
 public interface CompetitorEntry {
-
     boolean isDiscarded();
 
     Double getScore();
@@ -9,5 +8,4 @@ public interface CompetitorEntry {
     String getMaxPointsReason();
 
     Integer getRank();
-
 }

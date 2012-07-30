@@ -1,8 +1,7 @@
-package com.sap.sailing.winregatta.resultimport;
+package com.sap.sailing.resultimport;
 
 
-public interface CompetitorResult {
-
+public interface CompetitorRow {
     Iterable<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded();
 
     Double getTotalPointsBeforeDiscarding();
@@ -10,10 +9,7 @@ public interface CompetitorResult {
     Double getScoreAfterDiscarding();
 
     Iterable<String> getNames();
-    
-    /**
-     * Concatenates the {@link #getNames() names} with a "+"
-     */
+
     String getTeamName();
 
     String getSailID();
@@ -21,5 +17,4 @@ public interface CompetitorResult {
     Integer getTotalRank();
     
     String getClubName();
-
 }

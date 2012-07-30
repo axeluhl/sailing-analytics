@@ -10,4 +10,5 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: org.junit4;bundle-version="4.8.2",
  com.sap.sailing.winregatta.resultimport,
  com.sap.sailing.domain.common,
- com.sap.sailing.domain
+ com.sap.sailing.domain,
+ com.sap.sailing.resultimport

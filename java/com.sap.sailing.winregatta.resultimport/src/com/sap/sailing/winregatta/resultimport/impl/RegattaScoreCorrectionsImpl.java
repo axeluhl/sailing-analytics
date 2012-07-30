@@ -6,8 +6,8 @@ import java.util.List;
 import com.sap.sailing.domain.common.RegattaScoreCorrections;
 import com.sap.sailing.domain.common.ScoreCorrectionProvider;
 import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.winregatta.resultimport.CompetitorResult;
-import com.sap.sailing.winregatta.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.CompetitorRow;
+import com.sap.sailing.resultimport.RegattaResults;
 
 public class RegattaScoreCorrectionsImpl implements RegattaScoreCorrections {
     private final ScoreCorrectionProviderImpl provider;
@@ -26,7 +26,7 @@ public class RegattaScoreCorrectionsImpl implements RegattaScoreCorrections {
 
     private int getMaxListSize(RegattaResults regattaResult) {
         int result = 0;
-        for (CompetitorResult competitorResult : regattaResult.getCompetitorResults()) {
+        for (CompetitorRow competitorResult : regattaResult.getCompetitorResults()) {
             result = Math.max(result, Util.size(competitorResult.getRankAndMaxPointsReasonAndPointsAndDiscarded()));
         }
         return result;
@@ -39,7 +39,7 @@ public class RegattaScoreCorrectionsImpl implements RegattaScoreCorrections {
 
     @Override
     public String getRegattaName() {
-        return "Extreme Sailing Series";
+        return "???";
     }
 
     @Override

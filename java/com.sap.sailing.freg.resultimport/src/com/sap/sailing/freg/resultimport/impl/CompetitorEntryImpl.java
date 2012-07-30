@@ -1,6 +1,6 @@
 package com.sap.sailing.freg.resultimport.impl;
 
-import com.sap.sailing.freg.resultimport.CompetitorEntry;
+import com.sap.sailing.resultimport.CompetitorEntry;
 
 public class CompetitorEntryImpl implements CompetitorEntry {
     private final Integer rank;

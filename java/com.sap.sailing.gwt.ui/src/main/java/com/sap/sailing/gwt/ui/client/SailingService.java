@@ -254,4 +254,6 @@ public interface SailingService extends RemoteService {
 
     Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
+
+	List<String> getUrlResultProviderNames();
 }

@@ -120,7 +120,6 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
-import com.sap.sailing.freg.resultimport.FregResultProvider;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
@@ -170,6 +169,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.resultimport.UrlResultProvider;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
@@ -212,7 +212,6 @@ import com.sap.sailing.server.replication.ReplicaDescriptor;
 import com.sap.sailing.server.replication.ReplicationFactory;
 import com.sap.sailing.server.replication.ReplicationMasterDescriptor;
 import com.sap.sailing.server.replication.ReplicationService;
-import com.sap.sailing.winregatta.resultimport.WinRegattaResultProvider;
 
 /**
  * The server side implementation of the RPC service.
@@ -2555,23 +2554,23 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 scoreCorrectionForCompetitor.isDiscarded(), scoreCorrectionForCompetitor.getMaxPointsReason());
     }
     
-    private FregResultProvider getFregService() {
-        FregResultProvider result = null;
+    @Override
+    public List<String> getUrlResultProviderNames() {
+        List<String> result = new ArrayList<String>();
         for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
-            if (scp instanceof FregResultProvider) {
-                result = (FregResultProvider) scp;
-                break;
+            if (scp instanceof UrlResultProvider) {
+            	result.add(scp.getName());
             }
         }
         return result;
     }
 
-    private WinRegattaResultProvider getWinRegattaService() {
-    	WinRegattaResultProvider result = null;
+    private UrlResultProvider getUrlBasedScoreCorrectionProvider(String resultProviderName) {
+    	UrlResultProvider result = null;
         for (ScoreCorrectionProvider scp : getScoreCorrectionProviders()) {
-            if (scp instanceof WinRegattaResultProvider) {
-                result = (WinRegattaResultProvider) scp;
-                break;
+            if (scp instanceof UrlResultProvider && scp.getName().equals(resultProviderName)) {
+            	result = (UrlResultProvider) scp;
+            	break;
             }
         }
         return result;
@@ -2581,21 +2580,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public List<String> getResultImportUrls(String resultProviderName) {
         List<String> result = new ArrayList<String>();
 
-        if("FREG".equals(resultProviderName)) {
-            FregResultProvider fregService = getFregService();
-            if (fregService != null) {
-                Iterable<URL> allUrls = fregService.getAllUrls();
-                for (URL url : allUrls) {
-                    result.add(url.toString());
-                }
-            }
-        } else if("WinRegatta".equals(resultProviderName)) {
-            WinRegattaResultProvider winRegattaService = getWinRegattaService();
-            if (winRegattaService != null) {
-                Iterable<URL> allUrls = winRegattaService.getAllUrls();
-                for (URL url : allUrls) {
-                    result.add(url.toString());
-                }
+        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (urlBasedScoreCorrectionProvider != null) {
+            Iterable<URL> allUrls = urlBasedScoreCorrectionProvider.getAllUrls();
+            for (URL url : allUrls) {
+                result.add(url.toString());
             }
         }
         return result;
@@ -2603,35 +2592,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     @Override
     public void removeResultImportURLs(String resultProviderName, Set<String> toRemove) throws Exception {
-        if("FREG".equals(resultProviderName)) {
-        	FregResultProvider fregService = getFregService();
-            if (fregService != null) {
-                for (String urlToRemove : toRemove) {
-                    fregService.removeResultUrl(new URL(urlToRemove));
-                }
+        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (urlBasedScoreCorrectionProvider != null) {
+            for (String urlToRemove : toRemove) {
+            	urlBasedScoreCorrectionProvider.removeResultUrl(new URL(urlToRemove));
             }
-        } else if("WinRegatta".equals(resultProviderName)) {
-            WinRegattaResultProvider winRegattaService = getWinRegattaService();
-            if (winRegattaService != null) {
-                for (String urlToRemove : toRemove) {
-                	winRegattaService.removeResultUrl(new URL(urlToRemove));
-                }
-            }
-        }        
+        }
     }
 
     @Override
     public void addResultImportUrl(String resultProviderName, String url) throws Exception {
-        if("FREG".equals(resultProviderName)) {
-            FregResultProvider fregService = getFregService();
-            if (fregService != null) {
-                fregService.registerResultUrl(new URL(url));
-            }
-        } else if("WinRegatta".equals(resultProviderName)) {
-            WinRegattaResultProvider winRegattaService = getWinRegattaService();
-            if (winRegattaService != null) {
-            	winRegattaService.registerResultUrl(new URL(url));
-            }
-        }        
+        UrlResultProvider urlBasedScoreCorrectionProvider = getUrlBasedScoreCorrectionProvider(resultProviderName);
+        if (urlBasedScoreCorrectionProvider != null) {
+        	urlBasedScoreCorrectionProvider.registerResultUrl(new URL(url));
+        }
     }    
 }

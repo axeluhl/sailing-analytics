@@ -1,15 +1,16 @@
 package com.sap.sailing.winregatta.resultimport.impl;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.sap.sailing.winregatta.resultimport.CompetitorEntry;
-import com.sap.sailing.winregatta.resultimport.CompetitorResult;
+import com.sap.sailing.resultimport.CompetitorEntry;
+import com.sap.sailing.resultimport.CompetitorRow;
 
-public class CompetitorResultImpl implements CompetitorResult
+public class CompetitorResultImpl implements CompetitorRow
 {
 	private Integer totalRank;
 	private String country;
-	private String sailID;
+	private String sailNumber;
 	private String teamMember1Name;
 	private String teamMember1Club;
 	private String teamMember1DSVNumber;
@@ -29,7 +30,7 @@ public class CompetitorResultImpl implements CompetitorResult
 	}
 
 	public Object getResultKey() {
-		return sailID;
+		return sailNumber;
 	}
 
 	public Integer getTotalRank() {
@@ -48,12 +49,12 @@ public class CompetitorResultImpl implements CompetitorResult
 		this.country = country;
 	}
 
-	public String getSailID() {
-		return sailID;
+	public String getSailNumber() {
+		return sailNumber;
 	}
 
-	public void setSailID(String sailID) {
-		this.sailID = sailID;
+	public void setSailNumber(String sailNumber) {
+		this.sailNumber = sailNumber;
 	}
 
 	public String getTeamMember1Name() {
@@ -168,32 +169,6 @@ public class CompetitorResultImpl implements CompetitorResult
 		this.totalScore = totalScore;
 	}
 
-	private class ExcelDateFormatter {
-		String valueAsString;
-		Date valueAsDate;
-
-		public ExcelDateFormatter(String importedDate) {
-			if (importedDate != null && !importedDate.isEmpty()) {
-				// the format is in excel time format (number between 0 and 1)
-				try {
-					Double value = Double.parseDouble(importedDate) * 86400;
-					Long valueInSeconds = value.longValue();
-
-					this.valueAsDate = new Date(valueInSeconds * 1000);
-					this.valueAsString = String
-							.format("%02d:%02d:%02d", valueInSeconds / 3600,
-									(valueInSeconds % 3600) / 60,
-									(valueInSeconds % 60));
-				} catch (NumberFormatException e) {
-					this.valueAsString = "Invalid format: " + importedDate;
-				}
-			} else {
-				valueAsString = importedDate;
-				valueAsDate = null;
-			}
-		}
-	}
-
 	@Override
 	public Iterable<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded() {
 		// TODO Auto-generated method stub
@@ -214,19 +189,31 @@ public class CompetitorResultImpl implements CompetitorResult
 
 	@Override
 	public Iterable<String> getNames() {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> names = new ArrayList<String>();
+		if(teamMember1Name != null) {
+			names.add(teamMember1Name);
+		}
+		if(teamMember2Name != null) {
+			names.add(teamMember2Name);
+		}
+		if(teamMember3Name != null) {
+			names.add(teamMember3Name);
+		}
+		return names;
 	}
 
 	@Override
 	public String getTeamName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "";
+	}
+
+	@Override
+	public String getSailID() {		
+		return country.trim() + sailNumber.trim();
 	}
 
 	@Override
 	public String getClubName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "";
 	}
 }

@@ -423,4 +423,6 @@ public interface SailingServiceAsync {
 
 	void addResultImportUrl(String resultProviderName, String url,
 			AsyncCallback<Void> callback);
+
+	void getUrlResultProviderNames(AsyncCallback<List<String>> callback);
 }

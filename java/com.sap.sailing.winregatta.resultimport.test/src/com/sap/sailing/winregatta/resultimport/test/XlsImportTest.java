@@ -12,7 +12,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.sap.sailing.winregatta.resultimport.RegattaResults;
+import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.winregatta.resultimport.impl.CompetitorResultsXlsImporter;
 
 public class XlsImportTest {
