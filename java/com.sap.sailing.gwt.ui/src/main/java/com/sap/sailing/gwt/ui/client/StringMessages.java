@@ -364,4 +364,3 @@ public interface StringMessages extends Messages {
     String lastScoreUpdate();
     String warningBrowserUnsupported();
 }
->>>>>>> Fixed typo related to translation
