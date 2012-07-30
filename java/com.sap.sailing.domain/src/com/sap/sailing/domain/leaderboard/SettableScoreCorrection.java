@@ -6,6 +6,9 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.TimePoint;
 
 public interface SettableScoreCorrection extends ScoreCorrection {
+    void addScoreCorrectionListener(ScoreCorrectionListener listener);
+    
+    void removeScoreCorrectionListener(ScoreCorrectionListener listener);
 
     /**
      * @param reason

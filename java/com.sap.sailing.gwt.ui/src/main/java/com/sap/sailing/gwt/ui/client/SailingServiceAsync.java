@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -409,10 +410,10 @@ public interface SailingServiceAsync {
 
     void getRaceCourse(RaceIdentifier raceIdentifier, Date date, AsyncCallback<RaceCourseDTO> callback);
 
-    void removeControlPointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToDelete,
+    void removeWaypointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToDelete,
             AsyncCallback<Void> callback);
 
-    void addControlPointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition,
+    void addWaypointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition,
             AsyncCallback<Void> callback);
 
     void getFregResultUrls(AsyncCallback<List<String>> asyncCallback);
@@ -420,4 +421,6 @@ public interface SailingServiceAsync {
     void removeFregURLs(Set<String> toRemove, AsyncCallback<Void> asyncCallback);
 
     void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
+
+	void getRaceBuoys(RaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceBuoysDTO> callback);
 }
