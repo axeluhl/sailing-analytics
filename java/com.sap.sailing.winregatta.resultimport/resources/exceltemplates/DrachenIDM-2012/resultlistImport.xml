@@ -7,7 +7,7 @@
 			<mapping cell="A4">regattaInfo.date</mapping>
 		</section>
 		<loop startRow="12" endRow="12" items="competitors" var="competitor"
-			varType="com.sap.sailing.winregatta.resultimport.impl.CompetitorResultImpl">
+			varType="com.sap.sailing.winregatta.resultimport.impl.CompetitorRowImpl">
 			<section startRow="12" endRow="12">
 				<mapping row="12" col="0">competitor.totalRank</mapping>
 				<mapping row="12" col="1">competitor.country</mapping>

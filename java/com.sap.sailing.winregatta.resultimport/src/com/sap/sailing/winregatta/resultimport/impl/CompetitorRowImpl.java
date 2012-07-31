@@ -6,7 +6,7 @@ import java.util.List;
 import com.sap.sailing.resultimport.CompetitorEntry;
 import com.sap.sailing.resultimport.CompetitorRow;
 
-public class CompetitorResultImpl implements CompetitorRow
+public class CompetitorRowImpl implements CompetitorRow
 {
 	private Integer totalRank;
 	private String country;
@@ -26,7 +26,7 @@ public class CompetitorResultImpl implements CompetitorRow
 	private double race2Score;
 	private double totalScore;
 	
-	public CompetitorResultImpl() {
+	public CompetitorRowImpl() {
 	}
 
 	public Object getResultKey() {
@@ -171,8 +171,13 @@ public class CompetitorResultImpl implements CompetitorRow
 
 	@Override
 	public Iterable<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded() {
-		// TODO Auto-generated method stub
-		return null;
+	    List<CompetitorEntry> competitorEntries = new ArrayList<CompetitorEntry>();
+	    if(race1Rank != null && !Double.isNaN(race1Score))
+	    {
+	    	competitorEntries.add(new DefaultCompetitorEntryImpl());
+	    }
+
+		return competitorEntries;
 	}
 
 	@Override

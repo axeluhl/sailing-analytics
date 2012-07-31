@@ -40,7 +40,7 @@ public class CompetitorResultsXlsImporter {
 		beans.put("regattaInfo", regattaInfo);
 
 		readXlsSheetGeneric(xlsIs, sheetName, new BufferedInputStream(
-				readerXlsConfig), "Erg_Drachen", beans, CompetitorResultImpl.class);
+				readerXlsConfig), "Erg_Drachen", beans, CompetitorRowImpl.class);
 
         return new RegattaResults() {
             @Override
@@ -54,6 +54,7 @@ public class CompetitorResultsXlsImporter {
         };
 	}
 
+	@SuppressWarnings("unchecked")
 	private void readXlsSheetGeneric(InputStream xlsIs, String sheetName,
 			InputStream readerXlsConfig, String readerName,
 			Map<String, Object> beans, Class<?> sheetMappingRootClass)
