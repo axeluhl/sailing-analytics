@@ -749,7 +749,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             }
         }
         List<Competitor> rankedCompetitors;
-        boolean lockForWrite;
+        final boolean lockForWrite;
         synchronized (competitorRankings) {
             rankedCompetitors = competitorRankings.get(timePoint);
             if (rankedCompetitors == null) {

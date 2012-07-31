@@ -2,6 +2,7 @@ package com.sap.sailing.util.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -14,7 +15,7 @@ import com.sap.sailing.domain.common.impl.Util;
 public class LockUtil {
     private static final int NUMBER_OF_SECONDS_TO_WAIT_FOR_LOCK = 5;
     private static final Logger logger = Logger.getLogger(Util.class.getName());
-    private static final WeakHashMap<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new WeakHashMap<>();
+    private static final Map<NamedReentrantReadWriteLock, TimePoint> lastTimeWriteLockWasObtained = new WeakHashMap<>();
     /**
      * Bug <a href="http://bugs.sun.com/view_bug.do?bug_id=6822370">http://bugs.sun.com/view_bug.do?bug_id=6822370</a> seems
      * dangerous, particularly if it happens in a <code>LiveLeaderboardUpdater</code> thread. Even though the bug is reported to
@@ -57,12 +58,17 @@ public class LockUtil {
     
     public static void lockForWrite(NamedReentrantReadWriteLock lock) {
         lock(lock.writeLock(), "writeLock "+lock.getName());
-        lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
+        synchronized (lastTimeWriteLockWasObtained) {
+            lastTimeWriteLockWasObtained.put(lock, MillisecondsTimePoint.now());
+        }
     }
     
     public static void unlockAfterWrite(NamedReentrantReadWriteLock lock) {
         lock.writeLock().unlock();
-        TimePoint timePointWriteLockWasObtained = lastTimeWriteLockWasObtained.get(lock);
+        final TimePoint timePointWriteLockWasObtained;
+        synchronized (lastTimeWriteLockWasObtained) {
+            timePointWriteLockWasObtained = lastTimeWriteLockWasObtained.get(lock);
+        }
         if (timePointWriteLockWasObtained == null) {
             logger.info("Internal error: write lock "+lock.getName()+" to be unlocked but no time recorded for when it was last obtained.\n"+
                     getCurrentStackTrace());

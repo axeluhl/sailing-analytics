@@ -194,7 +194,8 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                         public V call() {
                             try {
                                 V preResult = cacheUpdateComputer.computeCacheUpdate(key, joinedUpdateInterval);
-                                LockUtil.lockForWrite(getOrCreateLockForKey(key));
+                                final NamedReentrantReadWriteLock lock = getOrCreateLockForKey(key);
+                                LockUtil.lockForWrite(lock);
                                 try {
                                     V result = cacheUpdateComputer.provideNewCacheValue(key, cache.get(key), preResult, joinedUpdateInterval);
                                     if (result == null) {
@@ -204,7 +205,13 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                                     }
                                     return result;
                                 } finally {
-                                    LockUtil.unlockAfterWrite(getOrCreateLockForKey(key));
+                                    // TODO use "lock" here once we have found out why two getOrCreateLockForKey calls with the same key may produce different locks
+                                    NamedReentrantReadWriteLock lockToUnlock = getOrCreateLockForKey(key);
+                                    if (lockToUnlock != lock) {
+                                        logger.severe("Internal error: "+lockToUnlock+" with object ID "+System.identityHashCode(lockToUnlock)+
+                                                " expected to be identical to "+lock+" with object ID "+System.identityHashCode(lock));
+                                    }
+                                    LockUtil.unlockAfterWrite(lockToUnlock);
                                     ongoingRecalculations.remove(key);
                                 }
                             } catch (Throwable e) {
