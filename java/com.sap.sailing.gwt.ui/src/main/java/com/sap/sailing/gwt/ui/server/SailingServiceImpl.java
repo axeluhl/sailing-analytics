@@ -43,6 +43,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -149,7 +150,6 @@ import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -169,7 +169,6 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
-import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -1528,35 +1527,35 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
     
     @Override
-    public RaceCourseDTO getRaceCourse(RaceIdentifier raceIdentifier, Date date) {
-        RaceCourseDTO result = new RaceCourseDTO();
+    public List<ControlPointDTO> getRaceCourse(RaceIdentifier raceIdentifier, Date date) {
+        List<ControlPointDTO> result = new ArrayList<ControlPointDTO>();
         if (date != null) {
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
             TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {
                 Course course = trackedRace.getRace().getCourse();
-                result.waypoints = new ArrayList<WaypointDTO>();
-                result.requestTime = date;
-                int waypointIndex = 0;
                 for (Waypoint waypoint : course.getWaypoints()) {
-                    WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), waypointIndex++);
-                    waypointDTO.buoys = new ArrayList<BuoyDTO>();
-                    result.waypoints.add(waypointDTO);
-                    
-                    Iterable<MarkPassing> markPassingsInOrder = trackedRace.getMarkPassingsInOrder(waypoint);
-                    waypointDTO.markPassingsCount = Util.size(markPassingsInOrder);
-
-                    for (Buoy buoy : waypoint.getBuoys()) {
-                        GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
-                        Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
-                        if (positionAtDate != null) {
-                            BuoyDTO markDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(),
-                                    positionAtDate.getLngDeg());
-                            waypointDTO.buoys.add(markDTO);
-                        }
-                    }
+                    result.add(createControlPointDTO(waypoint.getControlPoint(), trackedRace, dateAsTimePoint));
                 }
             }
+        }
+        return result;
+    }
+
+    private ControlPointDTO createControlPointDTO(ControlPoint controlPoint, TrackedRace trackedRace, TimePoint timePoint) {
+        ControlPointDTO result;
+        if (controlPoint instanceof Gate) {
+            final Buoy left = ((Gate) controlPoint).getLeft();
+            final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(timePoint, /* extrapolate */ false);
+            final Buoy right = ((Gate) controlPoint).getRight();
+            final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
+            result = new GateDTO(controlPoint.getName(),
+                    new BuoyDTO(left.getName(), leftPos.getLatDeg(), leftPos.getLngDeg()),
+                    new BuoyDTO(right.getName(), rightPos.getLatDeg(), rightPos.getLngDeg()));
+        } else {
+            final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getBuoys().iterator().next()).
+                    getEstimatedPosition(timePoint, /* extrapolate */ false);
+            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
         }
         return result;
     }

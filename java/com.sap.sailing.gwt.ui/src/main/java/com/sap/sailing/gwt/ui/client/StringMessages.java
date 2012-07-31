@@ -364,4 +364,8 @@ public interface StringMessages extends Messages {
     String lastScoreUpdate();
     String warningBrowserUnsupported();
     String newBuoy();
+    String controlPoint();
+    String errorUpdatingRaceCourse(String message);
+    String successfullyUpdatedCourse();
+    String selectOneBuoyOrTwoBuoysForGate();
 }

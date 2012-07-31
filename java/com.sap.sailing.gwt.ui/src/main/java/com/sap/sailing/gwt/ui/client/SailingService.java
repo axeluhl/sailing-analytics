@@ -31,7 +31,6 @@ import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
-import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -100,7 +99,7 @@ public interface SailingService extends RemoteService {
     
     CourseDTO getCoursePositions(RaceIdentifier raceIdentifier, Date date);
 
-    RaceCourseDTO getRaceCourse(RaceIdentifier raceIdentifier, Date date);
+    List<ControlPointDTO> getRaceCourse(RaceIdentifier raceIdentifier, Date date);
 
     List<QuickRankDTO> getQuickRanks(RaceIdentifier raceIdentifier, Date date) throws NoWindException;
 

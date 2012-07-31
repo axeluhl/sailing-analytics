@@ -19,10 +19,10 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
-import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
@@ -407,9 +407,9 @@ public interface SailingServiceAsync {
 
     void getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<WindInfoForRaceDTO> callback);
 
-    void getRaceCourse(RaceIdentifier raceIdentifier, Date date, AsyncCallback<RaceCourseDTO> callback);
+    void getRaceCourse(RaceIdentifier raceIdentifier, Date date, AsyncCallback<List<ControlPointDTO>> callback);
 
-    void updateRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, AsyncCallback<Void> callback);
+    void updateRaceCourse(RaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints, AsyncCallback<Void> callback);
 
     void getFregResultUrls(AsyncCallback<List<String>> asyncCallback);
 
