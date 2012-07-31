@@ -140,7 +140,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     /**
      * The first and last passing times of all course waypoints
      */
-    private final List<Pair<Waypoint, Pair<TimePoint, TimePoint>>> markPassingsTimes;
+    private transient List<Pair<Waypoint, Pair<TimePoint, TimePoint>>> markPassingsTimes;
 
     /**
      * The latest time point contained by any of the events received and processed
@@ -221,11 +221,26 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private boolean windLoadingCompleted;
     
     private transient CrossTrackErrorCache crossTrackErrorCache;
+    
+    /**
+     * Serializing an instance of this class has to serialized the various data structures holding the tracked race's
+     * state. When a race is currently on, these structures change very frequently, and
+     * {@link ConcurrentModificationException}s during serialization will be the norm rather than the exception. To
+     * avoid this, all modifications to any data structure that is not in itself synchronized obtains this lock's
+     * <em>read</em> lock (note that this may be confusing at first, but we'd like to support many concurrent writers;
+     * they each perform their own locking on the individual data structures they write; we only want to lock out a
+     * single serialization call which with this lock is represented as the "writer"). The serialization method
+     * {@link #writeObject(ObjectOutputStream)} obtains the <em>write</em> lock. Deadlocks are avoided because the serialization,
+     * once it obtains this write lock, it keeps serializing and releases the write lock when it's done, without doing any further
+     * synchronization or locking.
+     */
+    private final NamedReentrantReadWriteLock serializationLock;
 
     public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final WindStore windStore,
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
+        this.serializationLock = new NamedReentrantReadWriteLock("Serialization lock for tracked race "+race.getName(), /* fair */ true);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
         this.race = race;
@@ -235,7 +250,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis; 
-        this.startToNextMarkCacheInvalidationListeners = new HashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
+        this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Buoy, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = createManeuverCache();
         this.buoyTracks = new ConcurrentHashMap<Buoy, GPSFixTrack<Buoy, GPSFix>>();
         this.crossTrackErrorCache = new CrossTrackErrorCache(this);
@@ -269,7 +284,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             tracks.put(competitor, new DynamicGPSFixMovingTrackImpl<Competitor>(competitor,
                     millisecondsOverWhichToAverageSpeed));
         }
-        markPassingsForWaypoint = new HashMap<Waypoint, NavigableSet<MarkPassing>>();
+        markPassingsForWaypoint = new ConcurrentHashMap<Waypoint, NavigableSet<MarkPassing>>();
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
             markPassingsForWaypoint.put(waypoint, new ConcurrentSkipListSet<MarkPassing>(
                     MarkPassingByTimeComparator.INSTANCE));
@@ -279,9 +294,17 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         new Thread("Wind loader for tracked race "+getRace().getName()) {
             @Override
             public void run() {
-                final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
-                        trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
-                windTracks.putAll(loadedWindTracks);
+                // When this tracked race is to be serialized, wait for the loading of the wind tracks to complete.
+                // It seems sufficiently unlikely that serialization is requested after the constructor succeeds and
+                // before this thread obtains the lock.
+                LockUtil.lockForRead(serializationLock);
+                try {
+                    final Map<? extends WindSource, ? extends WindTrack> loadedWindTracks = windStore.loadWindTracks(
+                            trackedRegatta, TrackedRaceImpl.this, millisecondsOverWhichToAverageWind);
+                    windTracks.putAll(loadedWindTracks);
+                } finally {
+                    LockUtil.unlockAfterRead(serializationLock);
+                }
                 synchronized (TrackedRaceImpl.this) {
                     windLoadingCompleted = true;
                     TrackedRaceImpl.this.notifyAll();
@@ -304,14 +327,31 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      * Object serialization obtains a read lock for the course so that in cannot change while serializing this object. 
      */
     private void writeObject(ObjectOutputStream s) throws IOException {
-        getRace().getCourse().lockForRead();
+        LockUtil.lockForWrite(serializationLock);
         try {
             s.defaultWriteObject();
         } finally {
-            getRace().getCourse().unlockAfterRead();
+            LockUtil.unlockAfterWrite(serializationLock);
         }
     }
     
+    /**
+     * Deserialization has to be maintained in lock-step with {@link #writeObject(ObjectOutputStream) serialization}.
+     * When de-serializing, a possibly remote {@link #windStore} is ignored because it is transient. Instead, an
+     * {@link EmptyWindStore} is used for the de-serialized instance.
+     */
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        markPassingsTimes = new ArrayList<Pair<Waypoint, Pair<TimePoint, TimePoint>>>();
+        cacheInvalidationTimerLock = new Object();
+        windStore = EmptyWindStore.INSTANCE;
+        competitorRankings = new HashMap<TimePoint, List<Competitor>>();
+        competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
+        directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
+        crossTrackErrorCache = new CrossTrackErrorCache(this);
+        maneuverCache = createManeuverCache();
+    }
+
     @Override
     public synchronized void waitUntilWindLoadingComplete() throws InterruptedException {
         while (!windLoadingCompleted) {
@@ -330,21 +370,6 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 }, /* nameForLocks */ "Maneuver cache for race "+getRace().getName());
     }
     
-    /**
-     * When de-serializing, a possibly remote {@link #windStore} is ignored because it is transient. Instead,
-     * an {@link EmptyWindStore} is used for the de-serialized instance.
-     */
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        cacheInvalidationTimerLock = new Object();
-        windStore = EmptyWindStore.INSTANCE;
-        competitorRankings = new HashMap<TimePoint, List<Competitor>>();
-        competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
-        directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
-        crossTrackErrorCache = new CrossTrackErrorCache(this);
-        maneuverCache = createManeuverCache();
-    }
-
     /**
      * Precondition: race has already been set, e.g., in constructor before this methocd is called
      */
@@ -384,7 +409,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     protected NavigableSet<MarkPassing> createMarkPassingsCollectionForWaypoint(Waypoint waypoint) {
         final ConcurrentSkipListSet<MarkPassing> result = new ConcurrentSkipListSet<MarkPassing>(
                 MarkPassingByTimeComparator.INSTANCE);
-        markPassingsForWaypoint.put(waypoint, result);
+        LockUtil.lockForRead(serializationLock);
+        try {
+            markPassingsForWaypoint.put(waypoint, result);
+        } finally {
+            LockUtil.unlockAfterRead(serializationLock);
+        }
         return result;
     }
 
@@ -922,10 +952,15 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         if (result == null) {
             // try again, this time with more expensive synchronization
             synchronized (buoyTracks) {
-                result = buoyTracks.get(buoy);
-                if (result == null) {
-                    result = createBuoyTrack(buoy);
-                    buoyTracks.put(buoy, result);
+                LockUtil.lockForRead(serializationLock);
+                try {
+                    result = buoyTracks.get(buoy);
+                    if (result == null) {
+                        result = createBuoyTrack(buoy);
+                        buoyTracks.put(buoy, result);
+                    }
+                } finally {
+                    LockUtil.unlockAfterRead(serializationLock);
                 }
             }
         }
@@ -976,7 +1011,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                 if (result == null) {
                     result = createWindTrack(windSource, delayForWindEstimationCacheInvalidation == -1 ?
                             getMillisecondsOverWhichToAverageWind()/2 : delayForWindEstimationCacheInvalidation);
-                    windTracks.put(windSource, result);
+                    LockUtil.lockForRead(serializationLock);
+                    try {
+                        windTracks.put(windSource, result);
+                    } finally {
+                        LockUtil.unlockAfterRead(serializationLock);
+                    }
                 }
             }
         }
@@ -1026,9 +1066,14 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     @Override
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
         synchronized (this.windSourcesToExclude) {
-            this.windSourcesToExclude.clear();
-            for (WindSource windSourceToExclude : windSourcesToExclude) {
-                this.windSourcesToExclude.add(windSourceToExclude);
+            LockUtil.lockForRead(serializationLock);
+            try {
+                this.windSourcesToExclude.clear();
+                for (WindSource windSourceToExclude : windSourcesToExclude) {
+                    this.windSourcesToExclude.add(windSourceToExclude);
+                }
+            } finally {
+                LockUtil.unlockAfterRead(serializationLock);
             }
         }
     }
@@ -1191,30 +1236,36 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
-        // assuming that getRace().getCourse()'s write lock is held by the current thread
-        updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
-        getOrCreateMarkPassingsInOrderAsNavigableSet(waypointThatGotAdded);
-        for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
-            getOrCreateTrack(buoy);
-        }
-        // a waypoint got added; this means that a leg got added as well; but we shouldn't claim we know where
-        // in the leg list of the course the leg was added; that's an implementation secret of CourseImpl. So try:
-        LinkedHashMap<Leg, TrackedLeg> reorderedTrackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
-        for (Leg leg : getRace().getCourse().getLegs()) {
-            if (!trackedLegs.containsKey(leg)) {
-                // no tracked leg for leg yet:
-                TrackedLeg newTrackedLeg = createTrackedLeg(leg);
-                reorderedTrackedLegs.put(leg, newTrackedLeg);
-            } else {
-                reorderedTrackedLegs.put(leg, trackedLegs.get(leg));
+        LockUtil.lockForRead(serializationLock);
+        try {
+            // assuming that getRace().getCourse()'s write lock is held by the current thread
+            updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointAdded(zeroBasedIndex, waypointThatGotAdded);
+            getOrCreateMarkPassingsInOrderAsNavigableSet(waypointThatGotAdded);
+            for (Buoy buoy : waypointThatGotAdded.getBuoys()) {
+                getOrCreateTrack(buoy);
             }
+            // a waypoint got added; this means that a leg got added as well; but we shouldn't claim we know where
+            // in the leg list of the course the leg was added; that's an implementation secret of CourseImpl. So try:
+            LinkedHashMap<Leg, TrackedLeg> reorderedTrackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
+            for (Leg leg : getRace().getCourse().getLegs()) {
+                if (!trackedLegs.containsKey(leg)) {
+                    // no tracked leg for leg yet:
+                    TrackedLeg newTrackedLeg = createTrackedLeg(leg);
+                    reorderedTrackedLegs.put(leg, newTrackedLeg);
+                } else {
+                    reorderedTrackedLegs.put(leg, trackedLegs.get(leg));
+                }
+            }
+            // now ensure that the iteration order is in sync with the leg iteration order
+            trackedLegs.clear();
+            for (Map.Entry<Leg, TrackedLeg> entry : reorderedTrackedLegs.entrySet()) {
+                trackedLegs.put(entry.getKey(), entry.getValue());
+            }
+            updated(/* time point */null); // no maneuver cache invalidation required because we don't yet have mark
+                                           // passings for new waypoint
+        } finally {
+            LockUtil.unlockAfterRead(serializationLock);
         }
-        // now ensure that the iteration order is in sync with the leg iteration order
-        trackedLegs.clear();
-        for (Map.Entry<Leg, TrackedLeg> entry : reorderedTrackedLegs.entrySet()) {
-            trackedLegs.put(entry.getKey(), entry.getValue());
-        }
-        updated(/* time point */null); // no maneuver cache invalidation required because we don't yet have mark passings for new waypoint
     }
 
     private void updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointAdded(int zeroBasedIndex,
@@ -1251,7 +1302,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private void addStartToNextMarkCacheInvalidationListener(Buoy buoy) {
         GPSFixTrack<Buoy, GPSFix> track = getOrCreateTrack(buoy);
         StartToNextMarkCacheInvalidationListener listener = new StartToNextMarkCacheInvalidationListener(track);
-        startToNextMarkCacheInvalidationListeners.put(buoy, listener);
+        LockUtil.lockForRead(serializationLock);
+        try {
+            startToNextMarkCacheInvalidationListeners.put(buoy, listener);
+        } finally {
+            LockUtil.unlockAfterRead(serializationLock);
+        }
         track.addListener(listener);
     }
 
@@ -1265,41 +1321,53 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         StartToNextMarkCacheInvalidationListener listener = startToNextMarkCacheInvalidationListeners.get(buoy);
         if (listener != null) {
             listener.stopListening();
-            startToNextMarkCacheInvalidationListeners.remove(buoy);
+            LockUtil.lockForRead(serializationLock);
+            try {
+                startToNextMarkCacheInvalidationListeners.remove(buoy);
+            } finally {
+                LockUtil.unlockAfterRead(serializationLock);
+            }
         }
     }
 
     @Override
     public  void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
-        // assuming that getRace().getCourse()'s write lock is held by the current thread
-        updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointRemoved(zeroBasedIndex, waypointThatGotRemoved);
-        Leg toRemove = null;
-        Leg last = null;
-        int i = 0;
-        for (Map.Entry<Leg, TrackedLeg> e : trackedLegs.entrySet()) {
-            last = e.getKey();
-            if (i == zeroBasedIndex) {
-                toRemove = e.getKey();
-                break;
+        LockUtil.lockForRead(serializationLock);
+        try {
+            // assuming that getRace().getCourse()'s write lock is held by the current thread
+            updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointRemoved(zeroBasedIndex,
+                    waypointThatGotRemoved);
+            Leg toRemove = null;
+            Leg last = null;
+            int i = 0;
+            for (Map.Entry<Leg, TrackedLeg> e : trackedLegs.entrySet()) {
+                last = e.getKey();
+                if (i == zeroBasedIndex) {
+                    toRemove = e.getKey();
+                    break;
+                }
+                i++;
             }
-            i++;
-        }
-        if (toRemove == null && !trackedLegs.isEmpty()) {
-            // last waypoint removed
-            toRemove = last;
-        }
-        if (toRemove != null) {
-            trackedLegs.remove(toRemove);
-            updated(/* time point */null);
-        }
-        // remove all corresponding markpassings if a waypoint has been removed
-        NavigableSet<MarkPassing> markPassingsRemoved = markPassingsForWaypoint.remove(waypointThatGotRemoved);
-        for (NavigableSet<MarkPassing> markPassingsForOneCompetitor : markPassingsForCompetitor.values()) {
-            if (!markPassingsForOneCompetitor.isEmpty()) {
-                final Competitor competitor = markPassingsForOneCompetitor.iterator().next().getCompetitor();
-                markPassingsForOneCompetitor.removeAll(markPassingsRemoved);
-                triggerManeuverCacheRecalculation(competitor);
+            if (toRemove == null && !trackedLegs.isEmpty()) {
+                // last waypoint removed
+                toRemove = last;
             }
+            if (toRemove != null) {
+                trackedLegs.remove(toRemove);
+                updated(/* time point */null);
+            }
+            // remove all corresponding markpassings if a waypoint has been removed
+            NavigableSet<MarkPassing> markPassingsRemoved;
+            markPassingsRemoved = markPassingsForWaypoint.remove(waypointThatGotRemoved);
+            for (NavigableSet<MarkPassing> markPassingsForOneCompetitor : markPassingsForCompetitor.values()) {
+                if (!markPassingsForOneCompetitor.isEmpty()) {
+                    final Competitor competitor = markPassingsForOneCompetitor.iterator().next().getCompetitor();
+                    markPassingsForOneCompetitor.removeAll(markPassingsRemoved);
+                    triggerManeuverCacheRecalculation(competitor);
+                }
+            }
+        } finally {
+            LockUtil.unlockAfterRead(serializationLock);
         }
     }
 
