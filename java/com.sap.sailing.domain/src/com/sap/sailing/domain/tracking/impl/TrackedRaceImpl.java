@@ -1875,7 +1875,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     public Iterable<WindSource> getWindSources() {
         while (true) {
             try {
-                return new ArrayList<WindSource>(windTracks.keySet());
+                return new HashSet<WindSource>(windTracks.keySet());
+            } catch (ConcurrentModificationException cme) {
+                logger.info("Caught " + cme + "; trying again.");
+            }
+        }
+    }
+
+    @Override
+    public Iterable<Buoy> getBuoys() {
+        while (true) {
+            try {
+                return new HashSet<Buoy>(buoyTracks.keySet());
             } catch (ConcurrentModificationException cme) {
                 logger.info("Caught " + cme + "; trying again.");
             }

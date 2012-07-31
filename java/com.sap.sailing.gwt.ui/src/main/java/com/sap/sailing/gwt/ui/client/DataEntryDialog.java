@@ -44,7 +44,7 @@ public abstract class DataEntryDialog<T> {
          */
         String getErrorMessage(T valueToValidate);
     }
-    
+
     /**
      * @param validator
      *            an optional validator; if <code>null</code>, no validation of data entered is performed; otherwise,
@@ -56,9 +56,23 @@ public abstract class DataEntryDialog<T> {
      */
     public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
             Validator<T> validator, final AsyncCallback<T> callback) {
+        this(title, message, okButtonName, cancelButtonName, validator, /* animationEnabled */ true, callback);
+    }
+    
+    /**
+     * @param validator
+     *            an optional validator; if <code>null</code>, no validation of data entered is performed; otherwise,
+     *            data validation is triggered upon any noticeable change in any of the elements constructed by
+     *            {@link #createCheckbox(String)}, {@link #createTextBox(String)}, etc.
+     * @param callback
+     *            will be called when the dialog if {@link AsyncCallback#onFailure(Throwable) cancelled} or
+     *            {@link AsyncCallback#onSuccess(Object) confirmed}
+     */
+    public DataEntryDialog(String title, String message, String okButtonName, String cancelButtonName,
+            Validator<T> validator, boolean animationEnabled, final AsyncCallback<T> callback) {
         dateEntryDialog = new DialogBox();
         dateEntryDialog.setText(title);
-        dateEntryDialog.setAnimationEnabled(true);
+        dateEntryDialog.setAnimationEnabled(animationEnabled);
         this.validator = validator;
         okButton = new Button(okButtonName);
         FlowPanel dialogFPanel = new FlowPanel();
