@@ -111,7 +111,7 @@ public class CourseImpl extends NamedImpl implements Course {
     public void addWaypoint(int zeroBasedPosition, Waypoint waypointToAdd) {
         LockUtil.lock(lock.writeLock());
         try {
-        	logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "'");
+            logger.info("Adding waypoint " + waypointToAdd + " to course '" + getName() + "'");
             waypoints.add(zeroBasedPosition, waypointToAdd);
             Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
             updatesToWaypointIndexes.put(waypointToAdd, zeroBasedPosition);
@@ -131,6 +131,7 @@ public class CourseImpl extends NamedImpl implements Course {
                 legs.add(new LegImpl(this, legStartWaypointIndex));
             }
             notifyListenersWaypointAdded(zeroBasedPosition, waypointToAdd);
+            logger.info("Waypoint " + waypointToAdd + " added to course '" + getName() + "'");
         } finally {
             lock.writeLock().unlock();
         }
@@ -144,6 +145,7 @@ public class CourseImpl extends NamedImpl implements Course {
             try {
                 boolean isLast = zeroBasedPosition == waypoints.size() - 1;
                 removedWaypoint = waypoints.remove(zeroBasedPosition);
+                logger.info("Removing waypoint " + removedWaypoint + " from course '" + getName() + "'");
                 waypointIndexes.remove(removedWaypoint);
                 Map<Waypoint, Integer> updatesToWaypointIndexes = new HashMap<Waypoint, Integer>();
                 for (Map.Entry<Waypoint, Integer> e : waypointIndexes.entrySet()) {
@@ -161,6 +163,7 @@ public class CourseImpl extends NamedImpl implements Course {
                     legs.remove(zeroBasedPosition);
                 }
                 notifyListenersWaypointRemoved(zeroBasedPosition, removedWaypoint);
+                logger.info("Waypoint " + removedWaypoint + " removed from course '" + getName() + "'");
             } finally {
                 lock.writeLock().unlock();
             }
