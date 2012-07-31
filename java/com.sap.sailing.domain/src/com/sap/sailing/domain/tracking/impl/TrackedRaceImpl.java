@@ -2,6 +2,7 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -204,6 +205,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     private transient WindStore windStore;
 
     private transient Timer cacheInvalidationTimer;
+    private transient Object cacheInvalidationTimerLock;
 
     private transient CombinedWindTrackImpl combinedWindTrack;
 
@@ -224,6 +226,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
             long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForWindEstimationCacheInvalidation) {
         super();
+        this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
         this.race = race;
         this.windStore = windStore;
@@ -297,6 +300,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
     }
     
+    /**
+     * Object serialization obtains a read lock for the course so that in cannot change while serializing this object. 
+     */
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        getRace().getCourse().lockForRead();
+        try {
+            s.defaultWriteObject();
+        } finally {
+            getRace().getCourse().unlockAfterRead();
+        }
+    }
+    
     @Override
     public synchronized void waitUntilWindLoadingComplete() throws InterruptedException {
         while (!windLoadingCompleted) {
@@ -321,6 +336,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        cacheInvalidationTimerLock = new Object();
         windStore = EmptyWindStore.INSTANCE;
         competitorRankings = new HashMap<TimePoint, List<Competitor>>();
         competitorRankingsLocks = new HashMap<TimePoint, NamedReentrantReadWriteLock>();
@@ -619,26 +635,36 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public TrackedLeg getTrackedLegFinishingAt(Waypoint endOfLeg) {
-        int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(endOfLeg);
-        if (indexOfWaypoint == -1) {
-            throw new IllegalArgumentException("Waypoint " + endOfLeg + " not found in " + getRace().getCourse());
-        } else if (indexOfWaypoint == 0) {
-            throw new IllegalArgumentException("Waypoint " + endOfLeg + " isn't start of any leg in "
-                    + getRace().getCourse());
+        getRace().getCourse().lockForRead();
+        try {
+            int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(endOfLeg);
+            if (indexOfWaypoint == -1) {
+                throw new IllegalArgumentException("Waypoint " + endOfLeg + " not found in " + getRace().getCourse());
+            } else if (indexOfWaypoint == 0) {
+                throw new IllegalArgumentException("Waypoint " + endOfLeg + " isn't start of any leg in "
+                        + getRace().getCourse());
+            }
+            return trackedLegs.get(race.getCourse().getLegs().get(indexOfWaypoint - 1));
+        } finally {
+            getRace().getCourse().unlockAfterRead();
         }
-        return trackedLegs.get(race.getCourse().getLegs().get(indexOfWaypoint - 1));
     }
 
     @Override
     public TrackedLeg getTrackedLegStartingAt(Waypoint startOfLeg) {
-        int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(startOfLeg);
-        if (indexOfWaypoint == -1) {
-            throw new IllegalArgumentException("Waypoint " + startOfLeg + " not found in " + getRace().getCourse());
-        } else if (indexOfWaypoint == Util.size(getRace().getCourse().getWaypoints()) - 1) {
-            throw new IllegalArgumentException("Waypoint " + startOfLeg + " isn't start of any leg in "
-                    + getRace().getCourse());
+        getRace().getCourse().lockForRead();
+        try {
+            int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(startOfLeg);
+            if (indexOfWaypoint == -1) {
+                throw new IllegalArgumentException("Waypoint " + startOfLeg + " not found in " + getRace().getCourse());
+            } else if (indexOfWaypoint == Util.size(getRace().getCourse().getWaypoints()) - 1) {
+                throw new IllegalArgumentException("Waypoint " + startOfLeg + " isn't start of any leg in "
+                        + getRace().getCourse());
+            }
+            return trackedLegs.get(race.getCourse().getLegs().get(indexOfWaypoint));
+        } finally {
+            getRace().getCourse().unlockAfterRead();
         }
-        return trackedLegs.get(race.getCourse().getLegs().get(indexOfWaypoint));
     }
 
     @Override
@@ -675,7 +701,12 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     }
 
     public TrackedLeg getTrackedLeg(Leg leg) {
-        return trackedLegs.get(leg);
+        getRace().getCourse().lockForRead();
+        try {
+            return trackedLegs.get(leg);
+        } finally {
+            getRace().getCourse().unlockAfterRead();
+        }
     }
 
     @Override
@@ -987,14 +1018,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Iterable<WindSource> getWindSourcesToExclude() {
-        return Collections.unmodifiableCollection(windSourcesToExclude);
+        synchronized (windSourcesToExclude) {
+            return Collections.unmodifiableCollection(windSourcesToExclude);
+        }
     }
 
     @Override
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
-        this.windSourcesToExclude.clear();
-        for (WindSource windSourceToExclude : windSourcesToExclude) {
-            this.windSourcesToExclude.add(windSourceToExclude);
+        synchronized (this.windSourcesToExclude) {
+            this.windSourcesToExclude.clear();
+            for (WindSource windSourceToExclude : windSourcesToExclude) {
+                this.windSourcesToExclude.add(windSourceToExclude);
+            }
         }
     }
 
@@ -1123,15 +1158,18 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
     /**
      * Schedules the clearing of the caches. If a cache clearing is already scheduled, this is a no-op.
      */
-    private synchronized void clearAllCachesExceptManeuvers() {
-        if (cacheInvalidationTimer == null) {
-            cacheInvalidationTimer = new Timer("Cache invalidation timer for TrackedRaceImpl " + getRace().getName());
-            cacheInvalidationTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    synchronized (TrackedRaceImpl.this) {
-                        cacheInvalidationTimer.cancel();
-                        cacheInvalidationTimer = null;
+    private void clearAllCachesExceptManeuvers() {
+        synchronized (cacheInvalidationTimerLock) {
+            if (cacheInvalidationTimer == null) {
+                cacheInvalidationTimer = new Timer("Cache invalidation timer for TrackedRaceImpl "
+                        + getRace().getName());
+                cacheInvalidationTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        synchronized (cacheInvalidationTimerLock) {
+                            cacheInvalidationTimer.cancel();
+                            cacheInvalidationTimer = null;
+                        }
                         synchronized (competitorRankings) {
                             competitorRankings.clear();
                         }
@@ -1139,8 +1177,8 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
                             competitorRankingsLocks.clear();
                         }
                     }
-                }
-            }, DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS);
+                }, DELAY_FOR_CACHE_CLEARING_IN_MILLISECONDS);
+            }
         }
     }
 
