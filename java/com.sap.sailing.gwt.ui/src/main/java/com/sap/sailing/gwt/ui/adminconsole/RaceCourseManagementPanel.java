@@ -93,7 +93,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                             }
                         }
 
-                    }, callback);
+                    }, /* animationEnabled */ false, callback);
             selectionModel = new MultiSelectionModel<BuoyDTO>();
             selectionModel.addSelectionChangeHandler(new Handler() {
                 @Override
@@ -345,7 +345,10 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 } else {
                     w.setNewBuoy(selectedNewBuoy);
                 }
-                controlPointDataProvider.getList().set(controlPointDataProvider.getList().indexOf(w), w);
+                final int indexOf = controlPointDataProvider.getList().indexOf(w);
+                if (indexOf != -1) {
+                    controlPointDataProvider.getList().set(indexOf, w);
+                }
             }
         }
     }

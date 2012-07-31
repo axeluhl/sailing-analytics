@@ -1582,7 +1582,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 for (int i=lastMatchPosition+1; matchFromOldCourse == null && i<Util.size(waypoints); i++) {
                     Waypoint waypointAtI = Util.get(waypoints, i);
                     ControlPoint controlPointAtI = waypointAtI.getControlPoint();
-                    if (controlPointAtI.getName().equals(controlPointDTO.name)) {
+                    if (controlPointAtI.getName().equals(controlPointDTO.name) && buoyNamesMatch(controlPointAtI.getBuoys(), controlPointDTO.getBuoys())) {
                         matchFromOldCourse = controlPointAtI;
                         newControlPoints.add(matchFromOldCourse);
                         lastMatchPosition = i;
@@ -1608,6 +1608,19 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private boolean buoyNamesMatch(Iterable<Buoy> buoys, Iterable<BuoyDTO> buoyDTOs) {
+        Iterator<Buoy> buoysIter = buoys.iterator();
+        Iterator<BuoyDTO> buoyDTOsIter = buoyDTOs.iterator();
+        while (buoysIter.hasNext() && buoyDTOsIter.hasNext()) {
+            Buoy nextBuoy = buoysIter.next();
+            BuoyDTO nextBuoyDTO = buoyDTOsIter.next();
+            if (!nextBuoy.getName().equals(nextBuoyDTO.name)) {
+                return false;
+            }
+        }
+        return buoysIter.hasNext() == buoyDTOsIter.hasNext();
     }
 
     private List<PositionDTO> getBuoyPositionDTOs(TimePoint timePoint, TrackedRace trackedRace, Waypoint waypoint) {
