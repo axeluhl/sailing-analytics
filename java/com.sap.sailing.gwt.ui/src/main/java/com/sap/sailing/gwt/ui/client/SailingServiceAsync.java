@@ -42,7 +42,6 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
-import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 
@@ -410,11 +409,7 @@ public interface SailingServiceAsync {
 
     void getRaceCourse(RaceIdentifier raceIdentifier, Date date, AsyncCallback<RaceCourseDTO> callback);
 
-    void removeWaypointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToDelete,
-            AsyncCallback<Void> callback);
-
-    void addWaypointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition,
-            AsyncCallback<Void> callback);
+    void updateRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, AsyncCallback<Void> callback);
 
     void getFregResultUrls(AsyncCallback<List<String>> asyncCallback);
 
@@ -422,5 +417,5 @@ public interface SailingServiceAsync {
 
     void addFragUrl(String result, AsyncCallback<Void> asyncCallback);
 
-	void getRaceBuoys(RaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceBuoysDTO> callback);
+    void getRaceBuoys(RaceIdentifier raceIdentifier, Date date,	AsyncCallback<RaceBuoysDTO> callback);
 }

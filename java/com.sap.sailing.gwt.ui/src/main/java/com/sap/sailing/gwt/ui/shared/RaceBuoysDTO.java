@@ -5,5 +5,5 @@ import java.util.Set;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class RaceBuoysDTO implements IsSerializable {
-    public Set<MarkDTO> buoys;
+    public Set<BuoyDTO> buoys;
 }

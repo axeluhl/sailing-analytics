@@ -363,4 +363,5 @@ public interface StringMessages extends Messages {
     String errorTryingToObtainLeaderboardContents(String message);
     String lastScoreUpdate();
     String warningBrowserUnsupported();
+    String newBuoy();
 }
