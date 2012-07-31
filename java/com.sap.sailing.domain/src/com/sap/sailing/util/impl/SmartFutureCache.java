@@ -205,13 +205,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                                     }
                                     return result;
                                 } finally {
-                                    // TODO use "lock" here once we have found out why two getOrCreateLockForKey calls with the same key may produce different locks
-                                    NamedReentrantReadWriteLock lockToUnlock = getOrCreateLockForKey(key);
-                                    if (lockToUnlock != lock) {
-                                        logger.severe("Internal error: "+lockToUnlock+" with object ID "+System.identityHashCode(lockToUnlock)+
-                                                " expected to be identical to "+lock+" with object ID "+System.identityHashCode(lock));
-                                    }
-                                    LockUtil.unlockAfterWrite(lockToUnlock);
+                                    LockUtil.unlockAfterWrite(lock);
                                     ongoingRecalculations.remove(key);
                                 }
                             } catch (Throwable e) {
