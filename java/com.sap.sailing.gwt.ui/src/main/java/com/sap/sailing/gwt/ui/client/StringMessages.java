@@ -368,4 +368,8 @@ public interface StringMessages extends Messages {
     String errorUpdatingRaceCourse(String message);
     String successfullyUpdatedCourse();
     String selectOneBuoyOrTwoBuoysForGate();
+    String errorTryingToObtainTheBuoysOfTheRace(String message);
+    String errorTryingToObtainRaceCourse(String message);
+    String insertWaypointBeforeSelected();
+    String insertWaypointAfterSelected();
 }

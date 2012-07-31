@@ -81,7 +81,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         private final MultiSelectionModel<BuoyDTO> selectionModel;
         
         public ControlPointCreationDialog(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
-                AsyncCallback<ControlPointDTO> callback) {
+                List<BuoyDTO> buoys, AsyncCallback<ControlPointDTO> callback) {
             super(stringMessages.controlPoint(), stringMessages.selectOneBuoyOrTwoBuoysForGate(),
                     stringMessages.ok(), stringMessages.cancel(), new Validator<ControlPointDTO>() {
                         @Override
@@ -95,7 +95,16 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
                     }, callback);
             selectionModel = new MultiSelectionModel<BuoyDTO>();
+            selectionModel.addSelectionChangeHandler(new Handler() {
+                @Override
+                public void onSelectionChange(SelectionChangeEvent event) {
+                    validate();
+                }
+            });
             buoysTable = createBuoysTable(stringMessages, tableRes, selectionModel);
+            ListDataProvider<BuoyDTO> buoyDataProvider = new ListDataProvider<BuoyDTO>();
+            buoyDataProvider.getList().addAll(buoys);
+            buoyDataProvider.addDataDisplay(buoysTable);
         }
 
         @Override
@@ -171,22 +180,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         controlPointsSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                ignoreWaypointAndOldAndNewBuoySelectionChange = true;
-                try {
-                    buoySelectionModel.setSelected(buoySelectionModel.getSelectedObject(), false);
-                    final int selectionSize = controlPointsSelectionModel.getSelectedSet().size();
-                    insertWaypointAfter.setEnabled(selectionSize==1);
-                    insertWaypointBefore.setEnabled(selectionSize==1);
-                    removeWaypointBtn.setEnabled(selectionSize>=1);
-                    if (selectionSize == 1) {
-                        BuoyDTO newBuoy = controlPointsSelectionModel.getSelectedSet().iterator().next().getNewBuoy();
-                        if (newBuoy != null) {
-                            buoySelectionModel.setSelected(newBuoy, true);
-                        }
-                    }
-                } finally {
-                    ignoreWaypointAndOldAndNewBuoySelectionChange = false;
-                }
+                handleControlPointSelectionChange();
             }
         });
         TextColumn<ControlPointAndOldAndNewBuoy> nameColumn = new TextColumn<ControlPointAndOldAndNewBuoy>() {
@@ -231,7 +225,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         
         courseActionsPanel = new HorizontalPanel();
         courseActionsPanel.setSpacing(10);
-        insertWaypointBefore = new Button("Insert waypoint before selected"); // TODO i18n
+        insertWaypointBefore = new Button(stringMessages.insertWaypointBeforeSelected());
         insertWaypointBefore.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -241,7 +235,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         });
         insertWaypointBefore.setEnabled(false);
         courseActionsPanel.add(insertWaypointBefore);
-        insertWaypointAfter = new Button("Insert waypoint after selected"); // TODO i18n
+        insertWaypointAfter = new Button(stringMessages.insertWaypointAfterSelected());
         insertWaypointAfter.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -278,6 +272,25 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         courseActionsPanel.add(saveBtn);
         courseActionsPanel.setVisible(false);
         this.selectedRaceContentPanel.add(courseActionsPanel);
+    }
+
+    private void handleControlPointSelectionChange() {
+        ignoreWaypointAndOldAndNewBuoySelectionChange = true;
+        try {
+            buoySelectionModel.setSelected(buoySelectionModel.getSelectedObject(), false);
+            final int selectionSize = controlPointsSelectionModel.getSelectedSet().size();
+            insertWaypointAfter.setEnabled(selectionSize==1);
+            insertWaypointBefore.setEnabled(selectionSize==1);
+            removeWaypointBtn.setEnabled(selectionSize>=1);
+            if (selectionSize == 1) {
+                BuoyDTO newBuoy = controlPointsSelectionModel.getSelectedSet().iterator().next().getNewBuoy();
+                if (newBuoy != null) {
+                    buoySelectionModel.setSelected(newBuoy, true);
+                }
+            }
+        } finally {
+            ignoreWaypointAndOldAndNewBuoySelectionChange = false;
+        }
     }
 
     private void saveCourse(SailingServiceAsync sailingService, final StringMessages stringMessages) {
@@ -339,7 +352,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
     private void insertWaypoint(final SailingServiceAsync sailingService, StringMessages stringMessages,
             AdminConsoleTableResources tableRes, final boolean beforeSelection) {
-        new ControlPointCreationDialog(stringMessages, tableRes, new AsyncCallback<ControlPointDTO>() {
+        new ControlPointCreationDialog(stringMessages, tableRes, buoyDataProvider.getList(), new AsyncCallback<ControlPointDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 // dialog cancelled, do nothing
@@ -374,14 +387,16 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            RaceCourseManagementPanel.this.errorReporter.reportError("Error trying to obtain the buoys of the race: " + caught.getMessage()); // TODO i18n
+                            RaceCourseManagementPanel.this.errorReporter.reportError(
+                                    RaceCourseManagementPanel.this.stringMessages.errorTryingToObtainTheBuoysOfTheRace(
+                                    caught.getMessage()));
                         }
                     });
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    RaceCourseManagementPanel.this.errorReporter.reportError("Error trying to obtain the course of the race: " + caught.getMessage()); // TODO i18n
+                    RaceCourseManagementPanel.this.errorReporter.reportError(stringMessages.errorTryingToObtainRaceCourse(caught.getMessage()));
                 }
             });
         } else {
@@ -416,5 +431,6 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 i.remove();
             }
         }
+        handleControlPointSelectionChange();
     }
 }

@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 /**
- * Equality and hash code are defined by the control point's name.
+ * Equality and hash code are defined based on Java object identity
  * 
  * @author Axel Uhl (D043530)
  *
@@ -14,13 +14,13 @@ public abstract class ControlPointDTO extends NamedDTO {
     }
     
     @Override
-    public int hashCode() {
-        return 98174 ^ name.hashCode();
+    public boolean equals(Object o) {
+        return this == o;
     }
     
     @Override
-    public boolean equals(Object o) {
-        return name.equals(((BuoyDTO) o).name);
+    public int hashCode() {
+        return System.identityHashCode(this);
     }
     
     public abstract Iterable<BuoyDTO> getBuoys();
