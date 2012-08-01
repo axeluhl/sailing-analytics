@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -127,7 +129,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                     left = second;
                     right = first;
                 }
-                gateName = left.name.replaceFirst("( \\()?[lL][eE][fF][tT]\\)?", "");
+                gateName = left.name.replaceFirst(REGEX_FOR_LEFT, "");
                 result = new GateDTO(gateName, left, right);
             }
             return result;
@@ -138,6 +140,8 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             return buoysTable;
         }
     }
+    
+    private static final String REGEX_FOR_LEFT = "( \\()?[lL][eE][fF][tT]\\)?";
 
     /**
      * A table that lists the buoys for which events have been received for the race selected. Note that this list may
@@ -156,6 +160,16 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     private final CellTable<ControlPointAndOldAndNewBuoy> controlPointsTable;
     private final MultiSelectionModel<ControlPointAndOldAndNewBuoy> controlPointsSelectionModel; 
     private final ListDataProvider<ControlPointAndOldAndNewBuoy> controlPointDataProvider;
+    
+    /**
+     * When for a control point's buoy a replacement buoy is defined (see {@link #updateNewBuoy(Set, BuoyDTO)}),
+     * the control point needs to be replaced before {@link #saveCourse(SailingServiceAsync, StringMessages) saving}.
+     * Those control points are added to this set. When the buoy is reset to the original buoy for all the control
+     * point's buoys, the control point is removed from this set again. {@link #saveCourse(SailingServiceAsync, StringMessages)}
+     * then is responsible for creating replacement {@link ControlPointDTO}s before sending the new control point list to the
+     * server.
+     */
+    private final Set<ControlPointDTO> controlPointsNeedingReplacement;
 
     private final HorizontalPanel courseActionsPanel;
     
@@ -168,6 +182,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     public RaceCourseManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         super(sailingService, errorReporter, regattaRefresher, stringMessages);
+        controlPointsNeedingReplacement = new HashSet<ControlPointDTO>();
         Grid grid = new Grid(1, 2);
         grid.setCellPadding(10);
         selectedRaceContentPanel.add(grid);
@@ -285,7 +300,11 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             if (selectionSize == 1) {
                 BuoyDTO newBuoy = controlPointsSelectionModel.getSelectedSet().iterator().next().getNewBuoy();
                 if (newBuoy != null) {
-                    buoySelectionModel.setSelected(newBuoy, true);
+                    for (BuoyDTO buoyDTO : buoyDataProvider.getList()) {
+                        if (buoyDTO.name.equals(newBuoy.name)) {
+                            buoySelectionModel.setSelected(buoyDTO, true);
+                        }
+                    }
                 }
             }
         } finally {
@@ -294,10 +313,22 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
     }
 
     private void saveCourse(SailingServiceAsync sailingService, final StringMessages stringMessages) {
+        Set<ControlPointDTO> oldControlPointsFromTableAlreadyHandled = new HashSet<ControlPointDTO>();
         List<ControlPointDTO> controlPoints = new ArrayList<ControlPointDTO>();
         for (ControlPointAndOldAndNewBuoy cpaoanb : controlPointDataProvider.getList()) {
-            if (!controlPoints.contains(cpaoanb.getControlPoint())) {
-                controlPoints.add(cpaoanb.getControlPoint());
+            if (!oldControlPointsFromTableAlreadyHandled.contains(cpaoanb.getControlPoint())) {
+                oldControlPointsFromTableAlreadyHandled.add(cpaoanb.getControlPoint());
+                ControlPointDTO controlPointToAdd;
+                if (controlPointsNeedingReplacement.contains(cpaoanb.getControlPoint())) {
+                    if (cpaoanb.getControlPoint() instanceof GateDTO) {
+                        controlPointToAdd = createGate((GateDTO) cpaoanb.getControlPoint());
+                    } else {
+                        controlPointToAdd = cpaoanb.getNewBuoy();
+                    }
+                } else {
+                    controlPointToAdd = cpaoanb.getControlPoint();
+                }
+                controlPoints.add(controlPointToAdd);
             }
         }
         sailingService.updateRaceCourse(singleSelectedRace, controlPoints, new AsyncCallback<Void>() {
@@ -309,8 +340,30 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             @Override
             public void onSuccess(Void result) {
                 Window.setStatus(stringMessages.successfullyUpdatedCourse());
+                refreshSelectedRaceData();
             }
         });
+    }
+
+    /**
+     * When a gate needs replacement, its entries in {@link #controlPointDataProvider} are looked up, and a new
+     * {@link GateDTO} is created having the same name as the old gate, but using the new buoys as the gate's buoys.
+     */
+    private ControlPointDTO createGate(GateDTO oldGate) {
+        BuoyDTO newLeft = null;
+        BuoyDTO newRight = null;
+        for (ControlPointAndOldAndNewBuoy cpaoanb : controlPointDataProvider.getList()) {
+            if (cpaoanb.getControlPoint() == oldGate) {
+                BuoyDTO newBuoy = cpaoanb.getNewBuoy();
+                if (newRight != null || newBuoy.name.matches("^.*"+REGEX_FOR_LEFT+".*$")) {
+                    newLeft = newBuoy;
+                } else {
+                    newRight = newBuoy;
+                }
+            }
+        }
+        assert newLeft != null && newRight != null;
+        return new GateDTO(oldGate.name, newLeft, newRight);
     }
 
     private CellTable<BuoyDTO> createBuoysTable(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
@@ -329,7 +382,7 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             @Override
             public SafeHtml getValue(BuoyDTO buoy) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                builder.appendEscaped(buoy.name + ", " + stringMessages.position() + ": " + buoy.position.toFormattedString());
+                builder.appendEscaped(buoy.position.toFormattedString());
                 return builder.toSafeHtml();
             }
         };
@@ -345,11 +398,31 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
                 } else {
                     w.setNewBuoy(selectedNewBuoy);
                 }
+                if (w.getOldBuoy().name.equals(w.getNewBuoy().name)) {
+                    checkIfAllBuoysOfControlPointAreUnchangedAndIfSoRememberThis(w.getControlPoint());
+                } else {
+                    controlPointsNeedingReplacement.add(w.getControlPoint());
+                }
                 final int indexOf = controlPointDataProvider.getList().indexOf(w);
                 if (indexOf != -1) {
                     controlPointDataProvider.getList().set(indexOf, w);
                 }
             }
+        }
+    }
+
+    private void checkIfAllBuoysOfControlPointAreUnchangedAndIfSoRememberThis(ControlPointDTO controlPoint) {
+        boolean allBuoysUnchanged = true;
+        for (ControlPointAndOldAndNewBuoy cpaoanb : controlPointDataProvider.getList()) {
+            if (cpaoanb.getControlPoint() == controlPoint) {
+                if (!cpaoanb.getOldBuoy().name.equals(cpaoanb.getNewBuoy().name)) {
+                    allBuoysUnchanged = false;
+                    break;
+                }
+            }
+        }
+        if (allBuoysUnchanged) {
+            controlPointsNeedingReplacement.remove(controlPoint);
         }
     }
 
@@ -417,7 +490,15 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         }
         controlPointDataProvider.getList().clear();
         controlPointDataProvider.getList().addAll(waypointsAndOldAndNewBuoys);
-        buoyDataProvider.setList(new ArrayList<BuoyDTO>(buoysDTO.buoys));
+        controlPointsNeedingReplacement.clear();
+        buoyDataProvider.getList().clear();
+        buoyDataProvider.getList().addAll(buoysDTO.buoys);
+        Collections.sort(buoyDataProvider.getList(), new Comparator<BuoyDTO>() {
+            @Override
+            public int compare(BuoyDTO o1, BuoyDTO o2) {
+                return o1.name.compareTo(o2.name);
+            }
+        });
         for (ControlPointAndOldAndNewBuoy w : controlPointsSelectionModel.getSelectedSet()) {
             controlPointsSelectionModel.setSelected(w, false);
         }
