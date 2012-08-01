@@ -26,6 +26,9 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
+import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTest {
     
@@ -75,8 +78,9 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup2);
         
         // the leaderboard named leaderboardNames[2] occurs in both groups
-        final LeaderboardGroup loadedLeaderboardGroup1 = domainObjectFactory.loadLeaderboardGroup(groupName1, /* regattaRegistry */ null);
-        final LeaderboardGroup loadedLeaderboardGroup2 = domainObjectFactory.loadLeaderboardGroup(groupName2, /* regattaRegistry */ null);
+        RacingEventService racingEventService = new RacingEventServiceImpl(MongoDBService.INSTANCE); // expected to load leaderboard groups
+        final LeaderboardGroup loadedLeaderboardGroup1 = racingEventService.getLeaderboardGroupByName(groupName1);
+        final LeaderboardGroup loadedLeaderboardGroup2 = racingEventService.getLeaderboardGroupByName(groupName2);
 
         assertEquals(groupName1, loadedLeaderboardGroup1.getName());
         assertEquals(groupDescription1, loadedLeaderboardGroup1.getDescription());

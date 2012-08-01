@@ -262,6 +262,13 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
         }
     }
+    
+    @Override
+    public void addLeaderboard(Leaderboard leaderboard) {
+        synchronized (leaderboardsByName) {
+            leaderboardsByName.put(leaderboard.getName(), leaderboard);
+        }
+    }
 
     private void loadStoredLeaderboardsAndGroups() {
         logger.info("loading stored leaderboards and groups");
@@ -269,15 +276,6 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups(this, this)) {
             logger.info("loaded leaderboard group "+leaderboardGroup.getName()+" into "+this);
             leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
-            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                leaderboardsByName.put(leaderboard.getName(), leaderboard);
-                logger.info("loaded leaderboard "+leaderboard.getName()+" into "+this);
-            }
-        }
-        // Loading the remaining leaderboards
-        for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup(this, this)) {
-            leaderboardsByName.put(leaderboard.getName(), leaderboard);
-            logger.info("loaded leaderboard "+leaderboard.getName()+" into "+this);
         }
         logger.info("done with loading stored leaderboards and groups");
     }
@@ -288,10 +286,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         FlexibleLeaderboard result = new FlexibleLeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 discardThresholds), new LowerScoreIsBetter());
         synchronized (leaderboardsByName) {
-            if (leaderboardsByName.containsKey(name)) {
+            if (getLeaderboardByName(name) != null) {
                 throw new IllegalArgumentException("Leaderboard with name "+name+" already exists");
             }
-            leaderboardsByName.put(name, result);
+            addLeaderboard(result);
         }
         mongoObjectFactory.storeLeaderboard(result);
         return result;
@@ -307,10 +305,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                     discardThresholds), new LowerScoreIsBetter());
             synchronized (leaderboardsByName) {
-                if (leaderboardsByName.containsKey(result.getName())) {
+                if (getLeaderboardByName(result.getName()) != null) {
                     throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists in "+this);
                 }
-                leaderboardsByName.put(result.getName(), result);
+                addLeaderboard(result);
             }
             mongoObjectFactory.storeLeaderboard(result);
         } else {

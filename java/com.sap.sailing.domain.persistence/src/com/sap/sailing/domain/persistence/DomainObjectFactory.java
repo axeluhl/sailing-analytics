@@ -37,9 +37,10 @@ public interface DomainObjectFactory {
     /**
      * @param leaderboardRegistry
      *            if not <code>null</code>, then before creating and loading the leaderboard it is looked up in this
-     *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>, the
-     *            leaderboards are loaded in any case. Note: leaderboards loaded by this call are <em>not</em> added to
-     *            the leaderboard registry here. The caller has to do that.
+     *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>,
+     *            the leaderboard is loaded in any case. If the leaderboard is loaded and
+     *            <code>leaderboardRegistry</code> is not <code>null</code>, the leaderboard loaded is
+     *            {@link LeaderboardRegistry#addLeaderboard(Leaderboard) added to the registry}.
      * @return The group with the name <code>name</code>, or <code>null</code> if no such group exists.
      */
     LeaderboardGroup loadLeaderboardGroup(String name, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
@@ -47,9 +48,10 @@ public interface DomainObjectFactory {
     /**
      * @param leaderboardRegistry
      *            if not <code>null</code>, then before creating and loading the leaderboard it is looked up in this
-     *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>, the
-     *            leaderboards are loaded in any case. Note: leaderboards loaded by this call are <em>not</em> added to
-     *            the leaderboard registry here. The caller has to do that.
+     *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>,
+     *            the leaderboard is loaded in any case. If the leaderboard is loaded and
+     *            <code>leaderboardRegistry</code> is not <code>null</code>, the leaderboard loaded is
+     *            {@link LeaderboardRegistry#addLeaderboard(Leaderboard) added to the registry}.
      * @return All groups in the database.
      */
     Iterable<LeaderboardGroup> getAllLeaderboardGroups(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
@@ -57,9 +59,10 @@ public interface DomainObjectFactory {
     /**
      * @param leaderboardRegistry
      *            if not <code>null</code>, then before creating and loading the leaderboard it is looked up in this
-     *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>, the
-     *            leaderboards are loaded in any case. Note: leaderboards loaded by this call are <em>not</em> added to
-     *            the leaderboard registry here. The caller has to do that.
+     *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>,
+     *            the leaderboard is loaded in any case. If the leaderboard is loaded and
+     *            <code>leaderboardRegistry</code> is not <code>null</code>, the leaderboard loaded is
+     *            {@link LeaderboardRegistry#addLeaderboard(Leaderboard) added to the registry}.
      * @return All leaderboards in the database, which aren't contained by a leaderboard group
      */
     Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);

@@ -184,8 +184,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      * @param leaderboardRegistry
      *            if not <code>null</code>, then before creating and loading the leaderboard it is looked up in this
      *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>,
-     *            the leaderboard is loaded in any case. Note: a leaderboard loaded by this call is <em>not</em> added
-     *            to the leaderboard registry here. The caller has to do that.
+     *            the leaderboard is loaded in any case. If the leaderboard is loaded and
+     *            <code>leaderboardRegistry</code> is not <code>null</code>, the leaderboard loaded is
+     *            {@link LeaderboardRegistry#addLeaderboard(Leaderboard) added to the registry}.
      * 
      * @return <code>null</code> in case the leaderboard couldn't be loaded, e.g., because the regatta referenced by a
      *         {@link RegattaLeaderboard} cannot be found; the leaderboard loaded or found in
@@ -217,6 +218,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (result != null) {
                 DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
                 loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, scoreCorrection);
+                // add the leaderboard to the registry
+                if (leaderboardRegistry != null) {
+                    leaderboardRegistry.addLeaderboard(result);
+                    logger.info("loaded leaderboard "+result.getName()+" into "+leaderboardRegistry);
+                }
+
             }
         }
         return result;
@@ -374,7 +381,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     public Iterable<LeaderboardGroup> getAllLeaderboardGroups(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         Set<LeaderboardGroup> leaderboardGroups = new HashSet<LeaderboardGroup>();
-        
         try {
             for (DBObject o : leaderboardGroupCollection.find()) {
                 leaderboardGroups.add(loadLeaderboardGroup(o, regattaRegistry, leaderboardRegistry));
@@ -401,6 +407,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 leaderboards.add(loadedLeaderboard);
             }
         }
+        logger.info("loaded leaderboard group "+name);
         return new LeaderboardGroupImpl(name, description, leaderboards);
     }
     
