@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
+import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -59,6 +61,10 @@ import com.sap.sailing.server.operationaltransformation.UpdateLeaderboardMaxPoin
 public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest {
     private static final Logger logger = Logger.getLogger(TestStoringAndLoadingEventsAndRegattas.class.getName());
     
+    public TestStoringAndLoadingEventsAndRegattas() throws UnknownHostException, MongoException {
+        super();
+    }
+
     @Test
     public void testLoadStoreSimpleEvent() {
         final String eventName = "Event Name";

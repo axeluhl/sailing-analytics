@@ -28,6 +28,10 @@ import com.sap.sailing.domain.tracking.impl.WindImpl;
 public class TestStoringAndRetrievingWindData extends AbstractMongoDBTest {
     private static final String WIND_TEST_COLLECTION = "wind_test_collection";
     
+    public TestStoringAndRetrievingWindData() throws UnknownHostException, MongoException {
+        super();
+    }
+
     @Before
     @Override
     public void dropTestDB() throws UnknownHostException, MongoException, InterruptedException {

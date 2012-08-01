@@ -1319,7 +1319,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     /**
-     * Also updates the min/max values on the columns
+     * Assigns <code>leaderboard</code> to {@link #leaderboard} and updates the UI accordingly. Also updates the min/max
+     * values on the columns.
      */
     protected void updateLeaderboard(LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
