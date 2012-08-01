@@ -1,7 +1,10 @@
 package com.sap.sailing.mongodb.test;
 
+import java.net.UnknownHostException;
+
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.MongoException;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
@@ -15,6 +18,10 @@ import com.sap.sailing.mongodb.MongoDBService;
  *
  */
 public class ConvertWindData extends AbstractMongoDBTest {
+    public ConvertWindData() throws UnknownHostException, MongoException {
+        super();
+    }
+
     public static void main(String[] args) {
         MongoObjectFactoryImpl mof = new MongoObjectFactoryImpl(MongoDBService.INSTANCE.getDB());
         DBCollection windTracksCollection = mof.getWindTrackCollection();

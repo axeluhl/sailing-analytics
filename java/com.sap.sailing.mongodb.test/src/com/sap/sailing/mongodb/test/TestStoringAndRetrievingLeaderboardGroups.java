@@ -3,12 +3,14 @@ package com.sap.sailing.mongodb.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -31,10 +33,14 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTest {
-    
     private MongoObjectFactory mongoObjectFactory = null;
     private DomainObjectFactory domainObjectFactory = null;
     
+    
+    public TestStoringAndRetrievingLeaderboardGroups() throws UnknownHostException, MongoException {
+        super();
+    }
+
     @Before
     public void setUp() {
         mongoObjectFactory = new MongoObjectFactoryImpl(db);
