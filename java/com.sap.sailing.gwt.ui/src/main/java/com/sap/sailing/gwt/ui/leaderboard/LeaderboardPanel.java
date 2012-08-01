@@ -1324,10 +1324,17 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
      */
     protected void updateLeaderboard(LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
+            Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(leaderboard);
+            for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
+                columnToCollapseAndExpandAgain.toggleExpansion();
+            }
             competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */ this);
             selectedRaceColumns.addAll(getRaceColumnsToAddImplicitly(leaderboard));
             setLeaderboard(leaderboard);
             adjustColumnLayout(leaderboard);
+            for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
+                columnToCollapseAndExpandAgain.toggleExpansion();
+            }
             adjustDelayToLive();
             getData().getList().clear();
             getData().getList().addAll(getRowsToDisplay(leaderboard));
@@ -1369,6 +1376,40 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 scoreCorrectionLastUpdateTimeLabel.setText("");
             }
         }
+    }
+
+    /**
+     * Due to a course change, a race may change its number of legs. All expanded race columns that show leg columns and
+     * whose leg count changed need to be collapsed before the leaderboard is replaced, and expanded afterwards again.
+     * Race columns whose toggling is {@link ExpandableSortableColumn#isTogglingInProcess() currently in progress} are
+     * not considered because their new state will be considered after replacing anyhow.
+     * 
+     * @param newLeaderboard
+     *            the new leaderboard before assigning to {@link #leaderboard}
+     * @return the columns that were collapsed in this step and that shall be expanded again after the leaderboard has
+     *         been replaced
+     */
+    private Collection<RaceColumn<?>> getExpandedRaceColumnsWhoseDisplayedLegCountChanged(LeaderboardDTO newLeaderboard) {
+        Set<RaceColumn<?>> result = new HashSet<RaceColumn<?>>();
+        if (selectedRaceDetails.contains(DetailType.DISPLAY_LEGS)) {
+            for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
+                Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
+                if (c instanceof RaceColumn<?>) {
+                    RaceColumn<?> rc = (RaceColumn<?>) c;
+                    // If the new leaderboard no longer contains the column, getLegCount will return -1, causing the column
+                    // to be collapsed if it was expanded. This is correct because otherwise, removing it would no longer
+                    // know the correct leg count.
+                    if (!rc.isTogglingInProcess() && rc.isExpanded()) {
+                        int oldLegCount = getLeaderboard().getLegCount(rc.getRaceColumnName());
+                        int newLegCount = newLeaderboard.getLegCount(rc.getRaceColumnName());
+                        if (oldLegCount != newLegCount) {
+                            result.add(rc);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     /**
