@@ -30,7 +30,7 @@ public class WindTest {
      */
     @Test
     public void testAveragingWind() throws InterruptedException {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
         TimePoint t1 = MillisecondsTimePoint.now();
         TimePoint t2 = new MillisecondsTimePoint(t1.asMillis()+10);
         TimePoint middle = new MillisecondsTimePoint((t1.asMillis()+t2.asMillis())/2);
@@ -45,7 +45,7 @@ public class WindTest {
     
     @Test
     public void testMultipleWindFixesWithSameTimestampInSameWindTrack() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
         TimePoint now = MillisecondsTimePoint.now();
         DegreePosition pos1 = new DegreePosition(0, 0);
         DegreePosition pos2 = new DegreePosition(1, 1);
@@ -71,7 +71,7 @@ public class WindTest {
     
     @Test
     public void testEmptyTrackYieldsNullAsWindEstimate() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
         assertNull(track.getAveragedWind(new DegreePosition(0, 0), MillisecondsTimePoint.now()));
     }
 
@@ -82,7 +82,7 @@ public class WindTest {
      */
     @Test
     public void testAveragingOfSparseWindTrack() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
         Wind wind2 = new WindImpl(pos, new MillisecondsTimePoint(1000), new KnotSpeedWithBearingImpl(20, new DegreeBearingImpl(0)));
@@ -115,7 +115,7 @@ public class WindTest {
     
     @Test
     public void testSingleElementWindTrack() {
-        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(AVERAGING_INTERVAL_MILLIS, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
@@ -126,7 +126,7 @@ public class WindTest {
 
     @Test
     public void testSingleElementExtrapolation() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
@@ -138,7 +138,7 @@ public class WindTest {
 
     @Test
     public void testSingleElementExtrapolationBeyondThreshold() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(123)));
         track.add(wind);
@@ -151,7 +151,7 @@ public class WindTest {
 
     @Test
     public void testTwoElementWindTrackSameBearing() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(100)));
         track.add(wind1);
@@ -164,7 +164,7 @@ public class WindTest {
 
     @Test
     public void testTwoElementWindTrackDifferentBearing() {
-        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(30000 /* 30s averaging interval */, /* useSpeed */ true, "TestWindTrack");
         DegreePosition pos = new DegreePosition(0, 0);
         Wind wind1 = new WindImpl(pos, new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(110)));
         track.add(wind1);
@@ -196,7 +196,7 @@ public class WindTest {
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(85)));
         Wind wind3 = new WindImpl(null, new MillisecondsTimePoint(df.parse("2009-07-11T17:31:40").getTime()),
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(80)));
-        WindTrack track = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true);
+        WindTrack track = new WindTrackImpl(/* millisecondsOverWhichToAverage */ 30000, /* useSpeed */ true, "TestWindTrack");
         track.add(wind1);
         track.add(wind2);
         track.add(wind3);

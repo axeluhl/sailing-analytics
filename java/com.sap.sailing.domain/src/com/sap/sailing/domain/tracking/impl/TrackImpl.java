@@ -5,13 +5,13 @@ import java.io.ObjectOutputStream;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
 import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
 
 public class TrackImpl<FixType extends Timed> implements Track<FixType> {
@@ -21,7 +21,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
      */
     private final NavigableSet<Timed> fixes;
 
-    private final ReentrantReadWriteLock readWriteLock;
+    private final NamedReentrantReadWriteLock readWriteLock;
 
     protected static class DummyTimed implements Timed {
         private static final long serialVersionUID = 6047311973718918856L;
@@ -40,12 +40,12 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         }
     }
     
-    public TrackImpl() {
-        this(new ArrayListNavigableSet<Timed>(TimedComparator.INSTANCE));
+    public TrackImpl(String nameForReadWriteLock) {
+        this(new ArrayListNavigableSet<Timed>(TimedComparator.INSTANCE), nameForReadWriteLock);
     }
     
-    protected TrackImpl(NavigableSet<Timed> fixes) {
-        this.readWriteLock = new ReentrantReadWriteLock();
+    protected TrackImpl(NavigableSet<Timed> fixes, String nameForReadWriteLock) {
+        this.readWriteLock = new NamedReentrantReadWriteLock(nameForReadWriteLock, /* fair */ false);
         this.fixes = fixes;
     }
     
@@ -63,20 +63,20 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
 
     @Override
     public void lockForRead() {
-        LockUtil.lock(readWriteLock.readLock());
+        LockUtil.lockForRead(readWriteLock);
     }
 
     @Override
     public void unlockAfterRead() {
-        readWriteLock.readLock().unlock();
+        LockUtil.unlockAfterRead(readWriteLock);
     }
     
     protected void lockForWrite() {
-        LockUtil.lock(readWriteLock.writeLock());
+        LockUtil.lockForWrite(readWriteLock);
     }
     
     protected void unlockAfterWrite() {
-        readWriteLock.writeLock().unlock();
+        LockUtil.unlockAfterWrite(readWriteLock);
     }
 
     /**

@@ -2,7 +2,6 @@ package com.sap.sailing.domain.tracking.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -25,15 +24,15 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -62,19 +61,6 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         }
         // default wind tracks are observed because they are created by the superclass constructor using
         // createWindTrack which adds this object as a listener
-    }
-    
-    /**
-     * Synchronized object serialization on this object so that incoming new data doesn't disrupt the serialization process.
-     * Also obtain a read lock for the course so that in cannot change while serializing this object. 
-     */
-    private synchronized void writeObject(ObjectOutputStream s) throws IOException {
-        getRace().getCourse().lockForRead();
-        try {
-            s.defaultWriteObject();
-        } finally {
-            getRace().getCourse().unlockAfterRead();
-        }
     }
     
     /**
@@ -374,59 +360,59 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
         Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
         MarkPassing oldStartMarkPassing = null;
         boolean requiresStartTimeUpdate = true;
-        synchronized (this) {
-            NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
-            synchronized (markPassingsForCompetitor) {
-                for (MarkPassing oldMarkPassing : markPassingsForCompetitor) {
-                    if (oldStartMarkPassing == null) {
-                        oldStartMarkPassing = oldMarkPassing;
-                    }
-                    oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);
+        NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
+        synchronized (markPassingsForCompetitor) {
+            for (MarkPassing oldMarkPassing : markPassingsForCompetitor) {
+                if (oldStartMarkPassing == null) {
+                    oldStartMarkPassing = oldMarkPassing;
                 }
+                oldMarkPassings.put(oldMarkPassing.getWaypoint(), oldMarkPassing);
             }
-            clearMarkPassings(competitor);
-            TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
-            for (MarkPassing markPassing : markPassings) {
-                // try to find corresponding old start mark passing
-                if (oldStartMarkPassing != null && markPassing.getWaypoint().getName().equals(oldStartMarkPassing.getWaypoint().getName())) {
-                    if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null &&
-                        markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
-                        requiresStartTimeUpdate = false;
-                    }
-                }
-                synchronized (markPassingsForCompetitor) {
-                    if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
-                        StringBuilder courseWaypointsWithID = new StringBuilder();
-                        boolean first = true;
-                        for (Waypoint courseWaypoint : getRace().getCourse().getWaypoints()) {
-                            if (first) {
-                                first = false;
-                            } else {
-                                courseWaypointsWithID.append(" -> ");
-                            }
-                            courseWaypointsWithID.append(courseWaypoint.toString());
-                            courseWaypointsWithID.append(" (ID=");
-                            courseWaypointsWithID.append(courseWaypoint.getId());
-                            courseWaypointsWithID.append(")");
-                        }
-                        logger.severe("Received mark passing "+markPassing+" for race "+getRace()+
-                                " for waypoint ID"+markPassing.getWaypoint().getId()+
-                                " but the waypoint does not exist in course "+courseWaypointsWithID);
-                    } else {
-                        markPassingsForCompetitor.add(markPassing);
-                    }
-                }
-                Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing.getWaypoint());
-                synchronized (markPassingsInOrderForWaypoint) {
-                    markPassingsInOrderForWaypoint.add(markPassing);
-                }
-                if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
-                    timePointOfLatestEvent = markPassing.getTimePoint();
-                }
-            }
-            updated(timePointOfLatestEvent);
-            triggerManeuverCacheRecalculation(competitor);
         }
+        clearMarkPassings(competitor);
+        TimePoint timePointOfLatestEvent = new MillisecondsTimePoint(0);
+        for (MarkPassing markPassing : markPassings) {
+            // try to find corresponding old start mark passing
+            if (oldStartMarkPassing != null
+                    && markPassing.getWaypoint().getName().equals(oldStartMarkPassing.getWaypoint().getName())) {
+                if (markPassing.getTimePoint() != null && oldStartMarkPassing.getTimePoint() != null
+                        && markPassing.getTimePoint().equals(oldStartMarkPassing.getTimePoint())) {
+                    requiresStartTimeUpdate = false;
+                }
+            }
+            synchronized (markPassingsForCompetitor) {
+                if (!Util.contains(getRace().getCourse().getWaypoints(), markPassing.getWaypoint())) {
+                    StringBuilder courseWaypointsWithID = new StringBuilder();
+                    boolean first = true;
+                    for (Waypoint courseWaypoint : getRace().getCourse().getWaypoints()) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            courseWaypointsWithID.append(" -> ");
+                        }
+                        courseWaypointsWithID.append(courseWaypoint.toString());
+                        courseWaypointsWithID.append(" (ID=");
+                        courseWaypointsWithID.append(courseWaypoint.getId());
+                        courseWaypointsWithID.append(")");
+                    }
+                    logger.severe("Received mark passing " + markPassing + " for race " + getRace()
+                            + " for waypoint ID" + markPassing.getWaypoint().getId()
+                            + " but the waypoint does not exist in course " + courseWaypointsWithID);
+                } else {
+                    markPassingsForCompetitor.add(markPassing);
+                }
+            }
+            Collection<MarkPassing> markPassingsInOrderForWaypoint = getOrCreateMarkPassingsInOrderAsNavigableSet(markPassing
+                    .getWaypoint());
+            synchronized (markPassingsInOrderForWaypoint) {
+                markPassingsInOrderForWaypoint.add(markPassing);
+            }
+            if (markPassing.getTimePoint().compareTo(timePointOfLatestEvent) > 0) {
+                timePointOfLatestEvent = markPassing.getTimePoint();
+            }
+        }
+        updated(timePointOfLatestEvent);
+        triggerManeuverCacheRecalculation(competitor);
         // update the race times like start, end and the leg times
         if (requiresStartTimeUpdate) {
             invalidateStartTime();
@@ -508,7 +494,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
 
     @Override
-    public synchronized void recordWind(Wind wind, WindSource windSource) {
+    public void recordWind(Wind wind, WindSource windSource) {
         getOrCreateWindTrack(windSource).add(wind);
         updated(/* time point */null); // wind events shouldn't advance race time
         triggerManeuverCacheRecalculationForAllCompetitors();
@@ -516,7 +502,7 @@ public class DynamicTrackedRaceImpl extends TrackedRaceImpl implements
     }
     
     @Override
-    public synchronized void removeWind(Wind wind, WindSource windSource) {
+    public void removeWind(Wind wind, WindSource windSource) {
         getOrCreateWindTrack(windSource).remove(wind);
         updated(/* time point */null); // wind events shouldn't advance race time
         triggerManeuverCacheRecalculationForAllCompetitors();
