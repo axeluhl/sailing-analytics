@@ -1,5 +1,8 @@
 package com.sap.sailing.mongodb.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+
 import java.util.ArrayList;
 
 import org.junit.Assert;
@@ -10,6 +13,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -22,6 +26,9 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
+import com.sap.sailing.mongodb.MongoDBService;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTest {
     
@@ -32,6 +39,54 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
     public void setUp() {
         mongoObjectFactory = new MongoObjectFactoryImpl(db);
         domainObjectFactory = new DomainObjectFactoryImpl(db);
+    }
+    
+    /**
+     * Bug 908: asserting that after loading two leaderboard groups referencing the same leaderbard the leaderboard is
+     * loaded only once
+     */
+    @Test
+    public void testStoringAndRetrievingTwoLeaderboardGroupsReferencingTheSameLeaderboard() {
+        final String[] leaderboardNames = {"Leaderboard 0", "Leaderboard 1", "Leaderboard 2", "Leaderboard 3"};
+        final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
+        
+        final String groupName1 = "Leaderboard Group 1";
+        final String groupDescription1 = "A leaderboard group 1";
+        final ArrayList<Leaderboard> leaderboards1 = new ArrayList<>();
+        Leaderboard leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[0], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter());
+        leaderboards1.add(leaderboard);
+        leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[1], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter());
+        leaderboards1.add(leaderboard);
+        leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[2], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter());
+        leaderboards1.add(leaderboard);
+        final LeaderboardGroup leaderboardGroup1 = new LeaderboardGroupImpl(groupName1, groupDescription1, leaderboards1);
+        mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup1);
+        
+        final String groupName2 = "Leaderboard Group 2";
+        final String groupDescription2= "A leaderboard group 2";
+        final ArrayList<Leaderboard> leaderboards2 = new ArrayList<>();
+        leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[2], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter());
+        leaderboards2.add(leaderboard);
+        leaderboard = new FlexibleLeaderboardImpl(leaderboardNames[3], new ScoreCorrectionImpl(),
+                new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces), new LowerScoreIsBetter());
+        leaderboards2.add(leaderboard);
+        final LeaderboardGroup leaderboardGroup2 = new LeaderboardGroupImpl(groupName2, groupDescription2, leaderboards2);
+        mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup2);
+        
+        // the leaderboard named leaderboardNames[2] occurs in both groups
+        RacingEventService racingEventService = new RacingEventServiceImpl(MongoDBService.INSTANCE); // expected to load leaderboard groups
+        final LeaderboardGroup loadedLeaderboardGroup1 = racingEventService.getLeaderboardGroupByName(groupName1);
+        final LeaderboardGroup loadedLeaderboardGroup2 = racingEventService.getLeaderboardGroupByName(groupName2);
+
+        assertEquals(groupName1, loadedLeaderboardGroup1.getName());
+        assertEquals(groupDescription1, loadedLeaderboardGroup1.getDescription());
+        assertEquals(groupName2, loadedLeaderboardGroup2.getName());
+        assertEquals(groupDescription2, loadedLeaderboardGroup2.getDescription());
+        assertSame(Util.get(loadedLeaderboardGroup1.getLeaderboards(), 2), Util.get(loadedLeaderboardGroup2.getLeaderboards(), 0));
     }
     
     @Test
@@ -59,7 +114,8 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         final LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl(groupName, groupDescription, leaderboards);
         mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
         
-        final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null);
+        final LeaderboardGroup loadedLeaderboardGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null,
+                /* leaderboardRegistry */ null);
 
         Assert.assertEquals(groupName, loadedLeaderboardGroup.getName());
         Assert.assertEquals(groupDescription, loadedLeaderboardGroup.getDescription());
@@ -103,7 +159,8 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[1]);
         mongoObjectFactory.storeLeaderboard(ungroupedLeaderboards[2]);
         
-        Iterable<Leaderboard> loadedUngroupedLeaderboards = domainObjectFactory.getLeaderboardsNotInGroup(/* regattaRegistry */ null);
+        Iterable<Leaderboard> loadedUngroupedLeaderboards = domainObjectFactory.getLeaderboardsNotInGroup(/* regattaRegistry */ null,
+                /* leaderboardRegistry */ null);
         
         Assert.assertTrue(loadedUngroupedLeaderboards.iterator().hasNext());
         
@@ -147,7 +204,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         mongoObjectFactory.renameLeaderboard(leaderboardName, newLeaderboardName);
         leaderboard.setName(newLeaderboardName);
         
-        LeaderboardGroup loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null);
+        LeaderboardGroup loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null, /* leaderboardRegistry */ null);
         String loadedLeaderboardName = loadedGroup.getLeaderboards().iterator().next().getName();
         Assert.assertEquals(newLeaderboardName, loadedLeaderboardName);
         
@@ -164,7 +221,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         Assert.assertEquals(race.getRaceIdentifier(fleet), loadedRaceColumnByName.getRaceIdentifier(loadedFleet));
         
         // Check if the group received the changes
-        loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null);
+        loadedGroup = domainObjectFactory.loadLeaderboardGroup(groupName, /* regattaRegistry */ null, /* leaderboardRegistry */ null);
         final RaceColumn loadedRaceColumnFromGroupByName = loadedGroup.getLeaderboards().iterator().next().getRaceColumnByName(columnName);
         Fleet loadedGroupFleet = loadedRaceColumnFromGroupByName.getFleetByName(fleet.getName());
         RaceIdentifier loadedIdentifier = loadedRaceColumnFromGroupByName.getRaceIdentifier(loadedGroupFleet);

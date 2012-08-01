@@ -273,7 +273,7 @@ public class LeaderboardDTOCache {
     private TimePoint getTimePointOfLatestModification(Leaderboard leaderboard) {
         TimePoint result = null;
         for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-            if (result == null || trackedRace.getTimePointOfNewestEvent().after(result)) {
+            if (result == null || (trackedRace.getTimePointOfNewestEvent() != null && trackedRace.getTimePointOfNewestEvent().after(result))) {
                 result = trackedRace.getTimePointOfNewestEvent();
             }
         }
@@ -302,7 +302,7 @@ public class LeaderboardDTOCache {
         long startOfRequestHandling = System.currentTimeMillis();
         final TimePoint adjustedTimePoint;
         TimePoint timePointOfLastModification = getTimePointOfLatestModification(leaderboard);
-        if (timePoint.after(timePointOfLastModification)) {
+        if (timePointOfLastModification != null && timePoint.after(timePointOfLastModification)) {
             adjustedTimePoint = timePointOfLastModification; 
             logger.fine("Adjusted time point in getLeaderboardByName from "+timePoint+" to "+adjustedTimePoint);
         } else {
