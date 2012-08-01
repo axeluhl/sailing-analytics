@@ -597,48 +597,54 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public Iterable<Pair<Waypoint, Pair<TimePoint, TimePoint>>> getMarkPassingsTimes() {
-        synchronized (markPassingsTimes) {
-            if (markPassingsTimes.isEmpty()) {
-                int wayPointNumber = 1;
-                // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time
-                // order of the waypoint times
-                Date previousLegPassingTime = null;
-                for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
-                    TimePoint firstPassingTime = null;
-                    TimePoint lastPassingTime = null;
-                    if (wayPointNumber == 1) {
-                        // For the first leg the use of "firstPassingDate" is not correct,
-                        // because boats can pass the start line before the actual start;
-                        // therefore we are using the calculated start time here
-                        firstPassingTime = getStartOfRace();
-                    } else {
-                        NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(waypoint);
-                        if (markPassings != null && !markPassings.isEmpty()) {
-                            // ensure the leg times are in the right time order; there may perhaps be left-overs for
-                            // marks to be reached later that
-                            // claim it has been passed in the past which may have been an accidental tracker read-out;
-                            // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point
-                            // ordering
-                            synchronized (markPassings) {
-                                for (MarkPassing currentMarkPassing : markPassings) {
-                                    Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
-                                    if (previousLegPassingTime == null
-                                            || currentPassingDate.after(previousLegPassingTime)) {
-                                        firstPassingTime = currentMarkPassing.getTimePoint();
-                                        previousLegPassingTime = currentPassingDate;
-                                        break;
+        getRace().getCourse().lockForRead(); // ensure the list of waypoints doesn't change while we're updating the markPassingTimes structure
+        try {
+            synchronized (markPassingsTimes) {
+                if (markPassingsTimes.isEmpty()) {
+                    int wayPointNumber = 1;
+                    // Remark: sometimes it can happen that a mark passing with a wrong time stamp breaks the right time
+                    // order of the waypoint times
+                    Date previousLegPassingTime = null;
+                    for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
+                        TimePoint firstPassingTime = null;
+                        TimePoint lastPassingTime = null;
+                        if (wayPointNumber == 1) {
+                            // For the first leg the use of "firstPassingDate" is not correct,
+                            // because boats can pass the start line before the actual start;
+                            // therefore we are using the calculated start time here
+                            firstPassingTime = getStartOfRace();
+                        } else {
+                            NavigableSet<MarkPassing> markPassings = getMarkPassingsInOrderAsNavigableSet(waypoint);
+                            if (markPassings != null && !markPassings.isEmpty()) {
+                                // ensure the leg times are in the right time order; there may perhaps be left-overs for
+                                // marks to be reached later that
+                                // claim it has been passed in the past which may have been an accidental tracker
+                                // read-out;
+                                // the results of getMarkPassingsInOrder(to) has by definition an ascending time-point
+                                // ordering
+                                synchronized (markPassings) {
+                                    for (MarkPassing currentMarkPassing : markPassings) {
+                                        Date currentPassingDate = currentMarkPassing.getTimePoint().asDate();
+                                        if (previousLegPassingTime == null
+                                                || currentPassingDate.after(previousLegPassingTime)) {
+                                            firstPassingTime = currentMarkPassing.getTimePoint();
+                                            previousLegPassingTime = currentPassingDate;
+                                            break;
+                                        }
                                     }
                                 }
                             }
                         }
+                        Pair<TimePoint, TimePoint> timesPair = new Pair<TimePoint, TimePoint>(firstPassingTime,
+                                lastPassingTime);
+                        markPassingsTimes.add(new Pair<Waypoint, Pair<TimePoint, TimePoint>>(waypoint, timesPair));
+                        wayPointNumber++;
                     }
-                    Pair<TimePoint, TimePoint> timesPair = new Pair<TimePoint, TimePoint>(firstPassingTime,
-                            lastPassingTime);
-                    markPassingsTimes.add(new Pair<Waypoint, Pair<TimePoint, TimePoint>>(waypoint, timesPair));
-                    wayPointNumber++;
                 }
+                return markPassingsTimes;
             }
-            return markPassingsTimes;
+        } finally {
+            getRace().getCourse().unlockAfterRead();
         }
     }
 
@@ -1236,6 +1242,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
+        invalidateMarkPassingTimes();
         LockUtil.lockForRead(serializationLock);
         try {
             // assuming that getRace().getCourse()'s write lock is held by the current thread
@@ -1332,6 +1339,7 @@ public abstract class TrackedRaceImpl implements TrackedRace, CourseListener {
 
     @Override
     public  void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        invalidateMarkPassingTimes();
         LockUtil.lockForRead(serializationLock);
         try {
             // assuming that getRace().getCourse()'s write lock is held by the current thread

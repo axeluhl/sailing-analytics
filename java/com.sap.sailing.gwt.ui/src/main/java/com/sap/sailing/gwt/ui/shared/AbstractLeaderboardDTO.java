@@ -48,10 +48,10 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
      * {@link LeaderboardEntryDTO#legDetails} for that race, the number of entries in the leg details is returned,
      * telling the number of legs that the race has. Otherwise, -1 is returned.
      */
-    public int getLegCount(String raceName) {
+    public int getLegCount(String raceColumnName) {
         for (LeaderboardRowDTO row : rows.values()) {
-            if (row.fieldsByRaceColumnName.get(raceName) != null && row.fieldsByRaceColumnName.get(raceName).legDetails != null) {
-                return row.fieldsByRaceColumnName.get(raceName).legDetails.size();
+            if (row.fieldsByRaceColumnName.get(raceColumnName) != null && row.fieldsByRaceColumnName.get(raceColumnName).legDetails != null) {
+                return row.fieldsByRaceColumnName.get(raceColumnName).legDetails.size();
             }
         }
         return -1;
