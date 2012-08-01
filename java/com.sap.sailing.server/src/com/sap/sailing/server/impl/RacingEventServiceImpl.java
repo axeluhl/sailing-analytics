@@ -277,6 +277,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             logger.info("loaded leaderboard group "+leaderboardGroup.getName()+" into "+this);
             leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
         }
+        // Loading the remaining leaderboards
+        domainObjectFactory.getLeaderboardsNotInGroup(this, this);
         logger.info("done with loading stored leaderboards and groups");
     }
     
