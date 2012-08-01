@@ -8,7 +8,7 @@ echo Active branch is: $active_branch
 cd $exec_dir
 server_instance=`basename \`pwd\``
 echo Active server is: $server_instance
-if [ $active_branch == $server_instance ]
+if [ "$1" = "-f" -o $active_branch == $server_instance ]
 then
 p2PluginRepository=$GIT_DIR/java/com.sap.sailing.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/x86_64
 echo p2 repository for branch $active_branch: $p2PluginRepository
@@ -26,5 +26,6 @@ echo Done.
 else
    echo "********** CANCEL INSTALLATION **************************"
    echo "ACTIVE BRANCH DOES NOT FIT THE CURRENT SERVER INSTANCE!!!"
+   echo "Use option -f to force install"
 fi
 
