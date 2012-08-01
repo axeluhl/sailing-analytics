@@ -55,6 +55,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
@@ -113,7 +114,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 
-public class RacingEventServiceImpl implements RacingEventService, RegattaListener {
+public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -265,7 +266,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     private void loadStoredLeaderboardsAndGroups() {
         logger.info("loading stored leaderboards and groups");
         // Loading all leaderboard groups and the contained leaderboards
-        for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups(this)) {
+        for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups(this, this)) {
             logger.info("loaded leaderboard group "+leaderboardGroup.getName()+" into "+this);
             leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
@@ -274,7 +275,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
         }
         // Loading the remaining leaderboards
-        for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup(this)) {
+        for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup(this, this)) {
             leaderboardsByName.put(leaderboard.getName(), leaderboard);
             logger.info("loaded leaderboard "+leaderboard.getName()+" into "+this);
         }

@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 
@@ -29,24 +30,39 @@ public interface DomainObjectFactory {
      */
     Leaderboard loadLeaderboard(String name, RegattaRegistry regattaRegistry);
 
-    Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry);
+    Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
 
     RaceIdentifier loadRaceIdentifier(DBObject dbObject);
     
     /**
+     * @param leaderboardRegistry
+     *            if not <code>null</code>, then before creating and loading the leaderboard it is looked up in this
+     *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>, the
+     *            leaderboards are loaded in any case. Note: leaderboards loaded by this call are <em>not</em> added to
+     *            the leaderboard registry here. The caller has to do that.
      * @return The group with the name <code>name</code>, or <code>null</code> if no such group exists.
      */
-    LeaderboardGroup loadLeaderboardGroup(String name, RegattaRegistry regattaRegistry);
+    LeaderboardGroup loadLeaderboardGroup(String name, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
     
     /**
+     * @param leaderboardRegistry
+     *            if not <code>null</code>, then before creating and loading the leaderboard it is looked up in this
+     *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>, the
+     *            leaderboards are loaded in any case. Note: leaderboards loaded by this call are <em>not</em> added to
+     *            the leaderboard registry here. The caller has to do that.
      * @return All groups in the database.
      */
-    Iterable<LeaderboardGroup> getAllLeaderboardGroups(RegattaRegistry regattaRegistry);
+    Iterable<LeaderboardGroup> getAllLeaderboardGroups(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
     
     /**
+     * @param leaderboardRegistry
+     *            if not <code>null</code>, then before creating and loading the leaderboard it is looked up in this
+     *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>, the
+     *            leaderboards are loaded in any case. Note: leaderboards loaded by this call are <em>not</em> added to
+     *            the leaderboard registry here. The caller has to do that.
      * @return All leaderboards in the database, which aren't contained by a leaderboard group
      */
-    Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry);
+    Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry);
 
     Map<? extends WindSource, ? extends WindTrack> loadWindTracks(Regatta regatta, RaceDefinition race,
             long millisecondsOverWhichToAverageWind);
