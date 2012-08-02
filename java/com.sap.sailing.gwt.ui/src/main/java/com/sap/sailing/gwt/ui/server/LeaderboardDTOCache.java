@@ -169,7 +169,7 @@ public class LeaderboardDTOCache {
             removeFromCache(leaderboard);
         }
     }
-
+    
     public LeaderboardDTOCache(SailingServiceImpl sailingService, boolean waitForLatestAnalyses) {
         this.sailingService = sailingService;
         this.waitForLatestAnalyses = waitForLatestAnalyses;
@@ -222,11 +222,13 @@ public class LeaderboardDTOCache {
             private static final long serialVersionUID = 8165124797028386317L;
             @Override
             public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+                removeFromCache(leaderboard);
                 registerListener(leaderboard, trackedRace);
             }
 
             @Override
             public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+                removeFromCache(leaderboard);
                 Map<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard.get(leaderboard);
                 if (listenersMap != null) {
                     Set<CacheInvalidationListener> listeners = listenersMap.get(trackedRace);
