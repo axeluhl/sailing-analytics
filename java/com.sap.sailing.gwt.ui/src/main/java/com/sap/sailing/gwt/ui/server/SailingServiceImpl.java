@@ -1486,9 +1486,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                     Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                     if (positionAtDate != null) {
-                        BuoyDTO markDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(),
+                        BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(),
                                 positionAtDate.getLngDeg());
-                        result.buoys.add(markDTO);
+                        result.buoys.add(buoyDTO);
                     }
                 }
                 

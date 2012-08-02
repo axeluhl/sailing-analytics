@@ -156,7 +156,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private final Map<WindSource, WindSensorOverlay> windSensorOverlays;
     
-    private final Map<BuoyDTO, Marker> buoyMarkers;
+    private final Map<String, Marker> buoyMarkers;
+    
+    private final Map<String, BuoyDTO> buoyDTOs;
 
     /**
      * markers displayed in response to
@@ -241,7 +243,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         tails = new HashMap<CompetitorDTO, Polyline>();
         firstShownFix = new HashMap<CompetitorDTO, Integer>();
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
-        buoyMarkers = new HashMap<BuoyDTO, Marker>();
+        buoyMarkers = new HashMap<String, Marker>();
+        buoyDTOs = new HashMap<String, BuoyDTO>();
         boatCanvasOverlays = new HashMap<CompetitorDTO, BoatCanvasOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
@@ -535,22 +538,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected void showMarksOnMap(CourseDTO courseDTO) {
         if (map != null && courseDTO != null) {
-            Set<BuoyDTO> toRemove = new HashSet<BuoyDTO>(buoyMarkers.keySet());
+            Map<String, BuoyDTO> toRemove = new HashMap<String, BuoyDTO>(buoyDTOs);
             if (courseDTO.buoys != null) {
-                for (BuoyDTO markDTO : courseDTO.buoys) {
-                    Marker buoyMarker = buoyMarkers.get(markDTO);
+                for (BuoyDTO buoyDTO : courseDTO.buoys) {
+                    Marker buoyMarker = buoyMarkers.get(buoyDTO.name);
                     if (buoyMarker == null) {
-                        buoyMarker = createBuoyMarker(markDTO);
-                        buoyMarkers.put(markDTO, buoyMarker);
+                        buoyMarker = createBuoyMarker(buoyDTO);
+                        buoyMarkers.put(buoyDTO.name, buoyMarker);
+                        buoyDTOs.put(buoyDTO.name, buoyDTO);
                         map.addOverlay(buoyMarker);
                     } else {
-                        buoyMarker.setLatLng(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg));
-                        toRemove.remove(markDTO);
+                        buoyMarker.setLatLng(LatLng.newInstance(buoyDTO.position.latDeg, buoyDTO.position.lngDeg));
+                        toRemove.remove(buoyDTO.name);
                     }
                 }
-                for (BuoyDTO toRemoveMarkDTO : toRemove) {
-                    Marker marker = buoyMarkers.remove(toRemoveMarkDTO);
+                for (String toRemoveBuoyName : toRemove.keySet()) {
+                    Marker marker = buoyMarkers.remove(toRemoveBuoyName);
                     map.removeOverlay(marker);
+                    buoyDTOs.remove(toRemoveBuoyName);
                 }
             }
         }
@@ -1649,7 +1654,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
             LatLngBounds newBounds = null;
-            Iterable<BuoyDTO> marksToZoom = forMap.buoyMarkers.keySet();
+            Iterable<BuoyDTO> marksToZoom = forMap.buoyDTOs.values();
             if (marksToZoom != null) {
                 for (BuoyDTO markDTO : marksToZoom) {
                     LatLng markLatLng = LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg);
