@@ -19,11 +19,13 @@ import com.sap.sailing.resultimport.RegattaResults;
 import com.sap.sailing.resultimport.UrlResultProvider;
 
 public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, UrlResultProvider {
-	private static final long serialVersionUID = -52564333737320563L;
+	private static final long serialVersionUID = -5501186796881875686L;
 
 	private static final String name = "'WinRegatta Plus' XLS Score Importer";
 
     private final Set<URL> allUrls;
+    
+    private String sheetName = "Erg_Drachen";
 
     public ScoreCorrectionProviderImpl() throws MalformedURLException {
         allUrls = new HashSet<URL>();
@@ -43,7 +45,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Url
             try {
                 conn = url.openConnection();
                 TimePoint lastModified = new MillisecondsTimePoint(conn.getLastModified());
-                RegattaResults regattaResult = importer.getRegattaResults((InputStream) conn.getContent(), "Erg_Drachen");
+                RegattaResults regattaResult = importer.getRegattaResults((InputStream) conn.getContent(),
+                		CompetitorResultsXlsImporter.IMPORT_TEMPLATE_WITHOUT_RANKS_DRACHEN, sheetName);
                 final String boatClassName = getBoatClassName(regattaResult);
                 result.put(boatClassName, Collections.singleton(new Pair<String, TimePoint>(boatClassName, lastModified)));
             } catch (Exception e) {
@@ -69,7 +72,8 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Url
     	CompetitorResultsXlsImporter importer = new CompetitorResultsXlsImporter();
         for (URL url : getAllUrls()) {
             final URLConnection conn = url.openConnection();
-            RegattaResults regattaResult = importer.getRegattaResults((InputStream) conn.getContent(), "Erg_Drachen");
+            RegattaResults regattaResult = importer.getRegattaResults((InputStream) conn.getContent(), 
+            		CompetitorResultsXlsImporter.IMPORT_TEMPLATE_WITHOUT_RANKS_DRACHEN, sheetName);
             if ((boatClassName == null && getBoatClassName(regattaResult) == null) ||
                     boatClassName.equals(getBoatClassName(regattaResult))) {
                 return new RegattaScoreCorrectionsImpl(this, regattaResult);

@@ -1,10 +1,13 @@
 package com.sap.sailing.winregatta.resultimport.impl;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.resultimport.CompetitorEntry;
 import com.sap.sailing.resultimport.CompetitorRow;
+import com.sap.sailing.resultimport.impl.DefaultCompetitorEntryImpl;
 
 public class CompetitorRowImpl implements CompetitorRow
 {
@@ -20,13 +23,15 @@ public class CompetitorRowImpl implements CompetitorRow
 	private String teamMember3Name;
 	private String teamMember3Club;
 	private String teamMember3DSVNumber;
-	private String race1Rank;
-	private double race1Score;
-	private String race2Rank;
-	private double race2Score;
+	private Map<Integer, String> ranks;
+	private Map<Integer, String> scores;
+	
 	private double totalScore;
+	private int racesCount = 6;
 	
 	public CompetitorRowImpl() {
+		ranks = new LinkedHashMap<Integer, String>();
+		scores = new LinkedHashMap<Integer, String>();
 	}
 
 	public Object getResultKey() {
@@ -129,36 +134,76 @@ public class CompetitorRowImpl implements CompetitorRow
 		this.teamMember3DSVNumber = teamMember3DSVNumber;
 	}
 
-	public String getRace1Rank() {
-		return race1Rank;
+	public void setRace1Rank(String raceRank) {
+		if(raceRank != null) {
+			ranks.put(1, raceRank);
+		}
 	}
 
-	public void setRace1Rank(String race1Rank) {
-		this.race1Rank = race1Rank;
+	public void setRace1Score(String raceScore) {
+		if(raceScore != null) {
+			scores.put(1, raceScore);
+		}
 	}
 
-	public double getRace1Score() {
-		return race1Score;
+	public void setRace2Rank(String raceRank) {
+		if(raceRank != null) {
+			ranks.put(2, raceRank);
+		}
 	}
 
-	public void setRace1Score(double race1Score) {
-		this.race1Score = race1Score;
+	public void setRace2Score(String raceScore) {
+		if(raceScore != null) {
+			scores.put(2, raceScore);
+		}
 	}
 
-	public String getRace2Rank() {
-		return race2Rank;
+	public void setRace3Rank(String raceRank) {
+		if(raceRank != null) {
+			ranks.put(3, raceRank);
+		}
 	}
 
-	public void setRace2Rank(String race2Rank) {
-		this.race2Rank = race2Rank;
+	public void setRace3Score(String raceScore) {
+		if(raceScore != null) {
+			scores.put(3, raceScore);
+		}
 	}
 
-	public double getRace2Score() {
-		return race2Score;
+	public void setRace4Rank(String raceRank) {
+		if(raceRank != null) {
+			ranks.put(4, raceRank);
+		}
 	}
 
-	public void setRace2Score(double race2Score) {
-		this.race2Score = race2Score;
+	public void setRace4Score(String raceScore) {
+		if(raceScore != null) {
+			scores.put(4, raceScore);
+		}
+	}
+
+	public void setRace5Rank(String raceRank) {
+		if(raceRank != null) {
+			ranks.put(5, raceRank);
+		}
+	}
+
+	public void setRace5Score(String raceScore) {
+		if(raceScore != null) {
+			scores.put(5, raceScore);
+		}
+	}
+
+	public void setRace6Rank(String raceRank) {
+		if(raceRank != null) {
+			ranks.put(6, raceRank);
+		}
+	}
+
+	public void setRace6Score(String raceScore) {
+		if(raceScore != null) {
+			scores.put(6, raceScore);
+		}
 	}
 
 	public double getTotalScore() {
@@ -172,9 +217,43 @@ public class CompetitorRowImpl implements CompetitorRow
 	@Override
 	public Iterable<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded() {
 	    List<CompetitorEntry> competitorEntries = new ArrayList<CompetitorEntry>();
-	    if(race1Rank != null && !Double.isNaN(race1Score))
-	    {
-	    	competitorEntries.add(new DefaultCompetitorEntryImpl());
+	    for(int i = 1; i <= racesCount; i++) {
+		    if(scores.containsKey(i)) {
+		    	boolean discarded = false;
+		    	Integer rank = null;
+		        String maxPointsReason;
+		    	
+		        if(ranks.containsKey(i)) {
+			    	String rankAsString = ranks.get(i);
+			    	if(rankAsString.startsWith("(") && rankAsString.endsWith(")")) {
+			    		rankAsString = rankAsString.substring(1, rankAsString.length()-1);
+			    		discarded = true;
+			    	}		        	
+			        try {
+			            rank = Integer.valueOf(rankAsString);
+			        } catch (NumberFormatException nfe) {
+			            rank = null;
+			        }
+		        }
+
+		    	String scoreAsString = scores.get(i);
+		    	if(scoreAsString.startsWith("(") && scoreAsString.endsWith(")")) {
+		    		scoreAsString = scoreAsString.substring(1, scoreAsString.length()-1);
+		    		discarded = true;
+		    	}
+		    	
+		    	Double score;
+		        try {
+		            score= Double.valueOf(scoreAsString);
+		            maxPointsReason = null;
+		        } catch (NumberFormatException nfe) {
+		            // must have been a disqualification / max-points-reason
+		            score = null;
+		            maxPointsReason = scoreAsString;
+		        }
+		        
+		    	competitorEntries.add(new DefaultCompetitorEntryImpl(rank, maxPointsReason, score, discarded));
+		    }
 	    }
 
 		return competitorEntries;
@@ -182,13 +261,11 @@ public class CompetitorRowImpl implements CompetitorRow
 
 	@Override
 	public Double getTotalPointsBeforeDiscarding() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Double getScoreAfterDiscarding() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -209,7 +286,7 @@ public class CompetitorRowImpl implements CompetitorRow
 
 	@Override
 	public String getTeamName() {
-		return "";
+		return teamMember1Name;
 	}
 
 	@Override
@@ -221,4 +298,5 @@ public class CompetitorRowImpl implements CompetitorRow
 	public String getClubName() {
 		return "";
 	}
+
 }

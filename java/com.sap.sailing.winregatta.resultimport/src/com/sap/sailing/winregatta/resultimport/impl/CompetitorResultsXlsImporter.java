@@ -20,27 +20,27 @@ import com.sap.sailing.resultimport.CompetitorRow;
 import com.sap.sailing.resultimport.RegattaResults;
 
 public class CompetitorResultsXlsImporter {
-	private static String jxlsImportTemplatePath = "/exceltemplates/DrachenIDM-2012/resultlistImport.xml";
+    public static final String IMPORT_TEMPLATE_WITH_RANKS_DRACHEN = "ImportTemplateWithRanks_Drachen.xml";
+    public static final String IMPORT_TEMPLATE_WITHOUT_RANKS_DRACHEN = "ImportTemplateWithoutRanks_Drachen.xml";
+    public static final String IMPORT_TEMPLATE_505 = "ImportTemplate_505er.xml";
 
+    private static final String RESOURCES_PATH = "/exceltemplates";
+	
 	public CompetitorResultsXlsImporter() {
 	}
 
-    public RegattaResults getRegattaResults(InputStream xlsIs, String sheetName)
+    public RegattaResults getRegattaResults(InputStream excelFileInputStream, String importTemplateName, String excelSheetName)
     		throws IOException, InvalidFormatException, SAXException {
-		InputStream readerXlsConfig = getClass().getResourceAsStream(jxlsImportTemplatePath);
-
-		if (readerXlsConfig == null)
-			throw new IllegalStateException(String.format("Can not read classpath resource '%s'",
-					jxlsImportTemplatePath));
-
-		final List<CompetitorRow> results = new ArrayList<CompetitorRow>();
+    	InputStream templateFileInputStream = getClass().getResourceAsStream(RESOURCES_PATH + "/" + importTemplateName);
+    	
+    	final List<CompetitorRow> results = new ArrayList<CompetitorRow>();
 		final RegattaInfo regattaInfo = new RegattaInfo();
 		HashMap<String, Object> beans = new HashMap<String, Object>();
 		beans.put("competitors", results);
 		beans.put("regattaInfo", regattaInfo);
 
-		readXlsSheetGeneric(xlsIs, sheetName, new BufferedInputStream(
-				readerXlsConfig), "Erg_Drachen", beans, CompetitorRowImpl.class);
+		readXlsSheetGeneric(excelFileInputStream, excelSheetName, new BufferedInputStream(
+				templateFileInputStream), excelSheetName, beans, CompetitorRowImpl.class);
 
         return new RegattaResults() {
             @Override

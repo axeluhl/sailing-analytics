@@ -21,16 +21,18 @@
 				<mapping row="12" col="9">competitor.teamMember3Name</mapping>
 				<mapping row="12" col="10">competitor.teamMember3Club</mapping>
 				<mapping row="12" col="11">competitor.teamMember3DSVNumber</mapping>
-				<mapping row="12" col="12">competitor.race1Rank</mapping>
-				<mapping row="12" col="13">competitor.race1Score</mapping>
-				<mapping row="12" col="14">competitor.race2Rank</mapping>
-				<mapping row="12" col="15">competitor.race2Score</mapping>
-				<mapping row="12" col="16">competitor.totalScore</mapping>
+				<mapping row="12" col="12">competitor.race1Score</mapping>
+				<mapping row="12" col="13">competitor.race2Score</mapping>
+				<mapping row="12" col="14">competitor.race3Score</mapping>
+				<mapping row="12" col="15">competitor.race4Score</mapping>
+				<mapping row="12" col="16">competitor.race5Score</mapping>
+				<mapping row="12" col="17">competitor.race6Score</mapping>
+				<mapping row="12" col="18">competitor.totalScore</mapping>
 			</section>
 			<loopbreakcondition>
-			<!-- stops at first cell with the text in the first column -->
+			<!-- stops at first cell with no te in the first column -->
 				<rowcheck offset="0">
-					<cellcheck offset="0"> WinRegatta Plus   Version 4.5    (c)  2010 Günter Meissner   http://www.winregatta.de/</cellcheck>
+					<cellcheck offset="0">END</cellcheck>
 				</rowcheck>
 			</loopbreakcondition>
 		</loop>
