@@ -43,6 +43,7 @@ import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Gate;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
@@ -125,12 +126,15 @@ import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.BuoyDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -138,15 +142,14 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 import com.sap.sailing.gwt.ui.shared.LegEntryDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkDTO;
 import com.sap.sailing.gwt.ui.shared.PlacemarkOrderDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
+import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
-import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -166,7 +169,6 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
-import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -268,6 +270,8 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
      */
     private final Set<CacheInvalidationListener> cacheInvalidationListeners;
+    
+    private final LeaderboardDTOCache leaderboardDTOCacheWaitingForLatestAnalysis;
 
     public SailingServiceImpl() {
         BundleContext context = Activator.getDefault();
@@ -287,6 +291,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
         executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         leaderboardByNameLiveUpdaters = new HashMap<String, LiveLeaderboardUpdater>();
+        leaderboardDTOCacheWaitingForLatestAnalysis = new LeaderboardDTOCache(this, /* waitForLatestAnalyses */ true);
     }
     
     public void destroy() {
@@ -383,26 +388,27 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             synchronized (leaderboardByNameLiveUpdaters) {
                 liveLeaderboardUpdater = leaderboardByNameLiveUpdaters.get(leaderboardName);
                 if (liveLeaderboardUpdater == null) {
-                    liveLeaderboardUpdater = new LiveLeaderboardUpdater(leaderboardName, this);
+                    liveLeaderboardUpdater = new LiveLeaderboardUpdater(getService().getLeaderboardByName(leaderboardName), this);
                     leaderboardByNameLiveUpdaters.put(leaderboardName, liveLeaderboardUpdater);
                 }
             }
             result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
         } else {
-            result = computeLeaderboardByName(leaderboardName, new MillisecondsTimePoint(date), namesOfRaceColumnsForWhichToLoadLegDetails,
-                    /* waitForLatestAnalyses */ true); // in replay mode we'de like to know things exactly and can afford it
+            // in replay we'd like up-to-date results; they are still cached
+            // which is OK because the cache is invalidated whenever any of the tracked races attached to the leaderboard changes.
+            result = leaderboardDTOCacheWaitingForLatestAnalysis.getLeaderboardByName(getService().getLeaderboardByName(leaderboardName),
+                    new MillisecondsTimePoint(date), namesOfRaceColumnsForWhichToLoadLegDetails); 
         }
         logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
 
-    protected LeaderboardDTO computeLeaderboardByName(String leaderboardName, final TimePoint timePoint,
+    protected LeaderboardDTO computeLeaderboardByName(final Leaderboard leaderboard, final TimePoint timePoint,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, final boolean waitForLatestAnalyses)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         LeaderboardDTO result = null;
-        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             result = new LeaderboardDTO(leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity()==null ?
                         null : leaderboard.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(),
@@ -490,7 +496,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 }
             }
         }
-        logger.fine("computeLeaderboardByName("+leaderboardName+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
+        logger.fine("computeLeaderboardByName("+leaderboard.getName()+", "+timePoint+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
         return result;
     }
@@ -848,7 +854,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                 raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
                 raceDTO.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
                 raceDTO.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
-                raceDTO.timePointOfLastEvent = trackedRace.getTimePointOfLastEvent() == null ? null : trackedRace.getTimePointOfLastEvent().asDate();
                 raceDTO.timePointOfNewestEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
                 raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
                 raceDTO.delayToLiveInMs = trackedRace.getDelayToLiveInMillis(); 
@@ -1464,7 +1469,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
             TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {
-                result.buoys = new HashSet<MarkDTO>();
+                result.buoys = new HashSet<BuoyDTO>();
                 result.waypointPositions = new ArrayList<PositionDTO>();
                 Set<Buoy> buoys = new HashSet<Buoy>();
                 Course course = trackedRace.getRace().getCourse();
@@ -1481,9 +1486,9 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
                     GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
                     Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
                     if (positionAtDate != null) {
-                        MarkDTO markDTO = new MarkDTO(buoy.getName(), positionAtDate.getLatDeg(),
+                        BuoyDTO buoyDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(),
                                 positionAtDate.getLngDeg());
-                        result.buoys.add(markDTO);
+                        result.buoys.add(buoyDTO);
                     }
                 }
                 
@@ -1502,91 +1507,120 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public RaceCourseDTO getRaceCourse(RaceIdentifier raceIdentifier, Date date) {
-        RaceCourseDTO result = new RaceCourseDTO();
+    public RaceBuoysDTO getRaceBuoys(RaceIdentifier raceIdentifier, Date date) {
+        RaceBuoysDTO raceBuoysDTO = new RaceBuoysDTO();
+        TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        if (trackedRace != null) {
+            raceBuoysDTO.buoys = new HashSet<BuoyDTO>();
+            Iterable<Buoy> buoys = trackedRace.getBuoys();
+            for (Buoy buoy : buoys) {
+                GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
+                Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
+                if (positionAtDate != null) {
+                    BuoyDTO markDTO = new BuoyDTO(buoy.getName(), positionAtDate.getLatDeg(), positionAtDate.getLngDeg());
+                    raceBuoysDTO.buoys.add(markDTO);
+                }
+            }
+        }
+        return raceBuoysDTO;
+    }
+    
+    @Override
+    public List<ControlPointDTO> getRaceCourse(RaceIdentifier raceIdentifier, Date date) {
+        List<ControlPointDTO> result = new ArrayList<ControlPointDTO>();
         if (date != null) {
             TimePoint dateAsTimePoint = new MillisecondsTimePoint(date);
             TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
             if (trackedRace != null) {
                 Course course = trackedRace.getRace().getCourse();
-                result.waypoints = new ArrayList<WaypointDTO>();
-                result.requestTime = date;
-                int waypointIndex = 0;
                 for (Waypoint waypoint : course.getWaypoints()) {
-                    WaypointDTO waypointDTO = new WaypointDTO(waypoint.getName(), waypointIndex++);
-                    waypointDTO.buoys = new ArrayList<MarkDTO>();
-                    result.waypoints.add(waypointDTO);
-                    
-                    Iterable<MarkPassing> markPassingsInOrder = trackedRace.getMarkPassingsInOrder(waypoint);
-                    waypointDTO.markPassingsCount = Util.size(markPassingsInOrder);
-
-                    for (Buoy buoy : waypoint.getBuoys()) {
-                        GPSFixTrack<Buoy, GPSFix> track = trackedRace.getOrCreateTrack(buoy);
-                        Position positionAtDate = track.getEstimatedPosition(dateAsTimePoint, /* extrapolate */false);
-                        if (positionAtDate != null) {
-                            MarkDTO markDTO = new MarkDTO(buoy.getName(), positionAtDate.getLatDeg(),
-                                    positionAtDate.getLngDeg());
-                            waypointDTO.buoys.add(markDTO);
-                        }
-                    }
+                    result.add(createControlPointDTO(waypoint.getControlPoint(), trackedRace, dateAsTimePoint));
                 }
             }
         }
         return result;
     }
 
-    @Override
-    public void addControlPointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition) {
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        if (trackedRace != null) {
-            Course course = trackedRace.getRace().getCourse();
-            Iterable<Waypoint> waypoints = course.getWaypoints();
-            Map<String, ControlPoint> controlPointsByName = new HashMap<String, ControlPoint>();
-            
-            int waypointsCount = Util.size(waypoints);
-            if(waypointsCount >= 3) {
-                List<ControlPoint> newControlPoints = new ArrayList<ControlPoint>();
-                for (Waypoint wayPoint : waypoints) {
-                    ControlPoint controlPoint = wayPoint.getControlPoint();
-                    newControlPoints.add(controlPoint);
-                    controlPointsByName.put(controlPoint.getName(), controlPoint);
-                }
-                for(String controlPointName: controlPointNames) {
-                    ControlPoint controlPointToInsert = controlPointsByName.get(controlPointName);
-                    if(controlPointToInsert != null) {
-                        newControlPoints.add(insertPosition, controlPointToInsert);
-                    }
-                }
-                try {
-                    course.update(newControlPoints, com.sap.sailing.domain.base.DomainFactory.INSTANCE);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
+    private ControlPointDTO createControlPointDTO(ControlPoint controlPoint, TrackedRace trackedRace, TimePoint timePoint) {
+        ControlPointDTO result;
+        if (controlPoint instanceof Gate) {
+            final Buoy left = ((Gate) controlPoint).getLeft();
+            final Position leftPos = trackedRace.getOrCreateTrack(left).getEstimatedPosition(timePoint, /* extrapolate */ false);
+            final Buoy right = ((Gate) controlPoint).getRight();
+            final Position rightPos = trackedRace.getOrCreateTrack(right).getEstimatedPosition(timePoint, /* extrapolate */ false);
+            result = new GateDTO(controlPoint.getName(),
+                    new BuoyDTO(left.getName(), leftPos.getLatDeg(), leftPos.getLngDeg()),
+                    new BuoyDTO(right.getName(), rightPos.getLatDeg(), rightPos.getLngDeg()));
+        } else {
+            final Position posOfFirst = trackedRace.getOrCreateTrack(controlPoint.getBuoys().iterator().next()).
+                    getEstimatedPosition(timePoint, /* extrapolate */ false);
+            result = new BuoyDTO(controlPoint.getName(), posOfFirst.getLatDeg(), posOfFirst.getLngDeg());
         }
+        return result;
     }
 
+    /**
+     * For each {@link ControlPointDTO} in <code>controlPoints</code> tries to find the best-matching waypoint
+     * from the course that belongs to the race identified by <code>raceIdentifier</code>. If such a waypoint is
+     * found, its control point is added to the control point list for the new course. Otherwise, a new control
+     * point is created using the default {@link com.sap.sailing.domain.base.DomainFactory} instance. The resulting
+     * list of control points is then passed to {@link Course#update(List, com.sap.sailing.domain.base.DomainFactory)} for
+     * the course of the race identified by <code>raceIdentifier</code>.
+     */
     @Override
-    public void removeControlPointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToDelete) {
+    public void updateRaceCourse(RaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints) {
+        final com.sap.sailing.domain.base.DomainFactory baseDomainFactory = com.sap.sailing.domain.base.DomainFactory.INSTANCE;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Course course = trackedRace.getRace().getCourse();
             Iterable<Waypoint> waypoints = course.getWaypoints();
             List<ControlPoint> newControlPoints = new ArrayList<ControlPoint>();
-            for (Waypoint wayPoint : waypoints) {
-                newControlPoints.add(wayPoint.getControlPoint());
-            }
-            int indexOffset = 0;
-            for(WaypointDTO waypointToRemove: waypointsToDelete) {
-                newControlPoints.remove(waypointToRemove.courseIndex - indexOffset);
-                indexOffset++;
+            int lastMatchPosition = -1;
+            for (ControlPointDTO controlPointDTO : controlPoints) {
+                ControlPoint matchFromOldCourse = null;
+                for (int i=lastMatchPosition+1; matchFromOldCourse == null && i<Util.size(waypoints); i++) {
+                    Waypoint waypointAtI = Util.get(waypoints, i);
+                    ControlPoint controlPointAtI = waypointAtI.getControlPoint();
+                    if (controlPointAtI.getName().equals(controlPointDTO.name) && buoyNamesMatch(controlPointAtI.getBuoys(), controlPointDTO.getBuoys())) {
+                        matchFromOldCourse = controlPointAtI;
+                        newControlPoints.add(matchFromOldCourse);
+                        lastMatchPosition = i;
+                    }
+                }
+                if (matchFromOldCourse == null) {
+                    // no match found; create new control point:
+                    ControlPoint newControlPoint;
+                    if (controlPointDTO instanceof GateDTO) {
+                        GateDTO gateDTO = (GateDTO) controlPointDTO;
+                        Buoy left = baseDomainFactory.getOrCreateBuoy(gateDTO.getLeft().name);
+                        Buoy right = baseDomainFactory.getOrCreateBuoy(gateDTO.getRight().name);
+                        newControlPoint = baseDomainFactory.createGate(left, right, gateDTO.name);
+                    } else {
+                        newControlPoint = baseDomainFactory.getOrCreateBuoy(controlPointDTO.name);
+                    }
+                    newControlPoints.add(newControlPoint);
+                }
             }
             try {
-                course.update(newControlPoints, com.sap.sailing.domain.base.DomainFactory.INSTANCE);
+                course.update(newControlPoints, baseDomainFactory);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }        
+        }
+    }
+
+    private boolean buoyNamesMatch(Iterable<Buoy> buoys, Iterable<BuoyDTO> buoyDTOs) {
+        Iterator<Buoy> buoysIter = buoys.iterator();
+        Iterator<BuoyDTO> buoyDTOsIter = buoyDTOs.iterator();
+        while (buoysIter.hasNext() && buoyDTOsIter.hasNext()) {
+            Buoy nextBuoy = buoysIter.next();
+            BuoyDTO nextBuoyDTO = buoyDTOsIter.next();
+            if (!nextBuoy.getName().equals(nextBuoyDTO.name)) {
+                return false;
+            }
+        }
+        return buoysIter.hasNext() == buoyDTOsIter.hasNext();
     }
 
     private List<PositionDTO> getBuoyPositionDTOs(TimePoint timePoint, TrackedRace trackedRace, Waypoint waypoint) {

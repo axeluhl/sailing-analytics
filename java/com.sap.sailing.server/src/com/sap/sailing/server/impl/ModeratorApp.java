@@ -194,11 +194,8 @@ public class ModeratorApp extends SailingServerHttpServlet {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
         } else {
             try {
-                // TODO decide what makes for a good default; some recorded races send notifications about early events late 
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-                        trackedRace.getTimePointOfLastEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
-//                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-//                        trackedRace.getTimePointOfLastEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfLastEvent());
+                        trackedRace.getTimePointOfNewestEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
                 String sinceUpdateString = req.getParameter(PARAM_NAME_SINCE_UPDATE);
                 if (sinceUpdateString != null) {
                     int sinceUpdate = Integer.valueOf(sinceUpdateString);

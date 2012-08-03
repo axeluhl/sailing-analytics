@@ -78,11 +78,11 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
                 /* millisecondsOverWhichToAverageWind */ 30000, /* simulator */ null) {
             @Override
             protected void handleEvent(Triple<Route, RouteData, Race> event) {
+                super.handleEvent(event);
                 synchronized (routeData) {
                     routeData[0] = event.getB();
                     routeData.notifyAll();
                 }
-                super.handleEvent(event);
             }
         });
         addListenersForStoredDataAndStartController(receivers);

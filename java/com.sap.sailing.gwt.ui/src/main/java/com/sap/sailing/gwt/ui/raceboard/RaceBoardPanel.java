@@ -35,7 +35,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.TimeZoomModel;
 import com.sap.sailing.gwt.ui.client.Timer;
-import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
+import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
@@ -82,7 +82,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
     private RaceTimePanel timePanel;
     private final Timer timer;
     private final RaceSelectionProvider raceSelectionProvider;
-    private final UserAgentTypes userAgentType;
+    private final UserAgentDetails userAgent;
     private final CompetitorSelectionModel competitorSelectionModel;
     private final TimeZoomModel timeZoomModel; 
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
@@ -102,7 +102,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
 
     public RaceBoardPanel(SailingServiceAsync sailingService, UserDTO theUser, Timer timer,
             RaceSelectionProvider theRaceSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentTypes userAgentType,
+            ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentDetails userAgent,
             RaceBoardViewModes viewMode, RaceTimesInfoProvider raceTimesInfoProvider) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -114,7 +114,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
         selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
         this.errorReporter = errorReporter;
-        this.userAgentType = userAgentType;
+        this.userAgent = userAgent;
         this.viewMode = viewMode;
         asyncActionsExecutor = new AsyncActionsExecutor();
         FlowPanel mainPanel = new FlowPanel();
@@ -199,7 +199,7 @@ public class RaceBoardPanel extends FormPanel implements RegattaDisplayer, RaceS
                         /* nameOfRaceColumnToShow */null, /* nameOfRaceToShow */selectedRaceIdentifier.getRaceName());
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier,
                 competitorSelectionModel, timer, leaderboardName, leaderboardGroupName, errorReporter, stringMessages,
-                userAgentType, /* showRaceDetails */ true);
+                userAgent, /* showRaceDetails */ true);
      }
 
     private <SettingsType> void addComponentToNavigationMenu(final ComponentViewer componentViewer,

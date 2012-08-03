@@ -79,7 +79,7 @@ import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
-import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.BuoyDTO;
 import com.sap.sailing.gwt.ui.shared.PositionDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
@@ -161,7 +161,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private final Map<WindSource, WindSensorOverlay> windSensorOverlays;
     
-    private final Map<MarkDTO, Marker> buoyMarkers;
+    private final Map<String, Marker> buoyMarkers;
+    
+    private final Map<String, BuoyDTO> buoyDTOs;
 
     /**
      * markers displayed in response to
@@ -246,7 +248,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         tails = new HashMap<CompetitorDTO, Polyline>();
         firstShownFix = new HashMap<CompetitorDTO, Integer>();
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
-        buoyMarkers = new HashMap<MarkDTO, Marker>();
+        buoyMarkers = new HashMap<String, Marker>();
+        buoyDTOs = new HashMap<String, BuoyDTO>();
         boatCanvasOverlays = new HashMap<CompetitorDTO, BoatCanvasOverlay>();
         competitorInfoOverlays = new HashMap<CompetitorDTO, CompetitorInfoOverlay>();
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
@@ -542,22 +545,24 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected void showMarksOnMap(CourseDTO courseDTO) {
         if (map != null && courseDTO != null) {
-            Set<MarkDTO> toRemove = new HashSet<MarkDTO>(buoyMarkers.keySet());
+            Map<String, BuoyDTO> toRemove = new HashMap<String, BuoyDTO>(buoyDTOs);
             if (courseDTO.buoys != null) {
-                for (MarkDTO markDTO : courseDTO.buoys) {
-                    Marker buoyMarker = buoyMarkers.get(markDTO);
+                for (BuoyDTO buoyDTO : courseDTO.buoys) {
+                    Marker buoyMarker = buoyMarkers.get(buoyDTO.name);
                     if (buoyMarker == null) {
-                        buoyMarker = createBuoyMarker(markDTO);
-                        buoyMarkers.put(markDTO, buoyMarker);
+                        buoyMarker = createBuoyMarker(buoyDTO);
+                        buoyMarkers.put(buoyDTO.name, buoyMarker);
+                        buoyDTOs.put(buoyDTO.name, buoyDTO);
                         map.addOverlay(buoyMarker);
                     } else {
-                        buoyMarker.setLatLng(LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg));
-                        toRemove.remove(markDTO);
+                        buoyMarker.setLatLng(LatLng.newInstance(buoyDTO.position.latDeg, buoyDTO.position.lngDeg));
+                        toRemove.remove(buoyDTO.name);
                     }
                 }
-                for (MarkDTO toRemoveMarkDTO : toRemove) {
-                    Marker marker = buoyMarkers.remove(toRemoveMarkDTO);
+                for (String toRemoveBuoyName : toRemove.keySet()) {
+                    Marker marker = buoyMarkers.remove(toRemoveBuoyName);
                     map.removeOverlay(marker);
+                    buoyDTOs.remove(toRemoveBuoyName);
                 }
             }
         }
@@ -925,7 +930,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return !settings.isShowOnlySelectedCompetitors() && competitorSelection.isSelected(competitorDTO);
     }
 
-    protected Marker createBuoyMarker(final MarkDTO markDTO) {
+    protected Marker createBuoyMarker(final BuoyDTO markDTO) {
         MarkerOptions options = MarkerOptions.newInstance();
         if (raceMapImageManager.buoyIcon != null) {
             options.setIcon(raceMapImageManager.buoyIcon);
@@ -975,7 +980,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return windSensorOverlay;
     }
 
-    private void showMarkInfoWindow(MarkDTO markDTO, LatLng latlng) {
+    private void showMarkInfoWindow(BuoyDTO markDTO, LatLng latlng) {
         map.getInfoWindow().open(latlng, new InfoWindowContent(getInfoWindowContent(markDTO)));
     }
 
@@ -1020,7 +1025,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return flowPanel;
     }
     
-    private Widget getInfoWindowContent(MarkDTO markDTO) {
+    private Widget getInfoWindowContent(BuoyDTO markDTO) {
         VerticalPanel vPanel = new VerticalPanel();
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.mark(), markDTO.name));
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(markDTO.position.latDeg, markDTO.position.lngDeg)));
@@ -1694,9 +1699,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
             LatLngBounds newBounds = null;
-            Iterable<MarkDTO> marksToZoom = forMap.buoyMarkers.keySet();
+            Iterable<BuoyDTO> marksToZoom = forMap.buoyDTOs.values();
             if (marksToZoom != null) {
-                for (MarkDTO markDTO : marksToZoom) {
+                for (BuoyDTO markDTO : marksToZoom) {
                     LatLng markLatLng = LatLng.newInstance(markDTO.position.latDeg, markDTO.position.lngDeg);
                     LatLngBounds bounds = LatLngBounds.newInstance(markLatLng, markLatLng);
                     if (newBounds == null) {

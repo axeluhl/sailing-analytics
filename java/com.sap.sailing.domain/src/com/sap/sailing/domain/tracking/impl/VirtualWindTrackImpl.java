@@ -22,7 +22,8 @@ public abstract class VirtualWindTrackImpl extends WindTrackImpl {
     private final TrackedRace trackedRace;
     
     protected VirtualWindTrackImpl(TrackedRace trackedRace, long millisecondsOverWhichToAverage, double baseConfidence, boolean useSpeed) {
-        super(millisecondsOverWhichToAverage, baseConfidence, useSpeed);
+        super(millisecondsOverWhichToAverage, baseConfidence, useSpeed,
+                /* nameForReadWriteLock */ VirtualWindTrackImpl.class.getSimpleName()+" for race "+trackedRace.getRace().getName());
         this.trackedRace = trackedRace;
     }
     

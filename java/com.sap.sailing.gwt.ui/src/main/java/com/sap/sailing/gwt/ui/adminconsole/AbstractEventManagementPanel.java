@@ -11,10 +11,10 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
     protected final TrackedRacesListComposite trackedRacesListComposite;
     
     public AbstractEventManagementPanel(SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
-            ErrorReporter errorReporter, RaceSelectionProvider raceSelectionProvider, StringMessages stringConstants) {
-        super(sailingService, regattaRefresher, errorReporter, stringConstants);
+            ErrorReporter errorReporter, RaceSelectionProvider raceSelectionProvider, StringMessages stringMessages) {
+        super(sailingService, regattaRefresher, errorReporter, stringMessages);
         // TrackedEventsComposite should exist in every *ManagementPanel. 
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
-                raceSelectionProvider, stringConstants, /* multiselection */ true);
+                raceSelectionProvider, stringMessages, /* multiselection */ true);
     }
 }

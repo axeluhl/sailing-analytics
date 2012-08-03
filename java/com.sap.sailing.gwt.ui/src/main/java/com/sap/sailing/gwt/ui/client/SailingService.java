@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
+import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CourseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -29,7 +30,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MultiCompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.QuickRankDTO;
-import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 import com.sap.sailing.gwt.ui.shared.RaceDTO;
 import com.sap.sailing.gwt.ui.shared.RaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -42,7 +43,6 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
-import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 
@@ -99,7 +99,7 @@ public interface SailingService extends RemoteService {
     
     CourseDTO getCoursePositions(RaceIdentifier raceIdentifier, Date date);
 
-    RaceCourseDTO getRaceCourse(RaceIdentifier raceIdentifier, Date date);
+    List<ControlPointDTO> getRaceCourse(RaceIdentifier raceIdentifier, Date date);
 
     List<QuickRankDTO> getQuickRanks(RaceIdentifier raceIdentifier, Date date) throws NoWindException;
 
@@ -242,10 +242,6 @@ public interface SailingService extends RemoteService {
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
-    void removeControlPointsFromRaceCourse(RaceIdentifier raceIdentifier, List<WaypointDTO> waypointsToDelete);
-
-    void addControlPointsToRaceCourse(RaceIdentifier raceIdentifier, List<String> controlPointNames, int insertPosition);
-
     List<String> getFregResultUrls();
 
     void removeFregURLs(Set<String> toRemove) throws Exception;
@@ -254,4 +250,8 @@ public interface SailingService extends RemoteService {
 
     Void updateLeaderboardScoreCorrectionMetadata(String leaderboardName, Date timePointOfLastCorrectionValidity,
             String comment);
+
+	RaceBuoysDTO getRaceBuoys(RaceIdentifier raceIdentifier, Date date);
+
+    void updateRaceCourse(RaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints);
 }

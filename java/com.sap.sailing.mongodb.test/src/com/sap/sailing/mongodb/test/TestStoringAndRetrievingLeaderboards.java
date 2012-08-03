@@ -4,11 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Test;
 
+import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -33,6 +35,10 @@ import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
+    public TestStoringAndRetrievingLeaderboards() throws UnknownHostException, MongoException {
+        super();
+    }
+
     @Test
     public void testStoreAndRetrieveLeaderboardWithCommentedScoreCorrection() {
         final String leaderboardName = "TestLeaderboard";

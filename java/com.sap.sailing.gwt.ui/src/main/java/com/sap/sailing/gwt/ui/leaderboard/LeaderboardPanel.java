@@ -68,7 +68,7 @@ import com.sap.sailing.gwt.ui.client.TimeListener;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
-import com.sap.sailing.gwt.ui.client.UserAgentChecker.UserAgentTypes;
+import com.sap.sailing.gwt.ui.client.UserAgentDetails;
 import com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.shared.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorDTO;
@@ -962,21 +962,21 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             String leaderboardGroupName, ErrorReporter errorReporter, final StringMessages stringMessages,
-            final UserAgentTypes userAgentType, boolean showRaceDetails) {
+            final UserAgentDetails userAgent, boolean showRaceDetails) {
         this(sailingService, asyncActionsExecutor, settings, /* preSelectedRace */null, competitorSelectionProvider, leaderboardName,
-                leaderboardGroupName, errorReporter, stringMessages, userAgentType, showRaceDetails);
+                leaderboardGroupName, errorReporter, stringMessages, userAgent, showRaceDetails);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentTypes userAgentType, boolean showRaceDetails) {
+            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails) {
         this(sailingService, asyncActionsExecutor, settings, preSelectedRace, competitorSelectionProvider, new Timer(PlayModes.Replay, /* delayBetweenAutoAdvancesInMilliseconds */3000l),
-                leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgentType, showRaceDetails);
+                leaderboardName, leaderboardGroupName, errorReporter, stringMessages, userAgent, showRaceDetails);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, RaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardName, String leaderboardGroupName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentTypes userAgentType, boolean showRaceDetails) {
+            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails) {
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
@@ -1014,7 +1014,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         leaderboardTable = new CellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
         getLeaderboardTable().setWidth("100%");
-        if (userAgentType == UserAgentTypes.MOBILE) {
+        if (userAgent.isMobile() == UserAgentDetails.PlatformTypes.MOBILE) {
             leaderboardSelectionModel = new ToggleSelectionModel<LeaderboardRowDTO>();
         } else {
             leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
@@ -1319,14 +1319,22 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
     }
 
     /**
-     * Also updates the min/max values on the columns
+     * Assigns <code>leaderboard</code> to {@link #leaderboard} and updates the UI accordingly. Also updates the min/max
+     * values on the columns.
      */
     protected void updateLeaderboard(LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
+            Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(leaderboard);
+            for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
+                columnToCollapseAndExpandAgain.toggleExpansion();
+            }
             competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */ this);
             selectedRaceColumns.addAll(getRaceColumnsToAddImplicitly(leaderboard));
             setLeaderboard(leaderboard);
             adjustColumnLayout(leaderboard);
+            for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
+                columnToCollapseAndExpandAgain.toggleExpansion();
+            }
             adjustDelayToLive();
             getData().getList().clear();
             getData().getList().addAll(getRowsToDisplay(leaderboard));
@@ -1368,6 +1376,40 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 scoreCorrectionLastUpdateTimeLabel.setText("");
             }
         }
+    }
+
+    /**
+     * Due to a course change, a race may change its number of legs. All expanded race columns that show leg columns and
+     * whose leg count changed need to be collapsed before the leaderboard is replaced, and expanded afterwards again.
+     * Race columns whose toggling is {@link ExpandableSortableColumn#isTogglingInProcess() currently in progress} are
+     * not considered because their new state will be considered after replacing anyhow.
+     * 
+     * @param newLeaderboard
+     *            the new leaderboard before assigning to {@link #leaderboard}
+     * @return the columns that were collapsed in this step and that shall be expanded again after the leaderboard has
+     *         been replaced
+     */
+    private Collection<RaceColumn<?>> getExpandedRaceColumnsWhoseDisplayedLegCountChanged(LeaderboardDTO newLeaderboard) {
+        Set<RaceColumn<?>> result = new HashSet<RaceColumn<?>>();
+        if (selectedRaceDetails.contains(DetailType.DISPLAY_LEGS)) {
+            for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
+                Column<LeaderboardRowDTO, ?> c = getLeaderboardTable().getColumn(i);
+                if (c instanceof RaceColumn<?>) {
+                    RaceColumn<?> rc = (RaceColumn<?>) c;
+                    // If the new leaderboard no longer contains the column, getLegCount will return -1, causing the column
+                    // to be collapsed if it was expanded. This is correct because otherwise, removing it would no longer
+                    // know the correct leg count.
+                    if (!rc.isTogglingInProcess() && rc.isExpanded()) {
+                        int oldLegCount = getLeaderboard().getLegCount(rc.getRaceColumnName());
+                        int newLegCount = newLeaderboard.getLegCount(rc.getRaceColumnName());
+                        if (oldLegCount != newLegCount) {
+                            result.add(rc);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     /**

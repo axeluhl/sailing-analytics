@@ -1,9 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -17,138 +21,254 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
-import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sailing.gwt.ui.shared.BuoyDTO;
+import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.gwt.ui.shared.GateDTO;
+import com.sap.sailing.gwt.ui.shared.RaceBuoysDTO;
 
+/**
+ * A panel that has a race selection (inherited from {@link AbstractRaceManagementPanel}) and which adds a table
+ * for a selected race showing the race's waypoints together with the number of mark passings already received for that
+ * waypoint. Also, the control can be used to send course updates into the tracked race, mostly to simulate these types
+ * of events. Conceivably, this may in the future also become a way to set up and edit courses for a tracked race.
+ * 
+ * @author Frank Mittag (C5163874), Axel Uhl (D043530)
+ */
 public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
-    private final CellTable<WaypointDTO> courseWaypointsTable;
-    private final Label courseDataRequestTimeLabel;
+    /**
+     * Represents one buoy assignment for a control point. Gates have multiple such records, one for each of their buoys.
+     * 
+     * @author Axel Uhl (D043530)
+     */
+    private static class ControlPointAndOldAndNewBuoy {
+        private final ControlPointDTO controlPoint;
+        private final BuoyDTO oldBuoy;
+        private BuoyDTO newBuoy;
+        public ControlPointAndOldAndNewBuoy(ControlPointDTO controlPoint, BuoyDTO oldBuoy) {
+            super();
+            this.controlPoint = controlPoint;
+            this.oldBuoy = oldBuoy;
+            this.newBuoy = oldBuoy;
+        }
+        public BuoyDTO getNewBuoy() {
+            return newBuoy;
+        }
+        public void setNewBuoy(BuoyDTO newBuoy) {
+            this.newBuoy = newBuoy;
+        }
+        public ControlPointDTO getControlPoint() {
+            return controlPoint;
+        }
+        public BuoyDTO getOldBuoy() {
+            return oldBuoy;
+        }
+    }
     
-    private final ListDataProvider<WaypointDTO> waypointDataProvider;
-    
-    private final HorizontalPanel courseActionsPanel;
+    private class ControlPointCreationDialog extends DataEntryDialog<ControlPointDTO> {
+        private final CellTable<BuoyDTO> buoysTable;
+        private final MultiSelectionModel<BuoyDTO> selectionModel;
+        
+        public ControlPointCreationDialog(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
+                List<BuoyDTO> buoys, AsyncCallback<ControlPointDTO> callback) {
+            super(stringMessages.controlPoint(), stringMessages.selectOneBuoyOrTwoBuoysForGate(),
+                    stringMessages.ok(), stringMessages.cancel(), new Validator<ControlPointDTO>() {
+                        @Override
+                        public String getErrorMessage(ControlPointDTO valueToValidate) {
+                            if (valueToValidate == null) {
+                                return stringMessages.selectOneBuoyOrTwoBuoysForGate();
+                            } else {
+                                return null;
+                            }
+                        }
 
-    private final MultiSelectionModel<WaypointDTO> wayPointSelectionModel; 
+                    }, /* animationEnabled */ false, callback);
+            selectionModel = new MultiSelectionModel<BuoyDTO>();
+            selectionModel.addSelectionChangeHandler(new Handler() {
+                @Override
+                public void onSelectionChange(SelectionChangeEvent event) {
+                    validate();
+                }
+            });
+            buoysTable = createBuoysTable(stringMessages, tableRes, selectionModel);
+            ListDataProvider<BuoyDTO> buoyDataProvider = new ListDataProvider<BuoyDTO>();
+            buoyDataProvider.getList().addAll(buoys);
+            buoyDataProvider.addDataDisplay(buoysTable);
+        }
+
+        @Override
+        protected ControlPointDTO getResult() {
+            ControlPointDTO result = null;
+            Set<BuoyDTO> selection = selectionModel.getSelectedSet();
+            if (selection.size() == 1) {
+                result = selectionModel.getSelectedSet().iterator().next();
+            } else if (selection.size() == 2) {
+                Iterator<BuoyDTO> i = selectionModel.getSelectedSet().iterator();
+                BuoyDTO first = i.next();
+                BuoyDTO second = i.next();
+                BuoyDTO left;
+                BuoyDTO right;
+                String gateName;
+                if (first.name.toLowerCase().contains("left")) {
+                    left = first;
+                    right = second;
+                } else {
+                    left = second;
+                    right = first;
+                }
+                gateName = left.name.replaceFirst(REGEX_FOR_LEFT, "");
+                result = new GateDTO(gateName, left, right);
+            }
+            return result;
+        }
+
+        @Override
+        protected Widget getAdditionalWidget() {
+            return buoysTable;
+        }
+    }
+    
+    private static final String REGEX_FOR_LEFT = "( \\()?[lL][eE][fF][tT]\\)?";
+
+    /**
+     * A table that lists the buoys for which events have been received for the race selected. Note that this list may
+     * be longer than the list of buoys actually used by the control points backing the course's waypoints because of
+     * the possibility of spare marks / buoys.
+     */
+    private final CellTable<BuoyDTO> buoysTable;
+    private final ListDataProvider<BuoyDTO> buoyDataProvider;
+    private final SingleSelectionModel<BuoyDTO> buoySelectionModel;
+
+    /**
+     * A table that lists the product of Waypoint x ControlPoint x Buoy plus a hint as to the number of mark passings.
+     * The (multi-)selection on this table can be used as either a selection of waypoints or a selection of control points
+     * or a selection of buoys.
+     */
+    private final CellTable<ControlPointAndOldAndNewBuoy> controlPointsTable;
+    private final MultiSelectionModel<ControlPointAndOldAndNewBuoy> controlPointsSelectionModel; 
+    private final ListDataProvider<ControlPointAndOldAndNewBuoy> controlPointDataProvider;
+    
+    /**
+     * When for a control point's buoy a replacement buoy is defined (see {@link #updateNewBuoy(Set, BuoyDTO)}),
+     * the control point needs to be replaced before {@link #saveCourse(SailingServiceAsync, StringMessages) saving}.
+     * Those control points are added to this set. When the buoy is reset to the original buoy for all the control
+     * point's buoys, the control point is removed from this set again. {@link #saveCourse(SailingServiceAsync, StringMessages)}
+     * then is responsible for creating replacement {@link ControlPointDTO}s before sending the new control point list to the
+     * server.
+     */
+    private final Set<ControlPointDTO> controlPointsNeedingReplacement;
+
+    private final HorizontalPanel courseActionsPanel;
+    
+    private final Handler buoySelectionChangeHandler;
+    private final Button insertWaypointBefore;
+    private final Button insertWaypointAfter;
+    private final Button removeWaypointBtn;
+    private boolean ignoreWaypointAndOldAndNewBuoySelectionChange;
     
     public RaceCourseManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         super(sailingService, errorReporter, regattaRefresher, stringMessages);
-
-        courseDataRequestTimeLabel = new Label();
-        this.selectedRaceContentPanel.add(courseDataRequestTimeLabel);
+        controlPointsNeedingReplacement = new HashSet<ControlPointDTO>();
+        Grid grid = new Grid(1, 2);
+        grid.setCellPadding(10);
+        selectedRaceContentPanel.add(grid);
         
-        AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        courseWaypointsTable = new CellTable<WaypointDTO>(/* pageSize */10000, tableRes);
-        this.selectedRaceContentPanel.add(courseWaypointsTable);
-        wayPointSelectionModel = new MultiSelectionModel<WaypointDTO>();
-        courseWaypointsTable.setSelectionModel(wayPointSelectionModel);
-        
-        TextColumn<WaypointDTO> nameColumn = new TextColumn<WaypointDTO>() {
+        final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+        controlPointsTable = new CellTable<ControlPointAndOldAndNewBuoy>(/* pageSize */10000, tableRes);
+        grid.setWidget(0,  0, controlPointsTable);
+        controlPointsSelectionModel = new MultiSelectionModel<ControlPointAndOldAndNewBuoy>();
+        controlPointsTable.setSelectionModel(controlPointsSelectionModel);
+        controlPointsSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
-            public String getValue(WaypointDTO waypointDTO) {
-                return waypointDTO.name;
+            public void onSelectionChange(SelectionChangeEvent event) {
+                handleControlPointSelectionChange();
+            }
+        });
+        TextColumn<ControlPointAndOldAndNewBuoy> nameColumn = new TextColumn<ControlPointAndOldAndNewBuoy>() {
+            @Override
+            public String getValue(ControlPointAndOldAndNewBuoy cpaoanb) {
+                return cpaoanb.getControlPoint().name;
             }
         }; 
-        courseWaypointsTable.addColumn(nameColumn, stringMessages.waypoint());
-
-        final SafeHtmlCell buoysCell = new SafeHtmlCell();
-        Column<WaypointDTO, SafeHtml> buoysColumn = new Column<WaypointDTO, SafeHtml>(buoysCell) {
+        controlPointsTable.addColumn(nameColumn, stringMessages.controlPoint());
+        TextColumn<ControlPointAndOldAndNewBuoy> oldBuoyColumn = new TextColumn<ControlPointAndOldAndNewBuoy>() {
             @Override
-            public SafeHtml getValue(WaypointDTO waypoint) {
-                SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                int buoysCount = waypoint.buoys.size();
-                int i = 1;
-                for (MarkDTO mark : waypoint.buoys) {
-                    builder.appendEscaped(mark.name + ", " + stringMessages.position() + ": " + mark.position.toFormattedString());
-                    if (i < buoysCount) {
-                        builder.appendHtmlConstant("<br>");
-                    }
-                    i++;
+            public String getValue(ControlPointAndOldAndNewBuoy cpaoanb) {
+                return "" + cpaoanb.getOldBuoy().name;
+            }
+        }; 
+        controlPointsTable.addColumn(oldBuoyColumn, stringMessages.buoy());
+        TextColumn<ControlPointAndOldAndNewBuoy> newBuoyColumn = new TextColumn<ControlPointAndOldAndNewBuoy>() {
+            @Override
+            public String getValue(ControlPointAndOldAndNewBuoy cpaoanb) {
+                return "" + cpaoanb.getNewBuoy().name;
+            }
+        }; 
+        controlPointsTable.addColumn(newBuoyColumn, stringMessages.newBuoy());
+        controlPointDataProvider = new ListDataProvider<ControlPointAndOldAndNewBuoy>();
+        controlPointDataProvider.addDataDisplay(controlPointsTable);
+
+        // race buoys table
+        buoyDataProvider = new ListDataProvider<BuoyDTO>();
+        buoySelectionChangeHandler = new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                if (!ignoreWaypointAndOldAndNewBuoySelectionChange) {
+                    updateNewBuoy(controlPointsSelectionModel.getSelectedSet(), buoySelectionModel.getSelectedObject());
                 }
-                return builder.toSafeHtml();
             }
         };
-        courseWaypointsTable.addColumn(buoysColumn, stringMessages.buoys());
-
-        TextColumn<WaypointDTO> markPassingsCountColumn = new TextColumn<WaypointDTO>() {
-            @Override
-            public String getValue(WaypointDTO waypointDTO) {
-                return "" + waypointDTO.markPassingsCount;
-            }
-        }; 
-        courseWaypointsTable.addColumn(markPassingsCountColumn, stringMessages.markPassing());
-
-        waypointDataProvider = new ListDataProvider<WaypointDTO>();
-        waypointDataProvider.addDataDisplay(courseWaypointsTable);
+        buoySelectionModel = new SingleSelectionModel<BuoyDTO>();
+        buoysTable = createBuoysTable(stringMessages, tableRes, buoySelectionModel);
+        buoysTable.getSelectionModel().addSelectionChangeHandler(buoySelectionChangeHandler);
+        buoyDataProvider.addDataDisplay(buoysTable);
+        grid.setWidget(0,  1, buoysTable);
         
         courseActionsPanel = new HorizontalPanel();
         courseActionsPanel.setSpacing(10);
-        Button insertRoundBtn = new Button("Insert round (2 waypoints)");
-        insertRoundBtn.addClickHandler(new ClickHandler() {
+        insertWaypointBefore = new Button(stringMessages.insertWaypointBeforeSelected());
+        insertWaypointBefore.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if(wayPointSelectionModel.getSelectedSet().size() != 2) {
-                    Window.alert("To insert (copy) a round you have to select two waypoints.");
-                    return;
-                } else {
-                    Map<Integer, String> controlPointsToInsert = new TreeMap<Integer, String>();
-                    for(WaypointDTO selectedWaypoint: wayPointSelectionModel.getSelectedSet()) {
-                        controlPointsToInsert.put(selectedWaypoint.courseIndex, selectedWaypoint.name);
-                    }
-                    int insertPosition = waypointDataProvider.getList().size()-2;
-                    sailingService.addControlPointsToRaceCourse(singleSelectedRace,
-                            new ArrayList<String>(controlPointsToInsert.values()), insertPosition, new AsyncCallback<Void>() {
-                        @Override
-                        public void onSuccess(Void arg0) {
-                            refreshSelectedRaceData();
-                        }
-                        
-                        @Override
-                        public void onFailure(Throwable arg0) {
-                        }
-                    });
-                }
+                insertWaypoint(sailingService, stringMessages, tableRes, /* before */ true);
             }
+
         });
-        courseActionsPanel.add(insertRoundBtn);
-        
-        Button removeRoundBtn = new Button("Remove Round (2 waypoints)");
-        removeRoundBtn.addClickHandler(new ClickHandler() {
+        insertWaypointBefore.setEnabled(false);
+        courseActionsPanel.add(insertWaypointBefore);
+        insertWaypointAfter = new Button(stringMessages.insertWaypointAfterSelected());
+        insertWaypointAfter.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if(wayPointSelectionModel.getSelectedSet().size() != 2) {
-                    Window.alert("To delete a round you have to select two waypoints.");
-                    return;
-                } else {
-                    Map<Integer, WaypointDTO> controlPointsToDelete = new TreeMap<Integer, WaypointDTO>();
-                    for(WaypointDTO selectedWaypoint: wayPointSelectionModel.getSelectedSet()) {
-                        controlPointsToDelete.put(selectedWaypoint.courseIndex, selectedWaypoint);
-                    }
-                    sailingService.removeControlPointsFromRaceCourse(singleSelectedRace,
-                            new ArrayList<WaypointDTO>(controlPointsToDelete.values()), new AsyncCallback<Void>() {
-                        @Override
-                        public void onSuccess(Void arg0) {
-                            refreshSelectedRaceData();
-                        }
-                        
-                        @Override
-                        public void onFailure(Throwable arg0) {
-                        }
-                    });
-                }
+                insertWaypoint(sailingService, stringMessages, tableRes, /* before */ false);
+            }
+
+        });
+        insertWaypointAfter.setEnabled(false);
+        courseActionsPanel.add(insertWaypointAfter);
+        removeWaypointBtn = new Button(stringMessages.remove());
+        removeWaypointBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                removeSelectedWaypoints(sailingService);
             }
         });
-        courseActionsPanel.add(removeRoundBtn);
-        
+        removeWaypointBtn.setEnabled(false);
+        courseActionsPanel.add(removeWaypointBtn);
         Button refreshBtn = new Button(stringMessages.refresh());
         refreshBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -157,25 +277,202 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
             }
         });
         courseActionsPanel.add(refreshBtn);
-        
+        Button saveBtn = new Button(stringMessages.save());
+        saveBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                saveCourse(sailingService, stringMessages);
+            }
+        });
+        courseActionsPanel.add(saveBtn);
         courseActionsPanel.setVisible(false);
         this.selectedRaceContentPanel.add(courseActionsPanel);
+    }
+
+    private void handleControlPointSelectionChange() {
+        ignoreWaypointAndOldAndNewBuoySelectionChange = true;
+        try {
+            buoySelectionModel.setSelected(buoySelectionModel.getSelectedObject(), false);
+            final int selectionSize = controlPointsSelectionModel.getSelectedSet().size();
+            insertWaypointAfter.setEnabled(selectionSize==1);
+            insertWaypointBefore.setEnabled(selectionSize==1);
+            removeWaypointBtn.setEnabled(selectionSize>=1);
+            if (selectionSize == 1) {
+                BuoyDTO newBuoy = controlPointsSelectionModel.getSelectedSet().iterator().next().getNewBuoy();
+                if (newBuoy != null) {
+                    for (BuoyDTO buoyDTO : buoyDataProvider.getList()) {
+                        if (buoyDTO.name.equals(newBuoy.name)) {
+                            buoySelectionModel.setSelected(buoyDTO, true);
+                        }
+                    }
+                }
+            }
+        } finally {
+            ignoreWaypointAndOldAndNewBuoySelectionChange = false;
+        }
+    }
+
+    private void saveCourse(SailingServiceAsync sailingService, final StringMessages stringMessages) {
+        Set<ControlPointDTO> oldControlPointsFromTableAlreadyHandled = new HashSet<ControlPointDTO>();
+        List<ControlPointDTO> controlPoints = new ArrayList<ControlPointDTO>();
+        for (ControlPointAndOldAndNewBuoy cpaoanb : controlPointDataProvider.getList()) {
+            if (!oldControlPointsFromTableAlreadyHandled.contains(cpaoanb.getControlPoint())) {
+                oldControlPointsFromTableAlreadyHandled.add(cpaoanb.getControlPoint());
+                ControlPointDTO controlPointToAdd;
+                if (controlPointsNeedingReplacement.contains(cpaoanb.getControlPoint())) {
+                    if (cpaoanb.getControlPoint() instanceof GateDTO) {
+                        controlPointToAdd = createGate((GateDTO) cpaoanb.getControlPoint());
+                    } else {
+                        controlPointToAdd = cpaoanb.getNewBuoy();
+                    }
+                } else {
+                    controlPointToAdd = cpaoanb.getControlPoint();
+                }
+                controlPoints.add(controlPointToAdd);
+            }
+        }
+        sailingService.updateRaceCourse(singleSelectedRace, controlPoints, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError(stringMessages.errorUpdatingRaceCourse(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                Window.setStatus(stringMessages.successfullyUpdatedCourse());
+                refreshSelectedRaceData();
+            }
+        });
+    }
+
+    /**
+     * When a gate needs replacement, its entries in {@link #controlPointDataProvider} are looked up, and a new
+     * {@link GateDTO} is created having the same name as the old gate, but using the new buoys as the gate's buoys.
+     */
+    private ControlPointDTO createGate(GateDTO oldGate) {
+        BuoyDTO newLeft = null;
+        BuoyDTO newRight = null;
+        for (ControlPointAndOldAndNewBuoy cpaoanb : controlPointDataProvider.getList()) {
+            if (cpaoanb.getControlPoint() == oldGate) {
+                BuoyDTO newBuoy = cpaoanb.getNewBuoy();
+                if (newRight != null || newBuoy.name.matches("^.*"+REGEX_FOR_LEFT+".*$")) {
+                    newLeft = newBuoy;
+                } else {
+                    newRight = newBuoy;
+                }
+            }
+        }
+        assert newLeft != null && newRight != null;
+        return new GateDTO(oldGate.name, newLeft, newRight);
+    }
+
+    private CellTable<BuoyDTO> createBuoysTable(final StringMessages stringMessages, AdminConsoleTableResources tableRes,
+            SelectionModel<BuoyDTO> selectionModel) {
+        CellTable<BuoyDTO> result = new CellTable<BuoyDTO>(/* pageSize */10000, tableRes);
+        result.setSelectionModel(selectionModel);
+        TextColumn<BuoyDTO> buoyNameColumn = new TextColumn<BuoyDTO>() {
+            @Override
+            public String getValue(BuoyDTO buoyDTO) {
+                return buoyDTO.name;
+            }
+        };
+        result.addColumn(buoyNameColumn, stringMessages.buoy());
+        final SafeHtmlCell buoyPositionCell = new SafeHtmlCell();
+        Column<BuoyDTO, SafeHtml> buoyPositionColumn = new Column<BuoyDTO, SafeHtml>(buoyPositionCell) {
+            @Override
+            public SafeHtml getValue(BuoyDTO buoy) {
+                SafeHtmlBuilder builder = new SafeHtmlBuilder();
+                builder.appendEscaped(buoy.position.toFormattedString());
+                return builder.toSafeHtml();
+            }
+        };
+        result.addColumn(buoyPositionColumn, stringMessages.position());
+        return result;
+    }
+
+    private void updateNewBuoy(Set<ControlPointAndOldAndNewBuoy> selectedWaypointsAndOldAndNewBuoys, BuoyDTO selectedNewBuoy) {
+        if (selectedWaypointsAndOldAndNewBuoys != null) {
+            for (ControlPointAndOldAndNewBuoy w : selectedWaypointsAndOldAndNewBuoys) {
+                if (selectedNewBuoy == null) {
+                    w.setNewBuoy(w.getOldBuoy());
+                } else {
+                    w.setNewBuoy(selectedNewBuoy);
+                }
+                if (w.getOldBuoy().name.equals(w.getNewBuoy().name)) {
+                    checkIfAllBuoysOfControlPointAreUnchangedAndIfSoRememberThis(w.getControlPoint());
+                } else {
+                    controlPointsNeedingReplacement.add(w.getControlPoint());
+                }
+                final int indexOf = controlPointDataProvider.getList().indexOf(w);
+                if (indexOf != -1) {
+                    controlPointDataProvider.getList().set(indexOf, w);
+                }
+            }
+        }
+    }
+
+    private void checkIfAllBuoysOfControlPointAreUnchangedAndIfSoRememberThis(ControlPointDTO controlPoint) {
+        boolean allBuoysUnchanged = true;
+        for (ControlPointAndOldAndNewBuoy cpaoanb : controlPointDataProvider.getList()) {
+            if (cpaoanb.getControlPoint() == controlPoint) {
+                if (!cpaoanb.getOldBuoy().name.equals(cpaoanb.getNewBuoy().name)) {
+                    allBuoysUnchanged = false;
+                    break;
+                }
+            }
+        }
+        if (allBuoysUnchanged) {
+            controlPointsNeedingReplacement.remove(controlPoint);
+        }
+    }
+
+    private void insertWaypoint(final SailingServiceAsync sailingService, StringMessages stringMessages,
+            AdminConsoleTableResources tableRes, final boolean beforeSelection) {
+        new ControlPointCreationDialog(stringMessages, tableRes, buoyDataProvider.getList(), new AsyncCallback<ControlPointDTO>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                // dialog cancelled, do nothing
+            }
+
+            @Override
+            public void onSuccess(ControlPointDTO result) {
+                Set<ControlPointAndOldAndNewBuoy> selectedElements = controlPointsSelectionModel.getSelectedSet();
+                if (!selectedElements.isEmpty()) {
+                    ControlPointAndOldAndNewBuoy selectedElement = selectedElements.iterator().next();
+                    int insertPos = controlPointDataProvider.getList().indexOf(selectedElement) + (beforeSelection?0:1);
+                    for (BuoyDTO buoyDTO : result.getBuoys()) {
+                        controlPointDataProvider.getList().add(insertPos++, new ControlPointAndOldAndNewBuoy(result, buoyDTO));
+                    }
+                }
+            }
+        }).show();
     }
 
     @Override
     void refreshSelectedRaceData() {
         if (singleSelectedRace != null && selectedRaceDTO != null) {
             courseActionsPanel.setVisible(true);
-            
-            sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<RaceCourseDTO>() {
+            sailingService.getRaceCourse(singleSelectedRace, new Date(),  new AsyncCallback<List<ControlPointDTO>>() {
                 @Override
-                public void onSuccess(RaceCourseDTO result) {
-                    updateCourseInfo(result);
+                public void onSuccess(final List<ControlPointDTO> controlPoints) {
+                    sailingService.getRaceBuoys(singleSelectedRace, new Date(),  new AsyncCallback<RaceBuoysDTO>() {
+                        @Override
+                        public void onSuccess(RaceBuoysDTO raceBuoysDTO) {
+                            updateCourseAndBuoysInfo(controlPoints, raceBuoysDTO);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            RaceCourseManagementPanel.this.errorReporter.reportError(
+                                    RaceCourseManagementPanel.this.stringMessages.errorTryingToObtainTheBuoysOfTheRace(
+                                    caught.getMessage()));
+                        }
+                    });
                 }
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    RaceCourseManagementPanel.this.errorReporter.reportError("Error trying to obtain the course of the race: " + caught.getMessage());
+                    RaceCourseManagementPanel.this.errorReporter.reportError(stringMessages.errorTryingToObtainRaceCourse(caught.getMessage()));
                 }
             });
         } else {
@@ -183,8 +480,41 @@ public class RaceCourseManagementPanel extends AbstractRaceManagementPanel {
         }
     }
 
-    private void updateCourseInfo(RaceCourseDTO courseDTO) {
-        waypointDataProvider.setList(courseDTO.waypoints);
-        courseDataRequestTimeLabel.setText(courseDTO.requestTime.toString());
+    private void updateCourseAndBuoysInfo(List<ControlPointDTO> controlPoints, RaceBuoysDTO buoysDTO) {
+        List<ControlPointAndOldAndNewBuoy> waypointsAndOldAndNewBuoys = new ArrayList<ControlPointAndOldAndNewBuoy>();
+        for (ControlPointDTO controlPointDTO : controlPoints) {
+            for (BuoyDTO buoy : controlPointDTO.getBuoys()) {
+                ControlPointAndOldAndNewBuoy waypointAndOldAndNewBuoy = new ControlPointAndOldAndNewBuoy(controlPointDTO, buoy);
+                waypointsAndOldAndNewBuoys.add(waypointAndOldAndNewBuoy);
+            }
+        }
+        controlPointDataProvider.getList().clear();
+        controlPointDataProvider.getList().addAll(waypointsAndOldAndNewBuoys);
+        controlPointsNeedingReplacement.clear();
+        buoyDataProvider.getList().clear();
+        buoyDataProvider.getList().addAll(buoysDTO.buoys);
+        Collections.sort(buoyDataProvider.getList(), new Comparator<BuoyDTO>() {
+            @Override
+            public int compare(BuoyDTO o1, BuoyDTO o2) {
+                return o1.name.compareTo(o2.name);
+            }
+        });
+        for (ControlPointAndOldAndNewBuoy w : controlPointsSelectionModel.getSelectedSet()) {
+            controlPointsSelectionModel.setSelected(w, false);
+        }
+    }
+
+    private void removeSelectedWaypoints(final SailingServiceAsync sailingService) {
+        final Set<ControlPointDTO> selectedControlPoints = new HashSet<ControlPointDTO>();
+        for (ControlPointAndOldAndNewBuoy cpaoanb : controlPointsSelectionModel.getSelectedSet()) {
+            selectedControlPoints.add(cpaoanb.getControlPoint());
+        }
+        for (Iterator<ControlPointAndOldAndNewBuoy> i=controlPointDataProvider.getList().iterator(); i.hasNext(); ) {
+            ControlPointAndOldAndNewBuoy next = i.next();
+            if (selectedControlPoints.contains(next.getControlPoint())) {
+                i.remove();
+            }
+        }
+        handleControlPointSelectionChange();
     }
 }

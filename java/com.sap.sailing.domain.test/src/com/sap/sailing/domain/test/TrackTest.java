@@ -101,7 +101,7 @@ public class TrackTest {
     @Test
     public void testDistanceTraveledBackwardsQuery() {
         final Set<Triple<TimePoint, TimePoint, Distance>> cacheEntries = new HashSet<>();
-        final DistanceCache distanceCache = new DistanceCache() {
+        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
             @Override
             public void cache(TimePoint from, TimePoint to, Distance distance) {
                 super.cache(from, to, distance);
@@ -375,7 +375,7 @@ public class TrackTest {
     @Test
     public void testDistanceTraveledOnSmoothenedTrackThenAddingOutlier() {
         final Set<TimePoint> invalidationCalls = new HashSet<TimePoint>();
-        final DistanceCache distanceCache = new DistanceCache() {
+        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
             @Override
             public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
                 super.invalidateAllAtOrLaterThan(timePoint);
@@ -476,7 +476,7 @@ public class TrackTest {
     @Test
     public void testDistanceCacheAccessForPartialStrip() {
         final Set<TimePoint> invalidationCalls = new HashSet<TimePoint>();
-        final DistanceCache distanceCache = new DistanceCache() {
+        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
             @Override
             public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
                 super.invalidateAllAtOrLaterThan(timePoint);
