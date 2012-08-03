@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Selenium
+Bundle-SymbolicName: org.openqa.selenium.osgi
+Bundle-Version: 2.23.1
+Bundle-Vendor: openqa
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
