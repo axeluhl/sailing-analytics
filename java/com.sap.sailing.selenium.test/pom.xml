@@ -38,7 +38,7 @@
                             <!--
                             <argLine>-Dwebdriver.firefox.bin=D:\Internet\Firefox\firefox.exe -Xmx1024m -Djetty.home=${basedir}\..\target\configuration\jetty</argLine>
                             -->
-                            <argLine>${tycho.argLine}</argLine>
+                            <argLine>${tycho.integration.tests.argLine}</argLine>
                             
                             <product>raceanalysis.product</product>
                             <application>raceanalysis.application</application>

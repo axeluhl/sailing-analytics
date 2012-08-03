@@ -32,6 +32,7 @@
       <id>non-debug.no-proxy</id>
       <properties>
         <tycho.argLine>-Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</tycho.argLine>
+		<tycho.integration.tests.argLine>-Dselenium.test.environment.configuration=ci-test-environment.xml -Xmx1024m -Djetty.home=${basedir}\..\target\configuration\jetty</tycho.integration.tests.argLine>
       </properties>
     </profile>
     
@@ -52,7 +53,7 @@
     <profile>
       <id>integration.test</id>
 	  <properties>
-        <tycho.argLine>-Dselenium.test.environment.configuration=ci-test-environment.xml -Xmx1024m -Djetty.home=${basedir}\..\target\configuration\jetty</tycho.argLine>
+        <tycho.integration.tests.argLine>-Dselenium.test.environment.configuration=ci-test-environment.xml -Xmx1024m -Djetty.home=${basedir}\..\target\configuration\jetty</tycho.integration.tests.argLine>
       </properties>
     </profile>
   </profiles>
