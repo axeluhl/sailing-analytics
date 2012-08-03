@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <test-environment xmlns="http://www.sapsailing.com/test-environment"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.sapsailing.com/test-environment ./test-environment-configuration.xsd ">
   
   <context-root>http://riccardo:riccardo@localhost:8888/</context-root>
-  
+  <!--
   <system-properties>
      <system-property>
         <name>webdriver.chrome.driver</name>
@@ -16,7 +16,7 @@
         <value>D:\Internet\Firefox\firefox.exe</value>
      </system-property>
   </system-properties>
-  
+  -->
   <driver-defenition class="org.openqa.selenium.firefox.FirefoxDriver">
      <!--
      <capabilities>

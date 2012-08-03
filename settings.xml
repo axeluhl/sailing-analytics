@@ -52,7 +52,7 @@
     <profile>
       <id>integration.test</id>
 	  <properties>
-        <tycho.argLine>-Dselenium.test.configuration=local-test-config.xml -Xmx1024m -Djetty.home=${basedir}\..\target\configuration\jetty</tycho.argLine>
+        <tycho.argLine>-Dselenium.test.environment.configuration=ci-test-environment.xml -Xmx1024m -Djetty.home=${basedir}\..\target\configuration\jetty</tycho.argLine>
       </properties>
     </profile>
   </profiles>
