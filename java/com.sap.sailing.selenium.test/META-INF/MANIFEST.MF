@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Selenium Integration Tests
+Bundle-SymbolicName: com.sap.sailing.selenium.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: org.openqa.selenium.osgi;bundle-version="2.23.1",
+ org.junit4;bundle-version="4.8.2"

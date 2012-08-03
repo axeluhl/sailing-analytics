@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:cfg="http://www.sapsailing.com/test-environment"
+      targetNamespace="http://www.sapsailing.com/test-environment" elementFormDefault="qualified">
+   
+   <xsd:element name="test-environment" type="cfg:test-environment" />
+   
+   <xsd:complexType name="test-environment">
+      <xsd:sequence minOccurs="1" maxOccurs="1">
+         <xsd:element name="context-root" type="xsd:string" minOccurs="1" maxOccurs="1" />
+         <xsd:element name="system-properties" type="cfg:system-properties" minOccurs="0" maxOccurs="1" />
+         <xsd:element name="driver-defenition" type="cfg:driver-defenition" minOccurs="1" maxOccurs="unbounded" />
+      </xsd:sequence>
+   </xsd:complexType>
+   
+   <xsd:complexType name="system-properties">
+      <xsd:sequence minOccurs="1" maxOccurs="unbounded">
+         <xsd:element name="system-property" type="cfg:parameter" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+   </xsd:complexType>
+   
+   <xsd:complexType name="driver-defenition">
+      <xsd:sequence minOccurs="0" maxOccurs="1">
+        <xsd:element name="capabilities" type="cfg:capabilities" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+      <xsd:attribute name="class" type="xsd:string" use="required" />
+   </xsd:complexType>
+   
+   <xsd:complexType name="capabilities">
+      <xsd:annotation>
+        <xsd:documentation>
+          See http://code.google.com/p/selenium/wiki/DesiredCapabilities
+        </xsd:documentation>
+      </xsd:annotation>
+      <xsd:sequence minOccurs="1" maxOccurs="unbounded">
+         <xsd:element name="capability" type="cfg:parameter" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+   </xsd:complexType>
+   
+   <xsd:complexType name="parameter">
+      <xsd:sequence minOccurs="1" maxOccurs="1">
+         <xsd:element name="name" type="xsd:string" minOccurs="1" maxOccurs="1" />
+         <xsd:element name="value" type="xsd:string" minOccurs="1" maxOccurs="1" />
+      </xsd:sequence>
+   </xsd:complexType>
+</xsd:schema>

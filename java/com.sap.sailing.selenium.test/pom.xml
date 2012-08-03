@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>root</artifactId>
+        <groupId>com.sap.sailing</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>com.sap.sailing.selenium.test</artifactId>
+    <packaging>eclipse-test-plugin</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Skip the normal tests, we'll run them in the integration-test phase -->
+                    <skip>true</skip>
+                </configuration>
+                
+                <executions>
+                    <execution>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            
+                            <excludes>  
+                               <exclude>**/core/**</exclude>  
+                            </excludes>
+                            
+                            <appArgLine>-consoleLog -console -clean</appArgLine>
+                            <!--
+                            <argLine>-Dwebdriver.firefox.bin=D:\Internet\Firefox\firefox.exe -Xmx1024m -Djetty.home=${basedir}\..\target\configuration\jetty</argLine>
+                            -->
+                            <argLine>${tycho.argLine}</argLine>
+                            
+                            <product>raceanalysis.product</product>
+                            <application>raceanalysis.application</application>
+                            
+                            <dependencies>
+                                <dependency>
+                                    <type>eclipse-feature</type>
+                                    <artifactId>com.sap.sailing.feature</artifactId>
+                                    <version>0.0.0</version>
+                                </dependency>
+                                <dependency>
+                                    <type>eclipse-feature</type>
+                                    <artifactId>com.sap.sailing.feature.runtime</artifactId>
+                                    <version>0.0.0</version>
+                                </dependency>
+                            </dependencies>
+                            
+                            <bundleStartLevel>
+                                <bundle>
+                                    <id>com.sap.sailing.ess40.resultimport</id>
+                                    <level>3</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.gwt.ui</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.kiworesultimport</id>
+                                    <level>3</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.server</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.www</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>com.sap.sailing.xcelsiusadapter</id>
+                                    <level>4</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>org.eclipse.equinox.common</id>
+                                    <level>2</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>org.eclipse.equinox.simpleconfigurator</id>
+                                    <level>2</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                                <bundle>
+                                    <id>org.eclipse.jetty.osgi.boot</id>
+                                    <level>1</level>
+                                    <autoStart>true</autoStart>
+                                </bundle>
+                            </bundleStartLevel>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

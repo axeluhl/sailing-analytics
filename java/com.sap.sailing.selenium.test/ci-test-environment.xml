@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<test-environment xmlns="http://www.sapsailing.com/test-environment"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sapsailing.com/test-environment ./test-environment-configuration.xsd ">
+  
+  <context-root>http://riccardo:riccardo@localhost:8888/</context-root>
+  
+  <system-properties>
+     <system-property>
+        <name>webdriver.chrome.driver</name>
+        <value>D:\Development\Tools\Chrome Driver\chromedriver.exe</value>
+     </system-property>
+     <system-property>
+        <name>webdriver.firefox.bin</name>
+        <value>D:\Internet\Firefox\firefox.exe</value>
+     </system-property>
+  </system-properties>
+  
+  <driver-defenition class="org.openqa.selenium.firefox.FirefoxDriver">
+     <!--
+     <capabilities>
+        <capability>
+          <name>version</name>
+          <value>14.0.0</value>
+        </capability>
+     </capabilities>
+     -->
+  </driver-defenition>
+  
+  <!--
+  <driver-defenition class="org.openqa.selenium.chrome.ChromeDriver" />
+  -->
+</test-environment>
