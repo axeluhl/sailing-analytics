@@ -59,6 +59,8 @@
 		<module>com.sap.sailing.ess40.resultimport.test</module>
 		<module>com.sap.sailing.freg.resultimport</module>
 		<module>com.sap.sailing.freg.resultimport.test</module>
+		<module>com.sap.sailing.selenium.test</module>
+		<module>org.openqa.selenium.osgi</module>
 	</modules>
 	
 	<properties>
@@ -143,9 +145,11 @@
 				<artifactId>tycho-surefire-plugin</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
+				    <argLine>${tycho.argLine}</argLine>
 <!-- non-debug -->
-<!-- proxy -->
+<!-- proxy
 					<argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.206.73 -Dmongo.host=10.18.206.73 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>
+-->
 <!-- -->
 <!-- no proxy
 					<argLine>-Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</argLine>

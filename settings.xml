@@ -1,13 +1,14 @@
 <settings>
   <servers>
-        <server>
-            <id>ssh-repository</id>
-            <filePermissions>664</filePermissions>
-            <directoryPermissions>775</directoryPermissions>
-        </server>
+    <server>
+      <id>ssh-repository</id>
+        <filePermissions>664</filePermissions>
+      <directoryPermissions>775</directoryPermissions>
+    </server>
   </servers>
+  
   <proxies>
-   <proxy>
+    <proxy>
       <active>true</active>
       <protocol>http</protocol>
       <host>proxy.wdf.sap.corp</host>
@@ -15,6 +16,46 @@
       <nonProxyHosts>localhost|*.sap.corp</nonProxyHosts>
     </proxy>
   </proxies>
+  
+  <profiles>
+    <profile>
+      <id>non-debug.proxy</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <tycho.argLine>-Dfile.encoding=cp1252 -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dtractrac.tunnel=true -Dtractrac.tunnel.host=10.18.206.73 -Dmongo.host=10.18.206.73 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</tycho.argLine>
+	  </properties>
+    </profile>
+    
+    <profile>
+      <id>non-debug.no-proxy</id>
+      <properties>
+        <tycho.argLine>-Dfile.encoding=cp1252 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</tycho.argLine>
+      </properties>
+    </profile>
+    
+    <profile>
+      <id>debug.proxy</id>
+      <properties>
+      <tycho.argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</tycho.argLine>
+      </properties>
+    </profile>
+    
+    <profile>
+      <id>debug.no-proxy</id>
+      <properties>
+        <tycho.argLine>-Dfile.encoding=cp1252 -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y -Dmongo.dbName=winddbTest -Dreplication.brokerURL=tcp://localhost:61615 -Xmx1024m -XX:PermSize=256m -XX:-UseGCOverheadLimit -XX:+UseParallelGC</tycho.argLine>
+      </properties>
+    </profile>
+    
+    <profile>
+      <id>integration.test</id>
+	  <properties>
+        <tycho.argLine>-Dselenium.test.configuration=local-test-config.xml -Xmx1024m -Djetty.home=${basedir}\..\target\configuration\jetty</tycho.argLine>
+      </properties>
+    </profile>
+  </profiles>
 </settings>
 
 
