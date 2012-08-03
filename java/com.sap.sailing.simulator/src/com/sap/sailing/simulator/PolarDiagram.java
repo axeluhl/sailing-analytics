@@ -1,7 +1,11 @@
 package com.sap.sailing.simulator;
 
+import java.util.Map;
+import java.util.NavigableMap;
+
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Speed;
 
 public interface PolarDiagram {
 		
@@ -13,6 +17,10 @@ public interface PolarDiagram {
 	
 	void setWind(SpeedWithBearing newWind);
 	
+	Bearing getTargetDirection();
+	
+	void setTargetDirection(Bearing newTargetDirection);
+	
 	SpeedWithBearing getSpeedAtBearing(Bearing bearing);
 	
 	Bearing[] optimalDirectionsUpwind();
@@ -20,6 +28,8 @@ public interface PolarDiagram {
 	
 	long getTurnLoss();
 	WindSide getWindSide(Bearing bearing);
+	
+	NavigableMap<Speed, NavigableMap<Bearing, Speed>> polarDiagramPlot(Double bearingStep);
 	
 	
 }
