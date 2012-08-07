@@ -10,6 +10,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 import org.junit.Test;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -26,12 +27,15 @@ public class TracTracEventManagementPanelUITest extends AbstractSeleniumTest {
         
         driver.get(getContextRoot() + "gwt/AdminConsole.html");
         
-        captureScreenshot();
+        //captureScreenshot();
         
         for(String handle : driver.getWindowHandles()) {
             System.out.println("Window handle: " + handle);
             //System.out.println("Title for window: " +driver.switchTo().window(handle).getTitle());
         }
+        
+        Alert alert = driver.switchTo().alert();
+        System.out.println(alert.getText());
         
         System.out.println("Title of page is: " + driver.getTitle());
         

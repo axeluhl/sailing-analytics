@@ -31,6 +31,7 @@ public abstract class AbstractSeleniumTest {
         Augmenter augmenter = new Augmenter();
         WebDriver augmentedDriver = augmenter.augment(getWebDriver());
         File source = ((TakesScreenshot) augmentedDriver).getScreenshotAs(OutputType.FILE);
+        System.out.println("Path for file is: " +  "'./target/screenshots/" + source.getName() + "'");
         String path = "./target/screenshots/" + source.getName();
         
         Files.copy(source, new File(path));
