@@ -22,15 +22,21 @@ public class TracTracEventManagementPanelUITest extends AbstractSeleniumTest {
     public void test() {
         WebDriver driver = getWebDriver();
         
+        System.out.println("Driver used for test is: " + driver.getClass().getName());
+        
         driver.get(getContextRoot() + "gwt/AdminConsole.html");
+        
         for(String handle : driver.getWindowHandles()) {
             System.out.println("Window handle: " + handle);
-            System.out.println("Title for window: " +driver.switchTo().window(handle).getTitle());
+            //System.out.println("Title for window: " +driver.switchTo().window(handle).getTitle());
         }
-        System.out.println("Driver used for test is: " + driver.getClass().getName());
+        
         System.out.println("Title of page is: " + driver.getTitle());
+        
         assertEquals("Unexpected page title", "SAP Sailing Analytics Administration Console", driver.getTitle());
+        
         System.out.println("First step passed");
+        
         WebElement tracTracTab = driver.findElement(By.xpath("//div[@class='gwt-TabBarItem' and @role='tab']/div[text()='TracTrac Events']/.."));
         tracTracTab.click();
         
