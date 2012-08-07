@@ -155,7 +155,8 @@ public class Selenium extends ParentRunner<Runner> {
             try {
                 String driverClassname = this.defenition.getDriver();
                 Map<String, String> capabilityDefenitions = this.defenition.getCapabilities();
-                
+                System.out.println("Used driver is: " + driverClassname);
+                System.out.println("Context root is: " + this.root);
                 Class<WebDriver> clazz = (Class<WebDriver>) Class.forName(driverClassname);
                 Capabilities capabilities = new DesiredCapabilities(capabilityDefenitions);
                 

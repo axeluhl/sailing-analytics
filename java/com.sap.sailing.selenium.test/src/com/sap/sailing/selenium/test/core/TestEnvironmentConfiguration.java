@@ -103,7 +103,7 @@ public class TestEnvironmentConfiguration {
     private static synchronized Document readTestConfiguration() throws ParserConfigurationException,
             SAXException, IOException {
         String path = System.getProperty(TEST_ENVIRONMENT_CONFIGURATION);
-        System.out.println("--------------------------------------" + path + " (" + TEST_ENVIRONMENT_CONFIGURATION + ")");
+        
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema = schemaFactory.newSchema(new StreamSource(TEST_ENVIRONMENT_SCHEMA));
         
