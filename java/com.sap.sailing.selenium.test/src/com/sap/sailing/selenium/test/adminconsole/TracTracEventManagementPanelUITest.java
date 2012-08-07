@@ -19,12 +19,14 @@ import org.openqa.selenium.support.ui.FluentWait;
 
 public class TracTracEventManagementPanelUITest extends AbstractSeleniumTest {
     @Test
-    public void test() {
+    public void test() throws Exception {
         WebDriver driver = getWebDriver();
         
         System.out.println("Driver used for test is: " + driver.getClass().getName());
         
         driver.get(getContextRoot() + "gwt/AdminConsole.html");
+        
+        captureScreenshot();
         
         for(String handle : driver.getWindowHandles()) {
             System.out.println("Window handle: " + handle);
