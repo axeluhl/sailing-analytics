@@ -4,7 +4,7 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.sapsailing.com/test-environment ./test-environment-configuration.xsd ">
   
-  <context-root>http://riccardo:riccardo@localhost:8888/</context-root>
+  <context-root>http://riccardo:riccardo@localhost:8889/</context-root>
   <!--
   <system-properties>
      <system-property>

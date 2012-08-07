@@ -38,7 +38,7 @@
                             <!--
                             <argLine>-Dwebdriver.firefox.bin=D:\Internet\Firefox\firefox.exe -Xmx1024m -Djetty.home=${basedir}\..\target\configuration\jetty</argLine>
                             -->
-                            <argLine>-Dselenium.test.environment.configuration=ci-test-environment.xml -Xmx1024m -Djetty.home=${basedir}/../target/configuration/jetty</argLine>
+                            <argLine>-Dselenium.test.environment.configuration=ci-test-environment.xml -Xmx1024m -Djetty.port=8889 -Djetty.home=${basedir}/../target/configuration/jetty</argLine>
                             
                             <product>raceanalysis.product</product>
                             <application>raceanalysis.application</application>
