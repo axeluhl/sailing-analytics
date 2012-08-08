@@ -1,6 +1,5 @@
 package com.sap.sailing.simulator;
 
-import java.util.Map;
 import java.util.NavigableMap;
 
 import com.sap.sailing.domain.base.SpeedWithBearing;

@@ -17,7 +17,7 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianBearingImpl;
 import com.sap.sailing.simulator.PolarDiagram;
 
-public class PolarDiagram49 implements PolarDiagram {
+public class PolarDiagram505 implements PolarDiagram {
 
     // the current speed and direction of the wind
     private SpeedWithBearing wind = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(180));
@@ -33,154 +33,156 @@ public class PolarDiagram49 implements PolarDiagram {
     private NavigableMap<Speed, Speed> gybeSOG;
 
     // this constructor creates an instance with a hard-coded set of values
-    public PolarDiagram49() {
+    public PolarDiagram505() {
         speedTable = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
         NavigableMap<Bearing, Speed> tableRow;
 
-        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram49.bearingComparator);
+        double cutAngle = 35.0;
+
+        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram505.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-        tableRow.put(new DegreeBearingImpl(52), Speed.NULL);
+        tableRow.put(new DegreeBearingImpl(cutAngle), new KnotSpeedImpl(1));
         tableRow.put(new DegreeBearingImpl(60), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(75), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(90), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(110), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(120), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(135), Speed.NULL);
-        tableRow.put(new DegreeBearingImpl(150), Speed.NULL);
+        // tableRow.put(new DegreeBearingImpl(150), Speed.NULL);
         tableRow.put(new DegreeBearingImpl(180), Speed.NULL);
         speedTable.put(Speed.NULL, tableRow);
 
-        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram49.bearingComparator);
+        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram505.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-        tableRow.put(new DegreeBearingImpl(52), new KnotSpeedImpl(6.57));
-        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(7.01));
-        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(7.36));
-        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(7.31));
-        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(6.73));
-        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(6.39));
-        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(5.58));
-        tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(4.62));
+        tableRow.put(new DegreeBearingImpl(cutAngle), new KnotSpeedImpl(1));
+        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(5.09));
+        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(5.17));
+        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(5.25));
+        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(5.15));
+        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(5.1));
+        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(5.03));
+        // tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(4.62));
         tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(2.5));
         speedTable.put(new KnotSpeedImpl(6), tableRow);
 
-        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram49.bearingComparator);
+        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram505.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-        tableRow.put(new DegreeBearingImpl(52), new KnotSpeedImpl(7.78));
-        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(8.13));
-        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(8.38));
-        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(8.31));
-        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(8.04));
-        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(7.79));
-        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(7));
-        tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(5.85));
-        tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(3));
+        tableRow.put(new DegreeBearingImpl(cutAngle), new KnotSpeedImpl(1));
+        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(5.38));
+        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(5.47));
+        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(5.57));
+        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(6.01));
+        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(6.23));
+        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(6.57));
+        // tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(5.85));
+        tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(3.35));
         speedTable.put(new KnotSpeedImpl(8), tableRow);
 
-        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram49.bearingComparator);
+        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram505.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-        tableRow.put(new DegreeBearingImpl(52), new KnotSpeedImpl(8.34));
-        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(8.66));
-        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(9.01));
-        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(8.95));
-        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(8.87));
-        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(8.64));
-        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(8.02));
-        tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(6.97));
-        tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(4));
+        tableRow.put(new DegreeBearingImpl(cutAngle), new KnotSpeedImpl(1));
+        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(5.67));
+        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(5.77));
+        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(5.88));
+        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(6.94));
+        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(7.47));
+        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(8.26));
+        // tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(6.97));
+        tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(4.25));
         speedTable.put(new KnotSpeedImpl(10), tableRow);
 
-        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram49.bearingComparator);
+        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram505.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-        tableRow.put(new DegreeBearingImpl(52), new KnotSpeedImpl(8.64));
-        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(8.95));
-        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(9.39));
-        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(9.5));
-        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(9.54));
-        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(9.3));
-        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(8.71));
-        tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(7.86));
+        tableRow.put(new DegreeBearingImpl(cutAngle), new KnotSpeedImpl(1));
+        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(6.06));
+        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(6.18));
+        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(6.30));
+        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(7.86));
+        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(8.64));
+        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(9.81));
+        // tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(7.86));
         tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(5));
         speedTable.put(new KnotSpeedImpl(12), tableRow);
 
-        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram49.bearingComparator);
+        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram505.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-        tableRow.put(new DegreeBearingImpl(52), new KnotSpeedImpl(8.84));
-        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(9.15));
-        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(9.62));
-        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(9.98));
-        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(10.08));
-        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(9.95));
-        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(9.29));
-        tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(8.57));
-        tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(6));
+        tableRow.put(new DegreeBearingImpl(cutAngle), new KnotSpeedImpl(1));
+        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(6.55));
+        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(6.69));
+        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(6.83));
+        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(8.71));
+        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(9.66));
+        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(11.07));
+        // tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(8.57));
+        tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(5.75));
         speedTable.put(new KnotSpeedImpl(14), tableRow);
 
-        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram49.bearingComparator);
+        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram505.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-        tableRow.put(new DegreeBearingImpl(52), new KnotSpeedImpl(8.95));
-        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(9.28));
-        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(9.8));
-        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(10.28));
-        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(10.44));
-        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(10.72));
-        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(9.88));
-        tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(9.13));
-        tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(7));
+        tableRow.put(new DegreeBearingImpl(cutAngle), new KnotSpeedImpl(1));
+        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(7.05));
+        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(7.20));
+        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(7.35));
+        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(9.50));
+        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(10.58));
+        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(12.19));
+        // tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(9.13));
+        tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(6.5));
         speedTable.put(new KnotSpeedImpl(16), tableRow);
 
-        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram49.bearingComparator);
+        tableRow = new TreeMap<Bearing, Speed>(PolarDiagram505.bearingComparator);
         tableRow.put(new DegreeBearingImpl(0), Speed.NULL);
-        tableRow.put(new DegreeBearingImpl(52), new KnotSpeedImpl(8.91));
-        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(9.34));
-        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(10.01));
-        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(10.67));
-        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(11.17));
-        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(11.81));
-        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(11.47));
-        tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(10.26));
+        tableRow.put(new DegreeBearingImpl(cutAngle), new KnotSpeedImpl(1));
+        tableRow.put(new DegreeBearingImpl(60), new KnotSpeedImpl(7.04));
+        tableRow.put(new DegreeBearingImpl(75), new KnotSpeedImpl(7.20));
+        tableRow.put(new DegreeBearingImpl(90), new KnotSpeedImpl(7.35));
+        tableRow.put(new DegreeBearingImpl(110), new KnotSpeedImpl(9.90));
+        tableRow.put(new DegreeBearingImpl(120), new KnotSpeedImpl(11.18));
+        tableRow.put(new DegreeBearingImpl(135), new KnotSpeedImpl(13.09));
+        // tableRow.put(new DegreeBearingImpl(150), new KnotSpeedImpl(10.26));
         tableRow.put(new DegreeBearingImpl(180), new KnotSpeedImpl(7.5));
         speedTable.put(new KnotSpeedImpl(20), tableRow);
 
-        beatAngles = new TreeMap<Speed, Bearing>();
-        beatAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(45));
-        beatAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(43.4));
-        beatAngles.put(new KnotSpeedImpl(8), new DegreeBearingImpl(41.8));
-        beatAngles.put(new KnotSpeedImpl(10), new DegreeBearingImpl(38.9));
-        beatAngles.put(new KnotSpeedImpl(12), new DegreeBearingImpl(37.5));
-        beatAngles.put(new KnotSpeedImpl(14), new DegreeBearingImpl(36.8));
-        beatAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(36.3));
-        beatAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(36.9));
+        NavigableMap<Speed, Bearing> beatAngles = new TreeMap<Speed, Bearing>();
+        beatAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(44.0));
+        beatAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(44.0));
+        beatAngles.put(new KnotSpeedImpl(8), new DegreeBearingImpl(46.5));
+        beatAngles.put(new KnotSpeedImpl(10), new DegreeBearingImpl(50.0));
+        beatAngles.put(new KnotSpeedImpl(12), new DegreeBearingImpl(52.0));
+        beatAngles.put(new KnotSpeedImpl(14), new DegreeBearingImpl(54.0));
+        beatAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(55.0));
+        beatAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(56.0));
 
-        double beatScale = 1.1;
-        beatSOG = new TreeMap<Speed, Speed>();
+        double beatScale = 1.0;
+        NavigableMap<Speed, Speed> beatSOG = new TreeMap<Speed, Speed>();
         beatSOG.put(new KnotSpeedImpl(0), new KnotSpeedImpl(0));
-        beatSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(5.85 * beatScale));
-        beatSOG.put(new KnotSpeedImpl(8), new KnotSpeedImpl(6.98 * beatScale));
-        beatSOG.put(new KnotSpeedImpl(10), new KnotSpeedImpl(7.39 * beatScale));
-        beatSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(7.68 * beatScale));
-        beatSOG.put(new KnotSpeedImpl(14), new KnotSpeedImpl(7.89 * beatScale));
-        beatSOG.put(new KnotSpeedImpl(16), new KnotSpeedImpl(7.92 * beatScale));
-        beatSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(7.94 * beatScale));
+        beatSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(5.00 * beatScale));
+        beatSOG.put(new KnotSpeedImpl(8), new KnotSpeedImpl(5.30 * beatScale));
+        beatSOG.put(new KnotSpeedImpl(10), new KnotSpeedImpl(5.60 * beatScale));
+        beatSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(6.00 * beatScale));
+        beatSOG.put(new KnotSpeedImpl(14), new KnotSpeedImpl(6.50 * beatScale));
+        beatSOG.put(new KnotSpeedImpl(16), new KnotSpeedImpl(7.00 * beatScale));
+        beatSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(7.00 * beatScale));
 
-        gybeAngles = new TreeMap<Speed, Bearing>();
-        gybeAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(120));
-        gybeAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(140));
-        gybeAngles.put(new KnotSpeedImpl(8), new DegreeBearingImpl(142.6));
-        gybeAngles.put(new KnotSpeedImpl(10), new DegreeBearingImpl(148.4));
-        gybeAngles.put(new KnotSpeedImpl(12), new DegreeBearingImpl(154.4));
-        gybeAngles.put(new KnotSpeedImpl(14), new DegreeBearingImpl(162.5));
-        gybeAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(169.6));
-        gybeAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(172.3));
+        NavigableMap<Speed, Bearing> gybeAngles = new TreeMap<Speed, Bearing>();
+        gybeAngles.put(new KnotSpeedImpl(0), new DegreeBearingImpl(141.0));
+        gybeAngles.put(new KnotSpeedImpl(6), new DegreeBearingImpl(141.0));
+        gybeAngles.put(new KnotSpeedImpl(8), new DegreeBearingImpl(141.0));
+        gybeAngles.put(new KnotSpeedImpl(10), new DegreeBearingImpl(139.5));
+        gybeAngles.put(new KnotSpeedImpl(12), new DegreeBearingImpl(137.5));
+        gybeAngles.put(new KnotSpeedImpl(14), new DegreeBearingImpl(139.5));
+        gybeAngles.put(new KnotSpeedImpl(16), new DegreeBearingImpl(142.5));
+        gybeAngles.put(new KnotSpeedImpl(20), new DegreeBearingImpl(150.0));
 
-        gybeSOG = new TreeMap<Speed, Speed>();
+        NavigableMap<Speed, Speed> gybeSOG = new TreeMap<Speed, Speed>();
         gybeSOG.put(new KnotSpeedImpl(0), new KnotSpeedImpl(0));
-        gybeSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(5.22));
-        gybeSOG.put(new KnotSpeedImpl(8), new KnotSpeedImpl(6.38));
-        gybeSOG.put(new KnotSpeedImpl(10), new KnotSpeedImpl(7.09));
-        gybeSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(7.6));
-        gybeSOG.put(new KnotSpeedImpl(14), new KnotSpeedImpl(7.97));
-        gybeSOG.put(new KnotSpeedImpl(16), new KnotSpeedImpl(8.39));
-        gybeSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(9.38));
+        gybeSOG.put(new KnotSpeedImpl(6), new KnotSpeedImpl(5.00));
+        gybeSOG.put(new KnotSpeedImpl(8), new KnotSpeedImpl(6.70));
+        gybeSOG.put(new KnotSpeedImpl(10), new KnotSpeedImpl(8.50));
+        gybeSOG.put(new KnotSpeedImpl(12), new KnotSpeedImpl(10.00));
+        gybeSOG.put(new KnotSpeedImpl(14), new KnotSpeedImpl(11.50));
+        gybeSOG.put(new KnotSpeedImpl(16), new KnotSpeedImpl(13.00));
+        gybeSOG.put(new KnotSpeedImpl(20), new KnotSpeedImpl(15.00));
 
         for (Speed s : speedTable.keySet()) {
 
@@ -195,8 +197,9 @@ public class PolarDiagram49 implements PolarDiagram {
     }
 
     // a constructor that allows a generic set of parameters
-    public PolarDiagram49(NavigableMap<Speed, NavigableMap<Bearing, Speed>> speeds, NavigableMap<Speed, Bearing> beats,
-            NavigableMap<Speed, Bearing> gybes, NavigableMap<Speed, Speed> beatSOGs, NavigableMap<Speed, Speed> gybeSOGs) {
+    public PolarDiagram505(NavigableMap<Speed, NavigableMap<Bearing, Speed>> speeds,
+            NavigableMap<Speed, Bearing> beats, NavigableMap<Speed, Bearing> gybes,
+            NavigableMap<Speed, Speed> beatSOGs, NavigableMap<Speed, Speed> gybeSOGs) {
 
         wind = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180));
 
