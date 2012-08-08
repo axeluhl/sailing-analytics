@@ -77,7 +77,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
         return new PathImpl(lst, wf);
     }
 
-    private Path createHeuristic() {
+    private Path createHeuristic(int maxLeft, int maxRight, boolean startLeft) {
+
         Boundary boundary = simulationParameters.getBoundaries();
         WindFieldGenerator wf = simulationParameters.getWindField();
         PolarDiagram pd = simulationParameters.getBoatPolarDiagram();
@@ -89,9 +90,14 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Position currentPosition = start;
         TimePoint currentTime = startTime;
 
+        int stepsLeft = 0;
+        int stepsRight = 0;
+        boolean allLeft = true;
+        boolean allRight = true;
+
         int prevDirection = -1;
-        long turnloss = 4000; // time lost when doing a turn
-        long windpred = 3000; // time used to predict wind, i.e. hypothetical sailors prediction
+        long turnloss = pd.getTurnLoss(); // 4000; // time lost when doing a turn
+        long windpred = 1000; // time used to predict wind, i.e. hypothetical sailors prediction
         TimePoint directTime;
         TimePoint leftTime;
         TimePoint rightTime;
@@ -105,6 +111,9 @@ public class SailingSimulatorImpl implements SailingSimulator {
         long timeStep = wf.getTimeStep().asMillis();
         logger.info("Time step :" + timeStep);
         // while there is more than 5% of the total distance to the finish
+
+        SpeedWithBearing slft = null;
+        SpeedWithBearing srght = null;
         while (currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(0.05)) > 0) {
 
             // TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
@@ -114,21 +123,22 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
             Wind cWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
             logger.fine("cWind speed:" + cWind.getKnots() + " angle:" + cWind.getBearing().getDegrees());
+            // System.out.println("Start WindBear: " + (cWind.getBearing().getDegrees() - bearStart.getDegrees()));
             pd.setWind(cWind);
 
             // get wind of direction
             Bearing wLft = pd.optimalDirectionsUpwind()[0];
             Bearing wRght = pd.optimalDirectionsUpwind()[1];
-            Bearing wDirect = currentPosition.getBearingGreatCircle(end);
+            // Bearing wDirect = currentPosition.getBearingGreatCircle(end);
 
-            SpeedWithBearing sWDirect = pd.getSpeedAtBearing(wDirect);
+            // SpeedWithBearing sWDirect = pd.getSpeedAtBearing(wDirect);
             SpeedWithBearing sWLft = pd.getSpeedAtBearing(wLft);
             SpeedWithBearing sWRght = pd.getSpeedAtBearing(wRght);
             logger.fine("left boat speed:" + sWLft.getKnots() + " angle:" + sWLft.getBearing().getDegrees()
                     + "  right boat speed:" + sWRght.getKnots() + " angle:" + sWRght.getBearing().getDegrees());
 
             TimePoint wTime = new MillisecondsTimePoint(currentTime.asMillis() + windpred);
-            Position pWDirect = sWDirect.travelTo(currentPosition, currentTime, wTime);
+            // Position pWDirect = sWDirect.travelTo(currentPosition, currentTime, wTime);
             Position pWLft = sWLft.travelTo(currentPosition, currentTime, wTime);
             Position pWRght = sWRght.travelTo(currentPosition, currentTime, wTime);
 
@@ -137,32 +147,38 @@ public class SailingSimulatorImpl implements SailingSimulator {
             logger.fine("right   Pos:" + pWRght.getLatDeg() + "," + pWRght.getLngDeg());
 
             // calculate next step
-            Wind dWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, pWDirect, null));
-            logger.fine("dWind speed:" + dWind.getKnots() + " angle:" + dWind.getBearing().getDegrees());
-            pd.setWind(dWind);
-            Bearing direct = currentPosition.getBearingGreatCircle(end);
-            SpeedWithBearing sdirect = pd.getSpeedAtBearing(direct);
+            // Wind dWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, pWDirect, null));
+            // logger.fine("dWind speed:" + dWind.getKnots() + " angle:" + dWind.getBearing().getDegrees());
+            // pd.setWind(dWind);
+            // Bearing direct = currentPosition.getBearingGreatCircle(end);
+            // SpeedWithBearing sdirect = pd.getSpeedAtBearing(direct);
 
             Wind lWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, pWLft, null));
             logger.fine("lWind speed:" + lWind.getKnots() + " angle:" + lWind.getBearing().getDegrees());
+            // System.out.println("Left WindBear: " + (lWind.getBearing().getDegrees() - bearStart.getDegrees()));
             pd.setWind(lWind);
             Bearing lft = pd.optimalDirectionsUpwind()[0];
-            SpeedWithBearing slft = pd.getSpeedAtBearing(lft);
+            slft = pd.getSpeedAtBearing(lft);
 
             Wind rWind = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, pWRght, null));
             logger.fine("rWind speed:" + rWind.getKnots() + " angle:" + rWind.getBearing().getDegrees());
+            // System.out.println("Right WindBear: " + (rWind.getBearing().getDegrees() - bearStart.getDegrees()));
             pd.setWind(rWind);
             Bearing rght = pd.optimalDirectionsUpwind()[1];
-            SpeedWithBearing srght = pd.getSpeedAtBearing(rght);
+            srght = pd.getSpeedAtBearing(rght);
+
+            // System.out.println("Bearings : " + (lft.getDegrees() - bearStart.getDegrees()) + " "
+            // + (rght.getDegrees() - bearStart.getDegrees()));
 
             logger.fine("left boat speed:" + slft.getKnots() + " angle:" + slft.getBearing().getDegrees()
                     + "  right boat speed:" + srght.getKnots() + " angle:" + srght.getBearing().getDegrees());
 
-            if (prevDirection == 0) {
-                directTime = new MillisecondsTimePoint(nextTimeVal);
-                leftTime = new MillisecondsTimePoint(nextTimeVal - turnloss);
-                rightTime = new MillisecondsTimePoint(nextTimeVal - turnloss);
-            } else if (prevDirection == 1) {
+            /*
+             * if (prevDirection == 0) { directTime = new MillisecondsTimePoint(nextTimeVal); leftTime = new
+             * MillisecondsTimePoint(nextTimeVal - turnloss); rightTime = new MillisecondsTimePoint(nextTimeVal -
+             * turnloss); } else
+             */
+            if (prevDirection == 1) {
                 directTime = new MillisecondsTimePoint(nextTimeVal - turnloss);
                 leftTime = new MillisecondsTimePoint(nextTimeVal);
                 rightTime = new MillisecondsTimePoint(nextTimeVal - turnloss);
@@ -176,44 +192,176 @@ public class SailingSimulatorImpl implements SailingSimulator {
                 rightTime = new MillisecondsTimePoint(nextTimeVal);
             }
 
-            Position pdirect = sdirect.travelTo(currentPosition, currentTime, directTime);
+            // Position pdirect = sdirect.travelTo(currentPosition, currentTime, directTime);
             Position plft = slft.travelTo(currentPosition, currentTime, leftTime);
             Position prght = srght.travelTo(currentPosition, currentTime, rightTime);
 
-            Distance ddirect = pdirect.getDistance(end);
+            // System.out.println("RelBearLeft : " + (slft.getBearing().getDegrees() - bearStart.getDegrees()));
+            // System.out.println("RelBearRight: " + (srght.getBearing().getDegrees() - bearStart.getDegrees()));
+
+            // Distance ddirect = pdirect.getDistance(end);
             Distance dlft = plft.getDistance(end);
             Distance drght = prght.getDistance(end);
 
-            if (ddirect.compareTo(dlft) <= 0 && ddirect.compareTo(drght) <= 0) {
-                lst.add(new TimedPositionWithSpeedImpl(nextTime, pdirect, sdirect));
-                currentPosition = pdirect;
-                prevDirection = 0;
+            double lDistCM = Math.round(dlft.getMeters() * 1000.) / 1000.;
+            double rDistCM = Math.round(drght.getMeters() * 1000.) / 1000.;
+
+            /*
+             * if (ddirect.compareTo(dlft) <= 0 && ddirect.compareTo(drght) <= 0) { lst.add(new
+             * TimedPositionWithSpeedImpl(nextTime, pdirect, sdirect)); currentPosition = pdirect; prevDirection = 0; }
+             */
+
+            if (prevDirection == -1) {
+
+                if (startLeft) {
+                    lst.add(new TimedPositionWithSpeedImpl(nextTime, plft, slft));
+                    currentPosition = plft;
+                    if (prevDirection == 2) {
+                        allLeft = false;
+                    } else {
+                        stepsLeft++;
+                    }
+                    prevDirection = 1;
+                } else {
+                    lst.add(new TimedPositionWithSpeedImpl(nextTime, prght, srght));
+                    currentPosition = prght;
+                    if (prevDirection == 1) {
+                        allRight = false;
+                    } else {
+                        stepsRight++;
+                    }
+                    prevDirection = 2;
+                }
+
+            } else {
+                // System.out.println("Distance Left - Right: "+lDistCM+" - "+ rDistCM);
+                if (((lDistCM <= rDistCM) && (!allLeft || (stepsLeft < maxLeft)))
+                        || (allRight && (stepsRight >= maxRight))) {
+                    lst.add(new TimedPositionWithSpeedImpl(nextTime, plft, slft));
+                    currentPosition = plft;
+                    if (prevDirection == 2) {
+                        allLeft = false;
+                    } else {
+                        stepsLeft++;
+                    }
+                    prevDirection = 1;
+                } else {
+                    // if (((drght.compareTo(dlft) < 0)&&(stepsRight < maxRight))||(stepsLeft >= maxLeft)) {
+                    lst.add(new TimedPositionWithSpeedImpl(nextTime, prght, srght));
+                    currentPosition = prght;
+                    if (prevDirection == 1) {
+                        allRight = false;
+                    } else {
+                        stepsRight++;
+                    }
+                    prevDirection = 2;
+                }
             }
 
-            if (dlft.compareTo(ddirect) <= 0 && dlft.compareTo(drght) <= 0) {
-                lst.add(new TimedPositionWithSpeedImpl(nextTime, plft, slft));
-                currentPosition = plft;
-                prevDirection = 1;
-            }
-
-            if (drght.compareTo(dlft) <= 0 && drght.compareTo(ddirect) <= 0) {
-                lst.add(new TimedPositionWithSpeedImpl(nextTime, prght, srght));
-                currentPosition = prght;
-                prevDirection = 2;
-            }
             currentTime = nextTime;
 
         }
 
-        long nextTimeVal = currentTime.asMillis() + timeStep;// 30000;
-        TimePoint nextTime = new MillisecondsTimePoint(nextTimeVal);
+        // approach end
+        double bearingToEnd;
+        SpeedWithBearing bearingBoat;
+        if (prevDirection == 1) {
+            bearingToEnd = currentPosition.getBearingGreatCircle(end).getDegrees()
+                    - pd.optimalDirectionsUpwind()[1].getDegrees();
+            bearingBoat = slft;
+        } else {
+            bearingToEnd = pd.optimalDirectionsUpwind()[0].getDegrees()
+                    - currentPosition.getBearingGreatCircle(end).getDegrees();
+            bearingBoat = srght;
+        }
+        bearingToEnd = (bearingToEnd + 360 + 180) % 360 - 180;
+        // System.out.println("b2End:" + bearingToEnd);
+        double bearingToEndSign = Math.signum(bearingToEnd);
+        Position tackPosition = currentPosition;
+        Position tackPositionNew = currentPosition;
+        TimePoint tackTime = currentTime;
+        TimePoint tackTimeNext = currentTime;
+        long searchTime = 500;
+        while (Math.signum(bearingToEnd) == bearingToEndSign) {
+            tackTime = tackTimeNext;
+            tackPosition = tackPositionNew;
+            if (bearingToEnd < 0) {
+                tackTimeNext = new MillisecondsTimePoint(tackTime.asMillis() + searchTime);
+                tackPositionNew = bearingBoat.travelTo(tackPosition, tackTime, tackTimeNext);
+            } else {
+                tackTimeNext = new MillisecondsTimePoint(tackTime.asMillis() - searchTime);
+                tackPositionNew = bearingBoat.travelTo(tackPosition, tackTime, tackTimeNext);
+            }
+            if (prevDirection == 1) {
+                bearingToEnd = tackPositionNew.getBearingGreatCircle(end).getDegrees()
+                        - pd.optimalDirectionsUpwind()[1].getDegrees();
+                // System.out.println("bEnd :" + tackPosition.getBearingGreatCircle(end).getDegrees());
+                // System.out.println("bBoat:" + pd.optimalDirectionsUpwind()[1].getDegrees());
+            } else {
+                bearingToEnd = pd.optimalDirectionsUpwind()[0].getDegrees()
+                        - tackPositionNew.getBearingGreatCircle(end).getDegrees();
+                // System.out.println("bEnd :" + tackPosition.getBearingGreatCircle(end).getDegrees());
+                // System.out.println("bBoat:" + pd.optimalDirectionsUpwind()[0].getDegrees());
+            }
+            bearingToEnd = (bearingToEnd + 360 + 180) % 360 - 180;
+            // System.out.println("b2End:" + bearingToEnd);
+        }
 
-        Wind wndEnd = wf.getWind(new TimedPositionWithSpeedImpl(nextTime, end, null));
-        logger.fine("wndEnd speed:" + wndEnd.getKnots() + " angle:" + wndEnd.getBearing().getDegrees());
+        // scan more detailed between tackPosition and tackPositionNew
+        boolean endIteration = false;
+        while ((Math.abs(bearingToEnd) > 0.1) && (!endIteration)) {
+            TimePoint tackTimeMid = new MillisecondsTimePoint((tackTime.asMillis() + tackTimeNext.asMillis()) / 2);
+            if (tackTimeMid.asMillis() == tackTime.asMillis()) {
+                endIteration = true;
+            }
+            Position tackPositionMid = bearingBoat.travelTo(tackPosition, tackTime, tackTimeMid);
+            if (prevDirection == 1) {
+                bearingToEnd = tackPositionMid.getBearingGreatCircle(end).getDegrees()
+                        - pd.optimalDirectionsUpwind()[1].getDegrees();
+                // System.out.println("bEnd :" + tackPositionMid.getBearingGreatCircle(end).getDegrees());
+                // System.out.println("bBoat:" + pd.optimalDirectionsUpwind()[1].getDegrees());
+            } else {
+                bearingToEnd = pd.optimalDirectionsUpwind()[0].getDegrees()
+                        - tackPositionMid.getBearingGreatCircle(end).getDegrees();
+                // System.out.println("bEnd :" + tackPositionMid.getBearingGreatCircle(end).getDegrees());
+                // System.out.println("bBoat:" + pd.optimalDirectionsUpwind()[0].getDegrees());
+            }
+            bearingToEnd = (bearingToEnd + 360 + 180) % 360 - 180;
+            // System.out.println("fine b2End:" + bearingToEnd);
+            if (Math.signum(bearingToEnd) == bearingToEndSign) {
+                tackPosition = tackPositionMid;
+                tackTime = tackTimeMid;
+            } else {
+                tackPositionNew = tackPositionMid;
+                tackTimeNext = tackTimeMid;
+            }
+        }
+
+        TimePoint tackTimeOpt = new MillisecondsTimePoint((tackTime.asMillis() + tackTimeNext.asMillis()) / 2);
+        Position tackPositionOpt = bearingBoat.travelTo(tackPosition, tackTime, tackTimeOpt);
+
+        // System.out.println("tack time:"+tackPosition.)
+        lst.remove(lst.size() - 1);
+        lst.add(new TimedPositionWithSpeedImpl(tackTimeOpt, tackPositionOpt, null));
+
+        currentPosition = tackPosition;
+        currentTime = tackTime;
+
+        Wind wndEnd = wf.getWind(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
+        // System.out.println("wndEnd speed:" + wndEnd.getKnots() + " angle:" + wndEnd.getBearing().getDegrees());
         pd.setWind(wndEnd);
         Bearing bearEnd = currentPosition.getBearingGreatCircle(end);
+        // System.out.println("bearEnd angle:" + bearEnd.getDegrees());
         SpeedWithBearing spdEnd = pd.getSpeedAtBearing(bearEnd);
-        lst.add(new TimedPositionWithSpeedImpl(nextTime, end, spdEnd));
+
+        long nextTimeVal = currentTime.asMillis()
+                + Math.round(currentPosition.getDistance(end).getMeters() / spdEnd.getMetersPerSecond()) * 1000;// 30000;
+        // System.out.println("time:" + currentTime.asMillis() + " " + currentPosition.getDistance(end).getMeters()
+        // + " speed:" + spdEnd.getMetersPerSecond());
+        // System.out.println("next:" + nextTimeVal);
+        TimePoint nextTime = new MillisecondsTimePoint(nextTimeVal + turnloss);
+
+        lst.add(new TimedPositionWithSpeedImpl(nextTime, end, null));
 
         return new PathImpl(lst, wf);
     }
@@ -223,8 +371,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
     //
 
     // find minimum duration in alternate steps from h1=hidx to the calling h2
-    private durP findMinDur(ArrayList<durP> alldur) {
-        durP mindur = alldur.get(0);
+    private DPDuration findMinDur(ArrayList<DPDuration> alldur) {
+        DPDuration mindur = alldur.get(0);
         for (int i = 0; i < alldur.size(); i++) {
             if (alldur.get(i).duration < mindur.duration) {
                 mindur = alldur.get(i);
@@ -235,11 +383,11 @@ public class SailingSimulatorImpl implements SailingSimulator {
     }
 
     // calculate duration of step from position p1 to position p2 at time curtime from side of wind side1
-    private durP calcDuration(TimePoint curtime, int side1, Position p1, Position p2, WindField windField,
+    private DPDuration calcDuration(TimePoint curtime, int side1, Position p1, Position p2, WindField windField,
             PolarDiagram polarDiagram) {
 
         // set turnloss to be approximately 4sec (until polardiagram has getTurnloss() method)
-        long turnloss = 4000;
+        long turnloss = polarDiagram.getTurnLoss(); // 4000;
 
         // System.out.println("p1: "+p1+" p2:"+p2);
 
@@ -279,12 +427,12 @@ public class SailingSimulatorImpl implements SailingSimulator {
         } else {
             side2 = (int) Math.signum(relativeBearing.getDegrees());
         }
-        if ((side1 != 0)&&(side2 != 0)&&(side1 == -side2)) {
+        if ((side1 != 0) && (side2 != 0) && (side1 == -side2)) {
             timeToP = timeToP + turnloss;
         }
 
         // return arrival time at p2 and wind side at p2 as durP instance
-        durP durToP = new durP(timeToP, side2, 0, 0);
+        DPDuration durToP = new DPDuration(timeToP, side2, 0, 0);
 
         return durToP;
     }
@@ -292,8 +440,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
     // duration parameters: duration in millis, side of the wind, referencing horizontal grid column hidx,
     // and path index pidx (pidx currently unused, maybe used for structuring in groups of equivalent time, see
     // prototype R-script)
-    class durP {
-        public durP(long dur, int sid, int h, int p) {
+    class DPDuration {
+        public DPDuration(long dur, int sid, int h, int p) {
             duration = dur;
             side = sid;
             hidx = h;
@@ -307,8 +455,8 @@ public class SailingSimulatorImpl implements SailingSimulator {
     }
 
     // location parameters: horizontal grid index idx, duration dur to reach this point (within path)
-    class locP {
-        public locP(int i, long d) {
+    class DPLocation {
+        public DPLocation(int i, long d) {
             idx = i;
             dur = d;
         }
@@ -318,7 +466,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
     }
 
     // dynamic programming forward iteration main algorithm (see also R-script prototype)
-    private Path createDP() {
+    private Path createDynProgForward() {
 
         // retrieve simulation parameters
         Boundary boundary = new RectangularBoundary(simulationParameters.getCourse().get(0), simulationParameters
@@ -329,38 +477,41 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Position end = simulationParameters.getCourse().get(1);
         TimePoint startTime = windField.getStartTime();
 
-        // the solution path
-        LinkedList<TimedPositionWithSpeed> lst = new LinkedList<TimedPositionWithSpeed>();
+        // the optimal path
+        LinkedList<TimedPositionWithSpeed> optPath = new LinkedList<TimedPositionWithSpeed>();
 
         // initiate grid: since performance is good, make it somewhat larger than what we do with dijkstra
-        int sgridv = (int) Math.round(1.5 * simulationParameters.getProperty("Djikstra.gridv[int]").intValue()); // number
-                                                                                                                 // of
-                                                                                                                 // vertical
-                                                                                                                 // grid
-                                                                                                                 // steps
-        int sgridh = (int) Math.round(1.5 * simulationParameters.getProperty("Djikstra.gridh[int]").intValue()); // number
-                                                                                                                 // of
-                                                                                                                 // horizontal
-                                                                                                                 // grid
-                                                                                                                 // steps
+        int spatialGridsizeVertical = 15; // 21; //(int) Math.round(1.5 *
+                         // simulationParameters.getProperty("Djikstra.gridv[int]").intValue()); // number
+                         // of
+                         // vertical
+                         // grid
+                         // steps
+        // Formula: sgridh ~ xscale*sgridv/tan(beatangle*pi/180)
+        int spatialGridsizeHorizontal = 121; // (25-1)*5; //(41-1)*5; //(int) Math.round(2 *
+                          // simulationParameters.getProperty("Djikstra.gridh[int]").intValue()); // number
+                          // of
+                          // horizontal
+                          // grid
+                          // steps
 
         // make horizontal grid size uneven, to have an index for the middle line
-        if (sgridh % 2 == 0) {
-            sgridh++;
+        if (spatialGridsizeHorizontal % 2 == 0) {
+            spatialGridsizeHorizontal++;
         }
 
         // generate grid positions using sgridh and sgridv
-        Position[][] sailGrid = boundary.extractGrid(sgridh, sgridv);
+        Position[][] sailGrid = boundary.extractGrid(spatialGridsizeHorizontal, spatialGridsizeVertical);
 
         // optimization grid indexes:
         // vertical steps: 0, ..., v-1
         // horizontal steps: -gridh, ..., 0, ..., +gridh
-        int gridv = sgridv;
-        int gridh = sgridh / 2;
+        int optimizationGridsizeVertical = spatialGridsizeVertical;
+        int optimizationGridsizeHorizontal = spatialGridsizeHorizontal / 2;
 
-        ArrayList<durP> alldur;
-        ArrayList<ArrayList<Vector<locP>>> paths = new ArrayList<ArrayList<Vector<locP>>>();
-        ArrayList<durP> duras = new ArrayList<durP>();
+        ArrayList<DPDuration> alldur;
+        ArrayList<ArrayList<Vector<DPLocation>>> paths = new ArrayList<ArrayList<Vector<DPLocation>>>();
+        ArrayList<DPDuration> duras = new ArrayList<DPDuration>();
 
         // in each vertical step, paths having the same minimum duration are kept
         double mintol = 1.0; // threshold of closeness to realy minimum duration for keeping paths
@@ -368,63 +519,62 @@ public class SailingSimulatorImpl implements SailingSimulator {
                             // memory]
 
         // loop over vertical steps
-        for (int idxv = 0; idxv < (gridv - 1); idxv++) {
+        for (int idxv = 0; idxv < (optimizationGridsizeVertical - 1); idxv++) {
 
             // System.out.println("  vstep: "+idxv);
 
-            ArrayList<ArrayList<Vector<locP>>> pathsnew = new ArrayList<ArrayList<Vector<locP>>>();
-            ArrayList<durP> durasnew = new ArrayList<durP>();
+            ArrayList<ArrayList<Vector<DPLocation>>> pathsnew = new ArrayList<ArrayList<Vector<DPLocation>>>();
+            ArrayList<DPDuration> durasnew = new ArrayList<DPDuration>();
 
             // get start boundary correct
             int range1;
             if (idxv == 0) {
                 range1 = 0;
-                duras.add(new durP(startTime.asMillis(), 0, 0, 0));
             } else {
-                range1 = gridh;
+                range1 = optimizationGridsizeHorizontal;
             }
 
             // get end boundary correct
             int range2;
-            if (idxv == (gridv - 2)) {
+            if (idxv == (optimizationGridsizeVertical - 2)) {
                 range2 = 0;
             } else {
-                range2 = gridh;
+                range2 = optimizationGridsizeHorizontal;
             }
 
             // target loop: idxh2
             for (int idxh2 = -range2; idxh2 <= range2; idxh2++) {
 
-                alldur = new ArrayList<durP>();
-
-                // origin loop: idxh1
-                for (int idxh1 = -range1; idxh1 <= range1; idxh1++) {
-
-                    // calculate the time to go from [idxv,idxh1] to [idxv+1,idxh2]
-                    durP durationh1h2 = calcDuration(new MillisecondsTimePoint(duras.get(idxh1 + range1).duration),
-                            duras.get(idxh1 + range1).side, sailGrid[idxv][idxh1 + gridh], sailGrid[idxv + 1][idxh2
-                                    + gridh], windField, polarDiagram);
-
-                    // *forbidden* angles
-                    if (durationh1h2.duration < 0) {
-                        continue;
-                    }
-
-                    // remember durations of current vertical step in alldur
-                    durationh1h2.hidx = idxh1 + range1;
-                    alldur.add(durationh1h2);
-
-                } // horizontal origin loop: idxh1
+                alldur = new ArrayList<DPDuration>();
 
                 if (idxv > 0) { // if not at start of the grid
 
-                    if (idxv != (gridv - 2)) { // if not at end of the grid
+                    // origin loop: idxh1
+                    for (int idxh1 = -range1; idxh1 <= range1; idxh1++) {
+
+                        // calculate the time to go from [idxv,idxh1] to [idxv+1,idxh2]
+                        DPDuration durationh1h2 = calcDuration(new MillisecondsTimePoint(duras.get(idxh1 + range1).duration),
+                                duras.get(idxh1 + range1).side, sailGrid[idxv][idxh1 + optimizationGridsizeHorizontal], sailGrid[idxv + 1][idxh2
+                                        + optimizationGridsizeHorizontal], windField, polarDiagram);
+
+                        // *forbidden* angles
+                        if (durationh1h2.duration < 0) {
+                            continue;
+                        }
+
+                        // remember durations of current vertical step in alldur
+                        durationh1h2.hidx = idxh1 + range1;
+                        alldur.add(durationh1h2);
+
+                    } // horizontal origin loop: idxh1
+
+                    if (idxv != (optimizationGridsizeVertical - 2)) { // if not at end of the grid
 
                         // find minimum duration in alldur
-                        durP mindur = findMinDur(alldur);
+                        DPDuration mindur = findMinDur(alldur);
 
                         // remember minimum duration for reaching [idxv,idxh2]
-                        durP tdur = new durP(mindur.duration, mindur.side, idxh2 + gridh, 0);
+                        DPDuration tdur = new DPDuration(mindur.duration, mindur.side, idxh2 + optimizationGridsizeHorizontal, 0);
                         durasnew.add(tdur);
 
                         // keep all (see mintol, maxeqpaths) paths with minimum duration for reaching [idxv,idxh2]
@@ -432,18 +582,18 @@ public class SailingSimulatorImpl implements SailingSimulator {
                         for (int j = 0; j < alldur.size(); j++) {
 
                             if ((alldur.get(j).duration <= mintol * mindur.duration) && (k < maxeqpaths)) {
-                                ArrayList<Vector<locP>> npaths;
-                                if ((pathsnew.size() > 0) && (pathsnew.size() == (idxh2 + gridh + 1))) {
-                                    npaths = pathsnew.get(idxh2 + gridh);
+                                ArrayList<Vector<DPLocation>> npaths;
+                                if ((pathsnew.size() > 0) && (pathsnew.size() == (idxh2 + optimizationGridsizeHorizontal + 1))) {
+                                    npaths = pathsnew.get(idxh2 + optimizationGridsizeHorizontal);
                                 } else {
-                                    npaths = new ArrayList<Vector<locP>>();
+                                    npaths = new ArrayList<Vector<DPLocation>>();
                                     pathsnew.add(npaths);
                                 }
-                                ArrayList<Vector<locP>> tpaths = paths.get(alldur.get(j).hidx);
+                                ArrayList<Vector<DPLocation>> tpaths = paths.get(alldur.get(j).hidx);
                                 for (int i = 0; i < tpaths.size(); i++) {
-                                    Vector<locP> tpath;
-                                    tpath = (Vector<locP>) (tpaths.get(i)).clone();
-                                    tpath.add(new locP(idxh2, mindur.duration));
+                                    Vector<DPLocation> tpath;
+                                    tpath = (Vector<DPLocation>) (tpaths.get(i)).clone();
+                                    tpath.add(new DPLocation(idxh2, mindur.duration));
                                     npaths.add(tpath);
                                 }
                                 k++;
@@ -454,10 +604,10 @@ public class SailingSimulatorImpl implements SailingSimulator {
                     } else {
 
                         // find minimum in alldur
-                        durP mindur = findMinDur(alldur);
+                        DPDuration mindur = findMinDur(alldur);
 
                         // remember minimum duration for reaching [idxv,idxh2]
-                        durP tdur = new durP(mindur.duration, mindur.side, 0, 0);
+                        DPDuration tdur = new DPDuration(mindur.duration, mindur.side, 0, 0);
                         durasnew.add(tdur);
 
                         // keep all (see mintol, maxeqpaths) paths with minimum duration for reaching [idxv,idxh2]
@@ -465,18 +615,18 @@ public class SailingSimulatorImpl implements SailingSimulator {
                         for (int j = 0; j < alldur.size(); j++) {
 
                             if ((alldur.get(j).duration <= mintol * mindur.duration) && (k < maxeqpaths)) {
-                                ArrayList<Vector<locP>> npaths;
+                                ArrayList<Vector<DPLocation>> npaths;
                                 if ((pathsnew.size() > 0) && (pathsnew.size() == (idxh2 + range2 + 1))) {
                                     npaths = pathsnew.get(idxh2 + range2);
                                 } else {
-                                    npaths = new ArrayList<Vector<locP>>();
+                                    npaths = new ArrayList<Vector<DPLocation>>();
                                     pathsnew.add(npaths);
                                 }
-                                ArrayList<Vector<locP>> tpaths = paths.get(alldur.get(j).hidx);
+                                ArrayList<Vector<DPLocation>> tpaths = paths.get(alldur.get(j).hidx);
                                 for (int i = 0; i < tpaths.size(); i++) {
-                                    Vector<locP> tpath;
-                                    tpath = (Vector<locP>) (tpaths.get(i)).clone();
-                                    tpath.add(new locP(0, mindur.duration));
+                                    Vector<DPLocation> tpath;
+                                    tpath = (Vector<DPLocation>) (tpaths.get(i)).clone();
+                                    tpath.add(new DPLocation(0, mindur.duration));
                                     npaths.add(tpath);
                                 }
                                 k++;
@@ -487,16 +637,16 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
                 } else { // start of grid
 
-                    Vector<locP> tpath = new Vector<locP>();
-                    tpath.add(new locP(0, startTime.asMillis()));
-                    ArrayList<Vector<locP>> tpaths = new ArrayList<Vector<locP>>();
+                    Vector<DPLocation> tpath = new Vector<DPLocation>();
+                    tpath.add(new DPLocation(0, startTime.asMillis()));
+                    ArrayList<Vector<DPLocation>> tpaths = new ArrayList<Vector<DPLocation>>();
                     tpaths.add(tpath);
                     pathsnew.add(tpaths);
-                    durP tdur = calcDuration(startTime, 0, sailGrid[0][gridh], sailGrid[1][idxh2 + gridh], windField,
+                    DPDuration tdur = calcDuration(startTime, 0, sailGrid[0][optimizationGridsizeHorizontal], sailGrid[1][idxh2 + optimizationGridsizeHorizontal], windField,
                             polarDiagram);
-                    tdur.hidx = idxh2 + gridh;
+                    tdur.hidx = idxh2 + optimizationGridsizeHorizontal;
                     durasnew.add(tdur);
-                    tpath.add(new locP(idxh2, tdur.duration));
+                    tpath.add(new DPLocation(idxh2, tdur.duration));
                 }
 
             } // horizontal target loop: idxh2
@@ -520,15 +670,15 @@ public class SailingSimulatorImpl implements SailingSimulator {
             // for(int j=0; j<paths.get(i).size(); j++) {
             for (int j = 0; j < 1; j++) { // restrict to first path
                 for (int k = 0; k < paths.get(i).get(j).size(); k++) {
-                    Position p = sailGrid[k][paths.get(i).get(j).get(k).idx + gridh];
+                    Position p = sailGrid[k][paths.get(i).get(j).get(k).idx + optimizationGridsizeHorizontal];
                     TimePoint t = new MillisecondsTimePoint(paths.get(i).get(j).get(k).dur);
                     // System.out.println("deltaT: "+(t.asMillis()-startTime.asMillis())/1000.);
-                    lst.add(new TimedPositionWithSpeedImpl(t, p, null));
+                    optPath.add(new TimedPositionWithSpeedImpl(t, p, null));
                 }
             }
         }
 
-        return new PathImpl(lst, windField);
+        return new PathImpl(optPath, windField);
     }
 
     private Path createDjikstra() {
@@ -886,7 +1036,20 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
     }
 
-    private Path create1Turn(boolean tleft) {
+    class result1Turn {
+        public result1Turn(Path[] p, char s, int n) {
+            paths = p;
+            side = s;
+            middle = n;
+        }
+
+        Path[] paths;
+        char side;
+        int middle;
+    }
+
+    
+    private result1Turn create1Turn(boolean leftSide) {
 
         WindFieldGenerator windField = simulationParameters.getWindField();
         PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
@@ -894,86 +1057,93 @@ public class SailingSimulatorImpl implements SailingSimulator {
         Position end = simulationParameters.getCourse().get(1);
         TimePoint startTime = windField.getStartTime();// new MillisecondsTimePoint(0);
 
+        long turnloss = polarDiagram.getTurnLoss(); // 4000;
+
         Distance courseLength = start.getDistance(end);
+        Bearing bearStart2End = start.getBearingGreatCircle(end);
         Position currentPosition = start;
         TimePoint currentTime = startTime;
         TimePoint nextTime;
 
         double reachingTolerance = 0.03;
-        int smax = 400;
-        double[] reachTime = new double[smax];
-        boolean tfound;
-        long tdelta = windField.getTimeStep().asMillis() / 5;
+        int stepMax = 800;
+        double[] reachTime = new double[stepMax];
+        boolean targetFound;
+        long timeStep = windField.getTimeStep().asMillis() / 5;
         Bearing direction;
 
-        double newdist;
-        double mindist = courseLength.getMeters();
-        double allmindist = courseLength.getMeters();
-        //int allmins = smax;
+        double newDistance;
+        double minimumDistance = courseLength.getMeters();
+        double overallMinimumDistance = courseLength.getMeters();
+        int stepOfOverallMinimumDistance = stepMax;
         LinkedList<TimedPositionWithSpeed> path = null;
+        LinkedList<TimedPositionWithSpeed> prevpath = null;
+        LinkedList<TimedPositionWithSpeed> xpath1 = null;
+        LinkedList<TimedPositionWithSpeed> xpath2 = null;
+
         LinkedList<TimedPositionWithSpeed> allminpath = null;
 
-        for (int s = 0; s < smax; s++) {
+        for (int step = 0; step < stepMax; step++) {
 
             currentPosition = start;
             currentTime = startTime;
-            reachTime[s] = courseLength.getMeters();
-            tfound = false;
-            mindist = courseLength.getMeters();
+            reachTime[step] = courseLength.getMeters();
+            targetFound = false;
+            minimumDistance = courseLength.getMeters();
             path = new LinkedList<TimedPositionWithSpeed>();
-            path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null)); // currSpeed));
+            path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
 
-            int l = 0;
-            while ((l < s) && (!tfound)) {
+            int stepLeft = 0;
+            while ((stepLeft < step) && (!targetFound)) {
 
-                SpeedWithBearing currWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
-                polarDiagram.setWind(currWind);
-                if (tleft) {
+                SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+                polarDiagram.setWind(currentWind);
+                if (leftSide) {
                     direction = polarDiagram.optimalDirectionsUpwind()[0];
                 } else {
                     direction = polarDiagram.optimalDirectionsUpwind()[1];
                 }
                 SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
-                nextTime = new MillisecondsTimePoint(currentTime.asMillis() + tdelta);
+                nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
                 Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
-                newdist = nextPosition.getDistance(end).getMeters();
-                if (newdist < mindist) {
-                    mindist = newdist;
+                newDistance = nextPosition.getDistance(end).getMeters();
+                if (newDistance < minimumDistance) {
+                    minimumDistance = newDistance;
                 }
                 currentPosition = nextPosition;
                 currentTime = nextTime;
-                path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null)); // currSpeed));
+                path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
 
                 if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
-                    reachTime[s] = mindist;
-                    tfound = true;
-                    if (mindist < allmindist) {
-                        allmindist = mindist;
-                        //allmins = s;
+                    reachTime[step] = minimumDistance;
+                    targetFound = true;
+                    if (minimumDistance < overallMinimumDistance) {
+                        overallMinimumDistance = minimumDistance;
+                        stepOfOverallMinimumDistance = step;
                         allminpath = path;
                     }
                 }
-                l++;
+                stepLeft++;
             }
 
-            currentTime = new MillisecondsTimePoint(currentTime.asMillis() + 4000);
+            currentTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
 
-            int r = 0;
-            while ((r < (smax - s)) && (!tfound)) {
+            int stepRight = 0;
+            while ((stepRight < (stepMax - step)) && (!targetFound)) {
 
-                SpeedWithBearing currWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
-                polarDiagram.setWind(currWind);
-                if (tleft) {
+                SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
+                polarDiagram.setWind(currentWind);
+                if (leftSide) {
                     direction = polarDiagram.optimalDirectionsUpwind()[1];
                 } else {
                     direction = polarDiagram.optimalDirectionsUpwind()[0];
                 }
                 SpeedWithBearing currSpeed = polarDiagram.getSpeedAtBearing(direction);
-                nextTime = new MillisecondsTimePoint(currentTime.asMillis() + tdelta);
+                nextTime = new MillisecondsTimePoint(currentTime.asMillis() + timeStep);
                 Position nextPosition = currSpeed.travelTo(currentPosition, currentTime, nextTime);
-                newdist = nextPosition.getDistance(end).getMeters();
-                if (newdist < mindist) {
-                    mindist = newdist;
+                newDistance = nextPosition.getDistance(end).getMeters();
+                if (newDistance < minimumDistance) {
+                    minimumDistance = newDistance;
                 }
                 currentPosition = nextPosition;
                 currentTime = nextTime;
@@ -981,101 +1151,110 @@ public class SailingSimulatorImpl implements SailingSimulator {
 
                 if (currentPosition.getDistance(end).getMeters() < reachingTolerance * courseLength.getMeters()) {
                     // System.out.println(""+s+":"+path.size()+" dist:"+mindist);
-                    reachTime[s] = mindist;
-                    tfound = true;
-                    if (mindist < allmindist) {
-                        allmindist = mindist;
-                        //allmins = s;
-                        allminpath = path;
+                    Bearing bearPath2End = currentPosition.getBearingGreatCircle(end);
+                    double bearDiff = bearPath2End.getDegrees() - bearStart2End.getDegrees();
+                    // System.out.println(""+s+": "+mindist+" bearDiff: "+bearDiff);
+                    reachTime[step] = minimumDistance * Math.signum(bearDiff);
+                    if ((prevpath != null) && (Math.signum(reachTime[step]) != Math.signum(reachTime[step - 1]))) {
+                        xpath1 = path;
+                        xpath2 = prevpath;
+                    }
+                    prevpath = path;
+                    if (start.getDistance(currentPosition).getMeters() > start.getDistance(end).getMeters()) {
+                        targetFound = true;
+                    }
+                    if (minimumDistance < overallMinimumDistance) {
+                        overallMinimumDistance = minimumDistance;
+                        stepOfOverallMinimumDistance = step;
+                        allminpath = new LinkedList<TimedPositionWithSpeed>(path);
                     }
                 }
-                r++;
+                stepRight++;
             }
         }
 
-        // for (int i=0; i<reachTime.length; i++) { System.out.println(""+i+": "+reachTime[i]); } 
+        /*
+         * for (int i=0; i<reachTime.length; i++) { System.out.println(""+i+": "+reachTime[i]); }
+         */
 
-        return new PathImpl(allminpath, windField);
+        //PathImpl[] paths = new PathImpl[2];
+        // paths[0] = new PathImpl(xpath1,windField);
+        // paths[1] = new PathImpl(xpath2, windField);
+        PathImpl[] paths = new PathImpl[1];
+        paths[0] = new PathImpl(allminpath, windField);
+        char side;
+        if (leftSide) {
+            side = 'L';
+        } else {
+            side = 'R';
+        }
+        return new result1Turn(paths, side, stepOfOverallMinimumDistance);
 
     }
 
     @Override
     public Map<String, Path> getAllPaths() {
+
         Map<String, Path> allPaths = new HashMap<String, Path>();
-        // allPaths.put("Dummy", createDummy());
-        // allPaths.put("1-Turner Right", createOneTurnRight());
-        // allPaths.put("1-Turner Left", createOneTurnLeft());
-        allPaths.put("Opportunistic", createHeuristic());
-        allPaths.put("Omniscient", createDjikstra());
-        // allPaths.put("Omniscient", createDP());
+
+        // get 1-turners
+        result1Turn left1TurnResult = create1Turn(true);
+        Path leftPath = left1TurnResult.paths[0];
+        result1Turn right1TurnResult = create1Turn(false);
+        Path rightPath = right1TurnResult.paths[0];
+
+        // get left- and right-going heuristic based on 1-turner
+        Path oppPathL = createHeuristic(left1TurnResult.middle, right1TurnResult.middle, true);
+        Path oppPathR = createHeuristic(left1TurnResult.middle, right1TurnResult.middle, false);
+        Path oppPath = null;
+        if (oppPathL.getPathPoints().get(oppPathL.getPathPoints().size() - 1).getTimePoint().asMillis() <= oppPathR
+                .getPathPoints().get(oppPathR.getPathPoints().size() - 1).getTimePoint().asMillis()) {
+            oppPath = oppPathL;
+        } else {
+            oppPath = oppPathR;
+        }
+        Path optPath = createDynProgForward();
+
+        if (leftPath.getPathPoints() != null) {
+            if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath
+                    .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
+                optPath = leftPath;
+            }
+            allPaths.put("1-Turner Left", leftPath);
+        }
+
+        if (rightPath.getPathPoints() != null) {
+            if (rightPath.getPathPoints().get(rightPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath
+                    .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
+                optPath = rightPath;
+            }
+            allPaths.put("1-Turner Right", rightPath);
+        }
+
+        if (oppPath != null) {
+            if (oppPath.getPathPoints().get(oppPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath
+                    .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
+                optPath = oppPath;
+            }
+            allPaths.put("Opportunistic", oppPath);
+        }
+
+        allPaths.put("Omniscient", optPath);
+
         return allPaths;
     }
 
     public Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(long millisecondsStep) {
 
-        Map<String, List<TimedPositionWithSpeed>> allPaths = new HashMap<String, List<TimedPositionWithSpeed>>();
-        // allPaths.put("Dummy", createDummy().getEvenTimedPoints(millisecondsStep));
-        // allPaths.put("1-Turner Right", createOneTurnRight().getEvenTimedPoints(millisecondsStep));
-        /*
-         * Path oneLeft = createOneTurnLeft(); Path oneRight = createOneTurnRight(); if (oneLeft != null)
-         * allPaths.put("1-Turner Left", oneLeft.getEvenTimedPoints(millisecondsStep)); if (oneRight != null)
-         * allPaths.put("1-Turner Right", oneRight.getEvenTimedPoints(millisecondsStep)); allPaths.put("Opportunistic",
-         * createHeuristic().getEvenTimedPoints(millisecondsStep)); allPaths.put("Omniscient",
-         * createDjikstra().getEvenTimedPoints(millisecondsStep)); //allPaths.put("Omniscient",
-         * createDP().getEvenTimedPoints(millisecondsStep));
-         */
+        Map<String, List<TimedPositionWithSpeed>> allTimedPaths = new HashMap<String, List<TimedPositionWithSpeed>>();
 
-        Path leftPath = create1Turn(true);
-        Path rightPath = create1Turn(false);
-        Path oppPath = createHeuristic();
-        Path optPath = createDP();
-
-        if (false) {
-
-            if (leftPath != null) {
-                allPaths.put("1-Turner Left", leftPath.getEvenTimedPoints(millisecondsStep));
-            }
-
-            if (rightPath != null) {
-                allPaths.put("1-Turner Right", rightPath.getEvenTimedPoints(millisecondsStep));
-            }
-
-            if (oppPath != null) {
-                allPaths.put("Opportunistic", oppPath.getEvenTimedPoints(millisecondsStep));
-            }
-
-        } else {
-
-            if (leftPath != null) {
-                if (leftPath.getPathPoints().get(leftPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath
-                        .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
-                    optPath = leftPath;
-                }
-                allPaths.put("1-Turner Left", leftPath.getEvenTimedPoints(millisecondsStep));
-            }
-
-            if (rightPath != null) {
-                if (rightPath.getPathPoints().get(rightPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath
-                        .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
-                    optPath = rightPath;
-                }
-                allPaths.put("1-Turner Right", rightPath.getEvenTimedPoints(millisecondsStep));
-            }
-
-            if (oppPath != null) {
-                if (oppPath.getPathPoints().get(oppPath.getPathPoints().size() - 1).getTimePoint().asMillis() <= optPath
-                        .getPathPoints().get(optPath.getPathPoints().size() - 1).getTimePoint().asMillis()) {
-                    optPath = oppPath;
-                }
-                allPaths.put("Opportunistic", oppPath.getEvenTimedPoints(millisecondsStep));
-            }
-
+        Map<String, Path> allPaths = this.getAllPaths();
+        String[] allKeys = allPaths.keySet().toArray(new String[0]);
+        for (String currentKey : allKeys) {
+            allTimedPaths.put(currentKey, allPaths.get(currentKey).getEvenTimedPoints(millisecondsStep));
         }
 
-        // allPaths.put(, createHeuristic().getEvenTimedPoints(millisecondsStep));
-        allPaths.put("Omniscient", optPath.getEvenTimedPoints(millisecondsStep));
-
-        return allPaths;
+        return allTimedPaths;
     }
 
 }
