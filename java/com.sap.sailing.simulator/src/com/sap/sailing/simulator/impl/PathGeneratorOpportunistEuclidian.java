@@ -18,7 +18,7 @@ import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.WindFieldGenerator;
 
-public class PathGeneratorOpportunistic implements PathGenerator {
+public class PathGeneratorOpportunistEuclidian implements PathGenerator {
 
     private static Logger logger = Logger.getLogger("com.sap.sailing");
     SimulationParameters simulationParameters;
@@ -26,7 +26,7 @@ public class PathGeneratorOpportunistic implements PathGenerator {
     int maxRight;
     boolean startLeft;
     
-    public PathGeneratorOpportunistic(SimulationParameters params) {
+    public PathGeneratorOpportunistEuclidian(SimulationParameters params) {
         simulationParameters = params;
     }
 

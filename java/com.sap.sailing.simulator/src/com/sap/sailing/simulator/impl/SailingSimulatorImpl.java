@@ -45,7 +45,7 @@ public class SailingSimulatorImpl implements SailingSimulator {
         int right1TurnMiddle = gen1Turner.getMiddle();
 
         // get left- and right-going heuristic based on 1-turner
-        PathGeneratorOpportunistic genOpportunistic = new PathGeneratorOpportunistic(simulationParameters);
+        PathGeneratorOpportunistEuclidian genOpportunistic = new PathGeneratorOpportunistEuclidian(simulationParameters);
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, true);
         Path oppPathL = genOpportunistic.getPath();
         genOpportunistic.setEvaluationParameters(left1TurnMiddle, right1TurnMiddle, false);
