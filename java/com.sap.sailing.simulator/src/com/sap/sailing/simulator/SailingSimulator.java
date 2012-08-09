@@ -8,7 +8,6 @@ public interface SailingSimulator {
 	void setSimulationParameters(SimulationParameters params);
 	SimulationParameters getSimulationParameters();
 	
-	Path getOptimumPath();
 	Map<String, Path> getAllPaths();
 	Map<String, List<TimedPositionWithSpeed>> getAllPathsEvenTimed(long millisecondsStep);
 
