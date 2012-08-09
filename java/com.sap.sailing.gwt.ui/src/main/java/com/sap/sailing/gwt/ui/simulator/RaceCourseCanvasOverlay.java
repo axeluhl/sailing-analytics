@@ -51,6 +51,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     }
 
+    @SuppressWarnings("unused")
     private class RaceCourseMarkerMouseOverHandler implements MarkerMouseOverHandler {
 
         @Override
@@ -134,7 +135,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
             Point point = getMap().convertLatLngToDivPixel(endPoint);
             drawCircleWithText(point.getX() - getWidgetPosLeft(), point.getY() - getWidgetPosTop(), racecourseBuoySize,
                     racecourseColor, "End");
-       
+
             if (endMarker != null) {
                 endMarker.setLatLng(endPoint);
             } else {
@@ -204,7 +205,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
 
     @Override
     protected void redraw(boolean force) {
-        //System.out.println("method: RaceCourseCanvasOverlay.redraw().");
+        // System.out.println("method: RaceCourseCanvasOverlay.redraw().");
         if (startPoint != null && endPoint != null) {
             setCanvasSettings();
             // drawCanvas();

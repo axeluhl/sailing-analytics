@@ -86,16 +86,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         private SliderBar sliderBar;
         private WindPatternSetting<?> setting;
 
-	public WindControlCapture(SliderBar sliderBar,
-				WindPatternSetting<?> setting) {
+        public WindControlCapture(SliderBar sliderBar, WindPatternSetting<?> setting) {
             this.sliderBar = sliderBar;
             this.setting = setting;
         }
 
         @Override
         public void onValueChange(ValueChangeEvent<Double> arg0) {
-            sliderBar.setTitle(String.valueOf(Math.round(sliderBar
-					.getCurrentValue())));
+            sliderBar.setTitle(String.valueOf(Math.round(sliderBar.getCurrentValue())));
             logger.info("Slider value : " + arg0.getValue());
             setting.setValue(arg0.getValue());
             if (autoUpdate) {
@@ -107,8 +105,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
     private class PatternSelectorHandler implements ChangeHandler {
 
-            private class PatternRetriever implements
-				AsyncCallback<WindPatternDisplay> {
+        private class PatternRetriever implements AsyncCallback<WindPatternDisplay> {
 
             private String windPattern;
 
@@ -118,8 +115,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onFailure(Throwable message) {
-                errorReporter.reportError("Error retreiving wind patterns"
-						+ message.getMessage());
+                errorReporter.reportError("Error retreiving wind patterns" + message.getMessage());
             }
 
             @Override
@@ -143,10 +139,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         @Override
         public void onChange(ChangeEvent arg0) {
 
-            String windPattern = patternSelector.getItemText(patternSelector
-					.getSelectedIndex());
+            String windPattern = patternSelector.getItemText(patternSelector.getSelectedIndex());
             logger.info(windPattern);
-
 
             if (patternDisplayMap.containsKey(windPattern)) {
                 currentWPDisplay = patternDisplayMap.get(windPattern);
@@ -158,8 +152,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             } else {
                 WindPatternDTO pattern = patternNameDTOMap.get(windPattern);
-		simulatorSvc.getWindPatternDisplay(pattern,
-						new PatternRetriever(windPattern));
+                simulatorSvc.getWindPatternDisplay(pattern, new PatternRetriever(windPattern));
             }
             simulatorMap.removeOverlays();
         }
@@ -197,7 +190,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         timer = new Timer(PlayModes.Replay, 1000l);
         timer.setPlaySpeedFactor(30);
         timer.setTime(windParams.getStartTime().getTime());
-        //TO DO make it work for no time panel display
+        // TO DO make it work for no time panel display
         FlowPanel timeSliderWrapperPanel = new FlowPanel();
         timePanel = new TimePanel<TimePanelSettings>(timer, stringMessages);
         timeSliderWrapperPanel.getElement().getStyle().setProperty("height", "20%");
@@ -206,8 +199,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         timePanel.setVisible(false);
         resetTimer();
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
-	LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(
-				stringMessages.simulator(), stringMessages);
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.simulator(), stringMessages);
         logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
         this.addNorth(logoAndTitlePanel, 68);
 
@@ -247,8 +239,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
     private void createOptionsPanel() {
         FlowPanel controlPanel = new FlowPanel();
         FlowPanel controlPanelInnerWrapper = new FlowPanel();
-	controlPanelInnerWrapper.getElement().setClassName(
-				"controlPanelInnerWrapper");
+        controlPanelInnerWrapper.getElement().setClassName("controlPanelInnerWrapper");
         controlPanel.setTitle("Control Settings");
         controlPanel.getElement().setClassName("controlPanel");
         controlPanel.getElement().setId("masterPanelLeft");
@@ -278,8 +269,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
             @Override
             public void onFailure(Throwable message) {
-                errorReporter.reportError("Failed to initialize wind patterns\n"
-								+ message.getMessage());
+                errorReporter.reportError("Failed to initialize wind patterns\n" + message.getMessage());
             }
 
             @Override
@@ -309,7 +299,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         for (WindPatternSetting<?> s : currentWPDisplay.getSettings()) {
             switch (s.getDisplayWidgetType()) {
             case SLIDERBAR:
-                Panel sliderPanel = getSliderPanel(windControlPanel, s);
+                //Panel sliderPanel = getSliderPanel(windControlPanel, s);
                 // windControlPanel.add(sliderPanel);
                 // sliderPanel.getElement().getStyle().setFloat(Style.Float.NONE);
                 break;
@@ -323,6 +313,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         return windControlPanel;
     }
 
+    @SuppressWarnings("unused")
     private Panel getSliderPanel(Panel parentPanel, WindPatternSetting<?> s) {
 
         String labelName = s.getDisplayName();
@@ -351,12 +342,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         sliderBar.addValueChangeHandler(handler);
 
         sliderBar.setLabelFormatter(new SliderBar.LabelFormatter() {
-           
-			@Override
-			public String formatLabel(SliderBar slider, Double value,
-					Double previousValue) {
-				 return String.valueOf(Math.round(value));
-			}
+
+            @Override
+            public String formatLabel(SliderBar slider, Double value, Double previousValue) {
+                return String.valueOf(Math.round(value));
+            }
         });
 
         sliderBar.setCurrentValue(defaultValue);
@@ -408,14 +398,14 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
 
         sailingPanel.add(hp);
         // hp.setSize("80%", "10%");
-        //hp.setWidth("80%");
+        // hp.setWidth("80%");
         Panel raceDirection = createRaceDirectionSelector();
         sailingPanel.add(raceDirection);
-        //raceDirection.setWidth("80%");
+        // raceDirection.setWidth("80%");
 
         Panel strategySelector = createStrategySelector();
         sailingPanel.add(strategySelector);
-        //strategySelector.setWidth("80%");
+        // strategySelector.setWidth("80%");
     }
 
     private void createMapOptionsPanel() {
@@ -436,10 +426,11 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         mapOptions.add(courseInputButton);
         mapOptions.add(busyIndicator);
         rightPanel.add(mapOptions);
-        
+
         initDisplayOptions(mapOptions);
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, windParams, busyIndicator);
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, windParams,
+                busyIndicator);
 
         // FlowPanel mapPanel = new FlowPanel();
         // mapPanel.setTitle("Map");
@@ -553,7 +544,7 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         });
 
         HorizontalPanel p = new HorizontalPanel();
-        //p.add(busyIndicator);
+        // p.add(busyIndicator);
         DecoratorPanel d = new DecoratorPanel();
         p.add(summaryButton);
         p.add(replayButton);

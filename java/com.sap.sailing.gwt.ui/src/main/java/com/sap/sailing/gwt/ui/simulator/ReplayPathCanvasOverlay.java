@@ -8,38 +8,39 @@ import java.util.logging.Logger;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 
-public class ReplayPathCanvasOverlay extends PathCanvasOverlay  {
+public class ReplayPathCanvasOverlay extends PathCanvasOverlay {
 
+    private static final long serialVersionUID = -6284996043723173190L;
     private static Logger logger = Logger.getLogger(ReplayPathCanvasOverlay.class.getName());
-    private  List<WindDTO> windDTOToDraw;
-    
+    private List<WindDTO> windDTOToDraw;
+
     public ReplayPathCanvasOverlay(String name, Timer timer) {
         super(name, timer);
         this.displayWindAlongPath = false;
         windDTOToDraw = null;
-        //this.timer.addTimeListener(this);
+        // this.timer.addTimeListener(this);
         canvas.setStyleName("replayPanel");
     }
-    
+
     @Override
     protected void drawWindField() {
         timeChanged(timer.getTime());
     }
-    
+
     @Override
     public void timeChanged(Date date) {
-        
-       canvas.getContext2d().clearRect(0/*canvas.getAbsoluteLeft()*/, 0/*canvas.getAbsoluteTop()*/, 
-               canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
-       
+
+        canvas.getContext2d().clearRect(0/* canvas.getAbsoluteLeft() */, 0/* canvas.getAbsoluteTop() */,
+                canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+
         windDTOToDraw = new ArrayList<WindDTO>();
-        for(WindDTO windDTO : wl.getMatrix()) {
+        for (WindDTO windDTO : wl.getMatrix()) {
             if (windDTO.timepoint <= date.getTime()) {
                 windDTOToDraw.add(windDTO);
             }
         }
         logger.info("In ReplayPathCanvasOverlay.drawWindField drawing " + windDTOToDraw.size() + " points");
-        
+
         drawWindField(windDTOToDraw);
     }
 

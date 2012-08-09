@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.simulator;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private List<PathCanvasOverlay> replayPathCanvasOverlays;
     private RaceCourseCanvasOverlay raceCourseCanvasOverlay;
     private PathLegendCanvasOverlay legendCanvasOverlay;
-    
+
     private List<TimeListenerWithStoppingCriteria> timeListeners;
 
     private final SimulatorServiceAsync simulatorSvc;
@@ -53,7 +52,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private final ErrorReporter errorReporter;
     private final Timer timer;
     private final SimpleBusyIndicator busyIndicator;
-    
+
     private ColorPalette colorPalette;
 
     private static Logger logger = Logger.getLogger(SimulatorMap.class.getName());
@@ -66,16 +65,15 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     private class ResultManager implements AsyncCallback<SimulatorResultsDTO> {
-    	
-    	private class SortByTimeAsc implements Comparator<PathDTO> {
 
-			@Override
-			public int compare(PathDTO o1, PathDTO o2) {
-				return (int) (o1.getPathTime() - o2.getPathTime());
-			}
-    		
-    	}
-    	
+        /*
+         * private class SortByTimeAsc implements Comparator<PathDTO> {
+         * 
+         * @Override public int compare(PathDTO o1, PathDTO o2) { return (int) (o1.getPathTime() - o2.getPathTime()); }
+         * 
+         * }
+         */
+
         private boolean summaryView;
 
         public ResultManager(boolean summaryView) {
@@ -91,9 +89,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         public void onSuccess(SimulatorResultsDTO result) {
             PathDTO[] paths = result.paths;
             logger.info("Number of Paths : " + paths.length);
-            //SortByTimeAsc sorter = new SortByTimeAsc();
-            //Arrays.sort(paths, sorter);
-            
+            // SortByTimeAsc sorter = new SortByTimeAsc();
+            // Arrays.sort(paths, sorter);
+
             removeOverlays();
             pathCanvasOverlays.clear();
             replayPathCanvasOverlays.clear();
@@ -104,24 +102,23 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 WindFieldDTO pathWindDTO = new WindFieldDTO();
                 pathWindDTO.setMatrix(paths[i].getMatrix());
                 if (summaryView) {
-                    
+
                     PathCanvasOverlay pathCanvasOverlay = new PathCanvasOverlay(paths[i].name);
                     pathCanvasOverlays.add(pathCanvasOverlay);
                     pathCanvasOverlay.pathColor = colorPalette.getNextColor();
                     mapw.addOverlay(pathCanvasOverlay);
-                    pathCanvasOverlay.setWindField(pathWindDTO);    
-                    pathCanvasOverlay.redraw(true); 
+                    pathCanvasOverlay.setWindField(pathWindDTO);
+                    pathCanvasOverlay.redraw(true);
                     legendCanvasOverlay.setPathOverlays(pathCanvasOverlays);
-                    
+
                 } else {
-                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(paths[i].name,timer);
+                    ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(paths[i].name, timer);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.pathColor = colorPalette.getNextColor();
                     mapw.addOverlay(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setWindField(pathWindDTO);
                     legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
-                   
-                    
+
                 }
             }
             legendCanvasOverlay.redraw(true);
@@ -130,7 +127,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 logger.info("Number of windDTO : " + windFieldDTO.getMatrix().size());
                 mapw.addOverlay(windFieldCanvasOverlay);
                 refreshWindFieldOverlay(windFieldDTO);
-                
+
                 timeListeners.clear();
                 timeListeners.add(windFieldCanvasOverlay);
                 for (int i = 0; i < replayPathCanvasOverlays.size(); ++i) {
@@ -141,6 +138,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         }
 
     }
+
     public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
             int xRes, int yRes, Timer timer, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator) {
         this.simulatorSvc = simulatorSvc;
@@ -156,7 +154,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
 
         dataInitialized = false;
         overlaysInitialized = false;
-     
+
         windFieldCanvasOverlay = null;
         pathCanvasOverlays = null;
         replayPathCanvasOverlays = null;
@@ -212,7 +210,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
         // timeListeners.add(replayPathCanvasOverlay);
         legendCanvasOverlay = new PathLegendCanvasOverlay();
-        
+
         overlaysInitialized = true;
     }
 
@@ -256,7 +254,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     private void refreshWindFieldOverlay(final WindFieldDTO wl) {
-        windFieldCanvasOverlay.setWindField(wl);  
+        windFieldCanvasOverlay.setWindField(wl);
         timer.setTime(windParams.getStartTime().getTime());
         windFieldCanvasOverlay.redraw(true);
     }
@@ -277,9 +275,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         windParams.setxRes(xRes);
         windParams.setyRes(yRes);
         busyIndicator.setBusy(true);
-        //simulatorSvc.getPaths(windParams, windPatternDisplay, new PathManager(windPatternDisplay, summaryView));
-        simulatorSvc.getSimulatorResults(windParams, windPatternDisplay, !summaryView, 
-                new ResultManager(summaryView));
+        // simulatorSvc.getPaths(windParams, windPatternDisplay, new PathManager(windPatternDisplay, summaryView));
+        simulatorSvc.getSimulatorResults(windParams, windPatternDisplay, !summaryView, new ResultManager(summaryView));
 
     }
 
@@ -319,21 +316,21 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     }
 
     private void refreshSummaryView(WindPatternDisplay windPatternDisplay) {
-        //removeOverlays();
+        // removeOverlays();
         generatePath(windPatternDisplay, true);
     }
 
     private void refreshReplayView(WindPatternDisplay windPatternDisplay) {
-        //removeOverlays();
+        // removeOverlays();
         generatePath(windPatternDisplay, false);
     }
 
     private void refreshWindDisplayView(WindPatternDisplay windPatternDisplay) {
-        //removeOverlays();
+        // removeOverlays();
         windParams.setDefaultTimeSettings();
-        generateWindField(windPatternDisplay,true);
-        //timeListeners.clear();
-        //timeListeners.add(windFieldCanvasOverlay);
+        generateWindField(windPatternDisplay, true);
+        // timeListeners.clear();
+        // timeListeners.add(windFieldCanvasOverlay);
     }
 
     public void refreshView(ViewName name, WindPatternDisplay windPatternDisplay) {
