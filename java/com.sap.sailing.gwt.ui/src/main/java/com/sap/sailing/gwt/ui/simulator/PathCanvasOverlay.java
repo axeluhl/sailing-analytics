@@ -31,7 +31,7 @@ public class PathCanvasOverlay extends WindFieldCanvasOverlay implements Named {
     /**
      * Generated serial version id.
      */
-    protected static final long serialVersionUID = -6284996043723173190L;
+    private static final long serialVersionUID = -6284996043723173190L;
 
     private static Logger logger = Logger.getLogger(PathCanvasOverlay.class.getName());
     
