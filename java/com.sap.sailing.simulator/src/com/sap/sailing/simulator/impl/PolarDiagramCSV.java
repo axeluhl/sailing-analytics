@@ -17,7 +17,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 
-public class PolarDiagramCSV extends PolarDiagram49 {
+public class PolarDiagramCSV extends PolarDiagramBase {
 
 	public PolarDiagramCSV(String inputFile) throws IOException {
 
@@ -75,13 +75,6 @@ public class PolarDiagramCSV extends PolarDiagram49 {
 		}
 		bfr.close();
 
-		System.out.println(velocity);
-		System.out.println(beatAngles);
-		System.out.println(beatVMG);
-		System.out.println(speeds);
-		System.out.println(runVMG);
-		System.out.println(gybeAngles);
-
 		NavigableMap<Speed, NavigableMap<Bearing, Speed>> mapSpeedTable = new TreeMap<Speed, NavigableMap<Bearing, Speed>>();
 		NavigableMap<Speed, Bearing> mapBeatAngles = new TreeMap<Speed, Bearing>();
 		NavigableMap<Speed, Bearing> mapGybeAngles = new TreeMap<Speed, Bearing>();
@@ -100,12 +93,6 @@ public class PolarDiagramCSV extends PolarDiagram49 {
 			mapBeatSOG.put(velocity.get(i), beatVMG.get(i));
 			mapGybeSOG.put(velocity.get(i), runVMG.get(i));
 		}
-
-		/*
-		 * System.out.println(mapSpeedTable); System.out.println(mapBeatAngles);
-		 * System.out.println(mapGybeAngles); System.out.println(mapBeatSOG);
-		 * System.out.println(mapGybeSOG);
-		 */
 
 		setWind(new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180)));
 

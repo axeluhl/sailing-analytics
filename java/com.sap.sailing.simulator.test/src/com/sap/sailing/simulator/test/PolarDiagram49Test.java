@@ -22,7 +22,7 @@ import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.simulator.PolarDiagram;
-import com.sap.sailing.simulator.impl.PolarDiagram49;
+import com.sap.sailing.simulator.impl.PolarDiagramBase;
 
 import org.junit.Test;
 
@@ -31,7 +31,7 @@ public class PolarDiagram49Test {
     @Test
     public void testPolarDiagram49_1() throws IOException {
     	
-        PolarDiagram polarDiagram = new PolarDiagram49();
+        PolarDiagram polarDiagram = new PolarDiagramBase();
     	
     	NavigableMap<Speed, NavigableMap<Bearing, Speed>> table = polarDiagram.polarDiagramPlot(10.0);
         
