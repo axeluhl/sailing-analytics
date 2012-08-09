@@ -299,7 +299,8 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         for (WindPatternSetting<?> s : currentWPDisplay.getSettings()) {
             switch (s.getDisplayWidgetType()) {
             case SLIDERBAR:
-                //Panel sliderPanel = getSliderPanel(windControlPanel, s);
+                @SuppressWarnings("unused")
+                Panel sliderPanel = getSliderPanel(windControlPanel, s);
                 // windControlPanel.add(sliderPanel);
                 // sliderPanel.getElement().getStyle().setFloat(Style.Float.NONE);
                 break;
@@ -313,7 +314,6 @@ public class SimulatorMainPanel extends SplitLayoutPanel {
         return windControlPanel;
     }
 
-    @SuppressWarnings("unused")
     private Panel getSliderPanel(Panel parentPanel, WindPatternSetting<?> s) {
 
         String labelName = s.getDisplayName();

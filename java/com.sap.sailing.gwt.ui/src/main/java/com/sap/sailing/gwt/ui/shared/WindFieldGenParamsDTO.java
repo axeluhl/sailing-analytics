@@ -15,11 +15,11 @@ public class WindFieldGenParamsDTO implements IsSerializable {
     private Date startTime;
     private Date endTime;
     private Date timeStep;
-   
+
     public WindFieldGenParamsDTO() {
-       setDefaultTimeSettings();
+        setDefaultTimeSettings();
     }
-    
+
     public PositionDTO getNorthWest() {
         return northWest;
     }
@@ -76,12 +76,14 @@ public class WindFieldGenParamsDTO implements IsSerializable {
         this.timeStep = timeStep;
     }
 
+    @SuppressWarnings("deprecation")
     public void setDefaultTimeSettings() {
-        startTime = new Date();//new Date(0);
+        startTime = new Date();// new Date(0);
         startTime.setHours(0);
         startTime.setMinutes(0);
         startTime.setSeconds(0);
-        timeStep = new Date(30*1000);
+
+        timeStep = new Date(30 * 1000);
         endTime = new Date(startTime.getTime() + 10 * 60 * 1000);
     }
 }
