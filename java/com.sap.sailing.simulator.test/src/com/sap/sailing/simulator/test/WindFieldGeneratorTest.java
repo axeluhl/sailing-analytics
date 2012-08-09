@@ -209,7 +209,7 @@ public class WindFieldGeneratorTest {
             }
         }
         assertEquals("Size of windList ", hSteps * vSteps, windList.size());
-        double epsilon = 1e-6;
+        //double epsilon = 1e-6;
         // Check the speed
         assertEquals("StartTime First Wind Speed ", 10, windList.get(0).getKnots(), 0);
     }

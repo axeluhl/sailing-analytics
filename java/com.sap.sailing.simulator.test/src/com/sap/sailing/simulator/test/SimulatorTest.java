@@ -7,10 +7,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.simulator.Path;
@@ -38,8 +36,8 @@ public class SimulatorTest {
         PolarDiagram pd = new PolarDiagram49();//PolarDiagram49.CreateStandard49();
         RectangularBoundary bd = new RectangularBoundary(start, end, 0.1);
         Position[][] positions = bd.extractGrid(10, 10);
-        RectangularBoundary new_bd = new RectangularBoundary(start, end, 0.1);
-        Speed knotSpeed = new KnotSpeedImpl(8);
+        //RectangularBoundary new_bd = new RectangularBoundary(start, end, 0.1);
+        //Speed knotSpeed = new KnotSpeedImpl(8);
         WindControlParameters windParameters = new WindControlParameters(10, 180);
         WindFieldGenerator wf = new WindFieldGeneratorBlastImpl(bd, windParameters);
         wf.setPositionGrid(positions);
