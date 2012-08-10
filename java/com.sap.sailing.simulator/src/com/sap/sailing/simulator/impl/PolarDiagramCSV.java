@@ -50,11 +50,11 @@ public class PolarDiagramCSV extends PolarDiagramBase {
 					beatAngles.add(new DegreeBearingImpl(
 							new Double(elements[i])));
 				break;
-			case "beatvmg":
+			case "beatsog":
 				for (int i = 1; i < elements.length; i++)
 					beatVMG.add(new KnotSpeedImpl(new Double(elements[i])));
 				break;
-			case "runvmg":
+			case "runsog":
 				for (int i = 1; i < elements.length; i++)
 					runVMG.add(new KnotSpeedImpl(new Double(elements[i])));
 				break;
