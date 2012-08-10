@@ -1,8 +1,9 @@
 package com.sap.sailing.simulator.impl;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,9 +21,10 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 public class PolarDiagramCSV extends PolarDiagramBase {
 
 	public PolarDiagramCSV(String inputFile) throws IOException {
-
-		FileReader fr = new FileReader(inputFile);
-		BufferedReader bfr = new BufferedReader(fr);
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		InputStream csvFile = cl.getResourceAsStream(inputFile);
+		InputStreamReader isr = new InputStreamReader(csvFile);
+		BufferedReader bfr = new BufferedReader(isr);
 
 		List<Speed> velocity = new ArrayList<Speed>();
 		List<Bearing> beatAngles = new ArrayList<Bearing>();
@@ -36,7 +38,6 @@ public class PolarDiagramCSV extends PolarDiagramBase {
 			line = bfr.readLine();
 			if (line == null)
 				break;
-			// System.out.println(line);
 			String[] elements = line.split(",");
 			elements[0] = elements[0].replace(" ", "");
 			elements[0] = elements[0].toLowerCase();
@@ -93,7 +94,7 @@ public class PolarDiagramCSV extends PolarDiagramBase {
 			mapBeatSOG.put(velocity.get(i), beatVMG.get(i));
 			mapGybeSOG.put(velocity.get(i), runVMG.get(i));
 		}
-
+		
 		setWind(new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(180)));
 
 		super.speedTable = mapSpeedTable;
