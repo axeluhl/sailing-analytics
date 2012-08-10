@@ -14,10 +14,9 @@ public class PolarDiagramCSVTest {
     @SuppressWarnings("unused")
     @Test
     public void test() throws IOException {
-        PolarDiagram pd = new PolarDiagramCSV("C:\\Users\\i059829\\Desktop\\test.txt");
+        PolarDiagram pd = new PolarDiagramCSV("resources/PolarDiagram49.csv");
 
         assertEquals("No test", 1, 1);
-
     }
 
 }
