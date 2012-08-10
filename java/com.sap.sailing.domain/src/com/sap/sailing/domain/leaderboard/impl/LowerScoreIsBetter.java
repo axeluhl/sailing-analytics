@@ -9,12 +9,12 @@ import java.util.Comparator;
  * @author Axel Uhl (D043530)
  *
  */
-public class LowerScoreIsBetter implements Comparator<Integer>, Serializable {
+public class LowerScoreIsBetter implements Comparator<Double>, Serializable {
     private static final long serialVersionUID = -2767385186133743330L;
 
     @Override
-    public int compare(Integer o1, Integer o2) {
-        return o1-o2;
+    public int compare(Double o1, Double o2) {
+        return Double.valueOf(o1).compareTo(Double.valueOf(o2));
     }
 
 }

@@ -33,6 +33,7 @@ public interface StringMessages extends Messages {
     String total();
     String carry();
     String competitor();
+    String competitors();
     String defaultLeaderboard();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
@@ -62,6 +63,7 @@ public interface StringMessages extends Messages {
     String renameRace();
     String openSelectedLeaderboard();
     String rank();
+    String totalRank();
     String collapse();
     String expand();
     String leg();
@@ -139,7 +141,7 @@ public interface StringMessages extends Messages {
     String port();
     String raceStartTimeColumn();
     String showOnlySelected();
-    String tailLength();
+    String lengthInSeconds();
     String selectedRaces();
     String stressTest();
     String numberOfManeuvers();
@@ -178,6 +180,7 @@ public interface StringMessages extends Messages {
     String jibe();
     String penaltyCircle();
     String markPassing();
+    String mark();
     String otherManeuver();
     String douglasPeuckerPoints();
     String filterRacesByName();
@@ -212,7 +215,7 @@ public interface StringMessages extends Messages {
     String startDateNotAvailable();
     String startDate();
     String unknownManeuver();
-    String tailLengthMustBeNonNegative();
+    String tailLengthMustBePositive();
     String failedToLoadRaceInformation(String message);
     String competitorPassedMarkAtDate(String competitorName, String markName, String dateTime);
     String valueForCompetitorAt(String competitorName, String dateTime, String valueWithUnit);
@@ -291,13 +294,13 @@ public interface StringMessages extends Messages {
     String errorFetchingReplicaData(String message);
     String averageCrossTrackErrorInMeters();
     String enterMaster();
-    String errorStartingReplication(String hostname, String message);
+    String errorStartingReplication(String hostname, String exchangeName, String message);
     String helpLines();
     String startLine();
     String finishLine();
     String advantageLine();
     String courseMiddleLine();
-	/*Start of simulator related messages*/
+    /*Start of simulator related messages*/
     String simulator();
     String optionsBar();
     String update();
@@ -328,7 +331,7 @@ public interface StringMessages extends Messages {
     String replay();
     String display();
     /*End of simulator related messages*/
-    String jmsPortNumber();
+    String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
     String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
@@ -369,4 +372,35 @@ public interface StringMessages extends Messages {
     String boatClassDoesNotMatchSelectedRegatta(String boatClass, String regattaName);
     String regattaExistForSelectedBoatClass();
     String reload();
+    String addRegatta();
+    String exchangeName();
+    String course();
+    String courseLayout();
+    String buoy();
+    String gate();
+    String buoys();
+    String waypoint();
+    String showAllCompetitors();
+    String boatTails();
+    String maximalCount();
+    String maxVisibleCompetitorsCountMustBePositive();
+    String fregResultImportUrls();
+    String errorRefreshingFregUrlList(String message);
+    String successfullyUpdatedFregUrls();
+    String errorRemovingFregUrls(String message);
+    String pleaseEnterNonEmptyUrl();
+    String addFragUrl();
+    String errorAddingFragUrl(String message);
+    String errorTryingToObtainLeaderboardContents(String message);
+    String lastScoreUpdate();
+    String warningBrowserUnsupported();
+    String newBuoy();
+    String controlPoint();
+    String errorUpdatingRaceCourse(String message);
+    String successfullyUpdatedCourse();
+    String selectOneBuoyOrTwoBuoysForGate();
+    String errorTryingToObtainTheBuoysOfTheRace(String message);
+    String errorTryingToObtainRaceCourse(String message);
+    String insertWaypointBeforeSelected();
+    String insertWaypointAfterSelected();
 }

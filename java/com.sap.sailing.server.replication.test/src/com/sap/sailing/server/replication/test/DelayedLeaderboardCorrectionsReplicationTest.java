@@ -7,8 +7,6 @@ import static org.junit.Assert.assertNull;
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
 
-import javax.jms.JMSException;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,7 +41,7 @@ public class DelayedLeaderboardCorrectionsReplicationTest extends AbstractServer
     private ReplicationMasterDescriptor masterDescriptor;
     
     @Before
-    public void setUp() throws FileNotFoundException, UnknownHostException, JMSException, Exception {
+    public void setUp() throws FileNotFoundException, UnknownHostException {
         final MongoDBService mongoDBService = MongoDBService.INSTANCE;
         mongoDBService.getDB().dropDatabase();
     }

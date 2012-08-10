@@ -38,10 +38,9 @@ public class RaceMapZoomSettings {
      */
     public RaceMapZoomSettings() {
         typesToConsiderOnZoom = new ArrayList<ZoomTypes>();
-        typesToConsiderOnZoom.add(ZoomTypes.BOATS);
-        typesToConsiderOnZoom.add(ZoomTypes.TAILS);
+//        typesToConsiderOnZoom.add(ZoomTypes.BOATS);
+//        typesToConsiderOnZoom.add(ZoomTypes.TAILS);
         typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
-        //TODO reenable after disconnecting wind data from races
 //        typesToConsiderOnZoom.add(ZoomTypes.WINDSENSORS);
         zoomToSelectedCompetitors = false;
     }

@@ -59,17 +59,15 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     protected final StringMessages stringMessages;
     protected final DateTimeFormat dateFormatter = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL); 
     protected final DateTimeFormat timeFormatter = DateTimeFormat.getFormat("HH:mm:ss"); 
-    private final ImageResource playButtonImg;
-    private final ImageResource pauseButtonImg;
     private final ImageResource playSpeedImg;
     private final ImageResource playModeLiveActiveImg;
     private final ImageResource playModeReplayActiveImg;
     private final ImageResource playModeInactiveImg;
-    private final Image playPauseImage;
+    private final Button playPauseButton;
     private final Image playModeImage;
     protected Date lastReceivedDataTimepoint;
     private final Button slowDownButton;
-    private final Button speedUpButton;
+	private final Button speedUpButton;
 
     /**
      * The live delay may be adjusted automatically if the server decides so. However, if the user explicitly sets a live delay,
@@ -105,19 +103,17 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
         userExplicitlyChangedLivePlayDelay = false;
-        FlowPanel vp = new FlowPanel();
-        vp.setStyleName("timePanelInnerWrapper");
-        vp.setSize("100%", "100%");
+        FlowPanel timePanelInnerWrapper = new FlowPanel();
+        timePanelInnerWrapper.setStyleName("timePanelInnerWrapper");
+        timePanelInnerWrapper.setSize("100%", "100%");
         
-        SimplePanel s = new SimplePanel();
-        s.setStyleName("timePanelSlider");
-        s.getElement().getStyle().setPaddingLeft(66, Unit.PX);
-        s.getElement().getStyle().setPaddingRight(66, Unit.PX);
+        SimplePanel timePanelSlider = new SimplePanel();
+        timePanelSlider.setStyleName("timePanelSlider");
+        timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
+        timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
 
-        playButtonImg = resources.timesliderPlayActiveIcon();
-        pauseButtonImg = resources.timesliderPauseIcon();
         playSpeedImg = resources.timesliderPlaySpeedIcon();
-        playPauseImage = new Image(playButtonImg);
+        playPauseButton = new Button("");
 
         playModeLiveActiveImg = resources.timesliderPlayStateLiveActiveIcon();
         playModeReplayActiveImg = resources.timesliderPlayStateReplayActiveIcon();
@@ -148,20 +144,20 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
         });
         
-        vp.add(s);
-        s.add(timeSlider);
+        timePanelInnerWrapper.add(timePanelSlider);
+        timePanelSlider.add(timeSlider);
 
         FlowPanel controlsPanel = new FlowPanel();
         
         controlsPanel.setStyleName("timePanel-controls");
-        vp.add(controlsPanel);
+        timePanelInnerWrapper.add(controlsPanel);
         
         // play button control
         FlowPanel playControlPanel = new FlowPanel();
         playControlPanel.setStyleName("timePanel-controls-play");
         controlsPanel.add(playControlPanel);
         
-        playPauseImage.addClickHandler(new ClickHandler() {
+        playPauseButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 switch(TimePanel.this.timer.getPlayState()) {
@@ -177,11 +173,9 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
                 }
             }
         });
-        playPauseImage.getElement().getStyle().setFloat(Style.Float.LEFT);
-        playPauseImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        playPauseImage.setTitle(stringMessages.startStopPlaying());
-        playPauseImage.getElement().addClassName("playPauseImage");
-        playControlPanel.add(playPauseImage);
+        playPauseButton.setTitle(stringMessages.startStopPlaying());
+        playPauseButton.getElement().addClassName("playPauseButton");
+        playControlPanel.add(playPauseButton);
 
         backToLivePlayButton = new Button(stringMessages.playModeLive());
         backToLivePlayButton.addClickHandler(new ClickHandler() {
@@ -191,8 +185,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
                 TimePanel.this.timer.play();
             }
         });
-        backToLivePlayButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        backToLivePlayButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        backToLivePlayButton.addStyleName("backToLivePlayButton");
         backToLivePlayButton.setTitle(stringMessages.backToLive());
         playControlPanel.add(backToLivePlayButton);
 
@@ -207,7 +200,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         dateLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
         dateLabel.getElement().setClassName("dateLabel");
         timeLabel.getElement().getStyle().setFloat(Style.Float.LEFT);
-        timeLabel.getElement().getStyle().setFontWeight(Style.FontWeight.BOLD);
         timeLabel.getElement().setClassName("timeLabel");
         
         FlowPanel playModeControlPanel = new FlowPanel();
@@ -270,11 +262,10 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playSpeedImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
        
         playSpeedBox.getElement().getStyle().setFloat(Style.Float.LEFT);
-        playSpeedBox.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        speedUpButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        speedUpButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
-        slowDownButton.getElement().getStyle().setFloat(Style.Float.LEFT);
-        slowDownButton.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        playSpeedBox.getElement().getStyle().setPadding(2, Style.Unit.PX);
+
+        speedUpButton.addStyleName("timePanelButton");
+        slowDownButton.addStyleName("timePanelButton");
 
         // time delay
         FlowPanel timeDelayPanel = new FlowPanel();
@@ -293,7 +284,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         settingsAnchor.setStyleName("timePanelSettings");
         settingsAnchor.addClickHandler(new SettingsClickHandler(stringMessages));
         controlsPanel.add(settingsAnchor);
-        setWidget(vp);
+        setWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         
         
@@ -338,7 +329,6 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     /**
      * @param min must not be <code>null</code>
      * @param max must not be <code>null</code>
-     * @param fireEvent TODO
      */
     public void setMinMax(Date min, Date max, boolean fireEvent) {
         assert min != null && max != null;
@@ -379,8 +369,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         setJumpToLiveEnablement(liveModeToBeMadePossible && playMode != PlayModes.Live);
         switch (playState) {
         case Playing:
-            playPauseImage.setResource(pauseButtonImg);
-            playPauseImage.getElement().addClassName("playPauseImagePause");
+            playPauseButton.getElement().addClassName("playPauseButtonPause");
             if (playMode == PlayModes.Live) {
                 playModeImage.setResource(playModeLiveActiveImg);
             } else {
@@ -388,9 +377,8 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
             }
             break;
         case Paused:
-        	playPauseImage.getElement().removeClassName("playPauseImagePause");
+        	playPauseButton.getElement().removeClassName("playPauseButtonPause");
         case Stopped:
-            playPauseImage.setResource(playButtonImg);
             playModeImage.setResource(playModeInactiveImg);
             break;
         }

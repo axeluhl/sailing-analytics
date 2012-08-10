@@ -102,19 +102,19 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
             for (TrackedLegOfCompetitor competitorLeg : getTrackedLegsOfCompetitors()) {
                 rankedCompetitorList.add(competitorLeg);
             }
-            // ensure that race isn't updated by events as we're tying to sort the competitors
-            synchronized (getTrackedRace()) {
-                // TODO See bug 469; competitors already disqualified may need to be ranked worst 
-                Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint));
-                rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
-                synchronized (competitorTracksOrderedByRank) {
-                    competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
-                }
-                if (Util.size(getTrackedLegsOfCompetitors()) != rankedCompetitorList.size()) {
-                    logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
-                            + ") differs from number of competitors in race ("
-                            + Util.size(getTrackedRace().getRace().getCompetitors()) + ")");
-                }
+            // race may be updated while calculation is going on, but each individual calculation is properly
+            // synchronized, usually by read-write locks, so there is no major difference in synchronization issues
+            // an the asynchronous nature of how the data is being received
+            // TODO See bug 469; competitors already disqualified may need to be ranked worst
+            Collections.sort(rankedCompetitorList, new WindwardToGoComparator(this, timePoint));
+            rankedCompetitorList = Collections.unmodifiableList(rankedCompetitorList);
+            synchronized (competitorTracksOrderedByRank) {
+                competitorTracksOrderedByRank.put(timePoint, rankedCompetitorList);
+            }
+            if (Util.size(getTrackedLegsOfCompetitors()) != rankedCompetitorList.size()) {
+                logger.warning("Number of competitors in leg (" + Util.size(getTrackedLegsOfCompetitors())
+                        + ") differs from number of competitors in race ("
+                        + Util.size(getTrackedRace().getRace().getCompetitors()) + ")");
             }
         }
         return rankedCompetitorList;
@@ -246,7 +246,9 @@ public class TrackedLegImpl implements TrackedLeg, RaceChangeListener {
 
     @Override
     public Distance getCrossTrackError(Position p, TimePoint timePoint) {
-        return p.crossTrackError(getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint), getLegBearing(timePoint));
+        final Position approximatePosition = getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint);
+        final Bearing legBearing = getLegBearing(timePoint);
+        return approximatePosition==null || legBearing==null ? null : p.crossTrackError(approximatePosition, legBearing);
     }
 
 }

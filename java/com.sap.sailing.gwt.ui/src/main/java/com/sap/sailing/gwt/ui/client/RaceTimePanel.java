@@ -68,7 +68,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 }
                 
                 boolean timerAlreadyInitialized = getMin() != null && getMax() != null && timeSlider.getCurrentValue() != null;
-                if(!isTimeZoomed) {
+                if (!isTimeZoomed) {
                     updateMinMax(raceTimesInfo);
                     if (!timerAlreadyInitialized) {
                         initTimerPosition(raceTimesInfo);

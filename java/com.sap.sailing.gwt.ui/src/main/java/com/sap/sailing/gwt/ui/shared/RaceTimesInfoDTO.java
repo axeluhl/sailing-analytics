@@ -8,7 +8,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 
 public class RaceTimesInfoDTO implements IsSerializable {
-    private RaceIdentifier raceIdentifier;
+	private RaceIdentifier raceIdentifier;
 
     public List<LegInfoDTO> legInfos;
 
@@ -103,4 +103,15 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public void setMarkPassingTimes(List<MarkPassingTimesDTO> markPassingTimes) {
         this.markPassingTimes = markPassingTimes;
     }
+    
+    @Override
+	public String toString() {
+		return "RaceTimesInfoDTO [raceIdentifier=" + raceIdentifier
+				+ ", legInfos=" + legInfos + ", markPassingTimes="
+				+ markPassingTimes + ", startOfRace=" + startOfRace
+				+ ", startOfTracking=" + startOfTracking + ", endOfTracking="
+				+ endOfTracking + ", endOfRace=" + endOfRace
+				+ ", newestTrackingEvent=" + newestTrackingEvent
+				+ ", delayToLiveInMs=" + delayToLiveInMs + "]";
+	}
 }

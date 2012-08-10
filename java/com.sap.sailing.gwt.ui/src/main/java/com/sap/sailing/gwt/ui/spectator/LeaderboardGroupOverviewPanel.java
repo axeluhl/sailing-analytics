@@ -495,7 +495,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
     }
 
     private void loadGroups() {
-        sailingService.getLeaderboardGroups(new AsyncCallback<List<LeaderboardGroupDTO>>() {
+        sailingService.getLeaderboardGroups(true /*withGeoLocationData*/, new AsyncCallback<List<LeaderboardGroupDTO>>() {
             @Override
             public void onSuccess(List<LeaderboardGroupDTO> result) {
                 availableGroups = result == null ? new ArrayList<LeaderboardGroupDTO>() : result;

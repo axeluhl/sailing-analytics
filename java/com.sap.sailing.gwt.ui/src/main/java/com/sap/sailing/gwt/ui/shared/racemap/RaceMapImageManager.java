@@ -93,7 +93,7 @@ public class RaceMapImageManager {
     public void loadMapIcons(MapWidget map) {
         if(map != null) {
             buoyIcon = Icon.newInstance(resources.buoyIcon().getSafeUri().asString());
-            buoyIcon.setIconSize(Size.newInstance(12, 17));
+            buoyIcon.setIconSize(Size.newInstance(19, 28));
             buoyIcon.setIconAnchor(Point.newInstance(6, 15));
 
             Icon tackToStarboardIcon = Icon

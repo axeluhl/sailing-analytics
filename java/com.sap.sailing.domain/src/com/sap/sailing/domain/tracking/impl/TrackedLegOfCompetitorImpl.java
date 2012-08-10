@@ -20,7 +20,6 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
@@ -214,24 +213,30 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     /**
-     * Projects <code>speed</code> onto the wind direction to see how fast a boat travels
-     * "along the wind's direction."
+     * Projects <code>speed</code> onto the wind direction for upwind/downwind legs to see how fast a boat travels
+     * "along the wind's direction." For reaching legs (neither upwind nor downwind), the speed is projected onto
+     * the leg's direction.
      * 
      * @throws NoWindException in case the wind direction is not known
      */
     private SpeedWithBearing getWindwardSpeed(SpeedWithBearing speed, TimePoint at) throws NoWindException {
         SpeedWithBearing result = null;
         if (speed != null) {
-            Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
-            if (wind == null) {
-                throw new NoWindException("Need at least wind direction to determine windward speed");
+            Bearing projectToBearing;
+            if (getTrackedLeg().isUpOrDownwindLeg(at)) {
+                Wind wind = getWind(getTrackedRace().getTrack(getCompetitor()).getEstimatedPosition(at, false), at);
+                if (wind == null) {
+                    throw new NoWindException("Need at least wind direction to determine windward speed");
+                }
+                projectToBearing = wind.getBearing();
+            } else {
+                projectToBearing = getTrackedLeg().getLegBearing(at);
             }
-            Bearing bearing = wind.getBearing();
-            double cos = Math.cos(speed.getBearing().getRadians() - wind.getBearing().getRadians());
+            double cos = Math.cos(speed.getBearing().getRadians() - projectToBearing.getRadians());
             if (cos < 0) {
-                bearing = bearing.reverse();
+                projectToBearing = projectToBearing.reverse();
             }
-            result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), bearing);
+            result = new KnotSpeedWithBearingImpl(Math.abs(speed.getKnots() * cos), projectToBearing);
         }
         return result;
     }
@@ -376,38 +381,49 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Distance getAverageCrossTrackError(TimePoint timePoint) throws NoWindException {
-        double distanceInMeters = 0;
-        int count = 0;
-        GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(competitor);
-        GPSFixMoving fix = null;
-        final TrackedLeg trackedLeg = getTrackedLeg();
+    public Distance getAverageCrossTrackError(TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException {
+        Distance result = null;
         final MarkPassing legStartMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getFrom());
         if (legStartMarkPassing != null) {
             TimePoint legStart = legStartMarkPassing.getTimePoint();
             final MarkPassing legEndMarkPassing = getTrackedRace().getMarkPassing(competitor, getLeg().getTo());
-            track.lockForRead();
-            try {
-                Iterator<GPSFixMoving> fixIter = track.getFixesIterator(legStart, /* inclusive */true);
-                while (fixIter.hasNext()
-                        && (fix == null || ((legEndMarkPassing == null || fix.getTimePoint().compareTo(
-                                legEndMarkPassing.getTimePoint()) < 0) && fix.getTimePoint().compareTo(timePoint) < 0))) {
-                    fix = fixIter.next();
-                    if (fix.getTimePoint().compareTo(timePoint) < 0) {
-                        Distance xte = trackedLeg.getCrossTrackError(fix.getPosition(), fix.getTimePoint());
-                        distanceInMeters += xte.getMeters();
-                        count++;
-                    }
-                }
-            } finally {
-                track.unlockAfterRead();
+            TimePoint to;
+            if (legEndMarkPassing == null || legEndMarkPassing.getTimePoint().compareTo(timePoint) > 0) {
+                to = timePoint;
+            } else {
+                to = legEndMarkPassing.getTimePoint();
             }
+            result = getTrackedRace().getAverageCrossTrackError(competitor, legStart, to, /* upwindOnly */ false, waitForLatestAnalysis);
         }
-        return count == 0 ? null : new MeterDistance(distanceInMeters / count);
+        return result;
     }
 
     @Override
-    public Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException {
+    public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint)
+            throws NoWindException {
+        return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
+            @Override
+            public Competitor getLeader() {
+                return leaderInLegAtTimePoint;
+            }
+        });
+    }
+
+    private static interface LeaderGetter {
+        Competitor getLeader();
+    }
+    
+    @Override
+    public Double getGapToLeaderInSeconds(final TimePoint timePoint) throws NoWindException {
+        return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
+            @Override
+            public Competitor getLeader() {
+                return getTrackedLeg().getLeader(timePoint);
+            }
+        });
+    }
+    
+    private Double getGapToLeaderInSeconds(TimePoint timePoint, LeaderGetter leaderGetter) throws NoWindException {
         // If the leader already completed this leg, compute the estimated arrival time at the
         // end of this leg; if this leg's competitor also already finished the leg, return the
         // difference between this competitor's leg completion time point and the leader's completion
@@ -452,7 +468,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     }
                 }
                 // no-one has finished this leg yet at timePoint
-                Competitor leader = getTrackedLeg().getLeader(timePoint);
+                Competitor leader = leaderGetter.getLeader();
                 // Maybe our competitor is the leader. Check:
                 if (leader == getCompetitor()) {
                     return 0.0; // the leader's gap to the leader

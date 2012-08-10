@@ -31,7 +31,7 @@ public class LogoAndTitlePanel extends FlowPanel {
         sailingAnalyticsLabel.addStyleName("sailingAnalyticsLabel boldLabel");
         this.add(sailingAnalyticsLabelPanel);
         
-        if(title != null) {
+        if (title != null) {
             FlowPanel subTitleLabelWrapper = new FlowPanel();
             subTitleLabelWrapper.addStyleName("titleLabelWrapper");
             titleLabel = new Label(title);
@@ -40,7 +40,7 @@ public class LogoAndTitlePanel extends FlowPanel {
             this.add(subTitleLabelWrapper);
         }
         
-        if(subTitle != null) {
+        if (subTitle != null) {
             FlowPanel subTitleLabelWrapper = new FlowPanel();
             subTitleLabelWrapper.addStyleName("subTitleLabelWrapper");
             subTitleLabel = new Label(subTitle);

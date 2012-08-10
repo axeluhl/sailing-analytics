@@ -43,7 +43,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     /**
      * The factor by which a medal race score is multiplied in the overall point scheme
      */
-    private static final int MEDAL_RACE_FACTOR = 2;
+    private static final double MEDAL_RACE_FACTOR = 2.0;
     
     private final SettableScoreCorrection scoreCorrection;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
@@ -59,9 +59,9 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      * with aggregated results of races not tracked / displayed by this leaderboard in detail. The points
      * provided by this map are considered by {@link #getTotalPoints(Competitor, TimePoint)}.
      */
-    private final Map<Competitor, Integer> carriedPoints;
+    private final Map<Competitor, Double> carriedPoints;
 
-    private final Comparator<Integer> scoreComparator;
+    private final Comparator<Double> scoreComparator;
     
     private Set<RaceColumnListener> raceColumnListeners;
     
@@ -79,14 +79,14 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      */
     private class EntryImpl implements Entry {
         private final Callable<Integer> trackedPoints;
-        private final int netPoints;
+        private final double netPoints;
         private final boolean isNetPointsCorrected;
-        private final int totalPoints;
+        private final double totalPoints;
         private final MaxPointsReason maxPointsReason;
         private final boolean discarded;
         private final Fleet fleet;
 
-        private EntryImpl(Callable<Integer> trackedPoints, int netPoints, boolean isNetPointsCorrected, int totalPoints,
+        private EntryImpl(Callable<Integer> trackedPoints, double netPoints, boolean isNetPointsCorrected, double totalPoints,
                 MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
             super();
             this.trackedPoints = trackedPoints;
@@ -106,7 +106,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
             }
         }
         @Override
-        public int getNetPoints() {
+        public double getNetPoints() {
             return netPoints;
         }
         @Override
@@ -114,7 +114,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
             return isNetPointsCorrected;
         }
         @Override
-        public int getTotalPoints() {
+        public double getTotalPoints() {
             return totalPoints;
         }
         @Override
@@ -132,12 +132,14 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     /**
+     * @param scoreCorrection must not be <code>null</code>
      * @param scoreComparator the comparator to use to compare basic scores, such as net points
      * @param name must not be <code>null</code>
      */
     public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
-        this.carriedPoints = new HashMap<Competitor, Integer>();
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Double> scoreComparator) {
+        assert scoreCorrection != null;
+        this.carriedPoints = new HashMap<Competitor, Double>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
@@ -169,7 +171,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         return result;
     }
     
-    private Iterable<TrackedRace> getTrackedRaces() {
+    @Override
+    public Iterable<TrackedRace> getTrackedRaces() {
         Set<TrackedRace> trackedRaces = new HashSet<TrackedRace>();
         for (RaceColumn r : getRaceColumns()) {
             for (Fleet fleet : r.getFleets()) {
@@ -247,7 +250,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      * or otherwise a rank improved (lowered) by the number of disqualifications of competitors whose tracked rank is better (lower)
      * than <code>rank</code>.
      */
-    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace, TimePoint timePoint, int rank) {
+    private int improveByDisqualificationsOfBetterRankedCompetitors(RaceColumn raceColumn, TrackedRace trackedRace, TimePoint timePoint, int rank) throws NoWindException {
         int correctedRank = rank;
         List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(timePoint);
         int betterCompetitorRank=1;
@@ -264,7 +267,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     @Override
-    public int getNetPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint) throws NoWindException {
+    public double getNetPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint) throws NoWindException {
         return getScoreCorrection().getCorrectedScore(
                 new Callable<Integer>() {
                     public Integer call() throws NoWindException {
@@ -288,15 +291,15 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     @Override
-    public int getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+    public double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
         return isDiscarded(competitor, raceColumn, timePoint) ?
-                0 :
-                (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1) * getNetPoints(competitor, raceColumn, timePoint);
+                0.0 :
+                (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1.0) * getNetPoints(competitor, raceColumn, timePoint);
     }
     
     @Override
-    public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        int result = getCarriedPoints(competitor);
+    public double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+        double result = getCarriedPoints(competitor);
         for (RaceColumn r : getRaceColumns()) {
             result += getTotalPoints(competitor, r, timePoint);
         }
@@ -315,7 +318,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         boolean discarded = isDiscarded(competitor, race, timePoint);
         return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), correctedResults.isCorrected(),
                 discarded ? 0
-                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? MEDAL_RACE_FACTOR : 1),
+                        : correctedResults.getCorrectedScore() * (race.isMedalRace() ? MEDAL_RACE_FACTOR : 1.0),
                         correctedResults.getMaxPointsReason(), discarded, race.getFleetOfCompetitor(competitor));
     }
     
@@ -348,7 +351,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 Entry entry = new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(),
                         correctedResults.isCorrected(), discarded ? 0 : correctedResults.getCorrectedScore()
-                                * (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1), correctedResults.getMaxPointsReason(), discarded,
+                                * (raceColumn.isMedalRace() ? MEDAL_RACE_FACTOR : 1.0), correctedResults.getMaxPointsReason(), discarded,
                                 raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
@@ -357,13 +360,13 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     @Override
-    public void setCarriedPoints(Competitor competitor, int carriedPoints) {
+    public void setCarriedPoints(Competitor competitor, double carriedPoints) {
         this.carriedPoints.put(competitor, carriedPoints);
     }
 
     @Override
-    public int getCarriedPoints(Competitor competitor) {
-        Integer result = carriedPoints.get(competitor);
+    public double getCarriedPoints(Competitor competitor) {
+        Double result = carriedPoints.get(competitor);
         return result == null ? 0 : result;
     }
 
@@ -418,11 +421,11 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      */
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
-        final Map<Competitor, Pair<Integer, Fleet>> netPointsAndFleet = new HashMap<Competitor, Pair<Integer, Fleet>>();
+        final Map<Competitor, Pair<Double, Fleet>> netPointsAndFleet = new HashMap<Competitor, Pair<Double, Fleet>>();
         for (Competitor competitor : getCompetitors()) {
-            int netPoints = getNetPoints(competitor, raceColumn, timePoint);
+            double netPoints = getNetPoints(competitor, raceColumn, timePoint);
             if (netPoints != 0) {
-                netPointsAndFleet.put(competitor, new Pair<Integer, Fleet>(netPoints, raceColumn.getFleetOfCompetitor(competitor)));
+                netPointsAndFleet.put(competitor, new Pair<Double, Fleet>(netPoints, raceColumn.getFleetOfCompetitor(competitor)));
             }
         }
         List<Competitor> result = new ArrayList<Competitor>(netPointsAndFleet.keySet());
@@ -504,6 +507,29 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
         for (RaceColumnListener listener : raceColumnListeners) {
             listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
         }
+    }
+
+    @Override
+    public Long getDelayToLiveInMillis() {
+        TimePoint startOfLatestRace = null;
+        Long delayToLiveInMillisForLatestRace = null;
+        for (RaceColumn raceColumn : getRaceColumns()) {
+            for (Fleet fleet : raceColumn.getFleets()) {
+                TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                if (trackedRace != null) {
+                    if (startOfLatestRace == null
+                            || (trackedRace.getStartOfRace() != null && trackedRace.getStartOfRace().compareTo(startOfLatestRace) > 0)) {
+                        delayToLiveInMillisForLatestRace = trackedRace.getDelayToLiveInMillis();
+                    }
+                }
+            }
+        }
+        return delayToLiveInMillisForLatestRace;
+    }
+    
+    @Override
+    public Comparator<Double> getScoreComparator() {
+        return scoreComparator;
     }
 
 }

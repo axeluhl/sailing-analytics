@@ -5,22 +5,23 @@ import java.io.ObjectOutputStream;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.util.impl.ArrayListNavigableSet;
+import com.sap.sailing.util.impl.LockUtil;
+import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 import com.sap.sailing.util.impl.UnmodifiableNavigableSet;
 
-public abstract class TrackImpl<FixType extends Timed> implements Track<FixType> {
+public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     private static final long serialVersionUID = -4075853657857657528L;
     /**
      * The fixes, ordered by their time points
      */
     private final NavigableSet<Timed> fixes;
 
-    private final ReentrantReadWriteLock readWriteLock;
+    private final NamedReentrantReadWriteLock readWriteLock;
 
     protected static class DummyTimed implements Timed {
         private static final long serialVersionUID = 6047311973718918856L;
@@ -39,12 +40,12 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
         }
     }
     
-    public TrackImpl() {
-        this(new ArrayListNavigableSet<Timed>(TimedComparator.INSTANCE));
+    public TrackImpl(String nameForReadWriteLock) {
+        this(new ArrayListNavigableSet<Timed>(TimedComparator.INSTANCE), nameForReadWriteLock);
     }
     
-    protected TrackImpl(NavigableSet<Timed> fixes) {
-        this.readWriteLock = new ReentrantReadWriteLock();
+    protected TrackImpl(NavigableSet<Timed> fixes, String nameForReadWriteLock) {
+        this.readWriteLock = new NamedReentrantReadWriteLock(nameForReadWriteLock, /* fair */ false);
         this.fixes = fixes;
     }
     
@@ -62,25 +63,26 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
 
     @Override
     public void lockForRead() {
-        readWriteLock.readLock().lock();
+        LockUtil.lockForRead(readWriteLock);
     }
 
     @Override
     public void unlockAfterRead() {
-        readWriteLock.readLock().unlock();
+        LockUtil.unlockAfterRead(readWriteLock);
     }
     
     protected void lockForWrite() {
-        readWriteLock.writeLock().lock();
+        LockUtil.lockForWrite(readWriteLock);
     }
     
     protected void unlockAfterWrite() {
-        readWriteLock.writeLock().unlock();
+        LockUtil.unlockAfterWrite(readWriteLock);
     }
 
     /**
-     * Callers that want to iterate over the collection returned need to synchronize on <code>this</code> object to avoid
-     * {@link ConcurrentModificationException}s.
+     * Callers that want to iterate over the collection returned need to use {@link #lockForRead()} and {@link #unlockAfterRead()}
+     * to avoid {@link ConcurrentModificationException}s. Should they modify the structure returned, they have to use
+     * {@link #lockForWrite()} and {@link #unlockAfterWrite()}, respectively.
      */
     protected NavigableSet<FixType> getInternalRawFixes() {
         @SuppressWarnings("unchecked")
@@ -88,8 +90,11 @@ public abstract class TrackImpl<FixType extends Timed> implements Track<FixType>
         return result;
     }
 
+    /**
+     * asserts that the calling thread holds at least one of read and write lock
+     */
     protected void assertReadLock() {
-        if (readWriteLock.getReadHoldCount() < 1) {
+        if (readWriteLock.getReadHoldCount() < 1 && readWriteLock.getWriteHoldCount() < 1) {
             throw new IllegalStateException("Caller must obtain read lock using lockForRead() before calling this method");
         }
     }

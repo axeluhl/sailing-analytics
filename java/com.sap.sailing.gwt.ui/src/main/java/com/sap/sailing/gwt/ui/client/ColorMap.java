@@ -20,15 +20,17 @@ public class ColorMap<T> {
     private HSVColor[] baseColors;
 
     public ColorMap() {
-        baseColors = new HSVColor[8];
+        baseColors = new HSVColor[10];
         baseColors[0] = new HSVColor(0.0f, 1.0f, 1.0f); // Red
         baseColors[1] = new HSVColor(30.0f, 1.0f, 1.0f); // Orange
-        baseColors[2] = new HSVColor(60.f, 1.0f, 1.0f); // Yellow
+        baseColors[2] = new HSVColor(45.f, 1.0f, 1.0f);
         baseColors[3] = new HSVColor(120.0f, 1.0f, 1.0f); // Green
         baseColors[4] = new HSVColor(180.0f, 1.0f, 1.0f); // Cyan
         baseColors[5] = new HSVColor(240.0f, 1.0f, 1.0f); // Blue
         baseColors[6] = new HSVColor(270.0f, 1.0f, 1.0f); // Pink
-        baseColors[7] = new HSVColor(300.0f, 1.0f, 1.0f); // Magenta
+        baseColors[7] = new HSVColor(285.0f, 1.0f, 1.0f); 
+        baseColors[8] = new HSVColor(300.0f, 1.0f, 1.0f); // Magenta
+        baseColors[9] = new HSVColor(330.0f, 1.0f, 1.0f); 
 
         idColor = new HashMap<T, String>();
     }
@@ -59,12 +61,31 @@ public class ColorMap<T> {
     private String createHexColor(int index) {
         int baseColorCount = baseColors.length;
         int baseColorsIndex = index % baseColorCount;
-        float brightnessDecrease = Math.round(index / baseColorCount) * 0.05f;
-        float saturationDecrease = Math.round(index / baseColorCount) * 0.05f;
+        int factor = index / (baseColorCount*3);
+        float decreaseStepSize = 0.1f;
+        
+        float brightnessDecrease = 0;
+        float saturationDecrease = 0;
+        int mod3 = index % 3;
+        switch(mod3) {
+        case 0:
+        	brightnessDecrease = 0.0f;
+        	saturationDecrease = 0.0f;
+        	break;
+        case 1:
+        	brightnessDecrease = decreaseStepSize;
+        	saturationDecrease = 0.0f;
+        	break;
+        case 2:
+        	brightnessDecrease = 0.0f;
+        	saturationDecrease = decreaseStepSize;
+        	break;
+        }
+        brightnessDecrease = factor * decreaseStepSize + brightnessDecrease;
+        saturationDecrease = factor * decreaseStepSize + saturationDecrease;
         HSVColor hsvColor = baseColors[baseColorsIndex];
         HSVColor newColor = new HSVColor(hsvColor.getHue(), hsvColor.getSaturation() - saturationDecrease,
                 hsvColor.getBrightness() - brightnessDecrease);
         return newColor.getAsHtml();
     }
-
 }

@@ -54,6 +54,7 @@ import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
@@ -118,7 +119,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     @Override
     public WindTrack loadWindTrack(Regatta regatta, RaceDefinition race, WindSource windSource, long millisecondsOverWhichToAverage) {
-        WindTrack result = new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().getBaseConfidence(), windSource.getType().useSpeed());
+        WindTrack result = new WindTrackImpl(millisecondsOverWhichToAverage, windSource.getType().getBaseConfidence(),
+                windSource.getType().useSpeed(),
+                /* nameForReadWriteLock */ WindTrackImpl.class.getSimpleName()+" for source "+windSource.toString());
         try {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.EVENT_NAME.name(), regatta.getName());
@@ -145,7 +148,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.LEADERBOARD_NAME.name(), name);
             for (DBObject o : leaderboardCollection.find(query)) {
-                result = loadLeaderboard(o, regattaRegistry);
+                result = loadLeaderboard(o, regattaRegistry, /* leaderboardRegistry */ null);
             }
         } catch (Throwable t) {
              // something went wrong during DB access; report, then use empty new wind track
@@ -156,12 +159,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry) {
+    public Iterable<Leaderboard> getAllLeaderboards(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
             for (DBObject o : leaderboardCollection.find()) {
-                final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry);
+                final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry, leaderboardRegistry);
                 if (loadedLeaderboard != null) {
                     result.add(loadedLeaderboard);
                 }
@@ -178,28 +181,50 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      * If the DBObject has a field {@link FieldNames#REGATTA_NAME} then the object represents a
      * {@link RegattaLeaderboard}. Otherwise, a {@link FlexibleLeaderboard} will be loaded.
      * 
+     * @param leaderboardRegistry
+     *            if not <code>null</code>, then before creating and loading the leaderboard it is looked up in this
+     *            registry and only loaded if not found there. If <code>leaderboardRegistry</code> is <code>null</code>,
+     *            the leaderboard is loaded in any case. If the leaderboard is loaded and
+     *            <code>leaderboardRegistry</code> is not <code>null</code>, the leaderboard loaded is
+     *            {@link LeaderboardRegistry#addLeaderboard(Leaderboard) added to the registry}.
+     * 
      * @return <code>null</code> in case the leaderboard couldn't be loaded, e.g., because the regatta referenced by a
-     *         {@link RegattaLeaderboard} cannot be found; the leaderboard loaded, otherwise
+     *         {@link RegattaLeaderboard} cannot be found; the leaderboard loaded or found in
+     *         <code>leaderboardRegistry</code>, otherwise
      */
-    private Leaderboard loadLeaderboard(DBObject dbLeaderboard, RegattaRegistry regattaRegistry) {
-        SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
-        BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name());
-        int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
-        int i=0;
-        for (Object discardingThresholdAsObject : dbDiscardIndexResultsStartingWithHowManyRaces) {
-            discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
+    private Leaderboard loadLeaderboard(DBObject dbLeaderboard, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
+        Leaderboard result = null;
+        if (leaderboardRegistry != null) {
+            String leaderboardName = (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name());
+            result = leaderboardRegistry.getLeaderboardByName(leaderboardName);
         }
-        ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
-        String regattaName = (String) dbLeaderboard.get(FieldNames.REGATTA_NAME.name());
-        Leaderboard result;
-        if (regattaName == null) {
-            result = loadFlexibleLeaderboard(dbLeaderboard, scoreCorrection, resultDiscardingRule);
-        } else {
-            result = loadRegattaLeaderboard(regattaName, dbLeaderboard, scoreCorrection, resultDiscardingRule, regattaRegistry);
-        }
-        if (result != null) {
-            DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
-            loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections);
+        if (result == null) {
+            SettableScoreCorrection scoreCorrection = new ScoreCorrectionImpl();
+            BasicDBList dbDiscardIndexResultsStartingWithHowManyRaces = (BasicDBList) dbLeaderboard
+                    .get(FieldNames.LEADERBOARD_DISCARDING_THRESHOLDS.name());
+            int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
+            int i = 0;
+            for (Object discardingThresholdAsObject : dbDiscardIndexResultsStartingWithHowManyRaces) {
+                discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
+            }
+            ThresholdBasedResultDiscardingRule resultDiscardingRule = new ResultDiscardingRuleImpl(
+                    discardIndexResultsStartingWithHowManyRaces);
+            String regattaName = (String) dbLeaderboard.get(FieldNames.REGATTA_NAME.name());
+            if (regattaName == null) {
+                result = loadFlexibleLeaderboard(dbLeaderboard, scoreCorrection, resultDiscardingRule);
+            } else {
+                result = loadRegattaLeaderboard(regattaName, dbLeaderboard, scoreCorrection, resultDiscardingRule, regattaRegistry);
+            }
+            if (result != null) {
+                DelayedLeaderboardCorrections loadedLeaderboardCorrections = new DelayedLeaderboardCorrectionsImpl(result);
+                loadLeaderboardCorrections(dbLeaderboard, loadedLeaderboardCorrections, scoreCorrection);
+                // add the leaderboard to the registry
+                if (leaderboardRegistry != null) {
+                    leaderboardRegistry.addLeaderboard(result);
+                    logger.info("loaded leaderboard "+result.getName()+" into "+leaderboardRegistry);
+                }
+
+            }
         }
         return result;
     }
@@ -262,17 +287,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private void loadLeaderboardCorrections(DBObject dbLeaderboard, DelayedLeaderboardCorrections correctionsToUpdate) {
+    private void loadLeaderboardCorrections(DBObject dbLeaderboard, DelayedLeaderboardCorrections correctionsToUpdate,
+            SettableScoreCorrection scoreCorrectionToUpdate) {
         DBObject carriedPoints = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_CARRIED_POINTS.name());
         if (carriedPoints != null) {
             for (String competitorName : carriedPoints.keySet()) {
-                Integer carriedPointsForCompetitor = (Integer) carriedPoints.get(competitorName);
+                Double carriedPointsForCompetitor = ((Number) carriedPoints.get(competitorName)).doubleValue();
                 if (carriedPointsForCompetitor != null) {
                     correctionsToUpdate.setCarriedPoints(MongoUtils.unescapeDollarAndDot(competitorName), carriedPointsForCompetitor);
                 }
             }
         }
         DBObject dbScoreCorrection = (DBObject) dbLeaderboard.get(FieldNames.LEADERBOARD_SCORE_CORRECTIONS.name());
+        if (dbScoreCorrection.containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_TIMESTAMP.name())) {
+            scoreCorrectionToUpdate.setTimePointOfLastCorrectionsValidity(
+                    new MillisecondsTimePoint((Long) dbScoreCorrection.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_TIMESTAMP.name())));
+            dbScoreCorrection.removeField(FieldNames.LEADERBOARD_SCORE_CORRECTION_TIMESTAMP.name());
+        }
+        if (dbScoreCorrection.containsField(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name())) {
+            scoreCorrectionToUpdate.setComment((String) dbScoreCorrection.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name()));
+            dbScoreCorrection.removeField(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name());
+        }
         for (String raceName : dbScoreCorrection.keySet()) {
             DBObject dbScoreCorrectionForRace = (DBObject) dbScoreCorrection.get(raceName);
             for (String competitorName : dbScoreCorrectionForRace.keySet()) {
@@ -284,8 +319,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                     .get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name())));
                 }
                 if (dbScoreCorrectionForCompetitorInRace.containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
-                    correctionsToUpdate.correctScore(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, (Integer) dbScoreCorrectionForCompetitorInRace
-                                    .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name()));
+                    final Double leaderboardCorrectedScore = ((Number) dbScoreCorrectionForCompetitorInRace
+                            .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())).doubleValue();
+                    correctionsToUpdate.correctScore(MongoUtils.unescapeDollarAndDot(competitorName), raceColumn, (Double) leaderboardCorrectedScore);
                 }
             }
         }
@@ -325,14 +361,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public LeaderboardGroup loadLeaderboardGroup(String name, RegattaRegistry regattaRegistry) {
+    public LeaderboardGroup loadLeaderboardGroup(String name, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         LeaderboardGroup leaderboardGroup = null;
         
         try {
             BasicDBObject query = new BasicDBObject();
             query.put(FieldNames.LEADERBOARD_GROUP_NAME.name(), name);
-            leaderboardGroup = loadLeaderboardGroup(leaderboardGroupCollection.findOne(query), regattaRegistry);
+            leaderboardGroup = loadLeaderboardGroup(leaderboardGroupCollection.findOne(query), regattaRegistry, leaderboardRegistry);
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard group "+name+".");
             logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", t);
@@ -342,13 +378,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<LeaderboardGroup> getAllLeaderboardGroups(RegattaRegistry regattaRegistry) {
+    public Iterable<LeaderboardGroup> getAllLeaderboardGroups(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         Set<LeaderboardGroup> leaderboardGroups = new HashSet<LeaderboardGroup>();
-        
         try {
             for (DBObject o : leaderboardGroupCollection.find()) {
-                leaderboardGroups.add(loadLeaderboardGroup(o, regattaRegistry));
+                leaderboardGroups.add(loadLeaderboardGroup(o, regattaRegistry, leaderboardRegistry));
             }
         } catch (Throwable t) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
@@ -358,7 +393,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return leaderboardGroups;
     }
     
-    private LeaderboardGroup loadLeaderboardGroup(DBObject o, RegattaRegistry regattaRegistry) {
+    private LeaderboardGroup loadLeaderboardGroup(DBObject o, RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         String name = (String) o.get(FieldNames.LEADERBOARD_GROUP_NAME.name());
         String description = (String) o.get(FieldNames.LEADERBOARD_GROUP_DESCRIPTION.name());
@@ -367,16 +402,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         for (Object object : dbLeaderboardIds) {
             ObjectId dbLeaderboardId = (ObjectId) object;
             DBObject dbLeaderboard = leaderboardCollection.findOne(dbLeaderboardId);
-            final Leaderboard loadedLeaderboard = loadLeaderboard(dbLeaderboard, regattaRegistry);
+            final Leaderboard loadedLeaderboard = loadLeaderboard(dbLeaderboard, regattaRegistry, leaderboardRegistry);
             if (loadedLeaderboard != null) {
                 leaderboards.add(loadedLeaderboard);
             }
         }
+        logger.info("loaded leaderboard group "+name);
         return new LeaderboardGroupImpl(name, description, leaderboards);
     }
     
     @Override
-    public Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry) {
+    public Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
         DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Set<Leaderboard> result = new HashSet<Leaderboard>();
         try {
@@ -384,7 +420,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
                     + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0; }");
             for (DBObject o : leaderboardCollection.find(query)) {
-                final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry);
+                final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry, leaderboardRegistry);
                 if (loadedLeaderboard != null) {
                     result.add(loadedLeaderboard);
                 }
@@ -418,7 +454,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 WindTrack track = result.get(windSource);
                 if (track == null) {
                     track = new WindTrackImpl(millisecondsOverWhichToAverageWind, windSource.getType().getBaseConfidence(),
-                            windSource.getType().useSpeed());
+                            windSource.getType().useSpeed(),
+                            /* nameForReadWriteLock */ WindTrackImpl.class.getSimpleName()+" for source "+windSource.toString());
                     result.put(windSource, track);
                 }
                 track.add(wind);

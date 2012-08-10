@@ -19,9 +19,10 @@ import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.server.Servlet;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.server.SailingServerHttpServlet;
 
-public class LeaderboardJsonExport extends Servlet {
+public class LeaderboardJsonExport extends SailingServerHttpServlet {
     private static final long serialVersionUID = -2460691283231361152L;
     private static final String PARAM_NAME_LEADERBOARDNAME = "leaderboardName";
 
@@ -79,6 +80,10 @@ public class LeaderboardJsonExport extends Servlet {
                             jsonEntry.put("totalPoints", leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
                             jsonEntry.put("maxPointsReason", leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint));
                             jsonEntry.put("rank", rankedCompetitorsForColumn.indexOf(competitor)+1);
+                            final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+                            if (trackedRace != null) {
+                                jsonEntry.put("raceRank", trackedRace.getRank(competitor, timePoint));
+                            }
                             jsonEntry.put("isDiscarded", leaderboard.isDiscarded(competitor, raceColumn, timePoint));
                             jsonEntry.put("isCorrected", leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn));
                         }

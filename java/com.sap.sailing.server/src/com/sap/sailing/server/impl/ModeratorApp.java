@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
@@ -33,10 +34,10 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.server.Servlet;
+import com.sap.sailing.server.SailingServerHttpServlet;
 import com.sap.sailing.util.InvalidDateException;
 
-public class ModeratorApp extends Servlet {
+public class ModeratorApp extends SailingServerHttpServlet {
     private static final Logger logger = Logger.getLogger(ModeratorApp.class.getName());
     
     private static final long serialVersionUID = 1333207389294903999L;
@@ -122,8 +123,11 @@ public class ModeratorApp extends Servlet {
                             jsonFix.put("knotspeed", fix.getSpeed().getKnots());
                             String tackName;
                             try {
-                                tackName = trackedRace.getTack(competitor, fix.getTimePoint()).name();
-                                jsonFix.put("tack", tackName);
+                                final Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                                if (tack != null) {
+                                    tackName = tack.name();
+                                    jsonFix.put("tack", tackName);
+                                }
                             } catch (NoWindException e) {
                                 // don't output tack
                             }
@@ -190,11 +194,8 @@ public class ModeratorApp extends Servlet {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Race not found");
         } else {
             try {
-                // TODO decide what makes for a good default; some recorded races send notifications about early events late 
                 TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-                        trackedRace.getTimePointOfLastEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
-//                TimePoint timePoint = getTimePoint(req, PARAM_NAME_TIME, PARAM_NAME_TIME_MILLIS,
-//                        trackedRace.getTimePointOfLastEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfLastEvent());
+                        trackedRace.getTimePointOfNewestEvent()==null?MillisecondsTimePoint.now():trackedRace.getTimePointOfNewestEvent());
                 String sinceUpdateString = req.getParameter(PARAM_NAME_SINCE_UPDATE);
                 if (sinceUpdateString != null) {
                     int sinceUpdate = Integer.valueOf(sinceUpdateString);

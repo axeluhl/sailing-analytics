@@ -13,10 +13,10 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.DouglasPeucker;
 import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
@@ -188,6 +188,11 @@ public interface TrackedRace extends Serializable {
     GPSFixTrack<Buoy, GPSFix> getOrCreateTrack(Buoy buoy);
 
     /**
+     * Retrieves all buoys assigned to the race. They are not necessarily part of the race course.
+     */
+    Iterable<Buoy> getBuoys();
+
+    /**
      * If the <code>waypoint</code> only has one {@link #getBuoys() buoy}, its position at time <code>timePoint</code>
      * is returned. Otherwise, the center of gravity between the buoys' positions is computed and returned.
      */
@@ -351,6 +356,10 @@ public interface TrackedRace extends Serializable {
      */
     boolean raceIsKnownToStartUpwind();
     
+    /**
+     * Adds a race change listener to the set of listeners that will be notified about changes to this race.
+     * The listener won't be serialized together with this object.
+     */
     void addListener(RaceChangeListener listener);
     
     void removeListener(RaceChangeListener listener);
@@ -393,8 +402,12 @@ public interface TrackedRace extends Serializable {
 
     /**
      * Computes the average cross-track error for the legs with type {@link LegType#UPWIND}.
+     * 
+     * @param waitForLatestAnalysis
+     *            if <code>true</code> and any cache update is currently going on, wait for the update to complete and
+     *            then fetch the updated value; otherwise, serve this requests from whatever is currently in the cache
      */
-    Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    Distance getAverageCrossTrackError(Competitor competitor, TimePoint timePoint, boolean waitForLatestAnalysis) throws NoWindException;
 
     WindStore getWindStore();
 
@@ -404,5 +417,15 @@ public interface TrackedRace extends Serializable {
      * Returns the competitors of this tracked race, according to their ranking. Competitors whose {@link #getRank(Competitor)} is 0 will
      * be sorted "worst".
      */
-    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint);
+    List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException;
+
+    Distance getAverageCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly, boolean waitForLatestAnalyses) throws NoWindException;
+
+    /**
+     * When provided with a {@link WindStore} during construction, the tracked race will asynchronously load the wind
+     * data for this tracked race from the wind store in a background thread and update this tracked race with the results.
+     * Clients that want to wait for the wind loading process to complete can do so by calling this method which will block
+     * until the wind loading has completed.
+     */
+    void waitUntilWindLoadingComplete() throws InterruptedException;
 }

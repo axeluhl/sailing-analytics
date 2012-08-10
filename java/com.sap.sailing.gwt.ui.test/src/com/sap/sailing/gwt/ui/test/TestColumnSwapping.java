@@ -51,7 +51,7 @@ public class TestColumnSwapping {
         leaderboardCreationDate = new Date();
         try {
             // get Leaderboard with name and current date
-            leaderboardOriginalDTO = new LeaderboardDTO();
+            leaderboardOriginalDTO = new LeaderboardDTO(null, null);
             leaderboardOriginalDTO.addRace("Race1", DEFAULT_FLEET, true, null, null);
             leaderboardOriginalDTO.addRace("Race3", DEFAULT_FLEET, true, null, null);
             leaderboardOriginalDTO.addRace("Race2", DEFAULT_FLEET, true, null, null);
@@ -101,7 +101,7 @@ public class TestColumnSwapping {
 
     @Test
     public void testLeaderBoardDTOMethods() {
-        lb = new LeaderboardDTO();
+        lb = new LeaderboardDTO(null, null);
         assertNotNull("Leaderboard != NULL", lb);
         lb.addRace("1", DEFAULT_FLEET, false, null, null);
         lb.addRace("2", DEFAULT_FLEET, false, null, null);

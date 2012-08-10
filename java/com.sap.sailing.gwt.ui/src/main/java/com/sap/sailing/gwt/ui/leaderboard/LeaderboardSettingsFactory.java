@@ -62,7 +62,8 @@ public class LeaderboardSettingsFactory {
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, namesOfRaceColumnsToShow,
                         namesOfRacesToShow,
                         /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null, /* refresh interval */ null,
-                        /* delay to live */ null, /* name of race to sort */ nameOfRaceToSort, /* ascending */ true);
+                        /* delay to live */ null, /* name of race to sort */ nameOfRaceToSort, /* ascending */ true,
+                        /* updateUponPlayStateChange */ true);
                 break;
             case Replay:
             settings = createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, /* autoExpandFirstRace */
@@ -84,6 +85,16 @@ public class LeaderboardSettingsFactory {
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace) {
+        return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, nameOfRaceToSort, autoExpandPreSelectedRace,
+                /* refreshIntervalMillis */ null);
+    }
+    
+    /**
+     * Like {@link #createNewDefaultSettings(List, List, String, boolean)}, only that an additional refresh interval for auto-refresh
+     * may be specified; if <code>null</code>, no auto-refresh shall be performed
+     */
+    public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
+            List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace, Long refreshIntervalMillis) {
         if (namesOfRaceColumnsToShow != null && namesOfRacesToShow != null) {
             throw new IllegalArgumentException("Can specify race columns either by column or by race name, not both");
         }
@@ -99,7 +110,8 @@ public class LeaderboardSettingsFactory {
         raceDetails.add(DetailType.DISPLAY_LEGS);
         return new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, namesOfRaceColumnsToShow,
                 namesOfRacesToShow,
-                autoExpandPreSelectedRace, /* refresh interval */ null,
-                /* delay to live */ null, /* sort by column */ nameOfRaceToSort, /* ascending */ true);
+                autoExpandPreSelectedRace, refreshIntervalMillis,
+                /* delay to live */ null, /* sort by column */ nameOfRaceToSort, /* ascending */ true,
+                /* updateUponPlayStateChange */ true);
     }
 }

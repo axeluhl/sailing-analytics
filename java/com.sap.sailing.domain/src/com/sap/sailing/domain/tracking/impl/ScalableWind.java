@@ -3,6 +3,8 @@ package com.sap.sailing.domain.tracking.impl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
 import com.sap.sailing.domain.base.impl.ScalablePosition;
 import com.sap.sailing.domain.base.impl.ScalableSpeedWithBearing;
+import com.sap.sailing.domain.common.AbstractPosition;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.confidence.ScalableValue;
 import com.sap.sailing.domain.tracking.Wind;
 
@@ -61,14 +63,56 @@ public class ScalableWind implements ScalableValue<ScalableWind, Wind> {
     }
 
     @Override
-    public Wind divide(double divisor) {
-        return new WindImpl(scalablePosition == null ? null : scalablePosition.divide(divisor), new MillisecondsTimePoint(
-                (long) (scaledTimePointSumInMilliseconds / divisor)), scalableSpeedWithBearing.divide(divisor));
-    }
-
-    @Override
     public ScalableWind getValue() {
         return this;
     }
 
+    @Override
+    public Wind divide(double divisor) {
+        return new WindImpl(scalablePosition == null ? null : new LazyDividedScaledPosition(scalablePosition, divisor),
+                new MillisecondsTimePoint(
+                        (long) (scaledTimePointSumInMilliseconds / divisor)), scalableSpeedWithBearing.divide(divisor));
+    }
+
+    /**
+     * A wind object's position is currently not very frequently used. However, during averaging, computing the average
+     * position of a number of wind fixes costs quite a few CPU cycles. By making this calculation lazy / on-demand we may
+     * save some of them.
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
+    private static class LazyDividedScaledPosition extends AbstractPosition {
+        private static final long serialVersionUID = -4755705843467806809L;
+        private final ScalablePosition scalablePosition;
+        private final double divisor;
+        private Position position;
+        
+        public LazyDividedScaledPosition(ScalablePosition scalablePosition, double divisor) {
+            super();
+            this.scalablePosition = scalablePosition;
+            this.divisor = divisor;
+            this.position = null;
+        }
+
+        @Override
+        public synchronized double getLatRad() {
+            if (position == null) {
+                resolve();
+            }
+            return position.getLatRad();
+        }
+
+        @Override
+        public synchronized double getLngRad() {
+            if (position == null) {
+                resolve();
+            }
+            return position.getLngRad();
+        }
+        
+        private synchronized void resolve() {
+            position = scalablePosition.divide(divisor);
+        }
+    }
 }

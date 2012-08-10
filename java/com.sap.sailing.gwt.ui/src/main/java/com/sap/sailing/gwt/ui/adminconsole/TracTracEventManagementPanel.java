@@ -538,12 +538,12 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         if(racesWithNotMatchingBoatClasses.size() > 0) {
             String warningText = "WARNING\n";
             if(selectedRegatta != null) {
-                warningText += stringConstants.boatClassDoesNotMatchSelectedRegatta(selectedRegatta.boatClass.name, selectedRegatta.name);
+                warningText += stringMessages.boatClassDoesNotMatchSelectedRegatta(selectedRegatta.boatClass.name, selectedRegatta.name);
             } else {
-                warningText += stringConstants.regattaExistForSelectedBoatClass();
+                warningText += stringMessages.regattaExistForSelectedBoatClass();
             }
             warningText += "\n\n";
-            warningText += stringConstants.races() + "\n";
+            warningText += stringMessages.races() + "\n";
             for(TracTracRaceRecordDTO record: racesWithNotMatchingBoatClasses) {
                 warningText += record.name + "\n";
             }
@@ -591,7 +591,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         
         RegattaDTO oldRegattaSelection = getSelectedRegatta();
         regattaListBox.clear();
-        regattaListBox.addItem(stringConstants.noRegatta());
+        regattaListBox.addItem(stringMessages.noRegatta());
         if (!regattas.isEmpty()) {
             for (RegattaDTO regatta : regattas) {
                 regattaListBox.addItem(regatta.name);

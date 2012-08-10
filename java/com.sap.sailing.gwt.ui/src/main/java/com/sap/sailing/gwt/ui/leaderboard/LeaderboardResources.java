@@ -4,7 +4,15 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ImageResource;
 
 interface LeaderboardResources extends ClientBundle {
-
+	@Source("com/sap/sailing/gwt/ui/client/images/arrow-gain.png")
+	ImageResource arrowGainIcon();
+	
+	@Source("com/sap/sailing/gwt/ui/client/images/arrow-loss.png")
+	ImageResource arrowLossIcon();
+	
+	@Source("com/sap/sailing/gwt/ui/client/images/arrow-gain-loss.png")
+	ImageResource arrowGainLossIcon();
+	
     @Source("com/sap/sailing/gwt/ui/client/images/settings.png")
     ImageResource settingsIcon();
 

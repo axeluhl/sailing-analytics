@@ -1,13 +1,17 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.cell.client.AbstractSafeHtmlCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
+    private static final LeaderboardResources leaderboardResources = GWT.create(LeaderboardResources.class);
+	
     public RankGainColumn(String title, LegDetailField<Integer> field, CellTable<LeaderboardRowDTO> leaderboardTable,
             String headerStyle, String columnStyle) {
         super(title, null, field, new RankGainCell(), leaderboardTable, headerStyle, columnStyle);
@@ -33,12 +37,13 @@ public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
                     if (rankDelta != null) {
                         builder.append(Math.abs(rankDelta));
                         builder.appendHtmlConstant("&nbsp;");
+                        ImageResourceRenderer imgRenderer = new ImageResourceRenderer();
                         if (rankDelta < 0) {
-                            builder.appendHtmlConstant("<img src=\"/gwt/images/arrow-gain.png\"/>");
+                        	builder.append(imgRenderer.render(leaderboardResources.arrowGainIcon()));
                         } else if (rankDelta > 0) {
-                            builder.appendHtmlConstant("<img src=\"/gwt/images/arrow-loss.png\"/>");
+                        	builder.append(imgRenderer.render(leaderboardResources.arrowLossIcon()));
                         } else {
-                            builder.appendHtmlConstant("<img src=\"/gwt/images/arrow-gain-loss.png\"/>");
+                        	builder.append(imgRenderer.render(leaderboardResources.arrowGainLossIcon()));
                         }
                     }
                 }

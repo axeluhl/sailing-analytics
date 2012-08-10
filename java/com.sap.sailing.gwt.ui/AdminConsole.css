@@ -1,3 +1,6 @@
+@import url(fontface.css);
+@import url(CommonControls.css);
+
 /** Add css rules here for your application. */
 
 * {
@@ -125,13 +128,6 @@ h1 {
 	background: none repeat scroll 0 0 #e5e5e5;
 }
 
-.gwt-Button {
-	background-color: #e2e2e2;
-	border-color: #a3a3a3 !important;
-	white-space: nowrap;
-	color: #000;
-}
-
 .gwt-Button:hover {
     color: #fff;
 }
@@ -156,11 +152,6 @@ h1 {
 }
 
 select {
-	font-family: Arial !important;
-	font-size: 12px !important;
-}
-
-button {
 	font-family: Arial !important;
 	font-size: 12px !important;
 }
