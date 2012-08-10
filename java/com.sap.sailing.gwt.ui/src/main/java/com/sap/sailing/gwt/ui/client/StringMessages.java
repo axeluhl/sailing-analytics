@@ -326,7 +326,7 @@ public interface StringMessages extends Messages {
     String mixed();
     String maps();
     String startEnd();
-    String course();
+    String racecourse();
     String summary();
     String replay();
     String display();
