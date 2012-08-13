@@ -25,7 +25,7 @@ import org.openqa.selenium.WebDriver;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.sap.sailing.selenium.test.core.TestEnvironmentConfiguration.DriverDefenition;
+import com.sap.sailing.selenium.test.core.TestEnvironmentConfiguration.DriverDefinition;
 import com.sap.sailing.selenium.test.core.impl.TestEnvironmentImpl;
 
 public class Selenium extends ParentRunner<Runner> {
@@ -74,7 +74,7 @@ public class Selenium extends ParentRunner<Runner> {
             
             TestClass test = getTestClass();
             
-            for(DriverDefenition defenition : configuration.getDriverDefenitions()) {
+            for(DriverDefinition defenition : configuration.getDriverDefinitions()) {
                 this.children.add(new SeleniumJUnit4ClassRunner(test.getJavaClass(), contextRoot, defenition));
             }
         } catch (Exception exception) {
@@ -84,15 +84,15 @@ public class Selenium extends ParentRunner<Runner> {
     
     private class SeleniumJUnit4ClassRunner extends BlockJUnit4ClassRunner {
         private String root;
-        private DriverDefenition defenition;
+        private DriverDefinition definition;
         
         private TestEnvironmentImpl environment;
         
-        public SeleniumJUnit4ClassRunner(Class<?> klass, String root, DriverDefenition defenition) throws InitializationError {
+        public SeleniumJUnit4ClassRunner(Class<?> klass, String root, DriverDefinition definition) throws InitializationError {
             super(klass);
             
             this.root = root;
-            this.defenition = defenition;
+            this.definition = definition;
         }
 
         /**
@@ -153,10 +153,9 @@ public class Selenium extends ParentRunner<Runner> {
         
         private TestEnvironmentImpl createTestEnvironment() throws Exception {
             try {
-                String driverClassname = this.defenition.getDriver();
-                Map<String, String> capabilityDefenitions = this.defenition.getCapabilities();
-                System.out.println("Used driver is: " + driverClassname);
-                System.out.println("Context root is: " + this.root);
+                String driverClassname = this.definition.getDriver();
+                Map<String, String> capabilityDefenitions = this.definition.getCapabilities();
+                
                 Class<WebDriver> clazz = (Class<WebDriver>) Class.forName(driverClassname);
                 Capabilities capabilities = new DesiredCapabilities(capabilityDefenitions);
                 

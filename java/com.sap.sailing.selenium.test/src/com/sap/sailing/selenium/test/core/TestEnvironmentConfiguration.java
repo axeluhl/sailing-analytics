@@ -27,11 +27,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class TestEnvironmentConfiguration {
-    protected static class DriverDefenition {
+    protected static class DriverDefinition {
         private String driver;
         private Map<String, String> capabilities;
         
-        public DriverDefenition(String driver, Map<String, String> capabilities) {
+        public DriverDefinition(String driver, Map<String, String> capabilities) {
             this.driver = driver;
             this.capabilities = capabilities;
         }
@@ -57,7 +57,7 @@ public class TestEnvironmentConfiguration {
     
     private static final String SYSTEM_PROPERTY = "system-property";
     
-    private static final String DRIVER_DEFENITION = "driver-defenition";
+    private static final String DRIVER_DEFINITION = "driver-definition";
     
     private static final String DRIVER_CLASS = "class";
     
@@ -95,7 +95,7 @@ public class TestEnvironmentConfiguration {
                 
         String contextRoot = XMLHelper.getContentTextNS(testEnvironmentNode, CONTEXT_ROOT, NAMESPACE_URI);
         Map<String, String> systemProperties = createSystemProperties(testEnvironmentNode);
-        List<DriverDefenition> driverDefenitions = createDriverDefenitions(testEnvironmentNode);
+        List<DriverDefinition> driverDefenitions = createDriverDefenitions(testEnvironmentNode);
         
         return new TestEnvironmentConfiguration(contextRoot, systemProperties, driverDefenitions);
     }
@@ -139,26 +139,26 @@ public class TestEnvironmentConfiguration {
         return properties;
     }
     
-    private static List<DriverDefenition> createDriverDefenitions(Element testEnvironmentNode) {
-        List<DriverDefenition> defenitions = new LinkedList<>();
+    private static List<DriverDefinition> createDriverDefenitions(Element testEnvironmentNode) {
+        List<DriverDefinition> defenitions = new LinkedList<>();
         
-        List<Element> driverDefenitionNodes = XMLHelper.getElementsNS(testEnvironmentNode, DRIVER_DEFENITION,
+        List<Element> driverDefinitionNodes = XMLHelper.getElementsNS(testEnvironmentNode, DRIVER_DEFINITION,
                 NAMESPACE_URI);
         
-        for(Element driverDefenitionNode : driverDefenitionNodes) {
-            defenitions.add(createDriverDefenition(driverDefenitionNode));
+        for(Element driverDefinitionNode : driverDefinitionNodes) {
+            defenitions.add(createDriverDefinition(driverDefinitionNode));
         }
                 
         return defenitions;
     }
     
-    private static DriverDefenition createDriverDefenition(Element driverDefenitionNode) {
-        String driverClass = XMLHelper.getAttributeValueNS(driverDefenitionNode, DRIVER_CLASS, null);;
+    private static DriverDefinition createDriverDefinition(Element driverDefinitionNode) {
+        String driverClass = XMLHelper.getAttributeValueNS(driverDefinitionNode, DRIVER_CLASS, null);;
         
-        Element capabilitiesNode = XMLHelper.getElementNS(driverDefenitionNode, DRIVER_CAPABILITIES, NAMESPACE_URI);
+        Element capabilitiesNode = XMLHelper.getElementNS(driverDefinitionNode, DRIVER_CAPABILITIES, NAMESPACE_URI);
         
         if(capabilitiesNode == null)
-            return new DriverDefenition(driverClass, Collections.EMPTY_MAP);
+            return new DriverDefinition(driverClass, Collections.EMPTY_MAP);
         
         Map<String, String> capabilities = new HashMap<>();
         
@@ -169,19 +169,19 @@ public class TestEnvironmentConfiguration {
             capabilities.put(capabilityName, capabilityValue);
         }
         
-        return new DriverDefenition(driverClass, capabilities);
+        return new DriverDefinition(driverClass, capabilities);
     }
     
     private String root;
     
     private Map<String, String> properties;
     
-    private List<DriverDefenition> defenitions;
+    private List<DriverDefinition> definitions;
     
-    private TestEnvironmentConfiguration(String root, Map<String, String> properties, List<DriverDefenition> defenitions) {
+    private TestEnvironmentConfiguration(String root, Map<String, String> properties, List<DriverDefinition> defenitions) {
         this.root = root;
         this.properties = properties;
-        this.defenitions = defenitions;
+        this.definitions = defenitions;
     }
     
     public String getContextRoot() {
@@ -192,7 +192,7 @@ public class TestEnvironmentConfiguration {
         return this.properties;
     }
     
-    public List<DriverDefenition> getDriverDefenitions() {
-        return this.defenitions;
+    public List<DriverDefinition> getDriverDefinitions() {
+        return this.definitions;
     }
 }
