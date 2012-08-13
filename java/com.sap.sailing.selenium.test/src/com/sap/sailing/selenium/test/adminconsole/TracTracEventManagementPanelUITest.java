@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.test.adminconsole;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Function;
@@ -10,7 +11,6 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 import org.junit.Test;
 
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -33,10 +33,7 @@ public class TracTracEventManagementPanelUITest extends AbstractSeleniumTest {
             System.out.println("Window handle: " + handle);
             //System.out.println("Title for window: " +driver.switchTo().window(handle).getTitle());
         }
-        
-        Alert alert = driver.switchTo().alert();
-        System.out.println(alert.getText());
-        
+                
         System.out.println("Title of page is: " + driver.getTitle());
         
         assertEquals("Unexpected page title", "SAP Sailing Analytics Administration Console", driver.getTitle());
@@ -63,16 +60,16 @@ public class TracTracEventManagementPanelUITest extends AbstractSeleniumTest {
         WebElement listRacesButton = driver.findElement(By.xpath("//button[@class='gwt-Button' and text() = 'List Races']"));
         listRacesButton.click();
         
-//        wait.withTimeout(5, TimeUnit.MINUTES);
-//        wait.pollingEvery(10, TimeUnit.SECONDS);
-//        List<WebElement> trackableRaces = wait.until(new Function<WebDriver, List<WebElement>>() {
-//            @Override
-//            public List<WebElement> apply(WebDriver driver) {
-//                List<WebElement> elements = driver.findElements(By.xpath("//th[text() = 'Event']/../../../tbody/tr"));
-//                return elements.size() >= 90 ? elements : null;
-//            }
-//        });
-//        
-//        assertTrue("No trackable races found", trackableRaces.size() > 0);
+        wait.withTimeout(5, TimeUnit.MINUTES);
+        wait.pollingEvery(10, TimeUnit.SECONDS);
+        List<WebElement> trackableRaces = wait.until(new Function<WebDriver, List<WebElement>>() {
+            @Override
+            public List<WebElement> apply(WebDriver driver) {
+                List<WebElement> elements = driver.findElements(By.xpath("//th[text() = 'Event']/../../../tbody/tr"));
+                return elements.size() >= 90 ? elements : null;
+            }
+        });
+        
+        assertTrue("No trackable races found", trackableRaces.size() > 0);
     }
 }
