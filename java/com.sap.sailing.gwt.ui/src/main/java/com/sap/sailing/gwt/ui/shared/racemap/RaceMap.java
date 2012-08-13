@@ -602,31 +602,39 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     protected void showCompetitorInfoOnMap(final Date date, final Iterable<CompetitorDTO> competitorsToShow) {
         if (map != null) {
-            Set<CompetitorDTO> toRemoveCompetorInfoOverlays = new HashSet<CompetitorDTO>(competitorInfoOverlays.keySet());
-            for (CompetitorDTO competitorDTO : competitorsToShow) {
-                if (fixes.containsKey(competitorDTO)) {
-                    GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
-                    if (lastBoatFix != null) {
-                    	CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
-                        if (competitorInfoOverlay == null) {
-                        	competitorInfoOverlay = createCompetitorInfoOverlay(competitorDTO);
-                        	competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
-                            map.addOverlay(competitorInfoOverlay);
-                            competitorInfoOverlay.setBoatFix(lastBoatFix);
-                        	competitorInfoOverlay.redraw(true);
-                        } else {
-                            competitorInfoOverlay.setBoatFix(lastBoatFix);
-                        	competitorInfoOverlay.redraw(true);
+        	if(settings.isShowSelectedCompetitorsInfo()) {
+                Set<CompetitorDTO> toRemoveCompetorInfoOverlays = new HashSet<CompetitorDTO>(competitorInfoOverlays.keySet());
+                for (CompetitorDTO competitorDTO : competitorsToShow) {
+                    if (fixes.containsKey(competitorDTO)) {
+                        GPSFixDTO lastBoatFix = getBoatFix(competitorDTO, date);
+                        if (lastBoatFix != null) {
+                        	CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(competitorDTO);
+                            if (competitorInfoOverlay == null) {
+                            	competitorInfoOverlay = createCompetitorInfoOverlay(competitorDTO);
+                            	competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
+                                map.addOverlay(competitorInfoOverlay);
+                                competitorInfoOverlay.setBoatFix(lastBoatFix);
+                            	competitorInfoOverlay.redraw(true);
+                            } else {
+                                competitorInfoOverlay.setBoatFix(lastBoatFix);
+                            	competitorInfoOverlay.redraw(true);
+                            }
+                        	toRemoveCompetorInfoOverlays.remove(competitorDTO);
                         }
-                    	toRemoveCompetorInfoOverlays.remove(competitorDTO);
                     }
                 }
-            }
-            for (CompetitorDTO toRemoveCompetorDTO : toRemoveCompetorInfoOverlays) {
-            	CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(toRemoveCompetorDTO);
-                map.removeOverlay(competitorInfoOverlay);
-                competitorInfoOverlays.remove(toRemoveCompetorDTO);
-            }
+                for (CompetitorDTO toRemoveCompetorDTO : toRemoveCompetorInfoOverlays) {
+                	CompetitorInfoOverlay competitorInfoOverlay = competitorInfoOverlays.get(toRemoveCompetorDTO);
+                    map.removeOverlay(competitorInfoOverlay);
+                    competitorInfoOverlays.remove(toRemoveCompetorDTO);
+                }
+        	} else {
+        		// remove all overlays
+        		for(CompetitorInfoOverlay competitorInfoOverlay: competitorInfoOverlays.values()) {
+                    map.removeOverlay(competitorInfoOverlay);
+        		}
+        		competitorInfoOverlays.clear();
+        	}
         }
     }
     
@@ -1611,6 +1619,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         if (newSettings.isShowOnlySelectedCompetitors() != settings.isShowOnlySelectedCompetitors()) {
             settings.setShowOnlySelectedCompetitors(newSettings.isShowOnlySelectedCompetitors());
+            requiredRedraw = true;
+        }
+        if (newSettings.isShowSelectedCompetitorsInfo() != settings.isShowSelectedCompetitorsInfo()) {
+            settings.setShowSelectedCompetitorsInfo(newSettings.isShowSelectedCompetitorsInfo());
             requiredRedraw = true;
         }
         if (!newSettings.getZoomSettings().equals(settings.getZoomSettings())) {

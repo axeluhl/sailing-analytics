@@ -37,6 +37,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showOnlySelectedCompetitorsCheckBox;
     private CheckBox showTailsCheckBox;
     private CheckBox showAllCompetitorsCheckBox;
+    private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
     private IntegerBox maxVisibleCompetitorsCountBox;
     
@@ -79,10 +80,14 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         maxCompetitotorsCountPanel.setCellVerticalAlignment(maxVisibleCompetitorsCountBox, HasVerticalAlignment.ALIGN_MIDDLE);
         vp.add(maxCompetitotorsCountPanel);
         
-        showOnlySelectedCompetitorsCheckBox = dialog.createCheckbox(stringMessages.showOnlySelected());
+        showOnlySelectedCompetitorsCheckBox = dialog.createCheckbox(stringMessages.showOnlySelectedCompetitors());
         showOnlySelectedCompetitorsCheckBox.setValue(initialSettings.isShowOnlySelectedCompetitors());
         vp.add(showOnlySelectedCompetitorsCheckBox);
 
+        showSelectedCompetitorsInfoCheckBox = dialog.createCheckbox(stringMessages.showSelectedCompetitorsInfo());
+        showSelectedCompetitorsInfoCheckBox.setValue(initialSettings.isShowSelectedCompetitorsInfo());
+        vp.add(showSelectedCompetitorsInfoCheckBox);
+        
         Label zoomLabel = dialog.createHeadlineLabel(stringMessages.zoom());
         vp.add(zoomLabel);
         
@@ -195,6 +200,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         result.setHelpLinesSettings(getHelpLinesSettings());
         result.setShowDouglasPeuckerPoints(showDouglasPeuckerPointsCheckBox.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
+        result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
         result.setShowAllCompetitors(showAllCompetitorsCheckBox.getValue());
         result.setShowTails(showTailsCheckBox.getValue());
         result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue()*1000l);

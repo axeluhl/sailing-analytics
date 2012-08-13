@@ -81,12 +81,15 @@ public class CompetitorInfoOverlay extends CanvasOverlay {
             context2d.setFillStyle(grayTransparentColor);
             drawRoundedRect(context2d, cornerRadius/2, cornerRadius/2, infoBoxWidth-cornerRadius, infoBoxHeight-cornerRadius, cornerRadius);
             
-            context2d.setStrokeStyle("black");
-            context2d.setLineWidth(1);
+            // this translation is important for drawing lines with a real line width of 1 pixel
+            context2d.translate(-0.5, -0.5);
+            context2d.setStrokeStyle("gray");
+            context2d.setLineWidth(1.0);
             context2d.beginPath();
             context2d.moveTo(cornerRadius/2, infoBoxHeight/2);
             context2d.lineTo(cornerRadius/2, canvasHeight);
             context2d.stroke(); 
+            context2d.translate(0.0, 0.0);
 
             context2d.beginPath();
             context2d.setFillStyle("black");

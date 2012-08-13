@@ -140,7 +140,8 @@ public interface StringMessages extends Messages {
     String columnMoveDown();
     String port();
     String raceStartTimeColumn();
-    String showOnlySelected();
+    String showOnlySelectedCompetitors();
+    String showSelectedCompetitorsInfo();
     String lengthInSeconds();
     String selectedRaces();
     String stressTest();
