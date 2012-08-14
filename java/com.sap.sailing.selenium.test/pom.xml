@@ -11,6 +11,19 @@
     <artifactId>com.sap.sailing.selenium.test</artifactId>
     <packaging>eclipse-test-plugin</packaging>
 
+    <properties>
+        <parameters.jetty>
+          -Djetty.home=${basedir}\..\target\configuration\jetty -Djetty.port=8889
+        </parameters.jetty>
+        <!--
+          NOTE: The actual value for "parameters.integration-tests" and "parameters.proxy" should be defined in the
+          local settings.xml, because of the differences between the CI-Build and the local setup.
+        -->
+        <tycho.tests.argLine>
+          ${parameters.integration-tests} ${parameters.proxy} ${parameters.jetty} -Xmx1024m
+        </tycho.tests.argLine>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -34,15 +47,17 @@
                                <exclude>**/core/**</exclude>  
                             </excludes>
                             
+                            <argLine>${tycho.tests.argLine}</argLine>
                             <appArgLine>-consoleLog -console -clean</appArgLine>
-                            <!--
-                            <argLine>-Dwebdriver.firefox.bin=D:\Internet\Firefox\firefox.exe -Xmx1024m -Djetty.home=${basedir}\..\target\configuration\jetty</argLine>
-                            -->
-                            <argLine>-Dselenium.test.environment.configuration=ci-test-environment.xml -Xmx1024m -Djetty.port=8889 -Djetty.home=${basedir}/../target/configuration/jetty</argLine>
                             
                             <product>raceanalysis.product</product>
                             <application>raceanalysis.application</application>
                             
+                            <!--
+                              TODO: The "dependencies" as well as the "bundleStartLevel" should not be needed, since we
+                                    start a product for which a definition exists. However at the moment this definition
+                                    seems to be ignored by tycho. 
+                            -->
                             <dependencies>
                                 <dependency>
                                     <type>eclipse-feature</type>
