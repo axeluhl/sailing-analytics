@@ -7,10 +7,6 @@ import java.util.Map;
 
 import com.google.gwt.dom.client.Style.Float;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -36,12 +32,11 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private final Map<DetailType, CheckBox> legDetailCheckboxes;
     private final Map<DetailType, CheckBox> raceDetailCheckboxes;
     private final StringMessages stringConstants;
-    private LongBox delayBetweenAutoAdvancesInSecondsBox;
+    private LongBox refreshIntervalInSecondsBox;
     private LongBox delayInSecondsBox;
     private final boolean autoExpandPreSelectedRace;
     private final long delayBetweenAutoAdvancesInMilliseconds;
     private final long delayInMilliseconds;
-    private final Label descriptionTextLabel;
 
     public LeaderboardSettingsDialogComponent(List<DetailType> maneuverDetailSelection,
             List<DetailType> legDetailSelection, List<DetailType> raceDetailSelection, List<RaceColumnDTO> raceAllRaceColumns,
@@ -60,34 +55,19 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.delayInMilliseconds = delayInMilliseconds;
-        this.descriptionTextLabel = new Label();
     }
     
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
-        delayBetweenAutoAdvancesInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds/1000l, 4);
-        delayInSecondsBox = dialog.createLongBox(delayInMilliseconds/1000l, 4);
         FlowPanel dialogPanel = new FlowPanel();
         dialogPanel.add(createSelectedRacesPanel(dialog));
         dialogPanel.add(createRaceDetailPanel(dialog));
         dialogPanel.add(createLegDetailsPanel(dialog));
         dialogPanel.add(createMeneuverDetailsPanel(dialog));
         dialogPanel.add(createTimingDetailsPanel(dialog));
-        dialogPanel.add(createHelpPanel(dialog));
         return dialogPanel;
     }
 
-	private FlowPanel createHelpPanel(DataEntryDialog<?> dialog) {
-		FlowPanel helpPanel = new FlowPanel();
-
-		helpPanel.add(dialog.createHeadline("Description", false));
-		helpPanel.addStyleName("SettingsDialogComponent helpPanel");
-		
-		helpPanel.add(descriptionTextLabel);
-		
-		return helpPanel;
-	}
-    
 	private FlowPanel createMeneuverDetailsPanel(DataEntryDialog<?> dialog) {
 		FlowPanel meneuverPanel = new FlowPanel();
 		
@@ -111,6 +91,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     
     private FlowPanel createTimingDetailsPanel(DataEntryDialog<?> dialog) {
     	FlowPanel timingPanel = new FlowPanel();
+        refreshIntervalInSecondsBox = dialog.createLongBox(delayBetweenAutoAdvancesInMilliseconds/1000l, 4);
+        delayInSecondsBox = dialog.createLongBox(delayInMilliseconds/1000l, 4);
 
 	    timingPanel.add(dialog.createHeadline(stringConstants.timing(), true));
 	    timingPanel.addStyleName("SettingsDialogComponent timingSettings");
@@ -122,16 +104,16 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
 	    delayInSecondsWrapper.getElement().getStyle().setFloat(Float.LEFT);
 	    delayInSecondsWrapper.getElement().getStyle().setPaddingRight(20, Unit.PX);
 
-	    Label delayLabel = new Label(stringConstants.delayInSeconds());
+	    Label delayLabel = new Label(stringConstants.delayInSeconds() + ":");
 	    delayInSecondsWrapper.add(delayLabel);
 	    delayInSecondsWrapper.add(delayInSecondsBox);
 	    timingContent.add(delayInSecondsWrapper);
 	    
-	    FlowPanel delayBetweenAutoAdvancesWrapper = new FlowPanel();
-        Label delayBetweenAutoAdvancesLabel = new Label(stringConstants.delayBetweenAutoAdvances());
-        delayBetweenAutoAdvancesWrapper.add(delayBetweenAutoAdvancesLabel);
-        delayBetweenAutoAdvancesWrapper.add(delayBetweenAutoAdvancesInSecondsBox);
-        timingContent.add(delayBetweenAutoAdvancesWrapper);
+	    FlowPanel refreshIntervalWrapper = new FlowPanel();
+        Label refreshIntervalLabel = new Label(stringConstants.refreshInterval() + ":");
+        refreshIntervalWrapper.add(refreshIntervalLabel);
+        refreshIntervalWrapper.add(refreshIntervalInSecondsBox);
+        timingContent.add(refreshIntervalWrapper);
         
         timingPanel.add(timingContent);
     	return timingPanel;
@@ -150,30 +132,12 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         for (DetailType type : LeaderboardPanel.getAvailableRaceDetailColumnTypes()) {
             CheckBox checkbox = dialog.createCheckbox(DetailTypeFormatter.format(type, stringConstants));
             checkbox.setValue(currentRaceDetailSelection.contains(type));
-            setDescriptionMouseHandlers(checkbox, DetailTypeFormatter.format(type, stringConstants));
             raceDetailCheckboxes.put(type, checkbox);
             raceDetailDialogContent.add(checkbox);
         }
         
         raceDetailDialog.add(raceDetailDialogContent);
         return raceDetailDialog;
-	}
-
-	private void setDescriptionMouseHandlers(final FocusWidget widget, final String descriptiontext) {
-		widget.addMouseOverHandler(new MouseOverHandler() {
-			
-			@Override
-			public void onMouseOver(MouseOverEvent arg0) {
-				descriptionTextLabel.setText(descriptiontext);
-			}
-		});
-		widget.addMouseOutHandler(new MouseOutHandler() {
-			
-			@Override
-			public void onMouseOut(MouseOutEvent arg0) {
-				descriptionTextLabel.setText("");
-			}
-		});
 	}
 	
 	private FlowPanel createLegDetailsPanel(DataEntryDialog<?> dialog) {
@@ -244,7 +208,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 namesOfRaceColumnsToShow.add(entry.getKey().getRaceColumnName());
             }
         }
-        Long delayBetweenAutoAdvancesValue = delayBetweenAutoAdvancesInSecondsBox.getValue();
+        Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         Long delayInSecondsValue = delayInSecondsBox.getValue();
         return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow,
                 namesOfRaceColumnsToShow, /* nameOfRacesToShow */null, autoExpandPreSelectedRace,
@@ -273,5 +237,4 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     public FocusWidget getFocusWidget() {
         return delayInSecondsBox;
     }
-
 }
