@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.leaderboard;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -16,7 +17,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
  * @author Axel Uhl (d043530)
  *
  */
-public interface ScoringScheme {
+public interface ScoringScheme extends Serializable {
     /**
      * If this returns <code>true</code>, a higher score is better. For example, the Extreme Sailing Series uses this
      * scoring scheme, as opposed to the olympic sailing classes which use a low-point system.
@@ -29,7 +30,17 @@ public interface ScoringScheme {
      */
     Comparator<Double> getScoreComparator();
     
-    Double getScore(int rank);
+    /**
+     * For a <code>rank</code> that a <code>competitor</code> achieved in a race, returns the score attributed to this
+     * rank according to this scoring scheme. A scoring scheme may need to know the competitor list for the race. Therefore,
+     * the race column as well as the competitor need to be passed although some trivial scoring schemes may not need them.
+     */
+    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank);
     
-    Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason);
+    /**
+     * If a competitor is disqualified, a penalty score is attributed by this scoring scheme. Some schemes require to
+     * know the number of competitors in the race, some need to know the total number of competitors in the leaderboard
+     * or regatta.
+     */
+    Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason, int numberOfCompetitorsInLeaderboard);
 }

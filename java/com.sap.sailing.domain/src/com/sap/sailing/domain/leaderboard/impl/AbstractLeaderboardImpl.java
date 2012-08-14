@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -61,7 +62,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      */
     private final Map<Competitor, Double> carriedPoints;
 
-    private final Comparator<Double> scoreComparator;
+    private final ScoringScheme scoringScheme;
     
     private Set<RaceColumnListener> raceColumnListeners;
     
@@ -137,13 +138,13 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      * @param name must not be <code>null</code>
      */
     public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Double> scoreComparator) {
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoreComparator) {
         assert scoreCorrection != null;
         this.carriedPoints = new HashMap<Competitor, Double>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
-        this.scoreComparator = scoreComparator;
+        this.scoringScheme = scoreComparator;
         this.raceColumnListeners = new HashSet<RaceColumnListener>();
     }
     
@@ -274,7 +275,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
                         return getTrackedRank(competitor, raceColumn, timePoint);
                     }
                 }, competitor,
-                raceColumn, timePoint, Util.size(getCompetitors())).getCorrectedScore();
+                raceColumn, timePoint, Util.size(getCompetitors()), getScoringScheme()).getCorrectedScore();
     }
 
     @Override
@@ -314,7 +315,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
             }
         };
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, race,
-                timePoint, Util.size(getCompetitors()));
+                timePoint, Util.size(getCompetitors()), getScoringScheme());
         boolean discarded = isDiscarded(competitor, race, timePoint);
         return new EntryImpl(trackedPoints, correctedResults.getCorrectedScore(), correctedResults.isCorrected(),
                 discarded ? 0
@@ -342,7 +343,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
                     }
                 };
                 Result correctedResults = getScoreCorrection().getCorrectedScore(trackedPoints, competitor, raceColumn,
-                        timePoint, Util.size(getCompetitors()));
+                        timePoint, Util.size(getCompetitors()), getScoringScheme());
                 Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);
                 if (discardedRacesForCompetitor == null) {
                     discardedRacesForCompetitor = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, timePoint);
@@ -452,7 +453,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
                         }
                     }
                     if (comparisonResult == 0) {
-                        comparisonResult = scoreComparator.compare(netPointsAndFleet.get(o1).getA(), netPointsAndFleet.get(o2).getA());
+                        comparisonResult = scoringScheme.getScoreComparator().compare(netPointsAndFleet.get(o1).getA(), netPointsAndFleet.get(o2).getA());
                     }
                 }
                 return comparisonResult;
@@ -472,7 +473,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) throws NoWindException {
-        return new LeaderboardTotalRankComparator(this, timePoint, scoreComparator);
+        return new LeaderboardTotalRankComparator(this, timePoint, scoringScheme.getScoreComparator());
     }
 
     @Override
@@ -529,7 +530,11 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     
     @Override
     public Comparator<Double> getScoreComparator() {
-        return scoreComparator;
+        return scoringScheme.getScoreComparator();
+    }
+    
+    protected ScoringScheme getScoringScheme() {
+        return scoringScheme;
     }
 
 }

@@ -6,6 +6,8 @@ import java.util.Comparator;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 
 public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
+    private static final long serialVersionUID = 6830414905539642446L;
+
     private class ScoreComparator implements Comparator<Double>, Serializable {
         private static final long serialVersionUID = -2767385186133743330L;
 

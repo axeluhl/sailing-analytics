@@ -33,12 +33,12 @@ public interface ScoreCorrection extends Serializable {
      * Note, though, that {@link MaxPointsReason#NONE} can also be the reason for an explicit score correction, e.g., if
      * the tracking results were overruled by the jury. Clients may use
      * {@link #isScoreCorrected(Competitor, TrackedRace)} to detect the difference.
-     * 
      * @param numberOfCompetitors
      *            the number of competitors to use as the basis for penalty score calculation ("max points")
+     * @param scoringScheme TODO
      */
     Result getCorrectedScore(Callable<Integer> uncorrectedScore, Competitor competitor, RaceColumn raceColumn,
-            TimePoint timePoint, int numberOfCompetitors);
+            TimePoint timePoint, int numberOfCompetitors, ScoringScheme scoringScheme);
 
     /**
      * Note the difference between what this method does and a more naive comparison of uncorrected and corrected score.

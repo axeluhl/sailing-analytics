@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -137,7 +138,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      */
     @Override
     public Result getCorrectedScore(Callable<Integer> uncorrectedScore, final Competitor competitor, final RaceColumn raceColumn,
-            TimePoint timePoint, int numberOfCompetitorsInLeaderboard) {
+            TimePoint timePoint, int numberOfCompetitorsInLeaderboard, ScoringScheme scoringScheme) {
         double result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn);
         if (maxPointsReason == MaxPointsReason.NONE) {
@@ -147,7 +148,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             // e.g., in case we have an untracked race and the number of competitors is estimated incorrectly
             Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
             if (correctedNonMaxedScore == null) {
-                result = getMaxPoints(raceColumn.getTrackedRace(competitor), numberOfCompetitorsInLeaderboard);
+                result = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason, numberOfCompetitorsInLeaderboard);
             } else {
                 result = correctedNonMaxedScore;
             }
@@ -187,10 +188,6 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         } else {
             return correctedNonMaxedScore;
         }
-    }
-
-    private int getMaxPoints(TrackedRace trackedRace, int numberOfCompetitorsInLeaderboard) {
-        return trackedRace == null ? numberOfCompetitorsInLeaderboard+1 : Util.size(trackedRace.getRace().getCompetitors())+1;
     }
 
     @Override
