@@ -20,6 +20,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.impl.NamedImpl;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
@@ -31,6 +32,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private transient Set<RegattaListener> regattaListeners;
     private final Iterable<? extends Series> series;
     private Set<RaceColumnListener> raceColumnListeners;
+    private final ScoringScheme scoringScheme;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored
@@ -46,10 +48,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
      * is not {@link #isPersistent() marked for persistence}.
      */
-    public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry) {
+    public RegattaImpl(String baseName, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry, ScoringScheme scoringScheme) {
         this(baseName, boatClass, Collections.singletonList(new SeriesImpl("Default", /* isMedal */false, Collections
                 .singletonList(new FleetImpl("Default")), /* race column names */new ArrayList<String>(),
-                trackedRegattaRegistry)), /* persistent */false);
+                trackedRegattaRegistry)), /* persistent */false, scoringScheme);
     }
 
     /**
@@ -57,7 +59,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            all {@link Series} in this iterable will have their {@link Series#setRegatta(Regatta) regatta set} to
      *            this new regatta.
      */
-    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent) {
+    public RegattaImpl(String baseName, BoatClass boatClass, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme) {
         super(baseName+(boatClass==null?"":" ("+boatClass.getName()+")"));
         races = new HashSet<RaceDefinition>();
         regattaListeners = new HashSet<RegattaListener>();
@@ -69,6 +71,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             s.addRaceColumnListener(this);
         }
         this.persistent = persistent;
+        this.scoringScheme = scoringScheme;
     }
     
     @Override
@@ -218,6 +221,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         for (RaceColumnListener listener : raceColumnListeners) {
             listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
         }
+    }
+
+    @Override
+    public ScoringScheme getScoringScheme() {
+        return scoringScheme;
     }
 
 }
