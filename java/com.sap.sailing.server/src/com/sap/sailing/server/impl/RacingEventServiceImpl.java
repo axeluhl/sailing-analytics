@@ -55,6 +55,7 @@ import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
@@ -113,7 +114,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceTimes;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
 
-public class RacingEventServiceImpl implements RacingEventService, RegattaListener {
+public class RacingEventServiceImpl implements RacingEventService, RegattaListener, LeaderboardRegistry {
     private static final Logger logger = Logger.getLogger(RacingEventServiceImpl.class.getName());
 
     /**
@@ -261,23 +262,23 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             }
         }
     }
+    
+    @Override
+    public void addLeaderboard(Leaderboard leaderboard) {
+        synchronized (leaderboardsByName) {
+            leaderboardsByName.put(leaderboard.getName(), leaderboard);
+        }
+    }
 
     private void loadStoredLeaderboardsAndGroups() {
         logger.info("loading stored leaderboards and groups");
         // Loading all leaderboard groups and the contained leaderboards
-        for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups(this)) {
+        for (LeaderboardGroup leaderboardGroup : domainObjectFactory.getAllLeaderboardGroups(this, this)) {
             logger.info("loaded leaderboard group "+leaderboardGroup.getName()+" into "+this);
             leaderboardGroupsByName.put(leaderboardGroup.getName(), leaderboardGroup);
-            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                leaderboardsByName.put(leaderboard.getName(), leaderboard);
-                logger.info("loaded leaderboard "+leaderboard.getName()+" into "+this);
-            }
         }
         // Loading the remaining leaderboards
-        for (Leaderboard leaderboard : domainObjectFactory.getLeaderboardsNotInGroup(this)) {
-            leaderboardsByName.put(leaderboard.getName(), leaderboard);
-            logger.info("loaded leaderboard "+leaderboard.getName()+" into "+this);
-        }
+        domainObjectFactory.getLeaderboardsNotInGroup(this, this);
         logger.info("done with loading stored leaderboards and groups");
     }
     
@@ -287,10 +288,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         FlexibleLeaderboard result = new FlexibleLeaderboardImpl(name, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                 discardThresholds), new LowerScoreIsBetter());
         synchronized (leaderboardsByName) {
-            if (leaderboardsByName.containsKey(name)) {
+            if (getLeaderboardByName(name) != null) {
                 throw new IllegalArgumentException("Leaderboard with name "+name+" already exists");
             }
-            leaderboardsByName.put(name, result);
+            addLeaderboard(result);
         }
         mongoObjectFactory.storeLeaderboard(result);
         return result;
@@ -306,10 +307,10 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
             result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
                     discardThresholds), new LowerScoreIsBetter());
             synchronized (leaderboardsByName) {
-                if (leaderboardsByName.containsKey(result.getName())) {
+                if (getLeaderboardByName(result.getName()) != null) {
                     throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists in "+this);
                 }
-                leaderboardsByName.put(result.getName(), result);
+                addLeaderboard(result);
             }
             mongoObjectFactory.storeLeaderboard(result);
         } else {
@@ -534,7 +535,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
 
     @Override
     public Regatta getRegattaByName(String name) {
-        return regattasByName.get(name);
+        return name == null ? null : regattasByName.get(name);
     }
 
     @Override

@@ -427,10 +427,10 @@ body ::-webkit-scrollbar-track {
 .gwt-Button, .gwt-Button:visited {	
 	font-family: UbuntuBold, Verdana, Arial, sans-serif;
 	border: none;
-	margin: 0 0 0 5px;
+	
     background: url(images/btn-cta-orangeleft.png) center top repeat-x;
     display: inline-block;
-    padding: 5px 10px 6px;
+    padding: 2px 10px 4px;
     color: #fff;
     text-decoration: none;
     -moz-border-radius: 5px;
@@ -441,12 +441,15 @@ body ::-webkit-scrollbar-track {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-    cursor: pointer;
+    cursor: pointer; 
+    height: 24px;
+    white-space: nowrap;
 }	
 
 .gwt-Button:active {
     top: 1px;
     position: relative;
+    border: none;
 }
 
 .gwt-Button:hover {
@@ -558,4 +561,19 @@ body ::-webkit-scrollbar-track {
 
 .helpPanel {
 	margin-top: 15px;
+}
+
+.minMaxBackgroundBar {
+	left: 0px;
+	background-image: url(images/greyBar.png);
+	background-position: left;
+	background-repeat: no-repeat;
+}
+
+.formButton {
+	height: 20px;
+    padding: 0px 10px 3px;
+    float: left;
+    background: #7c7b7c url(images/alert-overlay.png) repeat-x;
+    font-family: UbuntuRegular, Arial, Verdana, sans-serif;
 }

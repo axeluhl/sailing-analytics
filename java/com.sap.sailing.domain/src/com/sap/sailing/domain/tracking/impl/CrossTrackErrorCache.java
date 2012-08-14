@@ -69,6 +69,10 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     }
     
     private static class CrossTrackErrorSumAndNumberOfFixesTrack extends TrackImpl<CrossTrackErrorSumAndNumberOfFixes> {
+        private CrossTrackErrorSumAndNumberOfFixesTrack(String nameForReadWriteLock) {
+            super(nameForReadWriteLock);
+        }
+
         private static final long serialVersionUID = 4884868659665863604L;
         
         public void deleteAllLaterThan(TimePoint from) {
@@ -165,7 +169,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
                         }
                         return result;
                     }
-                });
+                }, CrossTrackErrorCache.class.getSimpleName()+" for race "+owner.getRace().getName());
         this.owner = owner;
         owner.addListener(this);
     }
@@ -240,7 +244,9 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
      * the competitor's finish line passing, or the last GPS fix if there is no finish line passing.
      */
     private CrossTrackErrorSumAndNumberOfFixesTrack computeFixesForCacheUpdate(Competitor competitor, TimePoint from) throws NoWindException {
-        CrossTrackErrorSumAndNumberOfFixesTrack result = new CrossTrackErrorSumAndNumberOfFixesTrack();
+        CrossTrackErrorSumAndNumberOfFixesTrack result = new CrossTrackErrorSumAndNumberOfFixesTrack(
+                        CrossTrackErrorSumAndNumberOfFixesTrack.class.getSimpleName() + " for competitor "
+                        + competitor.getName() + " in race " + owner.getRace().getName());
         final CrossTrackErrorSumAndNumberOfFixesTrack competitorCacheEntry = cachePerCompetitor.get(competitor, /* waitForLatest */ false);
         final CrossTrackErrorSumAndNumberOfFixes lastCacheEntryBeforeFrom;
         lastCacheEntryBeforeFrom = competitorCacheEntry == null ? null : competitorCacheEntry.getLastFixBefore(from);
@@ -355,7 +361,7 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
             for (Map.Entry<Waypoint, MarkPassing> e : oldMarkPassings.entrySet()) {
                 if (!foundOldWaypoints.contains(e.getKey())) {
                     TimePoint timePointOfRemovedMarkPassing = e.getValue().getTimePoint();
-                    if (timePointOfRemovedMarkPassing.compareTo(from) < 0) {
+                    if (from == null || timePointOfRemovedMarkPassing.compareTo(from) < 0) {
                         from = timePointOfRemovedMarkPassing;
                     }
                 }

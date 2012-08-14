@@ -1,6 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,27 +38,89 @@ import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.WithValidityCache;
+import com.sap.sailing.util.impl.ArrayListNavigableSet;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
     private static final long serialVersionUID = -7282869695818293745L;
     private static final Speed DEFAULT_MAX_SPEED_FOR_SMOOTHING = new KnotSpeedImpl(50);
-    protected final Speed maxSpeedForSmoothening;
+    protected final Speed maxSpeedForSmoothing;
     
     private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
 
     private final Set<GPSTrackListener<ItemType, FixType>> listeners;
     
+    /**
+     * Computing {@link #getDistanceTraveled(TimePoint, TimePoint)} is more expensive the longer the track is and the
+     * higher the tracking frequency. It is called regularly, usually for the same start time. Keeping to re-evaluate
+     * all distances between all GPS fixes, even if they remain constant, is a waste of resources, particularly when we
+     * assume that usually GPS fixes are appended to a track and not usually randomly inserted, even though this can
+     * happen.
+     * <p>
+     * 
+     * This cache looks "backwards." It contains pairs whose first component represents a <code>to</code> parameter used
+     * in {@link #getDistanceTraveled(TimePoint, TimePoint)}. It is ordered by this component. The second component is a
+     * navigable, ordered set of pairs where the first pair component represents a <code>from</code> parameter used in
+     * {@link #getDistanceTraveled(TimePoint, TimePoint)} and the second pair component represents the result of
+     * {@link #getDistanceTraveled(TimePoint, TimePoint)} for this parameter combination. Note that the cache does only
+     * store distances for <code>from</code> time points actually passed to
+     * {@link #getDistanceTraveled(TimePoint, TimePoint)} and does not cache all interim combinations collected while
+     * computing a result. As such, it differs from a typical "dynamic programming" algorithm which would store all
+     * in-between values too. Assuming that <code>from</code> values are sparse (leg start, race start, ...), there
+     * doesn't seem to be much use in storing all the other in-between values too.
+     * <p>
+     * 
+     * For implementation efficiency in combination with using a {@link ArrayListNavigableSet} for the values and in
+     * order to be able to efficiently extend a cache entry for a single <code>to</code> fix, the navigable sets
+     * containing the <code>from</code> fixes and distances are ordered such that earlier fixes come later in the set.
+     * This way, extending the cache entry for a <code>to</code> fix to an earlier <code>from</code> fix only requires
+     * appending to the set.
+     * <p>
+     * 
+     * <b>Invalidation</b>: When a new fix is added to this track, all distance cache entries for fixes at or later than
+     * the new fix's time point are removed from this cache. Additionally, the fix insertion may have an impact on the
+     * {@link #getEarlierFixesWhoseValidityMayBeAffected(GPSFix) previous fix's} validity (track smoothing) and
+     * therefore on its selection for distance aggregation. Therefore, if fix addition turned the previous fix invalid,
+     * the cache entries for the time points at or after the previous fix also need to be removed.
+     * <p>
+     * 
+     * <b>Cache use</b>: When {@link #getDistanceTraveled(TimePoint, TimePoint)} is called, it first looks for a cache
+     * entry for the <code>to</code> parameter. If one is found, the earliest entry in the navigable set for the
+     * navigable set of <code>from</code> and distance values that is at or after the requested <code>from</code> time
+     * point is determined. If such an entry exists, the distance is remembered and the algorithm is repeated
+     * recursively, using the <code>from</code> value found in the cache as the new <code>to</code> value, and the
+     * <code>from</code> value originally passed to {@link #getDistanceTraveled(TimePoint, TimePoint)} as
+     * <code>from</code> again. If no entry is found in the cache entry for <code>to</code> that is at or after the
+     * requested <code>from</code> time, the distance is computed by iterating the smoothened fixes.
+     * <p>
+     * 
+     * If a cache entry for <code>to</code> is not found, the latest cache entry before it is looked up. If one is
+     * found, the distance between the <code>to</code> time point requested and the <code>to</code> time point found in
+     * the cache is computed by iterating the smoothened fixes for this interval. If none is found, the distance is
+     * computed by iterating backwards all the way to <code>from</code>.
+     * <p>
+     * 
+     * Once the {@link #getDistanceTraveled(TimePoint, TimePoint)} has computed its value, it adds the result to the
+     * cache.
+     */
+    private transient DistanceCache distanceCache;
+    
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage) {
         this(trackedItem, millisecondsOverWhichToAverage, DEFAULT_MAX_SPEED_FOR_SMOOTHING);
     }
     
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
-        super();
+        super(/* nameForReadWriteLock */ GPSFixTrackImpl.class.getSimpleName()+(trackedItem==null?"":(" for "+trackedItem.toString())));
         this.trackedItem = trackedItem;
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
-        this.maxSpeedForSmoothening = maxSpeedForSmoothening;
+        this.maxSpeedForSmoothing = maxSpeedForSmoothening;
         this.listeners = new HashSet<GPSTrackListener<ItemType, FixType>>();
+        this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        distanceCache = new DistanceCache(trackedItem.toString());
     }
 
     @Override
@@ -290,36 +355,74 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
 
     @Override
     public Distance getDistanceTraveled(TimePoint from, TimePoint to) {
-        lockForRead();
-        try {
-            double distanceInNauticalMiles = 0;
-            if (from.compareTo(to) < 0) {
-                Position fromPos = getEstimatedPosition(from, false);
-                if (fromPos == null) {
-                    return Distance.NULL;
-                }
-                lockForRead();
-                try {
-                    NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
-                    /* fromInclusive */false, new DummyGPSFix(to),
-                    /* toInclusive */false);
-                    for (GPSFix fix : subset) {
-                        double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(fix.getPosition()).getNauticalMiles();
-                        distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
-                        fromPos = fix.getPosition();
+        return getDistanceTraveledRecursively(from, to, 0);
+    }
+    
+    private Distance getDistanceTraveledRecursively(TimePoint from, TimePoint to, int recursionDepth) {
+        Distance result;
+        if (!from.before(to)) {
+            result = Distance.NULL;
+        } else {
+            lockForRead();
+            try {
+                Pair<TimePoint, Pair<TimePoint, Distance>> bestCacheEntry = getDistanceCache()
+                        .getEarliestFromAndDistanceAtOrAfterFrom(from, to);
+                if (bestCacheEntry != null) {
+                    // compute the missing stretches between best cache entry's "from" and our "from" and the cache
+                    // entry's "to" and our "to"
+                    Distance distanceFromFromToBeginningOfCacheEntry = Distance.NULL;
+                    Distance distanceFromEndOfCacheEntryToTo = Distance.NULL;
+                    if (!bestCacheEntry.getB().getA().equals(from)) {
+                        assert bestCacheEntry.getB().getA().after(from);
+                        distanceFromFromToBeginningOfCacheEntry = getDistanceTraveledRecursively(from, bestCacheEntry
+                                .getB().getA(), recursionDepth + 1);
                     }
-                } finally {
-                    unlockAfterRead();
+                    if (!bestCacheEntry.getA().equals(to)) {
+                        assert bestCacheEntry.getA().before(to);
+                        distanceFromEndOfCacheEntryToTo = getDistanceTraveledRecursively(bestCacheEntry.getA(), to,
+                                recursionDepth + 1);
+                    }
+                    result = distanceFromFromToBeginningOfCacheEntry.add(bestCacheEntry.getB().getB()).add(
+                            distanceFromEndOfCacheEntryToTo);
+                } else {
+                    double distanceInNauticalMiles = 0;
+                    if (from.compareTo(to) < 0) {
+                        // getEstimatedPosition's current implementation returns a position equal to that of a fix at
+                        // "from"
+                        // if there is one
+                        // with exactly that time stamp
+                        Position fromPos = getEstimatedPosition(from, /* extrapolate */false);
+                        if (fromPos == null) {
+                            result = Distance.NULL;
+                        } else {
+                            lockForRead();
+                            try {
+                                NavigableSet<GPSFix> subset = getGPSFixes().subSet(new DummyGPSFix(from),
+                                /* fromInclusive */false, new DummyGPSFix(to),
+                                /* toInclusive */false);
+                                for (GPSFix fix : subset) {
+                                    double distanceBetweenAdjacentFixesInNauticalMiles = fromPos.getDistance(
+                                            fix.getPosition()).getNauticalMiles();
+                                    distanceInNauticalMiles += distanceBetweenAdjacentFixesInNauticalMiles;
+                                    fromPos = fix.getPosition();
+                                }
+                            } finally {
+                                unlockAfterRead();
+                            }
+                            Position toPos = getEstimatedPosition(to, false);
+                            distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
+                            result = new NauticalMileDistance(distanceInNauticalMiles);
+                        }
+                    } else {
+                        result = Distance.NULL;
+                    }
                 }
-                Position toPos = getEstimatedPosition(to, false);
-                distanceInNauticalMiles += fromPos.getDistance(toPos).getNauticalMiles();
-                return new NauticalMileDistance(distanceInNauticalMiles);
-            } else {
-                return Distance.NULL;
+            } finally {
+                unlockAfterRead();
             }
-        } finally {
-            unlockAfterRead();
+            getDistanceCache().cache(from, to, result);
         }
+        return result;
     }
 
     @Override
@@ -500,27 +603,27 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         return new PartialNavigableSetView<FixType>(super.getInternalFixes()) {
             @Override
             protected boolean isValid(FixType e) {
-                return GPSFixTrackImpl.this.isValid(this, e);
+                return GPSFixTrackImpl.this.isValid(getRawFixes(), e);
             }
         };
     }
 
     /**
-     * When redefining this method, make sure to redefine {@link #invalidateValidityCaches(GPSFix)} accordingly.
+     * When redefining this method, make sure to redefine {@link #invalidateValidityAndDistanceCaches(GPSFix)} accordingly.
      * This implementation checks the immediate previous and next fix for <code>e</code>. Therefore, when
      * adding a fix, only immediately adjacent fix's validity caches need to be invalidated.
      */
-    protected boolean isValid(PartialNavigableSetView<FixType> filteredView, FixType e) {
+    protected boolean isValid(NavigableSet<FixType> rawFixes, FixType e) {
         assertReadLock();
         boolean result;
-        if (maxSpeedForSmoothening == null) {
+        if (maxSpeedForSmoothing == null) {
             result = true;
         } else {
             if (e.isValidityCached()) {
                 result = e.isValid();
             } else {
-                FixType previous = filteredView.lowerInternal(e);
-                FixType next = filteredView.higherInternal(e);
+                FixType previous = rawFixes.lower(e);
+                FixType next = rawFixes.higher(e);
                 Speed speedToPrevious = Speed.NULL;
                 if (previous != null) {
                     speedToPrevious = previous.getPosition().getDistance(e.getPosition())
@@ -531,8 +634,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     speedToNext = e.getPosition().getDistance(next.getPosition())
                             .inTime(next.getTimePoint().asMillis() - e.getTimePoint().asMillis());
                 }
-                result = ((previous == null || speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0) || (next == null || speedToNext
-                        .compareTo(maxSpeedForSmoothening) <= 0));
+                result = ((previous == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (next == null || speedToNext
+                        .compareTo(maxSpeedForSmoothing) <= 0));
                 e.cacheValidity(result);
             }
         }
@@ -542,18 +645,47 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     /**
      * After <code>gpsFix</code> was added to this track, invalidate the {@link WithValidityCache validity caches}
      * of the fixes whose validity may be affected. If subclasses redefine {@link #isValid(PartialNavigableSetView, GPSFix)},
-     * they must make sure that this method is redefined accordingly.
+     * they must make sure that this method is redefined accordingly.<p>
+     * 
+     * Distance cache invalidation is a bit tricky. Usually, the distance cache is invalidated starting with the time point
+     * of the <code>gpsFix</code> "upwards." However, if the adjacent earlier fixes have changed their validity by the addition
+     * of <code>gpsFix</code>, the distance cache must be invalidated starting with the first fix whose validity changed.
      */
-    protected void invalidateValidityCaches(FixType gpsFix) {
+    protected void invalidateValidityAndDistanceCaches(FixType gpsFix) {
         assertWriteLock();
+        TimePoint distanceCacheInvalidationStart = gpsFix.getTimePoint();
         gpsFix.invalidateCache();
-        FixType lower = getInternalRawFixes().lower(gpsFix);
-        if (lower != null) {
+        Iterable<FixType> lowers = getEarlierFixesWhoseValidityMayBeAffected(gpsFix);
+        for (FixType lower : lowers) {
+            boolean lowerWasValid = isValid(getRawFixes(), lower);
             lower.invalidateCache();
+            boolean lowerIsValid = isValid(getRawFixes(), lower);
+            if (lowerIsValid != lowerWasValid && lower.getTimePoint().before(distanceCacheInvalidationStart)) {
+                distanceCacheInvalidationStart = lower.getTimePoint();
+            }
         }
-        FixType higher = getInternalRawFixes().higher(gpsFix);
-        if (higher != null) {
+        getDistanceCache().invalidateAllAtOrLaterThan(distanceCacheInvalidationStart);
+        Iterable<FixType> highers = getLaterFixesWhoseValidityMayBeAffected(gpsFix);
+        for (FixType higher : highers) {
             higher.invalidateCache();
+        }
+    }
+
+    protected Iterable<FixType> getLaterFixesWhoseValidityMayBeAffected(FixType gpsFix) {
+        FixType higher = getInternalRawFixes().higher(gpsFix);
+        if (higher == null) {
+            return Collections.emptySet();
+        } else {
+            return Collections.singleton(higher);
+        }
+    }
+
+    protected Iterable<FixType> getEarlierFixesWhoseValidityMayBeAffected(FixType gpsFix) {
+        FixType lower = getInternalRawFixes().lower(gpsFix);
+        if (lower == null) {
+            return Collections.emptySet();
+        } else {
+            return Collections.singleton(lower);
         }
     }
 
@@ -583,6 +715,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } finally {
             unlockAfterRead();
         }
+    }
+
+    protected DistanceCache getDistanceCache() {
+        return distanceCache;
     }
 
 }

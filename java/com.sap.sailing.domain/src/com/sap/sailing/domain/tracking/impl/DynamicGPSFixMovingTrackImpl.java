@@ -240,14 +240,14 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
      * the fix is considered invalid.
      */
     @Override
-    protected boolean isValid(PartialNavigableSetView<GPSFixMoving> filteredView, GPSFixMoving e) {
+    protected boolean isValid(NavigableSet<GPSFixMoving> rawFixes, GPSFixMoving e) {
         assertReadLock();
         boolean result;
         if (e.isValidityCached()) {
             result = e.isValid();
         } else {
-            GPSFixMoving previous = filteredView.lowerInternal(e);
-            GPSFixMoving next = filteredView.higherInternal(e);
+            GPSFixMoving previous = rawFixes.lower(e);
+            GPSFixMoving next = rawFixes.higher(e);
             Speed speedToPrevious = Speed.NULL;
             if (previous != null) {
                 speedToPrevious = previous.getPosition().getDistance(e.getPosition())
@@ -262,9 +262,9 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends DynamicTrackImpl<Ite
                     * e.getSpeed().getMetersPerSecond())
                     && (next == null || speedToNext.getMetersPerSecond() <= MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING
                             * e.getSpeed().getMetersPerSecond())
-                    && (maxSpeedForSmoothening == null
-                            || (previous == null || speedToPrevious.compareTo(maxSpeedForSmoothening) <= 0) || (next == null || speedToNext
-                            .compareTo(maxSpeedForSmoothening) <= 0));
+                    && (maxSpeedForSmoothing == null
+                            || (previous == null || speedToPrevious.compareTo(maxSpeedForSmoothing) <= 0) || (next == null || speedToNext
+                            .compareTo(maxSpeedForSmoothing) <= 0));
             e.cacheValidity(result);
         }
         return result;

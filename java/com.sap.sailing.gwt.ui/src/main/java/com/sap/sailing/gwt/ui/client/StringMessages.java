@@ -140,7 +140,8 @@ public interface StringMessages extends Messages {
     String columnMoveDown();
     String port();
     String raceStartTimeColumn();
-    String showOnlySelected();
+    String showOnlySelectedCompetitors();
+    String showSelectedCompetitorsInfo();
     String lengthInSeconds();
     String selectedRaces();
     String stressTest();
@@ -180,6 +181,7 @@ public interface StringMessages extends Messages {
     String jibe();
     String penaltyCircle();
     String markPassing();
+    String mark();
     String otherManeuver();
     String douglasPeuckerPoints();
     String filterRacesByName();
@@ -359,4 +361,16 @@ public interface StringMessages extends Messages {
     String pleaseEnterNonEmptyUrl();
     String addFragUrl();
     String errorAddingFragUrl(String message);
+    String errorTryingToObtainLeaderboardContents(String message);
+    String lastScoreUpdate();
+    String warningBrowserUnsupported();
+    String newBuoy();
+    String controlPoint();
+    String errorUpdatingRaceCourse(String message);
+    String successfullyUpdatedCourse();
+    String selectOneBuoyOrTwoBuoysForGate();
+    String errorTryingToObtainTheBuoysOfTheRace(String message);
+    String errorTryingToObtainRaceCourse(String message);
+    String insertWaypointBeforeSelected();
+    String insertWaypointAfterSelected();
 }

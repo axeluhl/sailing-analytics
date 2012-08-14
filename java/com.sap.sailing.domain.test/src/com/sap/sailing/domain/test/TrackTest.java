@@ -2,15 +2,18 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.SortedSet;
 
 import org.junit.Before;
@@ -20,16 +23,24 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.SpeedWithBearing;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.base.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.MillisecondsTimePoint;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.Util;
+import com.sap.sailing.domain.common.impl.Util.Pair;
+import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.impl.DistanceCache;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
@@ -80,6 +91,39 @@ public class TrackTest {
         track.addGPSFix(gpsFix3);
         track.addGPSFix(gpsFix4);
         track.addGPSFix(gpsFix5);
+    }
+    
+    /**
+     * The DistanceCache must not contain any intervals pointing backwards because otherwise an endless recursion will
+     * result during the next cache look-up. This test performs a {@link GPSFixTrack#getDistanceTraveled(TimePoint, TimePoint)} with
+     * <code>from</code> later than <code>to</code> and ensures that no reversed entry is written to the cache.
+     */
+    @Test
+    public void testDistanceTraveledBackwardsQuery() {
+        final Set<Triple<TimePoint, TimePoint, Distance>> cacheEntries = new HashSet<>();
+        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
+            @Override
+            public void cache(TimePoint from, TimePoint to, Distance distance) {
+                super.cache(from, to, distance);
+                cacheEntries.add(new Triple<>(from, to, distance));
+            }
+            
+        };
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
+            private static final long serialVersionUID = -7277196393160609503L;
+            @Override
+            protected DistanceCache getDistanceCache() {
+                return distanceCache;
+            }
+        };
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint earlier = now.minus(10000);
+        TimePoint later = now.plus(10000);
+        Distance result = track.getDistanceTraveled(now, earlier);
+        assertEquals(Distance.NULL, result);
+        assertTrue(cacheEntries.isEmpty());
+        Distance nextResult = track.getDistanceTraveled(now, later);
+        assertEquals(Distance.NULL, nextResult);
     }
     
     @Test
@@ -326,6 +370,157 @@ public class TrackTest {
         } finally {
             track.unlockAfterRead();
         }
+    }
+    
+    @Test
+    public void testDistanceTraveledOnSmoothenedTrackThenAddingOutlier() {
+        final Set<TimePoint> invalidationCalls = new HashSet<TimePoint>();
+        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
+            @Override
+            public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
+                super.invalidateAllAtOrLaterThan(timePoint);
+                invalidationCalls.add(timePoint);
+            }
+        };
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
+            private static final long serialVersionUID = -7277196393160609503L;
+            @Override
+            protected DistanceCache getDistanceCache() {
+                return distanceCache;
+            }
+        };
+        final int timeBetweenFixesInMillis = 1000;
+        Bearing bearing = new DegreeBearingImpl(123);
+        Speed speed = new KnotSpeedImpl(7);
+        Position p = new DegreePosition(0, 0);
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint start = now;
+        final int steps = 10;
+        TimePoint next = null;
+        for (int i=0; i<steps; i++) {
+            GPSFix fix = new GPSFixImpl(p, start);
+            track.addGPSFix(fix);
+            next = start.plus(timeBetweenFixesInMillis);
+            p = p.translateGreatCircle(bearing, speed.travel(start, next));
+            start = next;
+            bearing = new DegreeBearingImpl(bearing.getDegrees() + 1);
+        }
+        invalidationCalls.clear();
+        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        final Pair<TimePoint, Pair<TimePoint, Distance>> fullIntervalCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start);
+        assertNotNull(fullIntervalCacheEntry); // no more entry for "to"-value start in cache
+        assertEquals(start, fullIntervalCacheEntry.getA());
+        assertEquals(now, fullIntervalCacheEntry.getB().getA());
+        TimePoint timePointForOutlier = new MillisecondsTimePoint(now.asMillis() + ((int) steps/2) * timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
+        Position outlierPosition = new DegreePosition(90, 90);
+        GPSFix outlier = new GPSFixImpl(outlierPosition, timePointForOutlier);
+        track.addGPSFix(outlier);
+        assertEquals(1, invalidationCalls.size());
+        assertEquals(timePointForOutlier, invalidationCalls.iterator().next()); // outlier doesn't turn its preceding element into an outlier
+        assertNull(distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now,  start)); // no more entry for "to"-value start in cache
+        invalidationCalls.clear();
+        final TimePoint timePointOfLastOriginalFix = track.getLastRawFix().getTimePoint();
+        assertEquals(speed.getMetersPerSecond() * (steps - 1),
+                track.getDistanceTraveled(now, timePointOfLastOriginalFix).getMeters(), 0.01);
+        final Pair<TimePoint, Pair<TimePoint, Distance>> newFullIntervalCacheEntry = distanceCache
+                .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
+        assertNotNull(newFullIntervalCacheEntry); // no more entry for "to"-value start in cache
+        assertEquals(timePointOfLastOriginalFix, newFullIntervalCacheEntry.getA());
+        assertEquals(now, newFullIntervalCacheEntry.getB().getA());
+        TimePoint timePointForLateOutlier = new MillisecondsTimePoint(now.asMillis() + (steps-1)*timeBetweenFixesInMillis + timeBetweenFixesInMillis/2);
+        Position lateOutlierPosition = new DegreePosition(90, 90);
+        GPSFix lateOutlier = new GPSFixImpl(lateOutlierPosition, timePointForLateOutlier);
+        track.addGPSFix(lateOutlier);
+        assertEquals(1, invalidationCalls.size());
+        assertEquals(timePointForLateOutlier, invalidationCalls.iterator().next());
+        invalidationCalls.clear();
+        // expect the invalidation to have started after the single cache entry, so the cache entry still has to be there:
+        final Pair<TimePoint, Pair<TimePoint, Distance>> stillPresentFullIntervalCacheEntry = distanceCache
+                .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
+        assertNotNull(stillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache
+        assertEquals(timePointOfLastOriginalFix, stillPresentFullIntervalCacheEntry.getA());
+        assertEquals(now, stillPresentFullIntervalCacheEntry.getB().getA());
+        GPSFix polishedLastFix = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
+        // ...which now still is expected to be the lateOutlier because no succeeding fix qualifies it as outlier:
+        assertEquals(lateOutlier, polishedLastFix);
+        track.lockForRead();
+        try {
+            assertEquals(steps+1, Util.size(track.getFixes())); // what will later be detected as outlier is now an additional fix
+        } finally {
+            track.unlockAfterRead();
+        }
+        // now add another "normal" fix, making the lateOutlier really an outlier
+        GPSFix fix = new GPSFixImpl(p, start); // the "overshoot" from the previous loop can be used to generate the next "regular" fix
+        track.addGPSFix(fix);
+        assertEquals(1, invalidationCalls.size());
+        // now assert that the fix addition also invalidated what is now detected as an outlier
+        assertEquals(timePointForLateOutlier, invalidationCalls.iterator().next());
+        assertTrue(timePointForLateOutlier.compareTo(fix.getTimePoint()) < 0);
+        // expect the invalidation to have started at the outlier, leaving the previous result ending at the fix right before the outlier intact
+        final Pair<TimePoint, Pair<TimePoint, Distance>> stillStillPresentFullIntervalCacheEntry = distanceCache
+                .getEarliestFromAndDistanceAtOrAfterFrom(now, timePointOfLastOriginalFix);
+        assertNotNull(stillStillPresentFullIntervalCacheEntry); // no more entry for "to"-value start in cache
+        assertEquals(timePointOfLastOriginalFix, stillStillPresentFullIntervalCacheEntry.getA());
+        assertEquals(now, stillStillPresentFullIntervalCacheEntry.getB().getA());
+        track.lockForRead();
+        try {
+            assertEquals(steps+1, Util.size(track.getFixes())); // the one "normal" late fix is added on top of the <steps> fixes, but the two outliers should now be removed
+        } finally {
+            track.unlockAfterRead();
+        }
+        GPSFix polishedLastFix2 = track.getLastFixBefore(new MillisecondsTimePoint(Long.MAX_VALUE)); // get the last smoothened fix...
+        assertEquals(fix, polishedLastFix2);
+        assertEquals(speed.getMetersPerSecond()*steps, track.getDistanceTraveled(now, start).getMeters(), 0.01);
+    }
+    
+    @Test
+    public void testDistanceCacheAccessForPartialStrip() {
+        final Set<TimePoint> invalidationCalls = new HashSet<TimePoint>();
+        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache") {
+            @Override
+            public void invalidateAllAtOrLaterThan(TimePoint timePoint) {
+                super.invalidateAllAtOrLaterThan(timePoint);
+                invalidationCalls.add(timePoint);
+            }
+        };
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
+            private static final long serialVersionUID = -7277196393160609503L;
+            @Override
+            protected DistanceCache getDistanceCache() {
+                return distanceCache;
+            }
+        };
+        final int timeBetweenFixesInMillis = 1000;
+        Bearing bearing = new DegreeBearingImpl(123);
+        Speed speed = new KnotSpeedImpl(7);
+        Position p = new DegreePosition(0, 0);
+        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint start = now;
+        final int steps = 10;
+        TimePoint next = null;
+        for (int i=0; i<steps; i++) {
+            GPSFix fix = new GPSFixImpl(p, start);
+            track.addGPSFix(fix);
+            next = start.plus(timeBetweenFixesInMillis);
+            p = p.translateGreatCircle(bearing, speed.travel(start, next));
+            start = next;
+            bearing = new DegreeBearingImpl(bearing.getDegrees() + 1);
+        }
+        invalidationCalls.clear();
+        final TimePoint stripFrom = now.plus(timeBetweenFixesInMillis);
+        final TimePoint stripTo = start.minus(2*timeBetweenFixesInMillis);
+        assertEquals(speed.getMetersPerSecond()*(steps-3),
+                track.getDistanceTraveled(stripFrom, stripTo).getMeters(), 0.01);
+        assertEquals(speed.getMetersPerSecond()*(steps-1), track.getDistanceTraveled(now, start).getMeters(), 0.01);
+        assertTrue(invalidationCalls.isEmpty());
+        // expect a cache entry exactly for the strip's boundaries
+        Pair<TimePoint, Pair<TimePoint, Distance>> stripCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(stripFrom, stripTo);
+        assertEquals(stripTo, stripCacheEntry.getA());
+        assertEquals(stripFrom, stripCacheEntry.getB().getA());
+        // expect a cache entry exactly for the full boundaries
+        Pair<TimePoint, Pair<TimePoint, Distance>> fullCacheEntry = distanceCache.getEarliestFromAndDistanceAtOrAfterFrom(now, start);
+        assertEquals(start, fullCacheEntry.getA());
+        assertEquals(now, fullCacheEntry.getB().getA());
     }
     
     @Test

@@ -399,7 +399,31 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getGapToLeaderInSeconds(TimePoint timePoint) throws NoWindException {
+    public Double getGapToLeaderInSeconds(TimePoint timePoint, final Competitor leaderInLegAtTimePoint)
+            throws NoWindException {
+        return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
+            @Override
+            public Competitor getLeader() {
+                return leaderInLegAtTimePoint;
+            }
+        });
+    }
+
+    private static interface LeaderGetter {
+        Competitor getLeader();
+    }
+    
+    @Override
+    public Double getGapToLeaderInSeconds(final TimePoint timePoint) throws NoWindException {
+        return getGapToLeaderInSeconds(timePoint, new LeaderGetter() {
+            @Override
+            public Competitor getLeader() {
+                return getTrackedLeg().getLeader(timePoint);
+            }
+        });
+    }
+    
+    private Double getGapToLeaderInSeconds(TimePoint timePoint, LeaderGetter leaderGetter) throws NoWindException {
         // If the leader already completed this leg, compute the estimated arrival time at the
         // end of this leg; if this leg's competitor also already finished the leg, return the
         // difference between this competitor's leg completion time point and the leader's completion
@@ -444,7 +468,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                     }
                 }
                 // no-one has finished this leg yet at timePoint
-                Competitor leader = getTrackedLeg().getLeader(timePoint);
+                Competitor leader = leaderGetter.getLeader();
                 // Maybe our competitor is the leader. Check:
                 if (leader == getCompetitor()) {
                     return 0.0; // the leader's gap to the leader

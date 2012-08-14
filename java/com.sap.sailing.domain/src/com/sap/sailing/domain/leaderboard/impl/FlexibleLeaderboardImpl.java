@@ -36,7 +36,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     private String name;
 
     public FlexibleLeaderboardImpl(String name, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Integer> scoreComparator) {
+            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Double> scoreComparator) {
         super(scoreCorrection, resultDiscardingRule, scoreComparator);
         if (name == null) {
             throw new IllegalArgumentException("A leaderboard's name must not be null");

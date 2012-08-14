@@ -105,7 +105,6 @@ public class Timer {
      */
     public Timer(PlayModes playMode, long refreshInterval) {
         this.refreshInterval = refreshInterval;
-        this.playMode = playMode;
         time = new Date();
         timeListeners = new HashSet<TimeListener>();
         playStateListeners = new HashSet<PlayStateListener>();
@@ -113,6 +112,7 @@ public class Timer {
         playSpeedFactor = 1.0;
         livePlayDelayInMillis = 0l;
         autoAdvance = true;
+        setPlayMode(playMode);
     }
     
     public void addTimeListener(TimeListener listener) {
@@ -209,7 +209,7 @@ public class Timer {
             if (playMode == PlayModes.Live) {
                 setTime(System.currentTimeMillis()-livePlayDelayInMillis);
             }
-            if(autoAdvance) {
+            if (autoAdvance) {
                 startAutoAdvance();
             }
             for (PlayStateListener playStateListener : playStateListeners) {
@@ -258,9 +258,11 @@ public class Timer {
     }
     
     public void setLivePlayDelayInMillis(long delayInMilliseconds) {
-        this.livePlayDelayInMillis = delayInMilliseconds;
-        if (getPlayState() == PlayStates.Playing) {
-            setTime(new Date().getTime() - delayInMilliseconds);
+        if (this.livePlayDelayInMillis != delayInMilliseconds) {
+            this.livePlayDelayInMillis = delayInMilliseconds;
+            if (getPlayMode() == PlayModes.Live) {
+                setTime(new Date().getTime() - delayInMilliseconds);
+            }
         }
     }
     

@@ -13,7 +13,8 @@ import java.util.TreeSet;
 /**
  * A view on a {@link NavigableSet} which suppresses some entries based on some configurable rule.
  * The {@link #size()} operation is expensive because it requires a full scan. {@link #isEmpty()} is
- * much cheaper because it suffices to find one element passing the filter rule.
+ * much cheaper because it suffices to find one element passing the filter rule. The filtering rule
+ * has to be expressed by subclsses implementing the {@link #isValid(Object)} method.
  * 
  * @author Axel Uhl (d043530)
  *

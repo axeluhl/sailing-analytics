@@ -26,14 +26,14 @@ public class LeaderboardEntryDTO implements IsSerializable {
      */
     public MaxPointsReason reasonForMaxPoints;
     
-    public int netPoints;
+    public double netPoints;
     
     /**
      * Tells if the net points have been overridden by a score correction. Can be used to render differently in editing environment.
      */
     public boolean netPointsCorrected;
     
-    public int totalPoints;
+    public double totalPoints;
     
     public boolean discarded;
     
@@ -63,11 +63,11 @@ public class LeaderboardEntryDTO implements IsSerializable {
         int result = 1;
         result = prime * result + (discarded ? 1231 : 1237);
         result = prime * result + ((legDetails == null) ? 0 : legDetails.hashCode());
-        result = prime * result + netPoints;
+        result = prime * result + (int) netPoints;
         result = prime * result + ((averageCrossTrackErrorInMeters == null) ? 0 : averageCrossTrackErrorInMeters.hashCode());
         result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
         result = prime * result + ((windwardDistanceToOverallLeaderInMeters == null) ? 0 : windwardDistanceToOverallLeaderInMeters.hashCode());
-        result = prime * result + totalPoints;
+        result = prime * result + (int) totalPoints;
         return result;
     }
 

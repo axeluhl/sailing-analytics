@@ -13,7 +13,8 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.operationaltransformation,
  com.sap.sailing.mongodb,
- com.mongodb.driver;bundle-version="2.6.2"
+ com.mongodb.driver;bundle-version="2.6.2",
+ com.sap.sailing.domain.test
 Import-Package: junit.framework;version="4.8.1",
  org.junit;version="4.8.1",
  com.tractrac.clientmodule,
