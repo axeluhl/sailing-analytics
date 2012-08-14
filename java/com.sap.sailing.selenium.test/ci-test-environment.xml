@@ -4,7 +4,7 @@
   Configuration file for the test environment. This file is used for the configuration of the environment for the
   executions of the integration tests. For the execution in a local environment you should make a copy of this file,
   change it accordingly to your local setup (eg. browser(s) to use for the tests) and adjust the property
-  "integration-tests.environment" in your user specific settings.xml.
+  "parameters.integration-tests" in your user specific settings.xml to point to your local copy of this file.
 -->
 <test-environment xmlns="http://www.sapsailing.com/test-environment"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
