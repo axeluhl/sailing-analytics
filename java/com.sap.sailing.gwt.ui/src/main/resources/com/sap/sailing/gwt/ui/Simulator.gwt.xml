@@ -24,7 +24,7 @@
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	
 	<!-- Specify the app entry point class.                         -->
-	<entry-point class='com.sap.sailing.gwt.ui.simulator.SimulatorEntryPoint'/>
+	<entry-point class='com.sap.sailing.gwt.ui.simulator.SimulatorEntryPoint2'/>
 	<!-- Specify the paths for translatable code                    -->
 	<extend-property name="locale" values="de"/>
 	<source path='shared'/>

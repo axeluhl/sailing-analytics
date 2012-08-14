@@ -1,5 +1,5 @@
 @import url(fontface.css);
-@import url(CommonControls.css);
+//@import url(CommonControls.css);
 
 /** Add css rules here for your application. */
 /*
@@ -34,7 +34,7 @@ body {
 	font-weight: 400;
 	padding: 80px 0 160px 0;
 	margin: 0;
-  color: #7c7c7c;
+	color: #7c7c7c;
 }
 
 table td,select,button {
@@ -62,32 +62,9 @@ table {
 	border-collapse: separate;
 }
 
-.LogoAndTitlePanel {
-	height: 68px;
-	font-family: Arial, Verdana, sans-serif;
-	position: fixed;
-	width: 100%;
-	top: 0;
-	background-image: url(images/white_gradient_header.png), url(images/header_bg_modern.png);
-	background-position: center top, 0 0;
-	background-repeat: no-repeat, repeat-x;
-	box-shadow: 0 0 20px #858585;
-	-moz-box-shadow: 0 0 20px #858585;
-	-webkit-box-shadow: 0 0 20px #858585;
-}
-
-.LogoAndTitlePanel:after {
-	content: " ";
-	display: block;
-	height: 0;
-	clear: both;
-	visibility: hidden;
-}
-
-.RaceBoardHeaderPanel {
+/*.RaceBoardHeaderPanel {
 	margin: 0 12px 14px 12px;
-}
-
+}*/
 .sapLogo {
 	float: left;
 	margin: 13px 0 0 12px;
@@ -105,12 +82,11 @@ table {
 	margin: 15px 0 0 0;
 }
 
-.leaderboardLabel {
+/*.leaderboardLabel {
 	border-bottom: 2px solid #007dc0;
 	padding: 0 0 6px 0;
 	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
-}
-
+}*/
 .refreshAndSettings {
 	background: #f2f2f2;
 	border-bottom: 2px solid #fff;
@@ -126,51 +102,13 @@ table {
 	padding: 0 0 0 0;
 }
 
-.race-name {	
+.race-name {
 	line-height: 1.0;
 }
 
 input.magnifier {
 	display: block;
 	margin: 3px auto 0 auto !important;
-}
-
-.timeLinePanel {
-	width: 100%;
-	position: fixed;
-	bottom: 0;
-	height: 140px;
-	z-index: 9;
-	background: #DDDCDC;
-	box-shadow: 0 0 20px #858585;
-	-webkit-box-shadow: 0 0 20px #858585;
-	-moz-box-shadow: 0 0 20px #858585;
-}
-
-.timeLineInnerPanel {
-	/*height: 100%;*/
-	margin: 0 12px;
-	margin-top: 20px;
-	background: #dddcdc;
-	/*padding: 38px 24px 0 24px;*/
-}
-
-.timeLineInnerBgPanel {
-	background: url(images/timeslider-bg.png) 0 0 repeat-x #f6f6f6;
-	-webkit-border-radius: 6px;
-	-moz-border-radius: 6px;
-	border-radius: 6px;
-	padding: 6px 10px 0;
-	border: 1px solid #a6a6a6;
-}
-
-.footerShadowPanel {
-	position: fixed;
-	height: 15px;
-	bottom: 0;
-	background: url(images/footer_shadow.png) left bottom repeat-x;
-	width: 100%;
-	z-index: 10;
 }
 
 .breadcrumbPanel {
@@ -182,7 +120,7 @@ input.magnifier {
 	width: 100%;
 }
 
-.raceBoardNavigation {
+/*.raceBoardNavigation {
 	float: right;
 	margin: 26px 0 0 0;
 	font-family: 'UbuntuLight', Arial, Verdana, sans-serif;
@@ -206,63 +144,34 @@ input.magnifier {
 	border-bottom: 4px solid #f0ab00;
 	color: #dddcdc;
 	text-decoration: none;
-}
-
-.timePanel-controls {
-	margin: 9px 0 0 0;
-}
-
-.timePanel-controls-play {
-}
-
-.timePanel-controls-playSpeed {
-	vertical-align: middle;
-	padding: 5px;
-	line-height: 25px;
-}
-
-.timePanel-label {
-}
-
-.timePanel-controls-time {
-}
-
-.timePanel-controls-timeDelay {
-}
-
-.gwt-DialogBox {
-	z-index: 20;
-}
-
-
+}*/
 .abstractChartPanel-importantMessageOfChart {
-    font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
-    font-size: 20px;
-    height: 70px;
-    margin: 0 auto;
-    padding: 49px 0 0 80px;
-    width: 300px;
-    color: #7c7c7c;
-	background: url(images/important-message.png) left center no-repeat;	
+	font-family: 'UbuntuBold', Arial, Verdana, sans-serif;
+	font-size: 20px;
+	height: 70px;
+	margin: 0 auto;
+	padding: 49px 0 0 80px;
+	width: 300px;
+	color: #7c7c7c;
+	background: url(images/important-message.png) left center no-repeat;
 }
 
-.breadcrumbPanel-NextArrow {
+/*.breadcrumbPanel-NextArrow {
 	display: none;
-}
-
+}*/
 .replayPanel {
 	position: relative;
 	z-index: 10;
 }
 
-.innerHeadline{
+.innerHeadline {
 	font-family: UbuntuMedium, Arial, Verdana, sans-serif;
 	font-size: 16px;
 	color: #7c7c7c;
 	margin: 15px 0
 }
 
-.sectorHeadline{
+.sectorHeadline {
 	font-family: UbuntuLight, Arial, Verdana, sans-serif;
 	font-size: 16px;
 }
@@ -271,7 +180,7 @@ input.magnifier {
 	margin: 0 10px;
 }
 
-.windPanel{
+.windPanel {
 	width: 100%;
 }
 
@@ -291,60 +200,49 @@ input.magnifier {
 }
 
 .mapOptions {
-    background: url(images/simulator/panel_bg.png) 0 0 repeat-x;
-    border-bottom: 4px solid #7c7b7c;
-    padding: 0 10px;
+	background: url(images/simulator/panel_bg.png) 0 0 repeat-x;
+	border-bottom: 4px solid #7c7b7c;
+	padding: 0 10px;
 }
 
-.gwt-SplitLayoutPanel-VDragger{
-	background: #7c7b7c;
-	 
-	 cursor: row-resize;
+.timePanelButton {
+	float: left;
+	margin: 0 0 0 5px;
 }
 
-.gwt-SplitLayoutPanel-HDragger{
-    background: #7c7b7c;
-cursor: col-resize;    
-}
-
-.gwt-Button {
-    background: url(images/btn-cta-orangeleft.png) center 0 repeat-x;
-    color: #fff;
-    font-family: UbuntuBold, Verdana, Arial, sans-serif;
-    font-size: 14px;
-    border: none;
-    padding: 5px 3px;
-    margin: 0 0 0 5px;
-    cursor: pointer;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    border-radius: 3px; 
-}   
-
-.gwt-Button:hover {
-    background: url(images/btn-cta-orangeleft.png) center -30px repeat-x;
+.playPauseButton {
+	padding: 0;
+	width: 28px;
+	height: 24px;
+	background: url(images/timeslider-play-active-icon.png) 0 0 no-repeat;
     cursor: pointer;
 }
 
-.gwt-Button[disabled] {
-  cursor: default;
-  color: #888;
-  background: #F1F1F1;
-  border: 1px solid #919090;
+.playPauseButton:hover{
+  background: url(images/playbutton-hover.png) 0 0 no-repeat !important;
+  cursor: pointer;
 }
 
-.gwt-Button[disabled]:hover {
-  cursor: default;
-  color: #888;
-  background: #F1F1F1;
-  border: 1px solid #919090;
+.playPauseButtonPause {
+	background: url(images/timeslider-pause-icon.png) 0 0 no-repeat;
 }
 
-.sliderWrapper{
+.playPauseButtonPause:hover {
+  background: url(images/playbuttonPause-hover.png) 0 0 no-repeat !important;
+  cursor: pointer;
+}
+
+
+.backToLivePlayButton {
+    float: left;
+    padding: 3px 10px 4px;
+}
+
+
+.sliderWrapper {
 	float: left;
 	width: 100%;
 	margin: 0 0 7px 0;
-	
 }
 
 .sliderLabel {
@@ -352,24 +250,100 @@ cursor: col-resize;
 	padding: 12px 0 14px 12px;
 }
 
-.boatClassLabel{
+/* styles for the masterPanel */
+#masterPanelLeft .gwt-SliderBar-shell {
+    background: url(images/simulator/slider_bg.png) 0 0 repeat-x;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border: 1px solid #ccc;
+    height: 36px;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-line {
+  border: 1px solid #919191;
+  background-color: #818181;
+  height: 4px;
+  width: 90%;
+  top: 23px;
+  overflow: hidden;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-line-disabled {
+  border: 1px solid gray;
+}
+
+/*#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-knob {
+  top: 14px;
+  width: 11px;
+  height: 21px;
+  z-index: 1;
+  cursor: pointer;
+}*/
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-tick {
+  top: 18px;
+  width: 1px;
+  height: 6pt;
+  background: #919191;
+  overflow: hidden;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-mark {
+  top: 21pt;
+  width: 6px;
+  height: 6pt;
+  background: #f0ab00;
+  overflow: hidden;
+  border-left: 4px solid #fff;
+  border-right: 4px solid #fff;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-tick-disabled {
+  background: gray;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-ticklabel {
+  font-size: 12px;
+  cursor: default;
+  font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+  top: 5px;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-markerlabel {
+  top: 30pt;
+  font-size: 12px;
+  color: #bc9434;
+  cursor: default;
+  font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+}
+
+#masterPanelLeft .gwt-SliderBar-shell-focused {
+
+}
+
+#masterPanelLeft .gwt-SliderBar-shell .gwt-SliderBar-line-sliding {
+  cursor: pointer;
+}
+
+.boatClassLabel {
 	width: 235px;
 	margin: 0 0 15px 0;
 }
 
-.sailingPanel{
+.sailingPanel {
 	width: 100%;
 }
 
-.MapDisplayOptions{
+.dockLayoutPanel div[style="position: absolute; overflow: hidden; left: 0px; right: 0px; bottom: 0px; height: 90px;"] {
+    box-shadow: 0 0 8px #424242;
+    z-index: 10;
+}
+
+.MapDisplayOptions {
 	margin: 0 15px 0 0;
 }
 
-.MapDisplayOptions label, .gwt-RadioButton label {
+.MapDisplayOptions label,.gwt-RadioButton label {
 	margin: 0 0 0 5px;
 }
-
-.timeSliderWrapperPanel{
-	-webkit-box-shadow: inset 0px 5px 10px 0px rgba(0, 0, 0, 0.15); /* WebKit */
-	-moz-box-shadow: inset 0px 5px 10px 0px rgba(0, 0, 0, 0.15); /* Firefox */
-	box-shadow: inset 0px 5px 10px 0px rgba(0, 0, 0, 0.15); /* Standard */
