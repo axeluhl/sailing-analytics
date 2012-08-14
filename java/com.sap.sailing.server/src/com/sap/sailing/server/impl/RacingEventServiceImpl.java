@@ -306,7 +306,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         RegattaLeaderboard result = null;
         if (regatta != null) {
             result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
-                    discardThresholds), new LowerScoreIsBetter());
+                    discardThresholds));
             synchronized (leaderboardsByName) {
                 if (getLeaderboardByName(result.getName()) != null) {
                     throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists in "+this);

@@ -240,7 +240,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (regatta == null) {
             logger.info("Couldn't find regatta "+regattaName+" for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
-            result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
+            result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule);
         }
         return result;
     }
