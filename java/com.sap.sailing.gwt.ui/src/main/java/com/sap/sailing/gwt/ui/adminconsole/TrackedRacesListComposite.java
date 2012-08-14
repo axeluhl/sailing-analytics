@@ -131,11 +131,12 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         this.raceSelectionProvider = raceSelectionProvider;
         this.stringMessages = stringMessages;
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
+        
         raceList = new ListDataProvider<RaceDTO>();
-        selectionModel = multiSelection ? new MultiSelectionModel<RaceDTO>()
-                : new SingleSelectionModel<RaceDTO>();
+        selectionModel = multiSelection ? new MultiSelectionModel<RaceDTO>() : new SingleSelectionModel<RaceDTO>();
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
+        
         panel = new VerticalPanel();
         setWidget(panel);
 
@@ -161,6 +162,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new CellTable<RaceDTO>(/* pageSize */10000, tableRes);
+        raceTable.ensureDebugId("TrackedRaces");
         ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(
                 raceList.getList());
         TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
@@ -349,6 +351,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
         btnRemoveRace = new Button(stringMessages.remove());
+        btnRemoveRace.ensureDebugId("RemoveRave");
         btnRemoveRace.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -360,6 +363,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         btnRemoveRace.setEnabled(false);
         trackedRacesButtonPanel.add(btnRemoveRace);
         btnUntrack = new Button(stringMessages.stopTracking());
+        btnUntrack.ensureDebugId("UntrackRace");
         btnUntrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent click) {
@@ -374,6 +378,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         trackedRacesButtonPanel.add(btnUntrack);
 
         btnRefresh = new Button(stringMessages.refresh());
+        btnRefresh.ensureDebugId("Refresh");
         btnRefresh.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -383,6 +388,7 @@ public class TrackedRacesListComposite extends SimplePanel implements Component<
         trackedRacesButtonPanel.add(btnRefresh);
 
         btnSetDelayToLive = new Button(stringMessages.setDelayToLive() + "...");
+        btnSetDelayToLive.ensureDebugId("SetDelayToLive");
         btnSetDelayToLive.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

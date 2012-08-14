@@ -2,6 +2,7 @@ package com.sap.sailing.selenium.test.adminconsole;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -23,24 +24,12 @@ public class TracTracEventManagementPanelUITest extends AbstractSeleniumTest {
     public void test() throws Exception {
         WebDriver driver = getWebDriver();
         
-        System.out.println("Driver used for test is: " + driver.getClass().getName());
-        
         driver.get(getContextRoot() + "gwt/AdminConsole.html");
         
-        //captureScreenshot();
+        assertEquals("Title of the page does not match.", "SAP Sailing Analytics Administration Console", driver.getTitle());
         
-        for(String handle : driver.getWindowHandles()) {
-            System.out.println("Window handle: " + handle);
-            //System.out.println("Title for window: " +driver.switchTo().window(handle).getTitle());
-        }
-                
-        System.out.println("Title of page is: " + driver.getTitle());
-        
-        assertEquals("Unexpected page title", "SAP Sailing Analytics Administration Console", driver.getTitle());
-        
-        System.out.println("First step passed");
-        
-        WebElement tracTracTab = driver.findElement(By.xpath("//div[@class='gwt-TabBarItem' and @role='tab']/div[text()='TracTrac Events']/.."));
+        WebElement tabPanel = driver.findElement(By.id(GWT_DEBUG_PREFIX + "AdministrationTabs"));
+        WebElement tracTracTab = tabPanel.findElement(By.xpath("//div[@class='gwt-TabBarItem' and @role='tab']/div[text()='TracTrac Events']/.."));
         tracTracTab.click();
         
         FluentWait<WebDriver> wait = new FluentWait<>(driver);
@@ -51,13 +40,13 @@ public class TracTracEventManagementPanelUITest extends AbstractSeleniumTest {
         WebElement urlField = wait.until(new Function<WebDriver, WebElement>() {
             @Override
             public WebElement apply(WebDriver driver) {
-                return driver.findElement(By.xpath("//div[@class='gwt-Label' and text() = 'JSON URL:']/../../td/input"));
+                return driver.findElement(By.id(GWT_DEBUG_PREFIX + "JSONURL"));
             }
         });
         urlField.clear();
-        urlField.sendKeys("http://germanmaster.traclive.dk/events/event_20120615_KielerWoch/jsonservice.php");
+        urlField.sendKeys("http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php");
         
-        WebElement listRacesButton = driver.findElement(By.xpath("//button[@class='gwt-Button' and text() = 'List Races']"));
+        WebElement listRacesButton = driver.findElement(By.id(GWT_DEBUG_PREFIX + "ListRaces"));
         listRacesButton.click();
         
         wait.withTimeout(5, TimeUnit.MINUTES);
@@ -65,11 +54,34 @@ public class TracTracEventManagementPanelUITest extends AbstractSeleniumTest {
         List<WebElement> trackableRaces = wait.until(new Function<WebDriver, List<WebElement>>() {
             @Override
             public List<WebElement> apply(WebDriver driver) {
-                List<WebElement> elements = driver.findElements(By.xpath("//th[text() = 'Event']/../../../tbody/tr"));
-                return elements.size() >= 90 ? elements : null;
+                WebElement availableRacesTabel = driver.findElement(By.id(GWT_DEBUG_PREFIX + "RacesTable"));
+                List<WebElement> elements = availableRacesTabel.findElements(By.xpath("//tbody/tr/td[1]/div[text()='BMW Cup']/../.."));
+                return elements.size() > 0 ? elements : null;
             }
         });
         
-        assertTrue("No trackable races found", trackableRaces.size() > 0);
+        assertTrue("There should be 13 trackable races available.", trackableRaces.size() == 13);
+        
+        WebElement trackWindCheckbox = driver.findElement(By.id(GWT_DEBUG_PREFIX + "TrackWind"));
+        trackWindCheckbox.click();
+        
+        WebElement cupRace1 = trackableRaces.get(0);
+        cupRace1.click();
+        
+        WebElement startTrackingButton = driver.findElement(By.id(GWT_DEBUG_PREFIX + "StartTracking"));
+        startTrackingButton.click();
+        
+        wait.withTimeout(5, TimeUnit.MINUTES);
+        wait.pollingEvery(10, TimeUnit.SECONDS);
+        List<WebElement> trackedRaces = wait.until(new Function<WebDriver, List<WebElement>>() {
+            @Override
+            public List<WebElement> apply(WebDriver driver) {
+                //WebElement trackedRacesTabel = driver.findElement(By.id(GWT_DEBUG_PREFIX + "RacesTable"));
+                List<WebElement> elements = new ArrayList<>();//trackedRacesTabel.findElements(By.xpath("//tbody/tr/td[1]/div[text()='BMW CUP']/../.."));
+                return elements.size() > 0 ? elements : null;
+            }
+        });
+        
+        // TODO: Check, remove (and check remove)!
     }
 }

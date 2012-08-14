@@ -3,6 +3,9 @@ package com.sap.sailing.selenium.test;
 import java.io.File;
 import java.io.IOException;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -21,6 +24,8 @@ import com.sap.sailing.selenium.test.core.TestEnvironment;
 
 @RunWith(Selenium.class)
 public abstract class AbstractSeleniumTest {
+    protected static final String GWT_DEBUG_PREFIX = "gwt-debug-";
+    
     @Managed
     protected TestEnvironment environment;
     
@@ -39,17 +44,25 @@ public abstract class AbstractSeleniumTest {
             driver = new Augmenter().augment(driver);
         }
         
-        File source = null;
+        File source = getScreenshotNotSupportedImage();
         
-        // TODO: Provide a picture "Not Supported" if the driver is not able to take screenshots
         if(driver instanceof TakesScreenshot)
             source = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        else
-            source = null;
         
         // TODO: Use the right path
         String path = "./target/screenshots/" + source.getName();
         
         Files.copy(source.toPath(), new File(path).toPath(), StandardCopyOption.REPLACE_EXISTING);
+    }
+    
+    private File getScreenshotNotSupportedImage() {
+        try {
+            URL pictureURL = AbstractSeleniumTest.class.getResource("not-supported.png");
+            URI pictureURI = pictureURL.toURI();
+            
+            return new File(pictureURI);
+        } catch(URISyntaxException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 }
