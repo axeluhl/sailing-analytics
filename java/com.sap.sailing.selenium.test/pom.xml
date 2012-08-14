@@ -56,7 +56,9 @@
                             <!--
                               TODO: The "dependencies" as well as the "bundleStartLevel" should not be needed, since we
                                     start a product for which a definition exists. However at the moment this definition
-                                    seems to be ignored by tycho. 
+                                    seems to be ignored by tycho.
+                                    
+                                    See also https://bugs.eclipse.org/bugs/show_bug.cgi?id=386988
                             -->
                             <dependencies>
                                 <dependency>
