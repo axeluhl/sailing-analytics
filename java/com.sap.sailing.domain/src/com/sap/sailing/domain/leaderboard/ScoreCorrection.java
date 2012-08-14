@@ -35,9 +35,8 @@ public interface ScoreCorrection extends Serializable {
      * {@link #isScoreCorrected(Competitor, TrackedRace)} to detect the difference.
      * @param numberOfCompetitors
      *            the number of competitors to use as the basis for penalty score calculation ("max points")
-     * @param scoringScheme TODO
      */
-    Result getCorrectedScore(Callable<Integer> uncorrectedScore, Competitor competitor, RaceColumn raceColumn,
+    Result getCorrectedScore(Callable<Integer> trackedRank, Competitor competitor, RaceColumn raceColumn,
             TimePoint timePoint, int numberOfCompetitors, ScoringScheme scoringScheme);
 
     /**
