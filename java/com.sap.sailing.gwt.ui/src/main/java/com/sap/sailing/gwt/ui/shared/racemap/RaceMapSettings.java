@@ -25,6 +25,8 @@ public class RaceMapSettings {
 
     private int maxVisibleCompetitorsCount = 50;
     
+    private boolean showSelectedCompetitorsInfo = true;
+    
     public RaceMapSettings() {
         // empty default settings; don't show maneuvers by default
         maneuverTypesToShow = new HashSet<ManeuverType>();
@@ -118,5 +120,13 @@ public class RaceMapSettings {
     public void setShowAllCompetitors(boolean showAllCompetitors) {
         this.showAllCompetitors = showAllCompetitors;
     }
+
+	public boolean isShowSelectedCompetitorsInfo() {
+		return showSelectedCompetitorsInfo;
+	}
+
+	public void setShowSelectedCompetitorsInfo(boolean showSelectedCompetitorsInfo) {
+		this.showSelectedCompetitorsInfo = showSelectedCompetitorsInfo;
+	}
 
 }
