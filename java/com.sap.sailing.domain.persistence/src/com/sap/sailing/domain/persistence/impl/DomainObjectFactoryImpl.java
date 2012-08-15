@@ -561,6 +561,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
+            // TODO bug 913: load scoring scheme from database; use ScoringSchemeType.LOW_POINT as default if none is found in DB
             result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true,
                     DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         }

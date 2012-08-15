@@ -391,9 +391,11 @@ public interface SailingServiceAsync {
     void moveColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void createRegatta(String regattaName, String boatClassName,
+    void createRegatta(
+            String regattaName,
+            String boatClassName,
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, AsyncCallback<RegattaDTO> callback);
+            boolean persistent, ScoringSchemeType scoringSchemeType, AsyncCallback<RegattaDTO> callback);
 
     void addColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);

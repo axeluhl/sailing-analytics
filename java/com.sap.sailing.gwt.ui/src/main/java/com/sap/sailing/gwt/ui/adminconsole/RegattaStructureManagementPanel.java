@@ -34,6 +34,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -464,7 +465,8 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             Pair<List<Triple<String, Integer, Color>>, Boolean> seriesPair = new Pair<List<Triple<String, Integer, Color>>, Boolean>(fleets, seriesDTO.isMedal());
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
-        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true, new AsyncCallback<RegattaDTO>() {
+        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true,
+                ScoringSchemeType.LOW_POINT, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());

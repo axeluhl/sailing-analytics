@@ -367,7 +367,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Regatta getOrCreateRegatta(String regattaName, String boatClassName);
 
-    Regatta createRegatta(String baseName, String boatClassName, Iterable<? extends Series> series, boolean persistent);
+    Regatta createRegatta(String baseName, String boatClassName, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}

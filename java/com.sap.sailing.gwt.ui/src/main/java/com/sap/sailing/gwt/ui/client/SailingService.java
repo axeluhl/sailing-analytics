@@ -137,7 +137,7 @@ public interface SailingService extends RemoteService {
     
     RegattaDTO createRegatta(String regattaName, String boatClassName, 
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent);
+            boolean persistent, ScoringSchemeType scoringSchemeType);
     
     void removeRegatta(RegattaIdentifier regattaIdentifier);
     

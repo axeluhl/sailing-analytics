@@ -2556,9 +2556,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public RegattaDTO createRegatta(String regattaName, String boatClassName, LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent) {
+    public RegattaDTO createRegatta(String regattaName, String boatClassName, LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent, ScoringSchemeType scoringSchemeType) {
         Regatta regatta = getService().apply(
-                new AddSpecificRegatta(regattaName, boatClassName, seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent));
+                new AddSpecificRegatta(regattaName, boatClassName, seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent,
+                        baseDomainFactory.createScoringScheme(scoringSchemeType)));
         return getRegattaDTO(regatta);
     }
 
