@@ -794,12 +794,12 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
             @Override
             public void onSuccess(final LeaderboardDescriptor newLeaderboard) {
-                RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.regatta.name); 
-                sailingService.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.discardThresholds,
+                sailingService.createFlexibleLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
+                        newLeaderboard.scoringScheme,
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                             @Override
                             public void onFailure(Throwable t) {
-                                errorReporter.reportError("Error trying to create the new regatta leaderboard " + newLeaderboard.name
+                                errorReporter.reportError("Error trying to create the new flexible leaderboard " + newLeaderboard.name
                                         + ": " + t.getMessage());
                             }
 
@@ -822,12 +822,12 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
             @Override
             public void onSuccess(final LeaderboardDescriptor newLeaderboard) {
-                sailingService.createFlexibleLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
-                        newLeaderboard.scoringScheme,
+                RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.regatta.name); 
+                sailingService.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.discardThresholds,
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                             @Override
                             public void onFailure(Throwable t) {
-                                errorReporter.reportError("Error trying to create the new flexible leaderboard " + newLeaderboard.name
+                                errorReporter.reportError("Error trying to create the new regatta leaderboard " + newLeaderboard.name
                                         + ": " + t.getMessage());
                             }
 

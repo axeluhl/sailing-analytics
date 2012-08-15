@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
 
@@ -132,6 +133,31 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
         // now assert that it gets discarded because due to disqualification it scores worse than all others:
         assertEquals(0, leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getTotalPoints(), 0.000000001);
+    }
+    
+    @Test
+    public void testDNDNotDiscardedInUntrackedRace() throws NoWindException {
+        raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
+        Competitor c2 = createCompetitor("Marcus Baur");
+        Competitor c3 = createCompetitor("Robert Stanjek");
+        MockedTrackedRaceWithFixedRankAndManyCompetitors testRace = new MockedTrackedRaceWithFixedRankAndManyCompetitors(
+                competitor, /* rank */ 1, /* started */true);
+        testRace.addCompetitor(c2);
+        testRace.addCompetitor(c3); // this makes maxPoints==4
+        ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
+                new int[] { 2 }), new LowerScoreIsBetter());
+        Fleet defaultFleet = leaderboard.getFleet(null);
+        RaceColumn r1 = leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
+        raceColumnsInLeaderboard.put(testRace, r1);
+        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false, defaultFleet);
+        scoreCorrection.setMaxPointsReason(competitor, r2, MaxPointsReason.DND); // non-discardable disqualification
+        // assert that max points were given before discarding...
+        assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
+        // ...and after...
+        assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getTotalPoints(), 0.000000001);
+        // ...because it's not discarded
+        assertFalse(leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).isDiscarded());
     }
     
     @Test
