@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
@@ -37,5 +38,10 @@ public class LowerScoreIsBetter extends AbstractScoringSchemeImpl {
             result = (double) (Util.size(trackedRace.getRace().getCompetitors())+1);
         }
         return result;
+    }
+
+    @Override
+    public ScoringSchemeType getType() {
+        return ScoringSchemeType.LOW_POINT;
     }
 }

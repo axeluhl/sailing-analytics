@@ -554,6 +554,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (dbRegatta != null) {
             String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
             String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
+            String scoringSchemeTypeName = (String) dbRegatta.get(FieldNames.SCORING_SCHEME_TYPE.name());
+            ScoringSchemeType scoringSchemeType;
+            if (scoringSchemeTypeName == null) {
+                scoringSchemeType = ScoringSchemeType.LOW_POINT; // the default
+            } else {
+                scoringSchemeType = ScoringSchemeType.valueOf(scoringSchemeTypeName);
+            }
             BoatClass boatClass = null;
             if (boatClassName != null) {
                 boolean typicallyStartsUpwind = (Boolean) dbRegatta.get(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name());
@@ -561,9 +568,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
-            // TODO bug 913: load scoring scheme from database; use ScoringSchemeType.LOW_POINT as default if none is found in DB
             result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true,
-                    DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                    DomainFactory.INSTANCE.createScoringScheme(scoringSchemeType));
         }
         return result;
     }
