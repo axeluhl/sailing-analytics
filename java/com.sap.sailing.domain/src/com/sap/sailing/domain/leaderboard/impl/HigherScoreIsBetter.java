@@ -25,11 +25,15 @@ public class HigherScoreIsBetter extends AbstractScoringSchemeImpl {
     @Override
     public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank) {
         Double result;
-        TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-        if (trackedRace == null) {
+        if (rank == 0) {
             result = null;
         } else {
-            result = (double) (Util.size(trackedRace.getRace().getCompetitors())-rank+1);
+            TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+            if (trackedRace == null) {
+                result = null;
+            } else {
+                result = (double) (Util.size(trackedRace.getRace().getCompetitors()) - rank + 1);
+            }
         }
         return result;
     }

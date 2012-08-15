@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.test;
+package com.sap.sailing.domain.test.mock;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -10,7 +10,6 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.test.mock.MockedTrackedRace;
 
 public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     private static final long serialVersionUID = -8587203762630194172L;

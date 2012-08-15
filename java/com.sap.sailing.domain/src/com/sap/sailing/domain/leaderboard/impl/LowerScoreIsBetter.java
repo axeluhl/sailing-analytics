@@ -25,7 +25,7 @@ public class LowerScoreIsBetter extends AbstractScoringSchemeImpl {
 
     @Override
     public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank) {
-        return (double) rank;
+        return rank == 0 ? null : (double) rank;
     }
 
     @Override

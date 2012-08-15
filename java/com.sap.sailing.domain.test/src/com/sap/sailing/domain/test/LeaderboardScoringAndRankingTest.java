@@ -31,6 +31,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithStartTimeAndRanks;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
@@ -336,7 +337,28 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Competitor[] f6 = new Competitor[] { c[1], c[2], c[3], c[0] };
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
         /* medal */ false, "testTieBreakWithEqualWinsAndTwoVersusOneSeconds",
-                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
+        assertEquals(rankedCompetitors.indexOf(c[0]), rankedCompetitors.indexOf(c[1])-1);
+    }
+
+    @Test
+    public void testTieBreakWithEqualWinsAndTwoVersusOneSecondsWithHighPointScoringScheme() throws NoWindException {
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        Competitor[] f1 = new Competitor[] { c[2], c[0], c[1], c[3] }; // c[0] scores 14
+        Competitor[] f2 = new Competitor[] { c[2], c[0], c[1], c[3] }; // c[1] scores 14 points altogether but has only one second rank
+        Competitor[] f3 = new Competitor[] { c[2], c[1], c[3], c[0] }; // c[2] scores 21
+        Competitor[] f4 = new Competitor[] { c[3], c[2], c[0], c[1] }; // c[3] scores 11
+        Competitor[] f5 = new Competitor[] { c[0], c[2], c[1], c[3] };
+        Competitor[] f6 = new Competitor[] { c[1], c[2], c[3], c[0] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
+        /* medal */ false, "testTieBreakWithEqualWinsAndTwoVersusOneSeconds",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", f1, f2, f3, f4, f5, f6);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);

@@ -60,9 +60,13 @@ public class ResultDiscardingRuleImpl implements ThresholdBasedResultDiscardingR
                 @Override
                 public int compare(RaceColumn o1, RaceColumn o2) {
                     try {
-                        // invert to get bad races first
-                        return -leaderboard.getScoreComparator().compare(leaderboard.getNetPoints(competitor, o1, timePoint),
-                                leaderboard.getNetPoints(competitor, o2, timePoint));
+                        // invert to get bad races first; have the score comparator sort null scores as "better" so they end
+                        // up at the end of the list
+                        return -leaderboard
+                                .getScoringScheme()
+                                .getScoreComparator(/* nullScoresAreBetter */true)
+                                .compare(leaderboard.getNetPoints(competitor, o1, timePoint),
+                                        leaderboard.getNetPoints(competitor, o2, timePoint));
                     } catch (NoWindException e) {
                         throw new NoWindError(e);
                     }

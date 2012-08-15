@@ -522,7 +522,6 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
-     * @param legRanksCache TODO
      */
     private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, TrackedRace trackedRace, Competitor competitor,
             TimePoint timePoint, boolean addLegDetails, boolean waitForLatestAnalyses,
