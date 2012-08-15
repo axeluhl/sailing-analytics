@@ -13,11 +13,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -29,6 +32,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
 
     private TextBox nameEntryField;
     private TextBox boatClassEntryField;
+    private ListBox scoringSchemeListBox;
 
     private List<SeriesDTO> createdSeries;
 
@@ -118,6 +122,10 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         nameEntryField.setVisibleLength(40);
         boatClassEntryField = createTextBox(null);
         boatClassEntryField.setVisibleLength(20);
+        scoringSchemeListBox = createListBox(false);
+        for (ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
+            scoringSchemeListBox.addItem(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants));
+        }
 
         createdSeries = new ArrayList<SeriesDTO>();
         seriesGrid = new Grid(0, 0);
@@ -127,9 +135,25 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
     protected RegattaDTO getResult() {
         regatta.name = nameEntryField.getText();
         regatta.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
+        regatta.scoringScheme = getSelectedScoringSchemeType();
         regatta.series = new ArrayList<SeriesDTO>();
         regatta.series.addAll(createdSeries);
         return regatta;
+    }
+    
+    public ScoringSchemeType getSelectedScoringSchemeType() {
+        ScoringSchemeType result = null;
+        int selIndex = scoringSchemeListBox.getSelectedIndex();
+        if(selIndex >= 0) { 
+            String itemText = scoringSchemeListBox.getItemText(selIndex);
+            for(ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
+                if(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants).equals(itemText)) {
+                    result = scoringSchemeType;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     @Override
@@ -139,12 +163,15 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends DataEntryDialog<Rega
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(2, 2);
+        Grid formGrid = new Grid(3, 2);
         panel.add(formGrid);
         formGrid.setWidget(0, 0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 0, new Label(stringConstants.boatClass() + ":"));
         formGrid.setWidget(1, 1, boatClassEntryField);
+        formGrid.setWidget(2, 0, new Label(stringConstants.scoringSystem() + ":"));
+        formGrid.setWidget(2, 1, scoringSchemeListBox);
+        
         panel.add(createHeadlineLabel(stringConstants.series()));
         panel.add(seriesGrid);
         Button addSeriesButton = new Button("Add series");

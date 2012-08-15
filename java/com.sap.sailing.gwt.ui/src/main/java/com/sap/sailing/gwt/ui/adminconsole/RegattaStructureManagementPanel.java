@@ -42,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.NamedDTO;
@@ -168,6 +169,15 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             }
         };
 
+        TextColumn<RegattaDTO> regattaScoringSystemColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                ScoringSchemeType scoringScheme = regatta.scoringScheme;
+                String scoringSystem = ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);
+                return scoringSystem==null?"(null)":scoringSystem;
+            }
+        };
+        
         final SafeHtmlCell seriesCell = new SafeHtmlCell();
         Column<RegattaDTO, SafeHtml> regattaSeriesColumn = new Column<RegattaDTO, SafeHtml>(seriesCell) {
             @Override
@@ -266,6 +276,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaTable.setWidth("100%");
         regattaTable.addColumn(regattaNameColumn, stringMessages.regattaName());
         regattaTable.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
+        regattaTable.addColumn(regattaScoringSystemColumn, stringMessages.scoringSystem());
         regattaTable.addColumn(regattaSeriesColumn, stringMessages.series());
         regattaTable.addColumn(regattaRacesColumn, stringMessages.races());
         regattaTable.addColumn(regattaFleetsColumn, stringMessages.fleets());
@@ -466,7 +477,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
         sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true,
-                ScoringSchemeType.LOW_POINT, new AsyncCallback<RegattaDTO>() {
+                newRegatta.scoringScheme, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());

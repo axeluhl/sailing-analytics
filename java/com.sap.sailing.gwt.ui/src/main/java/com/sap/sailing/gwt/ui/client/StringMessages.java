@@ -373,4 +373,7 @@ public interface StringMessages extends Messages {
     String errorTryingToObtainRaceCourse(String message);
     String insertWaypointBeforeSelected();
     String insertWaypointAfterSelected();
+    String scoringSchemeLowPointSystem();
+    String scoringSchemeHighPointSystem();
+    String scoringSystem();
 }
