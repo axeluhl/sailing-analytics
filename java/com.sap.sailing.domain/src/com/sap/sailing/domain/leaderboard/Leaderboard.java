@@ -104,10 +104,10 @@ public interface Leaderboard extends Named {
      * 
      * @param competitor
      *            a competitor contained in the {@link #getCompetitors()} result
-     * @param race
+     * @param raceColumn
      *            a race that is contained in the {@link #getRaceColumns()} result
      */
-    double getNetPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException;
+    double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException;
 
     /**
      * Tells if and why a competitor received "penalty" points for a race (however the scoring rules define the

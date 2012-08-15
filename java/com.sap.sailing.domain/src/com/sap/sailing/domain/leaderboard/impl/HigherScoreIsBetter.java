@@ -19,7 +19,7 @@ public class HigherScoreIsBetter extends AbstractScoringSchemeImpl {
     private static final long serialVersionUID = -2767385186133743330L;
 
     public HigherScoreIsBetter() {
-        super(/* higherIsBetter */ false);
+        super(/* higherIsBetter */ true);
     }
 
     @Override

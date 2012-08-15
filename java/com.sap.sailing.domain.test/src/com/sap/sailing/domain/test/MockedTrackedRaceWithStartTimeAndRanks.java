@@ -50,6 +50,11 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     private final List<Competitor> competitorsFromBestToWorst;
     private RaceDefinition race;
     
+    /**
+     * @param competitorsFromBestToWorst
+     *            copied, so not live; the list passed may change afterwards without effects on the rankings in this
+     *            mocked tracked race
+     */
     public MockedTrackedRaceWithStartTimeAndRanks(TimePoint startTime, List<Competitor> competitorsFromBestToWorst) {
         super();
         this.startTime = startTime;
