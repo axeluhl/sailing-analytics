@@ -19,7 +19,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     protected ListBox regattaListBox;
     protected Collection<RegattaDTO> existingRegattas;
 
-    protected static class LeaderboardParameterValidator implements Validator<StrippedLeaderboardDTO> {
+    protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
         protected final StringMessages stringConstants;
         protected final Collection<StrippedLeaderboardDTO> existingLeaderboards;
         
@@ -30,7 +30,7 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         }
 
         @Override
-        public String getErrorMessage(StrippedLeaderboardDTO leaderboardToValidate) {
+        public String getErrorMessage(LeaderboardDescriptor leaderboardToValidate) {
             String errorMessage;
             boolean nonEmpty = leaderboardToValidate.name != null && leaderboardToValidate.name.length() > 0;
 
@@ -69,15 +69,15 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         }
     }
     
-    public RegattaLeaderboardDialog(StrippedLeaderboardDTO leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
-            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<StrippedLeaderboardDTO> callback) {
+    public RegattaLeaderboardDialog(LeaderboardDescriptor leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
+            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDescriptor> callback) {
         super(stringConstants.createRegattaLeaderboard(), leaderboardDTO, stringConstants, validator, callback);
         this.existingRegattas = existingRegattas;
     }
     
     @Override
-    protected StrippedLeaderboardDTO getResult() {
-        StrippedLeaderboardDTO leaderboard = super.getResult();
+    protected LeaderboardDescriptor getResult() {
+        LeaderboardDescriptor leaderboard = super.getResult();
         leaderboard.regatta = getSelectedRegatta();
         return leaderboard;
     }
@@ -86,14 +86,12 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
         
-        Grid formGrid = new Grid(4,2);
+        Grid formGrid = new Grid(3,2);
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0,  0, new Label(stringConstants.name() + ":"));
         formGrid.setWidget(0, 1, nameTextBox);
         formGrid.setWidget(1, 0, new Label(stringConstants.regatta() + ":"));
         formGrid.setWidget(1, 1, regattaListBox);
-        formGrid.setWidget(2, 0, new Label(stringConstants.scoringSystem() + ":"));
-        formGrid.setWidget(2, 1, scoringSchemeListBox);
                 
         mainPanel.add(formGrid);
         

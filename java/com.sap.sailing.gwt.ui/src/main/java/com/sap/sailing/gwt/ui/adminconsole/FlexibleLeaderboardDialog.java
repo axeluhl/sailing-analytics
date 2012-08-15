@@ -6,15 +6,19 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialog {
+    protected ListBox scoringSchemeListBox;
 
-    protected static class LeaderboardParameterValidator implements Validator<StrippedLeaderboardDTO> {
+    protected static class LeaderboardParameterValidator implements Validator<LeaderboardDescriptor> {
         protected final StringMessages stringConstants;
         protected final Collection<StrippedLeaderboardDTO> existingLeaderboards;
         
@@ -25,7 +29,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
 
         @Override
-        public String getErrorMessage(StrippedLeaderboardDTO leaderboardToValidate) {
+        public String getErrorMessage(LeaderboardDescriptor leaderboardToValidate) {
             String errorMessage;
             boolean nonEmpty = leaderboardToValidate.name != null && leaderboardToValidate.name.length() > 0;
 
@@ -60,15 +64,17 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
     }
     
-    public FlexibleLeaderboardDialog(StrippedLeaderboardDTO leaderboardDTO, StringMessages stringConstants,
-            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<StrippedLeaderboardDTO> callback) {
+    public FlexibleLeaderboardDialog(LeaderboardDescriptor leaderboardDTO, StringMessages stringConstants,
+            ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDescriptor> callback) {
         super(stringConstants.createFlexibleLeaderboard(), leaderboardDTO, stringConstants, validator, callback);
     }
     
     @Override
-    protected StrippedLeaderboardDTO getResult() {
-        StrippedLeaderboardDTO leaderboard = super.getResult();
+    protected LeaderboardDescriptor getResult() {
+        LeaderboardDescriptor leaderboard = super.getResult();
         leaderboard.regatta = null;
+        leaderboard.scoringScheme = getSelectedScoringSchemeType();
+
         return leaderboard;
     }
 
@@ -95,4 +101,19 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         mainPanel.add(hp);
         return mainPanel;
     }  
+    
+    protected ScoringSchemeType getSelectedScoringSchemeType() {
+        ScoringSchemeType result = null;
+        int selIndex = scoringSchemeListBox.getSelectedIndex();
+        if(selIndex >= 0) { 
+            String itemText = scoringSchemeListBox.getItemText(selIndex);
+            for(ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
+                if(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants).equals(itemText)) {
+                    result = scoringSchemeType;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }

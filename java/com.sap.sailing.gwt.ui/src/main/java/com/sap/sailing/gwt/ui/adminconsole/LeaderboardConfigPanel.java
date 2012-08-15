@@ -220,31 +220,34 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     otherExistingLeaderboard.addAll(availableLeaderboardList);
                     otherExistingLeaderboard.remove(object);
                     if(object.regatta == null) {
+                        LeaderboardDescriptor descriptor = new LeaderboardDescriptor(object.name, ScoringSchemeType.LOW_POINT, object.discardThresholds);
                         FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(Collections
                                 .unmodifiableCollection(otherExistingLeaderboard),
-                                object, stringMessages, errorReporter,
-                                new AsyncCallback<StrippedLeaderboardDTO>() {
+                                descriptor, stringMessages, errorReporter,
+                                new AsyncCallback<LeaderboardDescriptor>() {
                                     @Override
                                     public void onFailure(Throwable arg0) {
                                     }
 
                                     @Override
-                                    public void onSuccess(StrippedLeaderboardDTO result) {
+                                    public void onSuccess(LeaderboardDescriptor result) {
                                         updateLeaderboard(oldLeaderboardName, result);
                                     }
                                 });
                         dialog.show();
                     } else {
+                        LeaderboardDescriptor descriptor = new LeaderboardDescriptor(object.name, 
+                                ScoringSchemeType.LOW_POINT, object.discardThresholds, object.regatta);
                         RegattaLeaderboardEditDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                 .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
-                                object, stringMessages, errorReporter,
-                                new AsyncCallback<StrippedLeaderboardDTO>() {
+                                descriptor, stringMessages, errorReporter,
+                                new AsyncCallback<LeaderboardDescriptor>() {
                                     @Override
                                     public void onFailure(Throwable arg0) {
                                     }
 
                                     @Override
-                                    public void onSuccess(StrippedLeaderboardDTO result) {
+                                    public void onSuccess(LeaderboardDescriptor result) {
                                         updateLeaderboard(oldLeaderboardName, result);
                                     }
                                 });
@@ -784,14 +787,27 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     private void createFlexibleLeaderboard() {
         FlexibleLeaderboardCreateDialog dialog = new FlexibleLeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
-                stringMessages, errorReporter, new AsyncCallback<StrippedLeaderboardDTO>() {
+                stringMessages, errorReporter, new AsyncCallback<LeaderboardDescriptor>() {
             @Override
             public void onFailure(Throwable arg0) {
             }
 
             @Override
-            public void onSuccess(StrippedLeaderboardDTO result) {
-                createNewLeaderboard(result);
+            public void onSuccess(final LeaderboardDescriptor newLeaderboard) {
+                RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.regatta.name); 
+                sailingService.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.discardThresholds,
+                        new AsyncCallback<StrippedLeaderboardDTO>() {
+                            @Override
+                            public void onFailure(Throwable t) {
+                                errorReporter.reportError("Error trying to create the new regatta leaderboard " + newLeaderboard.name
+                                        + ": " + t.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(StrippedLeaderboardDTO result) {
+                                addLeaderboard(result);
+                            }
+                        });
             }
         });
         dialog.show();
@@ -799,51 +815,30 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
 
     private void createRegattaLeaderboard() {
         RegattaLeaderboardCreateDialog dialog = new RegattaLeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
-                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter, new AsyncCallback<StrippedLeaderboardDTO>() {
+                Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter, new AsyncCallback<LeaderboardDescriptor>() {
             @Override
             public void onFailure(Throwable arg0) {
             }
 
             @Override
-            public void onSuccess(StrippedLeaderboardDTO result) {
-                createNewLeaderboard(result);
+            public void onSuccess(final LeaderboardDescriptor newLeaderboard) {
+                sailingService.createFlexibleLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
+                        newLeaderboard.scoringScheme,
+                        new AsyncCallback<StrippedLeaderboardDTO>() {
+                            @Override
+                            public void onFailure(Throwable t) {
+                                errorReporter.reportError("Error trying to create the new flexible leaderboard " + newLeaderboard.name
+                                        + ": " + t.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(StrippedLeaderboardDTO result) {
+                                addLeaderboard(result);
+                            }
+                        });
             }
         });
         dialog.show();
-    }
-
-    private void createNewLeaderboard(final StrippedLeaderboardDTO newLeaderboard) {
-        if(newLeaderboard.regatta == null) {
-            sailingService.createFlexibleLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
-                    ScoringSchemeType.LOW_POINT,
-                    new AsyncCallback<StrippedLeaderboardDTO>() {
-                        @Override
-                        public void onFailure(Throwable t) {
-                            errorReporter.reportError("Error trying to create new flexible leaderboard " + newLeaderboard.name
-                                    + ": " + t.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(StrippedLeaderboardDTO result) {
-                            addLeaderboard(result);
-                        }
-                    });
-        } else {
-            RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.regatta.name); 
-            sailingService.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.discardThresholds,
-                    new AsyncCallback<StrippedLeaderboardDTO>() {
-                        @Override
-                        public void onFailure(Throwable t) {
-                            errorReporter.reportError("Error trying to create new regatta leaderboard " + newLeaderboard.name
-                                    + ": " + t.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(StrippedLeaderboardDTO result) {
-                            addLeaderboard(result);
-                        }
-                    });
-        }
     }
 
     private void addLeaderboard(StrippedLeaderboardDTO result) {
@@ -853,7 +848,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         leaderboardSelectionChanged();
     }
     
-    private void updateLeaderboard(final String oldLeaderboardName, final StrippedLeaderboardDTO leaderboardToUdate) {
+    private void updateLeaderboard(final String oldLeaderboardName, final LeaderboardDescriptor leaderboardToUdate) {
         sailingService.updateLeaderboard(oldLeaderboardName, leaderboardToUdate.name,
                 leaderboardToUdate.discardThresholds, new AsyncCallback<Void>() {
                     @Override
@@ -867,8 +862,9 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                         for (int i = 0; i < leaderboardList.getList().size(); i++) {
                             StrippedLeaderboardDTO dao = leaderboardList.getList().get(i);
                             if (dao.name.equals(oldLeaderboardName)) {
-                                leaderboardList.getList().set(i, leaderboardToUdate);
-                                availableLeaderboardList.set(i, leaderboardToUdate);
+                                dao.name = leaderboardToUdate.name;
+                                dao.discardThresholds = leaderboardToUdate.discardThresholds;
+                                break;
                             }
                         }
                         leaderboardList.refresh();

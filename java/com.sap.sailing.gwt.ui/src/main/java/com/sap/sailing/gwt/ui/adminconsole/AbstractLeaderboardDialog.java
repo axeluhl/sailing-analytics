@@ -4,33 +4,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
-import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
-public abstract class AbstractLeaderboardDialog extends DataEntryDialog<StrippedLeaderboardDTO> {
+public abstract class AbstractLeaderboardDialog extends DataEntryDialog<LeaderboardDescriptor> {
     protected final StringMessages stringConstants;
     protected TextBox nameTextBox;
-    protected StrippedLeaderboardDTO leaderboard;
-    protected ListBox scoringSchemeListBox;
+    protected LeaderboardDescriptor leaderboard;
     
     protected LongBox[] discardThresholdBoxes;
     protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
 
-    public AbstractLeaderboardDialog(String title, StrippedLeaderboardDTO leaderboardDTO, StringMessages stringConstants,
-            Validator<StrippedLeaderboardDTO> validator,  AsyncCallback<StrippedLeaderboardDTO> callback) {
+    public AbstractLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringConstants,
+            Validator<LeaderboardDescriptor> validator,  AsyncCallback<LeaderboardDescriptor> callback) {
         super(title, null, stringConstants.ok(), stringConstants.cancel(), validator, callback);
         this.stringConstants = stringConstants;
         this.leaderboard = leaderboardDTO;
     }
     
     @Override
-    protected StrippedLeaderboardDTO getResult() {
+    protected LeaderboardDescriptor getResult() {
         List<Integer> discardThresholds = new ArrayList<Integer>();
         // go backwards; starting from first non-zero element, add them; take over leading zeroes which validator shall discard
         for (int i = discardThresholdBoxes.length-1; i>=0; i--) {
@@ -49,26 +44,10 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Stripped
         }
         leaderboard.name = nameTextBox.getValue();
         leaderboard.discardThresholds = discardThresholdsBoxContents;
-//        leaderboard.scoringScheme = getSelectedScoringSchemeType();
         
         return leaderboard;
     }
 
-    public ScoringSchemeType getSelectedScoringSchemeType() {
-        ScoringSchemeType result = null;
-        int selIndex = scoringSchemeListBox.getSelectedIndex();
-        if(selIndex >= 0) { 
-            String itemText = scoringSchemeListBox.getItemText(selIndex);
-            for(ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
-                if(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants).equals(itemText)) {
-                    result = scoringSchemeType;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-    
     @Override
     public void show() {
         super.show();

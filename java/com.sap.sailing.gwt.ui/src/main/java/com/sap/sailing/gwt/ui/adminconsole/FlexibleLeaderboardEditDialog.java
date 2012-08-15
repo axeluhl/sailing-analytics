@@ -13,16 +13,21 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
     
     public FlexibleLeaderboardEditDialog(Collection<StrippedLeaderboardDTO> otherExistingLeaderboards,
-            StrippedLeaderboardDTO leaderboard, StringMessages stringConstants, ErrorReporter errorReporter,
-            AsyncCallback<StrippedLeaderboardDTO> callback) {
+            LeaderboardDescriptor leaderboard, StringMessages stringConstants, ErrorReporter errorReporter,
+            AsyncCallback<LeaderboardDescriptor> callback) {
         super(leaderboard, stringConstants, errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(
                 stringConstants, otherExistingLeaderboards), callback);
         
         nameTextBox = createTextBox(leaderboard.name);
 
         scoringSchemeListBox = createListBox(false);
+        int j = 0;
         for (ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
             scoringSchemeListBox.addItem(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants));
+            if(leaderboard.scoringScheme == scoringSchemeType) {
+                scoringSchemeListBox.setSelectedIndex(j);
+            }
+            j++;
         }
         scoringSchemeListBox.setEnabled(false);
 
