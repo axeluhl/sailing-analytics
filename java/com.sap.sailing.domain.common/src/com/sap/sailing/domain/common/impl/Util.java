@@ -9,7 +9,7 @@ public class Util {
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
      */
-    public static <T> Collection<T> addAll(Iterable<T> what, Collection<T> addTo) {
+    public static <T> Collection<T> addAll(Iterable<? extends T> what, Collection<T> addTo) {
         for (T t : what) {
             addTo.add(t);
         }
