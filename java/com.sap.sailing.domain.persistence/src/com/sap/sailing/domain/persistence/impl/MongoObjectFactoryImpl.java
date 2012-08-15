@@ -153,6 +153,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private void storeFlexibleLeaderboard(FlexibleLeaderboard leaderboard, BasicDBObject dbLeaderboard) {
         BasicDBList dbRaceColumns = new BasicDBList();
+        dbLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), leaderboard.getScoringScheme().getType().name());
         dbLeaderboard.put(FieldNames.LEADERBOARD_COLUMNS.name(), dbRaceColumns);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             BasicDBObject dbRaceColumn = storeRaceColumn(raceColumn);

@@ -61,7 +61,6 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
-import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
@@ -247,9 +246,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private FlexibleLeaderboard loadFlexibleLeaderboard(DBObject dbLeaderboard,
             SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        // TODO see bug 914: load and set scoring scheme; use LOW_POINT as default if none found in DB
+        ScoringSchemeType scoringSchemeType = getScoringSchemeType(dbLeaderboard);
         FlexibleLeaderboardImpl result = new FlexibleLeaderboardImpl(
-                (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
+                (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule,
+                DomainFactory.INSTANCE.createScoringScheme(scoringSchemeType));
         BasicDBList dbRaceColumns = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMNS.name());
         // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage them here:
         Map<String, Fleet> fleetsByName = new HashMap<String, Fleet>();
@@ -554,13 +554,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (dbRegatta != null) {
             String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
             String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
-            String scoringSchemeTypeName = (String) dbRegatta.get(FieldNames.SCORING_SCHEME_TYPE.name());
-            ScoringSchemeType scoringSchemeType;
-            if (scoringSchemeTypeName == null) {
-                scoringSchemeType = ScoringSchemeType.LOW_POINT; // the default
-            } else {
-                scoringSchemeType = ScoringSchemeType.valueOf(scoringSchemeTypeName);
-            }
+            ScoringSchemeType scoringSchemeType = getScoringSchemeType(dbRegatta);
             BoatClass boatClass = null;
             if (boatClassName != null) {
                 boolean typicallyStartsUpwind = (Boolean) dbRegatta.get(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name());
@@ -572,6 +566,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     DomainFactory.INSTANCE.createScoringScheme(scoringSchemeType));
         }
         return result;
+    }
+
+    private ScoringSchemeType getScoringSchemeType(DBObject dbObject) {
+        String scoringSchemeTypeName = (String) dbObject.get(FieldNames.SCORING_SCHEME_TYPE.name());
+        ScoringSchemeType scoringSchemeType;
+        if (scoringSchemeTypeName == null) {
+            scoringSchemeType = ScoringSchemeType.LOW_POINT; // the default
+        } else {
+            scoringSchemeType = ScoringSchemeType.valueOf(scoringSchemeTypeName);
+        }
+        return scoringSchemeType;
     }
 
     private Iterable<Series> loadSeries(BasicDBList dbSeries, TrackedRegattaRegistry trackedRegattaRegistry) {
