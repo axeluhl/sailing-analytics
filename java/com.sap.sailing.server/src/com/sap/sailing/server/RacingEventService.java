@@ -36,6 +36,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -227,15 +228,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     
     /**
      * Creates a new leaderboard with the <code>name</code> specified.
-     * 
      * @param discardThresholds
      *            Tells the thresholds from which on a next higher number of worst races will be discarded per
      *            competitor. Example: <code>[3, 6]</code> means that starting from three races the single worst race
      *            will be discarded; starting from six races, the two worst races per competitor are discarded.
+     * @param scoringScheme TODO
      * 
      * @return the leaderboard created
      */
-    FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds);
+    FlexibleLeaderboard addFlexibleLeaderboard(String name, int[] discardThresholds, ScoringScheme scoringScheme);
     
     RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds);
 

@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.DefaultLeaderboardName;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.operationaltransformation.Peer;
 import com.sap.sailing.operationaltransformation.Peer.Role;
@@ -50,7 +51,8 @@ public class OperationalTransformationTest {
 
     @Test
     public void testAddLeaderboard() {
-        RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(LEADERBOARDNAME, new int[] { 5 });
+        RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(LEADERBOARDNAME, new int[] { 5 },
+                new LowerScoreIsBetter());
         server.apply(addLeaderboardOp);
         server.waitForNotRunning();
         replica.waitForNotRunning();

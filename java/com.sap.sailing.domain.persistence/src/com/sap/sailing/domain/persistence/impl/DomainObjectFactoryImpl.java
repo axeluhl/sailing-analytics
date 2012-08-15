@@ -247,6 +247,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     private FlexibleLeaderboard loadFlexibleLeaderboard(DBObject dbLeaderboard,
             SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        // TODO see bug 914: load and set scoring scheme; use LOW_POINT as default if none found in DB
         FlexibleLeaderboardImpl result = new FlexibleLeaderboardImpl(
                 (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
         BasicDBList dbRaceColumns = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMNS.name());

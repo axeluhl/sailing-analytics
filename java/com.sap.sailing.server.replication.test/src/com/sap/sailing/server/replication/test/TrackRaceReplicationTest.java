@@ -27,6 +27,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -114,7 +115,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testReassignmentToLeaderboardReplication() throws Exception {
         final String leaderboardName = "Test Leaderboard";
-        Leaderboard masterLeaderboard = master.apply(new CreateFlexibleLeaderboard(leaderboardName, new int[0]));
+        Leaderboard masterLeaderboard = master.apply(new CreateFlexibleLeaderboard(leaderboardName, new int[0], new LowerScoreIsBetter()));
         final String columnName = "R1";
         RaceColumn masterColumn = master.apply(new AddColumnToLeaderboard(columnName, leaderboardName, /* medalRace */ false));
         final Fleet defaultFleet = masterLeaderboard.getFleet(null);

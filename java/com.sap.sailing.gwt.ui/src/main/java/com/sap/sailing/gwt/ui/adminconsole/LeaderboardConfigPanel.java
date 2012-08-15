@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
@@ -773,6 +774,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     private void createNewLeaderboard(final StrippedLeaderboardDTO newLeaderboard) {
         if(newLeaderboard.regatta == null) {
             sailingService.createFlexibleLeaderboard(newLeaderboard.name, newLeaderboard.discardThresholds,
+                    ScoringSchemeType.LOW_POINT,
                     new AsyncCallback<StrippedLeaderboardDTO>() {
                         @Override
                         public void onFailure(Throwable t) {
