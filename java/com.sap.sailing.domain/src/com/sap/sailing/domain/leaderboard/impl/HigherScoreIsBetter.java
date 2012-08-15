@@ -36,14 +36,7 @@ public class HigherScoreIsBetter extends AbstractScoringSchemeImpl {
 
     @Override
     public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason, int numberOfCompetitorsInLeaderboard) {
-        Double result;
-        final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-        if (trackedRace == null) {
-            result = (double) (numberOfCompetitorsInLeaderboard+1);
-        } else {
-            result = (double) (Util.size(trackedRace.getRace().getCompetitors())+1);
-        }
-        return result;
+        return 0.0;
     }
 
     @Override

@@ -60,6 +60,46 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     /**
+     * Regarding bug 912, test adding a disqualification in the middle, with a high-point scoring scheme, and check that
+     * all competitors ranked worse advance by one, including getting <em>more</em> points due to the high-point scoring
+     * scheme. Note that this does not test the total points given for those competitors.
+     */
+    @Test
+    public void testOneStartedRaceWithDifferentScoresAndDisqualificationUsingHighPointScoringScheme() throws NoWindException {
+        List<Competitor> competitors = createCompetitors(10);
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
+                new String[] { "Default" },
+                /* medal */false, "testOneStartedRaceWithDifferentScores",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series finalSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        seriesIter.next();
+        finalSeries = seriesIter.next();
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitors.get(5), finalSeries.getRaceColumnByName("F1"), MaxPointsReason.DSQ);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace f1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors);
+        RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
+        f1Column.setTrackedRace(f1Column.getFleets().iterator().next(), f1);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(competitors.subList(0, 5), rankedCompetitors.subList(0, 5));
+        assertEquals(competitors.subList(6, 10), rankedCompetitors.subList(5, 9));
+        assertEquals(competitors.get(5), rankedCompetitors.get(9));
+        
+        // Now test the total points and make sure the other competitors advanced by one, too
+        assertEquals(0, leaderboard.getTotalPoints(competitors.get(5), f1Column, now), 0.000000001);
+        for (int i=0; i<5; i++) {
+            assertEquals(10-i, leaderboard.getTotalPoints(competitors.get(i), f1Column, now), 0.000000001);
+        }
+        for (int i=6; i<10; i++) {
+            assertEquals(10-(i-1), leaderboard.getTotalPoints(competitors.get(i), f1Column, now), 0.000000001);
+        }
+    }
+
+
+    /**
      * Asserts that the competitors ranking worse than the disqualified competitor advance by one in the
      * {@link Leaderboard#getCompetitorsFromBestToWorst(TimePoint)} ordering. Note that this does not test
      * the total points given for those competitors.
