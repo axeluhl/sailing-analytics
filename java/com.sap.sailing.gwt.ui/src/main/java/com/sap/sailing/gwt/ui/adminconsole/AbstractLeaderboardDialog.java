@@ -1,0 +1,77 @@
+package com.sap.sailing.gwt.ui.adminconsole;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.gwt.ui.client.DataEntryDialog;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+
+public abstract class AbstractLeaderboardDialog extends DataEntryDialog<StrippedLeaderboardDTO> {
+    protected final StringMessages stringConstants;
+    protected TextBox nameTextBox;
+    protected StrippedLeaderboardDTO leaderboard;
+    protected ListBox scoringSchemeListBox;
+    
+    protected LongBox[] discardThresholdBoxes;
+    protected static final int MAX_NUMBER_OF_DISCARDED_RESULTS = 4;
+
+    public AbstractLeaderboardDialog(String title, StrippedLeaderboardDTO leaderboardDTO, StringMessages stringConstants,
+            Validator<StrippedLeaderboardDTO> validator,  AsyncCallback<StrippedLeaderboardDTO> callback) {
+        super(title, null, stringConstants.ok(), stringConstants.cancel(), validator, callback);
+        this.stringConstants = stringConstants;
+        this.leaderboard = leaderboardDTO;
+    }
+    
+    @Override
+    protected StrippedLeaderboardDTO getResult() {
+        List<Integer> discardThresholds = new ArrayList<Integer>();
+        // go backwards; starting from first non-zero element, add them; take over leading zeroes which validator shall discard
+        for (int i = discardThresholdBoxes.length-1; i>=0; i--) {
+            if ((discardThresholdBoxes[i].getValue() != null
+                    && discardThresholdBoxes[i].getValue().toString().length() > 0) || !discardThresholds.isEmpty()) {
+                if (discardThresholdBoxes[i].getValue() == null) {
+                    discardThresholds.add(0, 0);
+                } else {
+                    discardThresholds.add(0, discardThresholdBoxes[i].getValue().intValue());
+                }
+            }
+        }
+        int[] discardThresholdsBoxContents = new int[discardThresholds.size()];
+        for (int i = 0; i < discardThresholds.size(); i++) {
+            discardThresholdsBoxContents[i] = discardThresholds.get(i);
+        }
+        leaderboard.name = nameTextBox.getValue();
+        leaderboard.discardThresholds = discardThresholdsBoxContents;
+//        leaderboard.scoringScheme = getSelectedScoringSchemeType();
+        
+        return leaderboard;
+    }
+
+    public ScoringSchemeType getSelectedScoringSchemeType() {
+        ScoringSchemeType result = null;
+        int selIndex = scoringSchemeListBox.getSelectedIndex();
+        if(selIndex >= 0) { 
+            String itemText = scoringSchemeListBox.getItemText(selIndex);
+            for(ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
+                if(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants).equals(itemText)) {
+                    result = scoringSchemeType;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    @Override
+    public void show() {
+        super.show();
+        nameTextBox.setFocus(true);
+    }    
+}
