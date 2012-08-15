@@ -2,10 +2,12 @@ package com.sap.sailing.domain.leaderboard.meta;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -13,6 +15,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
+import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.NamedImpl;
@@ -81,23 +84,28 @@ public class MetaLeaderboard extends NamedImpl implements Leaderboard {
     }
 
     @Override
-    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint)
+    public Double getNetPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint)
             throws NoWindException {
-        
-        // TODO Auto-generated method stub
-        return null;
+        return getScoreCorrection().getCorrectedScore(
+                new Callable<Integer>() {
+                    public Integer call() throws NoWindException {
+                        return getTrackedRank(competitor, raceColumn, timePoint);
+                    }
+                }, competitor,
+                raceColumn, timePoint, Util.size(getCompetitors()), getScoringScheme()).getCorrectedScore();
     }
 
     @Override
-    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn race, TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return null;
+    public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        return getScoreCorrection().getMaxPointsReason(competitor, raceColumn);
     }
 
+    /**
+     * For a meta leaderboard, net points equal total points as long as there are no discards and disqualifications
+     */
     @Override
-    public Double getTotalPoints(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
-        // TODO Auto-generated method stub
-        return null;
+    public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+        return getNetPoints(competitor, raceColumn, timePoint);
     }
 
     @Override
@@ -107,26 +115,57 @@ public class MetaLeaderboard extends NamedImpl implements Leaderboard {
 
     @Override
     public Double getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
-        // TODO Auto-generated method stub
-        return null;
+        double result = getCarriedPoints(competitor);
+        for (RaceColumn r : getRaceColumns()) {
+            final Double totalPoints = getTotalPoints(competitor, r, timePoint);
+            if (totalPoints != null) {
+                result += totalPoints;
+            }
+        }
+        return result;
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint)
+    public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, final TimePoint timePoint)
             throws NoWindException {
-        // TODO Auto-generated method stub
-        return null;
+        final Comparator<Double> comparator = getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false);
+        List<Competitor> sortedCompetitors = new ArrayList<Competitor>();
+        Util.addAll(getCompetitors(), sortedCompetitors);
+        Collections.sort(sortedCompetitors, new Comparator<Competitor>() {
+            @Override
+            public int compare(Competitor o1, Competitor o2) {
+                try {
+                    return comparator.compare(getTotalPoints(o1, raceColumn, timePoint), getTotalPoints(o2, raceColumn, timePoint));
+                } catch (NoWindException e) {
+                    throw new NoWindError(e);
+                }
+            }
+        });
+        return sortedCompetitors;
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) throws NoWindException {
-        // TODO Auto-generated method stub
-        return null;
+    public List<Competitor> getCompetitorsFromBestToWorst(final TimePoint timePoint) throws NoWindException {
+        final Comparator<Double> comparator = getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false);
+        List<Competitor> sortedCompetitors = new ArrayList<Competitor>();
+        Util.addAll(getCompetitors(), sortedCompetitors);
+        Collections.sort(sortedCompetitors, new Comparator<Competitor>() {
+            @Override
+            public int compare(Competitor o1, Competitor o2) {
+                try {
+                    return comparator.compare(getTotalPoints(o1, timePoint), getTotalPoints(o2, timePoint));
+                } catch (NoWindException e) {
+                    throw new NoWindError(e);
+                }
+            }
+        });
+        return sortedCompetitors;
     }
 
     @Override
     public Map<Pair<Competitor, RaceColumn>, Entry> getContent(TimePoint timePoint) throws NoWindException {
         // TODO Auto-generated method stub
+        // TODO this finally seems the spark in the powder keg: extract common base class from AbstractLeaderboardImpl!
         return null;
     }
 
