@@ -138,13 +138,13 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * <p>
      */
     @Override
-    public Result getCorrectedScore(Callable<Integer> trackedRank, final Competitor competitor,
+    public Result getCorrectedScore(Callable<Integer> trackedRankProvider, final Competitor competitor,
             final RaceColumn raceColumn, TimePoint timePoint, int numberOfCompetitorsInLeaderboard,
             ScoringScheme scoringScheme) {
-        double result;
+        Double result;
         final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn);
         if (maxPointsReason == MaxPointsReason.NONE) {
-            result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRank, scoringScheme);
+            result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme);
         } else {
             // allow explicit override even when max points reason is specified; calculation may be wrong,
             // e.g., in case we have an untracked race and the number of competitors is estimated incorrectly
@@ -156,7 +156,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
                 result = correctedNonMaxedScore;
             }
         }
-        final double correctedScore = result;
+        final Double correctedScore = result;
         return new Result() {
             @Override
             public MaxPointsReason getMaxPointsReason() {
@@ -164,7 +164,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             }
 
             @Override
-            public double getCorrectedScore() {
+            public Double getCorrectedScore() {
                 return correctedScore;
             }
 
@@ -182,8 +182,14 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
      * 
      * @param scoringScheme
      *            used to transform the tracked rank into a score if there is no score correction applied
+     * 
+     * @return <code>null</code> in case the <code>competitor</code> has no score assigned in that race which is the
+     * case if the score is not corrected by these score corrections, and the <code>trackedRankProvider</code> delivers 0
+     * as the rank, or if the score is not corrected and the scoring scheme cannot find the competitor in any tracked race
+     * of the <code>raceColumn</code>, meaning there cannot be a tracked rank for the competitor regardless what
+     * <code>trackedRankProvider</code> delivers.
      */
-    protected double getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn,
+    protected Double getCorrectedNonMaxedScore(Competitor competitor, RaceColumn raceColumn,
             Callable<Integer> trackedRankProvider, ScoringScheme scoringScheme) {
         Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
         Double result;

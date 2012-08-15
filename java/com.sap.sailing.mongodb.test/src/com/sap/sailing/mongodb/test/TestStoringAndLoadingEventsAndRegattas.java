@@ -53,7 +53,7 @@ import com.sap.sailing.domain.persistence.MongoFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
-import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
+import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;

@@ -27,14 +27,23 @@ public interface ScoringScheme extends Serializable {
     
     /**
      * A comparator in line with the result of {@link #isHigherBetter()}. The comparator returns "less" for results
-     * considered "better." 
+     * considered "better."
+     * 
+     * @param nullScoresAreBetter
+     *            if <code>true</code>, a <code>null</code> score will be considered "better" ("less") than a non-
+     *            <code>null</code> score; otherwise, <code>null</code> scores will be considered "worse" ("greater")
+     *            than non-<code>null</code> scores.
      */
-    Comparator<Double> getScoreComparator();
+    Comparator<Double> getScoreComparator(boolean nullScoresAreBetter);
     
     /**
      * For a <code>rank</code> that a <code>competitor</code> achieved in a race, returns the score attributed to this
      * rank according to this scoring scheme. A scoring scheme may need to know the competitor list for the race. Therefore,
-     * the race column as well as the competitor need to be passed although some trivial scoring schemes may not need them.
+     * the race column as well as the competitor need to be passed although some trivial scoring schemes may not need them.<p>
+     * 
+     * If the <code>competitor</code> has no {@link RaceColumn#getTrackedRace(Competitor) tracked race} in the column in which
+     * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
+     * race. 
      */
     Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank);
     

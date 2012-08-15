@@ -41,8 +41,8 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
     @Override
     public Triple<Double, Double, Boolean> internalApplyTo(RacingEventService toState) throws NoWindException {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
-        double newNetPoints;
-        double newTotalPoints;
+        Double newNetPoints;
+        Double newTotalPoints;
         boolean isScoreCorrected;
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);

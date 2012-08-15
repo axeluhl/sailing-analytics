@@ -108,7 +108,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     public RaceColumn addRace(TrackedRace race, String columnName, boolean medalRace, Fleet fleet) {
         FlexibleRaceColumn column = getRaceColumnByName(columnName);
         if (column == null) {
-            column = createRaceColumn(columnName, medalRace);
+            column = createRaceColumn(columnName, medalRace, fleet);
             column.addRaceColumnListener(this);
             races.add(column);
         }

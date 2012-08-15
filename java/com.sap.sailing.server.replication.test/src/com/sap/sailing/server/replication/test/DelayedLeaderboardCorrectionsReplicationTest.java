@@ -25,7 +25,7 @@ import com.sap.sailing.domain.leaderboard.DelayedLeaderboardCorrections;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
-import com.sap.sailing.domain.test.MockedTrackedRaceWithFixedRank;
+import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.mongodb.MongoDBService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
