@@ -23,7 +23,6 @@ import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
-import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -62,8 +61,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      */
     private final Map<Competitor, Double> carriedPoints;
 
-    private final ScoringScheme scoringScheme;
-    
     private Set<RaceColumnListener> raceColumnListeners;
     
     /**
@@ -138,13 +135,12 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      * @param name must not be <code>null</code>
      */
     public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, ScoringScheme scoreComparator) {
+            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         assert scoreCorrection != null;
         this.carriedPoints = new HashMap<Competitor, Double>();
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
-        this.scoringScheme = scoreComparator;
         this.raceColumnListeners = new HashSet<RaceColumnListener>();
     }
     
@@ -457,7 +453,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
                         }
                     }
                     if (comparisonResult == 0) {
-                        comparisonResult = scoringScheme.getScoreComparator().compare(netPointsAndFleet.get(o1).getA(), netPointsAndFleet.get(o2).getA());
+                        comparisonResult = getScoringScheme().getScoreComparator().compare(
+                                netPointsAndFleet.get(o1).getA(), netPointsAndFleet.get(o2).getA());
                     }
                 }
                 return comparisonResult;
@@ -477,7 +474,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     protected Comparator<? super Competitor> getTotalRankComparator(TimePoint timePoint) throws NoWindException {
-        return new LeaderboardTotalRankComparator(this, timePoint, scoringScheme.getScoreComparator());
+        return new LeaderboardTotalRankComparator(this, timePoint, getScoringScheme().getScoreComparator());
     }
 
     @Override
@@ -534,11 +531,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     
     @Override
     public Comparator<Double> getScoreComparator() {
-        return scoringScheme.getScoreComparator();
+        return getScoringScheme().getScoreComparator();
     }
-    
-    protected ScoringScheme getScoringScheme() {
-        return scoringScheme;
-    }
-
 }

@@ -26,13 +26,23 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements IsSerializ
     private Date timePointOfLastCorrectionsValidity;
     
     private String comment;
+    
+    /**
+     * Taken from the scoring scheme. Shall be used by the race columns to control their initial sort order.
+     */
+    private boolean higherScoresIsBetter;
 
     LeaderboardDTO() {} // for serialization
 
-    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment) {
+    public LeaderboardDTO(Date timePointOfLastCorrectionsValidity, String comment, boolean higherScoreIsBetter) {
         this.timePointOfLastCorrectionsValidity = timePointOfLastCorrectionsValidity;
         this.comment = comment;
         competitorOrderingPerRace = new HashMap<RaceColumnDTO, List<CompetitorDTO>>();
+        this.higherScoresIsBetter = higherScoreIsBetter;
+    }
+    
+    public boolean isHigherScoreBetter() {
+        return higherScoresIsBetter;
     }
     
     public void setCompetitorsFromBestToWorst(RaceColumnDTO raceColumn, List<CompetitorDTO> orderedCompetitors) {

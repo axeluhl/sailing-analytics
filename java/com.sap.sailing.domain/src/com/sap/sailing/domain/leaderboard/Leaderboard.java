@@ -254,4 +254,6 @@ public interface Leaderboard extends Named {
      * Obtains all {@link TrackedRace}s currently attached to any of the columns of this leaderboard
      */
     Iterable<TrackedRace> getTrackedRaces();
+
+    ScoringScheme getScoringScheme();
 }
