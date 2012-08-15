@@ -219,20 +219,37 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     List<StrippedLeaderboardDTO> otherExistingLeaderboard = new ArrayList<StrippedLeaderboardDTO>();
                     otherExistingLeaderboard.addAll(availableLeaderboardList);
                     otherExistingLeaderboard.remove(object);
-                    LeaderboardEditDialog dialog = new LeaderboardEditDialog(Collections
-                            .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
-                            object, stringMessages, errorReporter,
-                            new AsyncCallback<StrippedLeaderboardDTO>() {
-                                @Override
-                                public void onFailure(Throwable arg0) {
-                                }
+                    if(object.regatta == null) {
+                        FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(Collections
+                                .unmodifiableCollection(otherExistingLeaderboard),
+                                object, stringMessages, errorReporter,
+                                new AsyncCallback<StrippedLeaderboardDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable arg0) {
+                                    }
 
-                                @Override
-                                public void onSuccess(StrippedLeaderboardDTO result) {
-                                    updateLeaderboard(oldLeaderboardName, result);
-                                }
-                            });
-                    dialog.show();
+                                    @Override
+                                    public void onSuccess(StrippedLeaderboardDTO result) {
+                                        updateLeaderboard(oldLeaderboardName, result);
+                                    }
+                                });
+                        dialog.show();
+                    } else {
+                        RegattaLeaderboardEditDialog dialog = new RegattaLeaderboardEditDialog(Collections
+                                .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
+                                object, stringMessages, errorReporter,
+                                new AsyncCallback<StrippedLeaderboardDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable arg0) {
+                                    }
+
+                                    @Override
+                                    public void onSuccess(StrippedLeaderboardDTO result) {
+                                        updateLeaderboard(oldLeaderboardName, result);
+                                    }
+                                });
+                        dialog.show();
+                    }
                 } else if ("ACTION_EDIT_SCORES".equals(value)) {
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
                     Window.open("/gwt/LeaderboardEditing.html?name=" + object.name
@@ -258,12 +275,21 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         HorizontalPanel leaderboardButtonPanel = new HorizontalPanel();
         leaderboardButtonPanel.setSpacing(5);
         leaderboardsPanel.add(leaderboardButtonPanel);
-        Button btnNew = new Button("Create Leaderboard...");
-        leaderboardButtonPanel.add(btnNew);
-        btnNew.addClickHandler(new ClickHandler() {
+        Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
+        leaderboardButtonPanel.add(createFlexibleLeaderboardBtn);
+        createFlexibleLeaderboardBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent clickEvent) {
-                addNewLeaderboard();
+                createFlexibleLeaderboard();
+            }
+        });
+ 
+        Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
+        leaderboardButtonPanel.add(createRegattaLeaderboardBtn);
+        createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                createRegattaLeaderboard();
             }
         });
 
@@ -756,8 +782,23 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         raceColumnAndFleetList.refresh();
     }
 
-    private void addNewLeaderboard() {
-        LeaderboardCreateDialog dialog = new LeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
+    private void createFlexibleLeaderboard() {
+        FlexibleLeaderboardCreateDialog dialog = new FlexibleLeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
+                stringMessages, errorReporter, new AsyncCallback<StrippedLeaderboardDTO>() {
+            @Override
+            public void onFailure(Throwable arg0) {
+            }
+
+            @Override
+            public void onSuccess(StrippedLeaderboardDTO result) {
+                createNewLeaderboard(result);
+            }
+        });
+        dialog.show();
+    }
+
+    private void createRegattaLeaderboard() {
+        RegattaLeaderboardCreateDialog dialog = new RegattaLeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
                 Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter, new AsyncCallback<StrippedLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable arg0) {
