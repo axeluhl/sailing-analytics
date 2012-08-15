@@ -282,9 +282,7 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
 
     @Override
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        // FIXME bug 919: delegate directly to ScoreCorrection; must also work for no tracked race associated
-        return raceColumn.getTrackedRace(competitor) == null ? MaxPointsReason.NONE : getScoreCorrection()
-                .getMaxPointsReason(competitor, raceColumn);
+        return getScoreCorrection().getMaxPointsReason(competitor, raceColumn);
     }
     
     @Override
