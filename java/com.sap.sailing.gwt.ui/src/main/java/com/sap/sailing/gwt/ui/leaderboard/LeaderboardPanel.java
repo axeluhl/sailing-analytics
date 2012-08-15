@@ -508,11 +508,11 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
                         html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                        html.appendHtmlConstant(entry.totalPoints == 0 ? "" : scoreFormat.format(entry.totalPoints));
+                        html.appendHtmlConstant(entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints));
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.appendHtmlConstant(entry.netPoints == 0 ? "" : scoreFormat.format(entry.netPoints));
+                        html.appendHtmlConstant(entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints));
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
@@ -585,8 +585,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         public String getValue(LeaderboardRowDTO object) {
             // The following code exists only for robustness. This method should never be called because
             // RaceColumn implements its own render(...) method which doesn't make use of getValue(...)
-            final double totalPoints = object.fieldsByRaceColumnName.get(getRaceColumnName()).totalPoints;
-            return "" + (totalPoints == 0 ? "" : scoreFormat.format(totalPoints));
+            final Double totalPoints = object.fieldsByRaceColumnName.get(getRaceColumnName()).totalPoints;
+            return "" + (totalPoints == null ? "" : scoreFormat.format(totalPoints));
         }
 
         @Override
@@ -856,8 +856,8 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            double totalPoints = getLeaderboard().getTotalPoints(object);
-            return "" + (totalPoints==0 ? "" : scoreFormat.format(totalPoints));
+            Double totalPoints = getLeaderboard().getTotalPoints(object);
+            return "" + (totalPoints==null ? "" : scoreFormat.format(totalPoints));
         }
 
         @Override

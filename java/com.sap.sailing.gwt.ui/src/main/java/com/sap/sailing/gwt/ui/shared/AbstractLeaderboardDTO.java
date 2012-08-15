@@ -71,24 +71,30 @@ public abstract class AbstractLeaderboardDTO implements IsSerializable {
         return false;
     }
 
-    public double getTotalPoints(LeaderboardRowDTO object) {
-        double totalPoints = object.carriedPoints == null ? 0 : object.carriedPoints;
+    public Double getTotalPoints(LeaderboardRowDTO object) {
+        Double totalPoints = object.carriedPoints == null ? null : object.carriedPoints;
         for (LeaderboardEntryDTO e : object.fieldsByRaceColumnName.values()) {
-            totalPoints += e.totalPoints;
+            if(e.totalPoints != null) {
+                if(totalPoints == null) {
+                    totalPoints = e.totalPoints;
+                } else {
+                    totalPoints += e.totalPoints;
+                }
+            }
         }
         return totalPoints;
     }
 
-    public double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
-        double result = 0;
+    public Double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
+        Double netPoints = null;
         LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
             LeaderboardEntryDTO field = row.fieldsByRaceColumnName.get(nameOfLastRaceSoFar);
-            if (field != null) {
-                result = field.netPoints;
+            if (field != null &&  field.netPoints != null) {
+                netPoints = field.netPoints;
             }
         }
-        return result;
+        return netPoints;
     }
 
     public boolean raceIsTracked(String raceColumnName) {
