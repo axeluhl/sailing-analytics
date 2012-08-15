@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.MarkPassing;
 
 public interface DomainFactory {
@@ -57,5 +59,7 @@ public interface DomainFactory {
      * The stream returned by this method can be used 
      */
     ObjectInputStreamResolvingAgainstDomainFactory createObjectInputStreamResolvingAgainstThisFactory(InputStream inputStream) throws IOException;
+    
+    ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 
 }

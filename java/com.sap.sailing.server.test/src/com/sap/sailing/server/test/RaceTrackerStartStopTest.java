@@ -19,16 +19,18 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
-import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
+import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 
@@ -57,7 +59,8 @@ public class RaceTrackerStartStopTest {
     public void setUp() {
         racingEventService = new RacingEventServiceImplMock();
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
-        regatta = new RegattaImpl(EVENTNAME, boatClass, /* trackedRegattaRegistry */ null);
+        regatta = new RegattaImpl(EVENTNAME, boatClass, /* trackedRegattaRegistry */ null,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         racingEventService.getEventsByName().put(EVENTNAME, regatta);
         TrackedRegatta trackedRegatta1 = racingEventService.getOrCreateTrackedRegatta(regatta);
         racingEventService.getEventsByNameMap().put(EVENTNAME, regatta);

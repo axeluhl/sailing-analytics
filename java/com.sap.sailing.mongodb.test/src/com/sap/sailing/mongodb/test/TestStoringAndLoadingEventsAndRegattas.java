@@ -41,6 +41,7 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -353,7 +354,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         medalFleets.add(new FleetImpl("Medal"));
         Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, medalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(medalSeries);
-        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, persistent);
+        Regatta regatta = new RegattaImpl(regattaBaseName, boatClass, series, persistent,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         return regatta;
     }
 

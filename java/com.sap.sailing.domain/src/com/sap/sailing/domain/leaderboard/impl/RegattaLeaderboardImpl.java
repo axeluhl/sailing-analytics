@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import com.sap.sailing.domain.base.Fleet;
@@ -14,6 +13,7 @@ import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
  * A leaderboard that is based on the definition of a {@link Regatta} with its {@link Series} and {@link Fleet}. The regatta
@@ -29,8 +29,8 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     private final Regatta regatta;
 
     public RegattaLeaderboardImpl(Regatta regatta, SettableScoreCorrection scoreCorrection,
-            ThresholdBasedResultDiscardingRule resultDiscardingRule, Comparator<Double> scoreComparator) {
-        super(scoreCorrection, resultDiscardingRule, scoreComparator);
+            ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        super(scoreCorrection, resultDiscardingRule, regatta.getScoringScheme());
         this.regatta = regatta;
         regatta.addRaceColumnListener(this);
     }

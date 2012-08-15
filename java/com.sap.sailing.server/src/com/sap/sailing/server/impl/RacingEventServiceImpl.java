@@ -47,6 +47,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util;
@@ -305,7 +306,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
         RegattaLeaderboard result = null;
         if (regatta != null) {
             result = new RegattaLeaderboardImpl(regatta, new ScoreCorrectionImpl(), new ResultDiscardingRuleImpl(
-                    discardThresholds), new LowerScoreIsBetter());
+                    discardThresholds));
             synchronized (leaderboardsByName) {
                 if (getLeaderboardByName(result.getName()) != null) {
                     throw new IllegalArgumentException("Leaderboard with name " + result.getName() + " already exists in "+this);
@@ -552,7 +553,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     @Override
     public Regatta getOrCreateRegatta(String baseEventName, String boatClassName) {
         Regatta regatta = new RegattaImpl(baseEventName, getBaseDomainFactory().getOrCreateBoatClass(
-                boatClassName), this);
+                boatClassName), this, com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Regatta result = regattasByName.get(regatta.getName());
         if (result == null) {
             result = regatta;
@@ -566,7 +567,8 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
     public Regatta createRegatta(String baseEventName, String boatClassName,
             Iterable<? extends Series> series, boolean persistent) {
         Regatta regatta = new RegattaImpl(baseEventName,
-                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent);
+                getBaseDomainFactory().getOrCreateBoatClass(boatClassName), series, persistent, 
+                com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on "+this);
         cacheAndReplicateSpecificRegattaWithoutRaceColumns(regatta);
         if (persistent) {

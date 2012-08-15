@@ -42,6 +42,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -239,7 +240,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (regatta == null) {
             logger.info("Couldn't find regatta "+regattaName+" for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
-            result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
+            result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule);
         }
         return result;
     }
@@ -559,7 +560,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
-            result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true);
+            result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true,
+                    DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         }
         return result;
     }

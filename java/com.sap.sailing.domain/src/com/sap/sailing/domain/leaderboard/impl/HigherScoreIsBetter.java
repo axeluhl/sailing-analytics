@@ -8,23 +8,29 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 
 /**
- * The scoring system as used by the ISAF standard scoring scheme, also known as the "Low Point Scoring System."
- * Scores are primarily attributed according to rank, so a race's winner gets score 1.00 and so on. Lower scores are
- * therefore better.
+ * The scoring system as used by the Extreme Sailing Series. Disqualified competitors get 0 points; the winner gets as
+ * many points as there are competitors in the race. Higher scores are better.
  * 
  * @author Axel Uhl (D043530)
  * 
  */
-public class LowerScoreIsBetter extends AbstractScoringSchemeImpl {
+public class HigherScoreIsBetter extends AbstractScoringSchemeImpl {
     private static final long serialVersionUID = -2767385186133743330L;
 
-    public LowerScoreIsBetter() {
+    public HigherScoreIsBetter() {
         super(/* higherIsBetter */ false);
     }
 
     @Override
     public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank) {
-        return (double) rank;
+        Double result;
+        TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
+        if (trackedRace == null) {
+            result = null;
+        } else {
+            result = (double) (Util.size(trackedRace.getRace().getCompetitors())-rank+1);
+        }
+        return result;
     }
 
     @Override
