@@ -809,7 +809,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
 
     private RegattaDTO getRegattaDTO(Regatta regatta) {
         List<CompetitorDTO> competitorList = getCompetitorDTOs(regatta.getCompetitors());
-        RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), competitorList);
+        RegattaDTO regattaDTO = new RegattaDTO(regatta.getName(), regatta.getScoringScheme().getType(), competitorList);
         regattaDTO.races = getRaceDTOs(regatta);
         regattaDTO.series = getSeriesDTOs(regatta);
         BoatClass boatClass = regatta.getBoatClass();
