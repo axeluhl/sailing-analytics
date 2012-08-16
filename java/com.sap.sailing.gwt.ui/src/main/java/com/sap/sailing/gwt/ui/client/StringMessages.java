@@ -377,5 +377,7 @@ public interface StringMessages extends Messages {
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
+    String editFlexibleLeaderboard();
+    String editRegattaLeaderboard();
     String noRegatta();
 }

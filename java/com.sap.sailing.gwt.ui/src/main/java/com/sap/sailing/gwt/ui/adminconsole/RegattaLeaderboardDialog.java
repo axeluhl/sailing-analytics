@@ -69,9 +69,9 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         }
     }
     
-    public RegattaLeaderboardDialog(LeaderboardDescriptor leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
+    public RegattaLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDescriptor> callback) {
-        super(stringConstants.createRegattaLeaderboard(), leaderboardDTO, stringConstants, validator, callback);
+        super(title, leaderboardDTO, stringConstants, validator, callback);
         this.existingRegattas = existingRegattas;
     }
     

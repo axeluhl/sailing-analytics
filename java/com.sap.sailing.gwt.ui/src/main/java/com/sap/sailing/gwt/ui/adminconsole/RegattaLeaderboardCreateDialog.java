@@ -13,7 +13,7 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
     
     public RegattaLeaderboardCreateDialog(Collection<StrippedLeaderboardDTO> existingLeaderboards, Collection<RegattaDTO> existingRegattas, StringMessages stringConstants,
             ErrorReporter errorReporter, AsyncCallback<LeaderboardDescriptor> callback) {
-        super(new LeaderboardDescriptor(), existingRegattas, stringConstants, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringConstants, existingLeaderboards), callback);
+        super(stringConstants.createRegattaLeaderboard(), new LeaderboardDescriptor(), existingRegattas, stringConstants, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(stringConstants, existingLeaderboards), callback);
 
         nameTextBox = createTextBox(null);
 
