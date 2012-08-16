@@ -173,8 +173,8 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             @Override
             public String getValue(RegattaDTO regatta) {
                 ScoringSchemeType scoringScheme = regatta.scoringScheme;
-                String scoringSystem = ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);
-                return scoringSystem==null?"(null)":scoringSystem;
+                String scoringSystem = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               
+                return scoringSystem;
             }
         };
         

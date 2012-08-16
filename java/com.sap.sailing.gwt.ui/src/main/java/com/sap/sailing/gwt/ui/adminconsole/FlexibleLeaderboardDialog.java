@@ -64,9 +64,9 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
     }
     
-    public FlexibleLeaderboardDialog(LeaderboardDescriptor leaderboardDTO, StringMessages stringConstants,
+    public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringConstants,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDescriptor> callback) {
-        super(stringConstants.createFlexibleLeaderboard(), leaderboardDTO, stringConstants, validator, callback);
+        super(title, leaderboardDTO, stringConstants, validator, callback);
     }
     
     @Override

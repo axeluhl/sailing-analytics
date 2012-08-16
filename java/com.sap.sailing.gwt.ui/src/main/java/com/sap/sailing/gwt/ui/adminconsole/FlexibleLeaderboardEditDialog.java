@@ -15,7 +15,7 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
     public FlexibleLeaderboardEditDialog(Collection<StrippedLeaderboardDTO> otherExistingLeaderboards,
             LeaderboardDescriptor leaderboard, StringMessages stringConstants, ErrorReporter errorReporter,
             AsyncCallback<LeaderboardDescriptor> callback) {
-        super(leaderboard, stringConstants, errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(
+        super(stringConstants.editFlexibleLeaderboard(), leaderboard, stringConstants, errorReporter, new FlexibleLeaderboardDialog.LeaderboardParameterValidator(
                 stringConstants, otherExistingLeaderboards), callback);
         
         nameTextBox = createTextBox(leaderboard.name);

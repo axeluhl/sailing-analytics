@@ -57,6 +57,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.URLFactory;
+import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -130,12 +131,13 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
         this.errorReporter = errorReporter;
         this.availableLeaderboardList = new ArrayList<StrippedLeaderboardDTO>();
         VerticalPanel mainPanel = new VerticalPanel();
+        mainPanel.setWidth("100%");
         this.setWidget(mainPanel);
 
         //Create leaderboards list and functionality
         CaptionPanel leaderboardsCaptionPanel = new CaptionPanel(stringMessages.leaderboards());
         leaderboardsCaptionPanel.setStyleName("bold");
-        leaderboardsCaptionPanel.setWidth("50%");
+        leaderboardsCaptionPanel.setWidth("75%");
         mainPanel.add(leaderboardsCaptionPanel);
         
         VerticalPanel leaderboardsPanel = new VerticalPanel();
@@ -205,22 +207,37 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                 return result;
             }
         };
+        
+        TextColumn<StrippedLeaderboardDTO> scoringSystemColumn = new TextColumn<StrippedLeaderboardDTO>() {
+            @Override
+            public String getValue(StrippedLeaderboardDTO leaderboard) {
+                ScoringSchemeType scoringScheme = null;
+                if(leaderboard.regatta != null) {
+                    scoringScheme = leaderboard.regatta.scoringScheme;
+                } else {
+                    scoringScheme = leaderboard.scoringScheme;
+                }
+                String scoringSystem = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               
+                return scoringSystem;
+            }
+        };
+        
         ImagesBarColumn<StrippedLeaderboardDTO, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new ImagesBarColumn<StrippedLeaderboardDTO, LeaderboardConfigImagesBarCell>(
                 new LeaderboardConfigImagesBarCell(stringMessages));
         leaderboardActionColumn.setFieldUpdater(new FieldUpdater<StrippedLeaderboardDTO, String>() {
             @Override
-            public void update(int index, StrippedLeaderboardDTO object, String value) {
+            public void update(int index, StrippedLeaderboardDTO leaderboardDTO, String value) {
                 if ("ACTION_REMOVE".equals(value)) {
-                    if (Window.confirm("Do you really want to remove the leaderboard: '" + object.name + "' ?")) {
-                        removeLeaderboard(object);
+                    if (Window.confirm("Do you really want to remove the leaderboard: '" + leaderboardDTO.name + "' ?")) {
+                        removeLeaderboard(leaderboardDTO);
                     }
                 } else if ("ACTION_EDIT".equals(value)) {
-                    final String oldLeaderboardName = object.name;
+                    final String oldLeaderboardName = leaderboardDTO.name;
                     List<StrippedLeaderboardDTO> otherExistingLeaderboard = new ArrayList<StrippedLeaderboardDTO>();
                     otherExistingLeaderboard.addAll(availableLeaderboardList);
-                    otherExistingLeaderboard.remove(object);
-                    if(object.regatta == null) {
-                        LeaderboardDescriptor descriptor = new LeaderboardDescriptor(object.name, ScoringSchemeType.LOW_POINT, object.discardThresholds);
+                    otherExistingLeaderboard.remove(leaderboardDTO);
+                    if(leaderboardDTO.regatta == null) {
+                        LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, leaderboardDTO.scoringScheme, leaderboardDTO.discardThresholds);
                         FlexibleLeaderboardEditDialog dialog = new FlexibleLeaderboardEditDialog(Collections
                                 .unmodifiableCollection(otherExistingLeaderboard),
                                 descriptor, stringMessages, errorReporter,
@@ -236,8 +253,8 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                                 });
                         dialog.show();
                     } else {
-                        LeaderboardDescriptor descriptor = new LeaderboardDescriptor(object.name, 
-                                ScoringSchemeType.LOW_POINT, object.discardThresholds, object.regatta);
+                        LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, 
+                                null, leaderboardDTO.discardThresholds, leaderboardDTO.regatta);
                         RegattaLeaderboardEditDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                 .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
                                 descriptor, stringMessages, errorReporter,
@@ -255,16 +272,17 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     }
                 } else if ("ACTION_EDIT_SCORES".equals(value)) {
                     String debugParam = Window.Location.getParameter("gwt.codesvr");
-                    Window.open("/gwt/LeaderboardEditing.html?name=" + object.name
+                    Window.open("/gwt/LeaderboardEditing.html?name=" + leaderboardDTO.name
                             + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""), "_blank", null);
                 }
             }
         });
-        leaderboardTable.addColumn(linkColumn, "Name");
-        leaderboardTable.addColumn(discardingOptionsColumn, "Discarding");
-        leaderboardTable.addColumn(leaderboardActionColumn, "Actions");
+        leaderboardTable.addColumn(linkColumn, stringMessages.name());
+        leaderboardTable.addColumn(discardingOptionsColumn, stringMessages.discarding());
+        leaderboardTable.addColumn(scoringSystemColumn, stringMessages.scoringSystem());
+        leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
-        leaderboardTable.setWidth("500px");
+        leaderboardTable.setWidth("100%");
         tableSelectionModel = new SingleSelectionModel<StrippedLeaderboardDTO>();
         leaderboardTable.setSelectionModel(tableSelectionModel);
         tableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
