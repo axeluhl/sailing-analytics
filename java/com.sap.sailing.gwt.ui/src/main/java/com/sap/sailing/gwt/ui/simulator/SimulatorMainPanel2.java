@@ -29,7 +29,6 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
-import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
@@ -80,7 +79,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     private final int yRes;
     private final boolean autoUpdate;
 
-    private RaceTimePanel timePanel;
+    private SimulatorTimePanel timePanel;
     //private final Timer timer;
 
     private class WindControlCapture implements ValueChangeHandler<Double> {
@@ -190,8 +189,9 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         directionSelector.getElement().getStyle().setProperty("width", "215px");
         windParams = new WindFieldGenParamsDTO();
         timer = new Timer(PlayModes.Replay, 1000l);
-        timer.setPlaySpeedFactor(30);
-        timer.setTime(windParams.getStartTime().getTime());
+        //timer.setPlaySpeedFactor(30);
+        timer.setAutoAdvance(false);
+        //timer.setTime(windParams.getStartTime().getTime());
         // TO DO make it work for no time panel display
         FlowPanel timeSliderWrapperPanel = new FlowPanel();
         
@@ -200,8 +200,10 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         timeSliderWrapperPanel.getElement().setClassName("timeSliderWrapperPanel");
         timeSliderWrapperPanel.add(timePanel);
         timePanel.setVisible(false);*/
-        timePanel = new RaceTimePanel(timer, stringMessages, null);
-        //resetTimer();
+        timePanel = new SimulatorTimePanel(timer, stringMessages, null);
+        initTimer();
+        timer.setTime(windParams.getStartTime().getTime());
+        timePanel.setActive(false);
 
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         //LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(stringMessages.simulator(), stringMessages);
@@ -434,7 +436,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
         initDisplayOptions(mapOptions);
 
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, windParams,
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, timer, timePanel, windParams,
                 busyIndicator);
 
         // FlowPanel mapPanel = new FlowPanel();
@@ -448,17 +450,12 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
     }
 
-    // TODO Get the right dates and times
-    private void resetTimer() {
-        // windParams.setDefaultTimeSettings();
+    // initialize timer with a default time span based on windParams
+    private void initTimer() {
         Date startDate = windParams.getStartTime();
-        // timer.setTime(startDate.getTime());
         if (timePanel != null) {
-            timePanel.reset();
             timePanel.setMinMax(startDate, windParams.getEndTime(), false);
-            // timePanel.setVisible(false);
         }
-
     }
 
     private void initUpdateButton() {
@@ -476,16 +473,15 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
     private void update() {
 
         if (windDisplayButton.getValue()) {
-            timePanel.setVisible(true);
+            timePanel.setActive(true);
             simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay);
         } else if (summaryButton.getValue()) {
-            timePanel.setVisible(false);
+            timePanel.setActive(false);
             simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay);
         } else if (replayButton.getValue()) {
-            timePanel.setVisible(true);
+            timePanel.setActive(true);
             simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay);
         }
-        resetTimer();
 
     }
 
@@ -515,7 +511,8 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
 
             @Override
             public void onClick(ClickEvent arg0) {
-                timePanel.setVisible(false);
+                //timePanel.setVisible(false);
+                timePanel.setActive(false);
                 simulatorMap.refreshView(SimulatorMap.ViewName.SUMMARY, currentWPDisplay);
             }
 
@@ -529,8 +526,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 simulatorMap.refreshView(SimulatorMap.ViewName.REPLAY, currentWPDisplay);
-                resetTimer();
-                timePanel.setVisible(true);
+                timePanel.setActive(true);
             }
 
         });
@@ -543,8 +539,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
             @Override
             public void onClick(ClickEvent arg0) {
                 simulatorMap.refreshView(SimulatorMap.ViewName.WINDDISPLAY, currentWPDisplay);
-                resetTimer();
-                timePanel.setVisible(true);
+                timePanel.setActive(true);
             }
 
         });

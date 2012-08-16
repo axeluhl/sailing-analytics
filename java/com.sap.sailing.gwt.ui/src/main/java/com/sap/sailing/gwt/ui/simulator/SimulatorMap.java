@@ -51,6 +51,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final Timer timer;
+    private final SimulatorTimePanel timePanel;
     private final SimpleBusyIndicator busyIndicator;
 
     private ColorPalette colorPalette;
@@ -91,7 +92,9 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             logger.info("Number of Paths : " + paths.length);
             // SortByTimeAsc sorter = new SortByTimeAsc();
             // Arrays.sort(paths, sorter);
-
+            long startTime = paths[0].getMatrix().get(0).timepoint;
+            long maxDurationTime = 0;
+            
             removeOverlays();
             pathCanvasOverlays.clear();
             replayPathCanvasOverlays.clear();
@@ -120,7 +123,18 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     legendCanvasOverlay.setPathOverlays(replayPathCanvasOverlays);
 
                 }
+                
+                long tmpDurationTime = paths[i].getPathTime();
+                if (tmpDurationTime > maxDurationTime) {
+                    maxDurationTime = tmpDurationTime;
+                }
             }
+            
+            if (timePanel != null) {
+                timePanel.setMinMax(new Date(startTime), new Date(startTime+maxDurationTime), true);
+                timePanel.resetTimeSlider();
+            }
+            
             legendCanvasOverlay.redraw(true);
             if (!summaryView) {
                 WindFieldDTO windFieldDTO = result.windField;
@@ -134,6 +148,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     timeListeners.add(replayPathCanvasOverlays.get(i));
                 }
             }
+            
             busyIndicator.setBusy(false);
         }
 
@@ -147,6 +162,33 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         this.xRes = xRes;
         this.yRes = yRes;
         this.timer = timer;
+        this.timePanel = null;
+        timer.addTimeListener(this);
+        this.windParams = windParams;
+        this.busyIndicator = busyIndicator;
+        colorPalette = new ColorPaletteGenerator();
+
+        dataInitialized = false;
+        overlaysInitialized = false;
+
+        windFieldCanvasOverlay = null;
+        pathCanvasOverlays = null;
+        replayPathCanvasOverlays = null;
+        raceCourseCanvasOverlay = null;
+        timeListeners = new LinkedList<TimeListenerWithStoppingCriteria>();
+        initializeData();
+        // createOverlays();
+    }
+    
+    public SimulatorMap(SimulatorServiceAsync simulatorSvc, StringMessages stringMessages, ErrorReporter errorReporter,
+            int xRes, int yRes, Timer timer, SimulatorTimePanel timePanel, WindFieldGenParamsDTO windParams, SimpleBusyIndicator busyIndicator) {
+        this.simulatorSvc = simulatorSvc;
+        this.stringMessages = stringMessages;
+        this.errorReporter = errorReporter;
+        this.xRes = xRes;
+        this.yRes = yRes;
+        this.timer = timer;
+        this.timePanel = timePanel;
         timer.addTimeListener(this);
         this.windParams = windParams;
         this.busyIndicator = busyIndicator;
@@ -247,6 +289,10 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                 refreshWindFieldOverlay(wl);
                 timeListeners.clear();
                 timeListeners.add(windFieldCanvasOverlay);
+                
+                timePanel.setMinMax(windParams.getStartTime(), windParams.getEndTime(), true);
+                timePanel.resetTimeSlider();
+                
                 busyIndicator.setBusy(false);
             }
         });

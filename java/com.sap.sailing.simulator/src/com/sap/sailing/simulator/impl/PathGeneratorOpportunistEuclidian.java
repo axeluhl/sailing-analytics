@@ -83,7 +83,7 @@ public class PathGeneratorOpportunistEuclidian implements PathGenerator {
 
         SpeedWithBearing slft = null;
         SpeedWithBearing srght = null;
-        while (currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(0.05)) > 0) {
+        while (currentPosition.getDistance(end).compareTo(start.getDistance(end).scale(0.1)) > 0) {
 
             // TimePoint nextTime = new MillisecondsTimePoint(currentTime.asMillis() + 30000);
 

@@ -11,11 +11,20 @@
   overflow: hidden;
 }
 
-.gwt-SliderBar-shell .gwt-SliderBar-line-disabled {
+/*.gwt-SliderBar-shell .gwt-SliderBar-line-disabled {
   border: 1px solid gray;
-}
+}*/
 
 .gwt-SliderBar-shell .gwt-SliderBar-knob {
+  top: 12px;
+  width: 11px;
+  height: 21px;
+  z-index: 1;
+  cursor: pointer;
+  top: 7px;
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-knob-disabled {
   top: 12px;
   width: 11px;
   height: 21px;
@@ -46,11 +55,18 @@
   border-right: 3px solid #7c7b7c;
 }
 
-.gwt-SliderBar-shell .gwt-SliderBar-tick-disabled {
+/*.gwt-SliderBar-shell .gwt-SliderBar-tick-disabled {
   background: gray;
-}
+}*/
 
 .gwt-SliderBar-shell .gwt-SliderBar-ticklabel {
+  font-size: 12px;
+  cursor: default;
+  font-family: 'UbuntuBold',Arial,Verdana,sans-serif;
+  top: 0;
+}
+
+.gwt-SliderBar-shell .gwt-SliderBar-ticklabel-disabled {
   font-size: 12px;
   cursor: default;
   font-family: 'UbuntuBold',Arial,Verdana,sans-serif;

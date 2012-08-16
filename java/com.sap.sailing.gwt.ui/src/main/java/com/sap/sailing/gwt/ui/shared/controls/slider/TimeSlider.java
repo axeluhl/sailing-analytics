@@ -138,6 +138,27 @@ public class TimeSlider extends SliderBar {
             }
     }
 
+    public void setEnabled(boolean enabled) {
+        // this.tickLabelElements.clear();
+        super.setEnabled(enabled);
+        
+        if (enabled) {
+            for (Element elem : tickLabelElements) {
+                DOM.setElementProperty(elem, "className", "gwt-SliderBar-ticklabel");
+            }
+            for (Element elem : tickElements) {
+                DOM.setElementProperty(elem, "className", "gwt-SliderBar-tick");
+            }
+        } else {
+            for (Element elem : tickLabelElements) {
+                DOM.setElementProperty(elem, "className", "gwt-SliderBar-ticklabel-disabled");
+            }
+            for (Element elem : tickElements) {
+                DOM.setElementProperty(elem, "className", "gwt-SliderBar-tick gwt-SliderBar-tick-disabled");
+            }
+        }
+    }
+
     public void clearMarkersAndLabelsAndTicks() {
         clearMarkers();
         for (Element elem : tickLabelElements) {
