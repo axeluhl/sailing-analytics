@@ -18,13 +18,12 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindError;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
-import com.sap.sailing.domain.common.impl.NamedImpl;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
-import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
+import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -38,19 +37,19 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (d043530)
  * 
  */
-public class MetaLeaderboard extends NamedImpl implements Leaderboard {
+public class MetaLeaderboard extends AbstractSimpleLeaderboardImpl implements Leaderboard {
     private static final long serialVersionUID = 2368754404068836260L;
     private final List<Leaderboard> leaderboards;
-    private final MetaLeaderboardScoreCorrection scoreCorrection;
     private final Fleet metaFleet;
     private final ScoringScheme scoringScheme;
+    private final String name;
     
-    public MetaLeaderboard(String name, ScoringScheme scoringScheme) {
-        super(name);
+    public MetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        super(new MetaLeaderboardScoreCorrection(), resultDiscardingRule);
         leaderboards = new ArrayList<Leaderboard>();
-        scoreCorrection = new MetaLeaderboardScoreCorrection();
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
+        this.name = name;
     }
     
     @Override
@@ -71,11 +70,6 @@ public class MetaLeaderboard extends NamedImpl implements Leaderboard {
     public Entry getEntry(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public double getCarriedPoints(Competitor competitor) {
-        return 0;
     }
 
     @Override
@@ -189,50 +183,6 @@ public class MetaLeaderboard extends NamedImpl implements Leaderboard {
     }
 
     @Override
-    public void setCarriedPoints(Competitor competitor, double carriedPoints) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void unsetCarriedPoints(Competitor competitor) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean hasCarriedPoints() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean hasCarriedPoints(Competitor competitor) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public SettableScoreCorrection getScoreCorrection() {
-        return scoreCorrection;
-    }
-
-    @Override
-    public ThresholdBasedResultDiscardingRule getResultDiscardingRule() {
-        return new ThresholdBasedResultDiscardingRule() {
-            private static final long serialVersionUID = 5961387567698376786L;
-            @Override
-            public Set<RaceColumn> getDiscardedRaceColumns(Competitor competitor, Leaderboard leaderboard, TimePoint timePoint) {
-                return Collections.emptySet();
-            }
-            @Override
-            public int[] getDiscardIndexResultsStartingWithHowManyRaces() {
-                return new int[0];
-            }
-        };
-    }
-
-    @Override
     public Competitor getCompetitorByName(String competitorName) {
         for (Leaderboard leaderboard : leaderboards) {
             Competitor result = leaderboard.getCompetitorByName(competitorName);
@@ -240,18 +190,6 @@ public class MetaLeaderboard extends NamedImpl implements Leaderboard {
                 return result;
             }
         }
-        return null;
-    }
-
-    @Override
-    public void setDisplayName(Competitor competitor, String displayName) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public String getDisplayName(Competitor competitor) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -306,6 +244,11 @@ public class MetaLeaderboard extends NamedImpl implements Leaderboard {
     @Override
     public ScoringScheme getScoringScheme() {
         return scoringScheme;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
 }

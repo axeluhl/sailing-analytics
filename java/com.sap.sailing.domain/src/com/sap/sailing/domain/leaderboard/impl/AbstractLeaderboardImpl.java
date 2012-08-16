@@ -20,7 +20,6 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
-import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ScoreCorrection.Result;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -37,7 +36,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumnListener {
+public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardImpl implements RaceColumnListener {
     private static final Double DOUBLE_0 = new Double(0);
 
     private static final long serialVersionUID = -328091952760083438L;
@@ -47,22 +46,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      */
     private static final double MEDAL_RACE_FACTOR = 2.0;
     
-    private final SettableScoreCorrection scoreCorrection;
-    private ThresholdBasedResultDiscardingRule resultDiscardingRule;
-    
-    /**
-     * The optional display name mappings for competitors. This allows a user to override the tracking-provided
-     * competitor names for display in a leaderboard.
-     */
-    private final Map<Competitor, String> displayNames;
-    
-    /**
-     * Backs the {@link #getCarriedPoints(Competitor)} API with data. Can be used to prime this leaderboard
-     * with aggregated results of races not tracked / displayed by this leaderboard in detail. The points
-     * provided by this map are considered by {@link #getTotalPoints(Competitor, TimePoint)}.
-     */
-    private final Map<Competitor, Double> carriedPoints;
-
     private Set<RaceColumnListener> raceColumnListeners;
     
     /**
@@ -138,11 +121,8 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
      */
     public AbstractLeaderboardImpl(SettableScoreCorrection scoreCorrection,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        super(scoreCorrection, resultDiscardingRule);
         assert scoreCorrection != null;
-        this.carriedPoints = new HashMap<Competitor, Double>();
-        this.scoreCorrection = scoreCorrection;
-        this.displayNames = new HashMap<Competitor, String>();
-        this.resultDiscardingRule = resultDiscardingRule;
         this.raceColumnListeners = new HashSet<RaceColumnListener>();
     }
     
@@ -216,16 +196,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
             }
         }
         return null;
-    }
-
-    @Override
-    public SettableScoreCorrection getScoreCorrection() {
-        return scoreCorrection;
-    }
-    
-    @Override
-    public ThresholdBasedResultDiscardingRule getResultDiscardingRule() {
-        return resultDiscardingRule;
     }
 
     @Override
@@ -377,32 +347,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
     }
 
     @Override
-    public void setCarriedPoints(Competitor competitor, double carriedPoints) {
-        this.carriedPoints.put(competitor, carriedPoints);
-    }
-
-    @Override
-    public double getCarriedPoints(Competitor competitor) {
-        Double result = carriedPoints.get(competitor);
-        return result == null ? 0 : result;
-    }
-
-    @Override
-    public void unsetCarriedPoints(Competitor competitor) {
-        carriedPoints.remove(competitor);
-    }
-
-    @Override
-    public boolean hasCarriedPoints() {
-        return !carriedPoints.isEmpty();
-    }
-    
-    @Override
-    public boolean hasCarriedPoints(Competitor competitor) {
-        return carriedPoints.containsKey(competitor);
-    }
-
-    @Override
     public boolean considerForDiscarding(RaceColumn raceColumn, TimePoint timePoint) {
         boolean result = getScoreCorrection().hasCorrectionFor(raceColumn);
         if (!result && !raceColumn.isMedalRace()) {
@@ -415,21 +359,6 @@ public abstract class AbstractLeaderboardImpl implements Leaderboard, RaceColumn
             }
         }
         return result;
-    }
-
-    @Override
-    public String getDisplayName(Competitor competitor) {
-        return displayNames.get(competitor);
-    }
-    
-    @Override
-    public void setDisplayName(Competitor competitor, String displayName) {
-        displayNames.put(competitor, displayName);
-    }
-
-    @Override
-    public void setResultDiscardingRule(ThresholdBasedResultDiscardingRule discardingRule) {
-        this.resultDiscardingRule = discardingRule;
     }
 
     /**
