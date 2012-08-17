@@ -17,8 +17,6 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.util.impl.LockUtil;
-import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
 
 /**
  * A leaderboard whose columns are defined by leaderboards. This can be useful for a regatta series where many regattas
@@ -31,44 +29,28 @@ import com.sap.sailing.util.impl.NamedReentrantReadWriteLock;
  * @author Axel Uhl (d043530)
  * 
  */
-public class MetaLeaderboard extends AbstractSimpleLeaderboardImpl implements Leaderboard {
+public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardImpl implements Leaderboard {
     private static final long serialVersionUID = 2368754404068836260L;
-    private final List<Leaderboard> leaderboards;
-    private final NamedReentrantReadWriteLock leaderboardsLock;
     private final Fleet metaFleet;
     private final ScoringScheme scoringScheme;
     private final String name;
     
-    public MetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+    public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(new MetaLeaderboardScoreCorrection(), resultDiscardingRule);
-        leaderboards = new ArrayList<Leaderboard>();
-        leaderboardsLock = new NamedReentrantReadWriteLock("Leaderboards lock for "+MetaLeaderboard.class.getSimpleName()+" "+name, /* fair */ false);
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
         this.name = name;
     }
-    
-    public void addLeaderboard(Leaderboard leaderboard) {
-        LockUtil.lockForWrite(leaderboardsLock);
-        try {
-            leaderboards.add(leaderboard);
-        } finally {
-            LockUtil.unlockAfterWrite(leaderboardsLock);
-        }
-    }
+
+    protected abstract Iterable<Leaderboard> getLeaderboards();
     
     @Override
     public Iterable<Competitor> getCompetitors() {
-        LockUtil.lockForRead(leaderboardsLock);
-        try {
-            Set<Competitor> result = new HashSet<Competitor>();
-            for (Leaderboard leaderboard : leaderboards) {
-                Util.addAll(leaderboard.getCompetitors(), result);
-            }
-            return result;
-        } finally {
-            LockUtil.unlockAfterRead(leaderboardsLock);
+        Set<Competitor> result = new HashSet<Competitor>();
+        for (Leaderboard leaderboard : getLeaderboards()) {
+            Util.addAll(leaderboard.getCompetitors(), result);
         }
+        return result;
     }
 
     @Override
@@ -83,32 +65,22 @@ public class MetaLeaderboard extends AbstractSimpleLeaderboardImpl implements Le
 
     @Override
     public Iterable<RaceColumn> getRaceColumns() {
-        LockUtil.lockForRead(leaderboardsLock);
-        try {
-            List<RaceColumn> result = new ArrayList<RaceColumn>(leaderboards.size());
-            for (Leaderboard leaderboard : leaderboards) {
-                result.add(new MetaLeaderboardColumn(leaderboard, metaFleet));
-            }
-            return result;
-        } finally {
-            LockUtil.unlockAfterRead(leaderboardsLock);
+        List<RaceColumn> result = new ArrayList<RaceColumn>(Util.size(getLeaderboards()));
+        for (Leaderboard leaderboard : getLeaderboards()) {
+            result.add(new MetaLeaderboardColumn(leaderboard, metaFleet));
         }
+        return result;
     }
 
     @Override
     public Competitor getCompetitorByIdAsString(String idAsString) {
-        LockUtil.lockForRead(leaderboardsLock);
-        try {
-            for (Leaderboard leaderboard : leaderboards) {
-                Competitor result = leaderboard.getCompetitorByIdAsString(idAsString);
-                if (result != null) {
-                    return result;
-                }
+        for (Leaderboard leaderboard : getLeaderboards()) {
+            Competitor result = leaderboard.getCompetitorByIdAsString(idAsString);
+            if (result != null) {
+                return result;
             }
-            return null;
-        } finally {
-            LockUtil.unlockAfterRead(leaderboardsLock);
         }
+        return null;
     }
 
     /**
@@ -118,32 +90,22 @@ public class MetaLeaderboard extends AbstractSimpleLeaderboardImpl implements Le
      */
     @Override
     public Long getDelayToLiveInMillis() {
-        LockUtil.lockForRead(leaderboardsLock);
-        try {
-            for (int i = leaderboards.size() - 1; i >= 0; i--) {
-                Long result = leaderboards.get(i).getDelayToLiveInMillis();
-                if (result != null) {
-                    return result;
-                }
+        for (int i = Util.size(getLeaderboards()) - 1; i >= 0; i--) {
+            Long result = Util.get(getLeaderboards(), i).getDelayToLiveInMillis();
+            if (result != null) {
+                return result;
             }
-            return null;
-        } finally {
-            LockUtil.unlockAfterRead(leaderboardsLock);
         }
+        return null;
     }
 
     @Override
     public Iterable<TrackedRace> getTrackedRaces() {
-        LockUtil.lockForRead(leaderboardsLock);
-        try {
-            Set<TrackedRace> result = new HashSet<TrackedRace>();
-            for (Leaderboard leaderboard : leaderboards) {
-                Util.addAll(leaderboard.getTrackedRaces(), result);
-            }
-            return result;
-        } finally {
-            LockUtil.unlockAfterRead(leaderboardsLock);
+        Set<TrackedRace> result = new HashSet<TrackedRace>();
+        for (Leaderboard leaderboard : getLeaderboards()) {
+            Util.addAll(leaderboard.getTrackedRaces(), result);
         }
+        return result;
     }
 
     @Override
