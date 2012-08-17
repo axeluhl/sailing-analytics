@@ -7,11 +7,15 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 
 public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
 
     public String description;
     public List<StrippedLeaderboardDTO> leaderboards;
+    
+    private int[] overallLeaderboardDiscardThresholds;
+    private ScoringSchemeType overallLeaderboardScoringSchemeType;
     
     /**
      * Creates a new LeaderboardGroupDTO with empty but non-null name, description and an empty but non-null list for the leaderboards.<br />
@@ -32,6 +36,26 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
         this.leaderboards = leaderboards;
     }
     
+    public boolean hasOverallLeaderboard() {
+        return getOverallLeaderboardDiscardThresholds() != null;
+    }
+    
+    public int[] getOverallLeaderboardDiscardThresholds() {
+        return overallLeaderboardDiscardThresholds;
+    }
+
+    public void setOverallLeaderboardDiscardThresholds(int[] overallLeaderboardDiscardThresholds) {
+        this.overallLeaderboardDiscardThresholds = overallLeaderboardDiscardThresholds;
+    }
+
+    public ScoringSchemeType getOverallLeaderboardScoringSchemeType() {
+        return overallLeaderboardScoringSchemeType;
+    }
+
+    public void setOverallLeaderboardScoringSchemeType(ScoringSchemeType overallLeaderboardScoringSchemeType) {
+        this.overallLeaderboardScoringSchemeType = overallLeaderboardScoringSchemeType;
+    }
+
     public boolean containsRace(RaceIdentifier race) {
         boolean containsRace = false;
         leaderboardsLoop:

@@ -1327,7 +1327,7 @@ public class RacingEventServiceImpl implements RacingEventService, RegattaListen
                 group.addLeaderboard(leaderboard);
             }
         }
-        mongoObjectFactory.storeLeaderboardGroup(group);
+        updateStoredLeaderboardGroup(group);
     }
 
     @Override

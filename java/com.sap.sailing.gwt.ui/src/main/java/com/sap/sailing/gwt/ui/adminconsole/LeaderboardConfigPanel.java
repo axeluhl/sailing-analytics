@@ -255,7 +255,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
                     } else {
                         LeaderboardDescriptor descriptor = new LeaderboardDescriptor(leaderboardDTO.name, 
                                 null, leaderboardDTO.discardThresholds, leaderboardDTO.regatta);
-                        RegattaLeaderboardEditDialog dialog = new RegattaLeaderboardEditDialog(Collections
+                        AbstractLeaderboardDialog dialog = new RegattaLeaderboardEditDialog(Collections
                                 .unmodifiableCollection(otherExistingLeaderboard), Collections.unmodifiableCollection(allRegattas),
                                 descriptor, stringMessages, errorReporter,
                                 new AsyncCallback<LeaderboardDescriptor>() {
@@ -804,7 +804,7 @@ public class LeaderboardConfigPanel extends FormPanel implements RegattaDisplaye
     }
 
     private void createFlexibleLeaderboard() {
-        FlexibleLeaderboardCreateDialog dialog = new FlexibleLeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
+        AbstractLeaderboardDialog dialog = new FlexibleLeaderboardCreateDialog(Collections.unmodifiableCollection(availableLeaderboardList),
                 stringMessages, errorReporter, new AsyncCallback<LeaderboardDescriptor>() {
             @Override
             public void onFailure(Throwable arg0) {
