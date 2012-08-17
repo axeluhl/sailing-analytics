@@ -73,17 +73,17 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         List<Double> o2Scores = new ArrayList<Double>();
         int o1ScoreSum = 0;
         int o2ScoreSum = 0;
-        double o1MedalRaceScore = 0;
-        double o2MedalRaceScore = 0;
+        Double o1MedalRaceScore = 0.0;
+        Double o2MedalRaceScore = 0.0;
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
             int preemptiveColumnResult = 0;
-            final double o1Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o1, raceColumn));
-            if (o1Score != 0) {
+            final Double o1Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o1, raceColumn));
+            if (o1Score != null) {
                 o1Scores.add(o1Score);
                 o1ScoreSum += o1Score;
             }
-            final double o2Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o2, raceColumn));
-            if (o2Score != 0) {
+            final Double o2Score = totalPointsCache.get(new Pair<Competitor, RaceColumn>(o2, raceColumn));
+            if (o2Score != null) {
                 o2Scores.add(o2Score);
                 o2ScoreSum += o2Score;
             }
@@ -123,9 +123,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * Precondition: either both scored in medal race or both didn't. If both scored, the better score wins.
      * This is to be applied only if the total score of both competitors are equal to each other.
      */
-    private int compareByMedalRaceScore(double o1MedalRaceScore, double o2MedalRaceScore) {
-        assert o1MedalRaceScore != 0 || o2MedalRaceScore == 0;
-        if (o1MedalRaceScore != 0) {
+    private int compareByMedalRaceScore(Double o1MedalRaceScore, Double o2MedalRaceScore) {
+        assert o1MedalRaceScore != null || o2MedalRaceScore == null;
+        if (o1MedalRaceScore != null) {
             return getScoreComparator().compare(o1MedalRaceScore, o2MedalRaceScore);
         } else {
             return 0;
@@ -185,14 +185,14 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         return result;
     }
 
-    private int compareByMedalRaceParticipation(double o1Score, double o2Score) {
+    private int compareByMedalRaceParticipation(Double o1Score, Double o2Score) {
         // if only one scored in medal race, this decides the order and returns immediately
-        if (o1Score == 0) {
-            if (o2Score != 0) {
+        if (o1Score == null) {
+            if (o2Score != null) {
                 return 1;
             }
         } else {
-            if (o2Score == 0) {
+            if (o2Score == null) {
                 return -1;
             } else {
                 return 0;

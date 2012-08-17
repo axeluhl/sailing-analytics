@@ -22,6 +22,8 @@ public enum FieldNames {
     FLEET_ORDERING,
     FLEET_COLOR,
     
+    SCORING_SCHEME_TYPE,
+    
     RACE_NAME,
     
     VENUE,

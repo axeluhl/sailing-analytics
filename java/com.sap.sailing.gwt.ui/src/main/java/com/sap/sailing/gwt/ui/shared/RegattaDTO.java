@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 
 public class RegattaDTO extends NamedDTO implements IsSerializable {
     /**
@@ -13,13 +14,15 @@ public class RegattaDTO extends NamedDTO implements IsSerializable {
     public List<RaceDTO> races;
     public List<CompetitorDTO> competitors;
     public List<SeriesDTO> series;
+    public ScoringSchemeType scoringScheme;
 
     public RegattaDTO() {
     }
 
-    public RegattaDTO(String name, List<CompetitorDTO> competitors) {
+    public RegattaDTO(String name, ScoringSchemeType scoringScheme, List<CompetitorDTO> competitors) {
         super(name);
         this.name = name;
+        this.scoringScheme = scoringScheme;
         this.competitors = competitors;
     }
 

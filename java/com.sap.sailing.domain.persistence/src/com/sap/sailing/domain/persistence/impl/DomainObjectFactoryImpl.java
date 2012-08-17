@@ -42,6 +42,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -60,7 +61,6 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
-import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
@@ -239,15 +239,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (regatta == null) {
             logger.info("Couldn't find regatta "+regattaName+" for corresponding regatta leaderboard. Not loading regatta leaderboard.");
         } else {
-            result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
+            result = new RegattaLeaderboardImpl(regatta, scoreCorrection, resultDiscardingRule);
         }
         return result;
     }
 
     private FlexibleLeaderboard loadFlexibleLeaderboard(DBObject dbLeaderboard,
             SettableScoreCorrection scoreCorrection, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
+        ScoringSchemeType scoringSchemeType = getScoringSchemeType(dbLeaderboard);
         FlexibleLeaderboardImpl result = new FlexibleLeaderboardImpl(
-                (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule, new LowerScoreIsBetter());
+                (String) dbLeaderboard.get(FieldNames.LEADERBOARD_NAME.name()), scoreCorrection, resultDiscardingRule,
+                DomainFactory.INSTANCE.createScoringScheme(scoringSchemeType));
         BasicDBList dbRaceColumns = (BasicDBList) dbLeaderboard.get(FieldNames.LEADERBOARD_COLUMNS.name());
         // For a FlexibleLeaderboard, fleets are owned by the leaderboard's RaceColumn objects. We need to manage them here:
         Map<String, Fleet> fleetsByName = new HashMap<String, Fleet>();
@@ -552,6 +554,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (dbRegatta != null) {
             String baseName = (String) dbRegatta.get(FieldNames.REGATTA_BASE_NAME.name());
             String boatClassName = (String) dbRegatta.get(FieldNames.BOAT_CLASS_NAME.name());
+            ScoringSchemeType scoringSchemeType = getScoringSchemeType(dbRegatta);
             BoatClass boatClass = null;
             if (boatClassName != null) {
                 boolean typicallyStartsUpwind = (Boolean) dbRegatta.get(FieldNames.BOAT_CLASS_TYPICALLY_STARTS_UPWIND.name());
@@ -559,9 +562,21 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             BasicDBList dbSeries = (BasicDBList) dbRegatta.get(FieldNames.REGATTA_SERIES.name());
             Iterable<Series> series = loadSeries(dbSeries, trackedRegattaRegistry);
-            result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true);
+            result = new RegattaImpl(baseName, boatClass, series, /* persistent */ true,
+                    DomainFactory.INSTANCE.createScoringScheme(scoringSchemeType));
         }
         return result;
+    }
+
+    private ScoringSchemeType getScoringSchemeType(DBObject dbObject) {
+        String scoringSchemeTypeName = (String) dbObject.get(FieldNames.SCORING_SCHEME_TYPE.name());
+        ScoringSchemeType scoringSchemeType;
+        if (scoringSchemeTypeName == null) {
+            scoringSchemeType = ScoringSchemeType.LOW_POINT; // the default
+        } else {
+            scoringSchemeType = ScoringSchemeType.valueOf(scoringSchemeTypeName);
+        }
+        return scoringSchemeType;
     }
 
     private Iterable<Series> loadSeries(BasicDBList dbSeries, TrackedRegattaRegistry trackedRegattaRegistry) {

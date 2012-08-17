@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
@@ -193,7 +194,7 @@ public interface SailingServiceAsync {
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, int[] newDiscardingThreasholds,
             AsyncCallback<Void> callback);
 
-    void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds,
+    void createFlexibleLeaderboard(String leaderboardName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, int[] discardThresholds,
@@ -390,9 +391,11 @@ public interface SailingServiceAsync {
     void moveColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void createRegatta(String regattaName, String boatClassName,
+    void createRegatta(
+            String regattaName,
+            String boatClassName,
             LinkedHashMap<String, Pair<List<Triple<String, Integer, Color>>, Boolean>> seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, AsyncCallback<RegattaDTO> callback);
+            boolean persistent, ScoringSchemeType scoringSchemeType, AsyncCallback<RegattaDTO> callback);
 
     void addColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);

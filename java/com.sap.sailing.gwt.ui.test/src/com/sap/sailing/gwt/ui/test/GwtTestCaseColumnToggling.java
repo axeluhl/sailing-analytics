@@ -9,6 +9,7 @@ import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -101,7 +102,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
     }
     
     private void createLeaderboard(){
-        service.createFlexibleLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 },
+        service.createFlexibleLeaderboard(LEADERBOARD_NAME, new int[] { 1, 2 }, ScoringSchemeType.LOW_POINT,
                 new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onSuccess(StrippedLeaderboardDTO result) {

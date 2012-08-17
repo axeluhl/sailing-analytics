@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +30,8 @@ import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowerScoreIsBetter;
 import com.sap.sailing.domain.leaderboard.impl.ResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.impl.ScoreCorrectionImpl;
+import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRank;
+import com.sap.sailing.domain.test.mock.MockedTrackedRaceWithFixedRankAndManyCompetitors;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
@@ -132,6 +136,31 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
     }
     
     @Test
+    public void testDNDNotDiscardedInUntrackedRace() throws NoWindException {
+        raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
+        Competitor c2 = createCompetitor("Marcus Baur");
+        Competitor c3 = createCompetitor("Robert Stanjek");
+        MockedTrackedRaceWithFixedRankAndManyCompetitors testRace = new MockedTrackedRaceWithFixedRankAndManyCompetitors(
+                competitor, /* rank */ 1, /* started */true);
+        testRace.addCompetitor(c2);
+        testRace.addCompetitor(c3); // this makes maxPoints==4
+        ScoreCorrectionImpl scoreCorrection = new ScoreCorrectionImpl();
+        FlexibleLeaderboard leaderboard = new FlexibleLeaderboardImpl("Test Leaderboard", scoreCorrection, new ResultDiscardingRuleImpl(
+                new int[] { 2 }), new LowerScoreIsBetter());
+        Fleet defaultFleet = leaderboard.getFleet(null);
+        RaceColumn r1 = leaderboard.addRace(testRace, "R1", /* medalRace */ false, defaultFleet);
+        raceColumnsInLeaderboard.put(testRace, r1);
+        RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */ false, defaultFleet);
+        scoreCorrection.setMaxPointsReason(competitor, r2, MaxPointsReason.DND); // non-discardable disqualification
+        // assert that max points were given before discarding...
+        assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
+        // ...and after...
+        assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getTotalPoints(), 0.000000001);
+        // ...because it's not discarded
+        assertFalse(leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).isDiscarded());
+    }
+    
+    @Test
     public void testNoDNDDiscard() throws NoWindException {
         testRaces = new HashSet<TrackedRace>();
         raceColumnsInLeaderboard = new HashMap<TrackedRace, RaceColumn>();
@@ -206,15 +235,16 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             if (race.hasStarted(now)) {
                 int rank = race.getRank(competitor, now);
                 assertEquals(rank, leaderboard.getTrackedRank(competitor, raceColumn, now));
-                assertEquals(rank, leaderboard.getContent(now).get(key).getTrackedPoints());
-                assertEquals(rank, leaderboard.getEntry(competitor, raceColumn, now).getTrackedPoints());
+                assertEquals(rank, leaderboard.getContent(now).get(key).getTrackedRank());
+                assertEquals(rank, leaderboard.getEntry(competitor, raceColumn, now).getTrackedRank());
                 assertEquals(rank, leaderboard.getNetPoints(competitor, raceColumn, now), 0.000000001);
                 assertEquals(rank, leaderboard.getContent(now).get(key).getNetPoints(), 0.000000001);
                 assertEquals(rank, leaderboard.getEntry(competitor, raceColumn, now).getNetPoints(), 0.000000001);
                 // One race is discarded because four races were started, and for [3-6) one race can be discarded.
                 // The discarded race is the worst of those started, so the one with rank 4.
                 int expectedNumberOfDiscardedRaces =
-                        numberOfRacesFromWhichToDiscard < firstDiscardingThreshold ? 0 : numberOfRacesFromWhichToDiscard < secondDiscardingThreshold ? 1 : 2;
+                        numberOfRacesFromWhichToDiscard < firstDiscardingThreshold ? 0 :
+                            numberOfRacesFromWhichToDiscard < secondDiscardingThreshold ? 1 : 2;
                 boolean discarded = ranksOfNonMedalStartedRaces.indexOf(rank) >= ranksOfNonMedalStartedRaces.size()-expectedNumberOfDiscardedRaces;
                 int expected = discarded ? 0 : rank==medalRacePoints?2*rank:rank;
                 assertEquals(expected, leaderboard.getTotalPoints(competitor, raceColumn, now), 0.000000001);
@@ -223,11 +253,11 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 totalPoints += leaderboard.getContent(now).get(key).getTotalPoints();
             } else {
                 assertEquals(0, leaderboard.getTrackedRank(competitor, raceColumn, now));
-                assertEquals(0, leaderboard.getNetPoints(competitor, raceColumn, now), 0.000000001);
-                assertEquals(0, leaderboard.getContent(now).get(key).getTrackedPoints());
-                assertEquals(0, leaderboard.getContent(now).get(key).getNetPoints(), 0.000000001);
-                assertEquals(0, leaderboard.getEntry(competitor, raceColumn, now).getTrackedPoints());
-                assertEquals(0, leaderboard.getEntry(competitor, raceColumn, now).getNetPoints(), 0.000000001);
+                assertNull(leaderboard.getNetPoints(competitor, raceColumn, now));
+                assertEquals(0, leaderboard.getContent(now).get(key).getTrackedRank());
+                assertNull(leaderboard.getContent(now).get(key).getNetPoints());
+                assertEquals(0, leaderboard.getEntry(competitor, raceColumn, now).getTrackedRank());
+                assertNull(leaderboard.getEntry(competitor, raceColumn, now).getNetPoints());
                 // no increment on totalPoints
             }
         }

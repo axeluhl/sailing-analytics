@@ -36,6 +36,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -279,7 +280,9 @@ public class DomainFactoryImpl implements DomainFactory {
                 // This is particularly bad if a persistent regatta was loaded but a default regatta was accidentally created.
                 // Then, there is no way but restart the server to get rid of this stale cache entry here.
                 if (result == null) {
-                    result = new RegattaImpl(event.getName(), boatClass, trackedRegattaRegistry);
+                    result = new RegattaImpl(event.getName(), boatClass, trackedRegattaRegistry,
+                            // use the low-point system as the default scoring scheme
+                            com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
                     regattaCache.put(key, result);
                     weakRegattaCache.put(event, result);
                     logger.info("Created regatta "+result.getName()+" ("+result.hashCode()+") because none found for key "+key);

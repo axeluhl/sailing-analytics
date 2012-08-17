@@ -9,17 +9,21 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
-public class LeaderboardEditDialog extends LeaderboardDialog {
+public class RegattaLeaderboardEditDialog extends RegattaLeaderboardDialog {
     
-    public LeaderboardEditDialog(Collection<StrippedLeaderboardDTO> otherExistingLeaderboards, Collection<RegattaDTO> existingRegattas,
-            StrippedLeaderboardDTO leaderboard, StringMessages stringConstants, ErrorReporter errorReporter,
-            AsyncCallback<StrippedLeaderboardDTO> callback) {
-        super(leaderboard, existingRegattas, stringConstants, errorReporter, new LeaderboardDialog.LeaderboardParameterValidator(
+    public RegattaLeaderboardEditDialog(Collection<StrippedLeaderboardDTO> otherExistingLeaderboards, Collection<RegattaDTO> existingRegattas,
+            LeaderboardDescriptor leaderboard, StringMessages stringConstants, ErrorReporter errorReporter,
+            AsyncCallback<LeaderboardDescriptor> callback) {
+        super(stringConstants.editRegattaLeaderboard(), leaderboard, existingRegattas, stringConstants, errorReporter, new RegattaLeaderboardDialog.LeaderboardParameterValidator(
                 stringConstants, otherExistingLeaderboards), callback);
         
-        entryField = createTextBox(leaderboard.name);
+        nameTextBox = createTextBox(leaderboard.name);
 
         regattaListBox = createListBox(false);
+        regattaListBox.addItem(stringConstants.pleaseSelectARegatta());
+        for (RegattaDTO regatta : existingRegattas) {
+            regattaListBox.addItem(regatta.name);
+        }
         regattaListBox.setEnabled(false);
 
         discardThresholdBoxes = new LongBox[MAX_NUMBER_OF_DISCARDED_RESULTS];

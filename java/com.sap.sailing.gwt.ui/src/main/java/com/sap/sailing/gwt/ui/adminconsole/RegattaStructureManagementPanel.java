@@ -34,6 +34,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.Color;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.common.impl.Util.Triple;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
@@ -41,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.RegattaDisplayer;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.FleetDTO;
 import com.sap.sailing.gwt.ui.shared.NamedDTO;
@@ -167,6 +169,15 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             }
         };
 
+        TextColumn<RegattaDTO> regattaScoringSystemColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                ScoringSchemeType scoringScheme = regatta.scoringScheme;
+                String scoringSystem = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               
+                return scoringSystem;
+            }
+        };
+        
         final SafeHtmlCell seriesCell = new SafeHtmlCell();
         Column<RegattaDTO, SafeHtml> regattaSeriesColumn = new Column<RegattaDTO, SafeHtml>(seriesCell) {
             @Override
@@ -265,6 +276,7 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
         regattaTable.setWidth("100%");
         regattaTable.addColumn(regattaNameColumn, stringMessages.regattaName());
         regattaTable.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
+        regattaTable.addColumn(regattaScoringSystemColumn, stringMessages.scoringSystem());
         regattaTable.addColumn(regattaSeriesColumn, stringMessages.series());
         regattaTable.addColumn(regattaRacesColumn, stringMessages.races());
         regattaTable.addColumn(regattaFleetsColumn, stringMessages.fleets());
@@ -464,7 +476,8 @@ public class RegattaStructureManagementPanel extends SimplePanel implements Rega
             Pair<List<Triple<String, Integer, Color>>, Boolean> seriesPair = new Pair<List<Triple<String, Integer, Color>>, Boolean>(fleets, seriesDTO.isMedal());
             seriesStructure.put(seriesDTO.name, seriesPair);
         }
-        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true, new AsyncCallback<RegattaDTO>() {
+        sailingService.createRegatta(newRegatta.name, newRegatta.boatClass.name, seriesStructure, true,
+                newRegatta.scoringScheme, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new regatta" + newRegatta.name + ": " + t.getMessage());
