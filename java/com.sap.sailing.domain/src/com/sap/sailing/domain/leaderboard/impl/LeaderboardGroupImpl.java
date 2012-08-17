@@ -12,12 +12,27 @@ public class LeaderboardGroupImpl implements LeaderboardGroup {
     private static final long serialVersionUID = 2035927369446736934L;
     private String name;
     private String description;
-    private List<Leaderboard> leaderboards;
+    private final List<Leaderboard> leaderboards;
+    
+    /**
+     * An optional meta-leaderboard that shows overall results computed from the {@link #leaderboards} aggregated by
+     * this group. The meta-leaderboard currently has no own state that requires any persistence but can be re-constructed
+     * entirely from this leaderboard group.
+     */
+    private Leaderboard overallLeaderboard;
 
     public LeaderboardGroupImpl(String name, String description, List<Leaderboard> leaderboards) {
         this.name = name;
         this.description = description;
         this.leaderboards = new ArrayList<Leaderboard>(leaderboards);
+    }
+
+    public Leaderboard getOverallLeaderboard() {
+        return overallLeaderboard;
+    }
+
+    public void setOverallLeaderboard(Leaderboard overallLeaderboard) {
+        this.overallLeaderboard = overallLeaderboard;
     }
 
     @Override

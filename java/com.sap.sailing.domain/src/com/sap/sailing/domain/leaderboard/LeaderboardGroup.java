@@ -18,5 +18,6 @@ public interface LeaderboardGroup extends Named {
     void removeLeaderboard(Leaderboard leaderboard);
     void removeAllLeaderboards(Collection<Leaderboard> leaderboards);
     void clearLeaderboards();
-    
+    Leaderboard getOverallLeaderboard();
+    void setOverallLeaderboard(Leaderboard leaderboard);
 }
