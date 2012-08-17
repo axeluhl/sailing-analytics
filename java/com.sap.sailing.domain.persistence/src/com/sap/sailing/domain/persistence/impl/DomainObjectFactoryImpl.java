@@ -379,17 +379,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     @Override
     public Iterable<LeaderboardGroup> getAllLeaderboardGroups(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
-        DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
         Set<LeaderboardGroup> leaderboardGroups = new HashSet<LeaderboardGroup>();
-        try {
-            for (DBObject o : leaderboardGroupCollection.find()) {
-                leaderboardGroups.add(loadLeaderboardGroup(o, regattaRegistry, leaderboardRegistry));
+        if (database != null) {
+            DBCollection leaderboardGroupCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUPS.name());
+            try {
+                for (DBObject o : leaderboardGroupCollection.find()) {
+                    leaderboardGroups.add(loadLeaderboardGroup(o, regattaRegistry, leaderboardRegistry));
+                }
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
+                logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", t);
             }
-        } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboard groups.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadLeaderboardGroup", t);
         }
-        
         return leaderboardGroups;
     }
     
@@ -413,21 +414,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     @Override
     public Iterable<Leaderboard> getLeaderboardsNotInGroup(RegattaRegistry regattaRegistry, LeaderboardRegistry leaderboardRegistry) {
-        DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
         Set<Leaderboard> result = new HashSet<Leaderboard>();
-        try {
-            //Don't change the query object, unless you know what you're doing
-            BasicDBObject query = new BasicDBObject("$where", "function() { return db." + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
-                    + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0; }");
-            for (DBObject o : leaderboardCollection.find(query)) {
-                final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry, leaderboardRegistry);
-                if (loadedLeaderboard != null) {
-                    result.add(loadedLeaderboard);
+        if (database != null) {
+            DBCollection leaderboardCollection = database.getCollection(CollectionNames.LEADERBOARDS.name());
+            try {
+                // Don't change the query object, unless you know what you're doing
+                BasicDBObject query = new BasicDBObject("$where", "function() { return db."
+                        + CollectionNames.LEADERBOARD_GROUPS.name() + ".find({ "
+                        + FieldNames.LEADERBOARD_GROUP_LEADERBOARDS.name() + ": this._id }).count() == 0; }");
+                for (DBObject o : leaderboardCollection.find(query)) {
+                    final Leaderboard loadedLeaderboard = loadLeaderboard(o, regattaRegistry, leaderboardRegistry);
+                    if (loadedLeaderboard != null) {
+                        result.add(loadedLeaderboard);
+                    }
                 }
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
+                logger.throwing(DomainObjectFactoryImpl.class.getName(), "getAllLeaderboards", t);
             }
-        } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load leaderboards.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "getAllLeaderboards", t);
         }
         return result;
     }
@@ -486,17 +490,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<Event> loadAllEvents() {
         ArrayList<Event> result = new ArrayList<Event>();
-        DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
-        
-        try {
-            for (DBObject o : eventCollection.find()) {
-                result.add(loadEvent(o));
+        if (database != null) {
+            DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
+
+            try {
+                for (DBObject o : eventCollection.find()) {
+                    result.add(loadEvent(o));
+                }
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");
+                logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadEvents", t);
             }
-        } catch (Throwable t) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load events.");
-            logger.throwing(DomainObjectFactoryImpl.class.getName(), "loadEvents", t);
         }
-        
         return result;
     }
     
@@ -530,9 +535,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     @Override
     public Iterable<Regatta> loadAllRegattas(TrackedRegattaRegistry trackedRegattaRegistry) {
         List<Regatta> result = new ArrayList<Regatta>();
-        DBCollection regattaCollection = database.getCollection(CollectionNames.REGATTAS.name());
-        for (DBObject dbRegatta : regattaCollection.find()) {
-            result.add(loadRegatta(dbRegatta, trackedRegattaRegistry));
+        if (database != null) {
+            DBCollection regattaCollection = database.getCollection(CollectionNames.REGATTAS.name());
+            for (DBObject dbRegatta : regattaCollection.find()) {
+                result.add(loadRegatta(dbRegatta, trackedRegattaRegistry));
+            }
         }
         return result;
     }
@@ -646,15 +653,17 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     
     @Override
     public Map<String, Regatta> loadRaceIDToRegattaAssociations(RegattaRegistry regattaRegistry) {
-        DBCollection raceIDToRegattaCollection = database.getCollection(CollectionNames.REGATTA_FOR_RACE_ID.name());
         Map<String, Regatta> result = new HashMap<String, Regatta>();
-        for (DBObject o : raceIDToRegattaCollection.find()) {
-            Regatta regatta = regattaRegistry.getRegattaByName((String) o.get(FieldNames.REGATTA_NAME.name()));
-            if (regatta != null) {
-                result.put((String) o.get(FieldNames.RACE_ID_AS_STRING.name()), regatta);
-            } else {
-                logger.warning("Couldn't find regatta " + o.get(FieldNames.REGATTA_NAME.name())
-                        + ". Cannot restore race associations with this regatta.");
+        if (database != null) {
+            DBCollection raceIDToRegattaCollection = database.getCollection(CollectionNames.REGATTA_FOR_RACE_ID.name());
+            for (DBObject o : raceIDToRegattaCollection.find()) {
+                Regatta regatta = regattaRegistry.getRegattaByName((String) o.get(FieldNames.REGATTA_NAME.name()));
+                if (regatta != null) {
+                    result.put((String) o.get(FieldNames.RACE_ID_AS_STRING.name()), regatta);
+                } else {
+                    logger.warning("Couldn't find regatta " + o.get(FieldNames.REGATTA_NAME.name())
+                            + ". Cannot restore race associations with this regatta.");
+                }
             }
         }
         return result;

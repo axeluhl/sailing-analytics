@@ -43,12 +43,17 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         super();
         this.database = mongoDBService.getDB();
         this.swissTimingFactory = swissTimingFactory;
-        lastMessageCountCollection = database.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
-        init();
+        if (this.database != null) {
+            lastMessageCountCollection = database.getCollection(CollectionNames.LAST_MESSAGE_COUNT.name());
+            init();
+        } else {
+            lastMessageCountCollection = null;
+        }
     }
 
     private void init() {
         // ensure the required indexes for the collection of race specific messages
+        
         DBCollection racesMessageCollection = database.getCollection(CollectionNames.RACES_MESSAGES.name());
 
         BasicDBObject indexKeysRaceMsgs = new BasicDBObject();

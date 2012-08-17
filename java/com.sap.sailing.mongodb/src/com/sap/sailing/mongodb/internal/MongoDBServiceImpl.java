@@ -45,10 +45,15 @@ public class MongoDBServiceImpl implements MongoDBService {
             configuration = MongoDBConfiguration.getDefaultTestConfiguration();
             logger.info("Used default Mongo configuration: host:port/DBName: "+configuration.getHostName()+":"+configuration.getPort()+"/"+configuration.getDatabaseName());
         }
-        try {
-            return getDB(configuration);
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
+        // check if mongodb is disabled by configuring host="none", e.g. for strategy simulation
+        if (configuration.getHostName().equals("none")) {
+            return null; // if mongodb is disabled, getDB() allways return null
+        } else {
+            try {
+                return getDB(configuration);
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     
