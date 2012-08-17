@@ -75,7 +75,7 @@ public class TimeSlider extends SliderBar {
         }
 
         // Hide unused ticks
-        for (int i = (calculatedTimeTicks.size() + 1); i < tickElements.size(); i++) {
+        for (int i = calculatedTimeTicks.size(); i < tickElements.size(); i++) {
             DOM.setStyleAttribute(tickElements.get(i), "display", "none");
         }
     }
@@ -133,7 +133,7 @@ public class TimeSlider extends SliderBar {
             }
 
             // Hide unused labels
-            for (int i = (calculatedTimeTicks.size() + 1); i < tickLabelElements.size(); i++) {
+            for (int i = calculatedTimeTicks.size(); i < tickLabelElements.size(); i++) {
                 DOM.setStyleAttribute(tickLabelElements.get(i), "display", "none");
             }
     }
