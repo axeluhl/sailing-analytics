@@ -49,10 +49,10 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
      */
     private Date max;
     
-    private final IntegerBox playSpeedBox;
+    protected final IntegerBox playSpeedBox;
     private final Label timeDelayLabel;
-    private final Label timeLabel;
-    private final Label dateLabel;
+    protected final Label timeLabel;
+    protected final Label dateLabel;
     private final Label playModeLabel;
     protected final TimeSlider timeSlider;
     private final Button backToLivePlayButton;
@@ -63,7 +63,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
     private final ImageResource playModeLiveActiveImg;
     private final ImageResource playModeReplayActiveImg;
     private final ImageResource playModeInactiveImg;
-    private final Button playPauseButton;
+    protected final Button playPauseButton;
     private final Image playModeImage;
     protected Date lastReceivedDataTimepoint;
     private final Button slowDownButton;
@@ -157,22 +157,7 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         playControlPanel.setStyleName("timePanel-controls-play");
         controlsPanel.add(playControlPanel);
         
-        playPauseButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                switch(TimePanel.this.timer.getPlayState()) {
-                    case Stopped:
-                        TimePanel.this.timer.play();
-                        break;
-                    case Playing:
-                        TimePanel.this.timer.pause();
-                        break;
-                    case Paused:
-                    TimePanel.this.timer.play();
-                        break;
-                }
-            }
-        });
+        this.addPlayPauseButtonClickHandler();
         playPauseButton.setTitle(stringMessages.startStopPlaying());
         playPauseButton.getElement().addClassName("playPauseButton");
         playControlPanel.add(playPauseButton);
@@ -294,6 +279,29 @@ public class TimePanel<T extends TimePanelSettings> extends FormPanel implements
         controlsPanel.add(timeControlPanel);
     }
 
+    
+    protected void addPlayPauseButtonClickHandler() {
+
+        playPauseButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                switch (TimePanel.this.timer.getPlayState()) {
+                case Stopped:
+                    TimePanel.this.timer.play();
+                    break;
+                case Playing:
+                    TimePanel.this.timer.pause();
+                    break;
+                case Paused:
+                    TimePanel.this.timer.play();
+                    break;
+                }
+            }
+        });
+
+    }
+    
+    
     @Override
     public void timeChanged(Date time) {
         if (getMin() != null && getMax() != null) {

@@ -189,7 +189,6 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         directionSelector.getElement().getStyle().setProperty("width", "215px");
         windParams = new WindFieldGenParamsDTO();
         timer = new Timer(PlayModes.Replay, 1000l);
-        //timer.setPlaySpeedFactor(30);
         timer.setAutoAdvance(false);
         //timer.setTime(windParams.getStartTime().getTime());
         // TO DO make it work for no time panel display
@@ -200,7 +199,7 @@ public class SimulatorMainPanel2 extends SplitLayoutPanel {
         timeSliderWrapperPanel.getElement().setClassName("timeSliderWrapperPanel");
         timeSliderWrapperPanel.add(timePanel);
         timePanel.setVisible(false);*/
-        timePanel = new SimulatorTimePanel(timer, stringMessages, null);
+        timePanel = new SimulatorTimePanel(timer, stringMessages, windParams);
         initTimer();
         timer.setTime(windParams.getStartTime().getTime());
         timePanel.setActive(false);

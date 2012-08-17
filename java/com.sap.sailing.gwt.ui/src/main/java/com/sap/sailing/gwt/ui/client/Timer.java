@@ -140,9 +140,13 @@ public class Timer {
             }
         }
     }
-    
+
     public void setPlaySpeedFactor(double playSpeedFactor) {
         this.playSpeedFactor = playSpeedFactor;
+    }
+    
+    public double getPlaySpeedFactor() {
+        return playSpeedFactor;
     }
     
     public void setRefreshInterval(long refreshInterval) {
