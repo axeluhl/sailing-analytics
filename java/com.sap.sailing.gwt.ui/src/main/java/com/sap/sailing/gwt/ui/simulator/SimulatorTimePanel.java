@@ -1,11 +1,15 @@
 package com.sap.sailing.gwt.ui.simulator;
 
+import java.util.Date;
+
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
+import com.sap.sailing.gwt.ui.client.RaceTimePanelSettings;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.Timer;
 import com.sap.sailing.gwt.ui.client.Timer.PlayModes;
 import com.sap.sailing.gwt.ui.client.Timer.PlayStates;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 
 public class SimulatorTimePanel extends RaceTimePanel {
 
@@ -40,6 +44,18 @@ public class SimulatorTimePanel extends RaceTimePanel {
         }
         this.timer.setAutoAdvance(act);
         this.resetTimeSlider();
+    }
+
+    // TODO: adapt timepanel settings dialog to strategy simulator
+    @Override
+    public RaceTimePanelSettings getSettings() {
+        RaceTimePanelSettings result = new RaceTimePanelSettings();
+        result.setDelayToLivePlayInSeconds(timer.getLivePlayDelayInMillis()/1000);
+        result.setRefreshInterval(timer.getRefreshInterval());
+        RaceTimesInfoDTO rtInfo = new RaceTimesInfoDTO();
+        rtInfo.startOfRace = new Date(); // initialize so that rtInfo.delayToLiveInMs is shown
+        result.setRaceTimesInfo(rtInfo);
+        return result;
     }
 
 }
