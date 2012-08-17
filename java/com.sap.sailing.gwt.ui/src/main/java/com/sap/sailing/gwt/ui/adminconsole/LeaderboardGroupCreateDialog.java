@@ -12,7 +12,6 @@ public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
             StringMessages stringConstants, AsyncCallback<LeaderboardGroupDTO> callback) {
         super(new LeaderboardGroupDTO(), new LeaderboardGroupParameterValidator(stringConstants, existingGroups),
                 stringConstants, callback);
-
         nameEntryField = createTextBox(null);
         descriptionEntryField = createTextArea(null);
     }

@@ -304,6 +304,10 @@ public interface SailingServiceAsync {
      */
     void createLeaderboardGroup(String groupName, String description, AsyncCallback<LeaderboardGroupDTO> callback);
     
+    void addOverallLeaderboardToLeaderboardGroup(String leaderboardGroupName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, AsyncCallback<Void> callback);
+    
+    void removeOverallLeaderboardFromLeaderboardGroup(String leaderboardGroupName, AsyncCallback<Void> callback);
+    
     /**
      * Updates the data of the group with the name <code>oldName</code>.
      * 

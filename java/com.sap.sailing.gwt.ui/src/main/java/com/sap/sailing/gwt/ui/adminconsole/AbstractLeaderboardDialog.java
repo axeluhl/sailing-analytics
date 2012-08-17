@@ -52,5 +52,27 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
     public void show() {
         super.show();
         nameTextBox.setFocus(true);
+    }
+
+    protected LongBox[] initEmptyDiscardThresholdBoxes() {
+        LongBox[] result = new LongBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = createLongBoxWithOptionalValue(null, 2);
+            result[i].setVisibleLength(2);
+        }
+        return result;
+    }
+
+    protected LongBox[] initPrefilledDiscardThresholdBoxes(LeaderboardDescriptor leaderboard) {
+        LongBox[] result = new LongBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
+        for (int i = 0; i < result.length; i++) {
+            if (i < leaderboard.discardThresholds.length) {
+                result[i] = createLongBox(leaderboard.discardThresholds[i], 2);
+            } else {
+                result[i] = createLongBoxWithOptionalValue(null, 2);
+            }
+            result[i].setVisibleLength(2);
+        }
+        return result;
     }    
 }
