@@ -29,6 +29,6 @@ public class FlexibleLeaderboardEditDialog extends FlexibleLeaderboardDialog {
             j++;
         }
         scoringSchemeListBox.setEnabled(false);
-        discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboard);
+        discardThresholdBoxes = initPrefilledDiscardThresholdBoxes(leaderboard.discardThresholds, this);
     }
 }

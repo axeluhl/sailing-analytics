@@ -9,10 +9,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.ErrorReporter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 
 public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialog {
@@ -64,34 +62,30 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
     }
     
-    public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringConstants,
+    public FlexibleLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringMessages,
             ErrorReporter errorReporter, LeaderboardParameterValidator validator,  AsyncCallback<LeaderboardDescriptor> callback) {
-        super(title, leaderboardDTO, stringConstants, validator, callback);
+        super(title, leaderboardDTO, stringMessages, validator, callback);
     }
     
     @Override
     protected LeaderboardDescriptor getResult() {
         LeaderboardDescriptor leaderboard = super.getResult();
         leaderboard.regatta = null;
-        leaderboard.scoringScheme = getSelectedScoringSchemeType();
-
+        leaderboard.scoringScheme = getSelectedScoringSchemeType(scoringSchemeListBox, stringMessages);
         return leaderboard;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
         VerticalPanel mainPanel = new VerticalPanel();
-        
         Grid formGrid = new Grid(3,2);
         formGrid.setCellSpacing(3);
-        formGrid.setWidget(0,  0, new Label(stringConstants.name() + ":"));
+        formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameTextBox);
-        formGrid.setWidget(1, 0, new Label(stringConstants.scoringSystem() + ":"));
+        formGrid.setWidget(1, 0, new Label(stringMessages.scoringSystem() + ":"));
         formGrid.setWidget(1, 1, scoringSchemeListBox);
-                
         mainPanel.add(formGrid);
-        
-        mainPanel.add(new Label(stringConstants.discardRacesFromHowManyStartedRacesOn()));
+        mainPanel.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
         HorizontalPanel hp = new HorizontalPanel();
         hp.setSpacing(3);
         for (int i = 0; i < discardThresholdBoxes.length; i++) {
@@ -100,20 +94,5 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         }
         mainPanel.add(hp);
         return mainPanel;
-    }  
-    
-    protected ScoringSchemeType getSelectedScoringSchemeType() {
-        ScoringSchemeType result = null;
-        int selIndex = scoringSchemeListBox.getSelectedIndex();
-        if(selIndex >= 0) { 
-            String itemText = scoringSchemeListBox.getItemText(selIndex);
-            for(ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
-                if(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringConstants).equals(itemText)) {
-                    result = scoringSchemeType;
-                    break;
-                }
-            }
-        }
-        return result;
     }
 }

@@ -88,14 +88,14 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         
         Grid formGrid = new Grid(3,2);
         formGrid.setCellSpacing(3);
-        formGrid.setWidget(0,  0, new Label(stringConstants.name() + ":"));
+        formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameTextBox);
-        formGrid.setWidget(1, 0, new Label(stringConstants.regatta() + ":"));
+        formGrid.setWidget(1, 0, new Label(stringMessages.regatta() + ":"));
         formGrid.setWidget(1, 1, regattaListBox);
                 
         mainPanel.add(formGrid);
         
-        mainPanel.add(new Label(stringConstants.discardRacesFromHowManyStartedRacesOn()));
+        mainPanel.add(new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
         HorizontalPanel hp = new HorizontalPanel();
         hp.setSpacing(3);
         for (int i = 0; i < discardThresholdBoxes.length; i++) {

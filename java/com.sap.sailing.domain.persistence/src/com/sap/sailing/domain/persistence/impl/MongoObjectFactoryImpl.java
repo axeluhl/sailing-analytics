@@ -270,6 +270,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (overallLeaderboard != null) {
             BasicDBObject dbOverallLeaderboard = new BasicDBObject();
             dbLeaderboardGroup.put(FieldNames.LEADERBOARD_GROUP_OVERALL_LEADERBOARD.name(), dbOverallLeaderboard);
+            dbOverallLeaderboard.put(FieldNames.LEADERBOARD_NAME.name(), overallLeaderboard.getName());
             storeLeaderboardCorrectionsAndDiscards(overallLeaderboard, dbOverallLeaderboard);
             dbOverallLeaderboard.put(FieldNames.SCORING_SCHEME_TYPE.name(), overallLeaderboard.getScoringScheme().getType().name());
         }

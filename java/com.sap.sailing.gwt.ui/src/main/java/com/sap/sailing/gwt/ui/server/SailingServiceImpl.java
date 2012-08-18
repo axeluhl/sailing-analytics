@@ -177,7 +177,6 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
-import com.sap.sailing.server.operationaltransformation.AddOverallLeaderboardToLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
@@ -194,7 +193,6 @@ import com.sap.sailing.server.operationaltransformation.RemoveColumnFromSeries;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
-import com.sap.sailing.server.operationaltransformation.RemoveOverallLeaderboardFromLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sailing.server.operationaltransformation.RenameColumnInSeries;
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
@@ -2428,20 +2426,11 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public void addOverallLeaderboardToLeaderboardGroup(String leaderboardGroupName, int[] discardThresholds,
-            ScoringSchemeType scoringSchemeType) {
-        getService().apply(new AddOverallLeaderboardToLeaderboardGroup(leaderboardGroupName, discardThresholds, getService()
-                .getBaseDomainFactory().createScoringScheme(scoringSchemeType)));
-    }
-
-    @Override
-    public void removeOverallLeaderboardFromLeaderboardGroup(String leaderboardGroupName) {
-        getService().apply(new RemoveOverallLeaderboardFromLeaderboardGroup(leaderboardGroupName));
-    }
-
-    @Override
-    public void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames) {
-        getService().apply(new UpdateLeaderboardGroup(oldName, newName, description, leaderboardNames));
+    public void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
+        getService().apply(
+                new UpdateLeaderboardGroup(oldName, newName, description, leaderboardNames,
+                        overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType));
     }
 
     @Override
