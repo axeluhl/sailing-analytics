@@ -380,4 +380,5 @@ public interface StringMessages extends Messages {
     String editFlexibleLeaderboard();
     String editRegattaLeaderboard();
     String noRegatta();
+    String useOverallLeaderboard();
 }

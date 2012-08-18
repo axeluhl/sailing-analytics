@@ -37,7 +37,7 @@ public class LeaderboardGroupDTO extends NamedDTO implements IsSerializable {
     }
     
     public boolean hasOverallLeaderboard() {
-        return getOverallLeaderboardDiscardThresholds() != null;
+        return getOverallLeaderboardScoringSchemeType() != null;
     }
     
     public int[] getOverallLeaderboardDiscardThresholds() {

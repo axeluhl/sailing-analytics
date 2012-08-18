@@ -304,10 +304,6 @@ public interface SailingServiceAsync {
      */
     void createLeaderboardGroup(String groupName, String description, AsyncCallback<LeaderboardGroupDTO> callback);
     
-    void addOverallLeaderboardToLeaderboardGroup(String leaderboardGroupName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, AsyncCallback<Void> callback);
-    
-    void removeOverallLeaderboardFromLeaderboardGroup(String leaderboardGroupName, AsyncCallback<Void> callback);
-    
     /**
      * Updates the data of the group with the name <code>oldName</code>.
      * 
@@ -315,8 +311,10 @@ public interface SailingServiceAsync {
      * @param newName The new name of the group
      * @param description The new description of the group
      * @param leaderboardNames The list of names of the new leaderboards of the group
+     * @param overallLeaderboardDiscardThresholds TODO
+     * @param overallLeaderboardScoringSchemeType TODO
      */
-    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames, AsyncCallback<Void> callback);
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<Void> callback);
 
     /**
      * Returns the mark passings and the data for the given {@link DetailType} of all competitors in

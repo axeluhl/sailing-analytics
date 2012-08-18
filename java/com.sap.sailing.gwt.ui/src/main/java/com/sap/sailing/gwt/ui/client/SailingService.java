@@ -206,7 +206,8 @@ public interface SailingService extends RemoteService {
     
     LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description);
     
-    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames);
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     MultiCompetitorRaceDataDTO getCompetitorsRaceData(RaceIdentifier race, List<Pair<Date, CompetitorDTO>> competitors,
             Date toDate, long stepSize, DetailType detailType) 
@@ -255,9 +256,4 @@ public interface SailingService extends RemoteService {
 	RaceBuoysDTO getRaceBuoys(RaceIdentifier raceIdentifier, Date date);
 
     void updateRaceCourse(RaceIdentifier raceIdentifier, List<ControlPointDTO> controlPoints);
-
-    void addOverallLeaderboardToLeaderboardGroup(String leaderboardGroupName, int[] discardThresholds,
-            ScoringSchemeType scoringSchemeType);
-
-    void removeOverallLeaderboardFromLeaderboardGroup(String groupName);
 }

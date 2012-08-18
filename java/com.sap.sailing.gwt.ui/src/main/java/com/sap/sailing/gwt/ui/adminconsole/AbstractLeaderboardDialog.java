@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 
 public abstract class AbstractLeaderboardDialog extends DataEntryDialog<LeaderboardDescriptor> {
-    protected final StringMessages stringConstants;
+    protected final StringMessages stringMessages;
     protected TextBox nameTextBox;
     protected LeaderboardDescriptor leaderboard;
     
@@ -20,12 +23,19 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
     public AbstractLeaderboardDialog(String title, LeaderboardDescriptor leaderboardDTO, StringMessages stringConstants,
             Validator<LeaderboardDescriptor> validator,  AsyncCallback<LeaderboardDescriptor> callback) {
         super(title, null, stringConstants.ok(), stringConstants.cancel(), validator, callback);
-        this.stringConstants = stringConstants;
+        this.stringMessages = stringConstants;
         this.leaderboard = leaderboardDTO;
     }
     
     @Override
     protected LeaderboardDescriptor getResult() {
+        int[] discardThresholdsBoxContents = getDiscardThresholds(discardThresholdBoxes);
+        leaderboard.name = nameTextBox.getValue();
+        leaderboard.discardThresholds = discardThresholdsBoxContents;
+        return leaderboard;
+    }
+
+    protected static int[] getDiscardThresholds(LongBox[] discardThresholdBoxes) {
         List<Integer> discardThresholds = new ArrayList<Integer>();
         // go backwards; starting from first non-zero element, add them; take over leading zeroes which validator shall discard
         for (int i = discardThresholdBoxes.length-1; i>=0; i--) {
@@ -42,10 +52,7 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
         for (int i = 0; i < discardThresholds.size(); i++) {
             discardThresholdsBoxContents[i] = discardThresholds.get(i);
         }
-        leaderboard.name = nameTextBox.getValue();
-        leaderboard.discardThresholds = discardThresholdsBoxContents;
-        
-        return leaderboard;
+        return discardThresholdsBoxContents;
     }
 
     @Override
@@ -54,25 +61,48 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
         nameTextBox.setFocus(true);
     }
 
-    protected LongBox[] initEmptyDiscardThresholdBoxes() {
+    protected static LongBox[] initEmptyDiscardThresholdBoxes(DataEntryDialog<?> dialog) {
         LongBox[] result = new LongBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
         for (int i = 0; i < result.length; i++) {
-            result[i] = createLongBoxWithOptionalValue(null, 2);
+            result[i] = dialog.createLongBoxWithOptionalValue(null, 2);
             result[i].setVisibleLength(2);
         }
         return result;
     }
 
-    protected LongBox[] initPrefilledDiscardThresholdBoxes(LeaderboardDescriptor leaderboard) {
+    protected static LongBox[] initPrefilledDiscardThresholdBoxes(int[] valuesToShow, DataEntryDialog<?> dialog) {
         LongBox[] result = new LongBox[MAX_NUMBER_OF_DISCARDED_RESULTS];
         for (int i = 0; i < result.length; i++) {
-            if (i < leaderboard.discardThresholds.length) {
-                result[i] = createLongBox(leaderboard.discardThresholds[i], 2);
+            if (i < valuesToShow.length) {
+                result[i] = dialog.createLongBox(valuesToShow[i], 2);
             } else {
-                result[i] = createLongBoxWithOptionalValue(null, 2);
+                result[i] = dialog.createLongBoxWithOptionalValue(null, 2);
             }
             result[i].setVisibleLength(2);
         }
         return result;
     }    
+
+    protected static ListBox createScoringSchemeListBox(DataEntryDialog<?> dialog, StringMessages stringMessages) {
+        ListBox scoringSchemeListBox2 = dialog.createListBox(false);
+        for (ScoringSchemeType scoringSchemeType: ScoringSchemeType.values()) {
+            scoringSchemeListBox2.addItem(ScoringSchemeTypeFormatter.format(scoringSchemeType, stringMessages));
+        }
+        return scoringSchemeListBox2;
+    }
+
+    protected static ScoringSchemeType getSelectedScoringSchemeType(ListBox scoringSchemeListBox, StringMessages stringMessages) {
+        ScoringSchemeType result = null;
+        int selIndex = scoringSchemeListBox.getSelectedIndex();
+        if (selIndex >= 0) { 
+            String itemText = scoringSchemeListBox.getItemText(selIndex);
+            for (ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {
+                if (ScoringSchemeTypeFormatter.format(scoringSchemeType, stringMessages).equals(itemText)) {
+                    result = scoringSchemeType;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }

@@ -579,7 +579,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
             leaderboardNames.add(leaderboardDTO.name);
         }
         sailingService.updateLeaderboardGroup(oldGroupName, groupToUpdate.name, groupToUpdate.description,
-                leaderboardNames, new AsyncCallback<Void>() {
+                leaderboardNames, groupToUpdate.getOverallLeaderboardDiscardThresholds(),
+                groupToUpdate.getOverallLeaderboardScoringSchemeType(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to update leaderboard group " + oldGroupName + ": "

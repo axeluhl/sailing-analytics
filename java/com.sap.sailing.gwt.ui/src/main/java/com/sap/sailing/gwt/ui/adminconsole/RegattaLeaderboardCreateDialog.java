@@ -21,7 +21,7 @@ public class RegattaLeaderboardCreateDialog extends RegattaLeaderboardDialog {
         for (RegattaDTO regatta : existingRegattas) {
             regattaListBox.addItem(regatta.name);
         }
-        discardThresholdBoxes = initEmptyDiscardThresholdBoxes();
+        discardThresholdBoxes = initEmptyDiscardThresholdBoxes(this);
     }
 
 }
