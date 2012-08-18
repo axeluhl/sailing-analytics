@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +52,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard {
      */
     private final Map<Competitor, Double> carriedPoints;
 
-    protected Set<RaceColumnListener> raceColumnListeners;
+    private Set<RaceColumnListener> raceColumnListeners;
 
     /**
      * A leaderboard entry representing a snapshot of a cell at a given time point for a single race/competitor.
@@ -119,6 +120,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard {
         this.scoreCorrection = scoreCorrection;
         this.displayNames = new HashMap<Competitor, String>();
         this.resultDiscardingRule = resultDiscardingRule;
+        this.raceColumnListeners = new HashSet<RaceColumnListener>();
     }
 
     @Override

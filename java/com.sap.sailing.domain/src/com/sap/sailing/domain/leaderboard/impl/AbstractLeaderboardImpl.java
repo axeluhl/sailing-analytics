@@ -46,7 +46,6 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(scoreCorrection, resultDiscardingRule);
         assert scoreCorrection != null;
-        this.raceColumnListeners = new HashSet<RaceColumnListener>();
     }
     
     @Override
