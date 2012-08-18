@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -34,12 +35,14 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     private final Fleet metaFleet;
     private final ScoringScheme scoringScheme;
     private final String name;
+    private final WeakHashMap<Leaderboard, RaceColumn> columnsForLeaderboards;
     
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(new MetaLeaderboardScoreCorrection(), resultDiscardingRule);
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
         this.name = name;
+        columnsForLeaderboards = new WeakHashMap<>();
     }
 
     protected abstract Iterable<Leaderboard> getLeaderboards();
@@ -67,7 +70,16 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     public Iterable<RaceColumn> getRaceColumns() {
         List<RaceColumn> result = new ArrayList<RaceColumn>(Util.size(getLeaderboards()));
         for (Leaderboard leaderboard : getLeaderboards()) {
-            result.add(new MetaLeaderboardColumn(leaderboard, metaFleet));
+            result.add(getColumnForLeaderboard(leaderboard));
+        }
+        return result;
+    }
+
+    private RaceColumn getColumnForLeaderboard(Leaderboard leaderboard) {
+        RaceColumn result = columnsForLeaderboards.get(leaderboard);
+        if (result == null) {
+            result = new MetaLeaderboardColumn(leaderboard, metaFleet);
+            columnsForLeaderboards.put(leaderboard, result);
         }
         return result;
     }
