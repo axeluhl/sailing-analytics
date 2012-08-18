@@ -25,7 +25,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard {
+public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, RaceColumnListener {
     private static final long serialVersionUID = 330156778603279333L;
 
     static final Double DOUBLE_0 = new Double(0);
@@ -35,7 +35,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard {
      */
     static final double MEDAL_RACE_FACTOR = 2.0;
 
-    private  final SettableScoreCorrection scoreCorrection;
+    private final SettableScoreCorrection scoreCorrection;
 
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
 
@@ -399,5 +399,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard {
             }
         }
         return result;
+    }
+
+    @Override
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+    }
+
+    @Override
+    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
     }
 }

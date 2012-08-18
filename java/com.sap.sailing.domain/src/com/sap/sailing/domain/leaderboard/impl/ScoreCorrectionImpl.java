@@ -78,13 +78,13 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         scoreCorrectionListeners.remove(listener);
     }
 
-    private void notifyListeners(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
+    protected void notifyListeners(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
         for (ScoreCorrectionListener listener : scoreCorrectionListeners) {
             listener.correctedScoreChanced(competitor, oldCorrectedScore, newCorrectedScore);
         }
     }
 
-    private void notifyListeners(Competitor competitor, MaxPointsReason oldMaxPointsReason,
+    protected void notifyListeners(Competitor competitor, MaxPointsReason oldMaxPointsReason,
             MaxPointsReason newMaxPointsReason) {
         for (ScoreCorrectionListener listener : scoreCorrectionListeners) {
             listener.maxPointsReasonChanced(competitor, oldMaxPointsReason, newMaxPointsReason);
