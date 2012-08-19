@@ -410,4 +410,37 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
     }
+
+    /**
+     * Finds out the time point when any of the {@link Leaderboard#getTrackedRaces() tracked races currently attached to
+     * the <code>leaderboard</code>} and the {@link Leaderboard#getScoreCorrection() score corrections} have last been
+     * modified. If no tracked race is attached and no time-stamped score corrections have been applied to the leaderboard,
+     * <code>null</code> is returned. The time point computed this way is a good choice for normalizing queries for later time
+     * points in an attempt to achieve more cache hits.<p>
+     * 
+     * Note, however, that the result does not tell about structural changes to the leaderboard and therefore cannot be used
+     * to determine the need for cache invalidation. For example, if a column is added to a leaderboard after the time point
+     * returned by this method but that column's attached tracked race has finished before the time point returned by this method,
+     * the result of this method won't change. Still, the contents of the leaderboard will change by a change in column structure.
+     * A different means to determine the possibility of changes that happened to this leaderboard must be used for cache
+     * management. Such a facility has to listen for score correction changes, tracked races being attached or detached and
+     * the column structure changing.
+     * 
+     * @see TrackedRace#getTimePointOfNewestEvent()
+     * @see SettableScoreCorrection#getTimePointOfLastCorrectionsValidity()
+     */
+    @Override
+    public TimePoint getTimePointOfLatestModification() {
+        TimePoint result = null;
+        for (TrackedRace trackedRace : getTrackedRaces()) {
+            if (result == null || (trackedRace.getTimePointOfNewestEvent() != null && trackedRace.getTimePointOfNewestEvent().after(result))) {
+                result = trackedRace.getTimePointOfNewestEvent();
+            }
+        }
+        TimePoint timePointOfLastScoreCorrection = getScoreCorrection().getTimePointOfLastCorrectionsValidity();
+        if (timePointOfLastScoreCorrection != null && (result == null || timePointOfLastScoreCorrection.after(result))) {
+            result = timePointOfLastScoreCorrection;
+        }
+        return result;
+    }
 }

@@ -168,4 +168,5 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         }
         return delayToLiveInMillisForLatestRace;
     }
+
 }

@@ -260,4 +260,12 @@ public interface Leaderboard extends Named {
     Iterable<TrackedRace> getTrackedRaces();
 
     ScoringScheme getScoringScheme();
+
+    /**
+     * Finds out the time point when any of the {@link Leaderboard#getTrackedRaces() tracked races currently attached to
+     * the <code>leaderboard</code>} and the {@link Leaderboard#getScoreCorrection() score corrections} have last been
+     * modified. If no tracked race is attached and no time-stamped score corrections have been applied to the leaderboard,
+     * <code>null</code> is returned.
+     */
+    TimePoint getTimePointOfLatestModification();
 }
