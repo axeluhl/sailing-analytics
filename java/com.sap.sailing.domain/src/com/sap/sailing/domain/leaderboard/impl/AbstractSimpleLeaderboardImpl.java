@@ -322,25 +322,35 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
         return result;
     }
+    
+    private Set<RaceColumnListener> getRaceColumnListeners() {
+        synchronized (raceColumnListeners) {
+            return new HashSet<RaceColumnListener>(raceColumnListeners);
+        }
+    }
 
     @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.add(listener);
+        synchronized (raceColumnListeners) {
+            raceColumnListeners.add(listener);
+        }
     }
 
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.remove(listener);
+        synchronized (raceColumnListeners) {
+            raceColumnListeners.remove(listener);
+        }
     }
 
     protected void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
         }
     }
 
     protected void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
         }
     }
