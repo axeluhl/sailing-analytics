@@ -387,24 +387,40 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     public LeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails)
             throws NoWindException, InterruptedException, ExecutionException {
-        LeaderboardDTO result;
-        boolean liveMode = date == null;
         long startOfRequestHandling = System.currentTimeMillis();
-        if (liveMode) {
-            LiveLeaderboardUpdater liveLeaderboardUpdater;
+        LeaderboardDTO result = null;
+        TimePoint timePoint;
+        LiveLeaderboardUpdater liveLeaderboardUpdater;
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (date == null) {
+            // date==null means live mode; however, if we're after the end of all races and after all score corrections,
+            // don't use the live leaderboard updater which would keep re-calculating over and over again, but map this
+            // to a usual non-live call which uses the regular LeaderboardDTOCache which is invalidated properly when
+            // the tracked race associations or score corrections or tracked race contents changes:
+            // TODO see bug 929: use lock instead of synchronized to increase concurrency
             synchronized (leaderboardByNameLiveUpdaters) {
                 liveLeaderboardUpdater = leaderboardByNameLiveUpdaters.get(leaderboardName);
                 if (liveLeaderboardUpdater == null) {
-                    liveLeaderboardUpdater = new LiveLeaderboardUpdater(getService().getLeaderboardByName(leaderboardName), this);
+                    liveLeaderboardUpdater = new LiveLeaderboardUpdater(leaderboard, this);
                     leaderboardByNameLiveUpdaters.put(leaderboardName, liveLeaderboardUpdater);
                 }
             }
-            result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails);
+            final TimePoint nowMinusDelay = liveLeaderboardUpdater.getNowMinusDelay();
+            final TimePoint timePointOfLatestModification = leaderboard.getTimePointOfLatestModification();
+            if (!nowMinusDelay.before(timePointOfLatestModification)) {
+                timePoint = timePointOfLatestModification;
+            } else {
+                timePoint = null;
+                result = liveLeaderboardUpdater.getLiveLeaderboard(namesOfRaceColumnsForWhichToLoadLegDetails, nowMinusDelay);
+            }
         } else {
+            timePoint = new MillisecondsTimePoint(date);
+        }
+        if (timePoint != null) {
             // in replay we'd like up-to-date results; they are still cached
             // which is OK because the cache is invalidated whenever any of the tracked races attached to the leaderboard changes.
-            result = leaderboardDTOCacheWaitingForLatestAnalysis.getLeaderboardByName(getService().getLeaderboardByName(leaderboardName),
-                    new MillisecondsTimePoint(date), namesOfRaceColumnsForWhichToLoadLegDetails); 
+            result = leaderboardDTOCacheWaitingForLatestAnalysis.getLeaderboardByName(leaderboard,
+                    timePoint, namesOfRaceColumnsForWhichToLoadLegDetails); 
         }
         logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");

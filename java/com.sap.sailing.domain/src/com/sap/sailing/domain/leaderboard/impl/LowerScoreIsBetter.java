@@ -4,8 +4,6 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.domain.common.impl.Util;
-import com.sap.sailing.domain.tracking.TrackedRace;
 
 
 /**
@@ -24,18 +22,18 @@ public class LowerScoreIsBetter extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank) {
+    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Integer numberOfCompetitorsInRace) {
         return rank == 0 ? null : (double) rank;
     }
 
     @Override
-    public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason, int numberOfCompetitorsInLeaderboard) {
+    public Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
+            Integer numberOfCompetitorsInRace, int numberOfCompetitorsInLeaderboard) {
         Double result;
-        final TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
-        if (trackedRace == null) {
+        if (numberOfCompetitorsInRace == null) {
             result = (double) (numberOfCompetitorsInLeaderboard+1);
         } else {
-            result = (double) (Util.size(trackedRace.getRace().getCompetitors())+1);
+            result = (double) (numberOfCompetitorsInRace+1);
         }
         return result;
     }

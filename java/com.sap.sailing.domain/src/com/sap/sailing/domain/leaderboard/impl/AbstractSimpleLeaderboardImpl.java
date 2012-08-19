@@ -25,7 +25,7 @@ import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard {
+public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, RaceColumnListener {
     private static final long serialVersionUID = 330156778603279333L;
 
     static final Double DOUBLE_0 = new Double(0);
@@ -35,7 +35,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard {
      */
     static final double MEDAL_RACE_FACTOR = 2.0;
 
-    private  final SettableScoreCorrection scoreCorrection;
+    private final SettableScoreCorrection scoreCorrection;
 
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
 
@@ -322,25 +322,35 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard {
         }
         return result;
     }
+    
+    private Set<RaceColumnListener> getRaceColumnListeners() {
+        synchronized (raceColumnListeners) {
+            return new HashSet<RaceColumnListener>(raceColumnListeners);
+        }
+    }
 
     @Override
     public void addRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.add(listener);
+        synchronized (raceColumnListeners) {
+            raceColumnListeners.add(listener);
+        }
     }
 
     @Override
     public void removeRaceColumnListener(RaceColumnListener listener) {
-        raceColumnListeners.remove(listener);
+        synchronized (raceColumnListeners) {
+            raceColumnListeners.remove(listener);
+        }
     }
 
     protected void notifyListenersAboutTrackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.trackedRaceLinked(raceColumn, fleet, trackedRace);
         }
     }
 
     protected void notifyListenersAboutTrackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-        for (RaceColumnListener listener : raceColumnListeners) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
         }
     }
@@ -397,6 +407,49 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard {
                                 raceColumn.getFleetOfCompetitor(competitor));
                 result.put(new Pair<Competitor, RaceColumn>(competitor, raceColumn), entry);
             }
+        }
+        return result;
+    }
+
+    @Override
+    public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+    }
+
+    @Override
+    public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
+        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+    }
+
+    /**
+     * Finds out the time point when any of the {@link Leaderboard#getTrackedRaces() tracked races currently attached to
+     * the <code>leaderboard</code>} and the {@link Leaderboard#getScoreCorrection() score corrections} have last been
+     * modified. If no tracked race is attached and no time-stamped score corrections have been applied to the leaderboard,
+     * <code>null</code> is returned. The time point computed this way is a good choice for normalizing queries for later time
+     * points in an attempt to achieve more cache hits.<p>
+     * 
+     * Note, however, that the result does not tell about structural changes to the leaderboard and therefore cannot be used
+     * to determine the need for cache invalidation. For example, if a column is added to a leaderboard after the time point
+     * returned by this method but that column's attached tracked race has finished before the time point returned by this method,
+     * the result of this method won't change. Still, the contents of the leaderboard will change by a change in column structure.
+     * A different means to determine the possibility of changes that happened to this leaderboard must be used for cache
+     * management. Such a facility has to listen for score correction changes, tracked races being attached or detached and
+     * the column structure changing.
+     * 
+     * @see TrackedRace#getTimePointOfNewestEvent()
+     * @see SettableScoreCorrection#getTimePointOfLastCorrectionsValidity()
+     */
+    @Override
+    public TimePoint getTimePointOfLatestModification() {
+        TimePoint result = null;
+        for (TrackedRace trackedRace : getTrackedRaces()) {
+            if (result == null || (trackedRace.getTimePointOfNewestEvent() != null && trackedRace.getTimePointOfNewestEvent().after(result))) {
+                result = trackedRace.getTimePointOfNewestEvent();
+            }
+        }
+        TimePoint timePointOfLastScoreCorrection = getScoreCorrection().getTimePointOfLastCorrectionsValidity();
+        if (timePointOfLastScoreCorrection != null && (result == null || timePointOfLastScoreCorrection.after(result))) {
+            result = timePointOfLastScoreCorrection;
         }
         return result;
     }

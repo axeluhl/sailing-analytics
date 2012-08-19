@@ -28,7 +28,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
  * @author Axel Uhl (D043530)
  *
  */
-public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardImpl implements RaceColumnListener {
+public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardImpl {
     private static final long serialVersionUID = -328091952760083438L;
 
     /**
@@ -142,13 +142,13 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         competitorsCache = null;
-        notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
+        super.trackedRaceLinked(raceColumn, fleet, trackedRace);
     }
 
     @Override
     public void trackedRaceUnlinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         competitorsCache = null;
-        notifyListenersAboutTrackedRaceUnlinked(raceColumn, fleet, trackedRace);
+        super.trackedRaceUnlinked(raceColumn, fleet, trackedRace);
     }
 
     @Override
@@ -168,4 +168,5 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         }
         return delayToLiveInMillisForLatestRace;
     }
+
 }

@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.AbstractSimpleLeaderboardImpl;
@@ -34,16 +37,37 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     private final Fleet metaFleet;
     private final ScoringScheme scoringScheme;
     private final String name;
+    private final WeakHashMap<Leaderboard, RaceColumn> columnsForLeaderboards;
+    
+    private class ScoreCorrectionChangeForwarder implements ScoreCorrectionListener {
+        @Override
+        public void correctedScoreChanced(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
+            getScoreCorrection().notifyListeners(competitor, oldCorrectedScore, newCorrectedScore);
+        }
+
+        @Override
+        public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
+                MaxPointsReason newMaxPointsReason) {
+            getScoreCorrection().notifyListeners(competitor, oldMaxPointsReason, newMaxPointsReason);
+        }
+    }
     
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme, ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(new MetaLeaderboardScoreCorrection(), resultDiscardingRule);
+        getScoreCorrection().setMetaLeaderboard(this);
         metaFleet = new FleetImpl("MetaFleet");
         this.scoringScheme = scoringScheme;
         this.name = name;
+        columnsForLeaderboards = new WeakHashMap<>();
     }
 
     protected abstract Iterable<Leaderboard> getLeaderboards();
     
+    @Override
+    public MetaLeaderboardScoreCorrection getScoreCorrection() {
+        return (MetaLeaderboardScoreCorrection) super.getScoreCorrection();
+    }
+
     @Override
     public Iterable<Competitor> getCompetitors() {
         Set<Competitor> result = new HashSet<Competitor>();
@@ -67,7 +91,20 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     public Iterable<RaceColumn> getRaceColumns() {
         List<RaceColumn> result = new ArrayList<RaceColumn>(Util.size(getLeaderboards()));
         for (Leaderboard leaderboard : getLeaderboards()) {
-            result.add(new MetaLeaderboardColumn(leaderboard, metaFleet));
+            result.add(getColumnForLeaderboard(leaderboard));
+        }
+        return result;
+    }
+
+    private RaceColumn getColumnForLeaderboard(Leaderboard leaderboard) {
+        RaceColumn result = columnsForLeaderboards.get(leaderboard);
+        if (result == null) {
+            result = new MetaLeaderboardColumn(leaderboard, metaFleet);
+            result.addRaceColumnListener(this); // forwards RaceColumnListener events from the sub-leaderboards to this leaderboard's listeners
+            // also forward score correction changes applied to a sub-leaderboard to the score correction listeners on
+            // this leaderboard's score correction object
+            leaderboard.getScoreCorrection().addScoreCorrectionListener(new ScoreCorrectionChangeForwarder());
+            columnsForLeaderboards.put(leaderboard, result);
         }
         return result;
     }
