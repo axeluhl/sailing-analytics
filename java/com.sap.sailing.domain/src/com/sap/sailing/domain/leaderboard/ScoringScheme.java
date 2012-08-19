@@ -44,15 +44,23 @@ public interface ScoringScheme extends Serializable {
      * If the <code>competitor</code> has no {@link RaceColumn#getTrackedRace(Competitor) tracked race} in the column in which
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
      * race. 
+     * @param numberOfCompetitorsInRace TODO
      */
-    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank);
+    Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Integer numberOfCompetitorsInRace);
     
     /**
      * If a competitor is disqualified, a penalty score is attributed by this scoring scheme. Some schemes require to
      * know the number of competitors in the race, some need to know the total number of competitors in the leaderboard
      * or regatta.
+     * 
+     * @param numberOfCompetitorsInRace
+     *            if <code>null</code>, the caller cannot determine the number of competitors in the single race;
+     *            otherwise, this parameter tells the number of competitors in the same race as <code>competitor</code>,
+     *            not in the entire <code>raceColumn</code> (those may be more in case of split fleets). The scoring scheme
+     *            may use this number, if available, to infer a penalty score.
      */
-    Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason, int numberOfCompetitorsInLeaderboard);
-    
+    Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
+            Integer numberOfCompetitorsInRace, int numberOfCompetitorsInLeaderboard);
+
     ScoringSchemeType getType();
 }
