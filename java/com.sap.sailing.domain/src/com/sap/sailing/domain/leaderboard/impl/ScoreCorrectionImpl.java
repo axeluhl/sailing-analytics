@@ -67,26 +67,36 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         ois.defaultReadObject();
         this.scoreCorrectionListeners = new HashSet<ScoreCorrectionListener>();
     }
+    
+    private Set<ScoreCorrectionListener> getScoreCorrectionListeners() {
+        synchronized (scoreCorrectionListeners) {
+            return new HashSet<ScoreCorrectionListener>(scoreCorrectionListeners);
+        }
+    }
 
     @Override
     public void addScoreCorrectionListener(ScoreCorrectionListener listener) {
-        scoreCorrectionListeners.add(listener);
+        synchronized (scoreCorrectionListeners) {
+            scoreCorrectionListeners.add(listener);
+        }
     }
 
     @Override
     public void removeScoreCorrectionListener(ScoreCorrectionListener listener) {
-        scoreCorrectionListeners.remove(listener);
+        synchronized (scoreCorrectionListeners) {
+            scoreCorrectionListeners.remove(listener);
+        }
     }
 
     protected void notifyListeners(Competitor competitor, Double oldCorrectedScore, Double newCorrectedScore) {
-        for (ScoreCorrectionListener listener : scoreCorrectionListeners) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
             listener.correctedScoreChanced(competitor, oldCorrectedScore, newCorrectedScore);
         }
     }
 
     protected void notifyListeners(Competitor competitor, MaxPointsReason oldMaxPointsReason,
             MaxPointsReason newMaxPointsReason) {
-        for (ScoreCorrectionListener listener : scoreCorrectionListeners) {
+        for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
             listener.maxPointsReasonChanced(competitor, oldMaxPointsReason, newMaxPointsReason);
         }
     }

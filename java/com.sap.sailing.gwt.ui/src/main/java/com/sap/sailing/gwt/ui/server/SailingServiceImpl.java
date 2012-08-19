@@ -420,7 +420,7 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
             // in replay we'd like up-to-date results; they are still cached
             // which is OK because the cache is invalidated whenever any of the tracked races attached to the leaderboard changes.
             result = leaderboardDTOCacheWaitingForLatestAnalysis.getLeaderboardByName(leaderboard,
-                    new MillisecondsTimePoint(date), namesOfRaceColumnsForWhichToLoadLegDetails); 
+                    timePoint, namesOfRaceColumnsForWhichToLoadLegDetails); 
         }
         logger.fine("getLeaderboardByName("+leaderboardName+", "+date+", "+namesOfRaceColumnsForWhichToLoadLegDetails+") took "+
                 (System.currentTimeMillis()-startOfRequestHandling)+"ms");
