@@ -1,7 +1,10 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 
@@ -54,4 +57,33 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     public Comparator<Double> getScoreComparator(boolean nullScoresAreBetter) {
         return new ScoreComparator(nullScoresAreBetter);
     }
+
+    /**
+     * Assuming both competitors scored in the same number of races, compares the sorted scores.
+     */
+    @Override
+    public int compareByBetterScore(List<Double> o1Scores, List<Double> o2Scores, boolean nullScoresAreBetter) {
+        assert o1Scores.size() == o2Scores.size();
+        Comparator<Double> scoreComparator = getScoreComparator(nullScoresAreBetter);
+        Collections.sort(o1Scores, scoreComparator);
+        Collections.sort(o2Scores, scoreComparator);
+        // now both lists are sorted from best to worst score
+        Iterator<Double> o1Iter = o1Scores.iterator();
+        Iterator<Double> o2Iter = o2Scores.iterator();
+        int result = 0;
+        while (result == 0 && o1Iter.hasNext() && o2Iter.hasNext()) {
+            result = scoreComparator.compare(o1Iter.next(), o2Iter.next());
+        }
+        return result;
+    }
+
+    /**
+     * By default, this scoring scheme implementation directly compares the numbers of races scored. A competitor who
+     * scored fewer races is ranked worse ("greater") than a competitor with more races scored.
+     */
+    @Override
+    public int compareByNumberOfRacesScored(int competitor1NumberOfRacesScored, int competitor2NumberOfRacesScored) {
+        return competitor2NumberOfRacesScored - competitor1NumberOfRacesScored;
+    }
+
 }

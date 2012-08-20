@@ -1,10 +1,8 @@
 package com.sap.sailing.domain.leaderboard.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +13,7 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.TimePoint;
 import com.sap.sailing.domain.common.impl.Util.Pair;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
 
 /**
  * Compares two competitors that occur in a {@link Leaderboard#getCompetitors()} set in the context of the
@@ -47,13 +46,16 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
  */
 public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final Leaderboard leaderboard;
-    private final Comparator<Double> scoreComparator;
+    private final ScoringScheme scoringScheme;
     private final Map<Pair<Competitor, RaceColumn>, Double> totalPointsCache;
+    private final boolean nullScoresAreBetter;
     
-    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint, Comparator<Double> scoreComparator) throws NoWindException {
+    public LeaderboardTotalRankComparator(Leaderboard leaderboard, TimePoint timePoint,
+            ScoringScheme scoringScheme, boolean nullScoresAreBetter) throws NoWindException {
         super();
         this.leaderboard = leaderboard;
-        this.scoreComparator = scoreComparator;
+        this.scoringScheme = scoringScheme;
+        this.nullScoresAreBetter = nullScoresAreBetter;
         totalPointsCache = new HashMap<Pair<Competitor, RaceColumn>, Double>();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -202,24 +204,13 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     }
 
     /**
-     * Assuming both competitors scored in the same number of races, compares the sorted scores.
-     * @param o1Scores
-     * @param o2Scores
-     * @return
+     * Assuming both competitors scored in the same number of races, and assuming they scored the same total score,
+     * break the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
+     * 
+     * @see ScoringScheme#compareByBetterScore(List, List, boolean)
      */
     protected int compareByBetterScore(List<Double> o1Scores, List<Double> o2Scores) {
-        assert o1Scores.size() == o2Scores.size();
-        Comparator<Double> scoreComparator = getScoreComparator();
-        Collections.sort(o1Scores, scoreComparator);
-        Collections.sort(o2Scores, scoreComparator);
-        // now both lists are sorted from best to worst score
-        Iterator<Double> o1Iter = o1Scores.iterator();
-        Iterator<Double> o2Iter = o2Scores.iterator();
-        int result = 0;
-        while (result == 0 && o1Iter.hasNext() && o2Iter.hasNext()) {
-            result = scoreComparator.compare(o1Iter.next(), o2Iter.next());
-        }
-        return result;
+        return scoringScheme.compareByBetterScore(o1Scores, o2Scores, nullScoresAreBetter);
     }
     
     /**
@@ -228,7 +219,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
      * the integer numbers by their natural ordering.
      */
     protected Comparator<Double> getScoreComparator() {
-        return scoreComparator;
+        return scoringScheme.getScoreComparator(nullScoresAreBetter);
     }
 
     /**
