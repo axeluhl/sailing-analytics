@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.meta;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupListener;
@@ -23,13 +24,11 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard implements LeaderboardGroupListener, RaceColumnListener {
     private static final long serialVersionUID = 8087872002175528002L;
     
-    private static final String OVERALL = "Overall"; // TODO consider i18n, see also bug 923
-
     private final LeaderboardGroup leaderboardGroup;
 
     public LeaderboardGroupMetaLeaderboard(LeaderboardGroup leaderboardGroup, ScoringScheme scoringScheme,
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
-        super(leaderboardGroup.getName()+" "+OVERALL, scoringScheme, resultDiscardingRule);
+        super(leaderboardGroup.getName()+" "+LeaderboardNameConstants.OVERALL, scoringScheme, resultDiscardingRule);
         this.leaderboardGroup = leaderboardGroup;
         leaderboardGroup.addLeaderboardGroupListener(this);
         for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {

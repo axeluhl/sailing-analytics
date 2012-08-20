@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.sap.sailing.domain.common.Color;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.domain.common.impl.Util.Pair;
@@ -142,7 +143,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             mainPanel.add(groupDescriptionLabel);
             if (group.hasOverallLeaderboard()) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + group.name+" Overall"
+                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + group.name+" "+LeaderboardNameConstants.OVERALL
                         + (showRaceDetails ? "&showRaceDetails=true" : "")
                         + (embedded ? "&embedded=true" : "")
                         + "&leaderboardGroupName=" + group.name + "&root=" + root

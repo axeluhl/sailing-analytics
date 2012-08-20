@@ -2,6 +2,7 @@ package com.sap.sailing.domain.leaderboard;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -44,7 +45,6 @@ public interface ScoringScheme extends Serializable {
      * If the <code>competitor</code> has no {@link RaceColumn#getTrackedRace(Competitor) tracked race} in the column in which
      * the competitor participated, <code>null</code> is returned, meaning the competitor has no score assigned for that
      * race. 
-     * @param numberOfCompetitorsInRace TODO
      */
     Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Integer numberOfCompetitorsInRace);
     
@@ -62,5 +62,18 @@ public interface ScoringScheme extends Serializable {
     Double getPenaltyScore(RaceColumn raceColumn, Competitor competitor, MaxPointsReason maxPointsReason,
             Integer numberOfCompetitorsInRace, int numberOfCompetitorsInLeaderboard);
 
+    /**
+     * @param competitor1Scores scores of the first competitor, in the order of race columns in the leaderboard
+     * @param competitor2Scores scores of the second competitor, in the order of race columns in the leaderboard
+     */
+    int compareByBetterScore(List<Double> competitor1Scores, List<Double> competitor2Scores, boolean nullScoresAreBetter);
+
+    /**
+     * In case two competitors scored in different numbers of races, this scoring scheme decides whether this
+     * decides terminally their mutual ranking. If not, <code>0</code> is returned and the comparator needs to look
+     * at other criteria to compare the competitors.
+     */
+    int compareByNumberOfRacesScored(int competitor1NumberOfRacesScored, int competitor2NumberOfRacesScored);
+    
     ScoringSchemeType getType();
 }
