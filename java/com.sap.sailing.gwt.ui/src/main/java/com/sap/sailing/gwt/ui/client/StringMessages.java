@@ -381,4 +381,5 @@ public interface StringMessages extends Messages {
     String editRegattaLeaderboard();
     String noRegatta();
     String useOverallLeaderboard();
+    String overallStandings();
 }

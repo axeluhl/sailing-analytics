@@ -14,10 +14,10 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.sap.sailing.domain.common.Color;
@@ -69,13 +69,13 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
     private static final String STYLE_NAME_PREFIX = "leaderboardGroupPanel-";
     
     private final SailingServiceAsync sailingService;
-    private final StringMessages stringConstants;
+    private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private LeaderboardGroupDTO group;
     private final String root;
     private final String viewMode;
     
-    private FlowPanel mainPanel;
+    private VerticalPanel mainPanel;
     private Widget welcomeWidget = null;
     private boolean allLeaderboardNamesStartWithGroupName = false;
     private final boolean embedded;
@@ -87,11 +87,11 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
         this.embedded = embedded;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
-        this.stringConstants = stringConstants;
+        this.stringMessages = stringConstants;
         this.errorReporter = errorReporter;
         this.root = (root == null || root.length() == 0) ? "leaderboardGroupPanel" : root;
         this.viewMode = viewMode;
-        mainPanel = new FlowPanel();
+        mainPanel = new VerticalPanel();
         add(mainPanel);
         loadGroup(groupName);
     }
@@ -114,7 +114,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     }
                     buildGUI();
                 } else {
-                    errorReporter.reportError(stringConstants.noLeaderboardGroupWithNameFound(groupName));
+                    errorReporter.reportError(stringMessages.noLeaderboardGroupWithNameFound(groupName));
                 }
             }
             @Override
@@ -132,19 +132,27 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                 mainPanel.add(breadcrumbPanel);
             }
             // Create group details GUI
-            FlowPanel groupDetailsPanel = new FlowPanel();
-            groupDetailsPanel.setStyleName(STYLE_NAME_PREFIX + "GroupDetailsPanel");
-            mainPanel.add(groupDetailsPanel);
             Label groupNameLabel = new Label(group.name + ":");
             groupNameLabel.setStyleName(STYLE_NAME_PREFIX + "GroupName");
-            groupDetailsPanel.add(groupNameLabel);
+            mainPanel.add(groupNameLabel);
             // Using HTML to display the line breaks in the description
             HTML groupDescriptionLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(group.description)
                     .toSafeHtml());
             groupDescriptionLabel.setStyleName(STYLE_NAME_PREFIX + "GroupDescription");
-            groupDetailsPanel.add(groupDescriptionLabel);
+            mainPanel.add(groupDescriptionLabel);
+            if (group.hasOverallLeaderboard()) {
+                String debugParam = Window.Location.getParameter("gwt.codesvr");
+                String link = URLFactory.INSTANCE.encode("/gwt/Leaderboard.html?name=" + group.name+" Overall"
+                        + (showRaceDetails ? "&showRaceDetails=true" : "")
+                        + (embedded ? "&embedded=true" : "")
+                        + "&leaderboardGroupName=" + group.name + "&root=" + root
+                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                HTML overallLeaderboardAnchor = new HTML(getAnchor(link, stringMessages.overallStandings(), "ActiveButton"));
+                overallLeaderboardAnchor.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
+                mainPanel.add(overallLeaderboardAnchor);
+            }
             // Create group leaderboards GUI
-            Label leaderboardsTableLabel = new Label(stringConstants.leaderboards());
+            Label leaderboardsTableLabel = new Label(stringMessages.leaderboards());
             leaderboardsTableLabel.setStyleName(STYLE_NAME_PREFIX + "LeaderboardsTableLabel");
             mainPanel.add(leaderboardsTableLabel);
         }
@@ -176,22 +184,15 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                         + (embedded ? "&embedded=true" : "")
                         + "&leaderboardGroupName=" + group.name + "&root=" + root
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-                if (embedded) {
-                    return ANCHORTEMPLATE.anchorWithTarget(link, stringConstants.overview(), STYLE_NAME_PREFIX
-                            + "ActiveLeaderboard",
-                    /* target */"_blank");
-                } else {
-                    return ANCHORTEMPLATE.anchor(link, stringConstants.overview(), STYLE_NAME_PREFIX
-                            + "ActiveLeaderboard");
-                }
+                return getAnchor(link, stringMessages.overview(), /* style */ "ActiveLeaderboard");
             }
         };
         
         LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
         CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableResources);
         leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
-        leaderboardsTable.addColumn(leaderboardNameColumn, stringConstants.name());
-        leaderboardsTable.addColumn(overviewColumn, stringConstants.leaderboard());
+        leaderboardsTable.addColumn(leaderboardNameColumn, stringMessages.name());
+        leaderboardsTable.addColumn(overviewColumn, stringMessages.leaderboard());
         if (showRaceDetails) {
             SafeHtmlCell racesCell = new SafeHtmlCell();
             Column<StrippedLeaderboardDTO, SafeHtml> racesColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(
@@ -201,7 +202,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     return leaderboardRacesToHtml(leaderboard);
                 }
             };
-            leaderboardsTable.addColumn(racesColumn, stringConstants.races());
+            leaderboardsTable.addColumn(racesColumn, stringMessages.races());
         }
         leaderboardsTable.setRowData(group.leaderboards);
         mainPanel.add(leaderboardsTable);
@@ -262,9 +263,9 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     String displayName = fleetName;
                     if("Default".equals(fleetName)) {
                         if(raceColumns.get(0) != null && raceColumns.get(0).isMedalRace()) {
-                            displayName = stringConstants.medalRace(); 
+                            displayName = stringMessages.medalRace(); 
                         } else {
-                            displayName = stringConstants.race();
+                            displayName = stringMessages.race();
                         }
                     }
                     b.append(TEXTTEMPLATE.textWithClass(displayName, 50, STYLE_NAME_PREFIX + "Fleet"));
@@ -282,11 +283,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                         if (viewMode != null && !viewMode.isEmpty()) {
                             link += "&viewMode=" + viewMode;
                         }
-                        if (embedded) {
-                            b.append(ANCHORTEMPLATE.anchorWithTarget(link, linkText, STYLE_NAME_PREFIX + "ActiveRace", "_blank"));
-                        } else {
-                            b.append(ANCHORTEMPLATE.anchor(link, linkText, STYLE_NAME_PREFIX + "ActiveRace"));
-                        }
+                        b.append(getAnchor(link, linkText, /* style */ "ActiveRace"));
                     } else {
                         b.append(TEXTTEMPLATE.textWithClass(linkText, STYLE_NAME_PREFIX + "InactiveRace"));
                     }
@@ -295,25 +292,33 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
             }
             b.appendHtmlConstant("</div>");
         }
-
         return b.toSafeHtml();
+    }
+    
+    private SafeHtml getAnchor(String link, String linkText, String style) {
+        if (embedded) {
+            return ANCHORTEMPLATE.anchorWithTarget(link, linkText, STYLE_NAME_PREFIX + style, "_blank");
+        } else {
+            return ANCHORTEMPLATE.anchor(link, linkText, STYLE_NAME_PREFIX + style);
+        }
     }
 
     private boolean hasSameFleets(RaceColumnDTO raceColumn1, RaceColumnDTO raceColumn2) {
         Iterable<FleetDTO> raceColumn1Fleets = raceColumn1.getFleets();
         Iterable<FleetDTO> raceColumn2Fleets = raceColumn2.getFleets();
 
-        if(Util.size(raceColumn1Fleets) != Util.size(raceColumn2Fleets))
-            return false;
-        
-        for(int i = 0; i < Util.size(raceColumn1Fleets); i++) {
-            FleetDTO next1 = raceColumn1Fleets.iterator().next();
-            FleetDTO next2 = raceColumn2Fleets.iterator().next();
-            if(!next1.name.equals(next2.name)) 
-                return false;
+        boolean result = Util.size(raceColumn1Fleets) == Util.size(raceColumn2Fleets);
+        if (result) {
+            for (int i = 0; i < Util.size(raceColumn1Fleets); i++) {
+                FleetDTO next1 = raceColumn1Fleets.iterator().next();
+                FleetDTO next2 = raceColumn2Fleets.iterator().next();
+                if (!next1.name.equals(next2.name)) {
+                    result = false;
+                    break;
+                }
+            }
         }
-        
-        return true;
+        return result;
     }
     
     private BreadcrumbPanel createBreadcrumbPanel() {
@@ -324,7 +329,7 @@ public class LeaderboardGroupPanel extends FormPanel implements HasWelcomeWidget
                     + (showRaceDetails ? "?showRaceDetails=true" : "")
                     + (debugParam != null && !debugParam.isEmpty() ? (showRaceDetails?"":"?")+"gwt.codesvr=" + debugParam : "");
             ArrayList<Pair<String, String>> breadcrumbLinksData = new ArrayList<Pair<String, String>>();
-            breadcrumbLinksData.add(new Pair<String, String>(link, stringConstants.home()));
+            breadcrumbLinksData.add(new Pair<String, String>(link, stringMessages.home()));
             breadcrumbPanel = new BreadcrumbPanel(breadcrumbLinksData, group.name);
         }
         return breadcrumbPanel;
