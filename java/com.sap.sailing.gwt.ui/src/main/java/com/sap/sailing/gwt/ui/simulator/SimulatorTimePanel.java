@@ -20,9 +20,8 @@ public class SimulatorTimePanel extends RaceTimePanel {
     public SimulatorTimePanel(Timer timer, StringMessages stringMessages, WindFieldGenParamsDTO windParams) {
 
         super(timer, stringMessages, null);
- 
-        // TODO: connect to 
-        int secondsTimeStep = (int)windParams.getTimeStep().getTime()/1000;
+
+        int secondsTimeStep = (int) windParams.getTimeStep().getTime() / 1000;
         this.playSpeedBox.setValue(secondsTimeStep);
         this.timer.setPlaySpeedFactor(secondsTimeStep);
 
@@ -42,7 +41,7 @@ public class SimulatorTimePanel extends RaceTimePanel {
         super.playStateChanged(PlayStates.Stopped, PlayModes.Replay);
         this.setActive(false);
     }
-    
+
     @Override
     protected void addPlayPauseButtonClickHandler() {
 
@@ -50,24 +49,24 @@ public class SimulatorTimePanel extends RaceTimePanel {
             @Override
             public void onClick(ClickEvent event) {
                 boolean playable = false;
-                if ((new Date(SimulatorTimePanel.this.getMax().getTime() - ((long) SimulatorTimePanel.this.timer.getPlaySpeedFactor()*SimulatorTimePanel.this.timer.getRefreshInterval()))).after(SimulatorTimePanel.this.timer.getTime())) {
+                if (SimulatorTimePanel.this.getMax().after(SimulatorTimePanel.this.timer.getTime())) {
                     playable = true;
                 }
                 SimulatorTimePanel.this.timer.setAutoAdvance(playable);
-                switch(SimulatorTimePanel.this.timer.getPlayState()) {
-                    case Stopped:
-                        if (playable) {
-                            SimulatorTimePanel.this.timer.play();
-                        }
-                        break;
-                    case Playing:
-                        SimulatorTimePanel.this.timer.pause();
-                        break;
-                    case Paused:
-                        if (playable) {
-                            SimulatorTimePanel.this.timer.play();
-                        }
-                        break;
+                switch (SimulatorTimePanel.this.timer.getPlayState()) {
+                case Stopped:
+                    if (playable) {
+                        SimulatorTimePanel.this.timer.play();
+                    }
+                    break;
+                case Playing:
+                    SimulatorTimePanel.this.timer.pause();
+                    break;
+                case Paused:
+                    if (playable) {
+                        SimulatorTimePanel.this.timer.play();
+                    }
+                    break;
                 }
             }
         });
@@ -76,23 +75,30 @@ public class SimulatorTimePanel extends RaceTimePanel {
 
     @Override
     public void timeChanged(Date time) {
+
         if (getMin() != null && getMax() != null) {
 
-            // pause replay after max time has been reached
-            if (time.after(new Date(getMax().getTime() - ((long) timer.getPlaySpeedFactor()*timer.getRefreshInterval())))) {
+            boolean setMax = false;
+            if (time.after(getMax())) {
                 timer.pause();
                 super.playStateChanged(PlayStates.Paused, PlayModes.Replay);
+                setMax = true;
             }
 
-            // update time slider, date & time label
-            long t = time.getTime();
-            timeSlider.setCurrentValue(new Double(t), false);
-            dateLabel.setText(dateFormatter.format(time));
-            if (lastReceivedDataTimepoint == null) {
-                timeLabel.setText(timeFormatter.format(time));
+            if (setMax) {
+                timer.setTime(getMax().getTime()); // setTime triggers another timeChanged event, so omit label-update on setMax
             } else {
-                timeLabel.setText(timeFormatter.format(time) + " (" + timeFormatter.format(lastReceivedDataTimepoint)
-                        + ")");
+                // update time slider, date & time label
+                long t = time.getTime();
+                timeSlider.setCurrentValue(new Double(t), false);
+                dateLabel.setText(dateFormatter.format(time));
+                if (lastReceivedDataTimepoint == null) {
+                    timeLabel.setText(timeFormatter.format(time));
+                } else {
+                    timeLabel.setText(timeFormatter.format(time) + " ("
+                            + timeFormatter.format(lastReceivedDataTimepoint) + ")");
+                }
+                //System.out.println("" + timeLabel.getText());
             }
         }
     }
