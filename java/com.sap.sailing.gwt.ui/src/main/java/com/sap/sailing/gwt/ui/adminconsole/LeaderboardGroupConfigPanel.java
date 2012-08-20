@@ -557,7 +557,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel {
     }
     
     private void createNewGroup(final LeaderboardGroupDTO newGroup) {
-        sailingService.createLeaderboardGroup(newGroup.name, newGroup.description, new AsyncCallback<LeaderboardGroupDTO>() {
+        sailingService.createLeaderboardGroup(newGroup.name, newGroup.description,
+                newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(),
+                new AsyncCallback<LeaderboardGroupDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new leaderboard group" + newGroup.name

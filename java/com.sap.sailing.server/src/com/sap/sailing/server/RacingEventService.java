@@ -321,8 +321,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
      * @return The new leaderboard group
      */
-    LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<String> leaderboardNames);
-    
+    LeaderboardGroup addLeaderboardGroup(String groupName, String description, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
      * @param groupName The name of the group which shall be removed.
@@ -378,8 +379,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void addRace(RegattaIdentifier addToRegatta, RaceDefinition raceDefinition);
 
-    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
-    
+    void updateLeaderboardGroup(String oldName, String newName, String description, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+
     /**
      * Executes an operation whose effects need to be replicated to any replica of this service known and
      * {@link OperationExecutionListener#executed(RacingEventServiceOperation) notifies} all registered

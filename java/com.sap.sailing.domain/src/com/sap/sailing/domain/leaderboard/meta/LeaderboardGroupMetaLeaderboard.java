@@ -31,6 +31,11 @@ public class LeaderboardGroupMetaLeaderboard extends AbstractMetaLeaderboard imp
             ThresholdBasedResultDiscardingRule resultDiscardingRule) {
         super(leaderboardGroup.getName()+" "+OVERALL, scoringScheme, resultDiscardingRule);
         this.leaderboardGroup = leaderboardGroup;
+        leaderboardGroup.addLeaderboardGroupListener(this);
+        for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+            leaderboard.addRaceColumnListener(this);
+            registerScoreCorrectionChangeForwarder(leaderboard);
+        }
     }
 
     @Override

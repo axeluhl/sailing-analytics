@@ -2436,8 +2436,10 @@ public class SailingServiceImpl extends RemoteServiceServlet implements SailingS
     }
 
     @Override
-    public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description) {
-        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(groupName, description, new ArrayList<String>());
+    public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
+        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(groupName, description,
+                new ArrayList<String>(), overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
         return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false);
     }
 
