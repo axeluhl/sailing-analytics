@@ -7,6 +7,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
+import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public abstract class LegDetailColumn<FieldType extends Comparable<?>, RenderingType> extends
@@ -23,8 +24,8 @@ public abstract class LegDetailColumn<FieldType extends Comparable<?>, Rendering
     }
 
     protected LegDetailColumn(String title, String unit, LegDetailField<FieldType> field, Cell<RenderingType> cell,
-            CellTable<LeaderboardRowDTO> leaderboardTable, String headerStyle, String columnStyle) {
-        super(cell);
+            SortingOrder preferredSortingOrder, CellTable<LeaderboardRowDTO> leaderboardTable, String headerStyle, String columnStyle) {
+        super(cell, preferredSortingOrder);
         setHorizontalAlignment(ALIGN_CENTER);
         this.title = title;
         this.unit = unit;

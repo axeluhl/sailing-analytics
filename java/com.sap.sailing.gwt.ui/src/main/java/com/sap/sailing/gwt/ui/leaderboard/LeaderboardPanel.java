@@ -53,6 +53,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.Util;
 import com.sap.sailing.gwt.ui.actions.AsyncActionsExecutor;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
@@ -455,9 +456,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
         private final String headerStyle;
         private final String columnStyle;
 
-        public RaceColumn(RaceColumnDTO race, boolean enableExpansion, Cell<C> cell,
+        public RaceColumn(RaceColumnDTO race, boolean enableExpansion, Cell<C> cell, SortingOrder preferredSortingOrder,
                 String headerStyle, String columnStyle) {
-            super(LeaderboardPanel.this, enableExpansion, cell, stringMessages, LEG_COLUMN_HEADER_STYLE,
+            super(LeaderboardPanel.this, enableExpansion, cell, preferredSortingOrder, stringMessages, LEG_COLUMN_HEADER_STYLE,
                     LEG_COLUMN_STYLE, selectedRaceDetails);
             setHorizontalAlignment(ALIGN_CENTER);
             this.race = race;
@@ -500,6 +501,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             LeaderboardEntryDTO entry = object.fieldsByRaceColumnName.get(getRaceColumnName());
             if (entry != null) {
                 String fleetColorBarStyle = "";
+                String totalPointsAsText = entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints);
+                String netPointsAsText = entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
+                
                 if (entry.fleet != null && entry.fleet.getColor() != null) {
                     fleetColorBarStyle = " style=\"border-bottom: 3px solid "+entry.fleet.getColor().getAsHtml()+";\"";
                 }
@@ -508,16 +512,15 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 if (entry.reasonForMaxPoints == null || entry.reasonForMaxPoints == MaxPointsReason.NONE) {
                     if (!entry.discarded) {
                         html.appendHtmlConstant("<span style=\"font-weight: bold;\">");
-                        html.appendHtmlConstant(entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints));
+                        html.appendHtmlConstant(totalPointsAsText);
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.appendHtmlConstant(entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints));
+                        html.appendHtmlConstant(netPointsAsText);
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
-                    html.appendHtmlConstant(" <span title=\""+scoreFormat.format(entry.netPoints)+"/"+
-                            scoreFormat.format(entry.totalPoints)+"\" style=\"opacity: 0.5;\">");
+                    html.appendHtmlConstant(" <span title=\"" + netPointsAsText + "/" + totalPointsAsText +"\" style=\"opacity: 0.5;\">");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
                     }
@@ -576,9 +579,9 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
          */
         private final List<LegColumn> legColumns;
 
-        public TextRaceColumn(RaceColumnDTO race, boolean expandable, String headerStyle,
+        public TextRaceColumn(RaceColumnDTO race, boolean expandable, SortingOrder preferredSortingOrder, String headerStyle,
                 String columnStyle) {
-            super(race, expandable, new TextCell(), headerStyle, columnStyle);
+            super(race, expandable, new TextCell(), preferredSortingOrder, headerStyle, columnStyle);
             legColumns = new ArrayList<LegColumn>();
         }
 
@@ -618,34 +621,32 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 LeaderboardPanel leaderboardPanel, StringMessages stringMessages, String detailHeaderStyle,
                 String detailColumnStyle) {
             Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
-            result.put(
-                    DetailType.RACE_DISTANCE_TRAVELED,
+            result.put(DetailType.RACE_DISTANCE_TRAVELED,
                     new FormattedDoubleLegDetailColumn(stringMessages.distanceInMeters(), "["+stringMessages
-                            .distanceInMetersUnit()+"]", new RaceDistanceTraveledInMeters(), 0, getLeaderboardPanel()
+                            .distanceInMetersUnit()+"]", new RaceDistanceTraveledInMeters(), 0, 
+                            DetailType.RACE_DISTANCE_TRAVELED.getDefaultSortingOrder(), getLeaderboardPanel()
                             .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS, new FormattedDoubleLegDetailColumn(
                     stringMessages.averageSpeedInKnots(), "["+stringMessages.averageSpeedInKnotsUnit()+"]",
-                    new RaceAverageSpeedInKnots(), 2, getLeaderboardPanel().getLeaderboardTable(),
-                    LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(
-                    DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
+                    new RaceAverageSpeedInKnots(), 2, DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS.getDefaultSortingOrder(),
+                    getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS,
                     new FormattedDoubleLegDetailColumn(stringMessages.gapToLeaderInSeconds(), "["+stringMessages
-                            .gapToLeaderInSecondsUnit()+"]", new RaceGapToLeaderInSeconds(), 0, getLeaderboardPanel()
-                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(
-                    DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
+                            .gapToLeaderInSecondsUnit()+"]", new RaceGapToLeaderInSeconds(), 0, DetailType.RACE_GAP_TO_LEADER_IN_SECONDS.getDefaultSortingOrder(), 
+                            getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS,
                     new FormattedDoubleLegDetailColumn(stringMessages.windwardDistanceToLeader(), "["+stringMessages
-                            .distanceInMetersUnit()+"]", new RaceDistanceToLeaderInMeters(), 0, getLeaderboardPanel()
-                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
-            result.put(
-                    DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
+                            .distanceInMetersUnit()+"]", new RaceDistanceToLeaderInMeters(), 0, DetailType.RACE_DISTANCE_TO_LEADER_IN_METERS.getDefaultSortingOrder(), 
+                            getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+            result.put(DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS,
                     new FormattedDoubleLegDetailColumn(stringMessages.averageCrossTrackErrorInMeters(), "["+stringMessages
-                            .metersUnit()+"]", new RaceAverageCrossTrackErrorInMeters(), 0, getLeaderboardPanel()
-                            .getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
+                            .metersUnit()+"]", new RaceAverageCrossTrackErrorInMeters(), 0, DetailType.RACE_AVERAGE_CROSS_TRACK_ERROR_IN_METERS.getDefaultSortingOrder(),
+                            getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             result.put(DetailType.NUMBER_OF_MANEUVERS, getManeuverCountRaceColumn());
-            result.put(DetailType.CURRENT_LEG, new FormattedDoubleLegDetailColumn(stringMessages.currentLeg(), "",
-                    new CurrentLeg(), 0, getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE,
-                    LEG_COLUMN_STYLE));
+            result.put(DetailType.CURRENT_LEG,
+                    new FormattedDoubleLegDetailColumn(stringMessages.currentLeg(), "",
+                    new CurrentLeg(), 0, DetailType.CURRENT_LEG.getDefaultSortingOrder(), 
+                    getLeaderboardPanel().getLeaderboardTable(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE));
             
             return result;
         }
@@ -689,7 +690,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
             if (legColumns.size() > legNumber && legColumns.get(legNumber) != null) {
                 result = legColumns.get(legNumber);
             } else {
-                result = new LegColumn(LeaderboardPanel.this, getRaceColumnName(), legNumber, stringMessages,
+                result = new LegColumn(LeaderboardPanel.this, getRaceColumnName(), legNumber, SortingOrder.ASCENDING, stringMessages,
                         Collections.unmodifiableList(selectedLegDetails), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE,
                         LEG_DETAIL_COLUMN_HEADER_STYLE, LEG_DETAIL_COLUMN_STYLE);
                 while (legColumns.size() <= legNumber) {
@@ -1356,9 +1357,12 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
                 Collections.sort(getData().getList(), comparator);
             } else {
                 SortableColumn<LeaderboardRowDTO, ?> columnToSortFor = getDefaultSortColumn();
-                // if no sorting was selected, sort by ascending rank and mark
-                // table header so
-                sort(columnToSortFor, true);
+                // if no sorting was selected, sort by the preferred sorting order of the sort column
+                boolean ascending = true;
+                if(columnToSortFor.getPreferredSortingOrder() == SortingOrder.DESCENDING) {
+                    ascending = false;
+                }
+                sort(columnToSortFor, ascending);
             }
             // Reselect the selected rows
             clearSelection();
@@ -1747,7 +1751,7 @@ public class LeaderboardPanel extends FormPanel implements TimeListener, PlaySta
 
     protected RaceColumn<?> createRaceColumn(RaceColumnDTO raceInLeaderboard) {
         TextRaceColumn textRaceColumn = new TextRaceColumn(raceInLeaderboard, shallExpandRaceColumn(raceInLeaderboard),
-                RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
+                SortingOrder.ASCENDING, RACE_COLUMN_HEADER_STYLE, RACE_COLUMN_STYLE);
         return textRaceColumn;
     }
 

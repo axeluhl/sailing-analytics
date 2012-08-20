@@ -70,8 +70,8 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
     public ManeuverCountRaceColumn(LeaderboardPanel leaderboardPanel, RaceNameProvider raceNameProvider,
             StringMessages stringConstants, List<DetailType> maneuverDetailSelection, String headerStyle,
             String columnStylee, String detailHeaderStyle, String detailColumnStyle) {
-        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), stringConstants,
-                detailHeaderStyle, detailColumnStyle, maneuverDetailSelection);
+        super(leaderboardPanel, /* expandable */true /* all legs have details */, new TextCell(), DetailType.NUMBER_OF_MANEUVERS.getDefaultSortingOrder(), 
+                stringConstants, detailHeaderStyle, detailColumnStyle, maneuverDetailSelection);
         setHorizontalAlignment(ALIGN_CENTER);
         this.stringConstants = stringConstants;
         this.raceNameProvider = raceNameProvider;
@@ -258,11 +258,11 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
             String detailColumnStyle) {
         Map<DetailType, SortableColumn<LeaderboardRowDTO, ?>> result = new HashMap<DetailType, SortableColumn<LeaderboardRowDTO, ?>>();
         result.put(DetailType.TACK, new FormattedDoubleLegDetailColumn(stringConstants.tack(), "", new NumberOfTacks(),
-                0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                0, DetailType.TACK.getDefaultSortingOrder(), getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.JIBE, new FormattedDoubleLegDetailColumn(stringConstants.jibe(), "", new NumberOfJibes(),
-                0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
+                0, DetailType.JIBE.getDefaultSortingOrder(), getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle, detailColumnStyle));
         result.put(DetailType.PENALTY_CIRCLE, new FormattedDoubleLegDetailColumn(stringConstants.penaltyCircle(), "",
-                new NumberOfPenaltyCircles(), 0, getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle,
+                new NumberOfPenaltyCircles(), 0, DetailType.PENALTY_CIRCLE.getDefaultSortingOrder(), getLeaderboardPanel().getLeaderboardTable(), detailHeaderStyle,
                 detailColumnStyle));
         return result;
     }

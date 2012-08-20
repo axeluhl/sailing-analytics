@@ -5,6 +5,7 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.shared.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
@@ -14,9 +15,9 @@ public class FormattedDoubleLegDetailColumn extends LegDetailColumn<Double, Stri
     private final MinMaxRenderer minMaxRenderer;
 
     public FormattedDoubleLegDetailColumn(String title, String unit,
-            com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField<Double> field, int decimals,
+            com.sap.sailing.gwt.ui.leaderboard.LegDetailColumn.LegDetailField<Double> field, int decimals, SortingOrder preferredSortingOrder,
             CellTable<LeaderboardRowDTO> leaderboardTable, String headerStyle, String columnStyle) {
-        super(title, unit, field, new TextCell(), leaderboardTable, headerStyle, columnStyle);
+        super(title, unit, field, new TextCell(), preferredSortingOrder, leaderboardTable, headerStyle, columnStyle);
         formatter = NumberFormatterFactory.getDecimalFormat(decimals);
         this.minMaxRenderer = new MinMaxRenderer(this, getComparator());
     }

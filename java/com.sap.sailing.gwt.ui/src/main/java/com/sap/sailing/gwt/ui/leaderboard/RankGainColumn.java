@@ -7,6 +7,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardRowDTO;
 
 public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
@@ -14,7 +15,7 @@ public class RankGainColumn extends LegDetailColumn<Integer, Integer> {
 	
     public RankGainColumn(String title, LegDetailField<Integer> field, CellTable<LeaderboardRowDTO> leaderboardTable,
             String headerStyle, String columnStyle) {
-        super(title, null, field, new RankGainCell(), leaderboardTable, headerStyle, columnStyle);
+        super(title, null, field, new RankGainCell(), DetailType.RANK_GAIN.getDefaultSortingOrder(), leaderboardTable, headerStyle, columnStyle);
     }
 
     @Override
