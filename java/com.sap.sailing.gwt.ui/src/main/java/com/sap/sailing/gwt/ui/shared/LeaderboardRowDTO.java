@@ -14,6 +14,9 @@ public class LeaderboardRowDTO implements IsSerializable {
     public CompetitorDTO competitor;
     public Map<String, LeaderboardEntryDTO> fieldsByRaceColumnName;
     public Double carriedPoints;
+    public Double totalTimeSailedInSeconds;
+    public Double totalTimeSailedDownwindInSeconds;
+    public Double maximumSpeedOverGroundInKnots;
     
     @Override
     public int hashCode() {

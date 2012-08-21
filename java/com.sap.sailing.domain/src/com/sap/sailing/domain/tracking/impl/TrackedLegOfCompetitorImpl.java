@@ -508,6 +508,18 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
         MarkPassing markPassingForLegEnd = getMarkPassingForLegEnd();
         return markPassingForLegEnd != null && markPassingForLegEnd.getTimePoint().compareTo(timePoint) <= 0;
     }
+    
+    @Override
+    public TimePoint getStartTime() {
+        MarkPassing markPassingForLegStart = getMarkPassingForLegStart();
+        return markPassingForLegStart == null ? null : markPassingForLegStart.getTimePoint();
+    }
+
+    @Override
+    public TimePoint getFinishTime() {
+        MarkPassing markPassingForLegEnd = getMarkPassingForLegEnd();
+        return markPassingForLegEnd == null ? null : markPassingForLegEnd.getTimePoint();
+    }
 
     @Override
     public Speed getVelocityMadeGood(TimePoint at) throws NoWindException {
