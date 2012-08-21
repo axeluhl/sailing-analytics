@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 
 /**
  * A variant of the {@link HighPoint} scoring scheme which breaks ties differently and which assigns a score of 10 to
@@ -32,7 +33,7 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
         if (rank == 0) {
             result = null;
         } else {
-            result = (double) (MAX_POINTS - rank + 1);
+            result = Math.max(0.0, (double) (MAX_POINTS - rank + 1));
         }
         return result;
     }
@@ -89,6 +90,11 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
             }
         }
         return result;
+    }
+
+    @Override
+    public ScoringSchemeType getType() {
+        return ScoringSchemeType.HIGH_POINT_ESS_OVERALL;
     }
 
 }

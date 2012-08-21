@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +20,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialog;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -102,6 +104,10 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDTO>
         formGrid.setCellSpacing(3);
         formGrid.setWidget(0, 0, new Label(stringMessages.scoringSystem() + ":"));
         overallLeaderboardScoringSchemeListBox = AbstractLeaderboardDialog.createScoringSchemeListBox(this, stringMessages);
+        if (group.getOverallLeaderboardScoringSchemeType() != null) {
+            overallLeaderboardScoringSchemeListBox.setSelectedIndex(Arrays.asList(ScoringSchemeType.values()).indexOf(
+                    group.getOverallLeaderboardScoringSchemeType()));
+        }
         formGrid.setWidget(0, 1, overallLeaderboardScoringSchemeListBox);
         formGrid.setWidget(1, 0, new Label(stringMessages.discardRacesFromHowManyStartedRacesOn()));
         HorizontalPanel hp = new HorizontalPanel();

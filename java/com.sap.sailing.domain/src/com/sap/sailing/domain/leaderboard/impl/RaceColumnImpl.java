@@ -37,6 +37,7 @@ public class RaceColumnImpl extends AbstractRaceColumn implements FlexibleRaceCo
     @Override
     public void setIsMedalRace(boolean isMedalRace) {
         this.medalRace = isMedalRace;
+        notifyListenersAboutIsMedalRaceChanged();
     }
 
     @Override
